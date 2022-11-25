@@ -22,7 +22,7 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/NORangesSet.h"          // for set
+#include "common/NORangesSet.h"          // for NORangesSet
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
 #include "decoders/DcrDecoder.h"         // for DcrDecoder
@@ -36,23 +36,22 @@
 #include "decoders/NefDecoder.h"         // for NefDecoder
 #include "decoders/OrfDecoder.h"         // for OrfDecoder
 #include "decoders/PefDecoder.h"         // for PefDecoder
-#include "decoders/RawDecoder.h"         // for RawDecoder
 #include "decoders/Rw2Decoder.h"         // for Rw2Decoder
 #include "decoders/SrwDecoder.h"         // for SrwDecoder
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
-#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
+#include "io/Buffer.h"                   // for Buffer, DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness, Endianness::unk...
-#include "parsers/TiffParserException.h" // for ThrowTPE
+#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
 #include <cassert>                       // for assert
 #include <cstdint>                       // for UINT32_MAX, uint16_t, uint32_t
 #include <memory>                        // for make_unique, unique_ptr
-#include <string>                        // for string
 #include <tuple>                         // for tie, tuple
 #include <vector>                        // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {
+class RawDecoder;
 
 TiffParser::TiffParser(const Buffer& file) : RawParser(file) {}
 

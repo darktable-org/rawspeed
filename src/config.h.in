@@ -65,17 +65,6 @@ static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE, "Expected that CPU la
 // the RAWSPEED_SOURCE_DIR, because that would affect the reproducible builds.
 #endif
 
-#ifdef HAVE_OPENMP
-#cmakedefine OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-#ifdef OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-// See https://godbolt.org/z/AiyuX9
-#define OMPSHAREDCLAUSE(...)
-#else
-#define OMPSHAREDCLAUSE(...) shared(__VA_ARGS__)
-#endif
-#undef OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES
-#endif // HAVE_OPENMP
-
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.
 #define __has_feature(x) 0 // Compatibility with non-clang compilers.

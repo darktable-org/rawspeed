@@ -27,7 +27,7 @@
 #include "common/Point.h"                       // for iPoint2D
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
 #include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
+#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/PhaseOneDecompressor.h" // for PhaseOneStrip, Phase...
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
@@ -36,18 +36,18 @@
 #include "metadata/CameraMetaData.h"            // for CameraMetaData
 #include "metadata/ColorFilterArray.h"          // for ColorFilterArray
 #include "tiff/TiffIFD.h"                       // for TiffID, TiffRootIFD
-#include <algorithm>                            // for adjacent_find, gener...
-#include <array>                                // for array, array<>::cons...
+#include <algorithm>                            // for max, adjacent_find
+#include <array>                                // for array, array<>::valu...
 #include <cassert>                              // for assert
 #include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for lround
+#include <cmath>                                // for lround, abs
 #include <cstdlib>                              // for abs
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
 #include <string>                               // for operator==, string
 #include <utility>                              // for move
-#include <vector>                               // for vector
+#include <vector>                               // for vector, allocator
 
 namespace rawspeed {
 

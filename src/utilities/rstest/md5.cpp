@@ -28,10 +28,10 @@
  */
 
 #include "md5.h"
-#include <cstdint> // for uint32_t, uint8_t, UINT32_C
-#include <cstdio>  // for printf, snprintf
-#include <cstring> // for memset, strlen, memcmp, memcpy
-#include <string>  // for string
+#include <cstdint> // for uint32_t, uint8_t
+#include <cstdio>  // for size_t, snprintf
+#include <cstring> // for memset, memcpy
+#include <string>  // for allocator, string
 
 namespace rawspeed::md5 {
 

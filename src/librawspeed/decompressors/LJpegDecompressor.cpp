@@ -20,10 +20,11 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "common/Common.h"                // for unroll_loop, roundUpDivision
+#include "common/Common.h"                // for to_array, roundUpDivision
+#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
 #include <algorithm>                      // for copy_n
 #include <array>                          // for array

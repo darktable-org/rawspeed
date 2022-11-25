@@ -27,9 +27,7 @@
 namespace rawspeed {
 
 class Buffer;
-
 class CameraMetaData;
-
 class RawDecoder;
 
 class FiffParser final : public RawParser {

@@ -23,13 +23,15 @@
 #include "common/Common.h"                // for extractHighBits, isIntN
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for max
 #include <cassert>                        // for assert
-#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
+#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {

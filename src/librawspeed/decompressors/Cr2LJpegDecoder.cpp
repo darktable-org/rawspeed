@@ -21,15 +21,18 @@
 */
 
 #include "decompressors/Cr2LJpegDecoder.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::area_type
+#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include <algorithm>                      // for copy_n, min
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include <algorithm>                      // for generate_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t, uint32_t
 #include <initializer_list>               // for initializer_list
+#include <iterator>                       // for back_insert_iterator, back...
+#include <tuple>                          // for tuple, get
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -60,8 +63,8 @@ void Cr2LJpegDecoder::decodeScan()
     if (slicesWidth > mRaw->dim.x)
       ThrowRDE("Don't know slicing pattern, and failed to guess it.");
 
-    slicing = Cr2Slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                         /*lastSliceWidth=*/slicesWidth);
+    slicing = Cr2SliceWidths(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
+                             /*lastSliceWidth=*/slicesWidth);
   }
 
   bool isSubSampled = false;
@@ -128,13 +131,22 @@ void Cr2LJpegDecoder::decodeScan()
 
   int N_COMP = std::get<0>(format);
 
-  Cr2Decompressor d(mRaw, format, iPoint2D(frame.w, frame.h), slicing,
-                    getHuffmanTables(N_COMP), getInitialPredictors(N_COMP),
-                    input);
+  std::vector<Cr2Decompressor<HuffmanTable>::PerComponentRecipe> rec;
+  rec.reserve(N_COMP);
+  std::generate_n(std::back_inserter(rec), N_COMP,
+                  [&rec, hts = getHuffmanTables(N_COMP),
+                   initPred = getInitialPredictors(N_COMP)]()
+                      -> Cr2Decompressor<HuffmanTable>::PerComponentRecipe {
+                    const int i = rec.size();
+                    return {*hts[i], initPred[i]};
+                  });
+
+  Cr2Decompressor<HuffmanTable> d(mRaw, format, iPoint2D(frame.w, frame.h),
+                                  slicing, rec, input);
   d.decompress();
 }
 
-void Cr2LJpegDecoder::decode(const Cr2Slicing& slicing_) {
+void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
   slicing = slicing_;
   for (auto sliceId = 0; sliceId < slicing.numSlices; sliceId++) {
     const auto sliceWidth = slicing.widthOfSlice(sliceId);

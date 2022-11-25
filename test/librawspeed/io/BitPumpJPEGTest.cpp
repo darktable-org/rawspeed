@@ -19,14 +19,16 @@
 */
 
 #include "io/BitPumpJPEG.h" // for BitPumpJPEG
-#include "io/BitPumpTest.h" // for Endianness, Pattern, (anonymous), Buffer
+#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesBE, Patterns
+#include "io/BitStream.h"   // for BitStream
 #include "io/Buffer.h"      // for Buffer, DataBuffer
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
 #include <array>            // for array
 #include <cstdint>          // for uint8_t, uint32_t
-#include <gtest/gtest.h>    // for Test, Message, SuiteApiResolver, TestInf...
+#include <gtest/gtest.h>    // for Test, Message, TestInfo (ptr only), ASSE...
 #include <initializer_list> // for initializer_list
+#include <memory>           // for allocator
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::Buffer;

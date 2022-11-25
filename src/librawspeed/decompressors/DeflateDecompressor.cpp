@@ -18,15 +18,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
+#include "rawspeedconfig.h"           // for HAVE_ZLIB
+#include "common/Common.h"            // for bit_cast
+#include "common/CroppedArray2DRef.h" // for CroppedArray2DRef
+#include <array>                      // for array
+#include <climits>                    // for CHAR_BIT
+#include <utility>                    // for move
 
 #ifdef HAVE_ZLIB
 
-#include "common/FloatingPoint.h"         // for fp16ToFloat, fp24ToFloat
+#include "common/FloatingPoint.h"         // for Binary32, Binary16, Binary24
 #include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/DeflateDecompressor.h"
-#include "io/Endianness.h" // for getHostEndianness, Endianness
+#include "io/Endianness.h" // for getBE
 #include <cassert>         // for assert
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
@@ -80,9 +85,9 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
 };
 
 template <typename T>
-static inline void decodeFPDeltaRow(const unsigned char* src,
-                                    size_t realTileWidth,
-                                    CroppedArray2DRef<float> out, int row) {
+static inline void
+decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
+                 const CroppedArray2DRef<float>& out, int row) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
@@ -130,10 +135,9 @@ void DeflateDecompressor::decode(
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
 
-  const CroppedArray2DRef<float> out =
-      CroppedArray2DRef(mRaw->getF32DataAsUncroppedArray2DRef(),
-                        /*offsetCols=*/off.x, /*offsetRows=*/off.y,
-                        /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
+  const auto out = CroppedArray2DRef(
+      mRaw->getF32DataAsUncroppedArray2DRef(), /*offsetCols=*/off.x,
+      /*offsetRows=*/off.y, /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
 
   for (int row = 0; row < out.croppedHeight; ++row) {
     unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;

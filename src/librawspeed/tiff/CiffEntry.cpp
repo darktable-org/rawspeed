@@ -21,12 +21,12 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/NORangesSet.h"          // for set
-#include "io/Buffer.h"                   // for Buffer
+#include "common/NORangesSet.h"          // for NORangesSet
+#include "io/Buffer.h"                   // for Buffer, operator<
 #include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for ThrowCPE
-#include <string>                        // for string
-#include <utility>                       // for pair
+#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
+#include <algorithm>                     // for max
+#include <string>                        // for string, basic_string, alloc...
 #include <vector>                        // for vector
 
 using std::vector;

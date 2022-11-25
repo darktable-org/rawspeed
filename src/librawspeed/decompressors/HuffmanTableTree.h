@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
+#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree<>:...
 #include "io/BitStream.h"                       // for BitStreamTraits
-#include <algorithm>                            // for for_each
+#include <algorithm>                            // for max, for_each, copy
 #include <cassert>                              // for assert
 #include <initializer_list>                     // for initializer_list
 #include <iterator>                             // for advance, next

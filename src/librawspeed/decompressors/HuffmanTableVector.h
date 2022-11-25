@@ -24,6 +24,7 @@
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
+#include <algorithm>                            // for max, fill_n
 #include <cassert>                              // for assert
 #include <cstdint>                              // for uint64_t
 #include <tuple>                                // for tie

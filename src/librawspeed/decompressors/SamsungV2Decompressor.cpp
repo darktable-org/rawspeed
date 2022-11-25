@@ -25,12 +25,13 @@
 #include "common/Common.h"                // for clampBits, signExtend
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for fill_n
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t, uint32_t, int32_t
-#include <type_traits>                    // for __underlying_type_impl<>::...
+#include <type_traits>                    // for underlying_type_t
 
 namespace rawspeed {
 

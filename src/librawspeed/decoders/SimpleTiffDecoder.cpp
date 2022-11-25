@@ -23,11 +23,11 @@
 #include "decoders/SimpleTiffDecoder.h"
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for RawDecoderException (ptr o...
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffEntry.h"               // for TiffEntry
 #include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag::IMAGELENGTH, Tiff...
+#include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::IMAGELENGTH
 
 namespace rawspeed {
 

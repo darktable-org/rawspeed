@@ -28,10 +28,8 @@
 namespace rawspeed {
 
 class Buffer;
-
-class RawDecoder;
-
 class CameraMetaData;
+class RawDecoder;
 
 class CiffParser final : public RawParser {
   std::unique_ptr<const CiffIFD> mRootIFD;

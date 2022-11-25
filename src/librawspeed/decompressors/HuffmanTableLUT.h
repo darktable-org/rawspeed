@@ -22,7 +22,7 @@
 #pragma once
 
 #include "common/Common.h"                      // for extractHighBits
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
+#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "decompressors/HuffmanTableLookup.h"   // for HuffmanTableLookup
 #include "io/BitStream.h"                       // for BitStreamTraits

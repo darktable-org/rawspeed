@@ -22,13 +22,13 @@
 
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFDOwner
+#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
 #include <utility>                        // for move
 
 namespace rawspeed {
 
-class CameraMetaData;
 class Buffer;
+class CameraMetaData;
 
 class PefDecoder final : public AbstractTiffDecoder
 {

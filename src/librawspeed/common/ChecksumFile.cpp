@@ -20,7 +20,7 @@
 
 #include "common/ChecksumFile.h"
 #include "common/Common.h"            // for splitString
-#include "common/RawspeedException.h" // for ThrowRSE
+#include "common/RawspeedException.h" // for ThrowException, ThrowRSE
 #include "io/Buffer.h"                // for Buffer
 #include "io/FileReader.h"            // for FileReader
 #include <cassert>                    // for assert

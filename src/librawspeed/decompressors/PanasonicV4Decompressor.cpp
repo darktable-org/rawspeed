@@ -25,11 +25,11 @@
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for extractHighBits, rawspeed_...
 #include "common/Mutex.h"                 // for MutexLocker
-#include "common/Point.h"                 // for iPoint2D
+#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
-#include <algorithm>                      // for max, generate_n, min
+#include <algorithm>                      // for copy, max, fill_n, generate_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
@@ -37,7 +37,7 @@
 #include <limits>                         // for numeric_limits
 #include <memory>                         // for allocator_traits<>::value_...
 #include <utility>                        // for move
-#include <vector>                         // for vector
+#include <vector>                         // for vector, vector<>::iterator
 
 namespace rawspeed {
 

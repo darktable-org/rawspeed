@@ -1,15 +1,45 @@
 [
- { include: ["<zconf.h>", "private", "<zlib.h>", "public"] },
- { include: ["<jconfig.h>", "private", "<jpeglib.h>", "public"] },
- { include: ["<jmorecfg.h>", "private", "<jpeglib.h>", "public"] },
- { include: ["<bits/std_abs.h>", "private", "<cmath>", "public"] },
- { include: ["<bits/stl_set.h>", "private", "<set>", "public"] },
- { include: ["<bits/stdint-uintn.h>", "private", "<cstdint>", "public"] },
- { include: ["<bits/exception.h>", "private", "<exception>", "public"] },
- { include: ["<bits/types/clock_t.h>", "private", "<ctime>", "public"] },
- { include: ["<bits/std_function.h>", "private", "<functional>", "public"] },
- { include: ["<bits/stdint-intn.h>", "private", "<cstdint>", "public"] },
- { include: ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
- { include: ["@<gmock/.*>", "private", "<gmock/gmock.h>", "public"] },
- { include: ["<ThreadSafetyAnalysis.h>", "private", "\"ThreadSafetyAnalysis.h\"", "public"] }
+  # C++ alternatives to C standard headers
+  { include: [ "<assert.h>", public, "<cassert>", public ] },
+  { include: [ "<complex.h>", public, "<ccomplex>", public ] },
+  { include: [ "<ctype.h>", public, "<cctype>", public ] },
+  { include: [ "<errno.h>", public, "<cerrno>", public ] },
+  { include: [ "<float.h>", public, "<cfloat>", public ] },
+  { include: [ "<iso646.h>", public, "<ciso646>", public ] },
+  { include: [ "<limits.h>", public, "<climits>", public ] },
+  { include: [ "<locale.h>", public, "<clocale>", public ] },
+  { include: [ "<math.h>", public, "<cmath>", public ] },
+  { include: [ "<setjmp.h>", public, "<csetjmp>", public ] },
+  { include: [ "<signal.h>", public, "<csignal>", public ] },
+  { include: [ "<stdarg.h>", public, "<cstdarg>", public ] },
+  { include: [ "<stddef.h>", public, "<cstddef>", public ] },
+  { include: [ "<stdio.h>", public, "<cstdio>", public ] },
+  { include: [ "<stdlib.h>", public, "<cstdlib>", public ] },
+  { include: [ "<string.h>", public, "<cstring>", public ] },
+  { include: [ "<time.h>", public, "<ctime>", public ] },
+  { include: [ "<wchar.h>", public, "<cwchar>", public ] },
+  { include: [ "<wctype.h>", public, "<cwctype>", public ] },
+
+  # HACK: check whether this can be removed with next iwyu release.
+  { include: [ "<bits/chrono.h>", private, "<chrono>", public ] },
+  { include: [ "<bits/exception.h>", private, "<exception>", public ] },
+  { include: [ "<bits/std_abs.h>", private, "<cmath>", public ] },
+  { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
+  { include: [ "<bits/stdint-intn.h>", private, "<cstdint>", public ] },
+  { include: [ "<bits/stdint-uintn.h>", private, "<cstdint>", public ] },
+  { include: [ "<bits/stl_set.h>", private, "<set>", public ] },
+  { include: [ "<bits/types/clock_t.h>", private, "<ctime>", public ] },
+  { include: [ "<bits/utility.h>", private, "<utility>", public ] },
+
+  # libjpeg headers
+  { include: [ "<jconfig.h>", private, "<jpeglib.h>", public ] },
+  { include: [ "<jmorecfg.h>", private, "<jpeglib.h>", public ] },
+  { include: [ "<zconf.h>", private, "<zlib.h>", public ] },
+
+  # Google Test headers
+  { include: [ "@<gmock/.*>", private, "<gmock/gmock.h>", public ] },
+  { include: [ "@<gtest/.*>", private, "<gtest/gtest.h>", public ] },
+
+  # Our headers
+  { include: [ "<ThreadSafetyAnalysis.h>", private, "\"ThreadSafetyAnalysis.h\"", public ] },
 ]

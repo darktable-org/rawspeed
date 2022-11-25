@@ -21,18 +21,20 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Common.h"                // for uint32_t, uint16_t, clampBits
+#include "common/Common.h"                // for roundUpDivision, clampBits
+#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "common/Mutex.h"                 // for MutexLocker
 #include "common/Point.h"                 // for iRectangle2D, iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
 #include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include <algorithm>                      // for generate_n, fill_n
+#include <algorithm>                      // for generate_n, clamp, fill_n
 #include <cassert>                        // for assert
-#include <cmath>                          // for pow
-#include <iterator>                       // for back_insert_iterator
+#include <cmath>                          // for abs, isfinite, pow
+#include <cstdlib>                        // for abs
+#include <initializer_list>               // for initializer_list
+#include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple
@@ -102,6 +104,12 @@ public:
            "Creating DngOpcode during call stack unwinding?");
   }
 
+  DngOpcode() = delete;
+  DngOpcode(const DngOpcode&) = delete;
+  DngOpcode(DngOpcode&&) noexcept = delete;
+  DngOpcode& operator=(const DngOpcode&) noexcept = delete;
+  DngOpcode& operator=(DngOpcode&&) noexcept = delete;
+
   virtual ~DngOpcode() {
     assert((std::uncaught_exceptions() > 0 || setup_was_called) &&
            "Derived classes did not call our setup()!");
@@ -130,7 +138,7 @@ class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
 
 public:
   explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs,
-                                iRectangle2D& integrated_subimg_)
+                                const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_), value(bs.getU32()) {
     bs.getU32(); // Bayer Phase not used
   }
@@ -167,7 +175,7 @@ class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
 
 protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
-                     iRectangle2D& integrated_subimg_)
+                     const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
     const iRectangle2D subImage = iRectangle2D({0, 0}, integrated_subimg_.dim);
 
@@ -203,7 +211,7 @@ protected:
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
-                          iRectangle2D& integrated_subimg_)
+                          const iRectangle2D& integrated_subimg_)
       : ROIOpcode(ri, bs, integrated_subimg_) {
     DummyROIOpcode::setup(ri);
   }
@@ -213,7 +221,6 @@ public:
   }
 
   [[noreturn]] void apply(const RawImage& ri) override {
-    // NOLINTNEXTLINE: https://bugs.llvm.org/show_bug.cgi?id=50532
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
   }
@@ -226,7 +233,7 @@ class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs,
-                            iRectangle2D& integrated_subimg_)
+                            const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
     // Although it is not really obvious from the spec,
     // the coordinates appear to be global/crop-independent,
@@ -305,7 +312,7 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
 
 protected:
   explicit PixelOpcode(const RawImage& ri, ByteStream& bs,
-                       iRectangle2D& integrated_subimg_)
+                       const iRectangle2D& integrated_subimg_)
       : ROIOpcode(ri, bs, integrated_subimg_), firstPlane(bs.getU32()),
         planes(bs.getU32()) {
 
@@ -357,7 +364,7 @@ protected:
   vector<uint16_t> lookup;
 
   explicit LookupOpcode(const RawImage& ri, ByteStream& bs,
-                        iRectangle2D& integrated_subimg_)
+                        const iRectangle2D& integrated_subimg_)
       : PixelOpcode(ri, bs, integrated_subimg_), lookup(65536) {}
 
   void setup(const RawImage& ri) override {
@@ -379,7 +386,7 @@ protected:
 class DngOpcodes::TableMap final : public LookupOpcode {
 public:
   explicit TableMap(const RawImage& ri, ByteStream& bs,
-                    iRectangle2D& integrated_subimg_)
+                    const iRectangle2D& integrated_subimg_)
       : LookupOpcode(ri, bs, integrated_subimg_) {
     auto count = bs.getU32();
 
@@ -399,7 +406,7 @@ public:
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
 public:
   explicit PolynomialMap(const RawImage& ri, ByteStream& bs,
-                         iRectangle2D& integrated_subimg_)
+                         const iRectangle2D& integrated_subimg_)
       : LookupOpcode(ri, bs, integrated_subimg_) {
     vector<double> polynomial;
 
@@ -439,7 +446,7 @@ public:
 
 protected:
   DeltaRowOrColBase(const RawImage& ri, ByteStream& bs,
-                    iRectangle2D& integrated_subimg_)
+                    const iRectangle2D& integrated_subimg_)
       : PixelOpcode(ri, bs, integrated_subimg_) {}
 };
 
@@ -470,7 +477,7 @@ protected:
   virtual bool valueIsOk(float value) = 0;
 
   DeltaRowOrCol(const RawImage& ri, ByteStream& bs,
-                iRectangle2D& integrated_subimg_, float f2iScale_)
+                const iRectangle2D& integrated_subimg_, float f2iScale_)
       : DeltaRowOrColBase(ri, bs, integrated_subimg_), f2iScale(f2iScale_) {
     const auto deltaF_count = bs.getU32();
     (void)bs.check(deltaF_count, 4);
@@ -510,7 +517,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs,
-                             iRectangle2D& integrated_subimg_)
+                             const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  this->f2iScale) {}
@@ -548,7 +555,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
 
 public:
   explicit ScalePerRowOrCol(const RawImage& ri, ByteStream& bs,
-                            iRectangle2D& integrated_subimg_)
+                            const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /

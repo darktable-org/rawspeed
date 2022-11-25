@@ -27,7 +27,7 @@
 #include "io/Endianness.h"            // for Endianness, Endianness::little
 #include <cassert>                    // for assert
 #include <cstddef>                    // for size_t
-#include <cstdint>                    // for uint32_t, uint8_t
+#include <cstdint>                    // for uint8_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

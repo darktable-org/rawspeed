@@ -24,13 +24,13 @@
 #include "decompressors/PanasonicV5Decompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
+#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
 #include "io/Endianness.h"                // for Endianness, Endianness::li...
-#include <algorithm>                      // for generate_n, max
+#include <algorithm>                      // for copy, generate_n, max
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint8_t, uint16_t, uint32_t
 #include <iterator>                       // for back_insert_iterator, back...

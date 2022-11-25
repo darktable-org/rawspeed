@@ -19,17 +19,17 @@
 */
 
 #include "decompressors/PhaseOneDecompressor.h" // for PhaseOneDecompressor
-#include "common/RawImage.h"                    // for RawImage
+#include "common/RawImage.h"                    // for RawImage, RawImageData
 #include "common/RawspeedException.h"           // for RawspeedException
 #include "fuzz/Common.h"                        // for CreateRawImage
 #include "io/Buffer.h"                          // for Buffer, DataBuffer
 #include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h"                      // for Endianness, Endianness::
-#include <algorithm>                            // for generate_n
-#include <cassert>                              // for assert
-#include <cstdint>                              // for uint8_t
-#include <cstdio>                               // for size_t
-#include <iterator>                             // for back_insert_iterator
+#include "io/Endianness.h" // for Endianness, Endianness::little
+#include <algorithm>       // for generate_n
+#include <cassert>         // for assert
+#include <cstdint>         // for uint8_t
+#include <cstdio>          // for size_t
+#include <iterator>        // for back_insert_iterator, back_ins...
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

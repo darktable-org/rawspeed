@@ -22,17 +22,16 @@
 
 #include "parsers/FiffParser.h"
 #include "decoders/RafDecoder.h"         // for RafDecoder
-#include "decoders/RawDecoder.h"         // for RawDecoder
 #include "io/Buffer.h"                   // for Buffer, DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness, Endianness::big
 #include "parsers/FiffParserException.h" // for ThrowFPE
 #include "parsers/RawParser.h"           // for RawParser
 #include "parsers/TiffParser.h"          // for TiffParser
-#include "parsers/TiffParserException.h" // for TiffParserException
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT, TIFF...
+#include "parsers/TiffParserException.h" // for ThrowException, TiffParserE...
+#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"                // for FUJIOLDWB, FUJI_STRIPBYTECO...
+#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::FUJIOLDWB
 #include <cstdint>                       // for uint32_t, uint16_t
 #include <limits>                        // for numeric_limits
 #include <memory>                        // for make_unique, unique_ptr
@@ -78,11 +77,13 @@ void FiffParser::parseData() {
       uint32_t rawOffset = second_ifd - first_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
           subIFD.get(), TiffTag::FUJI_STRIPOFFSETS, TiffDataType::OFFSET, 1,
-          ByteStream::createCopy(&rawOffset, 4)));
+          ByteStream::createCopy(reinterpret_cast<const std::byte*>(&rawOffset),
+                                 4)));
       uint32_t max_size = mInput.getSize() - second_ifd;
       subIFD->add(std::make_unique<TiffEntry>(
           subIFD.get(), TiffTag::FUJI_STRIPBYTECOUNTS, TiffDataType::LONG, 1,
-          ByteStream::createCopy(&max_size, 4)));
+          ByteStream::createCopy(reinterpret_cast<const std::byte*>(&max_size),
+                                 4)));
     }
   }
 

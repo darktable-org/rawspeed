@@ -30,9 +30,8 @@
 
 namespace rawspeed {
 
-class CameraMetaData;
-
 class Buffer;
+class CameraMetaData;
 
 class ArwDecoder final : public AbstractTiffDecoder
 {
@@ -58,6 +57,7 @@ private:
   void GetWB() const;
   ByteStream in;
   int mShiftDownScale = 0;
+  int mShiftDownScaleForExif = 0;
 };
 
 } // namespace rawspeed

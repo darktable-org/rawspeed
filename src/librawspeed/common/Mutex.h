@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-#include "ThreadSafetyAnalysis.h"
+#include "rawspeedconfig.h"       // for HAVE_OPENMP
+#include "ThreadSafetyAnalysis.h" // for ACQUIRE, RELEASE, CAPABILITY, SCOP...
 
 #ifdef HAVE_OPENMP
-#include <omp.h>
+#include <omp.h> // for omp_destroy_lock, omp_init_lock
 #endif
 
 namespace rawspeed {

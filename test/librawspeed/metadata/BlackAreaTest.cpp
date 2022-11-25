@@ -21,7 +21,8 @@
 
 #include "metadata/BlackArea.h" // for BlackArea
 #include <gtest/gtest.h>        // for ParamIteratorInterface, Message, Tes...
-#include <memory>               // for unique_ptr
+#include <memory>               // for unique_ptr, allocator
+#include <string>               // for basic_string
 #include <tuple>                // for get, tuple
 
 using rawspeed::BlackArea;

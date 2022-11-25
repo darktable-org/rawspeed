@@ -1,5 +1,6 @@
 FILE(GLOB SOURCES
   "Array2DRef.h"
+  "BayerPhase.h"
   "ChecksumFile.cpp"
   "ChecksumFile.h"
   "Common.cpp"
@@ -28,6 +29,7 @@ FILE(GLOB SOURCES
   "Spline.h"
   "TableLookUp.cpp"
   "TableLookUp.h"
+  "iterator_range.h"
 )
 
 target_sources(rawspeed PRIVATE

@@ -32,7 +32,7 @@
 #include "parsers/FiffParser.h"           // for FiffParser
 #include "parsers/FiffParserException.h"  // for FiffParserException
 #include "parsers/TiffParser.h"           // for TiffParser
-#include "parsers/TiffParserException.h"  // for TiffParserException
+#include "parsers/TiffParserException.h"  // for ThrowException, TiffParser...
 
 namespace rawspeed {
 

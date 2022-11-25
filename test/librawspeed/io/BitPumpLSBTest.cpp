@@ -19,10 +19,11 @@
 */
 
 #include "io/BitPumpLSB.h"  // for BitPumpLSB
-#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesLE, BitPump...
+#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesLE, Patterns
 #include <array>            // for array
 #include <cstdint>          // for uint32_t, uint8_t
-#include <gtest/gtest.h>    // for Types, INSTANTIATE_TYPED_TEST_CASE_P
+#include <gtest/gtest.h>    // for INSTANTIATE_TYPED_TEST_CASE_P
+#include <memory>           // for allocator
 
 using rawspeed::BitPumpLSB;
 

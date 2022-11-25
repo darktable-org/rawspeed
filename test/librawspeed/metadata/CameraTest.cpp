@@ -20,7 +20,7 @@
 
 #include "metadata/Camera.h" // for Hints
 #include <gtest/gtest.h>     // for AssertionResult, Test, Message, TestPar...
-#include <string>            // for basic_string, string, to_string
+#include <string>            // for string, allocator, basic_string, to_string
 #include <tuple>             // for get, tuple
 
 using rawspeed::Hints;

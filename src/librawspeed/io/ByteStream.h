@@ -25,7 +25,7 @@
 #include "common/Common.h"    // for roundUp
 #include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
-#include "io/IOException.h"   // for ThrowIOE
+#include "io/IOException.h"   // for ThrowException, ThrowIOE
 #include <cassert>            // for assert
 #include <cstdint>            // for uint8_t, uint16_t, int32_t, uint32_t
 #include <cstring>            // for memchr, memcmp, memcpy
@@ -192,11 +192,11 @@ public:
 
   // special factory function to set up internal buffer with copy of passed data.
   // only necessary to create 'fake' TiffEntries (see e.g. RAF)
-  static ByteStream createCopy(const void* data_, size_type size_) {
+  static ByteStream createCopy(const std::byte* data_, size_type size_) {
     ByteStream bs;
-    auto* new_data = alignedMalloc<uint8_t, 8>(roundUp(size_, 8));
+    auto* new_data = alignedMalloc<std::byte, 8>(roundUp(size_, 8));
     memcpy(new_data, data_, size_);
-    bs.data = new_data;
+    bs.data = reinterpret_cast<const uint8_t*>(new_data);
     bs.size = size_;
     bs.isOwner = true;
     return bs; // hint: copy elision or move will happen

@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "common/Array2DRef.h"
-#include <cassert> // for assert
-#include <type_traits>
+#include "common/Array2DRef.h" // for Array2DRef
+#include <cassert>             // for assert
+#include <type_traits>         // for enable_if_t, remove_const_t, remove_cv_t
 
 namespace rawspeed {
 

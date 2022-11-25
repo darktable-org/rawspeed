@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h" // IWYU pragma: keep
+#include "decoders/RawDecoder.h" // for RawDecoder (ptr only)
 #include "parsers/RawParser.h"   // for RawParser
-#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
+#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner, TiffIFD (ptr only)
 #include <array>                 // for array
 #include <memory>                // for unique_ptr
 #include <utility>               // for pair
@@ -30,8 +30,8 @@
 namespace rawspeed {
 
 class Buffer;
-
 class CameraMetaData;
+class RawDecoder;
 
 class TiffParser final : public RawParser {
 public:

@@ -21,28 +21,30 @@
 */
 
 #include "decoders/Cr2Decoder.h"
+#include "common/Array2DRef.h"                 // for Array2DRef
 #include "common/Point.h"                      // for iPoint2D
-#include "common/RawspeedException.h"          // for RawspeedException
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
-#include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder, Cr2S...
+#include "decompressors/Cr2Decompressor.h"     // for Cr2SliceWidths
+#include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder
 #include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endianness...
+#include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include "metadata/Camera.h"                   // for Hints
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
-#include "parsers/TiffParserException.h"       // for ThrowTPE
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::SHORT
-#include "tiff/TiffTag.h"                      // for TiffTag, CANONCOLORDATA
+#include "metadata/ColorFilterArray.h"         // for CFAColor, CFAColor::G...
+#include "parsers/TiffParserException.h"       // for ThrowException, Rawsp...
+#include "tiff/TiffEntry.h"                    // for TiffEntry, TiffDataType
+#include "tiff/TiffTag.h"                      // for TiffTag, TiffTag::CAN...
 #include <array>                               // for array
 #include <cassert>                             // for assert
 #include <cstdint>                             // for uint32_t, uint16_t
-#include <memory>                              // for unique_ptr, allocator...
+#include <memory>                              // for unique_ptr, allocator
 #include <string>                              // for operator==, string
 #include <vector>                              // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {
+class CameraMetaData;
 
 bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                       [[maybe_unused]] const Buffer& file) {
@@ -90,8 +92,8 @@ RawImage Cr2Decoder::decodeOldFormat() {
   Cr2LJpegDecoder l(bs, mRaw);
   mRaw->createData();
 
-  Cr2Slicing slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                     /*lastSliceWidth=*/width);
+  Cr2SliceWidths slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
+                         /*lastSliceWidth=*/width);
   l.decode(slicing);
 
   // deal with D2000 GrayResponseCurve
@@ -145,7 +147,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
   const TiffIFD* raw = mRootIFD->getSubIFDs()[3].get();
 
-  Cr2Slicing slicing;
+  Cr2SliceWidths slicing;
   // there are four cases:
   // * there is a tag with three components,
   //   $ last two components are non-zero: all fine then.
@@ -165,9 +167,9 @@ RawImage Cr2Decoder::decodeNewFormat() {
 
     if (cr2SliceEntry->getU16(1) != 0 && cr2SliceEntry->getU16(2) != 0) {
       // first component can be either zero or non-zero, don't care
-      slicing = Cr2Slicing(/*numSlices=*/1 + cr2SliceEntry->getU16(0),
-                           /*sliceWidth=*/cr2SliceEntry->getU16(1),
-                           /*lastSliceWidth=*/cr2SliceEntry->getU16(2));
+      slicing = Cr2SliceWidths(/*numSlices=*/1 + cr2SliceEntry->getU16(0),
+                               /*sliceWidth=*/cr2SliceEntry->getU16(1),
+                               /*lastSliceWidth=*/cr2SliceEntry->getU16(2));
     } else if (cr2SliceEntry->getU16(0) == 0 && cr2SliceEntry->getU16(1) == 0 &&
                cr2SliceEntry->getU16(2) != 0) {
       // PowerShot G16, PowerShot S120, let Cr2LJpegDecoder guess.

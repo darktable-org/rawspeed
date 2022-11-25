@@ -32,10 +32,10 @@
 
 namespace rawspeed {
 
+class Buffer;
 class ByteStream;
 class CameraMetaData;
 class iPoint2D;
-class Buffer;
 
 class NefDecoder final : public AbstractTiffDecoder
 {

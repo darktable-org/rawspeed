@@ -20,28 +20,28 @@
 */
 
 #include "decoders/RawDecoder.h"
-#include "common/Common.h"                          // for roundUpDivision
+#include "common/Common.h"                          // for writeLog, roundU...
+#include "common/NotARational.h"                    // for NotARational
 #include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
-#include "io/FileIOException.h"                     // for FileIOException
+#include "io/FileIOException.h"                     // for ThrowException
 #include "io/IOException.h"                         // for IOException
 #include "metadata/BlackArea.h"                     // for BlackArea
-#include "metadata/Camera.h"                        // for Camera, Hints
+#include "metadata/Camera.h"                        // for Camera, Camera::...
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h"              // for ColorFilterArray
 #include "parsers/TiffParserException.h"            // for TiffParserException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD
-#include "tiff/TiffTag.h"                           // for BITSPERSAMPLE
-#include <algorithm>                                // for max
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
+#include <algorithm>                                // for copy, max
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
-#include <string>                                   // for string, basic_st...
+#include <string>                                   // for string, allocator
 #include <vector>                                   // for vector
 
 using std::vector;

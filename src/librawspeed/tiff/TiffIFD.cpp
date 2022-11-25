@@ -23,17 +23,18 @@
 
 #include "tiff/TiffIFD.h"
 #include "common/Common.h"            // for trimSpaces
-#include "common/NORangesSet.h"       // for set
-#include "common/RawspeedException.h" // for RawspeedException
+#include "common/NORangesSet.h"       // for NORangesSet
+#include "common/RawspeedException.h" // for ThrowException, RawspeedException
 #include "io/IOException.h"           // for IOException
 #include "tiff/TiffEntry.h"           // for TiffEntry
-#include "tiff/TiffTag.h"             // for TiffTag, MAKE, DNGPRIVATEDATA
+#include "tiff/TiffTag.h"             // for TiffTag, TiffTag::MAKE, TiffTa...
+#include <algorithm>                  // for copy, max
 #include <cassert>                    // for assert
-#include <map>                        // for map, operator!=, _Rb_tree_cons...
-#include <memory>                     // for unique_ptr, make_unique
-#include <string>                     // for string, operator==
+#include <map>                        // for map, operator!=, operator==
+#include <memory>                     // for unique_ptr, make_unique, alloc...
+#include <string>                     // for string, operator==, basic_string
 #include <utility>                    // for move, pair
-#include <vector>                     // for vector
+#include <vector>                     // for vector<>::iterator, vector
 
 using std::vector;
 

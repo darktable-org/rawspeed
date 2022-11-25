@@ -22,12 +22,13 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "interpolators/Cr2sRawInterpolator.h"
 #include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for clampBits
+#include "common/Common.h"                // for clampBits, rawspeed_get_nu...
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include <array>                          // for array
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include <array>                          // for array, array<>::value_type
 #include <cassert>                        // for assert
+#include <cstddef>                        // for size_t
 #include <cstdint>                        // for uint16_t
 
 namespace rawspeed {

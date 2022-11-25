@@ -18,12 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Memory.h" // for alignedMallocArray, alignedMalloc, aligned...
+#include "common/Memory.h" // for alignedMallocArray, alignedMalloc, aligne...
 #include <cstddef>         // for size_t
 #include <cstdint>         // for uint8_t, int64_t, SIZE_MAX, int16_t, int32_t
 #include <cstdlib>         // for exit
-#include <gtest/gtest.h>   // for Message, TestPartResult, Test, DeathTest
-#include <memory>          // for unique_ptr
+#include <gtest/gtest.h>   // for Test, Message, TestPartResult, TYPED_TEST
+#include <memory>          // for allocator, unique_ptr
+#include <string>          // for basic_string, string
 
 using rawspeed::alignedFree;
 using rawspeed::alignedFreeConstPtr;

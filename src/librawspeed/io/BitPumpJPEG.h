@@ -24,7 +24,9 @@
 #include "io/BitStream.h"  // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
-#include <cstdint>         // for uint8_t, uint32_t, uint64_t
+#include <algorithm>       // for copy_n, none_of
+#include <array>           // for array
+#include <cstdint>         // for uint8_t, uint32_t
 
 namespace rawspeed {
 

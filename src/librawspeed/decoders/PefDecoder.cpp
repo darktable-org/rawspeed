@@ -20,20 +20,21 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "common/Common.h"                    // for BitOrder::MSB
+#include "common/Common.h"                    // for BitOrder, BitOrder::MSB
 #include "common/Point.h"                     // for iPoint2D
-#include "decoders/RawDecoderException.h"     // for ThrowRDE
+#include "decoders/RawDecoderException.h"     // for ThrowException, ThrowRDE
 #include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
 #include "io/Buffer.h"                        // for Buffer, DataBuffer
 #include "io/ByteStream.h"                    // for ByteStream
 #include "io/Endianness.h"                    // for Endianness, Endianness...
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
-#include "tiff/TiffEntry.h"            // for TiffEntry, TiffDataType::UNDEFINED
+#include "metadata/ColorFilterArray.h"        // for CFAColor, CFAColor::GREEN
+#include "tiff/TiffEntry.h"                   // for TiffEntry, TiffDataType
 #include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                     // for TiffTag, ISOSPEEDRATINGS
+#include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
 #include <array>                              // for array
 #include <cstdint>                            // for uint32_t
-#include <memory>                             // for unique_ptr
+#include <memory>                             // for unique_ptr, allocator
+#include <optional>                           // for optional
 #include <string>                             // for operator==, string
 
 namespace rawspeed {

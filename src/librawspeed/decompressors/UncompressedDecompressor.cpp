@@ -21,17 +21,18 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
-#include "common/Common.h"                // for uint32_t, uint8_t, uint16_t
-#include "common/FloatingPoint.h"         // for fp16ToFloat
+#include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for BitOrder, copyPixels, BitO...
+#include "common/FloatingPoint.h"         // for Binary16, Binary24, Binary...
 #include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpLSB.h"                // for BitPumpLSB
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/BitPumpMSB16.h"              // for BitPumpMSB16
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/BitPumpLSB.h"                // for BitPumpLSB, BitStream<>::f...
+#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
+#include "io/BitPumpMSB16.h"              // for BitPumpMSB16, BitStream<>:...
+#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
 #include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for getHostEndianness, Endiann...
-#include "io/IOException.h"               // for ThrowIOE
+#include "io/Endianness.h"                // for Endianness, Endianness::li...
+#include "io/IOException.h"               // for ThrowException, ThrowIOE
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
 

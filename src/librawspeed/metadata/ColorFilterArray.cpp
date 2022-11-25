@@ -19,16 +19,18 @@
 */
 
 #include "metadata/ColorFilterArray.h"
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO::EXTRA
+#include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
 #include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include <algorithm>                      // for fill
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include <algorithm>                      // for copy, fill_n, fill, max
+#include <cassert>                        // for assert
 #include <cinttypes>                      // for PRId64
+#include <cmath>                          // for abs
 #include <cstdarg>                        // for va_arg, va_end, va_list
-#include <cstdlib>                        // for size_t, abs
+#include <cstdlib>                        // for abs, size_t
 #include <map>                            // for map
 #include <stdexcept>                      // for out_of_range
-#include <string>                         // for string
+#include <string>                         // for string, basic_string
 
 using std::vector;
 

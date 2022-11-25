@@ -20,7 +20,7 @@
 
 #include "common/Common.h"
 #include <cstdarg> // for va_end, va_list, va_start
-#include <cstdio>  // for printf, vprintf
+#include <cstdio>  // for fprintf, stdout, vfprintf
 
 // #define _DEBUG
 

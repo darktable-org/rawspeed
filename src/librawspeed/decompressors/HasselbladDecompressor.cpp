@@ -21,9 +21,10 @@
 
 #include "decompressors/HasselbladDecompressor.h"
 #include "common/Array2DRef.h"            // for Array2DRef
+#include "common/Common.h"                // for to_array
 #include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTableLUT, HuffmanTable
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
 #include "io/ByteStream.h"                // for ByteStream

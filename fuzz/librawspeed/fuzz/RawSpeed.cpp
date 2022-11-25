@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // IWYU pragma: keep
+#include "common/Common.h" // for rawspeed_get_number_of_processor_cores
 
 // define this function, it is only declared in rawspeed:
 // for fuzzing, do not want any threading.
