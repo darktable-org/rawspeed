@@ -19,7 +19,7 @@
 */
 
 #include "fuzz/Common.h"
-#include "common/Point.h"    // for iPoint2D, iPoint2D::value_type
+#include "adt/Point.h"       // for iPoint2D, iPoint2D::value_type
 #include "common/RawImage.h" // for RawImage, RawImageData, RawImageType
 #include "io/ByteStream.h"   // for ByteStream
 #include "io/IOException.h"  // for ThrowException, ThrowRSE, ThrowIOE

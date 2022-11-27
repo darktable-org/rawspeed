@@ -20,10 +20,10 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Array2DRef.h"                      // for Array2DRef
+#include "adt/Array2DRef.h"                         // for Array2DRef
+#include "adt/NotARational.h"                       // for NotARational
+#include "adt/Point.h"                              // for iPoint2D, iRecta...
 #include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/NotARational.h"                    // for NotARational
-#include "common/Point.h"                           // for iPoint2D, iRecta...
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...

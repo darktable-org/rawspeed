@@ -19,8 +19,8 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Point.h"              // for iPoint2D, iRectangle2D
+#include "adt/Array2DRef.h"            // for Array2DRef
+#include "adt/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
 #include "fuzz/Common.h"               // for CreateCFA, CreateRawImage
 #include "io/Buffer.h"                 // for Buffer, DataBuffer

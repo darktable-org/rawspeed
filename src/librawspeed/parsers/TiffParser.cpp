@@ -22,7 +22,7 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/NORangesSet.h"          // for NORangesSet
+#include "adt/NORangesSet.h"             // for NORangesSet
 #include "decoders/ArwDecoder.h"         // for ArwDecoder
 #include "decoders/Cr2Decoder.h"         // for Cr2Decoder
 #include "decoders/DcrDecoder.h"         // for DcrDecoder

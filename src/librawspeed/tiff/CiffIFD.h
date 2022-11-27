@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/NORangesSet.h" // for set
+#include "adt/NORangesSet.h"    // for set
 #include "tiff/CiffEntry.h"     // for CiffEntry (ptr only)
 #include "tiff/CiffTag.h"       // for CiffTag
 #include <cstdint>              // for uint32_t

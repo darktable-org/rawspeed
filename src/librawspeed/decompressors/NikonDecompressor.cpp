@@ -19,9 +19,9 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for extractHighBits, clampBits
-#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable

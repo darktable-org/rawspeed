@@ -29,10 +29,10 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP, RAWSPEED_CACH...
 #include "decompressors/VC5Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for roundUpDivision, rawspeed_...
 #include "common/ErrorLog.h"              // for ErrorLog
-#include "common/Point.h"                 // for iPoint2D
 #include "common/SimpleLUT.h"             // for SimpleLUT, SimpleLUT<>::va...
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big

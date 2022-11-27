@@ -19,8 +19,8 @@
 */
 
 #include "metadata/ColorFilterArray.h"
+#include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
 #include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include <algorithm>                      // for copy, fill_n, fill, max
 #include <cassert>                        // for assert

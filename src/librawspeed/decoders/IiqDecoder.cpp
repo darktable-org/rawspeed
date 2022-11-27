@@ -22,9 +22,9 @@
 */
 
 #include "decoders/IiqDecoder.h"
-#include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Mutex.h"                       // for MutexLocker
-#include "common/Point.h"                       // for iPoint2D
+#include "adt/Array2DRef.h"                     // for Array2DRef
+#include "adt/Mutex.h"                          // for MutexLocker
+#include "adt/Point.h"                          // for iPoint2D
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
 #include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
 #include "decoders/RawDecoderException.h"       // for ThrowException, Thro...

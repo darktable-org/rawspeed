@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Array2DRef.h" // for Array2DRef
+#include "adt/Array2DRef.h"    // for Array2DRef
 #include <array>               // for array
 #include <cstdint>             // for uint16_t
 

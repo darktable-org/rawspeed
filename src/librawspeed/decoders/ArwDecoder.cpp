@@ -20,9 +20,9 @@
 */
 
 #include "decoders/ArwDecoder.h"
+#include "adt/NORangesSet.h"                        // for NORangesSet
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for roundDown
-#include "common/NORangesSet.h"                     // for NORangesSet
-#include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...

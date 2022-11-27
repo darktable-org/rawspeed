@@ -20,11 +20,11 @@
 
 #include "rawspeedconfig.h"               // for WITH_SSE2
 #include "common/RawImage.h"              // for RawImageDataU16, RawImageType
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for clampBits, roundDown, writ...
-#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "common/Memory.h"                // for alignedFree, alignedMalloc...
-#include "common/Point.h"                 // for iPoint2D
 #include "common/TableLookUp.h"           // for TableLookUp
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea

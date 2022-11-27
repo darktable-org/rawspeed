@@ -21,7 +21,7 @@
 */
 
 #include "tiff/CiffEntry.h"
-#include "common/NORangesSet.h"          // for NORangesSet
+#include "adt/NORangesSet.h"             // for NORangesSet
 #include "io/Buffer.h"                   // for Buffer, operator<
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE

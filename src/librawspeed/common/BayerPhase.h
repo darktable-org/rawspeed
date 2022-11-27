@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Point.h"              // for iPoint2D
+#include "adt/Array2DRef.h"            // for Array2DRef
+#include "adt/Point.h"                 // for iPoint2D
 #include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
 #include <algorithm>                   // for find_if, equal
 #include <array>                       // for array, operator==

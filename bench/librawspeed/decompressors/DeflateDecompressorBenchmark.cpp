@@ -19,10 +19,10 @@
 */
 
 #include "decompressors/DeflateDecompressor.h" // for DeflateDecompressor
+#include "adt/Point.h"                         // for iPoint2D
 #include "bench/Common.h"                      // for areaToRectangle
 #include "common/Common.h"                     // for isAligned
 #include "common/Memory.h"                     // for alignedFree
-#include "common/Point.h"                      // for iPoint2D
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream

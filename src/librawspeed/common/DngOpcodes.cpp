@@ -21,10 +21,10 @@
 */
 
 #include "common/DngOpcodes.h"
+#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
+#include "adt/Mutex.h"                    // for MutexLocker
+#include "adt/Point.h"                    // for iRectangle2D, iPoint2D
 #include "common/Common.h"                // for roundUpDivision, clampBits
-#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
-#include "common/Mutex.h"                 // for MutexLocker
-#include "common/Point.h"                 // for iRectangle2D, iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream

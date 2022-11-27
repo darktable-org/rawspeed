@@ -23,9 +23,9 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/FujiDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageData, RawImage
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big

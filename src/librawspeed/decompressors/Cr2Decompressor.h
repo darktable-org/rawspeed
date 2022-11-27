@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/Point.h"                    // for iPoint2D
+#include "adt/Point.h"                       // for iPoint2D
+#include "adt/iterator_range.h"              // for iterator_range
 #include "common/RawImage.h"                 // for RawImage
 #include "common/RawspeedException.h"        // for ThrowException
-#include "common/iterator_range.h"           // for iterator_range
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTable.h" // for HuffmanTable, HuffmanTableLUT

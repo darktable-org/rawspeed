@@ -21,9 +21,9 @@
 */
 
 #include "decoders/OrfDecoder.h"
+#include "adt/NORangesSet.h"                        // for NORangesSet
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/NORangesSet.h"                     // for NORangesSet
-#include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/OlympusDecompressor.h"      // for OlympusDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...

@@ -20,11 +20,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Array2DRef.h"               // for Array2DRef
-#include "common/Point.h"                    // for iPoint2D, iPoint2D::area_...
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/iterator_range.h"           // for iterator_range
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D, iPoint2D::area_...
+#include "adt/iterator_range.h"           // for iterator_range
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor, Cr2SliceWidths
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT

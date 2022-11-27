@@ -21,7 +21,7 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Point.h"                           // for iPoint2D
+#include "adt/Point.h"                              // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for DataBuffer, Buffer

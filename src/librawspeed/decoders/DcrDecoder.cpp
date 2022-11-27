@@ -20,7 +20,7 @@
 */
 
 #include "decoders/DcrDecoder.h"
-#include "common/NORangesSet.h"              // for NORangesSet
+#include "adt/NORangesSet.h"                 // for NORangesSet
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/KodakDecompressor.h" // for KodakDecompressor
 #include "io/Buffer.h"                       // for Buffer, DataBuffer

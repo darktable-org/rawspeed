@@ -20,8 +20,8 @@
 */
 
 #include "metadata/Camera.h"
+#include "adt/Point.h"                        // for iPoint2D
 #include "common/Common.h"                    // for splitString
-#include "common/Point.h"                     // for iPoint2D
 #include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
 #include <algorithm>                          // for max, fill, transform
 #include <cctype>                             // for tolower

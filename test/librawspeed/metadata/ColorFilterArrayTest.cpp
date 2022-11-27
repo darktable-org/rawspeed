@@ -20,7 +20,7 @@
 */
 
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
-#include "common/Point.h"              // for iPoint2D
+#include "adt/Point.h"                 // for iPoint2D
 #include <cstdint>                     // for uint32_t
 #include <gtest/gtest.h>               // for ParamIteratorInterface, Message
 #include <iosfwd>                      // for ostream
