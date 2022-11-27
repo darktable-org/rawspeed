@@ -78,16 +78,8 @@ struct Cr2OutputTileIterator final {
   const iPoint2D& imgDim;
 
   Cr2SliceIterator sliceIter;
+  iPoint2D outPos = {0, 0};
   int sliceRow = 0;
-
-  [[nodiscard]] iPoint2D getOutPos() const {
-    const int integratedSlicesRow =
-        sliceIter.frameHeight * sliceIter.widthIter.sliceId + sliceRow;
-    int outRow = integratedSlicesRow % imgDim.y;
-    int outCol = integratedSlicesRow / imgDim.y;
-    outCol *= sliceIter.widthIter.slicing.widthOfSlice(0);
-    return {outCol, outRow};
-  }
 
   using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
@@ -100,7 +92,7 @@ struct Cr2OutputTileIterator final {
 
   value_type operator*() const {
     // Positioning
-    iRectangle2D tile = {getOutPos(), *sliceIter};
+    iRectangle2D tile = {outPos, *sliceIter};
     // Clamping
     int outRowsRemaining = imgDim.y - tile.getTop();
     assert(outRowsRemaining >= 0);
@@ -111,17 +103,24 @@ struct Cr2OutputTileIterator final {
     return tile;
   }
   Cr2OutputTileIterator& operator++() {
-    sliceRow += operator*().getHeight();
+    const iRectangle2D currTile = operator*();
+    sliceRow += currTile.getHeight();
+    outPos = currTile.getBottomLeft();
     assert(sliceRow >= 0 && sliceRow <= (*sliceIter).y && "Overflow");
     if (sliceRow == (*sliceIter).y) {
       ++sliceIter;
       sliceRow = 0;
+    }
+    if (outPos.y == imgDim.y) {
+      outPos.y = 0;
+      outPos.x += currTile.getWidth();
     }
     return *this;
   }
   friend bool operator==(const Cr2OutputTileIterator& a,
                          const Cr2OutputTileIterator& b) {
     assert(&a.imgDim == &b.imgDim && "Unrelated iterators.");
+    // NOTE: outPos is correctly omitted here.
     return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
   }
   friend bool operator!=(const Cr2OutputTileIterator& a,
