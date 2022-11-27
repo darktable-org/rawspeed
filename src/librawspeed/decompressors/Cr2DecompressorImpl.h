@@ -51,7 +51,7 @@ struct Cr2SliceIterator final {
 
   Cr2SliceWidthIterator widthIter;
 
-  using iterator_category = std::bidirectional_iterator_tag;
+  using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = iPoint2D;
   using pointer = const value_type*;   // Unusable, but must be here.
@@ -63,10 +63,6 @@ struct Cr2SliceIterator final {
   value_type operator*() const { return {*widthIter, frameHeight}; }
   Cr2SliceIterator& operator++() {
     ++widthIter;
-    return *this;
-  }
-  Cr2SliceIterator& operator--() {
-    --widthIter;
     return *this;
   }
   friend bool operator==(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
@@ -121,14 +117,6 @@ struct Cr2OutputTileIterator final {
       ++sliceIter;
       sliceRow = 0;
     }
-    return *this;
-  }
-  Cr2OutputTileIterator& operator--() {
-    if (sliceRow == 0) {
-      --sliceIter;
-      sliceRow = (*sliceIter).y;
-    }
-    sliceRow -= std::min(sliceRow, imgDim.y);
     return *this;
   }
   friend bool operator==(const Cr2OutputTileIterator& a,
