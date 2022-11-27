@@ -46,6 +46,26 @@ namespace rawspeed {
 
 class ByteStream;
 
+// NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
+namespace {
+
+enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
+
+inline TileSequenceStatus
+evaluateConsecutiveTiles(const iRectangle2D& rect,
+                         const iRectangle2D& nextRect) {
+  // Are these two are verically-adjacent rectangles of same width?
+  if (rect.getBottomLeft() == nextRect.getTopLeft() &&
+      rect.getBottomRight() == nextRect.getTopRight())
+    return TileSequenceStatus::ContinuesColumn;
+  // Otherwise, the next rectangle should be the first row of next column.
+  if (nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight())
+    return TileSequenceStatus::BeginsNewColumn;
+  return TileSequenceStatus::Invalid;
+}
+
+} // namespace
+
 struct Cr2SliceIterator final {
   const int frameHeight;
 
@@ -142,16 +162,13 @@ class Cr2VerticalOutputStripIterator final {
 
     for (++tmpIter; tmpIter != outputTileIterator_end; ++tmpIter) {
       iRectangle2D nextRect = *tmpIter;
-      // Are these two are verically-adjacent rectangles of same width?
-      if (rect.getBottomLeft() == nextRect.getTopLeft() &&
-          rect.getBottomRight() == nextRect.getTopRight()) {
-        rect.dim.y += nextRect.dim.y;
-        ++num;
-        continue;
-      }
-      // Otherwise, the next rectangle should be the first row of next column.
-      assert(nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight());
-      break;
+      const TileSequenceStatus s = evaluateConsecutiveTiles(rect, nextRect);
+      assert(s != TileSequenceStatus::Invalid && "Bad tiling.");
+      if (s == TileSequenceStatus::BeginsNewColumn)
+        break;
+      assert(s == TileSequenceStatus::ContinuesColumn);
+      rect.dim.y += nextRect.dim.y;
+      ++num;
     }
 
     return {rect, num};
@@ -326,9 +343,9 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
 
   std::optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getAllOutputTiles()) {
-    if (lastTile && output.getTop() != 0 &&
-        output.getWidth() != lastTile->getWidth())
-      ThrowRDE("Tiles can not change width mid-column.");
+    if (lastTile && evaluateConsecutiveTiles(*lastTile, output) ==
+                        TileSequenceStatus::Invalid)
+      ThrowRDE("Invalid tiling - slice width change mid-output row?");
     if (output.getBottomRight() <= dim) {
       lastTile = output;
       continue; // Tile still inbounds of image.
