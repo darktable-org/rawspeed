@@ -26,6 +26,8 @@ on:
       flavor:
         required: true
         type: string
+      ECO:
+        type: string
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
@@ -221,7 +223,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           RPUU_DST: ${{ env.RPUU_DST }}
-          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=${{ inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'SonarCloudStaticAnalysis' }} -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.flavor == 'Coverage' }}
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=${{ inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'SonarCloudStaticAnalysis' }} -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.flavor == 'Coverage' }}
           FLAVOR: ${{ inputs.flavor }}
           TARGET: configure
         run: |

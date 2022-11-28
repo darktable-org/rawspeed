@@ -60,6 +60,7 @@ target_test()
 
 target_test_integration()
 {
+  cmake --build "$BUILD_DIR" --target gcov-clean
   cmake --build "$BUILD_DIR" --target rstest-check
 }
 
@@ -74,7 +75,6 @@ handle_coverage_data()
 
 target_coverage_integration_data()
 {
-  cmake --build "$BUILD_DIR" --target gcov-clean
   cmake --build "$BUILD_DIR" --target gcov
   mkdir "$BUILD_DIR/gcov-reports-rsa"
   # Can't use \+ because OSX's mv does not have --target-directory, and \+ must

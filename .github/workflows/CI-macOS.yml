@@ -22,6 +22,8 @@ on:
       flavor:
         required: true
         type: string
+      ECO:
+        type: string
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
@@ -56,7 +58,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
-          ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DWITH_OPENMP=OFF
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DWITH_OPENMP=OFF
           FLAVOR: ${{ inputs.flavor }}
           TARGET: configure
         run: |
