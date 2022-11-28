@@ -211,7 +211,7 @@ jobs:
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
           echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
-      - name: Build And Test
+      - name: Configure
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -223,7 +223,7 @@ jobs:
           RPUU_DST: ${{ env.RPUU_DST }}
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=${{ inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'SonarCloudStaticAnalysis' }} -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.flavor == 'Coverage' }}
           FLAVOR: ${{ inputs.flavor }}
-          TARGET: build
+          TARGET: configure
         run: |
           set -xe
           cmake -E make_directory "${BUILD_DIR}"
@@ -232,6 +232,63 @@ jobs:
           if [ "$FLAVOR" = "ClangTidy" -o "$FLAVOR" = "ClangStaticAnalysis" -o "$FLAVOR" = "CodeQLAnalysis" -o "$FLAVOR" = "SonarCloudStaticAnalysis" ]; then
             export ECO="${ECO} -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG"
           fi
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Build
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: build
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Test
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage data
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Test (integration)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test_integration
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage (integration) data
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage_integration
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'ClangStaticAnalysis'
         name: Perform clang static analysis

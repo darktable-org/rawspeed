@@ -56,7 +56,7 @@ jobs:
             pugixml:p
             libjpeg-turbo:p
             zlib:p
-      - name: Build And Test
+      - name: Configure
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -65,11 +65,48 @@ jobs:
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           ECO: -DALLOW_DOWNLOADING_GOOGLETEST=ON
           FLAVOR: ${{ inputs.flavor }}
-          TARGET: build
+          TARGET: configure
         run: |
           set -xe
           cmake -E make_directory "${BUILD_DIR}"
           cmake -E make_directory "${INSTALL_PREFIX}"
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Build
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: build
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Test
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage data
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage
+        run: |
+          set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
