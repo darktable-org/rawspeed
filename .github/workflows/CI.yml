@@ -62,37 +62,25 @@ jobs:
       matrix:
         os: [ windows-latest ]
         msys2:
-          - { msystem: MINGW64, arch: x86_64 }
-          - { msystem: MINGW32, arch: i686   }
-          - { msystem: CLANG64, arch: x86_64 }
-        compiler:
-          - { family: GNU,  CC: gcc,   CXX: g++ }
-          - { family: LLVM, CC: clang, CXX: clang++ }
+          - { msystem: MINGW64,    arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
+          - { msystem: MINGW32,    arch: i686,    family: GNU,  CC: gcc,   CXX: g++ }
+          - { msystem: CLANG64,    arch: x86_64,  family: LLVM, CC: clang, CXX: clang++ }
+          - { msystem: CLANG32,    arch: i686,    family: LLVM, CC: clang, CXX: clang++ }
+          - { msystem: UCRT64,     arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
         flavor: [ RelWithDebInfo, Release ]
-        exclude:
-          - os: windows-latest
-            compiler: { family: LLVM, CC: clang, CXX: clang++ }
-            msys2: { msystem: MINGW64, arch: x86_64 }
-          - os: windows-latest
-            compiler: { family: LLVM, CC: clang, CXX: clang++ }
-            msys2: { msystem: MINGW32, arch: i686   }
-          - os: windows-latest
-            compiler: { family: GNU,  CC: gcc,   CXX: g++ }
-            msys2: { msystem: CLANG64, arch: x86_64 }
         include:
           - os: windows-latest
-            msys2: { msystem: MINGW64, arch: x86_64 }
-            compiler: { family: GNU, CC: gcc, CXX: g++ }
+            msys2: { msystem: UCRT64, arch: x86_64, family: GNU, CC: gcc, CXX: g++ }
             flavor: Coverage
-    name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.compiler.family }}.${{ matrix.flavor }}
+    name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.msys2.family }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
       os: ${{ matrix.os }}
       msys2-msystem: ${{ matrix.msys2.msystem }}
       msys2-arch: ${{ matrix.msys2.arch }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
+      compiler-family: ${{ matrix.msys2.family }}
+      compiler-CC: ${{ matrix.msys2.CC }}
+      compiler-CXX: ${{ matrix.msys2.CXX }}
       flavor: ${{ matrix.flavor }}
   macOS:
     strategy:
