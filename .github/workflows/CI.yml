@@ -23,7 +23,6 @@ jobs:
           - { distro: "debian:unstable-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
           - { distro: "debian:unstable-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
         flavor: [ RelWithDebInfo, Release ]
-    name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -48,7 +47,6 @@ jobs:
           - { distro: "ubuntu:jammy",         family: LLVM, version: 12, CC: clang-12, CXX: clang++-12 }
           - { distro: "debian:bullseye-slim", family: LLVM, version: 11, CC: clang-11, CXX: clang++-11 }
         flavor: [ RelWithDebInfo, Release ]
-    name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -74,7 +72,6 @@ jobs:
           - os: linux
             compiler: { distro: "debian:unstable", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
             flavor: CodeQLAnalysis
-    name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -94,7 +91,6 @@ jobs:
           - os: linux
             compiler: { distro: "debian:unstable", family: GNU, version: 12, CC: gcc-12, CXX: g++-12, GCOV: gcov-12 }
             flavor: Coverage
-    name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -114,7 +110,6 @@ jobs:
           - os: linux
             compiler: { distro: "debian:unstable", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
             flavor: SonarCloudStaticAnalysis
-    name: ${{ matrix.os }}.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -138,7 +133,6 @@ jobs:
           - { msystem: CLANG32,    arch: i686,    family: LLVM, CC: clang, CXX: clang++ }
           - { msystem: UCRT64,     arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
         flavor: [ RelWithDebInfo, Release ]
-    name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.msys2.family }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
       os: ${{ matrix.os }}
@@ -156,7 +150,6 @@ jobs:
           - os: windows-latest
             msys2: { msystem: MINGW64, arch: x86_64, family: GNU, CC: gcc, CXX: g++ }
             flavor: Coverage
-    name: ${{ matrix.os }}.${{ matrix.msys2.msystem }}.${{ matrix.msys2.family }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
       os: ${{ matrix.os }}
@@ -173,7 +166,6 @@ jobs:
         compiler:
           - { os: macos-12, family: XCode, version: 13.3.1, deployment_target: 13.3.1, CC: cc, CXX: c++ } # LLVM13
         flavor: [ RelWithDebInfo, Release ]
-    name: ${{ matrix.compiler.os }}.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-macOS.yml
     with:
       os: ${{ matrix.compiler.os }}
@@ -193,7 +185,6 @@ jobs:
           - { os: macos-11, family: XCode, version: 12.5.1, deployment_target: 12.5.1, CC: cc, CXX: c++ } # LLVM11
           - { os: macos-11, family: XCode, version: 12.4,   deployment_target: 12.4,   CC: cc, CXX: c++ } # LLVM10
         flavor: [ RelWithDebInfo, Release ]
-    name: ${{ matrix.compiler.os }}.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-macOS.yml
     with:
       os: ${{ matrix.compiler.os }}
@@ -210,7 +201,6 @@ jobs:
         include:
           - compiler: { os: macos-12, family: XCode, version: 13.3.1, deployment_target: 13.3.1, CC: cc, CXX: c++ } # LLVM13
             flavor: Coverage
-    name: ${{ matrix.compiler.os }}.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-macOS.yml
     with:
       os: ${{ matrix.compiler.os }}

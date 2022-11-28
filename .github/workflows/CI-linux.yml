@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_SCANNER_VERSION: 4.6.2.2472
+    name: ${{ inputs.distro }}.${{ inputs.compiler-family }}${{ inputs.compiler-version }}.${{ inputs.flavor }}
     container:
       image: ${{ inputs.distro }}
       options: --tmpfs /tmp:exec --tmpfs /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}:exec
