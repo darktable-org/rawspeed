@@ -28,7 +28,6 @@ env:
 
 jobs:
   windows-msys2:
-    name: ${{ inputs.os }}.${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
     runs-on: ${{ inputs.os }}
     defaults:
       run:

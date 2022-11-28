@@ -28,7 +28,6 @@ env:
 
 jobs:
   macOS:
-    name: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.compiler-version }}.targeting.OSX.${{ inputs.os-deployment_target }}.${{ inputs.flavor }}
     runs-on: ${{ inputs.os }}
     steps:
       - uses: actions/checkout@v3
