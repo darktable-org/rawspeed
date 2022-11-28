@@ -66,7 +66,7 @@ jobs:
           tee /etc/apt/apt.conf.d/80fixmissing > /dev/null <<EOT
           APT::Get::Fix-Missing "true";
           EOT
-      - name: Install/Update necessary packages
+      - name: Update base packages
         env:
           DEBIAN_FRONTEND: noninteractive
           COMPILER_FAMILY: ${{ inputs.compiler-family }}
@@ -75,47 +75,55 @@ jobs:
           set -xe
           rm -rf /var/lib/apt/lists/*
           apt-get update
-          apt-get upgrade
-          apt-get install ca-certificates \
-                          cmake \
-                          git \
-                          googletest \
-                          libjpeg-dev \
-                          libpugixml-dev \
-                          libxml2-utils \
-                          ninja-build \
-                          zlib1g-dev
+          apt-get install eatmydata
+          eatmydata apt-get upgrade
+      - name: Install necessary packages
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          COMPILER_FAMILY: ${{ inputs.compiler-family }}
+          FLAVOR: ${{ inputs.flavor }}
+        run: |
+          set -xe
+          eatmydata apt-get install ca-certificates \
+                                    cmake \
+                                    git \
+                                    googletest \
+                                    libjpeg-dev \
+                                    libpugixml-dev \
+                                    libxml2-utils \
+                                    ninja-build \
+                                    zlib1g-dev
           if [ "$COMPILER_FAMILY" = "GNU" ]; then
-            apt-get install g++-${{ inputs.compiler-version }} \
-                            gcc \
-                            gcc-${{ inputs.compiler-version }}
+            eatmydata apt-get install g++-${{ inputs.compiler-version }} \
+                                      gcc \
+                                      gcc-${{ inputs.compiler-version }}
           fi
           if [ "$COMPILER_FAMILY" = "LLVM" ]; then
-            apt-get install clang-${{ inputs.compiler-version }} \
-                            libomp-${{ inputs.compiler-version }}-dev
+            eatmydata apt-get install clang-${{ inputs.compiler-version }} \
+                                      libomp-${{ inputs.compiler-version }}-dev
           fi
           if [ "$FLAVOR" = "Coverage" ]; then
-            apt-get install rsync
+            eatmydata apt-get install rsync
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
-            apt-get install clang-tidy-${{ inputs.compiler-version }}
+            eatmydata apt-get install clang-tidy-${{ inputs.compiler-version }}
           fi
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
-            apt-get install curl \
-                            libxml2-dev \
-                            libxslt1-dev \
-                            make \
-                            python3-dev \
-                            python3-lxml \
-                            python3-pip-whl \
-                            python3-portalocker \
-                            python3-psutil \
-                            python3-venv \
-                            python3-virtualenv \
-                            python3-wheel \
-                            python3-yaml
+            eatmydata apt-get install curl \
+                                      libxml2-dev \
+                                      libxslt1-dev \
+                                      make \
+                                      python3-dev \
+                                      python3-lxml \
+                                      python3-pip-whl \
+                                      python3-portalocker \
+                                      python3-psutil \
+                                      python3-venv \
+                                      python3-virtualenv \
+                                      python3-wheel \
+                                      python3-yaml
           fi
-          apt-get clean
+          eatmydata apt-get clean
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
             ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/clang
@@ -196,9 +204,9 @@ jobs:
         run: |
           set -xe
           rm -rf /var/lib/apt/lists/*
-          apt-get update
-          apt-get install curl unzip
-          apt-get clean
+          eatmydata apt-get update
+          eatmydata apt-get install curl unzip
+          eatmydata apt-get clean
           mkdir -p $HOME/.sonar
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
