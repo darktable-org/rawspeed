@@ -34,7 +34,6 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
-      ECO: -DBUILD_BENCHMARKING=ON
   linux-legacy:
     strategy:
       fail-fast: false
@@ -143,7 +142,6 @@ jobs:
       compiler-CC: ${{ matrix.msys2.CC }}
       compiler-CXX: ${{ matrix.msys2.CXX }}
       flavor: ${{ matrix.flavor }}
-      ECO: -DBUILD_BENCHMARKING=ON
   windows-msys2-coverage:
     strategy:
       fail-fast: false
@@ -177,7 +175,6 @@ jobs:
       compiler-CC: ${{ matrix.compiler.CC }}
       compiler-CXX: ${{ matrix.compiler.CXX }}
       flavor: ${{ matrix.flavor }}
-      ECO: -DBUILD_BENCHMARKING=ON
   macOS-legacy:
     strategy:
       fail-fast: false
