@@ -59,7 +59,6 @@ jobs:
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
   linux-static-analysis:
-    if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
     strategy:
       fail-fast: false
       matrix:
@@ -105,6 +104,7 @@ jobs:
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
   linux-sonarcloud-static-analysis:
+    if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
     strategy:
       fail-fast: false
       matrix:
