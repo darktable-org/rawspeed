@@ -317,14 +317,12 @@ jobs:
           SONAR_SERVER_URL: "https://sonarcloud.io"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
         run: |
           set -xe
           cd "${SRC_DIR}"
-          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ secrets.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
+          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v3
