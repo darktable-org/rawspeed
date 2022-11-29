@@ -29,8 +29,6 @@ on:
       ECO:
         type: string
     secrets:
-      GITHUB_TOKEN:
-        type: string
       SONAR_TOKEN:
         type: string
       SONAR_PROJECT_KEY:
@@ -211,7 +209,7 @@ jobs:
       - if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         name: Download and set up sonar-scanner (for SonarCloud static analysis)
         env:
-          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ secrets.SONAR_SCANNER_VERSION }}-linux.zip
+          SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
         run: |
           set -xe
           rm -rf /var/lib/apt/lists/*
@@ -221,7 +219,7 @@ jobs:
           mkdir -p $HOME/.sonar
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-          echo "$HOME/.sonar/sonar-scanner-${{ secrets.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
+          echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
       - name: Configure
         env:
           CC: ${{ inputs.compiler-CC }}
