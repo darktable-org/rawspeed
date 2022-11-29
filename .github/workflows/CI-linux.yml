@@ -30,11 +30,8 @@ on:
         type: string
     secrets:
       SONAR_TOKEN:
-        type: string
       SONAR_PROJECT_KEY:
-        type: string
       SONAR_ORGANIZATION:
-        type: string
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
