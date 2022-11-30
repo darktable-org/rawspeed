@@ -20,9 +20,9 @@
 */
 
 #include "decoders/NefDecoder.h"
-#include "common/Array2DRef.h"                      // for Array2DRef
+#include "adt/Array2DRef.h"                         // for Array2DRef
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for clampBits, round...
-#include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/NikonDecompressor.h"        // for NikonDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...

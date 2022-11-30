@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/Point.h"                    // for iPoint2D
+#include "adt/Point.h"                       // for iPoint2D
+#include "adt/iterator_range.h"              // for iterator_range
 #include "common/RawImage.h"                 // for RawImage
 #include "common/RawspeedException.h"        // for ThrowException
-#include "common/iterator_range.h"           // for iterator_range
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTable.h" // for HuffmanTable, HuffmanTableLUT
@@ -89,7 +89,7 @@ struct Cr2SliceWidthIterator final {
 
   int sliceId;
 
-  using iterator_category = std::bidirectional_iterator_tag;
+  using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = int;
   using pointer = const value_type*;   // Unusable, but must be here.
@@ -106,10 +106,6 @@ struct Cr2SliceWidthIterator final {
   }
   Cr2SliceWidthIterator& operator++() {
     ++sliceId;
-    return *this;
-  }
-  Cr2SliceWidthIterator& operator--() {
-    --sliceId;
     return *this;
   }
   friend bool operator==(const Cr2SliceWidthIterator& a,

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Point.h" // for iPoint2D
+#include "adt/Point.h"    // for iPoint2D
 #include <cstddef>        // for size_t
 
 rawspeed::iPoint2D __attribute__((const))

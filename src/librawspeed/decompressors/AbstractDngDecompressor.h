@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include "adt/Point.h"                          // for iPoint2D
 #include "common/Common.h"                      // for roundUpDivision
-#include "common/Point.h"                       // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream

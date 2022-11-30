@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/NORangesSet.h"          // for set
+#include "adt/NORangesSet.h"             // for set
 #include "common/RawspeedException.h"    // for ThrowException
 #include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
 #include "io/ByteStream.h"               // for ByteStream

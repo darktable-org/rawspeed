@@ -20,8 +20,8 @@
 */
 
 #include "decoders/SrwDecoder.h"
+#include "adt/Point.h"                           // for iPoint2D
 #include "common/Common.h"                       // for BitOrder, BitOrder:...
-#include "common/Point.h"                        // for iPoint2D
 #include "decoders/RawDecoderException.h"        // for ThrowException, Thr...
 #include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
 #include "decompressors/SamsungV1Decompressor.h" // for SamsungV1Decompressor

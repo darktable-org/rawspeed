@@ -20,7 +20,7 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
-#include "common/Point.h"                         // for iPoint2D
+#include "adt/Point.h"                            // for iPoint2D
 #include "decoders/RawDecoderException.h"         // for ThrowException
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
 #include "io/Buffer.h"                            // for Buffer, DataBuffer

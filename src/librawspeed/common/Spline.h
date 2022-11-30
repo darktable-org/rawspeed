@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Point.h" // for iPoint2D
+#include "adt/Point.h"    // for iPoint2D
 #include <algorithm>      // for fill_n, max, copy, min
 #include <cassert>        // for assert
 #include <cstdint>        // for uint16_t

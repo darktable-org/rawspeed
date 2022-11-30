@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "common/Array2DRef.h"                  // for Array2DRef
+#include "adt/Array2DRef.h"                     // for Array2DRef
+#include "adt/DefaultInitAllocatorAdaptor.h"    // for DefaultInitAllocator...
 #include "common/BayerPhase.h"                  // for BayerPhase
-#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor

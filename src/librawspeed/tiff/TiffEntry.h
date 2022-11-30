@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/NotARational.h" // for NotARational
+#include "adt/NotARational.h"    // for NotARational
 #include "io/ByteStream.h"       // for ByteStream
 #include "tiff/TiffTag.h"        // for TiffTag
 #include <algorithm>             // for fill_n

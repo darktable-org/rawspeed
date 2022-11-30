@@ -19,8 +19,8 @@
 */
 
 #include "bench/Common.h"
+#include "adt/Point.h"     // for iPoint2D
 #include "common/Common.h" // for roundUp
-#include "common/Point.h"  // for iPoint2D
 #include <cassert>         // for assert
 #include <cmath>           // for ceil, sqrt
 

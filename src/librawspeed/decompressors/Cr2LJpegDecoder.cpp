@@ -21,7 +21,7 @@
 */
 
 #include "decompressors/Cr2LJpegDecoder.h"
-#include "common/Point.h"                 // for iPoint2D
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable

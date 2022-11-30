@@ -18,7 +18,7 @@
 */
 
 #include "RawSpeed-API.h"      // for RawImage, RawImageData, iPoint2D, Cam...
-#include "common/Array2DRef.h" // for Array2DRef
+#include "adt/Array2DRef.h"    // for Array2DRef
 #include <array>               // for array
 #include <cstddef>             // for byte, size_t
 #include <cstdint>             // for uint16_t, uint32_t

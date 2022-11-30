@@ -19,7 +19,7 @@
 */
 
 #include "common/Spline.h" // for Spline, Spline<>::value_type
-#include "common/Point.h"  // for iPoint2D, iPoint2D::value_type
+#include "adt/Point.h"     // for iPoint2D, iPoint2D::value_type
 #include <algorithm>       // for copy, max, generate_n, fill_n
 #include <array>           // for array
 #include <cassert>         // for assert

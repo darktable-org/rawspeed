@@ -19,10 +19,10 @@
 */
 
 #include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
-#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
-#include "common/Point.h"                 // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for fill_n, max, min

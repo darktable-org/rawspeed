@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Point.h"                 // for iPoint2D
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)

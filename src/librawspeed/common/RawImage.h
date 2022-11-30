@@ -22,13 +22,13 @@
 
 #include "rawspeedconfig.h"            // for WITH_SSE2
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Array2DRef.h"         // for Array2DRef
+#include "adt/Array2DRef.h"            // for Array2DRef
+#include "adt/CroppedArray2DRef.h"     // for CroppedArray2DRef
+#include "adt/Mutex.h"                 // for Mutex
+#include "adt/NotARational.h"          // for NotARational
+#include "adt/Point.h"                 // for iPoint2D, iRectangle2D (ptr o...
 #include "common/Common.h"             // for writeLog, DEBUG_PRIO, DEBUG_P...
-#include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
 #include "common/ErrorLog.h"           // for ErrorLog
-#include "common/Mutex.h"              // for Mutex
-#include "common/NotARational.h"       // for NotARational
-#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
 #include "common/TableLookUp.h"        // for TableLookUp
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray

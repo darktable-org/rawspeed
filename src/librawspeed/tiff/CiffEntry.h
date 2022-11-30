@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "common/NORangesSet.h" // for set
+#include "adt/NORangesSet.h"    // for set
 #include "io/ByteStream.h"      // for ByteStream
 #include "tiff/CiffTag.h"       // for CiffTag
 #include <cstdint>              // for uint32_t, uint16_t, uint8_t

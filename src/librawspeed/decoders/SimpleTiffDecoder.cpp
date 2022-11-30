@@ -21,7 +21,7 @@
 */
 
 #include "decoders/SimpleTiffDecoder.h"
-#include "common/Point.h"                 // for iPoint2D
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer

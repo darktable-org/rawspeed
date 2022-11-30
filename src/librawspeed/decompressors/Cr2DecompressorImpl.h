@@ -20,11 +20,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Array2DRef.h"               // for Array2DRef
-#include "common/Point.h"                    // for iPoint2D, iPoint2D::area_...
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/iterator_range.h"           // for iterator_range
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D, iPoint2D::area_...
+#include "adt/iterator_range.h"           // for iterator_range
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor, Cr2SliceWidths
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
@@ -46,12 +46,32 @@ namespace rawspeed {
 
 class ByteStream;
 
+// NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
+namespace {
+
+enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
+
+inline TileSequenceStatus
+evaluateConsecutiveTiles(const iRectangle2D& rect,
+                         const iRectangle2D& nextRect) {
+  // Are these two are verically-adjacent rectangles of same width?
+  if (rect.getBottomLeft() == nextRect.getTopLeft() &&
+      rect.getBottomRight() == nextRect.getTopRight())
+    return TileSequenceStatus::ContinuesColumn;
+  // Otherwise, the next rectangle should be the first row of next column.
+  if (nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight())
+    return TileSequenceStatus::BeginsNewColumn;
+  return TileSequenceStatus::Invalid;
+}
+
+} // namespace
+
 struct Cr2SliceIterator final {
   const int frameHeight;
 
   Cr2SliceWidthIterator widthIter;
 
-  using iterator_category = std::bidirectional_iterator_tag;
+  using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = iPoint2D;
   using pointer = const value_type*;   // Unusable, but must be here.
@@ -63,10 +83,6 @@ struct Cr2SliceIterator final {
   value_type operator*() const { return {*widthIter, frameHeight}; }
   Cr2SliceIterator& operator++() {
     ++widthIter;
-    return *this;
-  }
-  Cr2SliceIterator& operator--() {
-    --widthIter;
     return *this;
   }
   friend bool operator==(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
@@ -82,16 +98,8 @@ struct Cr2OutputTileIterator final {
   const iPoint2D& imgDim;
 
   Cr2SliceIterator sliceIter;
+  iPoint2D outPos = {0, 0};
   int sliceRow = 0;
-
-  [[nodiscard]] iPoint2D getOutPos() const {
-    const int integratedSlicesRow =
-        sliceIter.frameHeight * sliceIter.widthIter.sliceId + sliceRow;
-    int outRow = integratedSlicesRow % imgDim.y;
-    int outCol = integratedSlicesRow / imgDim.y;
-    outCol *= sliceIter.widthIter.slicing.widthOfSlice(0);
-    return {outCol, outRow};
-  }
 
   using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
@@ -104,7 +112,7 @@ struct Cr2OutputTileIterator final {
 
   value_type operator*() const {
     // Positioning
-    iRectangle2D tile = {getOutPos(), *sliceIter};
+    iRectangle2D tile = {outPos, *sliceIter};
     // Clamping
     int outRowsRemaining = imgDim.y - tile.getTop();
     assert(outRowsRemaining >= 0);
@@ -115,25 +123,24 @@ struct Cr2OutputTileIterator final {
     return tile;
   }
   Cr2OutputTileIterator& operator++() {
-    sliceRow += operator*().getHeight();
+    const iRectangle2D currTile = operator*();
+    sliceRow += currTile.getHeight();
+    outPos = currTile.getBottomLeft();
     assert(sliceRow >= 0 && sliceRow <= (*sliceIter).y && "Overflow");
     if (sliceRow == (*sliceIter).y) {
       ++sliceIter;
       sliceRow = 0;
     }
-    return *this;
-  }
-  Cr2OutputTileIterator& operator--() {
-    if (sliceRow == 0) {
-      --sliceIter;
-      sliceRow = (*sliceIter).y;
+    if (outPos.y == imgDim.y) {
+      outPos.y = 0;
+      outPos.x += currTile.getWidth();
     }
-    sliceRow -= std::min(sliceRow, imgDim.y);
     return *this;
   }
   friend bool operator==(const Cr2OutputTileIterator& a,
                          const Cr2OutputTileIterator& b) {
     assert(&a.imgDim == &b.imgDim && "Unrelated iterators.");
+    // NOTE: outPos is correctly omitted here.
     return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
   }
   friend bool operator!=(const Cr2OutputTileIterator& a,
@@ -155,16 +162,13 @@ class Cr2VerticalOutputStripIterator final {
 
     for (++tmpIter; tmpIter != outputTileIterator_end; ++tmpIter) {
       iRectangle2D nextRect = *tmpIter;
-      // Are these two are verically-adjacent rectangles of same width?
-      if (rect.getBottomLeft() == nextRect.getTopLeft() &&
-          rect.getBottomRight() == nextRect.getTopRight()) {
-        rect.dim.y += nextRect.dim.y;
-        ++num;
-        continue;
-      }
-      // Otherwise, the next rectangle should be the first row of next column.
-      assert(nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight());
-      break;
+      const TileSequenceStatus s = evaluateConsecutiveTiles(rect, nextRect);
+      assert(s != TileSequenceStatus::Invalid && "Bad tiling.");
+      if (s == TileSequenceStatus::BeginsNewColumn)
+        break;
+      assert(s == TileSequenceStatus::ContinuesColumn);
+      rect.dim.y += nextRect.dim.y;
+      ++num;
     }
 
     return {rect, num};
@@ -339,9 +343,9 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
 
   std::optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getAllOutputTiles()) {
-    if (lastTile && output.getTop() != 0 &&
-        output.getWidth() != lastTile->getWidth())
-      ThrowRDE("Tiles can not change width mid-column.");
+    if (lastTile && evaluateConsecutiveTiles(*lastTile, output) ==
+                        TileSequenceStatus::Invalid)
+      ThrowRDE("Invalid tiling - slice width change mid-output row?");
     if (output.getBottomRight() <= dim) {
       lastTile = output;
       continue; // Tile still inbounds of image.

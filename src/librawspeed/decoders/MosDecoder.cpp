@@ -20,8 +20,8 @@
 */
 
 #include "decoders/MosDecoder.h"
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for trimSpaces
-#include "common/Point.h"                           // for iPoint2D
 #include "decoders/IiqDecoder.h"                    // for IiqDecoder
 #include "decoders/RawDecoder.h"                    // for RawDecoder
 #include "decoders/RawDecoderException.h"           // for ThrowRDE

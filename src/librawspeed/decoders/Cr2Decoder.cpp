@@ -21,8 +21,8 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "common/Array2DRef.h"                 // for Array2DRef
-#include "common/Point.h"                      // for iPoint2D
+#include "adt/Array2DRef.h"                    // for Array2DRef
+#include "adt/Point.h"                         // for iPoint2D
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
 #include "decompressors/Cr2Decompressor.h"     // for Cr2SliceWidths
 #include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder

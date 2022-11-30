@@ -22,10 +22,10 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicV4Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Mutex.h"                    // for MutexLocker
+#include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
 #include "common/Common.h"                // for extractHighBits, rawspeed_...
-#include "common/Mutex.h"                 // for MutexLocker
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type

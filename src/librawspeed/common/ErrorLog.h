@@ -21,7 +21,7 @@
 #pragma once
 
 #include "ThreadSafetyAnalysis.h" // for REQUIRES, GUARDED_BY
-#include "common/Mutex.h"         // for Mutex
+#include "adt/Mutex.h"            // for Mutex
 #include <string>                 // for string, basic_string
 #include <vector>                 // for vector
 

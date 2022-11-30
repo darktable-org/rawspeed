@@ -21,7 +21,7 @@
 */
 
 #include "decoders/CrwDecoder.h"
-#include "common/Point.h"                  // for iPoint2D
+#include "adt/Point.h"                     // for iPoint2D
 #include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
 #include "decompressors/CrwDecompressor.h" // for CrwDecompressor
 #include "io/Buffer.h"                     // for Buffer

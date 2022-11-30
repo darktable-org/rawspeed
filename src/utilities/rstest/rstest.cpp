@@ -19,8 +19,8 @@
 */
 
 #include "RawSpeed-API.h"        // for RawImage, RawImageData, ImageMetaData
-#include "common/Array2DRef.h"   // for Array2DRef, Array2DRef<>::value_type
-#include "common/NotARational.h" // for NotARational
+#include "adt/Array2DRef.h"      // for Array2DRef, Array2DRef<>::value_type
+#include "adt/NotARational.h"    // for NotARational
 #include "md5.h"                 // for md5_state, md5_hash, hash_to_string
 #include <algorithm>             // for fill, copy, fill_n, max
 #include <array>                 // for array

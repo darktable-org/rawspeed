@@ -22,8 +22,8 @@
 */
 
 #include "tiff/TiffIFD.h"
+#include "adt/NORangesSet.h"          // for NORangesSet
 #include "common/Common.h"            // for trimSpaces
-#include "common/NORangesSet.h"       // for NORangesSet
 #include "common/RawspeedException.h" // for ThrowException, RawspeedException
 #include "io/IOException.h"           // for IOException
 #include "tiff/TiffEntry.h"           // for TiffEntry

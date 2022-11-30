@@ -21,8 +21,8 @@
 */
 
 #include "decompressors/OlympusDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Point.h"                 // for iPoint2D
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB

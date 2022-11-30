@@ -20,11 +20,11 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
+#include "adt/NORangesSet.h"                       // for NORangesSet
+#include "adt/NotARational.h"                      // for NotARational
+#include "adt/Point.h"                             // for iPoint2D, iRectan...
 #include "common/Common.h"                         // for roundUpDivision
 #include "common/DngOpcodes.h"                     // for DngOpcodes
-#include "common/NORangesSet.h"                    // for NORangesSet
-#include "common/NotARational.h"                   // for NotARational
-#include "common/Point.h"                          // for iPoint2D, iRectan...
 #include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
 #include "decompressors/AbstractDngDecompressor.h" // for DngSliceElement
 #include "io/Buffer.h"                             // for Buffer, operator<

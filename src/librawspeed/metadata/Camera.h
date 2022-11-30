@@ -21,8 +21,8 @@
 #pragma once
 
 #include "rawspeedconfig.h"            // for HAVE_PUGIXML
-#include "common/NotARational.h"       // for NotARational
-#include "common/Point.h"              // for iPoint2D
+#include "adt/NotARational.h"          // for NotARational
+#include "adt/Point.h"                 // for iPoint2D
 #include "metadata/BlackArea.h"        // for BlackArea
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
 #include "metadata/ColorFilterArray.h" // for CFAColor, ColorFilterArray
