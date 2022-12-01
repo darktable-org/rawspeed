@@ -20,11 +20,11 @@
 */
 
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
-#include "common/Point.h"              // for iPoint2D
+#include "adt/Point.h"                 // for iPoint2D
 #include <cstdint>                     // for uint32_t
 #include <gtest/gtest.h>               // for ParamIteratorInterface, Message
 #include <iosfwd>                      // for ostream
-#include <string>                      // for operator<<, string
+#include <string>                      // for allocator, basic_string, oper...
 #include <tuple>                       // for get, make_tuple, tuple
 
 using rawspeed::CFAColor;

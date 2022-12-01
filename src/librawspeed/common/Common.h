@@ -20,14 +20,15 @@
 
 #pragma once
 
-#include <algorithm>        // IWYU pragma: keep
+#include <algorithm>        // for max, clamp
+#include <array>            // for array
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
-#include <cstdint>          // for uint8_t, uint16_t, uintptr_t
+#include <cstdint>          // for uint8_t, uintptr_t, uint16_t
 #include <cstring>          // for size_t, memcpy
 #include <initializer_list> // for initializer_list
-#include <string>           // for string
-#include <type_traits>      // for enable_if, is_unsigned, is_pointer, make...
+#include <string>           // for string, basic_string, allocator
+#include <type_traits>      // for enable_if_t, is_trivially_copyable, make...
 #include <vector>           // for vector
 
 extern "C" int rawspeed_get_number_of_processor_cores();
@@ -55,6 +56,17 @@ inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
       src += srcPitch;
     }
   }
+}
+
+template <typename T_TO, typename T_FROM,
+          typename = std::enable_if_t<sizeof(T_TO) == sizeof(T_FROM)>,
+          typename = std::enable_if_t<std::is_trivially_constructible_v<T_TO>>,
+          typename = std::enable_if_t<std::is_trivially_copyable_v<T_TO>>,
+          typename = std::enable_if_t<std::is_trivially_copyable_v<T_FROM>>>
+inline T_TO bit_cast(const T_FROM& from) noexcept {
+  T_TO to;
+  memcpy(&to, &from, sizeof(T_TO));
+  return to;
 }
 
 // only works for positive values and zero
@@ -161,8 +173,7 @@ constexpr typename std::make_signed_t<T> __attribute__((const)) signExtend(
 }
 
 // Trim both leading and trailing spaces from the string
-inline std::string trimSpaces(const std::string& str)
-{
+inline std::string trimSpaces(std::string_view str) {
   // Find the first character position after excluding leading blank spaces
   size_t startpos = str.find_first_not_of(" \t");
 
@@ -173,7 +184,8 @@ inline std::string trimSpaces(const std::string& str)
   if ((startpos == std::string::npos) || (endpos == std::string::npos))
     return "";
 
-  return str.substr(startpos, endpos - startpos + 1);
+  str = str.substr(startpos, endpos - startpos + 1);
+  return {str.begin(), str.end()};
 }
 
 inline std::vector<std::string> splitString(const std::string& input,
@@ -199,6 +211,14 @@ inline std::vector<std::string> splitString(const std::string& input,
   }
 
   return result;
+}
+
+template <int N, typename T>
+inline std::array<T, N> to_array(const std::vector<T>& v) {
+  std::array<T, N> a;
+  assert(v.size() == N && "Size mismatch");
+  std::move(v.begin(), v.end(), a.begin());
+  return a;
 }
 
 enum class BitOrder {

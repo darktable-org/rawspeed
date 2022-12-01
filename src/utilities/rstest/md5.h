@@ -30,7 +30,7 @@
 #pragma once
 
 #include <array>   // for array
-#include <cstdint> // for uint8_t, uint32_t
+#include <cstdint> // for uint32_t, UINT32_C, uint8_t
 #include <cstdio>  // for size_t
 #include <string>  // for string
 

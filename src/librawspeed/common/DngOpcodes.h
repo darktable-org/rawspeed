@@ -29,44 +29,43 @@
 
 namespace rawspeed {
 
-class RawImage;
-
-class TiffEntry;
-
 class ByteStream;
+class RawImage;
+class iRectangle2D;
 
-class DngOpcodes
-{
+class DngOpcodes {
 public:
-  DngOpcodes(const RawImage& ri, const TiffEntry* entry);
+  DngOpcodes(const RawImage& ri, ByteStream bs);
   ~DngOpcodes();
   void applyOpCodes(const RawImage& ri) const;
 
 private:
   class DngOpcode;
+
   std::vector<std::unique_ptr<DngOpcode>> opcodes;
 
 protected:
+  class DeltaRowOrColBase;
+  class DummyROIOpcode;
   class FixBadPixelsConstant;
   class FixBadPixelsList;
-  class ROIOpcode;
-  class DummyROIOpcode;
-  class TrimBounds;
-  class PixelOpcode;
   class LookupOpcode;
-  class TableMap;
+  class PixelOpcode;
   class PolynomialMap;
-  class DeltaRowOrColBase;
+  class ROIOpcode;
+  class TableMap;
+  class TrimBounds;
   template <typename S> class DeltaRowOrCol;
   template <typename S> class OffsetPerRowOrCol;
   template <typename S> class ScalePerRowOrCol;
 
   template <class Opcode>
-  static std::unique_ptr<DngOpcode> constructor(const RawImage& ri,
-                                                ByteStream& bs);
+  static std::unique_ptr<DngOpcode>
+  constructor(const RawImage& ri, ByteStream& bs,
+              iRectangle2D& integrated_subimg);
 
-  using constructor_t = std::unique_ptr<DngOpcode> (*)(const RawImage& ri,
-                                                       ByteStream& bs);
+  using constructor_t = std::unique_ptr<DngOpcode> (*)(
+      const RawImage& ri, ByteStream& bs, iRectangle2D& integrated_subimg);
   static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
 };
 

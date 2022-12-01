@@ -17,16 +17,16 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "RawSpeed-API.h" // for RawImage, RawImageData, iPoint2D, CameraMe...
-
-#include <array>      // for array
-#include <cstddef>    // for size_t
-#include <cstdint>    // for uint32_t, uint8_t, uint16_t
-#include <cstdio>     // for fprintf, stdout, stderr
-#include <memory>     // for unique_ptr, make_unique
-#include <string>     // for string, operator+, basic_string
-#include <sys/stat.h> // for stat
-#include <vector>     // for vector
+#include "RawSpeed-API.h"      // for RawImage, RawImageData, iPoint2D, Cam...
+#include "adt/Array2DRef.h"    // for Array2DRef
+#include <array>               // for array
+#include <cstddef>             // for byte, size_t
+#include <cstdint>             // for uint16_t, uint32_t
+#include <cstdio>              // for fprintf, stdout, stderr
+#include <memory>              // for unique_ptr, allocator, make_unique
+#include <string>              // for string, operator+, basic_string
+#include <sys/stat.h>          // for stat
+#include <vector>              // for vector
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -242,10 +242,10 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
-      const uint8_t* const data = (*raw)->getDataUncropped(0, y);
-
+      const rawspeed::Array2DRef<std::byte> img =
+          (*raw)->getByteDataAsUncroppedArray2DRef();
       for (unsigned x = 0; x < bpp * dimUncropped.x; ++x)
-        sum += static_cast<double>(data[x]);
+        sum += static_cast<double>(img(y, x));
     }
     fprintf(stdout, "Image byte sum: %lf\n", sum);
     fprintf(stdout, "Image byte avg: %lf\n",
@@ -258,11 +258,10 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        const auto* const data =
-            reinterpret_cast<float*>((*raw)->getDataUncropped(0, y));
-
+        const rawspeed::Array2DRef<float> img =
+            (*raw)->getF32DataAsUncroppedArray2DRef();
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
-          sum += static_cast<double>(data[x]);
+          sum += static_cast<double>(img(y, x));
       }
 
       fprintf(stdout, "Image float sum: %lf\n", sum);
@@ -275,11 +274,10 @@ int main(int argc, char* argv[]) { // NOLINT
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
-        const auto* const data =
-            reinterpret_cast<uint16_t*>((*raw)->getDataUncropped(0, y));
-
+        const rawspeed::Array2DRef<uint16_t> img =
+            (*raw)->getU16DataAsUncroppedArray2DRef();
         for (unsigned x = 0; x < cpp * dimUncropped.x; ++x)
-          sum += static_cast<double>(data[x]);
+          sum += static_cast<double>(img(y, x));
       }
 
       fprintf(stdout, "Image uint16_t sum: %lf\n", sum);

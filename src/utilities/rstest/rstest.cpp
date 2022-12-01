@@ -18,26 +18,31 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"
-
-#include "md5.h"     // for md5_state, md5_hash, hash_to_string, md5_init
-#include <algorithm> // for fill, max
-#include <array>     // for array
-#include <cassert>   // for assert
-#include <chrono>    // for milliseconds, steady_clock, duration_cast
-#include <cstdarg>   // for va_end, va_list, va_start
-#include <cstdint>   // for uint16_t, uint32_t, uint8_t
-#include <cstdio>    // for fprintf, fclose, fopen, ftell, fwrite, size_t
-#include <cstdlib>   // for system
-#include <fstream>   // IWYU pragma: keep
-#include <iostream>  // for cout, cerr
-#include <iterator>  // for istreambuf_iterator, operator!=
-#include <map>       // for map
-#include <memory>    // for allocator, unique_ptr
-#include <sstream>   // IWYU pragma: keep
-#include <string>    // for string, operator+, operator<<, char_traits
-#include <utility>   // for pair
-#include <vector>    // for vector
+#include "RawSpeed-API.h"        // for RawImage, RawImageData, ImageMetaData
+#include "adt/Array2DRef.h"      // for Array2DRef, Array2DRef<>::value_type
+#include "adt/NotARational.h"    // for NotARational
+#include "md5.h"                 // for md5_state, md5_hash, hash_to_string
+#include <algorithm>             // for fill, copy, fill_n, max
+#include <array>                 // for array
+#include <cassert>               // for assert
+#include <chrono>                // for milliseconds, steady_clock, duratio...
+#include <cstdarg>               // for va_end, va_list, va_start
+#include <cstddef>               // for size_t, byte
+#include <cstdint>               // for uint16_t, uint8_t, uint32_t
+#include <cstdio>                // for fclose, fprintf, fopen, fwrite, vsn...
+#include <cstdlib>               // for system
+#include <fstream>               // for operator<<, basic_ostream, endl
+#include <functional>            // for less
+#include <iostream>              // for cout, cerr
+#include <iterator>              // for istreambuf_iterator, operator!=
+#include <map>                   // for map, operator!=, _Rb_tree_const_ite...
+#include <memory>                // for allocator, unique_ptr
+#include <sstream>               // for basic_ostringstream
+#include <string>                // for string, operator+, basic_string
+#include <string_view>           // for operator!=, string_view
+#include <type_traits>           // for __type_identity_t
+#include <utility>               // for tuple_element<>::type
+#include <vector>                // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
@@ -115,16 +120,17 @@ struct Timer {
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
 md5::md5_state imgDataHash(const RawImage& raw) {
+  const rawspeed::Array2DRef<std::byte> img =
+      raw->getByteDataAsUncroppedArray2DRef();
+
   md5::md5_state ret = md5::md5_init;
 
-  const iPoint2D dimUncropped = raw->getUncroppedDim();
-
   vector<md5::md5_state> line_hashes;
-  line_hashes.resize(dimUncropped.y, md5::md5_init);
+  line_hashes.resize(img.height, md5::md5_init);
 
-  for (int j = 0; j < dimUncropped.y; j++) {
-    const auto* d = raw->getDataUncropped(0, j);
-    md5::md5_hash(d, raw->pitch - raw->padding, &line_hashes[j]);
+  for (int j = 0; j < img.height; j++) {
+    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
+                  &line_hashes[j]);
   }
 
   md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
@@ -182,8 +188,8 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   if (r->metadata.colorMatrix.empty())
     APPEND(&oss, " (none)");
   else {
-    for (int e : r->metadata.colorMatrix)
-      APPEND(&oss, " %i", e);
+    for (const NotARational<int>& e : r->metadata.colorMatrix)
+      APPEND(&oss, " %i/%i", e.num, e.den);
   }
   APPEND(&oss, "\n");
 
@@ -250,13 +256,13 @@ void writePPM(const RawImage& raw, const std::string& fn) {
   width *= raw->getCpp();
 
   // Write pixels
+  const Array2DRef<uint16_t> img = raw->getU16DataAsUncroppedArray2DRef();
   for (int y = 0; y < height; ++y) {
-    auto* row = reinterpret_cast<uint16_t*>(raw->getDataUncropped(0, y));
     // PPM is big-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU16BE(row + x);
+      img(y, x) = getU16BE(&img(y, x));
 
-    fwrite(row, sizeof(*row), width, f.get());
+    fwrite(&img(y, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
 }
 
@@ -298,16 +304,16 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   width *= raw->getCpp();
 
   // Write pixels
+  const Array2DRef<float> img = raw->getF32DataAsUncroppedArray2DRef();
   for (int y = 0; y < height; ++y) {
     // NOTE: pfm has rows in reverse order
     const int row_in = height - 1 - y;
-    auto* row = reinterpret_cast<float*>(raw->getDataUncropped(0, row_in));
 
-    // PFM can have any endiannes, let's write little-endian
+    // PFM can have any endianness, let's write little-endian
     for (int x = 0; x < width; ++x)
-      row[x] = getU32LE(row + x);
+      img(row_in, x) = bit_cast<float>(getU32LE(&img(row_in, x)));
 
-    fwrite(row, sizeof(*row), width, f.get());
+    fwrite(&img(row_in, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
 }
 
@@ -524,9 +530,9 @@ int main(int argc, char **argv) {
   size_t time = 0;
   map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(argc, argv, o) \
-    OMPSHAREDCLAUSE(metadata) shared(cerr, failedTests) schedule(dynamic, 1) \
-    reduction(+ : time) if(remaining_argc > 2)
+#pragma omp parallel for default(none) firstprivate(argc, argv, o)             \
+    shared(metadata) shared(cerr, failedTests) schedule(dynamic, 1)            \
+    reduction(+ : time) if (remaining_argc > 2)
 #endif
   for (int i = 1; i < argc; ++i) {
     if (!argv[i])

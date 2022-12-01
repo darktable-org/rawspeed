@@ -20,8 +20,8 @@
 */
 
 #include "decoders/MosDecoder.h"
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for trimSpaces
-#include "common/Point.h"                           // for iPoint2D
 #include "decoders/IiqDecoder.h"                    // for IiqDecoder
 #include "decoders/RawDecoder.h"                    // for RawDecoder
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -29,10 +29,10 @@
 #include "io/Buffer.h"                              // for DataBuffer, Buffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
-#include "parsers/TiffParserException.h"            // for TiffParserException
+#include "parsers/TiffParserException.h"            // for ThrowException
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TILEOFFSETS, LEA...
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstdint>                                  // for uint32_t

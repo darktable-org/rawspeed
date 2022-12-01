@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
+#include "io/BitStream.h" // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getLE
 #include <cstdint>         // for uint16_t, uint8_t
@@ -33,6 +33,11 @@ struct MSB16BitPumpTag;
 // i.e. we push into the cache from the right and read it from the left
 
 using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
+
+template <> struct BitStreamTraits<MSB16BitPumpTag> final {
+  // How many bytes can we read from the input per each fillCache(), at most?
+  static constexpr int MaxProcessBytes = 4;
+};
 
 template <>
 inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uint8_t* input) {

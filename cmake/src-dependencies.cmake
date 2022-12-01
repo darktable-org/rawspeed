@@ -67,12 +67,6 @@ if(WITH_OPENMP)
 
   set(HAVE_OPENMP 1)
 
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
-     CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-    # See https://godbolt.org/z/AiyuX9
-    set(OPENMP_SHARED_CLAUSE_IS_BROKEN_FOR_CONST_VARIABLES TRUE)
-  endif()
-
   set_package_properties(OpenMP PROPERTIES
                          TYPE RECOMMENDED
                          URL https://www.openmp.org/

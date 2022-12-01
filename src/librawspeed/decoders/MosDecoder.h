@@ -25,11 +25,12 @@
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
 #include <string>                         // for string
+#include <string_view>                    // for string_view
 
 namespace rawspeed {
 
-class CameraMetaData;
 class Buffer;
+class CameraMetaData;
 
 class MosDecoder final : public AbstractTiffDecoder
 {

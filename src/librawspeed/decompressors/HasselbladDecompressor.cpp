@@ -20,10 +20,11 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Point.h"                 // for iPoint2D
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
+#include "common/Common.h"                // for to_array
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTableLUT, HuffmanTable
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
 #include "io/ByteStream.h"                // for ByteStream
@@ -73,7 +74,7 @@ void HasselbladDecompressor::decodeScan() {
   assert(out.width > 0);
   assert(out.width % 2 == 0);
 
-  const auto ht = getHuffmanTables<1>();
+  const auto ht = to_array<1>(getHuffmanTables(1));
   ht[0]->verifyCodeSymbolsAreValidDiffLenghts();
 
   BitPumpMSB32 bitStream(input);

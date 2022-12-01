@@ -30,7 +30,6 @@
 namespace rawspeed {
 
 class Buffer;
-
 class CameraMetaData;
 
 class CrwDecoder final : public RawDecoder {

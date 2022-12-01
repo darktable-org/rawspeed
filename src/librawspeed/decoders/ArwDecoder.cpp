@@ -20,10 +20,10 @@
 */
 
 #include "decoders/ArwDecoder.h"
+#include "adt/NORangesSet.h"                        // for NORangesSet
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for roundDown
-#include "common/Point.h"                           // for iPoint2D
-#include "common/RawspeedException.h"               // for RawspeedException
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -31,15 +31,14 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
+#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for DNGPRIVATEDATA
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t
-#include <memory>                                   // for unique_ptr
-#include <set>                                      // for set
+#include <memory>                                   // for unique_ptr, allo...
 #include <string>                                   // for operator==, string
 #include <vector>                                   // for vector
 
@@ -225,8 +224,12 @@ RawImage ArwDecoder::decodeRawInternal() {
     SonyArw1Decompressor a(mRaw);
     mRaw->createData();
     a.decompress(input);
+    mShiftDownScaleForExif = 2;
   } else
     DecodeARW2(input, width, height, bitPerPixel);
+
+  if (bitPerPixel == 12)
+    mShiftDownScaleForExif = 2;
 
   return mRaw;
 }
@@ -465,6 +468,21 @@ void ArwDecoder::GetWB() const {
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
+    }
+
+    if (encryptedIFD.hasEntry(TiffTag::SONYBLACKLEVEL)) {
+      const TiffEntry* bl = encryptedIFD.getEntry(TiffTag::SONYBLACKLEVEL);
+      if (bl->count != 4)
+        ThrowRDE("Black Level has %d entries instead of 4", bl->count);
+      for (int i = 0; i < 4; ++i)
+        mRaw->blackLevelSeparate[i] = bl->getU16(i) >> mShiftDownScaleForExif;
+    }
+
+    if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {
+      const TiffEntry* wl = encryptedIFD.getEntry(TiffTag::SONYWHITELEVEL);
+      if (wl->count != 1 && wl->count != 3)
+        ThrowRDE("White Level has %d entries instead of 1 or 3", wl->count);
+      mRaw->whitePoint = wl->getU16(0) >> mShiftDownScaleForExif;
     }
   }
 }

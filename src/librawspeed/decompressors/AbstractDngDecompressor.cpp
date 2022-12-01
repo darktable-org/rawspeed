@@ -21,8 +21,8 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP, HAV...
 #include "decompressors/AbstractDngDecompressor.h"
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for rawspeed_get_num...
-#include "common/Point.h"                           // for iPoint2D
 #include "common/RawImage.h"                        // for RawImageData
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
 #include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
@@ -37,7 +37,7 @@
 #include <limits>                                   // for numeric_limits
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string
-#include <vector>                                   // for vector
+#include <vector>                                   // for vector, allocator
 
 namespace rawspeed {
 

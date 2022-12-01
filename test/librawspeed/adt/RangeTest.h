@@ -18,12 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Range.h" // for Range
-#include <gtest/gtest.h>  // for ParamIteratorInterface, AssertionFailure
-#include <ostream>        // for basic_ostream::operator<<, operator<<, ost...
-#include <set>            // for set
-#include <tuple>          // for make_tuple, tuple, get
-#include <utility>        // for __tuple_element_t
+#include "adt/Range.h"   // for Range
+#include <gtest/gtest.h> // for ParamIteratorInterface, AssertionFailure
+#include <ostream>       // for basic_ostream::operator<<, operator<<, ost...
+#include <set>           // for allocator, set
+#include <tuple>         // for make_tuple, tuple, get
+#include <utility>       // for __tuple_element_t
 
 using rawspeed::Range;
 

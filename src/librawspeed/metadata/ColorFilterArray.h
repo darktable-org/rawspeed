@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include "common/Point.h" // for iPoint2D
-#include <cstdint>        // for uint32_t
+#include "adt/Point.h"    // for iPoint2D
+#include <algorithm>      // for copy
+#include <cstdint>        // for uint32_t, uint8_t
 #include <map>            // for map
 #include <string>         // for string
 #include <vector>         // for vector

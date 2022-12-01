@@ -18,20 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for clampBits, roundUp, copyPixels
-#include <algorithm>       // for fill, min, max, equal, generate_n
-#include <cassert>          // for assert
-#include <cstddef>          // for size_t
-#include <cstdint>          // for uint8_t, uint16_t
-#include <gtest/gtest.h>    // for ParamIteratorInterface, ParamGeneratorIn...
-#include <initializer_list> // for initializer_list
-#include <iterator>         // for back_inserter
-#include <limits>           // for numeric_limits
-#include <memory>           // for make_unique, unique_ptr
-#include <string>           // for string, operator==, basic_string
-#include <tuple>            // for make_tuple, get, tuple
-#include <type_traits>      // for __decay_and_strip<>::__type
-#include <vector>           // for vector, vector<>::value_type
+#include "common/Common.h" // for roundUp, clampBits, copyPixels, isAligned
+#include <algorithm>       // for fill, min, copy, equal, fill_n, max
+#include <cassert>         // for assert
+#include <cstddef>         // for size_t
+#include <cstdint>         // for uint8_t, uint16_t
+#include <gtest/gtest.h>   // for ParamIteratorInterface, ParamGeneratorInt...
+#include <limits>          // for numeric_limits
+#include <memory>          // for allocator, make_unique, unique_ptr
+#include <string>          // for basic_string, string, operator==
+#include <tuple>           // for make_tuple, get, tuple
+#include <type_traits>     // for __strip_reference_wrapper<>::__type
+#include <vector>          // for vector, vector<>::iterator, vector<>::val...
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;

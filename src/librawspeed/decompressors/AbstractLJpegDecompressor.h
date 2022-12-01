@@ -22,12 +22,14 @@
 #pragma once
 
 #include "common/RawImage.h"                    // for RawImage
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
+#include "common/RawspeedException.h"           // for ThrowException
+#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/ByteStream.h"                      // for ByteStream
+#include <algorithm>                            // for fill
 #include <array>                                // for array
-#include <cstdint>                              // for uint32_t, uint16_t
+#include <cstdint>                              // for uint16_t, uint32_t
 #include <memory>                               // for unique_ptr
 #include <vector>                               // for vector
 
@@ -148,11 +150,11 @@ public:
 
 class AbstractLJpegDecompressor : public AbstractDecompressor {
   // std::vector of unique HTs, to not recreate HT, but cache them
-  std::vector<std::unique_ptr<HuffmanTable>> huffmanTableStore;
-  HuffmanTable ht_;      // temporary table, used
+  std::vector<std::unique_ptr<const HuffmanTable>> huffmanTableStore;
+  HuffmanTable ht_; // temporary table, used during parsing LJpeg.
 
   uint32_t Pt = 0;
-  std::array<HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
+  std::array<const HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
 
 public:
   AbstractLJpegDecompressor(ByteStream bs, const RawImage& img);
@@ -167,12 +169,12 @@ protected:
   void parseSOF(ByteStream data, SOFInfo* i);
   void parseSOS(ByteStream data);
   void parseDHT(ByteStream data);
+  static void parseDRI(ByteStream dri);
   JpegMarker getNextMarker(bool allowskip);
 
-  template <int N_COMP>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::array<HuffmanTable*, N_COMP>
-  getHuffmanTables() const {
-    std::array<HuffmanTable*, N_COMP> ht;
+  [[nodiscard]] std::vector<const HuffmanTable*>
+  getHuffmanTables(int N_COMP) const {
+    std::vector<const HuffmanTable*> ht(N_COMP);
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
       if (const unsigned dcTbls = huff.size(); dcTblNo >= dcTbls) {
@@ -185,16 +187,13 @@ protected:
     return ht;
   }
 
-  template <int N_COMP>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] __attribute__((pure))
-  std::array<uint16_t, N_COMP>
-  getInitialPredictors() const {
-    std::array<uint16_t, N_COMP> pred;
+  [[nodiscard]] std::vector<uint16_t> getInitialPredictors(int N_COMP) const {
+    std::vector<uint16_t> pred(N_COMP);
     if (frame.prec < (Pt + 1)) {
       ThrowRDE("Invalid precision (%u) and point transform (%u) combination!",
                frame.prec, Pt);
     }
-    pred.fill(1 << (frame.prec - Pt - 1));
+    std::fill(pred.begin(), pred.end(), 1 << (frame.prec - Pt - 1));
     return pred;
   }
 

@@ -47,13 +47,14 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   // for special packed formats
   static int bytesPerLine(int w, bool skips);
 
-  template <typename Pump>
-  void decode16BitFP(const iPoint2D& size, const iPoint2D& offset,
-                     uint32_t skipBytes, uint32_t h, uint64_t y) const;
+  template <typename Pump, typename NarrowFpType>
+  void decodePackedFP(const iPoint2D& size, const iPoint2D& offset,
+                      uint32_t skipBytes, int rows, int row) const;
 
   template <typename Pump>
-  void decode24BitFP(const iPoint2D& size, const iPoint2D& offset,
-                     uint32_t skipBytes, uint32_t h, uint64_t y) const;
+  void decodePackedInt(const iPoint2D& size, const iPoint2D& offset,
+                       uint32_t skipBytes, int rows, int row,
+                       int bitPerPixel) const;
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <cstdint> // for uint32_t, uint16_t
+#include <cstdint> // for uint32_t, int32_t, uint16_t
 
 namespace rawspeed {
 

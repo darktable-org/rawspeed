@@ -21,8 +21,11 @@
 #pragma once
 
 #include "rawspeedconfig.h"             // for RAWSPEED_NOINLINE, RAWSPEED_...
+
+// IWYU pragma: begin_exports
 #include "common/RawspeedException.h"   // for ThrowExceptionHelper
 #include "parsers/RawParserException.h" // for RawParserException
+// IWYU pragma: end_exports
 
 namespace rawspeed {
 

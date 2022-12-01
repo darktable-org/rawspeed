@@ -22,21 +22,20 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PhaseOneDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/RawspeedException.h"     // for RawspeedException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include <algorithm>                      // for sort
+#include <algorithm>                      // for sort, fill_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for int32_t, uint16_t
 #include <memory>                         // for allocator_traits<>::value_...
 #include <string>                         // for string
 #include <utility>                        // for move
-#include <vector>                         // for vector, vector<>::size_type
+#include <vector>                         // for vector<>::iterator, vector
 
 namespace rawspeed {
 
@@ -46,7 +45,7 @@ PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
-  if (!(mRaw->getCpp() == 1 && mRaw->getBpp() == sizeof(uint16_t)))
+  if (mRaw->getCpp() != 1 || mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||

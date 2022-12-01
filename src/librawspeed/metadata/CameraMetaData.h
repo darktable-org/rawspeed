@@ -21,14 +21,16 @@
 #pragma once
 
 #include "rawspeedconfig.h"  // for HAVE_PUGIXML
-#include "metadata/Camera.h" // IWYU pragma: keep
+#include "metadata/Camera.h" // for Camera (ptr only)
 #include <cstdint>           // for uint32_t
 #include <map>               // for map
 #include <memory>            // for unique_ptr
-#include <string>            // for string
+#include <string>            // for operator<, string
+#include <string_view>       // for string_view
 #include <tuple>             // for tie, operator<, tuple
 
 namespace rawspeed {
+class Camera;
 
 struct CameraId {
   std::string make;
@@ -41,7 +43,8 @@ struct CameraId {
   }
 };
 
-class CameraMetaData final {
+// NOTE: *NOT* `final`, could be derived from by downstream.
+class CameraMetaData {
 public:
   CameraMetaData() = default;
 

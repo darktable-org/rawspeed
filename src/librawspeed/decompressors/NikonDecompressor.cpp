@@ -19,17 +19,18 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for extractHighBits, clampBits
-#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for max
 #include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint16_t, int16_t
+#include <cstdint>                        // for uint16_t, uint32_t, int16_t
 #include <cstdio>                         // for size_t
 #include <vector>                         // for vector
 
@@ -310,7 +311,7 @@ public:
    *
    *--------------------------------------------------------------
    */
-  int decodeDifference(BitPumpMSB& bits) { // NOLINT: google-runtime-references
+  int decodeDifference(BitPumpMSB& bits) {
     int rv;
     int l;
     int temp;

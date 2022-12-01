@@ -23,16 +23,16 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/FujiDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/RawspeedException.h"     // for RawspeedException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h" // for CFAColor::BLUE, CFAColor::GREEN, CFAColor::RED
-#include <algorithm>                      // for max, fill, min
-#include <cstdint>                        // for uint16_t, uint32_t, uint64_t
+#include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
+#include <algorithm>                      // for fill, min
+#include <cmath>                          // for abs
+#include <cstdint>                        // for uint16_t, uint32_t, int8_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
 #include <string>                         // for string
@@ -769,8 +769,8 @@ void FujiDecompressor::decompressThread() const noexcept {
 #endif
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
     block_info.reset(&common_info);
-    block_info.pump = BitPumpMSB(strip->bs);
     try {
+      block_info.pump = BitPumpMSB(strip->bs);
       fuji_decode_strip(&block_info, *strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.

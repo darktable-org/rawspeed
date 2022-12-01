@@ -19,14 +19,16 @@
 */
 
 #include "io/BitPumpJPEG.h" // for BitPumpJPEG
-#include "io/BitPumpTest.h" // for Endianness, Pattern, (anonymous), Buffer
+#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesBE, Patterns
+#include "io/BitStream.h"   // for BitStream
 #include "io/Buffer.h"      // for Buffer, DataBuffer
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
 #include <array>            // for array
 #include <cstdint>          // for uint8_t, uint32_t
-#include <gtest/gtest.h>    // for Test, Message, SuiteApiResolver, TestInf...
+#include <gtest/gtest.h>    // for Test, Message, TestInfo (ptr only), ASSE...
 #include <initializer_list> // for initializer_list
+#include <memory>           // for allocator
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::Buffer;
@@ -41,7 +43,7 @@ struct OnesTag;
 struct SaturatedTag;
 
 template <>
-const std::array<uint8_t, 4> Pattern<BitPumpJPEG, OnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitPumpJPEG, OnesTag>::Data = {
     {/* [Byte0 Byte1 Byte2 Byte3] */
      /* Byte: [Bit0 .. Bit7] */
      0b10100100, 0b01000010, 0b00001000, 0b00011111}};
@@ -51,7 +53,7 @@ template <> uint32_t Pattern<BitPumpJPEG, OnesTag>::data(int index) {
 }
 
 template <>
-const std::array<uint8_t, 4> Pattern<BitPumpJPEG, InvOnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitPumpJPEG, InvOnesTag>::Data = {
     {0b11010010, 0b00100001, 0b00000100, 0b00001111}};
 template <> uint32_t Pattern<BitPumpJPEG, InvOnesTag>::data(int index) {
   const auto set = GenOnesBE(0, -1);
@@ -68,7 +70,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(JPEG, BitPumpTest, Patterns<BitPumpJPEG>);
 
 TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
   // If 0xFF0x00 byte sequence is found, it is just 0xFF, i.e. 0x00 is ignored.
-  static const std::array<uint8_t, 2 + 4> data{
+  static const std::array<uint8_t, 2 + 8> data{
       {0xFF, 0x00, 0b10100100, 0b01000010, 0b00001000, 0b00011111}};
 
   const Buffer b(data.data(), data.size());
@@ -89,7 +91,7 @@ TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
 TEST(BitPumpJPEGTest, 0xFF0xXXIsTheEndTest) {
   // If 0xFF0xXX byte sequence is found, where XX != 0, then it is the end.
   for (uint8_t end = 0x01; end < 0xFF; end++) {
-    static const std::array<uint8_t, 2 + 4> data{
+    static const std::array<uint8_t, 2 + 8> data{
         {0xFF, end, 0xFF, 0xFF, 0xFF, 0xFF}};
 
     const Buffer b(data.data(), data.size());

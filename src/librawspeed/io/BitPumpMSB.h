@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "io/BitStream.h"  // for BitStream, BitStreamCacheRightInLeftOut
+#include "io/BitStream.h" // for BitStreamCacheRightInLeftOut, BitStream
 #include "io/Buffer.h"     // for Buffer::size_type
 #include "io/Endianness.h" // for getBE
 #include <cstdint>         // for uint32_t, uint8_t
@@ -34,8 +34,11 @@ struct MSBBitPumpTag;
 
 using BitPumpMSB = BitStream<MSBBitPumpTag, BitStreamCacheRightInLeftOut>;
 
-template <> struct BitStreamTraits<BitPumpMSB> final {
+template <> struct BitStreamTraits<MSBBitPumpTag> final {
   static constexpr bool canUseWithHuffmanTable = true;
+
+  // How many bytes can we read from the input per each fillCache(), at most?
+  static constexpr int MaxProcessBytes = 4;
 };
 
 template <>

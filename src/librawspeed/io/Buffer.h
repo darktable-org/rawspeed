@@ -23,13 +23,13 @@
 
 #include "AddressSanitizer.h" // for ASan
 #include "common/Common.h"    // for roundUp
-#include "common/Memory.h"    // for alignedFree, alignedFreeConstPtr, alig...
-#include "io/Endianness.h"    // for Endianness, getHostEndianness, Endiann...
-#include "io/IOException.h"   // for ThrowIOE
+#include "common/Memory.h"    // for alignedFree, alignedFreeConstPtr, aligne...
+#include "io/Endianness.h"    // for Endianness, getHostEndianness, Endiannes...
+#include "io/IOException.h"   // for ThrowException, ThrowIOE
 #include <cassert>            // for assert
 #include <cstdint>            // for uint8_t, uint64_t, uint32_t
 #include <memory>             // for unique_ptr
-#include <utility>            // for move, swap
+#include <utility>            // for move, operator<, pair, swap
 
 namespace rawspeed {
 

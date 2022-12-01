@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <cstddef> // for size_t
+#include <cstddef> // for byte, size_t
 
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.
@@ -47,18 +47,16 @@ struct MSan final {
 
   /* Checks that memory range is fully initialized, and reports an error if it
    * is not. */
-  static void CheckMemIsInitialized(const volatile void* addr, size_t size);
+  static void CheckMemIsInitialized(const std::byte* addr, size_t size);
 };
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-inline void MSan::CheckMemIsInitialized(const volatile void* addr,
-                                        size_t size) {
+inline void MSan::CheckMemIsInitialized(const std::byte* addr, size_t size) {
   __msan_check_mem_is_initialized(addr, size);
 }
 #else
-inline void
-MSan::CheckMemIsInitialized([[maybe_unused]] const volatile void* addr,
-                            [[maybe_unused]] size_t size) {
+inline void MSan::CheckMemIsInitialized([[maybe_unused]] const std::byte* addr,
+                                        [[maybe_unused]] size_t size) {
   // If we are building without MSAN, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
   // preprocessor in every place it is called.

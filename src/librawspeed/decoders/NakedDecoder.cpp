@@ -20,9 +20,9 @@
 */
 
 #include "decoders/NakedDecoder.h"
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream

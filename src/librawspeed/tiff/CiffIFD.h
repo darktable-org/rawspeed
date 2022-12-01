@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "common/NORangesSet.h" // for set
-#include "tiff/CiffEntry.h"     // IWYU pragma: keep
+#include "adt/NORangesSet.h"    // for set
+#include "tiff/CiffEntry.h"     // for CiffEntry (ptr only)
 #include "tiff/CiffTag.h"       // for CiffTag
 #include <cstdint>              // for uint32_t
 #include <map>                  // for map
@@ -35,6 +35,8 @@ namespace rawspeed {
 
 class Buffer;
 class ByteStream;
+class CiffEntry;
+template <typename T> class NORangesSet;
 
 class CiffIFD final {
   CiffIFD* const parent;

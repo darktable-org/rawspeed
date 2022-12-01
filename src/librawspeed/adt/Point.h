@@ -22,8 +22,11 @@
 #pragma once
 
 #include <algorithm>   // for max, min
+#include <cmath>       // for abs
 #include <cstdint>     // for int32_t, uint64_t
-#include <type_traits> // for make_signed, make_signed<>::type
+#include <cstdlib>     // for abs
+#include <tuple>       // for tie, operator==, tuple
+#include <type_traits> // for make_signed_t
 
 namespace rawspeed {
 
@@ -116,20 +119,30 @@ public:
   [[nodiscard]] constexpr int getWidth() const { return dim.x; }
   [[nodiscard]] constexpr int getHeight() const { return dim.y; }
   [[nodiscard]] constexpr iPoint2D getTopLeft() const { return pos; }
-  [[nodiscard]] constexpr iPoint2D getBottomRight() const { return dim + pos; }
+  [[nodiscard]] constexpr iPoint2D getBottomRight() const { return pos + dim; }
+  [[nodiscard]] constexpr iPoint2D getTopRight() const {
+    return pos + iPoint2D(dim.x, 0);
+  }
+  [[nodiscard]] constexpr iPoint2D getBottomLeft() const {
+    return pos + iPoint2D(0, dim.y);
+  }
   [[nodiscard]] constexpr bool hasPositiveArea() const {
     return (dim.x > 0) && (dim.y > 0);
   }
 
-  [[nodiscard]] constexpr bool
-  isThisInside(const iRectangle2D& otherPoint) const {
-    return pos >= otherPoint.pos &&
-           getBottomRight() <= otherPoint.getBottomRight();
+  [[nodiscard]] constexpr bool isPointInside(const iPoint2D& subPoint) const {
+    return subPoint >= getTopLeft() && subPoint < getBottomRight();
   }
 
   [[nodiscard]] constexpr bool
-  isPointInsideInclusive(const iPoint2D& checkPoint) const {
-    return pos <= checkPoint && getBottomRight() >= checkPoint;
+  isPointInsideInclusive(const iPoint2D& subPoint) const {
+    return subPoint >= getTopLeft() && subPoint <= getBottomRight();
+  }
+
+  [[nodiscard]] constexpr bool
+  isThisInside(const iRectangle2D& superRect) const {
+    return getTopLeft() >= superRect.getTopLeft() &&
+           getBottomRight() <= superRect.getBottomRight();
   }
 
   [[nodiscard]] unsigned int area() const { return dim.area(); }
@@ -202,5 +215,12 @@ public:
   iPoint2D pos{0, 0};
   iPoint2D dim{0, 0};
 };
+
+inline bool operator==(const iRectangle2D& a, const iRectangle2D b) {
+  return std::tie(a.pos, a.dim) == std::tie(b.pos, b.dim);
+}
+inline bool operator!=(const iRectangle2D& a, const iRectangle2D b) {
+  return !(a == b);
+}
 
 } // namespace rawspeed

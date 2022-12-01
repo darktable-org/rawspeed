@@ -1,5 +1,10 @@
 include(CheckCXXSymbolExists)
 
+set(CMAKE_REQUIRED_FLAGS_SAVE "${CMAKE_REQUIRED_FLAGS}")
+
+# Workaround cmake-3.25 bug.
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Wno-newline-eof")
+
 # C++17 has std::aligned_alloc :(
 
 CHECK_CXX_SYMBOL_EXISTS(malloc cstdlib HAVE_MALLOC)
@@ -27,3 +32,5 @@ if(HAVE_ALIGNED_MALLOC AND HAVE_ALIGNED_FREE)
 endif()
 
 message(SEND_ERROR "Can't find any aligned malloc() implementation!")
+
+set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE}")

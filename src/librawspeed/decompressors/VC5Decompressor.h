@@ -21,8 +21,9 @@
 
 #pragma once
 
-#include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
+#include "adt/Array2DRef.h"                     // for Array2DRef
+#include "adt/DefaultInitAllocatorAdaptor.h"    // for DefaultInitAllocator...
+#include "common/BayerPhase.h"                  // for BayerPhase
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
@@ -32,11 +33,12 @@
 #include <cstdint>                              // for int16_t, uint16_t
 #include <memory>                               // for unique_ptr
 #include <optional>                             // for optional
-#include <type_traits>                          // for __underlying_type_im...
-#include <utility>                              // for move
+#include <type_traits>                          // for underlying_type_t
+#include <utility>                              // for move, pair
 #include <vector>                               // for vector
 
 namespace rawspeed {
+class ErrorLog;
 
 const int MAX_NUM_PRESCALE = 8;
 
@@ -89,6 +91,8 @@ inline VC5Tag operator-(VC5Tag tag) {
 class VC5Decompressor final : public AbstractDecompressor {
   RawImage mRaw;
   ByteStream mBs;
+
+  BayerPhase phase;
 
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
   int outputBits;
@@ -207,6 +211,8 @@ class VC5Decompressor final : public AbstractDecompressor {
   getRLV(BitPumpMSB& bits);
 
   void parseLargeCodeblock(const ByteStream& bs);
+
+  template <BayerPhase p> void combineFinalLowpassBandsImpl() const noexcept;
 
   void combineFinalLowpassBands() const noexcept;
 

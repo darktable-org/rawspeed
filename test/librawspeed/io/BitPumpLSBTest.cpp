@@ -19,10 +19,11 @@
 */
 
 #include "io/BitPumpLSB.h"  // for BitPumpLSB
-#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesLE, BitPump...
+#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesLE, Patterns
 #include <array>            // for array
 #include <cstdint>          // for uint32_t, uint8_t
-#include <gtest/gtest.h>    // for Types, INSTANTIATE_TYPED_TEST_CASE_P
+#include <gtest/gtest.h>    // for INSTANTIATE_TYPED_TEST_CASE_P
+#include <memory>           // for allocator
 
 using rawspeed::BitPumpLSB;
 
@@ -32,7 +33,7 @@ struct InvOnesTag;
 struct OnesTag;
 
 template <>
-const std::array<uint8_t, 4> Pattern<BitPumpLSB, OnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitPumpLSB, OnesTag>::Data = {
     {/* [Byte0 Byte1 Byte2 Byte3] */
      /* Byte: [Bit7 .. Bit0] */
      0b01001011, 0b10000100, 0b00100000, 0b11110000}};
@@ -42,7 +43,7 @@ template <> uint32_t Pattern<BitPumpLSB, OnesTag>::data(int index) {
 }
 
 template <>
-const std::array<uint8_t, 4> Pattern<BitPumpLSB, InvOnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitPumpLSB, InvOnesTag>::Data = {
     {0b00100101, 0b01000010, 0b00010000, 0b11111000}};
 template <> uint32_t Pattern<BitPumpLSB, InvOnesTag>::data(int index) {
   const auto set = GenOnesLE(1, 0);

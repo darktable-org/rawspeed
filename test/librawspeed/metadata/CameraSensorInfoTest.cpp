@@ -20,13 +20,14 @@
 */
 
 #include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include <algorithm>                   // for generate
+#include <algorithm>                   // for copy, generate, fill_n, max
 #include <cstdlib>                     // for rand, srand
 #include <gmock/gmock.h>               // for InitGoogleMock
 #include <gtest/gtest.h>               // for ParamIteratorInterface, Message
 #include <iostream>                    // for operator<<, basic_ostream::op...
 #include <limits>                      // for numeric_limits
-#include <memory>                      // for unique_ptr
+#include <memory>                      // for unique_ptr, allocator
+#include <string>                      // for basic_string, string
 #include <tuple>                       // for get, tuple
 #include <vector>                      // for vector
 

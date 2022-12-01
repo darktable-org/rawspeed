@@ -22,11 +22,11 @@
 #pragma once
 
 #include "common/Common.h" // for clampBits
-#include <algorithm>       // for generate_n
+#include <algorithm>       // for generate_n, max
 #include <cassert>         // for assert
 #include <functional>      // for function
 #include <iterator>        // for back_inserter
-#include <type_traits>     // for enable_if, is_convertible
+#include <type_traits>     // for enable_if
 #include <vector>          // for vector
 
 namespace rawspeed {

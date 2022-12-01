@@ -22,16 +22,15 @@
 
 #include "decoders/RawDecoder.h" // for RawDecoder
 #include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"        // for IMAGEWIDTH, TiffTag
-#include <memory>                // for unique_ptr
+#include "tiff/TiffTag.h"        // for TiffTag, TiffTag::IMAGEWIDTH
+#include <memory>                // for unique_ptr, allocator
 #include <string>                // for string
 #include <utility>               // for move
 
 namespace rawspeed {
 
-class CameraMetaData;
-
 class Buffer;
+class CameraMetaData;
 
 class AbstractTiffDecoder : public RawDecoder
 {

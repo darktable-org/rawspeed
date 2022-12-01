@@ -20,9 +20,9 @@
 */
 
 #include "decoders/NefDecoder.h"
-#include "common/Array2DRef.h"                      // for Array2DRef
+#include "adt/Array2DRef.h"                         // for Array2DRef
+#include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for clampBits, round...
-#include "common/Point.h"                           // for iPoint2D
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/NikonDecompressor.h"        // for NikonDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -30,19 +30,19 @@
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for getU16BE, Endian...
-#include "io/IOException.h"                         // for ThrowIOE
+#include "io/IOException.h"                         // for ThrowException
 #include "metadata/Camera.h"                        // for Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/ColorFilterArray.h" // for CFAColor::GREEN, CFAColor::BLUE
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TIFF_...
+#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
+#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, IMAGELE...
-#include <algorithm>                                // for min
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
+#include <algorithm>                                // for min, max
 #include <cassert>                                  // for assert
 #include <cmath>                                    // for pow, exp, log
 #include <memory>                                   // for unique_ptr, allo...
-#include <sstream>                                  // for operator<<, ostr...
-#include <string>                                   // for string, operator==
+#include <sstream>                                  // for operator<<, basi...
+#include <string>                                   // for string, basic_st...
 #include <vector>                                   // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
@@ -394,6 +394,11 @@ void NefDecoder::checkSupportInternal(const CameraMetaData* meta) {
     checkCameraSupported(meta, id, mode);
 }
 
+int NefDecoder::getBitPerSample() const {
+  const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
+  return raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+}
+
 std::string NefDecoder::getMode() const {
   ostringstream mode;
   const auto* raw = getIFDWithLargestImage(TiffTag::CFAPATTERN);
@@ -599,6 +604,23 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
   std::string mode = getMode();
   std::string extended_mode = getExtendedMode(mode);
+
+  // Read black levels (seem to be recorded for 14bit always)
+  if (mRootIFD->hasEntryRecursive(TiffTag::NIKON_BLACKLEVEL)) {
+    const TiffEntry* bl =
+        mRootIFD->getEntryRecursive(TiffTag::NIKON_BLACKLEVEL);
+    if (bl->count != 4)
+      ThrowRDE("BlackLevel has %d entries instead of 4", bl->count);
+    uint32_t bitPerPixel = getBitPerSample();
+    if (bitPerPixel != 12 && bitPerPixel != 14)
+      ThrowRDE("Bad bit per pixel: %i", bitPerPixel);
+    const int sh = 14 - bitPerPixel;
+    mRaw->blackLevelSeparate[0] = bl->getU16(0) >> sh;
+    mRaw->blackLevelSeparate[1] = bl->getU16(1) >> sh;
+    mRaw->blackLevelSeparate[2] = bl->getU16(2) >> sh;
+    mRaw->blackLevelSeparate[3] = bl->getU16(3) >> sh;
+  }
+
   if (meta->hasCamera(id.make, id.model, extended_mode)) {
     setMetaData(meta, id, extended_mode, iso);
   } else if (meta->hasCamera(id.make, id.model, mode)) {

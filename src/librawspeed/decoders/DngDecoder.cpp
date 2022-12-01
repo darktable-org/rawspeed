@@ -20,33 +20,34 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
-#include "common/Common.h"                         // for uint32_t, roundUpDi...
+#include "adt/NORangesSet.h"                       // for NORangesSet
+#include "adt/NotARational.h"                      // for NotARational
+#include "adt/Point.h"                             // for iPoint2D, iRectan...
+#include "common/Common.h"                         // for roundUpDivision
 #include "common/DngOpcodes.h"                     // for DngOpcodes
-#include "common/NORangesSet.h"                    // for set
-#include "common/Point.h"                          // for iPoint2D, iRectan...
-#include "common/RawspeedException.h"              // for RawspeedException
 #include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
 #include "decompressors/AbstractDngDecompressor.h" // for DngSliceElement
-#include "io/Buffer.h"                             // for Buffer, DataBuffer
+#include "io/Buffer.h"                             // for Buffer, operator<
 #include "io/ByteStream.h"                         // for ByteStream
 #include "metadata/BlackArea.h"                    // for BlackArea
 #include "metadata/Camera.h"                       // for Camera
 #include "metadata/CameraMetaData.h"               // for CameraMetaData
 #include "metadata/ColorFilterArray.h"             // for CFAColor, ColorFi...
-#include "parsers/TiffParserException.h"           // for ThrowTPE
-#include "tiff/TiffEntry.h" // for TiffEntry, TiffDataType::LONG
+#include "parsers/TiffParserException.h"           // for ThrowException
+#include "tiff/TiffEntry.h"                        // for TiffEntry, TiffDa...
 #include "tiff/TiffIFD.h"                          // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                          // for ACTIVEAREA, TILEO...
-#include <algorithm>                               // for any_of
+#include "tiff/TiffTag.h"                          // for TiffTag, TiffTag:...
+#include <algorithm>                               // for transform, max
 #include <array>                                   // for array, array<>::v...
 #include <cassert>                                 // for assert
 #include <limits>                                  // for numeric_limits
 #include <map>                                     // for map
-#include <memory>                                  // for unique_ptr
+#include <memory>                                  // for unique_ptr, alloc...
 #include <stdexcept>                               // for out_of_range
-#include <string>                                  // for string, operator+
-#include <utility>                                 // for move, pair
+#include <string>                                  // for char_traits, string
+#include <utility>                                 // for move
 #include <vector>                                  // for vector, allocator
+// IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::vector;
 using std::map;
@@ -145,6 +146,40 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
   }
 }
 
+std::optional<iRectangle2D>
+DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
+  if (!raw->hasEntry(TiffTag::ACTIVEAREA))
+    return {};
+
+  const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
+  if (active_area->count != 4)
+    ThrowRDE("active area has %d values instead of 4", active_area->count);
+
+  const iRectangle2D fullImage(0, 0, mRaw->dim.x, mRaw->dim.y);
+
+  const auto corners = active_area->getU32Array(4);
+  const iPoint2D topLeft(static_cast<int>(corners[1]),
+                         static_cast<int>(corners[0]));
+  const iPoint2D bottomRight(static_cast<int>(corners[3]),
+                             static_cast<int>(corners[2]));
+
+  if (!(fullImage.isPointInsideInclusive(topLeft) &&
+        fullImage.isPointInsideInclusive(bottomRight) &&
+        bottomRight >= topLeft)) {
+    ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+             topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
+             fullImage.getTopLeft().x, fullImage.getTopLeft().y,
+             fullImage.getBottomRight().x, fullImage.getBottomRight().y);
+  }
+
+  iRectangle2D crop;
+  crop.setTopLeft(topLeft);
+  crop.setBottomRightAbsolute(bottomRight);
+  assert(fullImage.isThisInside(fullImage));
+
+  return crop;
+}
+
 void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Check if layout is OK, if present
@@ -158,9 +193,11 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Does NOT contain dimensions as some documents state
   const TiffEntry* cPat = raw->getEntry(TiffTag::CFAPATTERN);
+  if (!cPat->count)
+    ThrowRDE("CFA pattern is empty!");
 
   iPoint2D cfaSize(cfadim->getU32(1), cfadim->getU32(0));
-  if (cfaSize.area() != cPat->count) {
+  if (!cfaSize.hasPositiveArea() || cfaSize.area() != cPat->count) {
     ThrowRDE("CFA pattern dimension and pattern count does not "
              "match: %d.",
              cPat->count);
@@ -192,24 +229,47 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
   // the cfa is specified relative to the ActiveArea. we want it relative (0,0)
   // Since in handleMetadata(), in subFrame() we unconditionally shift CFA by
   // activearea+DefaultCropOrigin; here we need to undo the 'ACTIVEAREA' part.
-  if (!raw->hasEntry(TiffTag::ACTIVEAREA))
+  const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw);
+  if (!aa)
     return;
-
-  const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
-  if (active_area->count != 4)
-    ThrowRDE("active area has %d values instead of 4", active_area->count);
-
-  const auto aa = active_area->getFloatArray(2);
-  if (std::any_of(aa.cbegin(), aa.cend(), [](const auto v) {
-        return v < std::numeric_limits<iPoint2D::value_type>::min() ||
-               v > std::numeric_limits<iPoint2D::value_type>::max();
-      }))
-    ThrowRDE("Error decoding active area");
 
   // To reverse the ActiveArea modifictions done earlier, we need to
   // use the negated ActiveArea x/y values.
-  mRaw->cfa.shiftRight(-aa[1]);
-  mRaw->cfa.shiftDown(-aa[0]);
+  mRaw->cfa.shiftRight(-int(aa->pos.x));
+  mRaw->cfa.shiftDown(-int(aa->pos.y));
+}
+
+void DngDecoder::parseColorMatrix() const {
+  // Look for D65 calibrated color matrix
+
+  auto impl = [this](TiffTag I, TiffTag M) -> TiffEntry* {
+    if (!mRootIFD->hasEntryRecursive(I))
+      return nullptr;
+    if (const TiffEntry* illuminant = mRootIFD->getEntryRecursive(I);
+        illuminant->getU16() != 21 || // D65
+        !mRootIFD->hasEntryRecursive(M))
+      return nullptr;
+    return mRootIFD->getEntryRecursive(M);
+  };
+
+  const TiffEntry* mat;
+  mat = impl(TiffTag::CALIBRATIONILLUMINANT1, TiffTag::COLORMATRIX1);
+  if (!mat)
+    mat = impl(TiffTag::CALIBRATIONILLUMINANT2, TiffTag::COLORMATRIX2);
+  if (!mat)
+    return;
+
+  const auto srat_vals = mat->getSRationalArray(mat->count);
+  bool Success = true;
+  mRaw->metadata.colorMatrix.reserve(mat->count);
+  for (const auto& val : srat_vals) {
+    Success &= val.den != 0;
+    if (!Success)
+      break;
+    mRaw->metadata.colorMatrix.emplace_back(val);
+  }
+  if (!Success)
+    mRaw->metadata.colorMatrix.clear();
 }
 
 DngTilingDescription
@@ -218,7 +278,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
     const uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
     const uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
 
-    if (!(tilew > 0 && tileh > 0))
+    if (tilew <= 0 || tileh <= 0)
       ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
 
     assert(tilew > 0);
@@ -401,7 +461,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (mRaw->dim.x > 7424 || mRaw->dim.y > 5552) {
+  if (mRaw->dim.x > 9280 || mRaw->dim.y > 7680) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
@@ -427,33 +487,8 @@ RawImage DngDecoder::decodeRawInternal() {
 
 void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Crop
-  if (raw->hasEntry(TiffTag::ACTIVEAREA)) {
-    const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
-    if (active_area->count != 4)
-      ThrowRDE("active area has %d values instead of 4", active_area->count);
-
-    const iRectangle2D fullImage(0, 0, mRaw->dim.x, mRaw->dim.y);
-
-    const auto corners = active_area->getU32Array(4);
-    const iPoint2D topLeft(corners[1], corners[0]);
-    const iPoint2D bottomRight(corners[3], corners[2]);
-
-    if (!(fullImage.isPointInsideInclusive(topLeft) &&
-          fullImage.isPointInsideInclusive(bottomRight) &&
-          bottomRight >= topLeft)) {
-      ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
-               topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
-               fullImage.getTopLeft().x, fullImage.getTopLeft().y,
-               fullImage.getBottomRight().x, fullImage.getBottomRight().y);
-    }
-
-    iRectangle2D crop;
-    crop.setTopLeft(topLeft);
-    crop.setBottomRightAbsolute(bottomRight);
-    assert(fullImage.isThisInside(fullImage));
-
-    mRaw->subFrame(crop);
-  }
+  if (const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw))
+    mRaw->subFrame(*aa);
 
   if (raw->hasEntry(TiffTag::DEFAULTCROPORIGIN) &&
       raw->hasEntry(TiffTag::DEFAULTCROPSIZE)) {
@@ -461,13 +496,14 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     const TiffEntry* origin_entry = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
     const TiffEntry* size_entry = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
 
-    /* Read crop position (sometimes is rational so use float) */
-    const auto tl = origin_entry->getFloatArray(2);
-    if (std::any_of(tl.cbegin(), tl.cend(), [](const auto v) {
-          return v < std::numeric_limits<iPoint2D::value_type>::min() ||
-                 v > std::numeric_limits<iPoint2D::value_type>::max();
-        }))
-      ThrowRDE("Error decoding default crop origin");
+    const auto tl_r = origin_entry->getRationalArray(2);
+    std::array<unsigned, 2> tl;
+    std::transform(tl_r.begin(), tl_r.end(), tl.begin(),
+                   [](const NotARational<unsigned>& r) {
+                     if (r.den == 0 || r.num % r.den != 0)
+                       ThrowRDE("Error decoding default crop origin");
+                     return r.num / r.den;
+                   });
 
     if (iPoint2D cropOrigin(tl[0], tl[1]);
         cropped.isPointInsideInclusive(cropOrigin))
@@ -475,13 +511,14 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
     cropped.dim = mRaw->dim - cropped.pos;
 
-    /* Read size (sometimes is rational so use float) */
-    const auto sz = size_entry->getFloatArray(2);
-    if (std::any_of(sz.cbegin(), sz.cend(), [](const auto v) {
-          return v < std::numeric_limits<iPoint2D::value_type>::min() ||
-                 v > std::numeric_limits<iPoint2D::value_type>::max();
-        }))
-      ThrowRDE("Error decoding default crop size");
+    const auto sz_r = size_entry->getRationalArray(2);
+    std::array<unsigned, 2> sz;
+    std::transform(sz_r.begin(), sz_r.end(), sz.begin(),
+                   [](const NotARational<unsigned>& r) {
+                     if (r.den == 0 || r.num % r.den != 0)
+                       ThrowRDE("Error decoding default crop size");
+                     return r.num / r.den;
+                   });
 
     if (iPoint2D size(sz[0], sz[1]);
         size.isThisInside(mRaw->dim) &&
@@ -499,12 +536,13 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Adapt DNG DefaultScale to aspect-ratio
   if (raw->hasEntry(TiffTag::DEFAULTSCALE)) {
     const TiffEntry* default_scale = raw->getEntry(TiffTag::DEFAULTSCALE);
-    const auto scales = default_scale->getFloatArray(2);
-    if (!std::all_of(scales.cbegin(), scales.cend(),
-                     [](const auto v) { return v > decltype(v)(0); }))
-      ThrowRDE("Error decoding default scale");
-    // entry 1 is horizontal scale, entry 2 is vertical scale
-    mRaw->metadata.pixelAspectRatio = scales[0] / scales[1];
+    const auto scales = default_scale->getRationalArray(2);
+    for (const auto& scale : scales) {
+      if (scale.num == 0 || scale.den == 0)
+        ThrowRDE("Error decoding default pixel scale");
+    }
+    mRaw->metadata.pixelAspectRatio =
+        static_cast<double>(scales[0]) / static_cast<double>(scales[1]);
   }
 
   // Apply stage 1 opcodes
@@ -513,7 +551,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       const TiffEntry* opcodes = raw->getEntry(TiffTag::OPCODELIST1);
       // The entry might exist, but it might be empty, which means no opcodes
       if (opcodes->count > 0) {
-        DngOpcodes codes(mRaw, opcodes);
+        DngOpcodes codes(mRaw, opcodes->getData());
         codes.applyOpCodes(mRaw);
       }
     } catch (const RawDecoderException& e) {
@@ -557,7 +595,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
     // Apply stage 2 codes
     try {
-      DngOpcodes codes(mRaw, raw->getEntry(TiffTag::OPCODELIST2));
+      DngOpcodes codes(mRaw, raw->getEntry(TiffTag::OPCODELIST2)->getData());
       codes.applyOpCodes(mRaw);
     } catch (const RawDecoderException& e) {
       // We push back errors from the opcode parser, since the image may still
@@ -637,26 +675,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
   }
 
-  if (mRootIFD->hasEntryRecursive(TiffTag::COLORMATRIX2) &&
-      mRootIFD->hasEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2)) {
-    const TiffEntry* illuminant =
-        mRootIFD->getEntryRecursive(TiffTag::CALIBRATIONILLUMINANT2);
-    if (illuminant->getU16() == 21) { // D65
-      const TiffEntry* mat = mRootIFD->getEntryRecursive(TiffTag::COLORMATRIX2);
-      const auto srat_vals = mat->getSRationalArray(mat->count);
-      bool Success = true;
-      mRaw->metadata.colorMatrix.reserve(mat->count);
-      for (const auto& val : srat_vals) {
-        // FIXME: introduce proper rational type.
-        Success &= val.second == 10'000;
-        if (!Success)
-          break;
-        mRaw->metadata.colorMatrix.emplace_back(val.first);
-      }
-      if (!Success)
-        mRaw->metadata.colorMatrix.clear();
-    }
-  }
+  parseColorMatrix();
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */

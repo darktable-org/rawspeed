@@ -25,6 +25,7 @@ function(add_rs_test src)
   add_dependencies(tests ${TESTNAME})
 endfunction()
 
+add_subdirectory(adt)
 add_subdirectory(common)
 add_subdirectory(decompressors)
 add_subdirectory(io)

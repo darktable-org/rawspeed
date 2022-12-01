@@ -1,0 +1,123 @@
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      os-deployment_target:
+        required: true
+        type: string
+      compiler-family:
+        required: true
+        type: string
+      compiler-version:
+        required: true
+        type: string
+      compiler-CC:
+        required: true
+        type: string
+      compiler-CXX:
+        required: true
+        type: string
+      flavor:
+        required: true
+        type: string
+      ECO:
+        type: string
+
+env:
+  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+
+jobs:
+  macOS:
+    name: ${{ inputs.compiler-family }}.${{ inputs.compiler-version }}.targeting.OSX.${{ inputs.os-deployment_target }}.${{ inputs.flavor }}
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@v3
+        name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: 'rawspeed'
+          fetch-depth: 1
+      - name: Install Base Dependencies
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+        run: |
+          set -xe
+          brew update > /dev/null || true
+          brew tap Homebrew/bundle
+          cd "${SRC_DIR}/.ci/"
+          brew bundle --verbose
+      - name: Configure
+        env:
+          DEVELOPER_DIR: /Applications/Xcode_${{ inputs.compiler-version }}.app/Contents/Developer
+          MACOSX_DEPLOYMENT_TARGET: ${{ inputs.os-deployment_target }}
+          CC: ${{ inputs.compiler-CC }}
+          CXX: ${{ inputs.compiler-CXX }}
+          CFLAGS: -mmacosx-version-min=${{ inputs.os-deployment_target }}
+          CXXFLAGS: -mmacosx-version-min=${{ inputs.os-deployment_target }}
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DWITH_OPENMP=OFF
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: configure
+        run: |
+          set -xe
+          if [[ "$MACOSX_DEPLOYMENT_TARGET" == "10.7" ]]; then
+            export CXXFLAGS="$CXXFLAGS -stdlib=libc++"
+          fi
+          cmake -E make_directory "${BUILD_DIR}"
+          cmake -E make_directory "${INSTALL_PREFIX}"
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Build
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: build
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Test
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage data
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Upload coverage to Codecov (unit tests)
+        uses: codecov/codecov-action@v3
+        env:
+          OS: macOS
+          ARCH: x86_64
+          CXX: AppleXcode
+          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        with:
+          env_vars: OS,ARCH,CXX
+          flags: unittests
+          name: ${JOB_NAME}.Unittests
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
+          fail_ci_if_error: true

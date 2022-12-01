@@ -1,7 +1,10 @@
 CiffParserFuzzer-GetDecoder
 CiffParserFuzzer-GetDecoder-Decode
-Cr2DecompressorFuzzer
+Cr2DecompressorFuzzer-DummyHuffmanTable
+Cr2DecompressorFuzzer-HuffmanTable
+Cr2LJpegDecoderFuzzer
 CrwDecompressorFuzzer
+DngOpcodesFuzzer
 DummyLJpegDecompressorFuzzer
 FiffParserFuzzer-GetDecoder
 FiffParserFuzzer-GetDecoder-Decode

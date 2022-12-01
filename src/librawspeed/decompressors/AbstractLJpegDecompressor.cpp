@@ -21,7 +21,8 @@
 */
 
 #include "decompressors/AbstractLJpegDecompressor.h"
-#include "common/Point.h"                       // for iPoint2D
+#include "adt/Point.h"                          // for iPoint2D
+#include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable, Huffma...
@@ -46,7 +47,7 @@ AbstractLJpegDecompressor::AbstractLJpegDecompressor(ByteStream bs,
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (mRaw->dim.x > 8896 || mRaw->dim.y > 6304) {
+  if (mRaw->dim.x > 19440 || mRaw->dim.y > 6304) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
@@ -58,6 +59,7 @@ void AbstractLJpegDecompressor::decode() {
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
   struct {
+    bool DRI = false;
     bool DHT = false;
     bool SOF = false;
     bool SOS = false;
@@ -103,6 +105,12 @@ void AbstractLJpegDecompressor::decode() {
       break;
     case JpegMarker::DQT:
       ThrowRDE("Not a valid RAW file.");
+    case JpegMarker::DRI:
+      if (FoundMarkers.DRI)
+        ThrowRDE("Found second DRI marker");
+      parseDRI(data);
+      FoundMarkers.DRI = true;
+      break;
     default: // Just let it skip to next marker
       break;
     }
@@ -248,6 +256,13 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
       huffmanTableStore.emplace_back(std::move(dHT));
     }
   }
+}
+
+void AbstractLJpegDecompressor::parseDRI(ByteStream dri) {
+  if (dri.getRemainSize() != 2)
+    ThrowRDE("Invalid DRI header length.");
+  if (uint16_t Ri = dri.getU16(); Ri != 0)
+    ThrowRDE("Non-zero restart interval not supported.");
 }
 
 JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {

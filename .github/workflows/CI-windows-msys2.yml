@@ -1,0 +1,127 @@
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      msys2-msystem:
+        required: true
+        type: string
+      msys2-arch:
+        required: true
+        type: string
+      compiler-family:
+        required: true
+        type: string
+      compiler-CC:
+        required: true
+        type: string
+      compiler-CXX:
+        required: true
+        type: string
+      flavor:
+        required: true
+        type: string
+      ECO:
+        type: string
+
+env:
+  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+
+jobs:
+  windows-msys2:
+    name: ${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+    runs-on: ${{ inputs.os }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+        name: Fetch/Checkout RawSpeed git repo
+        with:
+          path: 'rawspeed'
+          fetch-depth: 1
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ inputs.msys2-msystem }}
+          update: true
+          install: >-
+            git
+            base-devel
+          pacboy: >-
+            cc:p
+            gcc-libs:p
+            omp:p
+            cmake:p
+            ninja:p
+            libxml2:p
+            pugixml:p
+            libjpeg-turbo:p
+            zlib:p
+      - name: Configure
+        env:
+          CC: ${{ inputs.compiler-CC }}
+          CXX: ${{ inputs.compiler-CXX }}
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: configure
+        run: |
+          set -xe
+          cmake -E make_directory "${BUILD_DIR}"
+          cmake -E make_directory "${INSTALL_PREFIX}"
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Build
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: build
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Test
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage data
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - if: inputs.flavor == 'Coverage'
+        name: Upload coverage to Codecov (unit tests)
+        uses: codecov/codecov-action@v3
+        env:
+          OS: windows
+          ARCH: ${{ inputs.msys2-arch }}
+          CXX: ${{ inputs.compiler-family }}
+          JOB_NAME: ${{ inputs.os }}.${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        with:
+          env_vars: OS,ARCH,CXX
+          flags: unittests
+          name: ${JOB_NAME}.Unittests
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest
+          fail_ci_if_error: true

@@ -22,16 +22,15 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/SonyArw2Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/RawspeedException.h"     // for RawspeedException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t, uint32_t, uint8_t
-#include <string>                         // for string
+#include <string>                         // for string, allocator
 
 namespace rawspeed {
 
