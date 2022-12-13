@@ -77,6 +77,7 @@ OlympusDecompressorFuzzer
 PanasonicV4DecompressorFuzzer
 PanasonicV5DecompressorFuzzer
 PanasonicV6DecompressorFuzzer
+PanasonicV7DecompressorFuzzer
 PentaxDecompressorFuzzer
 PhaseOneDecompressorFuzzer
 RawParserFuzzer-GetDecoder
