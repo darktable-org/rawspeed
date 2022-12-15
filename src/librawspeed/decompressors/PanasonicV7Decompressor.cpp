@@ -1,6 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
+    Copyright (C) 2022 LibRaw LLC (info@libraw.org)
     Copyright (C) 2022 Jordan Neumeyer
 
     This library is free software; you can redistribute it and/or
