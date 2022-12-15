@@ -41,7 +41,8 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
     ThrowRDE("Unexpected component count / data type");
 
   bitsPerSample = bps_;
-  pixelsPerBlock = bps_ == 14 ? 9 : 10;
+  // Default to 14 bit.
+  pixelsPerBlock = bps_ != 12 ? PixelsPerBlock14Bit : PixelsPerBlock12Bit;
   
   if (!mRaw->dim.hasPositiveArea() ||
       mRaw->dim.x % pixelsPerBlock != 0) {
@@ -63,7 +64,7 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
 }
 
 inline uint16_t
-PanasonicV7Decompressor::nextpixel(const ByteStream& bs, int pixelpos) {
+PanasonicV7Decompressor::streamedPixelRead(const ByteStream& bs, int pixelpos) noexcept {
     switch (pixelpos) {
       case 0: return bs.peekByte(0) | // low bits
                       ((bs.peekByte(1) & 0x3F) << 8); // high bits
@@ -89,12 +90,13 @@ PanasonicV7Decompressor::nextpixel(const ByteStream& bs, int pixelpos) {
       case 8: return bs.peekByte(14) | ((bs.peekByte(15) & 0x3F) << 8);
 
       default: 
-        ThrowRDE("Beyond pixel block size!");
+        // This shouldn't happen.
+        return 0;
   }
 }
 
 inline uint16_t
-PanasonicV7Decompressor::nextpixel12bit(const ByteStream& bs, int pixelpos) {
+PanasonicV7Decompressor::streamedPixelRead12Bit(const ByteStream& bs, int pixelpos) noexcept {
   switch(pixelpos) {
     case 0: return ((bs.peekByte(1) & 0xF) << 8) |
                     bs.peekByte(0);
@@ -126,7 +128,8 @@ PanasonicV7Decompressor::nextpixel12bit(const ByteStream& bs, int pixelpos) {
     case 9: return (bs.peekByte(14) << 4) |
                     (bs.peekByte(13) >> 4);
     default:
-      ThrowRDE("Beyond pixel block size!");
+      // This shouldn't happen.
+      return 0;
   }
 }
 
@@ -134,13 +137,13 @@ inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 PanasonicV7Decompressor::decompressBlock(ByteStream& rowInput, int row,
                                          int col, 
-                                         const std::function<uint16_t(const ByteStream&, int)> &readPixel ) const {
+                                         const std::function<uint16_t(const ByteStream&, int)> &readPixelFn ) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const auto stream = rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock);
 
   for (int pix = 0; pix < pixelsPerBlock;
        pix++, col++) {
-    out(row, col) = readPixel(stream, pix);
+    out(row, col) = readPixelFn(stream, pix);
   }
 }
 
@@ -151,10 +154,13 @@ void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
       mRaw->dim.x / pixelsPerBlock;
   const int bytesPerRow = PanasonicV7Decompressor::BytesPerBlock * blocksperrow;
 
+  // Default to 14 bit.
+  const auto readPixelFn = bitsPerSample != 12 ? streamedPixelRead : streamedPixelRead12Bit;
+
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
        rblock++, col += pixelsPerBlock) {
-    decompressBlock(rowInput, row, col, selectDecompressor());
+    decompressBlock(rowInput, row, col, readPixelFn);
   }
 }
 
