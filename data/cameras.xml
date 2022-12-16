@@ -17065,6 +17065,9 @@
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="M9 Digital Camera" mode="dng">
+		<ID make="Leica" model="M9">M9 Digital Camera</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M10" mode="dng">
 		<ID make="Leica" model="M10">LEICA M10</ID>
 	</Camera>
