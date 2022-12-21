@@ -26,6 +26,7 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "unused-macros"
   "unused-parameter"
   "weak-vtables"
+  "unsafe-buffer-usage" # FIXME: really want this. to be reenabled.
 )
 
 # Yes, these have to be *re-enabled* after CLANG_DISABLED_WARNING_FLAGS.
