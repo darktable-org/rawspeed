@@ -348,8 +348,13 @@ int RafDecoder::isCompressed() const {
   if (width == 0 || height == 0 || width > 11808 || height > 8754)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  uint32_t bps;
+  if (raw->hasEntry(TiffTag::FUJI_BITSPERSAMPLE))
+    bps = raw->getEntry(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
+  else
+    bps = 12;
+
   uint32_t count = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS)->getU32();
-  uint32_t bps = raw->getEntry(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
 
   // FIXME: This is not an ideal way to detect compression, but I'm not seeing
   // anything in the diff between exiv2/exiftool dumps of {un,}compressed raws.
