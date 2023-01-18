@@ -4406,6 +4406,42 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 30" mode="12bit-compressed">
+		<ID make="Nikon" model="Z 30">Nikon Z 30</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="251" white="3972"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10339 -3822 -890</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4183 12023 2436</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-671 1638 7049</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 30" mode="14bit-compressed">
+		<ID make="Nikon" model="Z 30">Nikon Z 30</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15892"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10339 -3822 -890</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4183 12023 2436</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-671 1638 7049</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Z 50" mode="12bit-compressed">
 		<ID make="Nikon" model="Z 50">Nikon Z 50</ID>
 		<CFA width="2" height="2">
@@ -17065,6 +17101,9 @@
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="M9 Digital Camera" mode="dng">
+		<ID make="Leica" model="M9">M9 Digital Camera</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M10" mode="dng">
 		<ID make="Leica" model="M10">LEICA M10</ID>
 	</Camera>
@@ -17104,6 +17143,9 @@
 	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR III" mode="dng">
 		<ID make="Ricoh" model="GR III">Ricoh GR III</ID>
+	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR IIIx" mode="dng">
+		<ID make="Ricoh" model="GR IIIx">Ricoh GR IIIx</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A720 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A720 IS">Canon PowerShot A720 IS</ID>
