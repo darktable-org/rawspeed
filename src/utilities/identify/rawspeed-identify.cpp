@@ -215,11 +215,11 @@ int main(int argc, char* argv[]) { // NOLINT
 
     fprintf(stdout, "isCFA: %d\n", r->isCFA);
     uint32_t filters = r->cfa.getDcrawFilter();
-    fprintf(stdout, "filters: %d (0x%x)\n", filters, filters);
+    fprintf(stdout, "filters: %u (0x%x)\n", filters, filters);
     const uint32_t bpp = r->getBpp();
-    fprintf(stdout, "bpp: %d\n", bpp);
+    fprintf(stdout, "bpp: %u\n", bpp);
     const uint32_t cpp = r->getCpp();
-    fprintf(stdout, "cpp: %d\n", cpp);
+    fprintf(stdout, "cpp: %u\n", cpp);
     fprintf(stdout, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
     // dimensions of uncropped image
