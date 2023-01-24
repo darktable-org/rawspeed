@@ -225,11 +225,11 @@ Cr2Decompressor<HuffmanTable>::getOutputTiles() {
   auto first = allOutputTiles.begin();
   auto end = allOutputTiles.end();
   assert(first != end && "No tiles?");
-  auto final = first;
-  while (std::next(final) != end && (*final).getBottomRight() != dim)
-    ++final;
-  assert((*final).getBottomRight() == dim && "Bad tiling");
-  return {first, ++final};
+  auto last = first;
+  while (std::next(last) != end && (*last).getBottomRight() != dim)
+    ++last;
+  assert((*last).getBottomRight() == dim && "Bad tiling");
+  return {first, ++last};
 }
 
 template <typename HuffmanTable>
