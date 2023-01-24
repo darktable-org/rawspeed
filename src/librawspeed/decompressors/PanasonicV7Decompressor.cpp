@@ -73,13 +73,12 @@ PanasonicV7Decompressor::decompressBlock(const ByteStream& block, int row,
 void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   assert(mRaw->dim.x % PixelsPerBlock == 0);
   const int blocksperrow = mRaw->dim.x / PixelsPerBlock;
-  const int bytesPerRow = PanasonicV7Decompressor::BytesPerBlock * blocksperrow;
+  const int bytesPerRow = BytesPerBlock * blocksperrow;
 
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
        rblock++, col += PixelsPerBlock) {
-    ByteStream block =
-        rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock);
+    ByteStream block = rowInput.getStream(BytesPerBlock);
     decompressBlock(block, row, col);
   }
 }
