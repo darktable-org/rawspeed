@@ -61,10 +61,10 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
 
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-PanasonicV7Decompressor::decompressBlock(ByteStream& rowInput, int row,
+PanasonicV7Decompressor::decompressBlock(const ByteStream& block, int row,
                                          int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  BitPumpLSB pump(rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock));
+  BitPumpLSB pump(block);
   for (int pix = 0; pix < PixelsPerBlock; pix++, col++)
     out(row, col) = pump.getBits(BitsPerSample);
 }
@@ -78,7 +78,9 @@ void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
        rblock++, col += PixelsPerBlock) {
-    decompressBlock(rowInput, row, col);
+    ByteStream block =
+        rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock);
+    decompressBlock(block, row, col);
   }
 }
 
