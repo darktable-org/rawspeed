@@ -40,6 +40,8 @@ FILE(GLOB SOURCES
   "PanasonicV5Decompressor.h"
   "PanasonicV6Decompressor.cpp"
   "PanasonicV6Decompressor.h"
+  "PanasonicV7Decompressor.cpp"
+  "PanasonicV7Decompressor.h"
   "PentaxDecompressor.cpp"
   "PentaxDecompressor.h"
   "PhaseOneDecompressor.cpp"
