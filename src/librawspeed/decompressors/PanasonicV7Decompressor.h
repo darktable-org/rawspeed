@@ -32,13 +32,10 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
 
   ByteStream input;
 
-  int pixelsPerBlock;
-  int bitsPerSample;
-
-  static constexpr int PixelsPerBlock14Bit = 9;
-  static constexpr int PixelsPerBlock12Bit = 10;
-
   static constexpr int BytesPerBlock = 16;
+  static constexpr int BitsPerSample = 14;
+  static constexpr int PixelsPerBlock =
+      (CHAR_BIT * BytesPerBlock) / BitsPerSample;
 
   inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
@@ -52,7 +49,7 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
   static uint16_t streamedPixelRead12Bit(const ByteStream& bs, int pixelpos) noexcept;
 
 public:
-  PanasonicV7Decompressor(const RawImage& img, const ByteStream& input_, int bps_);
+  PanasonicV7Decompressor(const RawImage& img, const ByteStream& input_);
 
   void decompress() const;
 };

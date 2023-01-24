@@ -34,24 +34,19 @@
 namespace rawspeed {
 
 PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
-                                                 const ByteStream& input_,
-                                                 const int bps_)
+                                                 const ByteStream& input_)
     : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  bitsPerSample = bps_;
-  // Default to 14 bit.
-  pixelsPerBlock = bps_ != 12 ? PixelsPerBlock14Bit : PixelsPerBlock12Bit;
-
-  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % pixelsPerBlock != 0) {
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % PixelsPerBlock != 0) {
     ThrowRDE("Unexpected image dimensions found: (%i; %i)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
   // How many blocks are needed for the given image size?
-  const auto numBlocks = mRaw->dim.area() / pixelsPerBlock;
+  const auto numBlocks = mRaw->dim.area() / PixelsPerBlock;
 
   // Does the input contain enough blocks?
   // How many full blocks does the input contain? This is truncating division.
@@ -105,45 +100,6 @@ PanasonicV7Decompressor::streamedPixelRead(const ByteStream& bs,
   }
 }
 
-inline uint16_t
-PanasonicV7Decompressor::streamedPixelRead12Bit(const ByteStream& bs,
-                                                int pixelpos) noexcept {
-  switch (pixelpos) {
-  case 0:
-    return ((bs.peekByte(1) & 0xF) << 8) | bs.peekByte(0);
-
-  case 1:
-    return (bs.peekByte(2) << 4) | (bs.peekByte(1) >> 4);
-
-  case 2:
-    return ((bs.peekByte(4) & 0xF) << 8) | bs.peekByte(3);
-
-  case 3:
-    return (bs.peekByte(5) << 4) | (bs.peekByte(4) >> 4);
-
-  case 4:
-    return ((bs.peekByte(7) & 0xF) << 8) | bs.peekByte(6);
-
-  case 5:
-    return (bs.peekByte(8) << 4) | (bs.peekByte(7) >> 4);
-
-  case 6:
-    return ((bs.peekByte(10) & 0xF) << 8) | bs.peekByte(9);
-
-  case 7:
-    return (bs.peekByte(11) << 4) | (bs.peekByte(10) >> 4);
-
-  case 8:
-    return ((bs.peekByte(13) & 0xF) << 8) | bs.peekByte(12);
-
-  case 9:
-    return (bs.peekByte(14) << 4) | (bs.peekByte(13) >> 4);
-  default:
-    // This shouldn't happen.
-    return 0;
-  }
-}
-
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 PanasonicV7Decompressor::decompressBlock(
@@ -154,24 +110,22 @@ PanasonicV7Decompressor::decompressBlock(
   const auto stream =
       rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock);
 
-  for (int pix = 0; pix < pixelsPerBlock; pix++, col++) {
+  for (int pix = 0; pix < PixelsPerBlock; pix++, col++) {
     out(row, col) = readPixelFn(stream, pix);
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
-  assert(mRaw->dim.x % pixelsPerBlock == 0);
-  const int blocksperrow = mRaw->dim.x / pixelsPerBlock;
+  assert(mRaw->dim.x % PixelsPerBlock == 0);
+  const int blocksperrow = mRaw->dim.x / PixelsPerBlock;
   const int bytesPerRow = PanasonicV7Decompressor::BytesPerBlock * blocksperrow;
 
-  // Default to 14 bit.
-  const auto readPixelFn =
-      bitsPerSample != 12 ? streamedPixelRead : streamedPixelRead12Bit;
+  const auto readPixelFn = streamedPixelRead;
 
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
-       rblock++, col += pixelsPerBlock) {
+       rblock++, col += PixelsPerBlock) {
     decompressBlock(rowInput, row, col, readPixelFn);
   }
 }
