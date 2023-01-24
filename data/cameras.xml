@@ -11287,7 +11287,9 @@
 		<Aliases>
 			<Alias>DC-G90</Alias>
 			<Alias>DC-G91</Alias>
+			<Alias>DC-G95D</Alias>
 			<Alias>DC-G99</Alias>
+			<Alias>DC-G99D</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -11304,7 +11306,9 @@
 		<Aliases>
 			<Alias>DC-G90</Alias>
 			<Alias>DC-G91</Alias>
+			<Alias>DC-G95D</Alias>
 			<Alias>DC-G99</Alias>
+			<Alias>DC-G99D</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
