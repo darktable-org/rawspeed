@@ -26,6 +26,7 @@
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "io/BitPumpLSB.h"
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t
@@ -58,61 +59,14 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
   input = input_.peekStream(numBlocks, BytesPerBlock);
 }
 
-inline uint16_t
-PanasonicV7Decompressor::streamedPixelRead(const ByteStream& bs,
-                                           int pixelpos) noexcept {
-  switch (pixelpos) {
-  case 0:
-    return bs.peekByte(0) |                // low bits
-           ((bs.peekByte(1) & 0x3F) << 8); // high bits
-
-  case 1:
-    return (bs.peekByte(1) >> 6) | (bs.peekByte(2) << 2) |
-           ((bs.peekByte(3) & 0xF) << 10);
-
-  case 2:
-    return (bs.peekByte(3) >> 4) | (bs.peekByte(4) << 4) |
-           ((bs.peekByte(5) & 3) << 12);
-
-  case 3:
-    return ((bs.peekByte(5) & 0xFC) >> 2) | (bs.peekByte(6) << 6);
-
-  case 4:
-    return bs.peekByte(7) | ((bs.peekByte(8) & 0x3F) << 8);
-
-  case 5:
-    return (bs.peekByte(8) >> 6) | (bs.peekByte(9) << 2) |
-           ((bs.peekByte(10) & 0xF) << 10);
-
-  case 6:
-    return (bs.peekByte(10) >> 4) | (bs.peekByte(11) << 4) |
-           ((bs.peekByte(12) & 3) << 12);
-
-  case 7:
-    return ((bs.peekByte(12) & 0xFC) >> 2) | (bs.peekByte(13) << 6);
-
-  case 8:
-    return bs.peekByte(14) | ((bs.peekByte(15) & 0x3F) << 8);
-
-  default:
-    // This shouldn't happen.
-    return 0;
-  }
-}
-
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-PanasonicV7Decompressor::decompressBlock(
-    ByteStream& rowInput, int row, int col,
-    const std::function<uint16_t(const ByteStream&, int)>& readPixelFn)
-    const noexcept {
+PanasonicV7Decompressor::decompressBlock(ByteStream& rowInput, int row,
+                                         int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  const auto stream =
-      rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock);
-
-  for (int pix = 0; pix < PixelsPerBlock; pix++, col++) {
-    out(row, col) = readPixelFn(stream, pix);
-  }
+  BitPumpLSB pump(rowInput.getStream(PanasonicV7Decompressor::BytesPerBlock));
+  for (int pix = 0; pix < PixelsPerBlock; pix++, col++)
+    out(row, col) = pump.getBits(BitsPerSample);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
@@ -121,12 +75,10 @@ void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   const int blocksperrow = mRaw->dim.x / PixelsPerBlock;
   const int bytesPerRow = PanasonicV7Decompressor::BytesPerBlock * blocksperrow;
 
-  const auto readPixelFn = streamedPixelRead;
-
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0, col = 0; rblock < blocksperrow;
        rblock++, col += PixelsPerBlock) {
-    decompressBlock(rowInput, row, col, readPixelFn);
+    decompressBlock(rowInput, row, col);
   }
 }
 

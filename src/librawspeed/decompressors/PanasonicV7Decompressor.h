@@ -39,14 +39,10 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
 
   inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  decompressBlock(ByteStream& rowInput, int row, int col, 
-                  const std::function<uint16_t(const ByteStream&, int)>& readPixel) const noexcept;
+  decompressBlock(ByteStream& rowInput, int row, int col) const noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   void decompressRow(int row) const noexcept;
-
-  static uint16_t streamedPixelRead(const ByteStream& bs, int pixelpos) noexcept;
-  static uint16_t streamedPixelRead12Bit(const ByteStream& bs, int pixelpos) noexcept;
 
 public:
   PanasonicV7Decompressor(const RawImage& img, const ByteStream& input_);
