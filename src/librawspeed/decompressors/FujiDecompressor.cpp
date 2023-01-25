@@ -42,6 +42,19 @@
 
 namespace rawspeed {
 
+namespace {
+
+struct BayerTag;
+struct XTransTag;
+
+template <typename T> static constexpr iPoint2D MCU;
+
+template <> static constexpr iPoint2D MCU<BayerTag> = {2, 2};
+
+template <> static constexpr iPoint2D MCU<XTransTag> = {6, 6};
+
+} // namespace
+
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
@@ -193,7 +206,7 @@ void FujiDecompressor::fuji_compressed_block::reset(
   }
 }
 
-template <typename T>
+template <typename Tag, typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
                                  T&& idx) const {
@@ -214,13 +227,13 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
 
   iPoint2D MCUIdx;
   const iPoint2D NumMCUs = strip.numMCUs();
-  const iPoint2D MCUSize = strip.h.MCU;
+  assert(MCU<Tag> == strip.h.MCU);
   for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
     for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
-      for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
-        for (int MCUCol = 0; MCUCol != MCUSize.x; ++MCUCol) {
-          int row_count = MCUSize.y * MCUIdx.y + MCURow;
-          int pixel_count = MCUSize.x * MCUIdx.x + MCUCol;
+      for (int MCURow = 0; MCURow != MCU<Tag>.y; ++MCURow) {
+        for (int MCUCol = 0; MCUCol != MCU<Tag>.x; ++MCUCol) {
+          int row_count = MCU<Tag>.y * MCUIdx.y + MCURow;
+          int pixel_count = MCU<Tag>.x * MCUIdx.x + MCUCol;
 
           const uint16_t* line_buf = nullptr;
 
@@ -257,7 +270,7 @@ void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block* info,
            ((pixel_count % 3) >> 1);
   };
 
-  copy_line(info, strip, cur_line, index);
+  copy_line<XTransTag>(info, strip, cur_line, index);
 }
 
 void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
@@ -265,7 +278,7 @@ void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
                                           int cur_line) const {
   auto index = [](int pixel_count) { return pixel_count >> 1; };
 
-  copy_line(info, strip, cur_line, index);
+  copy_line<BayerTag>(info, strip, cur_line, index);
 }
 
 inline void FujiDecompressor::fuji_zerobits(BitPumpMSB& pump, int* count) {
@@ -828,7 +841,8 @@ FujiDecompressor::FujiHeader::FujiHeader(ByteStream& bs)
       raw_rounded_width(bs.getU16()), raw_width(bs.getU16()),
       block_size(bs.getU16()), blocks_in_row(bs.getByte()),
       total_lines(bs.getU16()),
-      MCU(raw_type == 16 ? iPoint2D(6, 6) : iPoint2D(2, 2)) {}
+      MCU(raw_type == 16 ? ::rawspeed::MCU<XTransTag>
+                         : ::rawspeed::MCU<BayerTag>) {}
 
 FujiDecompressor::FujiHeader::operator bool() const {
   // general validation

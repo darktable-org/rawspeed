@@ -193,7 +193,7 @@ private:
   void fuji_decode_strip(fuji_compressed_block* info_block,
                          const FujiStrip& strip) const;
 
-  template <typename T>
+  template <typename Tag, typename T>
   void copy_line(fuji_compressed_block* info, const FujiStrip& strip,
                  int cur_line, T&& idx) const;
 
