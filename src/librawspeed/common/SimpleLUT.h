@@ -44,8 +44,8 @@ public:
   template <
       typename F,
       typename = std::enable_if_t<!std::is_same_v<
-          SimpleLUT, typename std::remove_cv<
-                         typename std::remove_reference<F>::type>::type>>,
+          SimpleLUT,
+          typename std::remove_cv_t<typename std::remove_reference_t<F>>>>,
       typename = std::enable_if<std::is_convertible_v<
           F, std::function<value_type(typename decltype(table)::size_type,
                                       typename decltype(table)::size_type)>>>>
