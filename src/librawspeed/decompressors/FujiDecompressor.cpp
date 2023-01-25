@@ -206,11 +206,12 @@ void FujiDecompressor::fuji_compressed_block::reset(
   }
 }
 
+
 template <typename Tag, typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
                                  T&& idx) const {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   std::array<uint16_t*, 3> lineBufB;
   std::array<uint16_t*, 6> lineBufG;
@@ -230,6 +231,10 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
   assert(MCU<Tag> == strip.h.MCU);
   for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
     for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
+      const auto out =
+          CroppedArray2DRef(img, strip.offsetX() + MCU<Tag>.x * MCUIdx.x,
+                            strip.offsetY(cur_line) + MCU<Tag>.y * MCUIdx.y,
+                            MCU<Tag>.x, MCU<Tag>.y);
       for (int MCURow = 0; MCURow != MCU<Tag>.y; ++MCURow) {
         for (int MCUCol = 0; MCUCol != MCU<Tag>.x; ++MCUCol) {
           int row_count = MCU<Tag>.y * MCUIdx.y + MCURow;
@@ -254,8 +259,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
             __builtin_unreachable();
           }
 
-          out(strip.offsetY(cur_line) + row_count,
-              strip.offsetX() + pixel_count) = line_buf[idx(pixel_count)];
+          out(MCURow, MCUCol) = line_buf[idx(pixel_count)];
         }
       }
     }
