@@ -56,6 +56,7 @@ public:
     uint16_t block_size;
     uint8_t blocks_in_row;
     uint16_t total_lines;
+    iPoint2D MCU;
   };
 
   FujiHeader header;
@@ -97,6 +98,13 @@ public:
 
       assert(h.block_size * h.blocks_in_row >= h.raw_width);
       return h.raw_width - offsetX();
+    }
+
+    // how many horizontal pixels does this block encode?
+    [[nodiscard]] iPoint2D numMCUs() const {
+      assert(width() % h.MCU.x == 0);
+      assert(lineHeight() % h.MCU.y == 0);
+      return {width() / h.MCU.x, lineHeight() / h.MCU.y};
     }
 
     // where vertically does this block start?

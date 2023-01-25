@@ -212,29 +212,39 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
     lineBufG[i] = info->linebuf[G2 + i] + 1;
   }
 
-  for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
-    for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
-      const uint16_t* line_buf = nullptr;
+  iPoint2D MCUIdx;
+  const iPoint2D NumMCUs = strip.numMCUs();
+  const iPoint2D MCUSize = strip.h.MCU;
+  for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
+    for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
+      for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
+        for (int MCUCol = 0; MCUCol != MCUSize.x; ++MCUCol) {
+          int row_count = MCUSize.y * MCUIdx.y + MCURow;
+          int pixel_count = MCUSize.x * MCUIdx.x + MCUCol;
 
-      switch (CFA[row_count][pixel_count % 6]) {
-      case CFAColor::RED: // red
-        line_buf = lineBufR[row_count >> 1];
-        break;
+          const uint16_t* line_buf = nullptr;
 
-      case CFAColor::GREEN: // green
-        line_buf = lineBufG[row_count];
-        break;
+          switch (CFA[MCURow][MCUCol]) {
+          case CFAColor::RED: // red
+            line_buf = lineBufR[row_count >> 1];
+            break;
 
-      case CFAColor::BLUE: // blue
-        line_buf = lineBufB[row_count >> 1];
-        break;
+          case CFAColor::GREEN: // green
+            line_buf = lineBufG[row_count];
+            break;
 
-      default:
-        __builtin_unreachable();
+          case CFAColor::BLUE: // blue
+            line_buf = lineBufB[row_count >> 1];
+            break;
+
+          default:
+            __builtin_unreachable();
+          }
+
+          out(strip.offsetY(cur_line) + row_count,
+              strip.offsetX() + pixel_count) = line_buf[idx(pixel_count)];
+        }
       }
-
-      out(strip.offsetY(cur_line) + row_count, strip.offsetX() + pixel_count) =
-          line_buf[idx(pixel_count)];
     }
   }
 }
@@ -817,7 +827,8 @@ FujiDecompressor::FujiHeader::FujiHeader(ByteStream& bs)
       raw_bits(bs.getByte()), raw_height(bs.getU16()),
       raw_rounded_width(bs.getU16()), raw_width(bs.getU16()),
       block_size(bs.getU16()), blocks_in_row(bs.getByte()),
-      total_lines(bs.getU16()) {}
+      total_lines(bs.getU16()),
+      MCU(raw_type == 16 ? iPoint2D(6, 6) : iPoint2D(2, 2)) {}
 
 FujiDecompressor::FujiHeader::operator bool() const {
   // general validation
