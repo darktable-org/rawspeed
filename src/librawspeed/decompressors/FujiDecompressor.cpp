@@ -747,6 +747,7 @@ void FujiDecompressor::fuji_decode_strip(
 
   const std::array<i_pair, 6> mtable = {
       {{R0, R3}, {R1, R4}, {G0, G6}, {G1, G7}, {B0, B3}, {B1, B4}}};
+  const std::array<int, 3> ctable = {R1, G1, B1};
   const std::array<i_pair, 3> ztable = {{{R2, 3}, {G2, 6}, {B2, 3}}};
 
   for (int cur_line = 0; cur_line < strip.height(); cur_line++) {
@@ -767,11 +768,17 @@ void FujiDecompressor::fuji_decode_strip(
       memcpy(info_block->linebuf[i.a], info_block->linebuf[i.b], line_size);
     }
 
-    for (auto i : ztable) {
+    std::array<std::array<uint16_t, 2>, 3> tmp;
+    for (int c = 0; c != 3; ++c) {
+      tmp[c][0] = info_block->linebuf[ctable[c]][1];
+      tmp[c][1] = info_block->linebuf[ctable[c]][common_info.line_width];
+    }
+
+    for (int c = 0; c != 3; ++c) {
+      auto i = ztable[c];
       memset(info_block->linebuf[i.a], 0, i.b * line_size);
-      info_block->linebuf[i.a][0] = info_block->linebuf[i.a - 1][1];
-      info_block->linebuf[i.a][common_info.line_width + 1] =
-          info_block->linebuf[i.a - 1][common_info.line_width];
+      info_block->linebuf[i.a][0] = tmp[c][0];
+      info_block->linebuf[i.a][common_info.line_width + 1] = tmp[c][1];
     }
   }
 }
