@@ -756,15 +756,15 @@ void FujiDecompressor::fuji_decode_strip(
       fuji_bayer_decode_block(info_block, cur_line);
     }
 
-    // copy data from line buffers and advance
-    for (auto i : mtable) {
-      memcpy(info_block->linebuf[i.a], info_block->linebuf[i.b], line_size);
-    }
-
     if (header.raw_type == 16) {
       copy_line_to_xtrans(info_block, strip, cur_line);
     } else {
       copy_line_to_bayer(info_block, strip, cur_line);
+    }
+
+    // copy data from line buffers and advance
+    for (auto i : mtable) {
+      memcpy(info_block->linebuf[i.a], info_block->linebuf[i.b], line_size);
     }
 
     for (auto i : ztable) {
