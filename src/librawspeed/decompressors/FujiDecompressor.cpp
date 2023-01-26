@@ -221,8 +221,8 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
   const Array2DRef<const CFAColor> CFA(CFAData.data(), MCU<Tag>.x, MCU<Tag>.y);
 
   iPoint2D MCUIdx;
-  const iPoint2D NumMCUs = strip.numMCUs();
   assert(MCU<Tag> == strip.h.MCU);
+  const iPoint2D NumMCUs = strip.numMCUs(MCU<Tag>);
   for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
     for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
       const auto out =

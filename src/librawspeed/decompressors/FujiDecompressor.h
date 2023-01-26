@@ -101,10 +101,10 @@ public:
     }
 
     // how many horizontal pixels does this block encode?
-    [[nodiscard]] iPoint2D numMCUs() const {
-      assert(width() % h.MCU.x == 0);
-      assert(lineHeight() % h.MCU.y == 0);
-      return {width() / h.MCU.x, lineHeight() / h.MCU.y};
+    [[nodiscard]] iPoint2D numMCUs(iPoint2D MCU) const {
+      assert(width() % MCU.x == 0);
+      assert(lineHeight() % MCU.y == 0);
+      return {width() / MCU.x, lineHeight() / MCU.y};
     }
 
     // where vertically does this block start?
