@@ -66,6 +66,9 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
     if (!p)
       ThrowRDE("Invalid X-Trans CFA");
+    if (p != iPoint2D(0, 0))
+      ThrowRDE("Unexpected X-Trans phase: {%i,%i}. Please file a bug!", p->x,
+               p->y);
   } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
     std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
     if (!p)
