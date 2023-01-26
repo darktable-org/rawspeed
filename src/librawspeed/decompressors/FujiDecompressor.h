@@ -186,8 +186,6 @@ private:
 
   ByteStream input;
 
-  std::array<std::array<CFAColor, 6>, 6> CFA;
-
   std::vector<FujiStrip> strips;
 
   void fuji_decode_strip(fuji_compressed_block* info_block,

@@ -91,21 +91,6 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
   } else
     ThrowRDE("Unexpected CFA size");
 
-  for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < 6; j++) {
-      const CFAColor c = mRaw->cfa.getColorAt(j, i);
-      switch (c) {
-      case CFAColor::RED:
-      case CFAColor::GREEN:
-      case CFAColor::BLUE:
-        CFA[i][j] = c;
-        break;
-      default:
-        ThrowRDE("Got unexpected color %u", static_cast<unsigned>(c));
-      }
-    }
-  }
-
   fuji_compressed_load_raw();
 }
 
@@ -226,6 +211,15 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
     lineBufG[i] = info->linebuf[G2 + i] + 1;
   }
 
+  std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData;
+  if constexpr (std::is_same_v<XTransTag, Tag>)
+    CFAData = getAsCFAColors(XTransPhase(0, 0));
+  else if constexpr (std::is_same_v<BayerTag, Tag>)
+    CFAData = getAsCFAColors(BayerPhase::RGGB);
+  else
+    __builtin_unreachable();
+  const Array2DRef<const CFAColor> CFA(CFAData.data(), MCU<Tag>.x, MCU<Tag>.y);
+
   iPoint2D MCUIdx;
   const iPoint2D NumMCUs = strip.numMCUs();
   assert(MCU<Tag> == strip.h.MCU);
@@ -242,7 +236,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
 
           const uint16_t* line_buf = nullptr;
 
-          switch (CFA[MCURow][MCUCol]) {
+          switch (CFA(MCURow, MCUCol)) {
           case CFAColor::RED: // red
             line_buf = lineBufR[row_count >> 1];
             break;
