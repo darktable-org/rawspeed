@@ -223,8 +223,8 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
   iPoint2D MCUIdx;
   const iPoint2D NumMCUs = strip.numMCUs();
   assert(MCU<Tag> == strip.h.MCU);
-  for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
-    for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
+  for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
+    for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
       const auto out =
           CroppedArray2DRef(img, strip.offsetX() + MCU<Tag>.x * MCUIdx.x,
                             strip.offsetY(cur_line) + MCU<Tag>.y * MCUIdx.y,
