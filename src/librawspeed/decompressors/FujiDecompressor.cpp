@@ -47,11 +47,11 @@ namespace {
 struct BayerTag;
 struct XTransTag;
 
-template <typename T> static constexpr iPoint2D MCU;
+template <typename T> constexpr iPoint2D MCU;
 
-template <> static constexpr iPoint2D MCU<BayerTag> = {2, 2};
+template <> constexpr iPoint2D MCU<BayerTag> = {2, 2};
 
-template <> static constexpr iPoint2D MCU<XTransTag> = {6, 6};
+template <> constexpr iPoint2D MCU<XTransTag> = {6, 6};
 
 } // namespace
 
@@ -87,7 +87,8 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     if (!p)
       ThrowRDE("Invalid Bayer CFA");
     if (p != BayerPhase::RGGB)
-      ThrowRDE("Unexpected Bayer phase: %i. Please file a bug!", *p);
+      ThrowRDE("Unexpected Bayer phase: %i. Please file a bug!",
+               static_cast<int>(*p));
   } else
     ThrowRDE("Unexpected CFA size");
 
