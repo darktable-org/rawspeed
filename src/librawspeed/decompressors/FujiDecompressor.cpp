@@ -25,8 +25,10 @@
 #include "decompressors/FujiDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
+#include "common/BayerPhase.h"            // for BayerPhase
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImageData, RawImage
+#include "common/XTransPhase.h"           // for XTransPhase
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
@@ -35,7 +37,8 @@
 #include <cstdint>                        // for uint16_t, uint32_t, int8_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
-#include <string>                         // for string
+#include <optional>
+#include <string> // for string
 
 namespace rawspeed {
 
@@ -58,6 +61,17 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
              "samples on <https://raw.pixls.us/>, thanks!");
   }
+
+  if (mRaw->cfa.getSize() == iPoint2D(6, 6)) {
+    std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
+    if (!p)
+      ThrowRDE("Invalid X-Trans CFA");
+  } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
+    std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+    if (!p)
+      ThrowRDE("Invalid Bayer CFA");
+  } else
+    ThrowRDE("Unexpected CFA size");
 
   for (int i = 0; i < 6; i++) {
     for (int j = 0; j < 6; j++) {
