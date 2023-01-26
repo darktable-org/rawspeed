@@ -25,8 +25,10 @@
 #include "decompressors/FujiDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
+#include "common/BayerPhase.h"            // for BayerPhase
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImageData, RawImage
+#include "common/XTransPhase.h"           // for XTransPhase
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
@@ -35,9 +37,23 @@
 #include <cstdint>                        // for uint16_t, uint32_t, int8_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
-#include <string>                         // for string
+#include <optional>
+#include <string> // for string
 
 namespace rawspeed {
+
+namespace {
+
+struct BayerTag;
+struct XTransTag;
+
+template <typename T> static constexpr iPoint2D MCU;
+
+template <> static constexpr iPoint2D MCU<BayerTag> = {2, 2};
+
+template <> static constexpr iPoint2D MCU<XTransTag> = {6, 6};
+
+} // namespace
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     : mRaw(img), input(std::move(input_)) {
@@ -59,20 +75,21 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
              "samples on <https://raw.pixls.us/>, thanks!");
   }
 
-  for (int i = 0; i < 6; i++) {
-    for (int j = 0; j < 6; j++) {
-      const CFAColor c = mRaw->cfa.getColorAt(j, i);
-      switch (c) {
-      case CFAColor::RED:
-      case CFAColor::GREEN:
-      case CFAColor::BLUE:
-        CFA[i][j] = c;
-        break;
-      default:
-        ThrowRDE("Got unexpected color %u", static_cast<unsigned>(c));
-      }
-    }
-  }
+  if (mRaw->cfa.getSize() == iPoint2D(6, 6)) {
+    std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
+    if (!p)
+      ThrowRDE("Invalid X-Trans CFA");
+    if (p != iPoint2D(0, 0))
+      ThrowRDE("Unexpected X-Trans phase: {%i,%i}. Please file a bug!", p->x,
+               p->y);
+  } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
+    std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+    if (!p)
+      ThrowRDE("Invalid Bayer CFA");
+    if (p != BayerPhase::RGGB)
+      ThrowRDE("Unexpected Bayer phase: %i. Please file a bug!", *p);
+  } else
+    ThrowRDE("Unexpected CFA size");
 
   fuji_compressed_load_raw();
 }
@@ -174,11 +191,12 @@ void FujiDecompressor::fuji_compressed_block::reset(
   }
 }
 
-template <typename T>
+
+template <typename Tag, typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
                                  T&& idx) const {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
   std::array<uint16_t*, 3> lineBufB;
   std::array<uint16_t*, 6> lineBufG;
@@ -193,29 +211,51 @@ void FujiDecompressor::copy_line(fuji_compressed_block* info,
     lineBufG[i] = info->linebuf[G2 + i] + 1;
   }
 
-  for (int row_count = 0; row_count < FujiStrip::lineHeight(); row_count++) {
-    for (int pixel_count = 0; pixel_count < strip.width(); pixel_count++) {
-      const uint16_t* line_buf = nullptr;
+  std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData;
+  if constexpr (std::is_same_v<XTransTag, Tag>)
+    CFAData = getAsCFAColors(XTransPhase(0, 0));
+  else if constexpr (std::is_same_v<BayerTag, Tag>)
+    CFAData = getAsCFAColors(BayerPhase::RGGB);
+  else
+    __builtin_unreachable();
+  const Array2DRef<const CFAColor> CFA(CFAData.data(), MCU<Tag>.x, MCU<Tag>.y);
 
-      switch (CFA[row_count][pixel_count % 6]) {
-      case CFAColor::RED: // red
-        line_buf = lineBufR[row_count >> 1];
-        break;
+  iPoint2D MCUIdx;
+  const iPoint2D NumMCUs = strip.numMCUs();
+  assert(MCU<Tag> == strip.h.MCU);
+  for (MCUIdx.y = 0; MCUIdx.y != NumMCUs.y; ++MCUIdx.y) {
+    for (MCUIdx.x = 0; MCUIdx.x != NumMCUs.x; ++MCUIdx.x) {
+      const auto out =
+          CroppedArray2DRef(img, strip.offsetX() + MCU<Tag>.x * MCUIdx.x,
+                            strip.offsetY(cur_line) + MCU<Tag>.y * MCUIdx.y,
+                            MCU<Tag>.x, MCU<Tag>.y);
+      for (int MCURow = 0; MCURow != MCU<Tag>.y; ++MCURow) {
+        for (int MCUCol = 0; MCUCol != MCU<Tag>.x; ++MCUCol) {
+          int row_count = MCU<Tag>.y * MCUIdx.y + MCURow;
+          int pixel_count = MCU<Tag>.x * MCUIdx.x + MCUCol;
 
-      case CFAColor::GREEN: // green
-        line_buf = lineBufG[row_count];
-        break;
+          const uint16_t* line_buf = nullptr;
 
-      case CFAColor::BLUE: // blue
-        line_buf = lineBufB[row_count >> 1];
-        break;
+          switch (CFA(MCURow, MCUCol)) {
+          case CFAColor::RED: // red
+            line_buf = lineBufR[row_count >> 1];
+            break;
 
-      default:
-        __builtin_unreachable();
+          case CFAColor::GREEN: // green
+            line_buf = lineBufG[row_count];
+            break;
+
+          case CFAColor::BLUE: // blue
+            line_buf = lineBufB[row_count >> 1];
+            break;
+
+          default:
+            __builtin_unreachable();
+          }
+
+          out(MCURow, MCUCol) = line_buf[idx(pixel_count)];
+        }
       }
-
-      out(strip.offsetY(cur_line) + row_count, strip.offsetX() + pixel_count) =
-          line_buf[idx(pixel_count)];
     }
   }
 }
@@ -228,7 +268,7 @@ void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block* info,
            ((pixel_count % 3) >> 1);
   };
 
-  copy_line(info, strip, cur_line, index);
+  copy_line<XTransTag>(info, strip, cur_line, index);
 }
 
 void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
@@ -236,7 +276,7 @@ void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block* info,
                                           int cur_line) const {
   auto index = [](int pixel_count) { return pixel_count >> 1; };
 
-  copy_line(info, strip, cur_line, index);
+  copy_line<BayerTag>(info, strip, cur_line, index);
 }
 
 inline void FujiDecompressor::fuji_zerobits(BitPumpMSB& pump, int* count) {
@@ -798,7 +838,9 @@ FujiDecompressor::FujiHeader::FujiHeader(ByteStream& bs)
       raw_bits(bs.getByte()), raw_height(bs.getU16()),
       raw_rounded_width(bs.getU16()), raw_width(bs.getU16()),
       block_size(bs.getU16()), blocks_in_row(bs.getByte()),
-      total_lines(bs.getU16()) {}
+      total_lines(bs.getU16()),
+      MCU(raw_type == 16 ? ::rawspeed::MCU<XTransTag>
+                         : ::rawspeed::MCU<BayerTag>) {}
 
 FujiDecompressor::FujiHeader::operator bool() const {
   // general validation
