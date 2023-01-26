@@ -70,6 +70,8 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
     std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
     if (!p)
       ThrowRDE("Invalid Bayer CFA");
+    if (p != BayerPhase::RGGB)
+      ThrowRDE("Unexpected Bayer phase: %i. Please file a bug!", *p);
   } else
     ThrowRDE("Unexpected CFA size");
 
