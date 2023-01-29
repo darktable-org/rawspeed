@@ -168,10 +168,10 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
 }
 
 void FujiDecompressor::fuji_compressed_block::reset(
-    const fuji_compressed_params* params) {
+    const fuji_compressed_params& params) {
   const bool reInit = !linealloc.empty();
 
-  linealloc.resize(ltotal * (params->line_width + 2), 0);
+  linealloc.resize(ltotal * (params.line_width + 2), 0);
 
   if (reInit)
     std::fill(linealloc.begin(), linealloc.end(), 0);
@@ -179,14 +179,14 @@ void FujiDecompressor::fuji_compressed_block::reset(
   linebuf[R0] = &linealloc[0];
 
   for (int i = R1; i <= B4; i++) {
-    linebuf[i] = linebuf[i - 1] + params->line_width + 2;
+    linebuf[i] = linebuf[i - 1] + params.line_width + 2;
   }
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
-      grad_even[j][i].value1 = params->maxDiff;
+      grad_even[j][i].value1 = params.maxDiff;
       grad_even[j][i].value2 = 1;
-      grad_odd[j][i].value1 = params->maxDiff;
+      grad_odd[j][i].value1 = params.maxDiff;
       grad_odd[j][i].value2 = 1;
     }
   }
@@ -846,7 +846,7 @@ void FujiDecompressor::decompressThread() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
-    block_info.reset(&common_info);
+    block_info.reset(common_info);
     try {
       block_info.pump = BitPumpMSB(strip->bs);
       fuji_decode_strip(&block_info, *strip);

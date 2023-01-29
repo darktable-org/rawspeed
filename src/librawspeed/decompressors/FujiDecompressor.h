@@ -172,7 +172,7 @@ private:
   struct fuji_compressed_block {
     fuji_compressed_block() = default;
 
-    void reset(const fuji_compressed_params* params);
+    void reset(const fuji_compressed_params& params);
 
     BitPumpMSB pump;
 
