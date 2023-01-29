@@ -661,30 +661,23 @@ void FujiDecompressor::fuji_bayer_decode_block(
   struct ColorPos {
     int even = 0;
     int odd = 1;
-
-    void reset() {
-      even = 0;
-      odd = 1;
-    }
   };
-
-  ColorPos r;
-  ColorPos g;
-  ColorPos b;
 
   const int line_width = common_info.line_width;
 
-  auto pass = [this, info, line_width, &g](xt_lines c0, xt_lines c1, int grad,
-                                           ColorPos& c0_pos, ColorPos& c1_pos) {
-    while (g.even < line_width || g.odd < line_width) {
-      if (g.even < line_width) {
+  auto pass = [this, info, line_width](xt_lines c0, xt_lines c1, int grad) {
+    ColorPos c0_pos;
+    ColorPos c1_pos;
+
+    while (c0_pos.even < line_width || c0_pos.odd < line_width) {
+      if (c0_pos.even < line_width) {
         fuji_decode_sample_even(info, info->linebuf[c0] + 1, &c0_pos.even,
                                 &(info->grad_even[grad]));
         fuji_decode_sample_even(info, info->linebuf[c1] + 1, &c1_pos.even,
                                 &(info->grad_even[grad]));
       }
 
-      if (g.even > 8) {
+      if (c0_pos.even > 8) {
         fuji_decode_sample_odd(info, info->linebuf[c0] + 1, &c0_pos.odd,
                                &(info->grad_odd[grad]));
         fuji_decode_sample_odd(info, info->linebuf[c1] + 1, &c1_pos.odd,
@@ -694,14 +687,14 @@ void FujiDecompressor::fuji_bayer_decode_block(
   };
 
   auto pass_RG = [&](xt_lines c0, xt_lines c1, int grad) {
-    pass(c0, c1, grad, r, g);
+    pass(c0, c1, grad);
 
     fuji_extend_red(info->linebuf, line_width);
     fuji_extend_green(info->linebuf, line_width);
   };
 
   auto pass_GB = [&](xt_lines c0, xt_lines c1, int grad) {
-    pass(c0, c1, grad, g, b);
+    pass(c0, c1, grad);
 
     fuji_extend_green(info->linebuf, line_width);
     fuji_extend_blue(info->linebuf, line_width);
@@ -709,33 +702,13 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
   pass_RG(R2, G2, 0);
 
-  r.reset();
-  g.reset();
-  b.reset();
-
   pass_GB(G3, B2, 1);
-
-  r.reset();
-  g.reset();
-  b.reset();
 
   pass_RG(R3, G4, 2);
 
-  r.reset();
-  g.reset();
-  b.reset();
-
   pass_GB(G5, B3, 0);
 
-  r.reset();
-  g.reset();
-  b.reset();
-
   pass_RG(R4, G6, 1);
-
-  r.reset();
-  g.reset();
-  b.reset();
 
   pass_GB(G7, B4, 2);
 }
