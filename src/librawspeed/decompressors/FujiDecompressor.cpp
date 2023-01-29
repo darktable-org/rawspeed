@@ -325,7 +325,7 @@ void FujiDecompressor::fuji_decode_sample(
   int code = 0;
   uint16_t* line_buf_cur = line_buf + pos;
 
-  int grad = func_0(line_buf_cur, &interp_val);
+  int grad = func_0(line_buf_cur, interp_val);
 
   int gradient = std::abs(grad);
 
@@ -384,7 +384,7 @@ void FujiDecompressor::fuji_decode_sample_even(
     std::array<int_pair, 41>& grads) const {
   const auto& ci = common_info;
   fuji_decode_sample(
-      [&ci](const uint16_t* line_buf_cur, int* interp_val) {
+      [&ci](const uint16_t* line_buf_cur, int& interp_val) {
         int Rb = line_buf_cur[-2 - ci.line_width];
         int Rc = line_buf_cur[-3 - ci.line_width];
         int Rd = line_buf_cur[-1 - ci.line_width];
@@ -400,11 +400,11 @@ void FujiDecompressor::fuji_decode_sample_even(
         diffRdRb = std::abs(Rd - Rb);
 
         if (diffRcRb > diffRfRb && diffRcRb > diffRdRb) {
-          *interp_val = Rf + Rd + 2 * Rb;
+          interp_val = Rf + Rd + 2 * Rb;
         } else if (diffRdRb > diffRcRb && diffRdRb > diffRfRb) {
-          *interp_val = Rf + Rc + 2 * Rb;
+          interp_val = Rf + Rc + 2 * Rb;
         } else {
-          *interp_val = Rd + Rc + 2 * Rb;
+          interp_val = Rd + Rc + 2 * Rb;
         }
 
         return grad;
@@ -426,7 +426,7 @@ void FujiDecompressor::fuji_decode_sample_odd(
     std::array<int_pair, 41>& grads) const {
   const auto& ci = common_info;
   fuji_decode_sample(
-      [&ci](const uint16_t* line_buf_cur, int* interp_val) {
+      [&ci](const uint16_t* line_buf_cur, int& interp_val) {
         int Ra = line_buf_cur[-1];
         int Rb = line_buf_cur[-2 - ci.line_width];
         int Rc = line_buf_cur[-3 - ci.line_width];
@@ -436,9 +436,9 @@ void FujiDecompressor::fuji_decode_sample_odd(
         int grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
 
         if ((Rb > Rc && Rb > Rd) || (Rb < Rc && Rb < Rd)) {
-          *interp_val = (Rg + Ra + 2 * Rb) >> 2;
+          interp_val = (Rg + Ra + 2 * Rb) >> 2;
         } else {
-          *interp_val = (Ra + Rg) >> 1;
+          interp_val = (Ra + Rg) >> 1;
         }
 
         return grad;
