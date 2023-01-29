@@ -671,18 +671,18 @@ void FujiDecompressor::xtrans_decode_block(
 
 void FujiDecompressor::fuji_bayer_decode_block(
     fuji_compressed_block* info, [[maybe_unused]] int cur_line) const {
-  struct ColorPos {
-    int even = 0;
-    int odd = 1;
-  };
-
   const int line_width = common_info.line_width;
 
   auto pass = [this, info, line_width](xt_lines c0, xt_lines c1, int grad) {
+    struct ColorPos {
+      int even = 0;
+      int odd = 1;
+    };
+
     ColorPos c0_pos;
     ColorPos c1_pos;
 
-    while (c0_pos.even < line_width || c0_pos.odd < line_width) {
+    for (int i = 0; i != line_width + 8; i += 2) {
       if (c0_pos.even < line_width) {
         fuji_decode_sample_even(info, info->linebuf[c0] + 1, c0_pos.even,
                                 &(info->grad_even[grad]));
