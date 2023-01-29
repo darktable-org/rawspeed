@@ -319,14 +319,11 @@ template <typename T1, typename T2>
 void FujiDecompressor::fuji_decode_sample(
     T1&& func_0, T2&& func_1, fuji_compressed_block& info, uint16_t* line_buf,
     int pos, std::array<int_pair, 41>& grads) const {
-  int interp_val = 0;
-
   int sample = 0;
   int code = 0;
   uint16_t* line_buf_cur = line_buf + pos;
 
-  int grad = func_0(line_buf_cur, interp_val);
-
+  auto [grad, interp_val] = func_0(line_buf_cur);
   int gradient = std::abs(grad);
 
   sample = fuji_zerobits(info.pump);
@@ -383,12 +380,9 @@ void FujiDecompressor::fuji_decode_sample_even(
     fuji_compressed_block& info, uint16_t* line_buf, int pos,
     std::array<int_pair, 41>& grads) const {
   fuji_decode_sample(
-      [this](const uint16_t* line_buf_cur, int& interp_val) {
-        const auto& ci = common_info;
-        auto [grad, interp_val_2] = fuji_decode_interpolation_even_inner(
-            ci.line_width, line_buf_cur, /*pos=*/0);
-        interp_val = interp_val_2;
-        return grad;
+      [this](const uint16_t* line_buf_cur) {
+        return fuji_decode_interpolation_even_inner(common_info.line_width,
+                                                    line_buf_cur, /*pos=*/0);
       },
       [](int grad, int interp_val, int code) {
         if (grad < 0) {
@@ -406,12 +400,9 @@ void FujiDecompressor::fuji_decode_sample_odd(
     fuji_compressed_block& info, uint16_t* line_buf, int pos,
     std::array<int_pair, 41>& grads) const {
   fuji_decode_sample(
-      [this](const uint16_t* line_buf_cur, int& interp_val) {
-        const auto& ci = common_info;
-        auto [grad, interp_val_2] = fuji_decode_interpolation_odd_inner(
-            ci.line_width, line_buf_cur, /*pos=*/0);
-        interp_val = interp_val_2;
-        return grad;
+      [this](const uint16_t* line_buf_cur) {
+        return fuji_decode_interpolation_odd_inner(common_info.line_width,
+                                                   line_buf_cur, /*pos=*/0);
       },
       [](int grad, int interp_val, int code) {
         if (grad < 0) {
