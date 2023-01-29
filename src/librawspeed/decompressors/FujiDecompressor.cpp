@@ -326,9 +326,10 @@ void FujiDecompressor::fuji_decode_sample(
   uint16_t* line_buf_cur = line_buf + pos;
 
   int grad;
-  int gradient;
 
-  func_0(line_buf_cur, &interp_val, &grad, &gradient);
+  func_0(line_buf_cur, &interp_val, &grad);
+
+  int gradient = std::abs(grad);
 
   sample = fuji_zerobits(info.pump);
 
@@ -385,8 +386,7 @@ void FujiDecompressor::fuji_decode_sample_even(
     std::array<int_pair, 41>& grads) const {
   const auto& ci = common_info;
   fuji_decode_sample(
-      [&ci](const uint16_t* line_buf_cur, int* interp_val, int* grad,
-            int* gradient) {
+      [&ci](const uint16_t* line_buf_cur, int* interp_val, int* grad) {
         int Rb = line_buf_cur[-2 - ci.line_width];
         int Rc = line_buf_cur[-3 - ci.line_width];
         int Rd = line_buf_cur[-1 - ci.line_width];
@@ -397,7 +397,6 @@ void FujiDecompressor::fuji_decode_sample_even(
         int diffRdRb;
 
         *grad = fuji_quant_gradient(Rb - Rf, Rc - Rb);
-        *gradient = std::abs(*grad);
         diffRcRb = std::abs(Rc - Rb);
         diffRfRb = std::abs(Rf - Rb);
         diffRdRb = std::abs(Rd - Rb);
@@ -427,8 +426,7 @@ void FujiDecompressor::fuji_decode_sample_odd(
     std::array<int_pair, 41>& grads) const {
   const auto& ci = common_info;
   fuji_decode_sample(
-      [&ci](const uint16_t* line_buf_cur, int* interp_val, int* grad,
-            int* gradient) {
+      [&ci](const uint16_t* line_buf_cur, int* interp_val, int* grad) {
         int Ra = line_buf_cur[-1];
         int Rb = line_buf_cur[-2 - ci.line_width];
         int Rc = line_buf_cur[-3 - ci.line_width];
@@ -436,7 +434,6 @@ void FujiDecompressor::fuji_decode_sample_odd(
         int Rg = line_buf_cur[1];
 
         *grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
-        *gradient = std::abs(*grad);
 
         if ((Rb > Rc && Rb > Rd) || (Rb < Rc && Rb < Rd)) {
           *interp_val = (Rg + Ra + 2 * Rb) >> 2;
