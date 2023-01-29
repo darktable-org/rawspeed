@@ -215,6 +215,9 @@ private:
   std::pair<int, int>
   fuji_decode_interpolation_even_inner(int line_width, const uint16_t* line_buf,
                                        int pos) const;
+  std::pair<int, int>
+  fuji_decode_interpolation_odd_inner(int line_width, const uint16_t* line_buf,
+                                      int pos) const;
   void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
                                       int pos) const;
   static void fuji_extend_generic(const std::array<uint16_t*, ltotal>& linebuf,
