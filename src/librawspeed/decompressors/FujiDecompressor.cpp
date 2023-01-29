@@ -709,15 +709,19 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
   pass_RG(R2, G2, 0);
 
+  r.reset();
   g.reset();
+  b.reset();
 
   pass_GB(G3, B2, 1);
 
   r.reset();
   g.reset();
+  b.reset();
 
   pass_RG(R3, G4, 2);
 
+  r.reset();
   g.reset();
   b.reset();
 
@@ -725,9 +729,11 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
   r.reset();
   g.reset();
+  b.reset();
 
   pass_RG(R4, G6, 1);
 
+  r.reset();
   g.reset();
   b.reset();
 
