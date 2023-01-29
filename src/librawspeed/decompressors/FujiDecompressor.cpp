@@ -192,7 +192,6 @@ void FujiDecompressor::fuji_compressed_block::reset(
   }
 }
 
-
 template <typename Tag, typename T>
 void FujiDecompressor::copy_line(fuji_compressed_block* info,
                                  const FujiStrip& strip, int cur_line,
@@ -686,31 +685,65 @@ void FujiDecompressor::fuji_bayer_decode_block(
     }
   };
 
-  auto pass_RG = [&](xt_lines c0, xt_lines c1, int grad) {
-    pass(c0, c1, grad);
+  using Tag = BayerTag;
+  const std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData =
+      getAsCFAColors(BayerPhase::RGGB);
+  const Array2DRef<const CFAColor> CFA(CFAData.data(), MCU<Tag>.x, MCU<Tag>.y);
 
-    fuji_extend_red(info->linebuf, line_width);
-    fuji_extend_green(info->linebuf, line_width);
+  std::array<int, 3> PerColorCounter;
+  std::fill(PerColorCounter.begin(), PerColorCounter.end(), 0);
+  auto ColorCounter = [&PerColorCounter](CFAColor c) -> int& {
+    switch (c) {
+    case CFAColor::RED:
+    case CFAColor::GREEN:
+    case CFAColor::BLUE:
+      return PerColorCounter[static_cast<uint8_t>(c)];
+    default:
+      __builtin_unreachable();
+    }
   };
 
-  auto pass_GB = [&](xt_lines c0, xt_lines c1, int grad) {
-    pass(c0, c1, grad);
-
-    fuji_extend_green(info->linebuf, line_width);
-    fuji_extend_blue(info->linebuf, line_width);
+  auto CurLineForColor = [&ColorCounter](CFAColor c) -> xt_lines {
+    xt_lines res;
+    switch (c) {
+    case CFAColor::RED:
+      res = R2;
+      break;
+    case CFAColor::GREEN:
+      res = G2;
+      break;
+    case CFAColor::BLUE:
+      res = B2;
+      break;
+    default:
+      __builtin_unreachable();
+    }
+    int& off = ColorCounter(c);
+    res = static_cast<xt_lines>(res + off);
+    ++off;
+    return res;
   };
 
-  pass_RG(R2, G2, 0);
-
-  pass_GB(G3, B2, 1);
-
-  pass_RG(R3, G4, 2);
-
-  pass_GB(G5, B3, 0);
-
-  pass_RG(R4, G6, 1);
-
-  pass_GB(G7, B4, 2);
+  for (int row = 0; row != 6; ++row) {
+    CFAColor c0 = CFA(row % CFA.height, /*col=*/0);
+    CFAColor c1 = CFA(row % CFA.height, /*col=*/1);
+    pass(CurLineForColor(c0), CurLineForColor(c1), row % 3);
+    for (CFAColor c : {c0, c1}) {
+      switch (c) {
+      case CFAColor::RED:
+        fuji_extend_red(info->linebuf, line_width);
+        break;
+      case CFAColor::GREEN:
+        fuji_extend_green(info->linebuf, line_width);
+        break;
+      case CFAColor::BLUE:
+        fuji_extend_blue(info->linebuf, line_width);
+        break;
+      default:
+        __builtin_unreachable();
+      }
+    }
+  }
 }
 
 void FujiDecompressor::fuji_decode_strip(
