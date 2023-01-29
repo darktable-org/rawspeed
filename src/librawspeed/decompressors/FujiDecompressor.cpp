@@ -674,32 +674,28 @@ void FujiDecompressor::fuji_bayer_decode_block(
     fuji_compressed_block& info, [[maybe_unused]] int cur_line) const {
   const int line_width = common_info.line_width;
 
-  auto pass = [this, &info, line_width](xt_lines c0, xt_lines c1, int grad) {
+  auto pass = [this, &info, line_width](std::array<xt_lines, 2> c, int grad) {
     struct ColorPos {
       int even = 0;
       int odd = 1;
     };
 
-    ColorPos c0_pos;
-    ColorPos c1_pos;
-
+    std::array<ColorPos, 2> pos;
     for (int i = 0; i != line_width + 8; i += 2) {
-      if (c0_pos.even < line_width) {
-        fuji_decode_sample_even(info, info.linebuf[c0] + 1, c0_pos.even,
-                                info.grad_even[grad]);
-        c0_pos.even += 2;
-        fuji_decode_sample_even(info, info.linebuf[c1] + 1, c1_pos.even,
-                                info.grad_even[grad]);
-        c1_pos.even += 2;
+      if (pos[0].even < line_width) {
+        for (int comp = 0; comp != 2; comp++) {
+          fuji_decode_sample_even(info, info.linebuf[c[comp]] + 1,
+                                  pos[comp].even, info.grad_even[grad]);
+          pos[comp].even += 2;
+        }
       }
 
-      if (c0_pos.even > 8) {
-        fuji_decode_sample_odd(info, info.linebuf[c0] + 1, c0_pos.odd,
-                               info.grad_odd[grad]);
-        c0_pos.odd += 2;
-        fuji_decode_sample_odd(info, info.linebuf[c1] + 1, c1_pos.odd,
-                               info.grad_odd[grad]);
-        c1_pos.odd += 2;
+      if (pos[0].even > 8) {
+        for (int comp = 0; comp != 2; comp++) {
+          fuji_decode_sample_odd(info, info.linebuf[c[comp]] + 1, pos[comp].odd,
+                                 info.grad_odd[grad]);
+          pos[comp].odd += 2;
+        }
       }
     }
   };
@@ -746,7 +742,7 @@ void FujiDecompressor::fuji_bayer_decode_block(
   for (int row = 0; row != 6; ++row) {
     CFAColor c0 = CFA(row % CFA.height, /*col=*/0);
     CFAColor c1 = CFA(row % CFA.height, /*col=*/1);
-    pass(CurLineForColor(c0), CurLineForColor(c1), row % 3);
+    pass({CurLineForColor(c0), CurLineForColor(c1)}, row % 3);
     for (CFAColor c : {c0, c1}) {
       switch (c) {
       case CFAColor::RED:
