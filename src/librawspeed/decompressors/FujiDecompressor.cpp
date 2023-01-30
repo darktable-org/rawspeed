@@ -509,7 +509,9 @@ void FujiDecompressor::xtrans_decode_block(
     int odd = 1;
   };
 
-  auto pass = [&](auto&& even_func, xt_lines c0, xt_lines c1, int grad) {
+  auto pass = [&](auto&& even_func, xt_lines c0, xt_lines c1, int row) {
+    int grad = row % 3;
+
     ColorPos c0_pos;
     ColorPos c1_pos;
 
@@ -597,7 +599,7 @@ void FujiDecompressor::xtrans_decode_block(
           c1_pos.even += 2;
         }
       },
-      G5, B3, 0);
+      G5, B3, 3);
 
   fuji_extend_green(info.linebuf, line_width);
   fuji_extend_blue(info.linebuf, line_width);
@@ -619,7 +621,7 @@ void FujiDecompressor::xtrans_decode_block(
                                 info.grad_even[grad]);
         c1_pos.even += 2;
       },
-      R4, G6, 1);
+      R4, G6, 4);
 
   fuji_extend_red(info.linebuf, line_width);
   fuji_extend_green(info.linebuf, line_width);
@@ -641,7 +643,7 @@ void FujiDecompressor::xtrans_decode_block(
           c1_pos.even += 2;
         }
       },
-      G7, B4, 2);
+      G7, B4, 5);
 
   fuji_extend_green(info.linebuf, line_width);
   fuji_extend_blue(info.linebuf, line_width);
