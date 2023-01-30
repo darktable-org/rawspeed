@@ -36,8 +36,8 @@ else()
     message(WARNING "Did not find Google Test sources! Fetching from web...")
     ExternalProject_Add(
       googletest
-      URL               https://github.com/google/googletest/archive/release-1.8.1.tar.gz
-      URL_HASH          SHA512=e6283c667558e1fd6e49fa96e52af0e415a3c8037afe1d28b7ff1ec4c2ef8f49beb70a9327b7fc77eb4052a58c4ccad8b5260ec90e4bceeac7a46ff59c4369d7
+      URL               https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz
+      URL_HASH          SHA512=209f1ed70fb6f7c1c9b91994c8be4de374246ec3b145b17c4331c6e849836daa0ec685a98c3dc3458c20aec2131833cd997e80ca14e82dd0fe45b81fbb01ee44
       PREFIX            "${CMAKE_BINARY_DIR}"
       STAMP_DIR         "${CMAKE_BINARY_DIR}/stamp"
       DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
