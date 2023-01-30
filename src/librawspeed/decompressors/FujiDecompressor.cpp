@@ -358,7 +358,13 @@ void FujiDecompressor::fuji_decode_sample(
 
   grads[gradient].value2++;
 
-  interp_val = func_1(grad, interp_val, code);
+  interp_val = func_1(interp_val);
+
+  if (grad < 0) {
+    interp_val -= code;
+  } else {
+    interp_val += code;
+  }
 
   if (interp_val < 0) {
     interp_val += common_info.total_values;
@@ -384,16 +390,8 @@ void FujiDecompressor::fuji_decode_sample_even(
         return fuji_decode_interpolation_even_inner(common_info.line_width,
                                                     line_buf_cur, /*pos=*/0);
       },
-      [](int grad, int interp_val, int code) {
-        if (grad < 0) {
-          interp_val = (interp_val >> 2) - code;
-        } else {
-          interp_val = (interp_val >> 2) + code;
-        }
-
-        return interp_val;
-      },
-      info, line_buf, pos, grads);
+      [](int interp_val) { return interp_val >> 2; }, info, line_buf, pos,
+      grads);
 }
 
 void FujiDecompressor::fuji_decode_sample_odd(
@@ -404,16 +402,7 @@ void FujiDecompressor::fuji_decode_sample_odd(
         return fuji_decode_interpolation_odd_inner(common_info.line_width,
                                                    line_buf_cur, /*pos=*/0);
       },
-      [](int grad, int interp_val, int code) {
-        if (grad < 0) {
-          interp_val -= code;
-        } else {
-          interp_val += code;
-        }
-
-        return interp_val;
-      },
-      info, line_buf, pos, grads);
+      [](int interp_val) { return interp_val; }, info, line_buf, pos, grads);
 }
 
 std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_even_inner(
