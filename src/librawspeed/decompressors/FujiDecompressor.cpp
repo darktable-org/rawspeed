@@ -520,11 +520,11 @@ void FujiDecompressor::xtrans_decode_block(
 
   auto pass = [&](auto&& even_func, xt_lines c0, xt_lines c1, int grad,
                   ColorPos& c0_pos, ColorPos& c1_pos) {
-    while (g.even < line_width || g.odd < line_width) {
-      if (g.even < line_width)
+    for (int i = 0; i != line_width + 8; i += 2) {
+      if (i < line_width)
         even_func(c0, c1, grad, c0_pos, c1_pos);
 
-      if (g.even > 8) {
+      if (i >= 8) {
         fuji_decode_sample_odd(info, info.linebuf[c0] + 1, c0_pos.odd,
                                info.grad_odd[grad]);
         c0_pos.odd += 2;
