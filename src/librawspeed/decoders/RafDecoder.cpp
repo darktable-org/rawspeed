@@ -263,9 +263,20 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
   mRaw->metadata.isoSpeed = iso;
 
+  auto id = mRootIFD->getID();
+
+  // Switch to one of the 16-bit modes if applicable and available
+  int bps = 0;
+  if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE))
+    bps = mRootIFD->getEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
+  if (bps == 16) {
+    std::string bitMode = (isCompressed() ? "16bit-compressed" : "16bit-uncompressed");
+    if (meta->hasCamera(id.make, id.model, bitMode))
+      mRaw->metadata.mode = bitMode;
+  }
+
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
-  auto id = mRootIFD->getID();
   const Camera* cam = meta->getCamera(id.make, id.model, mRaw->metadata.mode);
   if (!cam)
     ThrowRDE("Couldn't find camera");
