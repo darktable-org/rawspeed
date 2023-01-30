@@ -680,7 +680,7 @@ void FujiDecompressor::fuji_bayer_decode_block(
 
     std::array<ColorPos, 2> pos;
     for (int i = 0; i != line_width + 8; i += 2) {
-      if (pos[0].even < line_width) {
+      if (i < line_width) {
         for (int comp = 0; comp != 2; comp++) {
           fuji_decode_sample_even(info, info.linebuf[c[comp]] + 1,
                                   pos[comp].even, info.grad_even[grad]);
@@ -688,7 +688,7 @@ void FujiDecompressor::fuji_bayer_decode_block(
         }
       }
 
-      if (pos[0].even > 8) {
+      if (i >= 8) {
         for (int comp = 0; comp != 2; comp++) {
           fuji_decode_sample_odd(info, info.linebuf[c[comp]] + 1, pos[comp].odd,
                                  info.grad_odd[grad]);
