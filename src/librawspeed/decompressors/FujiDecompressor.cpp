@@ -315,15 +315,15 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   return decBits;
 }
 
-template <typename T1, typename T2>
+template <typename T>
 void FujiDecompressor::fuji_decode_sample(
-    T1&& func_0, T2&& func_1, fuji_compressed_block& info, uint16_t* line_buf,
-    int pos, std::array<int_pair, 41>& grads) const {
+    T&& func, fuji_compressed_block& info, uint16_t* line_buf, int pos,
+    std::array<int_pair, 41>& grads) const {
   int sample = 0;
   int code = 0;
   uint16_t* line_buf_cur = line_buf + pos;
 
-  auto [grad, interp_val] = func_0(line_buf_cur);
+  auto [grad, interp_val] = func(line_buf_cur);
   int gradient = std::abs(grad);
 
   sample = fuji_zerobits(info.pump);
@@ -358,8 +358,6 @@ void FujiDecompressor::fuji_decode_sample(
 
   grads[gradient].value2++;
 
-  interp_val = func_1(interp_val);
-
   if (grad < 0) {
     interp_val -= code;
   } else {
@@ -390,8 +388,7 @@ void FujiDecompressor::fuji_decode_sample_even(
         return fuji_decode_interpolation_even_inner(common_info.line_width,
                                                     line_buf_cur, /*pos=*/0);
       },
-      [](int interp_val) { return interp_val >> 2; }, info, line_buf, pos,
-      grads);
+      info, line_buf, pos, grads);
 }
 
 void FujiDecompressor::fuji_decode_sample_odd(
@@ -402,7 +399,7 @@ void FujiDecompressor::fuji_decode_sample_odd(
         return fuji_decode_interpolation_odd_inner(common_info.line_width,
                                                    line_buf_cur, /*pos=*/0);
       },
-      [](int interp_val) { return interp_val; }, info, line_buf, pos, grads);
+      info, line_buf, pos, grads);
 }
 
 std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_even_inner(
@@ -427,6 +424,7 @@ std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_even_inner(
   } else {
     interp_val = (Rd + Rc + 2 * Rb);
   }
+  interp_val >>= 2;
 
   int grad = fuji_quant_gradient(Rb - Rf, Rc - Rb);
   return {grad, interp_val};
@@ -462,7 +460,7 @@ void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
   auto [grad, interp_val] =
       fuji_decode_interpolation_even_inner(line_width, line_buf, pos);
   uint16_t* line_buf_cur = line_buf + pos;
-  *line_buf_cur = interp_val >> 2;
+  *line_buf_cur = interp_val;
 }
 
 void FujiDecompressor::fuji_extend_generic(

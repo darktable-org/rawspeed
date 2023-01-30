@@ -203,8 +203,8 @@ private:
   static inline int fuji_zerobits(BitPumpMSB& pump);
   static int bitDiff(int value1, int value2);
 
-  template <typename T1, typename T2>
-  void fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block& info,
+  template <typename T>
+  void fuji_decode_sample(T&& func, fuji_compressed_block& info,
                           uint16_t* line_buf, int pos,
                           std::array<int_pair, 41>& grads) const;
   void fuji_decode_sample_even(fuji_compressed_block& info, uint16_t* line_buf,
