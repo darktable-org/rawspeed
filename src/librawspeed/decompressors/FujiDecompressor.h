@@ -40,6 +40,10 @@ class FujiDecompressor final : public AbstractDecompressor {
   void decompressThread() const noexcept;
 
 public:
+  FujiDecompressor(const RawImage& img, ByteStream input);
+
+  void decompress() const;
+
   struct FujiHeader {
     FujiHeader() = default;
 
@@ -59,6 +63,7 @@ public:
     iPoint2D MCU;
   };
 
+private:
   FujiHeader header;
 
   struct FujiStrip {
@@ -118,13 +123,8 @@ public:
     [[nodiscard]] int offsetX() const { return h.block_size * n; }
   };
 
-  FujiDecompressor(const RawImage& img, ByteStream input);
-
   void fuji_compressed_load_raw();
 
-  void decompress() const;
-
-private:
   struct fuji_compressed_params {
     fuji_compressed_params() = default;
 
