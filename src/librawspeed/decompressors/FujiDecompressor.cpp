@@ -530,12 +530,11 @@ void FujiDecompressor::xtrans_decode_block(
       }
 
       if (i >= 8) {
-        fuji_decode_sample_odd(info, info.linebuf[c[0]] + 1, pos[0].odd,
-                               info.grad_odd[grad]);
-        pos[0].odd += 2;
-        fuji_decode_sample_odd(info, info.linebuf[c[1]] + 1, pos[1].odd,
-                               info.grad_odd[grad]);
-        pos[1].odd += 2;
+        for (int comp = 0; comp != 2; comp++) {
+          fuji_decode_sample_odd(info, info.linebuf[c[comp]] + 1, pos[comp].odd,
+                                 info.grad_odd[grad]);
+          pos[comp].odd += 2;
+        }
       }
     }
   };
