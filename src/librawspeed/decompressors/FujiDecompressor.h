@@ -40,6 +40,10 @@ class FujiDecompressor final : public AbstractDecompressor {
   void decompressThread() const noexcept;
 
 public:
+  FujiDecompressor(const RawImage& img, ByteStream input);
+
+  void decompress() const;
+
   struct FujiHeader {
     FujiHeader() = default;
 
@@ -59,6 +63,7 @@ public:
     iPoint2D MCU;
   };
 
+private:
   FujiHeader header;
 
   struct FujiStrip {
@@ -118,13 +123,8 @@ public:
     [[nodiscard]] int offsetX() const { return h.block_size * n; }
   };
 
-  FujiDecompressor(const RawImage& img, ByteStream input);
-
   void fuji_compressed_load_raw();
 
-  void decompress() const;
-
-private:
   struct fuji_compressed_params {
     fuji_compressed_params() = default;
 
@@ -172,7 +172,7 @@ private:
   struct fuji_compressed_block {
     fuji_compressed_block() = default;
 
-    void reset(const fuji_compressed_params* params);
+    void reset(const fuji_compressed_params& params);
 
     BitPumpMSB pump;
 
@@ -186,34 +186,42 @@ private:
 
   ByteStream input;
 
-  std::vector<FujiStrip> strips;
+  std::vector<ByteStream> strips;
 
-  void fuji_decode_strip(fuji_compressed_block* info_block,
+  void fuji_decode_strip(fuji_compressed_block& info_block,
                          const FujiStrip& strip) const;
 
   template <typename Tag, typename T>
-  void copy_line(fuji_compressed_block* info, const FujiStrip& strip,
+  void copy_line(fuji_compressed_block& info, const FujiStrip& strip,
                  int cur_line, T&& idx) const;
 
-  void copy_line_to_xtrans(fuji_compressed_block* info, const FujiStrip& strip,
+  void copy_line_to_xtrans(fuji_compressed_block& info, const FujiStrip& strip,
                            int cur_line) const;
-  void copy_line_to_bayer(fuji_compressed_block* info, const FujiStrip& strip,
+  void copy_line_to_bayer(fuji_compressed_block& info, const FujiStrip& strip,
                           int cur_line) const;
 
-  static inline void fuji_zerobits(BitPumpMSB& pump, int* count);
+  static inline int fuji_zerobits(BitPumpMSB& pump);
   static int bitDiff(int value1, int value2);
 
-  template <typename T1, typename T2>
-  void fuji_decode_sample(T1&& func_0, T2&& func_1, fuji_compressed_block* info,
-                          uint16_t* line_buf, int* pos,
-                          std::array<int_pair, 41>* grads) const;
-  void fuji_decode_sample_even(fuji_compressed_block* info, uint16_t* line_buf,
-                               int* pos, std::array<int_pair, 41>* grads) const;
-  void fuji_decode_sample_odd(fuji_compressed_block* info, uint16_t* line_buf,
-                              int* pos, std::array<int_pair, 41>* grads) const;
+  template <typename T>
+  __attribute__((always_inline)) void
+  fuji_decode_sample(T&& func, fuji_compressed_block& info, uint16_t* line_buf,
+                     int pos, std::array<int_pair, 41>& grads) const;
+  __attribute__((always_inline)) void
+  fuji_decode_sample_even(fuji_compressed_block& info, uint16_t* line_buf,
+                          int pos, std::array<int_pair, 41>& grads) const;
+  __attribute__((always_inline)) void
+  fuji_decode_sample_odd(fuji_compressed_block& info, uint16_t* line_buf,
+                         int pos, std::array<int_pair, 41>& grads) const;
 
-  static void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
-                                             int* pos);
+  std::pair<int, int>
+  fuji_decode_interpolation_even_inner(int line_width, const uint16_t* line_buf,
+                                       int pos) const;
+  std::pair<int, int>
+  fuji_decode_interpolation_odd_inner(int line_width, const uint16_t* line_buf,
+                                      int pos) const;
+  void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
+                                      int pos) const;
   static void fuji_extend_generic(const std::array<uint16_t*, ltotal>& linebuf,
                                   int line_width, int start, int end);
   static void fuji_extend_red(const std::array<uint16_t*, ltotal>& linebuf,
@@ -222,8 +230,8 @@ private:
                                 int line_width);
   static void fuji_extend_blue(const std::array<uint16_t*, ltotal>& linebuf,
                                int line_width);
-  void xtrans_decode_block(fuji_compressed_block* info, int cur_line) const;
-  void fuji_bayer_decode_block(fuji_compressed_block* info, int cur_line) const;
+  void xtrans_decode_block(fuji_compressed_block& info, int cur_line) const;
+  void fuji_bayer_decode_block(fuji_compressed_block& info, int cur_line) const;
 };
 
 } // namespace rawspeed
