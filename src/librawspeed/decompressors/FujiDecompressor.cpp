@@ -316,9 +316,10 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
 }
 
 template <typename T>
-void FujiDecompressor::fuji_decode_sample(
-    T&& func, fuji_compressed_block& info, uint16_t* line_buf, int pos,
-    std::array<int_pair, 41>& grads) const {
+__attribute__((always_inline)) void
+FujiDecompressor::fuji_decode_sample(T&& func, fuji_compressed_block& info,
+                                     uint16_t* line_buf, int pos,
+                                     std::array<int_pair, 41>& grads) const {
   int sample = 0;
   int code = 0;
   uint16_t* line_buf_cur = line_buf + pos;
@@ -380,7 +381,7 @@ void FujiDecompressor::fuji_decode_sample(
 #define fuji_quant_gradient(v1, v2)                                            \
   (9 * ci.q_table[ci.q_point[4] + (v1)] + ci.q_table[ci.q_point[4] + (v2)])
 
-void FujiDecompressor::fuji_decode_sample_even(
+__attribute__((always_inline)) void FujiDecompressor::fuji_decode_sample_even(
     fuji_compressed_block& info, uint16_t* line_buf, int pos,
     std::array<int_pair, 41>& grads) const {
   fuji_decode_sample(
@@ -391,7 +392,7 @@ void FujiDecompressor::fuji_decode_sample_even(
       info, line_buf, pos, grads);
 }
 
-void FujiDecompressor::fuji_decode_sample_odd(
+__attribute__((always_inline)) void FujiDecompressor::fuji_decode_sample_odd(
     fuji_compressed_block& info, uint16_t* line_buf, int pos,
     std::array<int_pair, 41>& grads) const {
   fuji_decode_sample(
@@ -402,8 +403,10 @@ void FujiDecompressor::fuji_decode_sample_odd(
       info, line_buf, pos, grads);
 }
 
-std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_even_inner(
-    int line_width, const uint16_t* line_buf, int pos) const {
+__attribute__((always_inline)) std::pair<int, int>
+FujiDecompressor::fuji_decode_interpolation_even_inner(int line_width,
+                                                       const uint16_t* line_buf,
+                                                       int pos) const {
   const auto& ci = common_info;
   const uint16_t* line_buf_cur = line_buf + pos;
 
@@ -430,8 +433,10 @@ std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_even_inner(
   return {grad, interp_val};
 }
 
-std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_odd_inner(
-    int line_width, const uint16_t* line_buf, int pos) const {
+__attribute__((always_inline)) std::pair<int, int>
+FujiDecompressor::fuji_decode_interpolation_odd_inner(int line_width,
+                                                      const uint16_t* line_buf,
+                                                      int pos) const {
   const auto& ci = common_info;
   const uint16_t* line_buf_cur = line_buf + pos;
 
@@ -454,9 +459,10 @@ std::pair<int, int> FujiDecompressor::fuji_decode_interpolation_odd_inner(
 
 #undef fuji_quant_gradient
 
-void FujiDecompressor::fuji_decode_interpolation_even(int line_width,
-                                                      uint16_t* line_buf,
-                                                      int pos) const {
+__attribute__((always_inline)) void
+FujiDecompressor::fuji_decode_interpolation_even(int line_width,
+                                                 uint16_t* line_buf,
+                                                 int pos) const {
   auto [grad, interp_val] =
       fuji_decode_interpolation_even_inner(line_width, line_buf, pos);
   uint16_t* line_buf_cur = line_buf + pos;
