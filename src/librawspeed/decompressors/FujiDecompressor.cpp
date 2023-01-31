@@ -508,25 +508,21 @@ void FujiDecompressor::xtrans_decode_block(
     std::array<ColorPos, 2> pos;
     for (int i = 0; i != line_width + 8; i += 2) {
       if (i < line_width) {
-        if (row == 0 || (row == 2 && i % 4 == 0) || (row == 4 && i % 4 == 2) ||
-            row == 5)
-          fuji_decode_interpolation_even(line_width, info.linebuf[c[0]] + 1,
-                                         pos[0].even);
-        if (row == 1 || (row == 2 && i % 4 == 2) || row == 3 ||
-            (row == 4 && i % 4 == 0))
-          fuji_decode_sample_even(info, info.linebuf[c[0]] + 1, pos[0].even,
-                                  info.grad_even[grad]);
-        pos[0].even += 2;
-
-        if (row == 1 || row == 2 || (row == 3 && i % 4 == 2) ||
-            (row == 5 && i % 4 == 0))
-          fuji_decode_interpolation_even(line_width, info.linebuf[c[1]] + 1,
-                                         pos[1].even);
-        if (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
-            (row == 5 && i % 4 == 2))
-          fuji_decode_sample_even(info, info.linebuf[c[1]] + 1, pos[1].even,
-                                  info.grad_even[grad]);
-        pos[1].even += 2;
+        for (int comp = 0; comp != 2; comp++) {
+          if ((comp == 0 && (row == 0 || (row == 2 && i % 4 == 0) ||
+                             (row == 4 && i % 4 == 2) || row == 5)) ||
+              (comp == 1 && (row == 1 || row == 2 || (row == 3 && i % 4 == 2) ||
+                             (row == 5 && i % 4 == 0))))
+            fuji_decode_interpolation_even(
+                line_width, info.linebuf[c[comp]] + 1, pos[comp].even);
+          if ((comp == 0 && (row == 1 || (row == 2 && i % 4 == 2) || row == 3 ||
+                             (row == 4 && i % 4 == 0))) ||
+              (comp == 1 && (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
+                             (row == 5 && i % 4 == 2))))
+            fuji_decode_sample_even(info, info.linebuf[c[comp]] + 1,
+                                    pos[comp].even, info.grad_even[grad]);
+          pos[comp].even += 2;
+        }
       }
 
       if (i >= 8) {
