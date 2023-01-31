@@ -505,39 +505,37 @@ void FujiDecompressor::xtrans_decode_block(
   auto pass = [&](xt_lines c0, xt_lines c1, int row) {
     int grad = row % 3;
 
-    ColorPos c0_pos;
-    ColorPos c1_pos;
-
+    std::array<ColorPos, 2> pos;
     for (int i = 0; i != line_width + 8; i += 2) {
       if (i < line_width) {
         if (row == 0 || (row == 2 && i % 4 == 0) || (row == 4 && i % 4 == 2) ||
             row == 5)
           fuji_decode_interpolation_even(line_width, info.linebuf[c0] + 1,
-                                         c0_pos.even);
+                                         pos[0].even);
         if (row == 1 || (row == 2 && i % 4 == 2) || row == 3 ||
             (row == 4 && i % 4 == 0))
-          fuji_decode_sample_even(info, info.linebuf[c0] + 1, c0_pos.even,
+          fuji_decode_sample_even(info, info.linebuf[c0] + 1, pos[0].even,
                                   info.grad_even[grad]);
-        c0_pos.even += 2;
+        pos[0].even += 2;
 
         if (row == 1 || row == 2 || (row == 3 && i % 4 == 2) ||
             (row == 5 && i % 4 == 0))
           fuji_decode_interpolation_even(line_width, info.linebuf[c1] + 1,
-                                         c1_pos.even);
+                                         pos[1].even);
         if (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
             (row == 5 && i % 4 == 2))
-          fuji_decode_sample_even(info, info.linebuf[c1] + 1, c1_pos.even,
+          fuji_decode_sample_even(info, info.linebuf[c1] + 1, pos[1].even,
                                   info.grad_even[grad]);
-        c1_pos.even += 2;
+        pos[1].even += 2;
       }
 
       if (i >= 8) {
-        fuji_decode_sample_odd(info, info.linebuf[c0] + 1, c0_pos.odd,
+        fuji_decode_sample_odd(info, info.linebuf[c0] + 1, pos[0].odd,
                                info.grad_odd[grad]);
-        c0_pos.odd += 2;
-        fuji_decode_sample_odd(info, info.linebuf[c1] + 1, c1_pos.odd,
+        pos[0].odd += 2;
+        fuji_decode_sample_odd(info, info.linebuf[c1] + 1, pos[1].odd,
                                info.grad_odd[grad]);
-        c1_pos.odd += 2;
+        pos[1].odd += 2;
       }
     }
   };
