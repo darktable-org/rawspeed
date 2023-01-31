@@ -502,7 +502,7 @@ void FujiDecompressor::xtrans_decode_block(
     int odd = 1;
   };
 
-  auto pass = [&](xt_lines c0, xt_lines c1, int row) {
+  auto pass = [&](std::array<xt_lines, 2> c, int row) {
     int grad = row % 3;
 
     std::array<ColorPos, 2> pos;
@@ -510,62 +510,62 @@ void FujiDecompressor::xtrans_decode_block(
       if (i < line_width) {
         if (row == 0 || (row == 2 && i % 4 == 0) || (row == 4 && i % 4 == 2) ||
             row == 5)
-          fuji_decode_interpolation_even(line_width, info.linebuf[c0] + 1,
+          fuji_decode_interpolation_even(line_width, info.linebuf[c[0]] + 1,
                                          pos[0].even);
         if (row == 1 || (row == 2 && i % 4 == 2) || row == 3 ||
             (row == 4 && i % 4 == 0))
-          fuji_decode_sample_even(info, info.linebuf[c0] + 1, pos[0].even,
+          fuji_decode_sample_even(info, info.linebuf[c[0]] + 1, pos[0].even,
                                   info.grad_even[grad]);
         pos[0].even += 2;
 
         if (row == 1 || row == 2 || (row == 3 && i % 4 == 2) ||
             (row == 5 && i % 4 == 0))
-          fuji_decode_interpolation_even(line_width, info.linebuf[c1] + 1,
+          fuji_decode_interpolation_even(line_width, info.linebuf[c[1]] + 1,
                                          pos[1].even);
         if (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
             (row == 5 && i % 4 == 2))
-          fuji_decode_sample_even(info, info.linebuf[c1] + 1, pos[1].even,
+          fuji_decode_sample_even(info, info.linebuf[c[1]] + 1, pos[1].even,
                                   info.grad_even[grad]);
         pos[1].even += 2;
       }
 
       if (i >= 8) {
-        fuji_decode_sample_odd(info, info.linebuf[c0] + 1, pos[0].odd,
+        fuji_decode_sample_odd(info, info.linebuf[c[0]] + 1, pos[0].odd,
                                info.grad_odd[grad]);
         pos[0].odd += 2;
-        fuji_decode_sample_odd(info, info.linebuf[c1] + 1, pos[1].odd,
+        fuji_decode_sample_odd(info, info.linebuf[c[1]] + 1, pos[1].odd,
                                info.grad_odd[grad]);
         pos[1].odd += 2;
       }
     }
   };
 
-  pass(R2, G2, 0);
+  pass({R2, G2}, 0);
 
   fuji_extend_red(info.linebuf, line_width);
   fuji_extend_green(info.linebuf, line_width);
 
-  pass(G3, B2, 1);
+  pass({G3, B2}, 1);
 
   fuji_extend_green(info.linebuf, line_width);
   fuji_extend_blue(info.linebuf, line_width);
 
-  pass(R3, G4, 2);
+  pass({R3, G4}, 2);
 
   fuji_extend_red(info.linebuf, line_width);
   fuji_extend_green(info.linebuf, line_width);
 
-  pass(G5, B3, 3);
+  pass({G5, B3}, 3);
 
   fuji_extend_green(info.linebuf, line_width);
   fuji_extend_blue(info.linebuf, line_width);
 
-  pass(R4, G6, 4);
+  pass({R4, G6}, 4);
 
   fuji_extend_red(info.linebuf, line_width);
   fuji_extend_green(info.linebuf, line_width);
 
-  pass(G7, B4, 5);
+  pass({G7, B4}, 5);
 
   fuji_extend_green(info.linebuf, line_width);
   fuji_extend_blue(info.linebuf, line_width);
