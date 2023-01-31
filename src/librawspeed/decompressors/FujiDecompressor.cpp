@@ -795,11 +795,8 @@ void FujiDecompressor::fuji_compressed_load_raw() {
   // calculating raw block offsets
   strips.reserve(header.blocks_in_row);
 
-  int block = 0;
-  for (const auto& block_size : block_sizes) {
-    strips.emplace_back(header, block, input.getStream(block_size));
-    block++;
-  }
+  for (const auto& block_size : block_sizes)
+    strips.emplace_back(input.getStream(block_size));
 }
 
 void FujiDecompressor::decompressThread() const noexcept {
@@ -808,11 +805,12 @@ void FujiDecompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
+  for (int block = 0; block < header.blocks_in_row; ++block) {
+    FujiStrip strip(header, block, strips[block]);
     block_info.reset(common_info);
     try {
-      block_info.pump = BitPumpMSB(strip->bs);
-      fuji_decode_strip(block_info, *strip);
+      block_info.pump = BitPumpMSB(strip.bs);
+      fuji_decode_strip(block_info, strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());

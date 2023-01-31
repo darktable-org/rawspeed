@@ -186,7 +186,7 @@ private:
 
   ByteStream input;
 
-  std::vector<FujiStrip> strips;
+  std::vector<ByteStream> strips;
 
   void fuji_decode_strip(fuji_compressed_block& info_block,
                          const FujiStrip& strip) const;
