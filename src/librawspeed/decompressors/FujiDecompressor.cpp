@@ -493,6 +493,99 @@ void FujiDecompressor::fuji_extend_blue(
   fuji_extend_generic(linebuf, line_width, B2, B4);
 }
 
+template <typename T>
+__attribute__((always_inline)) void
+FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
+                                    [[maybe_unused]] int cur_line) const {
+  const int line_width = common_info.line_width;
+
+  auto pass = [this, &info, line_width, func_even](std::array<xt_lines, 2> c,
+                                                   int grad) {
+    struct ColorPos {
+      int even = 0;
+      int odd = 1;
+    };
+
+    std::array<ColorPos, 2> pos;
+    for (int i = 0; i != line_width + 8; i += 2) {
+      if (i < line_width) {
+        for (int comp = 0; comp != 2; comp++) {
+          func_even(c[comp], pos[comp].even, info.grad_even[grad]);
+          pos[comp].even += 2;
+        }
+      }
+
+      if (i >= 8) {
+        for (int comp = 0; comp != 2; comp++) {
+          fuji_decode_sample_odd(info, info.linebuf[c[comp]] + 1, pos[comp].odd,
+                                 info.grad_odd[grad]);
+          pos[comp].odd += 2;
+        }
+      }
+    }
+  };
+
+  using Tag = BayerTag;
+  const std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData =
+      getAsCFAColors(BayerPhase::RGGB);
+  const Array2DRef<const CFAColor> CFA(CFAData.data(), MCU<Tag>.x, MCU<Tag>.y);
+
+  std::array<int, 3> PerColorCounter;
+  std::fill(PerColorCounter.begin(), PerColorCounter.end(), 0);
+  auto ColorCounter = [&PerColorCounter](CFAColor c) -> int& {
+    switch (c) {
+    case CFAColor::RED:
+    case CFAColor::GREEN:
+    case CFAColor::BLUE:
+      return PerColorCounter[static_cast<uint8_t>(c)];
+    default:
+      __builtin_unreachable();
+    }
+  };
+
+  auto CurLineForColor = [&ColorCounter](CFAColor c) -> xt_lines {
+    xt_lines res;
+    switch (c) {
+    case CFAColor::RED:
+      res = R2;
+      break;
+    case CFAColor::GREEN:
+      res = G2;
+      break;
+    case CFAColor::BLUE:
+      res = B2;
+      break;
+    default:
+      __builtin_unreachable();
+    }
+    int& off = ColorCounter(c);
+    res = static_cast<xt_lines>(res + off);
+    ++off;
+    return res;
+  };
+
+  for (int row = 0; row != 6; ++row) {
+    CFAColor c0 = CFA(row % CFA.height, /*col=*/0);
+    CFAColor c1 = CFA(row % CFA.height, /*col=*/1);
+    pass({CurLineForColor(c0), CurLineForColor(c1)}, row % 3);
+    for (CFAColor c : {c0, c1}) {
+      switch (c) {
+      case CFAColor::RED:
+        fuji_extend_red(info.linebuf, line_width);
+        break;
+      case CFAColor::GREEN:
+        fuji_extend_green(info.linebuf, line_width);
+        break;
+      case CFAColor::BLUE:
+        fuji_extend_blue(info.linebuf, line_width);
+        break;
+      default:
+        __builtin_unreachable();
+      }
+    }
+  }
+}
+
 void FujiDecompressor::xtrans_decode_block(
     fuji_compressed_block& info, [[maybe_unused]] int cur_line) const {
   const int line_width = common_info.line_width;
@@ -568,93 +661,11 @@ void FujiDecompressor::xtrans_decode_block(
 
 void FujiDecompressor::fuji_bayer_decode_block(
     fuji_compressed_block& info, [[maybe_unused]] int cur_line) const {
-  const int line_width = common_info.line_width;
-
-  auto pass = [this, &info, line_width](std::array<xt_lines, 2> c, int grad) {
-    struct ColorPos {
-      int even = 0;
-      int odd = 1;
-    };
-
-    std::array<ColorPos, 2> pos;
-    for (int i = 0; i != line_width + 8; i += 2) {
-      if (i < line_width) {
-        for (int comp = 0; comp != 2; comp++) {
-          fuji_decode_sample_even(info, info.linebuf[c[comp]] + 1,
-                                  pos[comp].even, info.grad_even[grad]);
-          pos[comp].even += 2;
-        }
-      }
-
-      if (i >= 8) {
-        for (int comp = 0; comp != 2; comp++) {
-          fuji_decode_sample_odd(info, info.linebuf[c[comp]] + 1, pos[comp].odd,
-                                 info.grad_odd[grad]);
-          pos[comp].odd += 2;
-        }
-      }
-    }
-  };
-
-  using Tag = BayerTag;
-  const std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData =
-      getAsCFAColors(BayerPhase::RGGB);
-  const Array2DRef<const CFAColor> CFA(CFAData.data(), MCU<Tag>.x, MCU<Tag>.y);
-
-  std::array<int, 3> PerColorCounter;
-  std::fill(PerColorCounter.begin(), PerColorCounter.end(), 0);
-  auto ColorCounter = [&PerColorCounter](CFAColor c) -> int& {
-    switch (c) {
-    case CFAColor::RED:
-    case CFAColor::GREEN:
-    case CFAColor::BLUE:
-      return PerColorCounter[static_cast<uint8_t>(c)];
-    default:
-      __builtin_unreachable();
-    }
-  };
-
-  auto CurLineForColor = [&ColorCounter](CFAColor c) -> xt_lines {
-    xt_lines res;
-    switch (c) {
-    case CFAColor::RED:
-      res = R2;
-      break;
-    case CFAColor::GREEN:
-      res = G2;
-      break;
-    case CFAColor::BLUE:
-      res = B2;
-      break;
-    default:
-      __builtin_unreachable();
-    }
-    int& off = ColorCounter(c);
-    res = static_cast<xt_lines>(res + off);
-    ++off;
-    return res;
-  };
-
-  for (int row = 0; row != 6; ++row) {
-    CFAColor c0 = CFA(row % CFA.height, /*col=*/0);
-    CFAColor c1 = CFA(row % CFA.height, /*col=*/1);
-    pass({CurLineForColor(c0), CurLineForColor(c1)}, row % 3);
-    for (CFAColor c : {c0, c1}) {
-      switch (c) {
-      case CFAColor::RED:
-        fuji_extend_red(info.linebuf, line_width);
-        break;
-      case CFAColor::GREEN:
-        fuji_extend_green(info.linebuf, line_width);
-        break;
-      case CFAColor::BLUE:
-        fuji_extend_blue(info.linebuf, line_width);
-        break;
-      default:
-        __builtin_unreachable();
-      }
-    }
-  }
+  fuji_decode_block(
+      [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grad) {
+        fuji_decode_sample_even(info, info.linebuf[c] + 1, pos, grad);
+      },
+      info, cur_line);
 }
 
 void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,

@@ -231,6 +231,10 @@ private:
                                 int line_width);
   static void fuji_extend_blue(const std::array<uint16_t*, ltotal>& linebuf,
                                int line_width);
+
+  template <typename T>
+  inline void fuji_decode_block(T&& func_even, fuji_compressed_block& info,
+                                int cur_line) const;
   void xtrans_decode_block(fuji_compressed_block& info, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block& info, int cur_line) const;
 };
