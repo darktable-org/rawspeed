@@ -510,106 +510,24 @@ void FujiDecompressor::xtrans_decode_block(
 
     for (int i = 0; i != line_width + 8; i += 2) {
       if (i < line_width) {
-        switch (row) {
-        case 0:
-        case 5:
+        if (row == 0 || (row == 2 && i % 4 == 0) || (row == 4 && i % 4 == 2) ||
+            row == 5)
           fuji_decode_interpolation_even(line_width, info.linebuf[c0] + 1,
                                          c0_pos.even);
-          break;
-        case 1:
-        case 3:
-          break;
-        case 2:
-          if (i % 4 == 0) {
-            fuji_decode_interpolation_even(line_width, info.linebuf[c0] + 1,
-                                           c0_pos.even);
-          }
-          break;
-        case 4:
-          if ((i % 4) == 2) {
-            fuji_decode_interpolation_even(line_width, info.linebuf[c0] + 1,
-                                           c0_pos.even);
-          }
-          break;
-        default:
-          __builtin_unreachable();
-        }
-        switch (row) {
-        case 0:
-        case 5:
-          break;
-        case 1:
-        case 3:
+        if (row == 1 || (row == 2 && i % 4 == 2) || row == 3 ||
+            (row == 4 && i % 4 == 0))
           fuji_decode_sample_even(info, info.linebuf[c0] + 1, c0_pos.even,
                                   info.grad_even[grad]);
-          break;
-        case 2:
-          if (i % 4 == 2) {
-            fuji_decode_sample_even(info, info.linebuf[c0] + 1, c0_pos.even,
-                                    info.grad_even[grad]);
-          }
-          break;
-        case 4:
-          if ((i % 4) == 0) {
-            assert((i % 4) == 0);
-            fuji_decode_sample_even(info, info.linebuf[c0] + 1, c0_pos.even,
-                                    info.grad_even[grad]);
-          }
-          break;
-        default:
-          __builtin_unreachable();
-        }
         c0_pos.even += 2;
 
-        switch (row) {
-        case 0:
-        case 4:
-          break;
-        case 1:
-        case 2:
+        if (row == 1 || row == 2 || (row == 3 && i % 4 == 2) ||
+            (row == 5 && i % 4 == 0))
           fuji_decode_interpolation_even(line_width, info.linebuf[c1] + 1,
                                          c1_pos.even);
-          break;
-        case 3:
-          if ((i % 4) == 2) {
-            fuji_decode_interpolation_even(line_width, info.linebuf[c1] + 1,
-                                           c1_pos.even);
-          }
-          break;
-        case 5:
-          if (i % 4 == 0) {
-            fuji_decode_interpolation_even(line_width, info.linebuf[c1] + 1,
-                                           c1_pos.even);
-          }
-          break;
-        default:
-          __builtin_unreachable();
-        }
-        switch (row) {
-        case 0:
-        case 4:
+        if (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
+            (row == 5 && i % 4 == 2))
           fuji_decode_sample_even(info, info.linebuf[c1] + 1, c1_pos.even,
                                   info.grad_even[grad]);
-          break;
-        case 1:
-        case 2:
-          break;
-        case 3:
-          if ((i % 4) == 0) {
-            fuji_decode_sample_even(info, info.linebuf[c1] + 1, c1_pos.even,
-                                    info.grad_even[grad]);
-          }
-          break;
-        case 5:
-          if (i % 4 == 2) {
-            assert((i % 4) == 2);
-            fuji_decode_sample_even(info, info.linebuf[c1] + 1, c1_pos.even,
-                                    info.grad_even[grad]);
-          }
-          break;
-        default:
-          __builtin_unreachable();
-        }
         c1_pos.even += 2;
       }
 
