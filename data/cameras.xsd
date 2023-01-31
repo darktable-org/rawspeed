@@ -495,8 +495,6 @@
       <xs:enumeration value="12bit-uncompressed"/>
       <xs:enumeration value="14bit-compressed"/>
       <xs:enumeration value="14bit-uncompressed"/>
-      <xs:enumeration value="16bit-compressed"/>
-      <xs:enumeration value="16bit-uncompressed"/>
       <xs:enumeration value="16:9"/>
       <xs:enumeration value="1:1"/>
       <xs:enumeration value="3:2"/>
