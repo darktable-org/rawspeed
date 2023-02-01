@@ -198,19 +198,6 @@ void FujiDecompressor::copy_line(fuji_compressed_block& info,
                                  T&& idx) const {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  std::array<uint16_t*, 3> lineBufB;
-  std::array<uint16_t*, 6> lineBufG;
-  std::array<uint16_t*, 3> lineBufR;
-
-  for (int i = 0; i < 3; i++) {
-    lineBufR[i] = info.linebuf[R2 + i] + 1;
-    lineBufB[i] = info.linebuf[B2 + i] + 1;
-  }
-
-  for (int i = 0; i < 6; i++) {
-    lineBufG[i] = info.linebuf[G2 + i] + 1;
-  }
-
   std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData;
   if constexpr (std::is_same_v<XTransTag, Tag>)
     CFAData = getAsCFAColors(XTransPhase(0, 0));
@@ -238,15 +225,15 @@ void FujiDecompressor::copy_line(fuji_compressed_block& info,
 
           switch (CFA(MCURow, MCUCol)) {
           case CFAColor::RED: // red
-            line_buf = lineBufR[row_count >> 1];
+            line_buf = &info.lines(R2 + (row_count >> 1), 1);
             break;
 
           case CFAColor::GREEN: // green
-            line_buf = lineBufG[row_count];
+            line_buf = &info.lines(G2 + (row_count), 1);
             break;
 
           case CFAColor::BLUE: // blue
-            line_buf = lineBufB[row_count >> 1];
+            line_buf = &info.lines(B2 + (row_count >> 1), 1);
             break;
 
           default:
