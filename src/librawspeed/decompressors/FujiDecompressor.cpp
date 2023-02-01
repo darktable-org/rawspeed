@@ -225,7 +225,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block& info,
             break;
 
           case CFAColor::GREEN: // green
-            row = G2 + (row_count);
+            row = G2 + row_count;
             break;
 
           case CFAColor::BLUE: // blue
