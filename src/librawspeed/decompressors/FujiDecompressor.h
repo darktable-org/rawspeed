@@ -207,23 +207,23 @@ private:
 
   template <typename T>
   inline void fuji_decode_sample(T&& func, fuji_compressed_block& info,
-                                 uint16_t* line_buf, int pos,
+                                 xt_lines c, int pos,
                                  std::array<int_pair, 41>& grads) const;
-  inline void fuji_decode_sample_even(fuji_compressed_block& info,
-                                      uint16_t* line_buf, int pos,
+  inline void fuji_decode_sample_even(fuji_compressed_block& info, xt_lines c,
+                                      int pos,
                                       std::array<int_pair, 41>& grads) const;
-  inline void fuji_decode_sample_odd(fuji_compressed_block& info,
-                                     uint16_t* line_buf, int pos,
+  inline void fuji_decode_sample_odd(fuji_compressed_block& info, xt_lines c,
+                                     int pos,
                                      std::array<int_pair, 41>& grads) const;
 
   inline std::pair<int, int>
-  fuji_decode_interpolation_even_inner(int line_width, const uint16_t* line_buf,
+  fuji_decode_interpolation_even_inner(fuji_compressed_block& info, xt_lines c,
                                        int pos) const;
   inline std::pair<int, int>
-  fuji_decode_interpolation_odd_inner(int line_width, const uint16_t* line_buf,
+  fuji_decode_interpolation_odd_inner(fuji_compressed_block& info, xt_lines c,
                                       int pos) const;
-  inline void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
-                                             int pos) const;
+  inline void fuji_decode_interpolation_even(fuji_compressed_block& info,
+                                             xt_lines c, int pos) const;
 
   static void fuji_extend_generic(fuji_compressed_block& info, int start,
                                   int end);
