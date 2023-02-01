@@ -456,28 +456,25 @@ FujiDecompressor::fuji_decode_interpolation_even(int line_width,
   *line_buf_cur = interp_val;
 }
 
-void FujiDecompressor::fuji_extend_generic(
-    const std::array<uint16_t*, ltotal>& linebuf, int line_width, int start,
-    int end) {
+void FujiDecompressor::fuji_extend_generic(fuji_compressed_block& info,
+                                           int start, int end) {
   for (int i = start; i <= end; i++) {
-    linebuf[i][0] = linebuf[i - 1][1];
-    linebuf[i][line_width + 1] = linebuf[i - 1][line_width];
+    info.lines(i, 0) = info.lines(i - 1, 1);
+    info.lines(i, info.lines.width - 1) =
+        info.lines(i - 1, info.lines.width - 2);
   }
 }
 
-void FujiDecompressor::fuji_extend_red(
-    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
-  fuji_extend_generic(linebuf, line_width, R2, R4);
+void FujiDecompressor::fuji_extend_red(fuji_compressed_block& info) {
+  fuji_extend_generic(info, R2, R4);
 }
 
-void FujiDecompressor::fuji_extend_green(
-    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
-  fuji_extend_generic(linebuf, line_width, G2, G7);
+void FujiDecompressor::fuji_extend_green(fuji_compressed_block& info) {
+  fuji_extend_generic(info, G2, G7);
 }
 
-void FujiDecompressor::fuji_extend_blue(
-    const std::array<uint16_t*, ltotal>& linebuf, int line_width) {
-  fuji_extend_generic(linebuf, line_width, B2, B4);
+void FujiDecompressor::fuji_extend_blue(fuji_compressed_block& info) {
+  fuji_extend_generic(info, B2, B4);
 }
 
 template <typename T>
@@ -561,13 +558,13 @@ FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
     for (CFAColor c : {c0, c1}) {
       switch (c) {
       case CFAColor::RED:
-        fuji_extend_red(info.linebuf, line_width);
+        fuji_extend_red(info);
         break;
       case CFAColor::GREEN:
-        fuji_extend_green(info.linebuf, line_width);
+        fuji_extend_green(info);
         break;
       case CFAColor::BLUE:
-        fuji_extend_blue(info.linebuf, line_width);
+        fuji_extend_blue(info);
         break;
       default:
         __builtin_unreachable();

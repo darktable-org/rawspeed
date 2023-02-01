@@ -225,14 +225,11 @@ private:
   inline void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
                                              int pos) const;
 
-  static void fuji_extend_generic(const std::array<uint16_t*, ltotal>& linebuf,
-                                  int line_width, int start, int end);
-  static void fuji_extend_red(const std::array<uint16_t*, ltotal>& linebuf,
-                              int line_width);
-  static void fuji_extend_green(const std::array<uint16_t*, ltotal>& linebuf,
-                                int line_width);
-  static void fuji_extend_blue(const std::array<uint16_t*, ltotal>& linebuf,
-                               int line_width);
+  static void fuji_extend_generic(fuji_compressed_block& info, int start,
+                                  int end);
+  static void fuji_extend_red(fuji_compressed_block& info);
+  static void fuji_extend_green(fuji_compressed_block& info);
+  static void fuji_extend_blue(fuji_compressed_block& info);
 
   template <typename T>
   inline void fuji_decode_block(T&& func_even, fuji_compressed_block& info,
