@@ -217,26 +217,26 @@ void FujiDecompressor::copy_line(fuji_compressed_block& info,
           int row_count = MCU<Tag>.y * MCUIdx.y + MCURow;
           int pixel_count = MCU<Tag>.x * MCUIdx.x + MCUCol;
 
-          const uint16_t* line_buf = nullptr;
+          int row;
 
           switch (CFA(MCURow, MCUCol)) {
           case CFAColor::RED: // red
-            line_buf = &info.lines(R2 + (row_count >> 1), 1);
+            row = R2 + (row_count >> 1);
             break;
 
           case CFAColor::GREEN: // green
-            line_buf = &info.lines(G2 + (row_count), 1);
+            row = G2 + (row_count);
             break;
 
           case CFAColor::BLUE: // blue
-            line_buf = &info.lines(B2 + (row_count >> 1), 1);
+            row = B2 + (row_count >> 1);
             break;
 
           default:
             __builtin_unreachable();
           }
 
-          out(MCURow, MCUCol) = line_buf[idx(pixel_count)];
+          out(MCURow, MCUCol) = info.lines(row, 1 + idx(pixel_count));
         }
       }
     }
