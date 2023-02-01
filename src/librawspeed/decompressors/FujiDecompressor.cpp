@@ -378,7 +378,8 @@ FujiDecompressor::fuji_decode_interpolation_even_inner(
   int diffRdRb = std::abs(Rd - Rb);
 
   int Term0 = 2 * Rb;
-  int Term1, Term2;
+  int Term1;
+  int Term2;
   if (diffRcRb > std::max(diffRfRb, diffRdRb)) {
     Term1 = Rf;
     Term2 = Rd;
