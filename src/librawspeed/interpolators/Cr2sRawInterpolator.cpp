@@ -108,13 +108,13 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
 
   using MCUTy = std::array<YCbCr, PixelsPerMCU>;
 
-  auto LoadMCU = [input = input, row](int MCUIdx) {
+  auto LoadMCU = [input_ = input, row](int MCUIdx) {
     MCUTy MCU;
     for (int YIdx = 0; YIdx < PixelsPerMCU; ++YIdx)
       YCbCr::LoadY(&MCU[YIdx],
-                   &input(row, InputComponentsPerMCU * MCUIdx + YIdx));
+                   &input_(row, InputComponentsPerMCU * MCUIdx + YIdx));
     YCbCr::LoadCbCr(&MCU[0],
-                    &input(row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
+                    &input_(row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
     return MCU;
   };
   auto StoreMCU = [this, out, row](const MCUTy& MCU, int MCUIdx) {
@@ -205,18 +205,18 @@ template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
 
   using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
 
-  auto LoadMCU = [input = input](int Row, int MCUIdx)
+  auto LoadMCU = [input_ = input](int Row, int MCUIdx)
       __attribute__((always_inline)) {
     MCUTy MCU;
     for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
       for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
         YCbCr::LoadY(&MCU[MCURow][MCUCol],
-                     &input(Row, InputComponentsPerMCU * MCUIdx +
-                                     X_S_F * MCURow + MCUCol));
+                     &input_(Row, InputComponentsPerMCU * MCUIdx +
+                                      X_S_F * MCURow + MCUCol));
       }
     }
     YCbCr::LoadCbCr(&MCU[0][0],
-                    &input(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
+                    &input_(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
     return MCU;
   };
   auto StoreMCU = [ this, out ](const MCUTy& MCU, int MCUIdx, int Row)
@@ -357,18 +357,18 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
 
   using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
 
-  auto LoadMCU = [input = input](int Row, int MCUIdx)
+  auto LoadMCU = [input_ = input](int Row, int MCUIdx)
       __attribute__((always_inline)) {
     MCUTy MCU;
     for (int MCURow = 0; MCURow < Y_S_F; ++MCURow) {
       for (int MCUCol = 0; MCUCol < X_S_F; ++MCUCol) {
         YCbCr::LoadY(&MCU[MCURow][MCUCol],
-                     &input(Row, InputComponentsPerMCU * MCUIdx +
-                                     X_S_F * MCURow + MCUCol));
+                     &input_(Row, InputComponentsPerMCU * MCUIdx +
+                                      X_S_F * MCURow + MCUCol));
       }
     }
     YCbCr::LoadCbCr(&MCU[0][0],
-                    &input(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
+                    &input_(Row, InputComponentsPerMCU * MCUIdx + YsPerMCU));
     return MCU;
   };
   auto StoreMCU = [ this, out ](const MCUTy& MCU, int MCUIdx, int Row)
