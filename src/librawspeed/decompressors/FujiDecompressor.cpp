@@ -402,12 +402,12 @@ FujiDecompressor::fuji_decode_interpolation_odd_inner(
   int Rd = info.lines(c - 1, pos + 1);
   int Rg = info.lines(c, pos + 1);
 
-  int interp_val;
-  if ((Rb > Rc && Rb > Rd) || (Rb < Rc && Rb < Rd)) {
-    interp_val = (Rg + Ra + 2 * Rb) >> 2;
-  } else {
-    interp_val = (Ra + Rg) >> 1;
+  int interp_val = (Ra + Rg);
+  if (auto [min, max] = std::minmax(Rc, Rd); Rb < min || Rb > max) {
+    interp_val += 2 * Rb;
+    interp_val >>= 1;
   }
+  interp_val >>= 1;
 
   int grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
   return {grad, interp_val};
