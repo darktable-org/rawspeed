@@ -567,8 +567,8 @@ FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
   }
 }
 
-void FujiDecompressor::xtrans_decode_block(
-    fuji_compressed_block& info, [[maybe_unused]] int cur_line) const {
+void FujiDecompressor::xtrans_decode_block(fuji_compressed_block& info,
+                                           int cur_line) const {
   fuji_decode_block(
       [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grad,
                     int row, int i, int comp) {
@@ -586,8 +586,8 @@ void FujiDecompressor::xtrans_decode_block(
       info, cur_line);
 }
 
-void FujiDecompressor::fuji_bayer_decode_block(
-    fuji_compressed_block& info, [[maybe_unused]] int cur_line) const {
+void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block& info,
+                                               int cur_line) const {
   fuji_decode_block(
       [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grad,
                     int row, int i,
