@@ -377,14 +377,21 @@ FujiDecompressor::fuji_decode_interpolation_even_inner(
   int diffRfRb = std::abs(Rf - Rb);
   int diffRdRb = std::abs(Rd - Rb);
 
-  int interp_val;
-  if (diffRcRb > diffRfRb && diffRcRb > diffRdRb) {
-    interp_val = (Rf + Rd + 2 * Rb);
-  } else if (diffRdRb > diffRcRb && diffRdRb > diffRfRb) {
-    interp_val = (Rf + Rc + 2 * Rb);
+  int Term0 = 2 * Rb;
+  int Term1, Term2;
+  if (diffRcRb > std::max(diffRfRb, diffRdRb)) {
+    Term1 = Rf;
+    Term2 = Rd;
   } else {
-    interp_val = (Rd + Rc + 2 * Rb);
+    if (diffRdRb > std::max(diffRcRb, diffRfRb)) {
+      Term1 = Rf;
+    } else {
+      Term1 = Rd;
+    }
+    Term2 = Rc;
   }
+
+  int interp_val = Term0 + Term1 + Term2;
   interp_val >>= 2;
 
   int grad = fuji_quant_gradient(Rb - Rf, Rc - Rb);
