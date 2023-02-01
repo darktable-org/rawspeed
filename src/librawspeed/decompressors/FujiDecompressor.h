@@ -215,7 +215,7 @@ private:
                                      int pos,
                                      std::array<int_pair, 41>& grads) const;
 
-  inline std::pair<int, int>
+  [[nodiscard]] inline std::pair<int, int>
   fuji_decode_interpolation_even_inner(const fuji_compressed_block& info,
                                        xt_lines c, int pos) const;
   inline std::pair<int, int>
