@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array2DRef.h"                     // for Array2DRef
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
@@ -181,7 +182,7 @@ private:
     std::array<std::array<int_pair, 41>, 3> grad_odd;
 
     std::vector<uint16_t> linealloc;
-    std::array<uint16_t*, ltotal> linebuf;
+    Array2DRef<uint16_t> lines;
   };
 
   ByteStream input;
@@ -205,32 +206,33 @@ private:
 
   template <typename T>
   inline void fuji_decode_sample(T&& func, fuji_compressed_block& info,
-                                 uint16_t* line_buf, int pos,
+                                 xt_lines c, int pos,
                                  std::array<int_pair, 41>& grads) const;
-  inline void fuji_decode_sample_even(fuji_compressed_block& info,
-                                      uint16_t* line_buf, int pos,
+  inline void fuji_decode_sample_even(fuji_compressed_block& info, xt_lines c,
+                                      int pos,
                                       std::array<int_pair, 41>& grads) const;
-  inline void fuji_decode_sample_odd(fuji_compressed_block& info,
-                                     uint16_t* line_buf, int pos,
+  inline void fuji_decode_sample_odd(fuji_compressed_block& info, xt_lines c,
+                                     int pos,
                                      std::array<int_pair, 41>& grads) const;
 
   inline std::pair<int, int>
-  fuji_decode_interpolation_even_inner(int line_width, const uint16_t* line_buf,
+  fuji_decode_interpolation_even_inner(fuji_compressed_block& info, xt_lines c,
                                        int pos) const;
   inline std::pair<int, int>
-  fuji_decode_interpolation_odd_inner(int line_width, const uint16_t* line_buf,
+  fuji_decode_interpolation_odd_inner(fuji_compressed_block& info, xt_lines c,
                                       int pos) const;
-  inline void fuji_decode_interpolation_even(int line_width, uint16_t* line_buf,
-                                             int pos) const;
+  inline void fuji_decode_interpolation_even(fuji_compressed_block& info,
+                                             xt_lines c, int pos) const;
 
-  static void fuji_extend_generic(const std::array<uint16_t*, ltotal>& linebuf,
-                                  int line_width, int start, int end);
-  static void fuji_extend_red(const std::array<uint16_t*, ltotal>& linebuf,
-                              int line_width);
-  static void fuji_extend_green(const std::array<uint16_t*, ltotal>& linebuf,
-                                int line_width);
-  static void fuji_extend_blue(const std::array<uint16_t*, ltotal>& linebuf,
-                               int line_width);
+  static void fuji_extend_generic(fuji_compressed_block& info, int start,
+                                  int end);
+  static void fuji_extend_red(fuji_compressed_block& info);
+  static void fuji_extend_green(fuji_compressed_block& info);
+  static void fuji_extend_blue(fuji_compressed_block& info);
+
+  template <typename T>
+  inline void fuji_decode_block(T&& func_even, fuji_compressed_block& info,
+                                int cur_line) const;
   void xtrans_decode_block(fuji_compressed_block& info, int cur_line) const;
   void fuji_bayer_decode_block(fuji_compressed_block& info, int cur_line) const;
 };
