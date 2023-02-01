@@ -365,7 +365,7 @@ FujiDecompressor::fuji_decode_sample(T&& func, fuji_compressed_block& info,
 
 __attribute__((always_inline)) std::pair<int, int>
 FujiDecompressor::fuji_decode_interpolation_even_inner(
-    fuji_compressed_block& info, xt_lines c, int pos) const {
+    const fuji_compressed_block& info, xt_lines c, int pos) const {
   const auto& ci = common_info;
 
   int Rb = info.lines(c - 1, pos);
