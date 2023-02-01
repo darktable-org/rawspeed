@@ -219,8 +219,8 @@ private:
   fuji_decode_interpolation_even_inner(const fuji_compressed_block& info,
                                        xt_lines c, int pos) const;
   inline std::pair<int, int>
-  fuji_decode_interpolation_odd_inner(fuji_compressed_block& info, xt_lines c,
-                                      int pos) const;
+  fuji_decode_interpolation_odd_inner(const fuji_compressed_block& info,
+                                      xt_lines c, int pos) const;
   inline void fuji_decode_interpolation_even(fuji_compressed_block& info,
                                              xt_lines c, int pos) const;
 
