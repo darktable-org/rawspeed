@@ -590,8 +590,10 @@ void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block& info,
                                                int cur_line) const {
   fuji_decode_block(
       [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grad,
-                    int row, int i,
-                    int comp) { fuji_decode_sample_even(info, c, pos, grad); },
+                    [[maybe_unused]] int row, [[maybe_unused]] int i,
+                    [[maybe_unused]] int comp) {
+        fuji_decode_sample_even(info, c, pos, grad);
+      },
       info, cur_line);
 }
 
