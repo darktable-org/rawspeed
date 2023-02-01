@@ -178,10 +178,6 @@ void FujiDecompressor::fuji_compressed_block::reset(
 
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
 
-  for (int i = R0; i <= B4; i++) {
-    linebuf[i] = &lines(i, 0);
-  }
-
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
       grad_even[j][i].value1 = params.maxDiff;

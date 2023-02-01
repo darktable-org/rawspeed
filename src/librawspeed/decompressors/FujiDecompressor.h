@@ -182,7 +182,6 @@ private:
     std::array<std::array<int_pair, 41>, 3> grad_odd;
 
     std::vector<uint16_t> linealloc;
-    std::array<uint16_t*, ltotal> linebuf;
     Array2DRef<uint16_t> lines;
   };
 
