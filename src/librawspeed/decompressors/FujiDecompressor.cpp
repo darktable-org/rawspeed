@@ -524,7 +524,7 @@ FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
     }
   };
 
-  auto CurLineForColor = [&ColorCounter](CFAColor c) -> xt_lines {
+  auto CurLineForColor = [&ColorCounter](CFAColor c) {
     xt_lines res;
     switch (c) {
     case CFAColor::RED:
