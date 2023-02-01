@@ -634,20 +634,20 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
 
     // copy data from line buffers and advance
     for (auto i : mtable) {
-      memcpy(info_block.linebuf[i.a], info_block.linebuf[i.b], line_size);
+      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.b, 0), line_size);
     }
 
     std::array<std::array<uint16_t, 2>, 3> tmp;
     for (int c = 0; c != 3; ++c) {
-      tmp[c][0] = info_block.linebuf[ctable[c]][1];
-      tmp[c][1] = info_block.linebuf[ctable[c]][common_info.line_width];
+      tmp[c][0] = info_block.lines(ctable[c], 1);
+      tmp[c][1] = info_block.lines(ctable[c], common_info.line_width);
     }
 
     for (int c = 0; c != 3; ++c) {
       auto i = ztable[c];
-      memset(info_block.linebuf[i.a], 0, i.b * line_size);
-      info_block.linebuf[i.a][0] = tmp[c][0];
-      info_block.linebuf[i.a][common_info.line_width + 1] = tmp[c][1];
+      memset(&info_block.lines(i.a, 0), 0, i.b * line_size);
+      info_block.lines(i.a, 0) = tmp[c][0];
+      info_block.lines(i.a, common_info.line_width + 1) = tmp[c][1];
     }
   }
 }
