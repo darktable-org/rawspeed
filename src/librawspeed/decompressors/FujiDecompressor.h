@@ -224,11 +224,11 @@ private:
   inline void fuji_decode_interpolation_even(fuji_compressed_block& info,
                                              xt_lines c, int pos) const;
 
-  static void fuji_extend_generic(fuji_compressed_block& info, int start,
+  static void fuji_extend_generic(const fuji_compressed_block& info, int start,
                                   int end);
-  static void fuji_extend_red(fuji_compressed_block& info);
-  static void fuji_extend_green(fuji_compressed_block& info);
-  static void fuji_extend_blue(fuji_compressed_block& info);
+  static void fuji_extend_red(const fuji_compressed_block& info);
+  static void fuji_extend_green(const fuji_compressed_block& info);
+  static void fuji_extend_blue(const fuji_compressed_block& info);
 
   template <typename T>
   inline void fuji_decode_block(T&& func_even, fuji_compressed_block& info,

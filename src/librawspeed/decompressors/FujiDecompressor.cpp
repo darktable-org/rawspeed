@@ -450,7 +450,7 @@ FujiDecompressor::fuji_decode_interpolation_even(fuji_compressed_block& info,
   info.lines(c, pos) = interp_val;
 }
 
-void FujiDecompressor::fuji_extend_generic(fuji_compressed_block& info,
+void FujiDecompressor::fuji_extend_generic(const fuji_compressed_block& info,
                                            int start, int end) {
   for (int i = start; i <= end; i++) {
     info.lines(i, 0) = info.lines(i - 1, 1);
@@ -459,15 +459,15 @@ void FujiDecompressor::fuji_extend_generic(fuji_compressed_block& info,
   }
 }
 
-void FujiDecompressor::fuji_extend_red(fuji_compressed_block& info) {
+void FujiDecompressor::fuji_extend_red(const fuji_compressed_block& info) {
   fuji_extend_generic(info, R2, R4);
 }
 
-void FujiDecompressor::fuji_extend_green(fuji_compressed_block& info) {
+void FujiDecompressor::fuji_extend_green(const fuji_compressed_block& info) {
   fuji_extend_generic(info, G2, G7);
 }
 
-void FujiDecompressor::fuji_extend_blue(fuji_compressed_block& info) {
+void FujiDecompressor::fuji_extend_blue(const fuji_compressed_block& info) {
   fuji_extend_generic(info, B2, B4);
 }
 
