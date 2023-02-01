@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array2DRef.h"                     // for Array2DRef
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
@@ -182,6 +183,7 @@ private:
 
     std::vector<uint16_t> linealloc;
     std::array<uint16_t*, ltotal> linebuf;
+    Array2DRef<uint16_t> lines;
   };
 
   ByteStream input;

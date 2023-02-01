@@ -176,10 +176,10 @@ void FujiDecompressor::fuji_compressed_block::reset(
   if (reInit)
     std::fill(linealloc.begin(), linealloc.end(), 0);
 
-  linebuf[R0] = &linealloc[0];
+  lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
 
-  for (int i = R1; i <= B4; i++) {
-    linebuf[i] = linebuf[i - 1] + params.line_width + 2;
+  for (int i = R0; i <= B4; i++) {
+    linebuf[i] = &lines(i, 0);
   }
 
   for (int j = 0; j < 3; j++) {
