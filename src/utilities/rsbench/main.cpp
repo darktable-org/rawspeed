@@ -184,7 +184,7 @@ static void addBench(Entry* entry, std::string tName, int threads) {
 int main(int argc, char** argv) {
   benchmark::Initialize(&argc, argv);
 
-  auto hasFlag = [argc, argv](const std::string& flag) {
+  auto hasFlag = [argc, argv](std::string_view flag) {
     int found = 0;
     for (int i = 1; i < argc; ++i) {
       if (!argv[i] || argv[i] != flag)
