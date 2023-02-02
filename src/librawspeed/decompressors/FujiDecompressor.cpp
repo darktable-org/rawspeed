@@ -298,15 +298,13 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
   return decBits;
 }
 
-template <typename T>
 __attribute__((always_inline)) int
-FujiDecompressor::fuji_decode_sample(T&& func, fuji_compressed_block& info,
-                                     xt_lines c, int pos,
+FujiDecompressor::fuji_decode_sample(fuji_compressed_block& info, xt_lines c,
+                                     int pos, int grad, int interp_val,
                                      std::array<int_pair, 41>& grads) const {
   int sample = 0;
   int code = 0;
 
-  auto [grad, interp_val] = func();
   int gradient = std::abs(grad);
 
   sample = fuji_zerobits(info.pump);
@@ -426,21 +424,15 @@ FujiDecompressor::fuji_decode_interpolation_odd_inner(
 __attribute__((always_inline)) int FujiDecompressor::fuji_decode_sample_even(
     fuji_compressed_block& info, xt_lines c, int pos,
     std::array<int_pair, 41>& grads) const {
-  return fuji_decode_sample(
-      [this, &info, c, pos]() {
-        return fuji_decode_interpolation_even_inner(info, c, pos);
-      },
-      info, c, pos, grads);
+  auto [grad, interp_val] = fuji_decode_interpolation_even_inner(info, c, pos);
+  return fuji_decode_sample(info, c, pos, grad, interp_val, grads);
 }
 
 __attribute__((always_inline)) int FujiDecompressor::fuji_decode_sample_odd(
     fuji_compressed_block& info, xt_lines c, int pos,
     std::array<int_pair, 41>& grads) const {
-  return fuji_decode_sample(
-      [this, &info, c, pos]() {
-        return fuji_decode_interpolation_odd_inner(info, c, pos);
-      },
-      info, c, pos, grads);
+  auto [grad, interp_val] = fuji_decode_interpolation_odd_inner(info, c, pos);
+  return fuji_decode_sample(info, c, pos, grad, interp_val, grads);
 }
 
 __attribute__((always_inline)) int
