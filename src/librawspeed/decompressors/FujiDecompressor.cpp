@@ -444,8 +444,8 @@ __attribute__((always_inline)) void FujiDecompressor::fuji_decode_sample_odd(
 }
 
 __attribute__((always_inline)) void
-FujiDecompressor::fuji_decode_interpolation_even(fuji_compressed_block& info,
-                                                 xt_lines c, int pos) const {
+FujiDecompressor::fuji_decode_interpolation_even(
+    const fuji_compressed_block& info, xt_lines c, int pos) const {
   auto [grad, interp_val] = fuji_decode_interpolation_even_inner(info, c, pos);
   info.lines(c, pos) = interp_val;
 }
