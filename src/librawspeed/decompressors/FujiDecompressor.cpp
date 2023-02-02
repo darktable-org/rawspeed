@@ -568,17 +568,17 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block& info,
   fuji_decode_block(
       [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grads,
                     int row, int i, int comp) {
+        assert(i % 4 == 0 || i % 4 == 2);
         if ((comp == 0 && (row == 0 || (row == 2 && i % 4 == 0) ||
-                           (row == 4 && i % 4 == 2) || row == 5)) ||
-            (comp == 1 && (row == 1 || row == 2 || (row == 3 && i % 4 == 2) ||
+                           (row == 4 && i % 4 != 0) || row == 5)) ||
+            (comp == 1 && (row == 1 || row == 2 || (row == 3 && i % 4 != 0) ||
                            (row == 5 && i % 4 == 0))))
           return fuji_decode_interpolation_even(info, c, pos);
-        if ((comp == 0 && (row == 1 || (row == 2 && i % 4 == 2) || row == 3 ||
-                           (row == 4 && i % 4 == 0))) ||
-            (comp == 1 && (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
-                           (row == 5 && i % 4 == 2))))
-          return fuji_decode_sample_even(info, c, pos, grads);
-        __builtin_unreachable();
+        assert((comp == 0 && (row == 1 || (row == 2 && i % 4 != 0) ||
+                              row == 3 || (row == 4 && i % 4 == 0))) ||
+               (comp == 1 && (row == 0 || (row == 3 && i % 4 == 0) ||
+                              row == 4 || (row == 5 && i % 4 != 0))));
+        return fuji_decode_sample_even(info, c, pos, grads);
       },
       info, cur_line);
 }
