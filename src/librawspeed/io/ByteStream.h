@@ -33,7 +33,7 @@
 
 namespace rawspeed {
 
-class ByteStream : public DataBuffer {
+class ByteStream final : public DataBuffer {
   size_type pos = 0; // position of stream in bytes (this is next byte to deliver)
 
 public:
