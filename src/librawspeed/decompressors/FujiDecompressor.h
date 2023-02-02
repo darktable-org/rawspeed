@@ -193,13 +193,13 @@ private:
                          const FujiStrip& strip) const;
 
   template <typename Tag, typename T>
-  void copy_line(fuji_compressed_block& info, const FujiStrip& strip,
+  void copy_line(const fuji_compressed_block& info, const FujiStrip& strip,
                  int cur_line, T&& idx) const;
 
-  void copy_line_to_xtrans(fuji_compressed_block& info, const FujiStrip& strip,
-                           int cur_line) const;
-  void copy_line_to_bayer(fuji_compressed_block& info, const FujiStrip& strip,
-                          int cur_line) const;
+  void copy_line_to_xtrans(const fuji_compressed_block& info,
+                           const FujiStrip& strip, int cur_line) const;
+  void copy_line_to_bayer(const fuji_compressed_block& info,
+                          const FujiStrip& strip, int cur_line) const;
 
   static inline int fuji_zerobits(BitPumpMSB& pump);
   static int bitDiff(int value1, int value2);

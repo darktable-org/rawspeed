@@ -189,7 +189,7 @@ void FujiDecompressor::fuji_compressed_block::reset(
 }
 
 template <typename Tag, typename T>
-void FujiDecompressor::copy_line(fuji_compressed_block& info,
+void FujiDecompressor::copy_line(const fuji_compressed_block& info,
                                  const FujiStrip& strip, int cur_line,
                                  T&& idx) const {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -243,7 +243,7 @@ void FujiDecompressor::copy_line(fuji_compressed_block& info,
   }
 }
 
-void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block& info,
+void FujiDecompressor::copy_line_to_xtrans(const fuji_compressed_block& info,
                                            const FujiStrip& strip,
                                            int cur_line) const {
   auto index = [](int pixel_count) {
@@ -254,7 +254,7 @@ void FujiDecompressor::copy_line_to_xtrans(fuji_compressed_block& info,
   copy_line<XTransTag>(info, strip, cur_line, index);
 }
 
-void FujiDecompressor::copy_line_to_bayer(fuji_compressed_block& info,
+void FujiDecompressor::copy_line_to_bayer(const fuji_compressed_block& info,
                                           const FujiStrip& strip,
                                           int cur_line) const {
   auto index = [](int pixel_count) { return pixel_count >> 1; };
