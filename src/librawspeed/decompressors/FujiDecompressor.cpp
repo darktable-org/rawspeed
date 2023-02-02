@@ -566,7 +566,7 @@ FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
 void FujiDecompressor::xtrans_decode_block(fuji_compressed_block& info,
                                            int cur_line) const {
   fuji_decode_block(
-      [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grad,
+      [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grads,
                     int row, int i, int comp) {
         if ((comp == 0 && (row == 0 || (row == 2 && i % 4 == 0) ||
                            (row == 4 && i % 4 == 2) || row == 5)) ||
@@ -577,7 +577,7 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block& info,
                            (row == 4 && i % 4 == 0))) ||
             (comp == 1 && (row == 0 || (row == 3 && i % 4 == 0) || row == 4 ||
                            (row == 5 && i % 4 == 2))))
-          return fuji_decode_sample_even(info, c, pos, grad);
+          return fuji_decode_sample_even(info, c, pos, grads);
         __builtin_unreachable();
       },
       info, cur_line);
@@ -586,10 +586,10 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block& info,
 void FujiDecompressor::fuji_bayer_decode_block(fuji_compressed_block& info,
                                                int cur_line) const {
   fuji_decode_block(
-      [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grad,
+      [this, &info](xt_lines c, int pos, std::array<int_pair, 41>& grads,
                     [[maybe_unused]] int row, [[maybe_unused]] int i,
                     [[maybe_unused]] int comp) {
-        return fuji_decode_sample_even(info, c, pos, grad);
+        return fuji_decode_sample_even(info, c, pos, grads);
       },
       info, cur_line);
 }
