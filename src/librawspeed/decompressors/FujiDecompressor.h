@@ -204,16 +204,15 @@ private:
   static inline int fuji_zerobits(BitPumpMSB& pump);
   static int bitDiff(int value1, int value2);
 
-  template <typename T>
-  inline void fuji_decode_sample(T&& func, fuji_compressed_block& info,
-                                 xt_lines c, int pos,
-                                 std::array<int_pair, 41>& grads) const;
-  inline void fuji_decode_sample_even(fuji_compressed_block& info, xt_lines c,
-                                      int pos,
-                                      std::array<int_pair, 41>& grads) const;
-  inline void fuji_decode_sample_odd(fuji_compressed_block& info, xt_lines c,
-                                     int pos,
-                                     std::array<int_pair, 41>& grads) const;
+  [[nodiscard]] inline int
+  fuji_decode_sample(fuji_compressed_block& info, xt_lines c, int pos, int grad,
+                     int interp_val, std::array<int_pair, 41>& grads) const;
+  [[nodiscard]] inline int
+  fuji_decode_sample_even(fuji_compressed_block& info, xt_lines c, int pos,
+                          std::array<int_pair, 41>& grads) const;
+  [[nodiscard]] inline int
+  fuji_decode_sample_odd(fuji_compressed_block& info, xt_lines c, int pos,
+                         std::array<int_pair, 41>& grads) const;
 
   [[nodiscard]] inline std::pair<int, int>
   fuji_decode_interpolation_even_inner(const fuji_compressed_block& info,
@@ -221,8 +220,9 @@ private:
   [[nodiscard]] inline std::pair<int, int>
   fuji_decode_interpolation_odd_inner(const fuji_compressed_block& info,
                                       xt_lines c, int pos) const;
-  inline void fuji_decode_interpolation_even(const fuji_compressed_block& info,
-                                             xt_lines c, int pos) const;
+  [[nodiscard]] inline int
+  fuji_decode_interpolation_even(const fuji_compressed_block& info, xt_lines c,
+                                 int pos) const;
 
   static void fuji_extend_generic(const fuji_compressed_block& info, int start,
                                   int end);
