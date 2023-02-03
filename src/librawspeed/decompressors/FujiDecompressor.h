@@ -205,8 +205,8 @@ private:
   static int bitDiff(int value1, int value2);
 
   [[nodiscard]] inline int
-  fuji_decode_sample(fuji_compressed_block& info, xt_lines c, int pos, int grad,
-                     int interp_val, std::array<int_pair, 41>& grads) const;
+  fuji_decode_sample(fuji_compressed_block& info, int grad, int interp_val,
+                     std::array<int_pair, 41>& grads) const;
   [[nodiscard]] inline int
   fuji_decode_sample_even(fuji_compressed_block& info, xt_lines c, int pos,
                           std::array<int_pair, 41>& grads) const;
