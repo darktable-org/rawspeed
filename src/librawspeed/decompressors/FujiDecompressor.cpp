@@ -177,13 +177,13 @@ void FujiDecompressor::fuji_compressed_block::reset(
 
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
 
-  // Fully zero-initialize first two (read-only, carry-in) lines of each color,
-  // including first and last helper columnts. This is needed for correctness.
+  // Zero-initialize first two (read-only, carry-in) lines of each color,
+  // including first and last helper columns of the second row.
+  // NOTE: on the first row, we don't need to zero-init helper columns.
+  // This is needed for correctness.
   const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
-  for (xt_lines color : {R0, G0, B0}) {
-    for (int line = 0; line != 2; ++line)
-      memset(&lines(color + line, 0), 0, line_size);
-  }
+  for (xt_lines color : {R0, G0, B0})
+    memset(&lines(color, 0), 0, 2 * line_size);
 
   // Also, zero-initialize the last helper column of the first real line
   // of each color. Again, this is needed for correctness.
