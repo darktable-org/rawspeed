@@ -177,7 +177,32 @@ void FujiDecompressor::fuji_compressed_block::reset(
   if (reInit)
     std::fill(linealloc.begin(), linealloc.end(), 0);
 
+  MSan::Allocated(reinterpret_cast<const std::byte*>(&linealloc[0]),
+                  ltotal * (params.line_width + 2));
+
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
+
+  // Fully zero-initialize first two (read-only, carry-in) lines of each color,
+  // including first and last helper columnts. This is needed for correctness.
+  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
+  for (xt_lines color : {R0, G0, B0}) {
+    for (int line = 0; line != 2; ++line)
+      memset(&lines(color + line, 0), 0, line_size);
+  }
+
+  struct i_pair {
+    int a;
+    int b;
+  };
+
+  // For all other lines, only zero-initialize the last helper column.
+  // Again, this is needed for correctness.
+  const std::array<std::pair<xt_lines, int>, 3> ztable = {
+      {{R2, 3}, {G2, 6}, {B2, 3}}};
+  for (auto I : ztable) {
+    for (int line = 0; line != I.second; ++line)
+      lines(I.first + line, lines.width - 1) = 0;
+  }
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
