@@ -631,6 +631,9 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
       copy_line_to_bayer(info_block, strip, cur_line);
     }
 
+    if (cur_line + 1 == strip.height())
+      break;
+
     // Last two lines of each color become the first two lines.
     for (auto i : colors) {
       memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.a + i.b - 2, 0),
