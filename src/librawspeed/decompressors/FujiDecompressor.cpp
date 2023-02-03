@@ -23,6 +23,7 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/FujiDecompressor.h"
+#include "MemorySanitizer.h"              // for MSan
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/BayerPhase.h"            // for BayerPhase
@@ -169,14 +170,25 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
 
 void FujiDecompressor::fuji_compressed_block::reset(
     const fuji_compressed_params& params) {
-  const bool reInit = !linealloc.empty();
-
   linealloc.resize(ltotal * (params.line_width + 2), 0);
 
-  if (reInit)
-    std::fill(linealloc.begin(), linealloc.end(), 0);
+  MSan::Allocated(reinterpret_cast<const std::byte*>(&linealloc[0]),
+                  ltotal * (params.line_width + 2));
 
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
+
+  // Zero-initialize first two (read-only, carry-in) lines of each color,
+  // including first and last helper columns of the second row.
+  // NOTE: on the first row, we don't need to zero-init helper columns.
+  // This is needed for correctness.
+  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
+  for (xt_lines color : {R0, G0, B0})
+    memset(&lines(color, 0), 0, 2 * line_size);
+
+  // Also, zero-initialize the last helper column of the first real line
+  // of each color. Again, this is needed for correctness.
+  for (xt_lines color : {R2, G2, B2})
+    lines(color, lines.width - 1) = 0;
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
@@ -299,8 +311,8 @@ int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
 }
 
 __attribute__((always_inline)) int
-FujiDecompressor::fuji_decode_sample(fuji_compressed_block& info, xt_lines c,
-                                     int pos, int grad, int interp_val,
+FujiDecompressor::fuji_decode_sample(fuji_compressed_block& info, int grad,
+                                     int interp_val,
                                      std::array<int_pair, 41>& grads) const {
   int sample = 0;
   int code = 0;
@@ -425,14 +437,14 @@ __attribute__((always_inline)) int FujiDecompressor::fuji_decode_sample_even(
     fuji_compressed_block& info, xt_lines c, int pos,
     std::array<int_pair, 41>& grads) const {
   auto [grad, interp_val] = fuji_decode_interpolation_even_inner(info, c, pos);
-  return fuji_decode_sample(info, c, pos, grad, interp_val, grads);
+  return fuji_decode_sample(info, grad, interp_val, grads);
 }
 
 __attribute__((always_inline)) int FujiDecompressor::fuji_decode_sample_odd(
     fuji_compressed_block& info, xt_lines c, int pos,
     std::array<int_pair, 41>& grads) const {
   auto [grad, interp_val] = fuji_decode_interpolation_odd_inner(info, c, pos);
-  return fuji_decode_sample(info, c, pos, grad, interp_val, grads);
+  return fuji_decode_sample(info, grad, interp_val, grads);
 }
 
 __attribute__((always_inline)) int
@@ -605,9 +617,7 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
     int b;
   };
 
-  const std::array<i_pair, 6> mtable = {
-      {{R0, R3}, {R1, R4}, {G0, G6}, {G1, G7}, {B0, B3}, {B1, B4}}};
-  const std::array<int, 3> ctable = {R1, G1, B1};
+  const std::array<i_pair, 3> mtable = {{{R0, R3}, {G0, G6}, {B0, B3}}};
   const std::array<i_pair, 3> ztable = {{{R2, 3}, {G2, 6}, {B2, 3}}};
 
   for (int cur_line = 0; cur_line < strip.height(); cur_line++) {
@@ -625,20 +635,17 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
 
     // copy data from line buffers and advance
     for (auto i : mtable) {
-      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.b, 0), line_size);
+      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.b, 0),
+             2 * line_size);
     }
 
-    std::array<std::array<uint16_t, 2>, 3> tmp;
-    for (int c = 0; c != 3; ++c) {
-      tmp[c][0] = info_block.lines(ctable[c], 1);
-      tmp[c][1] = info_block.lines(ctable[c], common_info.line_width);
-    }
+    for (auto i : ztable) {
+      MSan::Allocated(
+          reinterpret_cast<const std::byte*>(&info_block.lines(i.a, 0)),
+          i.b * line_size);
 
-    for (int c = 0; c != 3; ++c) {
-      auto i = ztable[c];
-      memset(&info_block.lines(i.a, 0), 0, i.b * line_size);
-      info_block.lines(i.a, 0) = tmp[c][0];
-      info_block.lines(i.a, common_info.line_width + 1) = tmp[c][1];
+      info_block.lines(i.a, info_block.lines.width - 1) =
+          info_block.lines(i.a - 1, info_block.lines.width - 2);
     }
   }
 }

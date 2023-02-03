@@ -45,10 +45,26 @@ struct MSan final {
   MSan& operator=(MSan&&) = delete;
   ~MSan() = delete;
 
+  /* Declare memory chunk as being newly-allocated. */
+  static void Allocated(const std::byte* addr, size_t size);
+
   /* Checks that memory range is fully initialized, and reports an error if it
    * is not. */
   static void CheckMemIsInitialized(const std::byte* addr, size_t size);
 };
+
+#if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
+inline void MSan::Allocated(const std::byte* addr, size_t size) {
+  __msan_allocated_memory(addr, size);
+}
+#else
+inline void MSan::Allocated([[maybe_unused]] const std::byte* addr,
+                            [[maybe_unused]] size_t size) {
+  // If we are building without MSAN, then there is no way to have a non-empty
+  // body of this function. It's better than to have a macros, or to use
+  // preprocessor in every place it is called.
+}
+#endif
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
 inline void MSan::CheckMemIsInitialized(const std::byte* addr, size_t size) {
