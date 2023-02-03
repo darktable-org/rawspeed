@@ -617,8 +617,7 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
     int b;
   };
 
-  const std::array<i_pair, 6> mtable = {
-      {{R0, R3}, {R1, R4}, {G0, G6}, {G1, G7}, {B0, B3}, {B1, B4}}};
+  const std::array<i_pair, 3> mtable = {{{R0, R3}, {G0, G6}, {B0, B3}}};
   const std::array<int, 3> ctable = {R1, G1, B1};
   const std::array<i_pair, 3> ztable = {{{R2, 3}, {G2, 6}, {B2, 3}}};
 
@@ -637,7 +636,8 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
 
     // copy data from line buffers and advance
     for (auto i : mtable) {
-      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.b, 0), line_size);
+      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.b, 0),
+             2 * line_size);
     }
 
     std::array<uint16_t, 3> tmp;
