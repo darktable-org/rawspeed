@@ -170,12 +170,7 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
 
 void FujiDecompressor::fuji_compressed_block::reset(
     const fuji_compressed_params& params) {
-  const bool reInit = !linealloc.empty();
-
   linealloc.resize(ltotal * (params.line_width + 2), 0);
-
-  if (reInit)
-    std::fill(linealloc.begin(), linealloc.end(), 0);
 
   MSan::Allocated(reinterpret_cast<const std::byte*>(&linealloc[0]),
                   ltotal * (params.line_width + 2));
