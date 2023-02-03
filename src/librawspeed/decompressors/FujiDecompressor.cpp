@@ -660,7 +660,6 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
       MSan::Allocated(
           reinterpret_cast<const std::byte*>(&info_block.lines(i.a, 0)),
           i.b * line_size);
-      info_block.lines(i.a, 0) = tmp[c][0];
       info_block.lines(i.a, info_block.lines.width - 1) = tmp[c][1];
     }
   }
