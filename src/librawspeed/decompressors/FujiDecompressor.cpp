@@ -618,7 +618,6 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
   };
 
   const std::array<i_pair, 3> mtable = {{{R0, R3}, {G0, G6}, {B0, B3}}};
-  const std::array<int, 3> ctable = {R1, G1, B1};
   const std::array<i_pair, 3> ztable = {{{R2, 3}, {G2, 6}, {B2, 3}}};
 
   for (int cur_line = 0; cur_line < strip.height(); cur_line++) {
@@ -640,17 +639,13 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
              2 * line_size);
     }
 
-    std::array<uint16_t, 3> tmp;
-    for (int c = 0; c != 3; ++c) {
-      tmp[c] = info_block.lines(ctable[c], info_block.lines.width - 2);
-    }
-
-    for (int c = 0; c != 3; ++c) {
-      auto i = ztable[c];
+    for (auto i : ztable) {
       MSan::Allocated(
           reinterpret_cast<const std::byte*>(&info_block.lines(i.a, 0)),
           i.b * line_size);
-      info_block.lines(i.a, info_block.lines.width - 1) = tmp[c];
+
+      info_block.lines(i.a, info_block.lines.width - 1) =
+          info_block.lines(i.a - 1, info_block.lines.width - 2);
     }
   }
 }
