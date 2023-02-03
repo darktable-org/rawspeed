@@ -23,6 +23,7 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/FujiDecompressor.h"
+#include "MemorySanitizer.h"              // for MSan
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/BayerPhase.h"            // for BayerPhase
@@ -637,6 +638,9 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
     for (int c = 0; c != 3; ++c) {
       auto i = ztable[c];
       memset(&info_block.lines(i.a, 0), 0, i.b * line_size);
+      MSan::Allocated(
+          reinterpret_cast<const std::byte*>(&info_block.lines(i.a, 0)),
+          i.b * line_size);
       info_block.lines(i.a, 0) = tmp[c][0];
       info_block.lines(i.a, info_block.lines.width - 1) = tmp[c][1];
     }
