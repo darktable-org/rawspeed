@@ -185,19 +185,10 @@ void FujiDecompressor::fuji_compressed_block::reset(
       memset(&lines(color + line, 0), 0, line_size);
   }
 
-  struct i_pair {
-    int a;
-    int b;
-  };
-
-  // For all other lines, only zero-initialize the last helper column.
-  // Again, this is needed for correctness.
-  const std::array<std::pair<xt_lines, int>, 3> ztable = {
-      {{R2, 3}, {G2, 6}, {B2, 3}}};
-  for (auto I : ztable) {
-    for (int line = 0; line != I.second; ++line)
-      lines(I.first + line, lines.width - 1) = 0;
-  }
+  // Also, zero-initialize the last helper column of the first real line
+  // of each color. Again, this is needed for correctness.
+  for (xt_lines color : {R2, G2, B2})
+    lines(color, lines.width - 1) = 0;
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
