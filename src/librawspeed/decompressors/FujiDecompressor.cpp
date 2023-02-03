@@ -616,8 +616,7 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
     int b;
   };
 
-  const std::array<i_pair, 3> mtable = {{{R0, R3}, {G0, G6}, {B0, B3}}};
-  const std::array<i_pair, 3> ztable = {{{R2, 3}, {G2, 6}, {B2, 3}}};
+  const std::array<i_pair, 3> colors = {{{R0, 5}, {G0, 8}, {B0, 5}}};
 
   for (int cur_line = 0; cur_line < strip.height(); cur_line++) {
     if (header.raw_type == 16) {
@@ -632,19 +631,23 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
       copy_line_to_bayer(info_block, strip, cur_line);
     }
 
-    // copy data from line buffers and advance
-    for (auto i : mtable) {
-      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.b, 0),
+    // Last two lines of each color become the first two lines.
+    for (auto i : colors) {
+      memcpy(&info_block.lines(i.a, 0), &info_block.lines(i.a + i.b - 2, 0),
              2 * line_size);
     }
 
-    for (auto i : ztable) {
+    for (auto i : colors) {
+      // All other lines of each color become uninitialized.
       MSan::Allocated(
-          reinterpret_cast<const std::byte*>(&info_block.lines(i.a, 0)),
-          i.b * line_size);
+          reinterpret_cast<const std::byte*>(&info_block.lines(i.a + 2, 0)),
+          (i.b - 2) * line_size);
 
-      info_block.lines(i.a, info_block.lines.width - 1) =
-          info_block.lines(i.a - 1, info_block.lines.width - 2);
+      // And the first (real, uninitialized) line of each color gets the content
+      // of the last helper column from the last decoded sample of previous
+      // line of that color.
+      info_block.lines(i.a + 2, info_block.lines.width - 1) =
+          info_block.lines(i.a + 2 - 1, info_block.lines.width - 2);
     }
   }
 }
