@@ -657,7 +657,6 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
 
     for (int c = 0; c != 3; ++c) {
       auto i = ztable[c];
-      memset(&info_block.lines(i.a, 0), 0, i.b * line_size);
       MSan::Allocated(
           reinterpret_cast<const std::byte*>(&info_block.lines(i.a, 0)),
           i.b * line_size);
