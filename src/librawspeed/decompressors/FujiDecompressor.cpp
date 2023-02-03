@@ -363,11 +363,10 @@ FujiDecompressor::fuji_decode_sample(fuji_compressed_block& info, int grad,
     interp_val -= common_info.total_values;
   }
 
-  if (interp_val >= 0) {
-    return std::min(interp_val, common_info.q_point[4]);
-  } else {
+  if (interp_val < 0)
     return 0;
-  }
+
+  return std::min(interp_val, common_info.q_point[4]);
 }
 
 #define fuji_quant_gradient(v1, v2)                                            \
