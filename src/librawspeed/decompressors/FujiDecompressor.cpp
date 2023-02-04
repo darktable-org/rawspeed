@@ -170,10 +170,12 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
 
 void FujiDecompressor::fuji_compressed_block::reset(
     const fuji_compressed_params& params) {
+  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
+
   linealloc.resize(ltotal * (params.line_width + 2), 0);
 
   MSan::Allocated(reinterpret_cast<const std::byte*>(&linealloc[0]),
-                  ltotal * (params.line_width + 2));
+                  ltotal * line_size);
 
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
 
@@ -181,7 +183,6 @@ void FujiDecompressor::fuji_compressed_block::reset(
   // including first and last helper columns of the second row.
   // NOTE: on the first row, we don't need to zero-init helper columns.
   // This is needed for correctness.
-  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
   for (xt_lines color : {R0, G0, B0})
     memset(&lines(color, 0), 0, 2 * line_size);
 
