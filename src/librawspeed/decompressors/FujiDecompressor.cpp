@@ -488,7 +488,8 @@ template <typename T>
 __attribute__((always_inline)) void
 FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
                                     [[maybe_unused]] int cur_line) const {
-  const int line_width = common_info.line_width;
+  assert(common_info.line_width % 2 == 0);
+  const int line_width = common_info.line_width / 2;
 
   auto pass = [this, &info, line_width, func_even](std::array<xt_lines, 2> c,
                                                    int row) {
@@ -500,7 +501,7 @@ FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
     };
 
     std::array<ColorPos, 2> pos;
-    for (int i = 0; i != line_width + 8; i += 2) {
+    for (int i = 0; i != line_width + 4; ++i) {
       if (i < line_width) {
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].even;
@@ -511,7 +512,7 @@ FujiDecompressor::fuji_decode_block(T&& func_even, fuji_compressed_block& info,
         }
       }
 
-      if (i >= 8) {
+      if (i >= 4) {
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].odd;
           int sample =
@@ -589,16 +590,15 @@ void FujiDecompressor::xtrans_decode_block(fuji_compressed_block& info,
   fuji_decode_block(
       [this, &info](xt_lines c, int col, std::array<int_pair, 41>& grads,
                     int row, int i, int comp) {
-        assert(i % 4 == 0 || i % 4 == 2);
-        if ((comp == 0 && (row == 0 || (row == 2 && i % 4 == 0) ||
-                           (row == 4 && i % 4 != 0) || row == 5)) ||
-            (comp == 1 && (row == 1 || row == 2 || (row == 3 && i % 4 != 0) ||
-                           (row == 5 && i % 4 == 0))))
+        if ((comp == 0 && (row == 0 || (row == 2 && i % 2 == 0) ||
+                           (row == 4 && i % 2 != 0) || row == 5)) ||
+            (comp == 1 && (row == 1 || row == 2 || (row == 3 && i % 2 != 0) ||
+                           (row == 5 && i % 2 == 0))))
           return fuji_decode_interpolation_even(info, c, col);
-        assert((comp == 0 && (row == 1 || (row == 2 && i % 4 != 0) ||
-                              row == 3 || (row == 4 && i % 4 == 0))) ||
-               (comp == 1 && (row == 0 || (row == 3 && i % 4 == 0) ||
-                              row == 4 || (row == 5 && i % 4 != 0))));
+        assert((comp == 0 && (row == 1 || (row == 2 && i % 2 != 0) ||
+                              row == 3 || (row == 4 && i % 2 == 0))) ||
+               (comp == 1 && (row == 0 || (row == 3 && i % 2 == 0) ||
+                              row == 4 || (row == 5 && i % 2 != 0))));
         return fuji_decode_sample_even(info, c, col, grads);
       },
       info, cur_line);
