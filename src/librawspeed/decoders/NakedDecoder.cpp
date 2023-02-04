@@ -29,6 +29,7 @@
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include <map>                                      // for map
+#include <optional>
 #include <stdexcept>                                // for out_of_range
 #include <string>                                   // for string, basic_st...
 
@@ -41,12 +42,17 @@ class CameraMetaData;
 NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
-const map<std::string, BitOrder, std::less<>> NakedDecoder::order2enum = {
-    {"plain", BitOrder::LSB},
-    {"jpeg", BitOrder::MSB},
-    {"jpeg16", BitOrder::MSB16},
-    {"jpeg32", BitOrder::MSB32},
-};
+static std::optional<BitOrder> getAsBitOrder(std::string_view s) {
+  if (s == "plain")
+    return BitOrder::LSB;
+  if (s == "jpeg")
+    return BitOrder::MSB;
+  if (s == "jpeg16")
+    return BitOrder::MSB16;
+  if (s == "jpeg32")
+    return BitOrder::MSB32;
+  return std::nullopt;
+}
 
 void NakedDecoder::parseHints() {
   const auto& cHints = cam->hints;
@@ -77,11 +83,10 @@ void NakedDecoder::parseHints() {
 
   auto order = cHints.get("order", std::string());
   if (!order.empty()) {
-    try {
-      bo = order2enum.at(order);
-    } catch (const std::out_of_range&) {
+    auto bo_ = getAsBitOrder(order);
+    if (!bo_)
       ThrowRDE("%s %s: unknown order: %s", make, model, order.c_str());
-    }
+    bo = *bo_;
   }
 }
 
