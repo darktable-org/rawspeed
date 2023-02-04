@@ -113,12 +113,23 @@ static std::optional<CFAColor> getAsCFAColor(char c) {
   }
 }
 
-const map<std::string, CFAColor, std::less<>> Camera::str2enum = {
-    {"GREEN", CFAColor::GREEN},   {"RED", CFAColor::RED},
-    {"BLUE", CFAColor::BLUE},     {"FUJI_GREEN", CFAColor::FUJI_GREEN},
-    {"CYAN", CFAColor::CYAN},     {"MAGENTA", CFAColor::MAGENTA},
-    {"YELLOW", CFAColor::YELLOW},
-};
+static std::optional<CFAColor> getAsCFAColor(std::string_view c) {
+  if (c == "GREEN")
+    return CFAColor::GREEN;
+  if (c == "RED")
+    return CFAColor::RED;
+  if (c == "BLUE")
+    return CFAColor::BLUE;
+  if (c == "FUJI_GREEN")
+    return CFAColor::FUJI_GREEN;
+  if (c == "CYAN")
+    return CFAColor::CYAN;
+  if (c == "MAGENTA")
+    return CFAColor::MAGENTA;
+  if (c == "YELLOW")
+    return CFAColor::YELLOW;
+  return std::nullopt;
+}
 
 #ifdef HAVE_PUGIXML
 void Camera::parseCFA(const xml_node &cur) {
@@ -164,16 +175,13 @@ void Camera::parseCFA(const xml_node &cur) {
         }
 
         const auto* c1 = c.child_value();
-        CFAColor c2;
 
-        try {
-          c2 = str2enum.at(c1);
-        } catch (const std::out_of_range&) {
+        auto c2 = getAsCFAColor(c1);
+        if (!c2)
           ThrowCME("Invalid color in CFA array of camera %s %s: %s",
                    make.c_str(), model.c_str(), c1);
-        }
 
-        cfa.setColorAt(iPoint2D(x, y), c2);
+        cfa.setColorAt(iPoint2D(x, y), *c2);
       }
   }
 }
