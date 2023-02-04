@@ -1,3 +1,11 @@
+set (DISABLED_WARNING_FLAGS
+  "global-constructors"
+)
+
+foreach(warning ${DISABLED_WARNING_FLAGS})
+  CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-${warning})
+endforeach()
+
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/all-fuzzers.txt" ALL_EXPECTED_FUZZERS)
 list(SORT ALL_EXPECTED_FUZZERS)
 
