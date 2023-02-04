@@ -1,5 +1,6 @@
 set (DISABLED_WARNING_FLAGS
   "global-constructors"
+  "exit-time-destructors"
 )
 
 foreach(warning ${DISABLED_WARNING_FLAGS})
