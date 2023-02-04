@@ -186,10 +186,12 @@ void FujiDecompressor::fuji_compressed_block::reset(
   for (xt_lines color : {R0, G0, B0})
     memset(&lines(color, 0), 0, 2 * line_size);
 
-  // Also, zero-initialize the last helper column of the first real line
-  // of each color. Again, this is needed for correctness.
+  // And the first (real, uninitialized) line of each color gets the content
+  // of the last helper column from the last decoded sample of previous
+  // line of that color.
+  // Again, this is needed for correctness.
   for (xt_lines color : {R2, G2, B2})
-    lines(color, lines.width - 1) = 0;
+    lines(color, lines.width - 1) = lines(color - 1, lines.width - 2);
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
