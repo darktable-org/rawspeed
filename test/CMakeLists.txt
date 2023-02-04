@@ -4,6 +4,8 @@ set (DISABLED_WARNING_FLAGS
   "suggest-attribute=const"
   "suggest-override"
   "used-but-marked-unused"
+  "global-constructors"
+  "exit-time-destructors"
 )
 
 foreach(warning ${DISABLED_WARNING_FLAGS})

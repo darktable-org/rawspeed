@@ -36,6 +36,7 @@
 #include <initializer_list>               // for initializer_list
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
+#include <optional>
 #include <stdexcept>                      // for out_of_range
 #include <tuple>                          // for tie, tuple
 // IWYU pragma: no_include <ext/alloc_traits.h>
@@ -614,11 +615,10 @@ DngOpcodes::DngOpcodes(const RawImage& ri, ByteStream bs) {
 
     const char* opName = nullptr;
     constructor_t opConstructor = nullptr;
-    try {
-      std::tie(opName, opConstructor) = Map.at(code);
-    } catch (const std::out_of_range&) {
+    if (auto Op = Map(code))
+      std::tie(opName, opConstructor) = *Op;
+    else
       ThrowRDE("Unknown unhandled Opcode: %d", code);
-    }
 
     if (opConstructor != nullptr)
       opcodes.emplace_back(opConstructor(ri, opcode_bs, integrated_subimg));
@@ -659,44 +659,56 @@ DngOpcodes::constructor(const RawImage& ri, ByteStream& bs,
 
 // ALL opcodes specified in DNG Specification MUST be listed here.
 // however, some of them might not be implemented.
-const std::map<uint32_t, std::pair<const char*, DngOpcodes::constructor_t>>
-    DngOpcodes::Map = {
-        {1U, make_pair("WarpRectilinear", nullptr)},
-        {2U, make_pair("WarpFisheye", nullptr)},
-        {3U, make_pair("FixVignetteRadial", nullptr)},
-        {4U,
-         make_pair("FixBadPixelsConstant",
-                   &DngOpcodes::constructor<DngOpcodes::FixBadPixelsConstant>)},
-        {5U, make_pair("FixBadPixelsList",
-                       &DngOpcodes::constructor<DngOpcodes::FixBadPixelsList>)},
-        {6U, make_pair("TrimBounds",
-                       &DngOpcodes::constructor<DngOpcodes::TrimBounds>)},
-        {7U,
-         make_pair("MapTable", &DngOpcodes::constructor<DngOpcodes::TableMap>)},
-        {8U, make_pair("MapPolynomial",
-                       &DngOpcodes::constructor<DngOpcodes::PolynomialMap>)},
-        {9U, make_pair("GainMap", nullptr)},
-        {10U,
-         make_pair(
-             "DeltaPerRow",
-             &DngOpcodes::constructor<
-                 DngOpcodes::OffsetPerRowOrCol<DeltaRowOrColBase::SelectY>>)},
-        {11U,
-         make_pair(
-             "DeltaPerColumn",
-             &DngOpcodes::constructor<
-                 DngOpcodes::OffsetPerRowOrCol<DeltaRowOrColBase::SelectX>>)},
-        {12U,
-         make_pair(
-             "ScalePerRow",
-             &DngOpcodes::constructor<
-                 DngOpcodes::ScalePerRowOrCol<DeltaRowOrColBase::SelectY>>)},
-        {13U,
-         make_pair(
-             "ScalePerColumn",
-             &DngOpcodes::constructor<
-                 DngOpcodes::ScalePerRowOrCol<DeltaRowOrColBase::SelectX>>)},
-
-};
+std::optional<std::pair<const char*, DngOpcodes::constructor_t>>
+DngOpcodes::Map(uint32_t code) {
+  switch (code) {
+  case 1U:
+    return make_pair("WarpRectilinear", nullptr);
+  case 2U:
+    return make_pair("WarpFisheye", nullptr);
+  case 3U:
+    return make_pair("FixVignetteRadial", nullptr);
+  case 4U:
+    return make_pair(
+        "FixBadPixelsConstant",
+        &DngOpcodes::constructor<DngOpcodes::FixBadPixelsConstant>);
+  case 5U:
+    return make_pair("FixBadPixelsList",
+                     &DngOpcodes::constructor<DngOpcodes::FixBadPixelsList>);
+  case 6U:
+    return make_pair("TrimBounds",
+                     &DngOpcodes::constructor<DngOpcodes::TrimBounds>);
+  case 7U:
+    return make_pair("MapTable",
+                     &DngOpcodes::constructor<DngOpcodes::TableMap>);
+  case 8U:
+    return make_pair("MapPolynomial",
+                     &DngOpcodes::constructor<DngOpcodes::PolynomialMap>);
+  case 9U:
+    return make_pair("GainMap", nullptr);
+  case 10U:
+    return make_pair(
+        "DeltaPerRow",
+        &DngOpcodes::constructor<
+            DngOpcodes::OffsetPerRowOrCol<DeltaRowOrColBase::SelectY>>);
+  case 11U:
+    return make_pair(
+        "DeltaPerColumn",
+        &DngOpcodes::constructor<
+            DngOpcodes::OffsetPerRowOrCol<DeltaRowOrColBase::SelectX>>);
+  case 12U:
+    return make_pair(
+        "ScalePerRow",
+        &DngOpcodes::constructor<
+            DngOpcodes::ScalePerRowOrCol<DeltaRowOrColBase::SelectY>>);
+  case 13U:
+    return make_pair(
+        "ScalePerColumn",
+        &DngOpcodes::constructor<
+            DngOpcodes::ScalePerRowOrCol<DeltaRowOrColBase::SelectX>>);
+  default:
+    return std::nullopt;
+  }
+}
 
 } // namespace rawspeed

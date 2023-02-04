@@ -112,9 +112,6 @@ public:
   std::vector<NotARational<int>> color_matrix;
 
 protected:
-  static const std::map<char, CFAColor> char2enum;
-  static const std::map<std::string, CFAColor, std::less<>> str2enum;
-
 #ifdef HAVE_PUGIXML
   void parseCFA(const pugi::xml_node &node);
   void parseCrop(const pugi::xml_node &node);
