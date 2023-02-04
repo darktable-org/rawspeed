@@ -27,6 +27,7 @@
 #include <cctype>                             // for tolower
 #include <cstdio>                             // for size_t
 #include <map>                                // for map
+#include <optional>
 #include <stdexcept>                          // for out_of_range
 #include <string>                             // for string, operator==
 #include <string_view>                        // for operator==, basic_stri...
@@ -91,12 +92,26 @@ Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
 static std::string name(const xml_node& a) { return a.name(); }
 #endif
 
-const map<char, CFAColor> Camera::char2enum = {
-    {'g', CFAColor::GREEN},  {'r', CFAColor::RED},
-    {'b', CFAColor::BLUE},   {'f', CFAColor::FUJI_GREEN},
-    {'c', CFAColor::CYAN},   {'m', CFAColor::MAGENTA},
-    {'y', CFAColor::YELLOW},
-};
+static std::optional<CFAColor> getAsCFAColor(char c) {
+  switch (c) {
+  case 'g':
+    return CFAColor::GREEN;
+  case 'r':
+    return CFAColor::RED;
+  case 'b':
+    return CFAColor::BLUE;
+  case 'f':
+    return CFAColor::FUJI_GREEN;
+  case 'c':
+    return CFAColor::CYAN;
+  case 'm':
+    return CFAColor::MAGENTA;
+  case 'y':
+    return CFAColor::YELLOW;
+  default:
+    return std::nullopt;
+  }
+}
 
 const map<std::string, CFAColor, std::less<>> Camera::str2enum = {
     {"GREEN", CFAColor::GREEN},   {"RED", CFAColor::RED},
@@ -127,16 +142,13 @@ void Camera::parseCFA(const xml_node &cur) {
         }
         for (size_t x = 0; x < key.size(); ++x) {
           auto c1 = key[x];
-          CFAColor c2;
 
-          try {
-            c2 = char2enum.at(static_cast<char>(tolower(c1)));
-          } catch (const std::out_of_range&) {
+          auto c2 = getAsCFAColor(static_cast<char>(tolower(c1)));
+          if (!c2)
             ThrowCME("Invalid color in CFA array of camera %s %s: %c",
                      make.c_str(), model.c_str(), c1);
-          }
 
-          cfa.setColorAt(iPoint2D(static_cast<int>(x), y), c2);
+          cfa.setColorAt(iPoint2D(static_cast<int>(x), y), *c2);
         }
       } else if (name(c) == "Color") {
         int x = c.attribute("x").as_int(-1);
