@@ -89,8 +89,8 @@ Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
 }
 
 #ifdef HAVE_PUGIXML
+
 static std::string name(const xml_node& a) { return a.name(); }
-#endif
 
 static std::optional<CFAColor> getAsCFAColor(char c) {
   switch (c) {
@@ -131,7 +131,6 @@ static std::optional<CFAColor> getAsCFAColor(std::string_view c) {
   return std::nullopt;
 }
 
-#ifdef HAVE_PUGIXML
 void Camera::parseCFA(const xml_node &cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
     ThrowCME("Not an CFA/CFA2 node!");
