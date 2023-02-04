@@ -181,10 +181,17 @@ void FujiDecompressor::fuji_compressed_block::reset(
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
   // including first and last helper columns of the second row.
-  // NOTE: on the first row, we don't need to zero-init helper columns.
   // This is needed for correctness.
-  for (xt_lines color : {R0, G0, B0})
+  for (xt_lines color : {R0, G0, B0}) {
     memset(&lines(color, 0), 0, 2 * line_size);
+
+    // On the first row, we don't need to zero-init helper columns.
+    MSan::Allocated(reinterpret_cast<const std::byte*>(&lines(color, 0)),
+                    sizeof(uint16_t));
+    MSan::Allocated(
+        reinterpret_cast<const std::byte*>(&lines(color, lines.width - 1)),
+        sizeof(uint16_t));
+  }
 
   // And the first (real, uninitialized) line of each color gets the content
   // of the last helper column from the last decoded sample of previous
