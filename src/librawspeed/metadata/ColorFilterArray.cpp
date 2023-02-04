@@ -29,6 +29,7 @@
 #include <cstdarg>                        // for va_arg, va_end, va_list
 #include <cstdlib>                        // for abs, size_t
 #include <map>                            // for map
+#include <optional>
 #include <stdexcept>                      // for out_of_range
 #include <string>                         // for string, basic_string
 
@@ -167,19 +168,36 @@ uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
   return filter;
 }
 
-const map<CFAColor, std::string> ColorFilterArray::color2String = {
-    {CFAColor::RED, "RED"},         {CFAColor::GREEN, "GREEN"},
-    {CFAColor::BLUE, "BLUE"},       {CFAColor::CYAN, "CYAN"},
-    {CFAColor::MAGENTA, "MAGENTA"}, {CFAColor::YELLOW, "YELLOW"},
-    {CFAColor::WHITE, "WHITE"},     {CFAColor::FUJI_GREEN, "FUJIGREEN"},
-    {CFAColor::UNKNOWN, "UNKNOWN"}};
+static std::optional<std::string_view> getColorAsString(CFAColor c) {
+  switch (c) {
+  case CFAColor::RED:
+    return "RED";
+  case CFAColor::GREEN:
+    return "GREEN";
+  case CFAColor::BLUE:
+    return "BLUE";
+  case CFAColor::CYAN:
+    return "CYAN";
+  case CFAColor::MAGENTA:
+    return "MAGENTA";
+  case CFAColor::YELLOW:
+    return "YELLOW";
+  case CFAColor::WHITE:
+    return "WHITE";
+  case CFAColor::FUJI_GREEN:
+    return "FUJIGREEN";
+  case CFAColor::UNKNOWN:
+    return "UNKNOWN";
+  default:
+    return std::nullopt;
+  }
+}
 
 std::string ColorFilterArray::colorToString(CFAColor c) {
-  try {
-    return color2String.at(c);
-  } catch (const std::out_of_range&) {
+  auto s = getColorAsString(c);
+  if (!s)
     ThrowRDE("Unsupported CFA Color: %u", static_cast<unsigned>(c));
-  }
+  return std::string(*s);
 }
 
 void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
