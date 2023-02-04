@@ -205,24 +205,36 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   mRaw->cfa.setSize(cfaSize);
 
-  static const map<uint32_t, CFAColor> int2enum = {
-      {0, CFAColor::RED},   {1, CFAColor::GREEN},   {2, CFAColor::BLUE},
-      {3, CFAColor::CYAN},  {4, CFAColor::MAGENTA}, {5, CFAColor::YELLOW},
-      {6, CFAColor::WHITE},
+  auto getAsCFAColor = [](uint32_t c) -> std::optional<CFAColor> {
+    switch (c) {
+    case 0:
+      return CFAColor::RED;
+    case 1:
+      return CFAColor::GREEN;
+    case 2:
+      return CFAColor::BLUE;
+    case 3:
+      return CFAColor::CYAN;
+    case 4:
+      return CFAColor::MAGENTA;
+    case 5:
+      return CFAColor::YELLOW;
+    case 6:
+      return CFAColor::WHITE;
+    default:
+      return std::nullopt;
+    }
   };
 
   for (int y = 0; y < cfaSize.y; y++) {
     for (int x = 0; x < cfaSize.x; x++) {
       uint32_t c1 = cPat->getByte(x + y * cfaSize.x);
-      CFAColor c2 = CFAColor::UNKNOWN;
 
-      try {
-        c2 = int2enum.at(c1);
-      } catch (const std::out_of_range&) {
+      auto c2 = getAsCFAColor(c1);
+      if (!c2)
         ThrowRDE("Unsupported CFA Color: %u", c1);
-      }
 
-      mRaw->cfa.setColorAt(iPoint2D(x, y), c2);
+      mRaw->cfa.setColorAt(iPoint2D(x, y), *c2);
     }
   }
 
