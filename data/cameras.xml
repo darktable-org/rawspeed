@@ -14862,7 +14862,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="4" width="-146" height="-6"/>
-		<Sensor black="63" white="16383"/>
+		<Sensor black="0" white="0"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">16212 -8423 -1583</ColorMatrixRow>
@@ -14880,7 +14880,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="4" width="-146" height="-6"/>
-		<Sensor black="62" white="16383"/>
+		<Sensor black="0" white="0"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">16212 -8423 -1583</ColorMatrixRow>
@@ -14898,7 +14898,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="4" width="-146" height="-6"/>
-		<Sensor black="63" white="16383"/>
+		<Sensor black="0" white="0"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">16212 -8423 -1583</ColorMatrixRow>
@@ -14916,7 +14916,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="4" width="-146" height="-6"/>
-		<Sensor black="62" white="16383"/>
+		<Sensor black="0" white="0"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">16212 -8423 -1583</ColorMatrixRow>
