@@ -70,9 +70,6 @@ public:
   static std::string colorToString(CFAColor c);
   static uint32_t __attribute__((const))
   shiftDcrawFilter(uint32_t filter, int x, int y);
-
-protected:
-  static const std::map<CFAColor, std::string> color2String;
 };
 
 // FC macro from dcraw outputs, given the filters definition, the dcraw color

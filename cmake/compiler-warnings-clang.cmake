@@ -17,8 +17,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "covered-switch-default"
   "deprecated"
   "double-promotion"
-  "exit-time-destructors"
-  "global-constructors"
   "gnu-zero-variadic-macro-arguments"
   "old-style-cast"
   "padded"

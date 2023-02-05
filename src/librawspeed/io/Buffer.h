@@ -65,7 +65,8 @@ public:
     if (!data)
       ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
 
-    assert(!ASan::RegionIsPoisoned(data.get(), size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<std::byte*>(data.get()),
+                                   size));
 
     return data;
   }
@@ -87,7 +88,8 @@ public:
     if (!data)
       ThrowIOE("Memory buffer is nonexistent");
 
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
 
     isOwner = true;
   }
@@ -95,18 +97,21 @@ public:
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
   }
 
   // creates a (non-owning) copy / view of rhs
   Buffer(const Buffer& rhs) : data(rhs.data), size(rhs.size) {
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
   }
 
   // Move data and ownership from rhs to this
   Buffer(Buffer&& rhs) noexcept
       : data(rhs.data), size(rhs.size), isOwner(rhs.isOwner) {
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
     rhs.isOwner = false;
   }
 
@@ -119,7 +124,8 @@ public:
 
   Buffer& operator=(Buffer&& rhs) noexcept {
     if (this == &rhs) {
-      assert(!ASan::RegionIsPoisoned(data, size));
+      assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                     size));
       return *this;
     }
 
@@ -130,7 +136,8 @@ public:
     size = rhs.size;
     isOwner = rhs.isOwner;
 
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
 
     rhs.isOwner = false;
 
@@ -139,14 +146,16 @@ public:
 
   Buffer& operator=(const Buffer& rhs) {
     if (this == &rhs) {
-      assert(!ASan::RegionIsPoisoned(data, size));
+      assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                     size));
       return *this;
     }
 
     Buffer unOwningTmp(rhs.data, rhs.size);
     *this = std::move(unOwningTmp);
     assert(!isOwner);
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
 
     return *this;
   }
@@ -173,7 +182,8 @@ public:
       ThrowIOE("Buffer overflow: image file may be truncated");
 
     assert(data);
-    assert(!ASan::RegionIsPoisoned(data + offset, count));
+    assert(!ASan::RegionIsPoisoned(
+        reinterpret_cast<const std::byte*>(data) + offset, count));
 
     return data + offset;
   }
@@ -184,12 +194,14 @@ public:
   // std begin/end iterators to allow for range loop
   [[nodiscard]] const uint8_t* begin() const {
     assert(data);
-    assert(!ASan::RegionIsPoisoned(data, 0));
+    assert(
+        !ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data), 0));
     return data;
   }
   [[nodiscard]] const uint8_t* end() const {
     assert(data);
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
     return data + size;
   }
 
@@ -204,7 +216,8 @@ public:
   }
 
   [[nodiscard]] inline size_type getSize() const {
-    assert(!ASan::RegionIsPoisoned(data, size));
+    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
+                                   size));
     return size;
   }
 

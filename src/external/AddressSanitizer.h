@@ -46,42 +46,47 @@ struct ASan final {
   ~ASan() = delete;
 
   // Marks memory region [addr, addr+size) as unaddressable.
-  static void PoisonMemoryRegion(void const volatile* addr, size_t size);
+  static void PoisonMemoryRegion(const volatile std::byte* addr, size_t size);
   // Marks memory region [addr, addr+size) as addressable.
-  static void UnPoisonMemoryRegion(void const volatile* addr, size_t size);
+  static void UnPoisonMemoryRegion(const volatile std::byte* addr, size_t size);
 
   // If at least one byte in [beg, beg+size) is poisoned, return true
   // Otherwise return 0.
-  static bool RegionIsPoisoned(void const volatile* addr, size_t size);
+  static bool RegionIsPoisoned(const volatile std::byte* addr, size_t size);
 };
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-inline void ASan::PoisonMemoryRegion(void const volatile* addr, size_t size) {
+inline void ASan::PoisonMemoryRegion(const volatile std::byte* addr,
+                                     size_t size) {
   __asan_poison_memory_region(addr, size);
 }
-inline void ASan::UnPoisonMemoryRegion(void const volatile* addr, size_t size) {
+inline void ASan::UnPoisonMemoryRegion(const volatile std::byte* addr,
+                                       size_t size) {
   __asan_unpoison_memory_region(addr, size);
 }
-inline bool ASan::RegionIsPoisoned(void const volatile* addr, size_t size) {
-  auto* beg = const_cast<void*>(addr); // NOLINT
+inline bool ASan::RegionIsPoisoned(const volatile std::byte* addr,
+                                   size_t size) {
+  auto* beg = const_cast<std::byte*>(addr); // NOLINT
   return nullptr != __asan_region_is_poisoned(beg, size);
 }
 #else
-inline void ASan::PoisonMemoryRegion([[maybe_unused]] void const volatile* addr,
-                                     [[maybe_unused]] size_t size) {
+inline void
+ASan::PoisonMemoryRegion([[maybe_unused]] const volatile std::byte* addr,
+                         [[maybe_unused]] size_t size) {
   // If we are building without ASan, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
   // preprocessor in every place it is called.
 }
 inline void
-ASan::UnPoisonMemoryRegion([[maybe_unused]] void const volatile* addr,
+ASan::UnPoisonMemoryRegion([[maybe_unused]] const volatile std::byte* addr,
                            [[maybe_unused]] size_t size) {
   // If we are building without ASan, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
   // preprocessor in every place it is called.
 }
-inline bool ASan::RegionIsPoisoned([[maybe_unused]] void const volatile* addr,
-                                   [[maybe_unused]] size_t size) {
+inline bool
+ASan::RegionIsPoisoned([[maybe_unused]] const volatile std::byte* addr,
+                       [[maybe_unused]] size_t size) {
   // If we are building without ASan, then there is no way to have a poisoned
   // memory region.
   return false;

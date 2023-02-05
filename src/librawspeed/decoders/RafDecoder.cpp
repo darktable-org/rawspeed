@@ -263,6 +263,14 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
   mRaw->metadata.isoSpeed = iso;
 
+  // Set white point derived from Exif.Fujifilm.BitsPerSample if available,
+  // can be overridden by XML data.
+  int bps = 0;
+  if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)) {
+    bps = mRootIFD->getEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
+    mRaw->whitePoint = (1 << bps) - 1;
+  }
+
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
   auto id = mRootIFD->getID();
@@ -273,9 +281,6 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(cam != nullptr);
 
   applyCorrections(cam);
-
-  const CameraSensorInfo *sensor = cam->getSensorInfo(iso);
-  mRaw->blackLevel = sensor->mBlackLevel;
 
   // at least the (bayer sensor) X100 comes with a tag like this:
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
@@ -298,9 +303,20 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       for (int& k : mRaw->blackLevelSeparate)
         k /= 9;
     }
+
+    // Set black level to average of EXIF data, can be overridden by XML data.
+    int sum = 0;
+    for (int b : mRaw->blackLevelSeparate)
+      sum += b;
+    mRaw->blackLevel = (sum + 2) >> 2;
   }
 
-  mRaw->whitePoint = sensor->mWhiteLevel;
+  const CameraSensorInfo *sensor = cam->getSensorInfo(iso);
+  if (sensor->mWhiteLevel > 0) {
+    mRaw->blackLevel = sensor->mBlackLevel;
+    mRaw->whitePoint = sensor->mWhiteLevel;
+  }
+
   mRaw->blackAreas = cam->blackAreas;
   mRaw->cfa = cam->cfa;
   if (!cam->color_matrix.empty())
@@ -348,14 +364,18 @@ int RafDecoder::isCompressed() const {
   if (width == 0 || height == 0 || width > 11808 || height > 8754)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  uint32_t bps;
+  if (raw->hasEntry(TiffTag::FUJI_BITSPERSAMPLE))
+    bps = raw->getEntry(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
+  else
+    bps = 12;
+
   uint32_t count = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS)->getU32();
 
-  // The uncompressed raf's can be 12/14 bpp, so if it is less than that,
-  // then we are likely in compressed raf.
-  // FIXME: this can't be the correct way to detect this. But i'm not seeing
+  // FIXME: This is not an ideal way to detect compression, but I'm not seeing
   // anything in the diff between exiv2/exiftool dumps of {un,}compressed raws.
   // Maybe we are supposed to check for valid FujiDecompressor::FujiHeader ?
-  return count * 8 / (width * height) < 12;
+  return count * 8 / (width * height) < bps;
 }
 
 } // namespace rawspeed

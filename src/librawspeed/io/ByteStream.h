@@ -33,9 +33,7 @@
 
 namespace rawspeed {
 
-class ByteStream : public DataBuffer
-{
-protected:
+class ByteStream final : public DataBuffer {
   size_type pos = 0; // position of stream in bytes (this is next byte to deliver)
 
 public:
@@ -57,7 +55,8 @@ public:
   [[nodiscard]] inline size_type check(size_type bytes) const {
     if (static_cast<uint64_t>(pos) + bytes > size)
       ThrowIOE("Out of bounds access in ByteStream");
-    assert(!ASan::RegionIsPoisoned(data + pos, bytes));
+    assert(!ASan::RegionIsPoisoned(
+        reinterpret_cast<const std::byte*>(data) + pos, bytes));
     return bytes;
   }
 

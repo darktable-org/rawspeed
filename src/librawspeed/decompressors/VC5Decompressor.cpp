@@ -429,7 +429,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
 
 void VC5Decompressor::initVC5LogTable() {
   mVC5LogTable = decltype(mVC5LogTable)(
-      [outputBits = outputBits](unsigned i, unsigned tableSize) {
+      [outputBits_ = outputBits](unsigned i, unsigned tableSize) {
         // The vanilla "inverse log" curve for decoding.
         auto normalizedCurve = [](auto normalizedI) {
           return (std::pow(113.0, normalizedI) - 1) / 112.0;
@@ -439,8 +439,8 @@ void VC5Decompressor::initVC5LogTable() {
         auto denormalizeY = [maxVal = std::numeric_limits<uint16_t>::max()](
                                 auto y) { return maxVal * y; };
         // Adjust for output whitelevel bitdepth.
-        auto rescaleY = [outputBits](auto y) {
-          auto scale = 16 - outputBits;
+        auto rescaleY = [outputBits_](auto y) {
+          auto scale = 16 - outputBits_;
           return y >> scale;
         };
 
@@ -669,8 +669,8 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
     int16_t decode() {
-      auto dequantize = [quant = quant](int16_t val) {
-        if (__builtin_mul_overflow(val, quant, &val))
+      auto dequantize = [quant_ = quant](int16_t val) {
+        if (__builtin_mul_overflow(val, quant_, &val))
           ThrowRDE("Impossible RLV value given current quantum");
         return val;
       };

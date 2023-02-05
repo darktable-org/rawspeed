@@ -21,11 +21,12 @@
 
 #pragma once
 
-#include <cstdint> // for uint32_t
-#include <map>     // for map
-#include <memory>  // for unique_ptr
-#include <utility> // for pair
-#include <vector>  // for vector
+#include <cstdint>  // for uint32_t
+#include <map>      // for map
+#include <memory>   // for unique_ptr
+#include <optional> // for optional
+#include <utility>  // for pair
+#include <vector>   // for vector
 
 namespace rawspeed {
 
@@ -66,7 +67,8 @@ protected:
 
   using constructor_t = std::unique_ptr<DngOpcode> (*)(
       const RawImage& ri, ByteStream& bs, iRectangle2D& integrated_subimg);
-  static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
+  static std::optional<std::pair<const char*, DngOpcodes::constructor_t>>
+  Map(uint32_t code);
 };
 
 } // namespace rawspeed
