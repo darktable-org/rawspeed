@@ -26,12 +26,21 @@
 
 namespace rawspeed {
 
+template <int B>
 class PanasonicV6Decompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   ByteStream input;
 
-  static constexpr int PixelsPerBlock = 11;
+  static constexpr int BitsPerSample = B;
+  static_assert(BitsPerSample == 14 || BitsPerSample == 12, "invalid bits per sample; only use 12/14 bits.");
+  static constexpr bool is14Bit = BitsPerSample == 14;
+
+  static constexpr int PixelsPerBlock = is14Bit ? 11 : 14;
+  static constexpr unsigned int PixelbaseZero = is14Bit ? 0x200 : 0x80;
+  static constexpr unsigned int PixelbaseCompare = is14Bit ? 0x2000 : 0x800;
+  static constexpr unsigned int SpixCompare = is14Bit ? 0xffff : 0x3fff;
+  static constexpr unsigned int PixelMask = is14Bit ? 0x3fff : 0xfff;
   static constexpr int BytesPerBlock = 16;
 
   inline void __attribute__((always_inline))
