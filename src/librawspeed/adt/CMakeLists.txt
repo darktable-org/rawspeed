@@ -1,4 +1,5 @@
 FILE(GLOB SOURCES
+  "Array1DRef.h"
   "Array2DRef.h"
   "CroppedArray2DRef.h"
   "DefaultInitAllocatorAdaptor.h"

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h" // for Array1DRef
 #include <cassert>     // for assert
 #include <cstddef>     // for byte
 #include <type_traits> // for negation, is_const, remove_const_t, is_same
@@ -37,8 +38,6 @@ template <class T> class Array2DRef {
   // We need to be able to convert to std::byte.
   friend Array2DRef<std::byte>;
   friend Array2DRef<const std::byte>;
-
-  T& operator[](int row) const;
 
 public:
   using value_type = T;
@@ -109,6 +108,8 @@ public:
     return {storage.data(), width, height};
   }
 
+  Array1DRef<T> operator[](int row) const;
+
   T& operator()(int row, int col) const;
 };
 
@@ -121,18 +122,19 @@ Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 
-template <class T> inline T& Array2DRef<T>::operator[](const int row) const {
+template <class T>
+inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
   assert(_data);
   assert(row >= 0);
   assert(row < height);
-  return _data[row * _pitch];
+  return Array1DRef<T>(&_data[row * _pitch], width);
 }
 
 template <class T>
 inline T& Array2DRef<T>::operator()(const int row, const int col) const {
   assert(col >= 0);
   assert(col < width);
-  return (&(operator[](row)))[col];
+  return (operator[](row))(col);
 }
 
 } // namespace rawspeed

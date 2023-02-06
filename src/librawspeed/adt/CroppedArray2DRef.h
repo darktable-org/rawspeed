@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h" // for Array1DRef
 #include "adt/Array2DRef.h" // for Array2DRef
 #include <cassert>          // for assert
 #include <type_traits>      // for enable_if_t, remove_const_t, remove_cv_t
@@ -32,7 +33,7 @@ template <class T> class CroppedArray2DRef {
   // We need to be able to convert to const version.
   friend CroppedArray2DRef<const T>;
 
-  T& operator[](int row) const;
+  Array1DRef<T> operator[](int row) const; // not cropped!
 
 public:
   using value_type = T;
@@ -81,17 +82,17 @@ CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
 }
 
 template <class T>
-inline T& CroppedArray2DRef<T>::operator[](const int row) const {
+inline Array1DRef<T> CroppedArray2DRef<T>::operator[](const int row) const {
   assert(row >= 0);
   assert(row < croppedHeight);
-  return base.operator()(offsetRows + row, /*col=*/0);
+  return base.operator[](offsetRows + row);
 }
 
 template <class T>
 inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
   assert(col >= 0);
   assert(col < croppedWidth);
-  return (&(operator[](row)))[offsetCols + col];
+  return (operator[](row))(offsetCols + col);
 }
 
 } // namespace rawspeed
