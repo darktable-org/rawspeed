@@ -34,7 +34,7 @@ namespace rawspeed {
 
 namespace {
 template <const int B> struct pana_cs6_page_decoder {
-  static_assert(B == 14 | B == 12, "only 12/14 bits are valid!");
+  static_assert((B == 14 || B == 12), "only 12/14 bits are valid!");
   static constexpr int BufferSize = B == 14 ? 14 : 18;
   std::array<uint16_t, BufferSize> pixelbuffer;
   unsigned char current = 0;
