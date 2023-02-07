@@ -33,7 +33,8 @@ class PanasonicV6Decompressor final : public AbstractDecompressor {
   ByteStream input;
 
   static constexpr int BitsPerSample = B;
-  static_assert(BitsPerSample == 14 || BitsPerSample == 12, "invalid bits per sample; only use 12/14 bits.");
+  static_assert(BitsPerSample == 14 || BitsPerSample == 12,
+                "invalid bits per sample; only use 12/14 bits.");
   static constexpr bool is14Bit = BitsPerSample == 14;
 
   static constexpr int PixelsPerBlock = is14Bit ? 11 : 14;
