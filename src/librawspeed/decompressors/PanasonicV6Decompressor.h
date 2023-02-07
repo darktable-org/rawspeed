@@ -57,4 +57,8 @@ public:
   void decompress() const;
 };
 
+// forward ref for tests
+extern template class PanasonicV6Decompressor<14>;
+extern template class PanasonicV6Decompressor<12>;
+
 } // namespace rawspeed
