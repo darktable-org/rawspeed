@@ -173,6 +173,6 @@ public:
   void decompress();
 };
 
-extern template class Cr2Decompressor<HuffmanTable>;
+extern template class Cr2Decompressor<HuffmanTable<>>;
 
 } // namespace rawspeed

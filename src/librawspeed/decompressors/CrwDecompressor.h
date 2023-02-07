@@ -33,7 +33,7 @@
 namespace rawspeed {
 
 class CrwDecompressor final : public AbstractDecompressor {
-  using crw_hts = std::array<HuffmanTable, 2>;
+  using crw_hts = std::array<HuffmanTable<>, 2>;
 
   RawImage mRaw;
   crw_hts mHuff;
@@ -49,7 +49,7 @@ public:
   void decompress();
 
 private:
-  static HuffmanTable makeDecoder(const uint8_t* ncpl, const uint8_t* values);
+  static HuffmanTable<> makeDecoder(const uint8_t* ncpl, const uint8_t* values);
   static crw_hts initHuffTables(uint32_t table);
 
   inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,

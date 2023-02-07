@@ -46,8 +46,8 @@ using rawspeed::HuffmanTable;
 namespace rawspeed_test {
 
 auto genHT =
-    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> HuffmanTable {
-  HuffmanTable ht;
+    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> HuffmanTable<> {
+  HuffmanTable<> ht;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
   Buffer b(v.data(), v.size());
@@ -58,7 +58,7 @@ auto genHT =
 
 auto genHTFull =
     [](std::initializer_list<uint8_t>&& nCodesPerLength,
-       std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable {
+       std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable<> {
   auto ht = genHT(std::move(nCodesPerLength));
   std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
   Buffer b(v.data(), v.size());

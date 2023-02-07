@@ -250,7 +250,7 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
 
     if (!huff[htIndex]) {
       // setup new ht_ and put it into the store
-      auto dHT = std::make_unique<HuffmanTable>(ht_);
+      auto dHT = std::make_unique<HuffmanTable<>>(ht_);
       dHT->setup(fullDecodeHT, fixDng16Bug);
       huff[htIndex] = dHT.get();
       huffmanTableStore.emplace_back(std::move(dHT));

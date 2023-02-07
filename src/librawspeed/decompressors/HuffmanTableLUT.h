@@ -68,7 +68,11 @@
 
 namespace rawspeed {
 
-class HuffmanTableLUT final : public HuffmanTableLookup {
+template <typename HuffmanTableTag>
+class HuffmanTableLUT final : public HuffmanTableLookup<HuffmanTableTag> {
+  using Base = HuffmanTableLookup<HuffmanTableTag>;
+  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
   // one or the other, depending on the relative performance of their arithmetic
@@ -96,8 +100,8 @@ class HuffmanTableLUT final : public HuffmanTableLookup {
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    const std::vector<CodeSymbol> symbols =
-        HuffmanTableLookup::setup(fullDecode_, fixDNGBug16_);
+    const std::vector<typename Base::CodeSymbol> symbols =
+        HuffmanTableLookup<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above
@@ -109,25 +113,25 @@ public:
 
       uint16_t ll = symbols[i].code << (LookupDepth - code_l);
       uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
-      uint16_t diff_l = codeValues[i];
+      uint16_t diff_l = Base::codeValues[i];
       for (uint16_t c = ll; c <= ul; c++) {
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
 
-        if (!FlagMask || !fullDecode || code_l > LookupDepth ||
+        if (!FlagMask || !Base::fullDecode || code_l > LookupDepth ||
             (code_l + diff_l > LookupDepth && diff_l != 16)) {
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
           // -> store only the length and do a normal sign extension later
-          assert(!fullDecode || diff_l > 0);
+          assert(!Base::fullDecode || diff_l > 0);
           decodeLookup[c] = diff_l << PayloadShift | code_l;
 
-          if (!fullDecode)
+          if (!Base::fullDecode)
             decodeLookup[c] |= FlagMask;
         } else {
           // Lookup bit depth is sufficient to encode the final value.
           decodeLookup[c] = FlagMask | code_l;
-          if (diff_l != 16 || fixDNGBug16)
+          if (diff_l != 16 || Base::fixDNGBug16)
             decodeLookup[c] += diff_l;
 
           if (diff_l) {
@@ -139,7 +143,8 @@ public:
             } else
               diff = uint32_t(-32768);
             decodeLookup[c] |= static_cast<int32_t>(
-                static_cast<uint32_t>(extend(diff, diff_l)) << PayloadShift);
+                static_cast<uint32_t>(Base::extend(diff, diff_l))
+                << PayloadShift);
           }
         }
       }
@@ -152,7 +157,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!fullDecode);
+    assert(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -162,7 +167,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(fullDecode);
+    assert(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -175,10 +180,10 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == fullDecode);
+    assert(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
 
-    CodeSymbol partial;
+    typename Base::CodeSymbol partial;
     partial.code_len = LookupDepth;
     partial.code = bs.peekBitsNoFill(partial.code_len);
 
@@ -195,7 +200,7 @@ public:
     if (lutEntry & FlagMask)
       return payload;
 
-    int codeValue;
+    typename Traits::CodeValueTy codeValue;
     if (lutEntry) {
       // If the flag is not set, but the entry is not empty,
       // the payload is the code value for this symbol.
@@ -207,10 +212,12 @@ public:
       // than LookupDepth or the input is corrupt. Need to read more bits...
       assert(len == 0);
       bs.skipBitsNoFill(partial.code_len);
-      std::tie(partial, codeValue) = finishReadingPartialSymbol(bs, partial);
+      std::tie(partial, codeValue) =
+          Base::finishReadingPartialSymbol(bs, partial);
     }
 
-    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, partial, codeValue);
+    return Base::template processSymbol<BIT_STREAM, FULL_DECODE>(bs, partial,
+                                                                 codeValue);
   }
 };
 

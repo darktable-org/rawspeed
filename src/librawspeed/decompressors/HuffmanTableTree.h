@@ -36,25 +36,28 @@
 
 namespace rawspeed {
 
-class HuffmanTableTree final : public AbstractHuffmanTable {
-  using ValueType = decltype(codeValues)::value_type;
+template <typename HuffmanTableTag>
+class HuffmanTableTree final : public AbstractHuffmanTable<HuffmanTableTag> {
+  using Base = AbstractHuffmanTable<HuffmanTableTag>;
+  using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
-  BinaryHuffmanTree<ValueType> tree;
+  BinaryHuffmanTree<typename Traits::CodeValueTy> tree;
 
 protected:
   template <typename BIT_STREAM>
-  inline std::pair<CodeSymbol, ValueType /*codeValue*/>
+  inline std::pair<typename Base::CodeSymbol,
+                   typename Traits::CodeValueTy /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    CodeSymbol partial;
+    typename Base::CodeSymbol partial;
 
     const auto* top = &(tree.root->getAsBranch());
 
     // Read bits until either find the code or detect the incorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
-      assert(partial.code_len <= 16);
+      assert(partial.code_len <= Traits::MaxCodeLenghtBits);
 
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
@@ -74,7 +77,7 @@ protected:
                  partial.code_len);
       }
 
-      if (static_cast<decltype(tree)::Node::Type>(*newNode) ==
+      if (static_cast<typename decltype(tree)::Node::Type>(*newNode) ==
           decltype(tree)::Node::Type::Leaf) {
         // Ok, great, hit a Leaf. This is it.
         return {partial, newNode->getAsLeaf().value};
@@ -90,11 +93,12 @@ protected:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
+    AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
 
-    auto currValue = codeValues.cbegin();
-    for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
-      const auto nCodesForCurrLen = nCodesPerLength[codeLen];
+    auto currValue = Base::codeValues.cbegin();
+    for (auto codeLen = 1UL; codeLen < Base::nCodesPerLength.size();
+         codeLen++) {
+      const auto nCodesForCurrLen = Base::nCodesPerLength[codeLen];
 
       auto nodes = tree.getAllVacantNodesAtDepth(codeLen);
       if (nodes.size() < nCodesForCurrLen) {
@@ -105,13 +109,13 @@ public:
       // Make first nCodesForCurrLen nodes Leafs
       std::for_each(nodes.cbegin(), std::next(nodes.cbegin(), nCodesForCurrLen),
                     [&currValue](auto* node) {
-                      *node =
-                          std::make_unique<decltype(tree)::Leaf>(*currValue);
+                      *node = std::make_unique<typename decltype(tree)::Leaf>(
+                          *currValue);
                       std::advance(currValue, 1);
                     });
     }
 
-    assert(codeValues.cend() == currValue);
+    assert(Base::codeValues.cend() == currValue);
 
     // And get rid of all the branches that do not lead to Leafs.
     // It is crucial to detect degenerate codes at the earliest.
@@ -119,11 +123,11 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline int decodeCodeValue(BIT_STREAM& bs) const {
+  inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!fullDecode);
+    assert(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -132,7 +136,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(fullDecode);
+    assert(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -145,15 +149,16 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == fullDecode);
+    assert(FULL_DECODE == Base::fullDecode);
 
     bs.fill(32);
 
-    CodeSymbol symbol;
-    int codeValue;
+    typename Base::CodeSymbol symbol;
+    typename Traits::CodeValueTy codeValue;
     std::tie(symbol, codeValue) = readSymbol(bs);
 
-    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
+    return Base::template processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol,
+                                                                 codeValue);
   }
 };
 

@@ -66,16 +66,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     bool failure0 = false;
     bool failure1 = false;
 
-    rawspeed::IMPL0 ht0;
-    rawspeed::IMPL1 ht1;
+    rawspeed::IMPL0<rawspeed::BaselineHuffmanTableTag> ht0;
+    rawspeed::IMPL1<rawspeed::BaselineHuffmanTableTag> ht1;
 
     try {
-      ht0 = createHuffmanTable<rawspeed::IMPL0>(bs0);
+      ht0 = createHuffmanTable<decltype(ht0)>(bs0);
     } catch (const rawspeed::RawspeedException&) {
       failure0 = true;
     }
     try {
-      ht1 = createHuffmanTable<rawspeed::IMPL1>(bs1);
+      ht1 = createHuffmanTable<decltype(ht1)>(bs1);
     } catch (const rawspeed::RawspeedException&) {
       failure1 = true;
     }

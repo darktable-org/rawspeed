@@ -522,9 +522,9 @@ void NikonDecompressor::decompress(const ByteStream& data,
   assert(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
 
   if (!split) {
-    decompress<HuffmanTable>(bits, 0, mRaw->dim.y);
+    decompress<HuffmanTable<>>(bits, 0, mRaw->dim.y);
   } else {
-    decompress<HuffmanTable>(bits, 0, split);
+    decompress<HuffmanTable<>>(bits, 0, split);
     huffSelect += 1;
     decompress<NikonLASDecompressor>(bits, split, mRaw->dim.y);
   }

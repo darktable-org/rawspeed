@@ -32,7 +32,10 @@
 namespace rawspeed {
 class Buffer;
 
+template <typename HuffmanTableTag = BaselineHuffmanTableTag>
 class DummyHuffmanTable final {
+  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
@@ -56,7 +59,7 @@ public:
   [[nodiscard]] bool isFullDecode() const { return fullDecode; }
 
   template <typename BIT_STREAM>
-  inline int decodeCodeValue(BIT_STREAM& bs) const {
+  inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");

@@ -58,8 +58,8 @@ PentaxDecompressor::PentaxDecompressor(const RawImage& img,
   }
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
-  HuffmanTable ht;
+HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Legacy() {
+  HuffmanTable<> ht;
 
   /* Initialize with legacy data */
   auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
@@ -69,8 +69,8 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
-  HuffmanTable ht;
+HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
+  HuffmanTable<> ht;
 
   const uint32_t depth = stream.getU16() + 12;
   if (depth > 15)
@@ -127,9 +127,9 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   return ht;
 }
 
-HuffmanTable
+HuffmanTable<>
 PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
-  HuffmanTable ht;
+  HuffmanTable<> ht;
 
   if (metaData)
     ht = SetupHuffmanTable_Modern(*metaData);

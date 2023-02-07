@@ -66,7 +66,11 @@
 
 namespace rawspeed {
 
-class HuffmanTableLookup : public AbstractHuffmanTable {
+template <typename HuffmanTableTag>
+class HuffmanTableLookup : public AbstractHuffmanTable<HuffmanTableTag> {
+  using Base = AbstractHuffmanTable<HuffmanTableTag>;
+  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+
 protected:
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
@@ -75,24 +79,26 @@ protected:
   std::vector<uint16_t> codeOffsetOL; // index is length of code
 
 public:
-  std::vector<CodeSymbol> setup(bool fullDecode_, bool fixDNGBug16_) {
-    AbstractHuffmanTable::setup(fullDecode_, fixDNGBug16_);
+  std::vector<typename Base::CodeSymbol> setup(bool fullDecode_,
+                                               bool fixDNGBug16_) {
+    AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
-    std::vector<CodeSymbol> symbols = generateCodeSymbols();
-    assert(symbols.size() == maxCodesCount());
+    std::vector<typename Base::CodeSymbol> symbols =
+        Base::generateCodeSymbols();
+    assert(symbols.size() == Base::maxCodesCount());
 
     // Figure F.15: generate decoding tables
-    unsigned int maxCodeLength = nCodesPerLength.size() - 1U;
+    unsigned int maxCodeLength = Base::nCodesPerLength.size() - 1U;
     codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
     maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
     for (unsigned int numCodesSoFar = 0, codeLen = 1; codeLen <= maxCodeLength;
          codeLen++) {
-      if (!nCodesPerLength[codeLen])
+      if (!Base::nCodesPerLength[codeLen])
         continue;
       codeOffsetOL[codeLen] = symbols[numCodesSoFar].code - numCodesSoFar;
-      numCodesSoFar += nCodesPerLength[codeLen];
+      numCodesSoFar += Base::nCodesPerLength[codeLen];
       maxCodeOL[codeLen] = symbols[numCodesSoFar - 1].code;
     }
 
@@ -100,11 +106,11 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline int decodeCodeValue(BIT_STREAM& bs) const {
+  inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!fullDecode);
+    assert(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -113,14 +119,15 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(fullDecode);
+    assert(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
 protected:
   template <typename BIT_STREAM>
-  inline std::pair<CodeSymbol, int /*codeValue*/>
-  finishReadingPartialSymbol(BIT_STREAM& bs, CodeSymbol partial) const {
+  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
+  finishReadingPartialSymbol(BIT_STREAM& bs,
+                             typename Base::CodeSymbol partial) const {
     while (partial.code_len < maxCodeOL.size() &&
            (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
             partial.code > maxCodeOL[partial.code_len])) {
@@ -136,16 +143,17 @@ protected:
       ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
                partial.code_len);
 
-    int codeValue = codeValues[partial.code - codeOffsetOL[partial.code_len]];
+    typename Traits::CodeValueTy codeValue =
+        Base::codeValues[partial.code - codeOffsetOL[partial.code_len]];
 
     return {partial, codeValue};
   }
 
   template <typename BIT_STREAM>
-  inline std::pair<CodeSymbol, int /*codeValue*/>
+  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
     // Start from completely unknown symbol.
-    CodeSymbol partial;
+    typename Base::CodeSymbol partial;
     partial.code_len = 0;
     partial.code = 0;
 
@@ -162,14 +170,15 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == fullDecode);
+    assert(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
 
-    CodeSymbol symbol;
-    int codeValue;
+    typename Base::CodeSymbol symbol;
+    typename Traits::CodeValueTy codeValue;
     std::tie(symbol, codeValue) = readSymbol(bs);
 
-    return processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol, codeValue);
+    return Base::template processSymbol<BIT_STREAM, FULL_DECODE>(bs, symbol,
+                                                                 codeValue);
   }
 };
 

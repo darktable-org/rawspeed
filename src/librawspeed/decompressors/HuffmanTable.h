@@ -31,9 +31,16 @@
 
 namespace rawspeed {
 
-using HuffmanTable = HuffmanTableLUT;
-// using HuffmanTable = HuffmanTableLookup;
-// using HuffmanTable = HuffmanTableTree;
-// using HuffmanTable = HuffmanTableVector;
+template <typename HuffmanTableTag = BaselineHuffmanTableTag>
+using HuffmanTable = HuffmanTableLUT<HuffmanTableTag>;
+
+// template <typename HuffmanTableTag>
+// using HuffmanTable = HuffmanTableLookup<HuffmanTableTag>;
+
+// template <typename HuffmanTableTag>
+// using HuffmanTable = HuffmanTableTree<HuffmanTableTag>;
+
+// template <typename HuffmanTableTag>
+// using HuffmanTable = HuffmanTableVector<HuffmanTableTag>;
 
 } // namespace rawspeed

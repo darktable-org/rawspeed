@@ -26,11 +26,11 @@
 #include <type_traits>     // for is_same
 
 namespace rawspeed {
-class DummyHuffmanTable;
+template <typename HuffmanTableTag> class DummyHuffmanTable;
 } // namespace rawspeed
 
 template <typename T> static constexpr int getHuffmanTableMaxLength() {
-  if constexpr (std::is_same<T, rawspeed::DummyHuffmanTable>())
+  if constexpr (std::is_same<T, rawspeed::DummyHuffmanTable<>>())
     return 0;
   return 16;
 }

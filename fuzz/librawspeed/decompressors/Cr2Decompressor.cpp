@@ -43,7 +43,7 @@
 
 namespace rawspeed {
 
-template class Cr2Decompressor<DummyHuffmanTable>;
+template class Cr2Decompressor<DummyHuffmanTable<>>;
 
 } // namespace rawspeed
 
@@ -82,12 +82,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const unsigned num_recips = bs.getU32();
 
     const unsigned num_unique_hts = bs.getU32();
-    std::vector<rawspeed::HuffmanTableImpl> uniqueHts;
+    std::vector<rawspeed::HuffmanTableImpl<>> uniqueHts;
     std::generate_n(std::back_inserter(uniqueHts), num_unique_hts, [&bs]() {
-      return createHuffmanTable<rawspeed::HuffmanTableImpl>(bs);
+      return createHuffmanTable<rawspeed::HuffmanTableImpl<>>(bs);
     });
 
-    std::vector<const rawspeed::HuffmanTableImpl*> hts;
+    std::vector<const rawspeed::HuffmanTableImpl<>*> hts;
     std::generate_n(std::back_inserter(hts), num_recips, [&bs, &uniqueHts]() {
       if (unsigned uniq_ht_idx = bs.getU32(); uniq_ht_idx < uniqueHts.size())
         return &uniqueHts[uniq_ht_idx];
@@ -101,18 +101,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
                     [&bs]() { return bs.get<uint16_t>(); });
 
     std::vector<rawspeed::Cr2Decompressor<
-        rawspeed::HuffmanTableImpl>::PerComponentRecipe>
+        rawspeed::HuffmanTableImpl<>>::PerComponentRecipe>
         rec;
     rec.reserve(num_recips);
     std::generate_n(std::back_inserter(rec), num_recips,
                     [&rec, hts, initPred]()
                         -> rawspeed::Cr2Decompressor<
-                            rawspeed::HuffmanTableImpl>::PerComponentRecipe {
+                            rawspeed::HuffmanTableImpl<>>::PerComponentRecipe {
                       const int i = rec.size();
                       return {*hts[i], initPred[i]};
                     });
 
-    rawspeed::Cr2Decompressor<rawspeed::HuffmanTableImpl> d(
+    rawspeed::Cr2Decompressor<rawspeed::HuffmanTableImpl<>> d(
         mRaw, format, frame, slicing, rec, bs.getSubStream(/*offset=*/0));
     mRaw->createData();
     d.decompress();

@@ -48,7 +48,7 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
   if (len == 0)
     return 0;
   int diff = bs.getBitsNoFill(len);
-  return HuffmanTable::extend(diff, len);
+  return HuffmanTable<>::extend(diff, len);
 }
 
 void SonyArw1Decompressor::decompress(const ByteStream& input) const {
