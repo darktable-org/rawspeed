@@ -26,39 +26,35 @@
 
 namespace rawspeed {
 
-template <int B>
 class PanasonicV6Decompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   ByteStream input;
 
-  static constexpr int BitsPerSample = B;
-  static_assert((BitsPerSample == 14 || BitsPerSample == 12),
-                "invalid bits per sample; only use 12/14 bits.");
-  static constexpr bool is14Bit = BitsPerSample == 14;
+  // Contains the decoding recepie for the block,
+  struct BlockDsc;
 
-  static constexpr int PixelsPerBlock = is14Bit ? 11 : 14;
-  static constexpr unsigned int PixelbaseZero = is14Bit ? 0x200 : 0x80;
-  static constexpr unsigned int PixelbaseCompare = is14Bit ? 0x2000 : 0x800;
-  static constexpr unsigned int SpixCompare = is14Bit ? 0xffff : 0x3fff;
-  static constexpr unsigned int PixelMask = is14Bit ? 0x3fff : 0xfff;
-  static constexpr int BytesPerBlock = 16;
+  // There are two variants. Which one is to be used depends on image's bps.
+  static const BlockDsc TwelveBitBlock;
+  static const BlockDsc FourteenBitBlock;
 
+  const uint32_t bps;
+
+  template <const BlockDsc& dsc>
   inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   decompressBlock(ByteStream& rowInput, int row, int col) const noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  void decompressRow(int row) const noexcept;
+  template <const BlockDsc& dsc> void decompressRow(int row) const noexcept;
+
+  template <const BlockDsc& dsc> void decompressInternal() const noexcept;
 
 public:
-  PanasonicV6Decompressor(const RawImage& img, const ByteStream& input_);
+  PanasonicV6Decompressor(const RawImage& img, const ByteStream& input_,
+                          uint32_t bps_);
 
-  void decompress() const;
+  void decompress() const noexcept;
 };
-
-// forward ref for tests
-extern template class PanasonicV6Decompressor<14>;
-extern template class PanasonicV6Decompressor<12>;
 
 } // namespace rawspeed

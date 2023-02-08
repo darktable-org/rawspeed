@@ -44,15 +44,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
     const auto bps = bs.get<uint32_t>();
 
-    if (bps == 12) {
-      rawspeed::PanasonicV6Decompressor<12> d(mRaw, rawData);
-      mRaw->createData();
-      d.decompress();
-    } else {
-      rawspeed::PanasonicV6Decompressor<14> p(mRaw, rawData);
-      mRaw->createData();
-      p.decompress();
-    }
+    rawspeed::PanasonicV6Decompressor d(mRaw, rawData, bps);
+    mRaw->createData();
+    d.decompress();
 
     mRaw->checkMemIsInitialized();
   } catch (const rawspeed::RawspeedException&) {

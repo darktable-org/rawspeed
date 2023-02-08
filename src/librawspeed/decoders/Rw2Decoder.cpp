@@ -148,15 +148,9 @@ RawImage Rw2Decoder::decodeRawInternal() {
         ThrowRDE("Version %i: unexpected bits per sample: %i", version,
                  bitsPerSample);
 
-      if(bitsPerSample == 14) {
-        PanasonicV6Decompressor<14> v6(mRaw, bs);
-        mRaw->createData();
-        v6.decompress();
-      } else {
-        PanasonicV6Decompressor<12> v6(mRaw, bs);
-        mRaw->createData();
-        v6.decompress();
-      }
+      PanasonicV6Decompressor v6(mRaw, bs, bitsPerSample);
+      mRaw->createData();
+      v6.decompress();
       return mRaw;
     }
     case 7: {
