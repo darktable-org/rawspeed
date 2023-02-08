@@ -83,44 +83,27 @@ template <int B> struct pana_cs6_page_decoder {
 
 template <>
 inline void __attribute__((always_inline))
-pana_cs6_page_decoder<12>::fillBuffer(const ByteStream& bs) noexcept {
-  // 12 bit: 8/0 + 4 upper bits of /1
-  pixelbuffer[0] = (bs.peekByte(15) << 4) | (bs.peekByte(14) >> 4);
-  // 12 bit: 4l/1 + 8/2
-  pixelbuffer[1] = (((bs.peekByte(14) & 0xf) << 8) | (bs.peekByte(13))) & 0xfff;
-
-  // 2; 2u/3, 6 low bits remains in bs.peekByte(12)
-  pixelbuffer[2] = (bs.peekByte(12) >> 6) & 0x3;
-  // 8; 6l/3 + 2u/4; 6 low bits remains in bs.peekByte(11)
-  pixelbuffer[3] = ((bs.peekByte(12) & 0x3f) << 2) | (bs.peekByte(11) >> 6);
-  // 8: 6l/4 + 2u/5; 6 low bits remains in bs.peekByte(10)
-  pixelbuffer[4] = ((bs.peekByte(11) & 0x3f) << 2) | (bs.peekByte(10) >> 6);
-  // 8: 6l/5 + 2u/6, 6 low bits remains in bs.peekByte(9)
-  pixelbuffer[5] = ((bs.peekByte(10) & 0x3f) << 2) | (bs.peekByte(9) >> 6);
-
-  // 2, 4 low bits remains in bs.peekByte(9)
-  pixelbuffer[6] = (bs.peekByte(9) >> 4) & 0x3;
-  // 8: 4 low bits from bs.peekByte(9), 4 upper bits from bs.peekByte(8)
-  pixelbuffer[7] = ((bs.peekByte(9) & 0xf) << 4) | (bs.peekByte(8) >> 4);
-  // 8: 4 low bits from bs.peekByte(8), 4 upper bits from bs.peekByte(7)
-  pixelbuffer[8] = ((bs.peekByte(8) & 0xf) << 4) | (bs.peekByte(7) >> 4);
-  // 8: 4 low bits from bs.peekByte(7), 4 upper bits from bs.peekByte(6)
-  pixelbuffer[9] = ((bs.peekByte(7) & 0xf) << 4) | (bs.peekByte(6) >> 4);
-
-  // 2: bits 2-3 from bs.peekByte(6), two low bits remain in bs.peekByte(6)
-  pixelbuffer[10] = (bs.peekByte(6) >> 2) & 0x3;
-  // 2: bits 2-3 from bs.peekByte(6), two low bits remain in bs.peekByte(6)
-  pixelbuffer[11] = ((bs.peekByte(6) & 0x3) << 6) | (bs.peekByte(5) >> 2);
-  // 8: 2 bits from bs.peekByte(5), 6 bits from bs.peekByte(4)
-  pixelbuffer[12] = ((bs.peekByte(5) & 0x3) << 6) | (bs.peekByte(4) >> 2);
-  // 8: 2 bits from bs.peekByte(4), 6 bits from bs.peekByte(3)
-  pixelbuffer[13] = ((bs.peekByte(4) & 0x3) << 6) | (bs.peekByte(3) >> 2);
-
-  // 2: low bits from bs.peekByte(3)
-  pixelbuffer[14] = bs.peekByte(3) & 0x3;
-  pixelbuffer[15] = bs.peekByte(2);
-  pixelbuffer[16] = bs.peekByte(1);
-  pixelbuffer[17] = bs.peekByte(0);
+pana_cs6_page_decoder<12>::fillBuffer(const ByteStream& bs_) noexcept {
+  BitPumpLSB bs(bs_);
+  bs.fill(32);
+  pixelbuffer[17] = bs.getBits(8);
+  pixelbuffer[16] = bs.getBits(8);
+  pixelbuffer[15] = bs.getBits(8);
+  pixelbuffer[14] = bs.getBits(2);
+  pixelbuffer[13] = bs.getBits(8);
+  pixelbuffer[12] = bs.getBits(8);
+  pixelbuffer[11] = bs.getBits(8);
+  pixelbuffer[10] = bs.getBits(2);
+  pixelbuffer[9] = bs.getBits(8);
+  pixelbuffer[8] = bs.getBits(8);
+  pixelbuffer[7] = bs.getBits(8);
+  pixelbuffer[6] = bs.getBits(2);
+  pixelbuffer[5] = bs.getBits(8);
+  pixelbuffer[4] = bs.getBits(8);
+  pixelbuffer[3] = bs.getBits(8);
+  pixelbuffer[2] = bs.getBits(2);
+  pixelbuffer[1] = bs.getBits(12);
+  pixelbuffer[0] = bs.getBits(12);
 }
 
 template <>
