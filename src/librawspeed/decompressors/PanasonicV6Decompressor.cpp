@@ -26,6 +26,7 @@
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t
@@ -124,44 +125,24 @@ pana_cs6_page_decoder<12>::fillBuffer(const ByteStream& bs) noexcept {
 
 template <>
 inline void __attribute__((always_inline))
-pana_cs6_page_decoder<14>::fillBuffer(const ByteStream& bs) noexcept {
-  // The bit packing scheme here is actually just 128-bit little-endian int,
-  // that we consume from the high bits to low bits, with no padding.
-  // It is really tempting to refactor this using proper BitPump, but so far
-  // that results in disappointing performance.
-
-  // 14 bits
-  pixelbuffer[0] = (bs.peekByte(15) << 6) | (bs.peekByte(14) >> 2);
-  // 14 bits
-  pixelbuffer[1] = (((bs.peekByte(14) & 0x3) << 12) | (bs.peekByte(13) << 4) |
-                    (bs.peekByte(12) >> 4)) &
-                   0x3fff;
-  // 2 bits
-  pixelbuffer[2] = (bs.peekByte(12) >> 2) & 0x3;
-  // 10 bits
-  pixelbuffer[3] = ((bs.peekByte(12) & 0x3) << 8) | bs.peekByte(11);
-  // 10 bits
-  pixelbuffer[4] = (bs.peekByte(10) << 2) | (bs.peekByte(9) >> 6);
-  // 10 bits
-  pixelbuffer[5] = ((bs.peekByte(9) & 0x3f) << 4) | (bs.peekByte(8) >> 4);
-  // 2 bits
-  pixelbuffer[6] = (bs.peekByte(8) >> 2) & 0x3;
-  // 10 bits
-  pixelbuffer[7] = ((bs.peekByte(8) & 0x3) << 8) | bs.peekByte(7);
-  // 10 bits
-  pixelbuffer[8] = ((bs.peekByte(6) << 2) & 0x3fc) | (bs.peekByte(5) >> 6);
-  // 10 bits
-  pixelbuffer[9] = ((bs.peekByte(5) << 4) | (bs.peekByte(4) >> 4)) & 0x3ff;
-  // 2 bits
-  pixelbuffer[10] = (bs.peekByte(4) >> 2) & 0x3;
-  // 10 bits
-  pixelbuffer[11] = ((bs.peekByte(4) & 0x3) << 8) | bs.peekByte(3);
-  // 10 bits
-  pixelbuffer[12] =
-      (((bs.peekByte(2) << 2) & 0x3fc) | bs.peekByte(1) >> 6) & 0x3ff;
-  // 10 bits
-  pixelbuffer[13] = ((bs.peekByte(1) << 4) | (bs.peekByte(0) >> 4)) & 0x3ff;
-  // 4 padding bits
+pana_cs6_page_decoder<14>::fillBuffer(const ByteStream& bs_) noexcept {
+  BitPumpLSB bs(bs_);
+  bs.fill(32);
+  bs.skipBitsNoFill(4);
+  pixelbuffer[13] = bs.getBits(10);
+  pixelbuffer[12] = bs.getBits(10);
+  pixelbuffer[11] = bs.getBits(10);
+  pixelbuffer[10] = bs.getBits(2);
+  pixelbuffer[9] = bs.getBits(10);
+  pixelbuffer[8] = bs.getBits(10);
+  pixelbuffer[7] = bs.getBits(10);
+  pixelbuffer[6] = bs.getBits(2);
+  pixelbuffer[5] = bs.getBits(10);
+  pixelbuffer[4] = bs.getBits(10);
+  pixelbuffer[3] = bs.getBits(10);
+  pixelbuffer[2] = bs.getBits(2);
+  pixelbuffer[1] = bs.getBits(14);
+  pixelbuffer[0] = bs.getBits(14);
 }
 
 } // namespace
