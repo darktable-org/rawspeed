@@ -117,6 +117,7 @@ HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
         sm_val = v2[j];
       }
     }
+    assert(sm_num < 16);
     codeValues.push_back(sm_num);
     v2[sm_num] = 0xffffffff;
   }
