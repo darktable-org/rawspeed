@@ -11286,6 +11286,30 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-GH5M2">
+		<ID make="Panasonic" model="DC-GH5M2">Panasonic DC-GH5M2</ID>
+		<Crop x="0" y="0" width="-56" height="0"/>
+		<Sensor black="129" white="4088"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9300 -3659 -755</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2981 10988 2287</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-190 1077 5016</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5M2" mode="4:3">
+		<ID make="Panasonic" model="DC-GH5M2">Panasonic DC-GH5M2</ID>
+		<Crop x="0" y="0" width="-56" height="0"/>
+		<Sensor black="129" white="4088"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9300 -3659 -755</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2981 10988 2287</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-190 1077 5016</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
 		<Crop x="0" y="0" width="-58" height="0"/>

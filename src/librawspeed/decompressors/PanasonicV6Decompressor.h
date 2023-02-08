@@ -31,20 +31,30 @@ class PanasonicV6Decompressor final : public AbstractDecompressor {
 
   ByteStream input;
 
-  static constexpr int PixelsPerBlock = 11;
-  static constexpr int BytesPerBlock = 16;
+  // Contains the decoding recepie for the block,
+  struct BlockDsc;
 
+  // There are two variants. Which one is to be used depends on image's bps.
+  static const BlockDsc TwelveBitBlock;
+  static const BlockDsc FourteenBitBlock;
+
+  const uint32_t bps;
+
+  template <const BlockDsc& dsc>
   inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   decompressBlock(ByteStream& rowInput, int row, int col) const noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  void decompressRow(int row) const noexcept;
+  template <const BlockDsc& dsc> void decompressRow(int row) const noexcept;
+
+  template <const BlockDsc& dsc> void decompressInternal() const noexcept;
 
 public:
-  PanasonicV6Decompressor(const RawImage& img, const ByteStream& input_);
+  PanasonicV6Decompressor(const RawImage& img, const ByteStream& input_,
+                          uint32_t bps_);
 
-  void decompress() const;
+  void decompress() const noexcept;
 };
 
 } // namespace rawspeed
