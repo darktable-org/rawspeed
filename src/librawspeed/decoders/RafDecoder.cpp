@@ -266,7 +266,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // Set white point derived from Exif.Fujifilm.BitsPerSample if available,
   // can be overridden by XML data.
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)) {
-    unsigned bps = bps =
+    unsigned bps =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
     if (bps > 16)
       ThrowRDE("Unexpected bit depth: %i", bps);
