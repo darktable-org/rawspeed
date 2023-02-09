@@ -13,11 +13,6 @@ coverage:
     project: false
   ignore:
     - test/.*
-  notify:
-    irc:
-      default:
-        server: "chat.freenode.net"
-        channel: "#rawspeed"
 parsers:
   gcov:
     branch_detection:
