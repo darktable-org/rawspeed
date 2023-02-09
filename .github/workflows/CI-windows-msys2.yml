@@ -24,6 +24,8 @@ on:
         type: string
       ECO:
         type: string
+    secrets:
+      CODECOV_TOKEN:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
@@ -119,6 +121,7 @@ jobs:
           CXX: ${{ inputs.compiler-family }}
           JOB_NAME: ${{ inputs.os }}.${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
           flags: unittests
           name: ${JOB_NAME}.Unittests

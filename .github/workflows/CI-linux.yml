@@ -29,6 +29,7 @@ on:
       ECO:
         type: string
     secrets:
+      CODECOV_TOKEN:
       SONAR_TOKEN:
       SONAR_PROJECT_KEY:
       SONAR_ORGANIZATION:
@@ -332,7 +333,7 @@ jobs:
           CXX: ${{ inputs.compiler-family }}
           JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
         with:
-          env_vars: OS,ARCH,CXX
+          token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           name: ${JOB_NAME}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
@@ -347,6 +348,7 @@ jobs:
           CXX: ${{ inputs.compiler-family }}
           JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
           flags: integration,rpu_u
           name: ${JOB_NAME}.Integration

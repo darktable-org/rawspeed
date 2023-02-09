@@ -103,6 +103,8 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   linux-sonarcloud-static-analysis:
     if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
     strategy:
@@ -175,6 +177,8 @@ jobs:
       compiler-CXX: ${{ matrix.msys2.CXX }}
       flavor: ${{ matrix.flavor }}
       ECO: -DBUILD_BENCHMARKING=OFF
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   macOS-fast:
     strategy:
       fail-fast: false
@@ -227,3 +231,5 @@ jobs:
       compiler-CC: ${{ matrix.compiler.CC }}
       compiler-CXX: ${{ matrix.compiler.CXX }}
       flavor: ${{ matrix.flavor }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
