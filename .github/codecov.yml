@@ -1,8 +1,8 @@
 codecov:
-  require_ci_to_pass: false
+  require_ci_to_pass: true
   notify:
-    after_n_builds: 4
-    wait_for_ci: no
+    after_n_builds: 3
+    wait_for_ci: true
 coverage:
   precision: 2
   range: "0...100"
