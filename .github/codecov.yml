@@ -1,8 +1,8 @@
 codecov:
-  require_ci_to_pass: true
+  require_ci_to_pass: false
   notify:
-    after_n_builds: 3
-    wait_for_ci: true
+    after_n_builds: 1
+    wait_for_ci: false
 coverage:
   precision: 2
   range: "0...100"
@@ -18,8 +18,8 @@ parsers:
     branch_detection:
       conditional: true
       loop: true
-      macro: false
-      method: false
+      macro: true
+      method: true
 comment:
   behavior: default
   layout: header, diff
