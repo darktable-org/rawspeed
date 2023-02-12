@@ -3912,9 +3912,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="400" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9200 -3522 -992</ColorMatrixRow>
@@ -3951,9 +3948,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="100" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9200 -3522 -992</ColorMatrixRow>
@@ -3990,9 +3984,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9028 -3423 -1035</ColorMatrixRow>
@@ -4029,9 +4020,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="252" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9028 -3423 -1035</ColorMatrixRow>
@@ -4104,9 +4092,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4143,9 +4128,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="251" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4182,9 +4164,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4221,9 +4200,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="251" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4260,9 +4236,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -4299,9 +4272,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="252" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -4338,9 +4308,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13705 -6004 -1400</ColorMatrixRow>
@@ -4377,9 +4344,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="251" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13705 -6004 -1400</ColorMatrixRow>
@@ -4770,9 +4734,6 @@
 		</CFA>
 		<Crop x="2" y="2" width="-2" height="-2"/>
 		<Sensor black="400" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8813 -3210 -1036</ColorMatrixRow>
@@ -4809,9 +4770,6 @@
 		</CFA>
 		<Crop x="2" y="2" width="-2" height="-2"/>
 		<Sensor black="100" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8813 -3210 -1036</ColorMatrixRow>
@@ -5796,9 +5754,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="150" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9369 -3195 -791</ColorMatrixRow>
@@ -5835,9 +5790,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="600" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9369 -3195 -791</ColorMatrixRow>
@@ -5892,9 +5844,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="100" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -5931,9 +5880,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="400" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -5982,9 +5928,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="192" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8598 -2848 -857</ColorMatrixRow>
@@ -6003,9 +5946,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="768" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8598 -2848 -857</ColorMatrixRow>
@@ -6401,6 +6341,7 @@
 		<Hints>
 			<Hint name="force_uncompressed" value=""/>
 			<Hint name="real_bpp" value="16"/>
+			<Hint name="msb_override" value="false"/>
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -6438,6 +6379,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="200" white="3800"/>
+		<Hints>
+			<Hint name="msb_override" value="false"/>
+		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10321 -3920 -931</ColorMatrixRow>
@@ -6586,6 +6530,7 @@
 		<Hints>
 			<Hint name="force_uncompressed" value=""/>
 			<Hint name="real_bpp" value="16"/>
+			<Hint name="msb_override" value="false"/>
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -6608,6 +6553,7 @@
 		<Hints>
 			<Hint name="force_uncompressed" value=""/>
 			<Hint name="real_bpp" value="16"/>
+			<Hint name="msb_override" value="false"/>
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">

@@ -274,8 +274,6 @@ void NefDecoder::DecodeUncompressed() const {
     ThrowRDE("Invalid bpp found: %u", bitPerPixel);
   }
 
-  bool bitorder = ! hints.has("msb_override");
-
   offY = 0;
   for (const NefSlice& slice : slices) {
     ByteStream in(DataBuffer(mFile.getSubView(slice.offset, slice.count),
@@ -295,8 +293,11 @@ void NefDecoder::DecodeUncompressed() const {
         if (in.getSize() % size.y != 0)
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
-        u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel,
-                              bitorder ? BitOrder::MSB : BitOrder::LSB);
+        BitOrder bo = (mRootIFD->rootBuffer.getByteOrder() == Endianness::big) ^
+                              hints.has("msb_override")
+                          ? BitOrder::MSB
+                          : BitOrder::LSB;
+        u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel, bo);
       }
     }
 
