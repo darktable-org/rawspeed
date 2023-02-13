@@ -74,6 +74,10 @@ template <typename T> constexpr bool isPowerOfTwo(T val) {
   return (val & (~val+1)) == val;
 }
 
+template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
+  return CHAR_BIT * sizeof(T);
+}
+
 constexpr size_t __attribute__((const))
 roundToMultiple(size_t value, size_t multiple, bool roundDown) {
   if ((multiple == 0) || (value % multiple == 0))
@@ -121,10 +125,6 @@ bool __attribute__((pure))
 isIn(const T value, const std::initializer_list<T2>& list) {
   return std::any_of(list.begin(), list.end(),
                      [value](const T2& t) { return t == value; });
-}
-
-template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
-  return CHAR_BIT * sizeof(T);
 }
 
 // Clamps the given value to the range 0 .. 2^n-1, with n <= 16
