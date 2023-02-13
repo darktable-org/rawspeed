@@ -20,6 +20,7 @@
 */
 
 #include "rawspeedconfig.h" // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
+#include "adt/AlignedAllocator.h" // for AlignedAllocator
 
 #ifdef HAVE_JPEG
 
@@ -133,11 +134,8 @@ void JpegDecompressor::decode(uint32_t offX,
     ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
-  unique_ptr<uint8_t[], // NOLINT
-             decltype(&alignedFree)>
-      complete_buffer(
-          alignedMallocArray<uint8_t, 16>(dinfo.output_height, row_stride),
-          &alignedFree);
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> complete_buffer;
+  complete_buffer.resize(dinfo.output_height * row_stride);
 
   const Array2DRef<uint8_t> tmp(&complete_buffer[0],
                                 dinfo.output_components * dinfo.output_width,
