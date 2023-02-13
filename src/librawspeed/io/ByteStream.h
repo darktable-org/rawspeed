@@ -189,18 +189,6 @@ public:
     } while (!isNullTerminator);
     return reinterpret_cast<const char*>(&data[start]);
   }
-
-  // special factory function to set up internal buffer with copy of passed data.
-  // only necessary to create 'fake' TiffEntries (see e.g. RAF)
-  static ByteStream createCopy(const std::byte* data_, size_type size_) {
-    ByteStream bs;
-    auto* new_data = alignedMalloc<std::byte, 8>(roundUp(size_, 8));
-    memcpy(new_data, data_, size_);
-    bs.data = reinterpret_cast<const uint8_t*>(new_data);
-    bs.size = size_;
-    bs.isOwner = true;
-    return bs; // hint: copy elision or move will happen
-  }
 };
 
 } // namespace rawspeed
