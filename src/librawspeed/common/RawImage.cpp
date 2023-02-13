@@ -56,13 +56,7 @@ RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
   createData();
 }
 
-RawImageData::~RawImageData() {
-  assert(dataRefCount == 0);
-  mOffset = iPoint2D(0, 0);
-
-  destroyData();
-}
-
+RawImageData::~RawImageData() { assert(dataRefCount == 0); }
 
 void RawImageData::createData() {
   static constexpr const auto alignment = 16;
@@ -174,8 +168,6 @@ void RawImageData::checkMemIsInitialized() {
   // the getDataUncropped() call may still be there. To be re-evaluated.
 }
 #endif
-
-void RawImageData::destroyData() { data.clear(); }
 
 void RawImageData::setCpp(uint32_t val) {
   if (isAllocated())
