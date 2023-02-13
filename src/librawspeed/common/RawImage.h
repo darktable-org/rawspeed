@@ -25,6 +25,7 @@
 #include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"            // for Array2DRef
 #include "adt/CroppedArray2DRef.h"     // for CroppedArray2DRef
+#include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Mutex.h"                 // for Mutex
 #include "adt/NotARational.h"          // for NotARational
 #include "adt/Point.h"                 // for iPoint2D, iRectangle2D (ptr o...
@@ -185,7 +186,9 @@ protected:
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> data;
+  std::vector<uint8_t, DefaultInitAllocatorAdaptor<
+                           uint8_t, AlignedAllocator<uint8_t, 16>>>
+      data;
   int cpp = 1; // Components per pixel
   int bpp = 0; // Bytes per pixel.
   friend class RawImage;
