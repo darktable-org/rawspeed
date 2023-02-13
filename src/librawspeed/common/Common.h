@@ -117,15 +117,15 @@ constexpr __attribute__((const)) bool isAligned(
     T value, size_t multiple,
     typename std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
   return (multiple == 0) ||
-         (reinterpret_cast<std::uintptr_t>(value) % multiple == 0);
+         (getMisalignmentOffset(reinterpret_cast<std::uintptr_t>(value),
+                                multiple) == 0);
 }
 
 template <class T>
 constexpr __attribute__((const)) bool isAligned(
     T value, size_t multiple,
     typename std::enable_if_t<!std::is_pointer_v<T>>* /*unused*/ = nullptr) {
-  return (multiple == 0) ||
-         (static_cast<std::uintptr_t>(value) % multiple == 0);
+  return (multiple == 0) || (getMisalignmentOffset(value, multiple) == 0);
 }
 
 template <typename T, typename T2>
