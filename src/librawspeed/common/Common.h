@@ -79,11 +79,19 @@ template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
 }
 
 constexpr size_t __attribute__((const))
+getMisalignmentOffset(size_t value, size_t multiple) {
+  if (multiple == 0)
+    return 0;
+  return value % multiple;
+}
+
+constexpr size_t __attribute__((const))
 roundToMultiple(size_t value, size_t multiple, bool roundDown) {
-  if ((multiple == 0) || (value % multiple == 0))
+  size_t offset = getMisalignmentOffset(value, multiple);
+  if (offset == 0)
     return value;
   // Drop remainder.
-  size_t roundedDown = value - (value % multiple);
+  size_t roundedDown = value - offset;
   if (roundDown) // If we were rounding down, then that's it.
     return roundedDown;
   // Else, just add one multiple.
