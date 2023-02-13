@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "AddressSanitizer.h"
 #include "common/Common.h"
 #include "common/Memory.h"
 #include <cstddef> // for size_t
@@ -54,6 +55,9 @@ public:
     auto* r = alignedMalloc<T, alignment>(numPaddedBytes);
     if (!r)
       throw std::bad_alloc();
+    ASan::PoisonMemoryRegion(
+        reinterpret_cast<const volatile std::byte*>(r + numElts),
+        numPaddedBytes - numBytes);
     return r;
   }
 
