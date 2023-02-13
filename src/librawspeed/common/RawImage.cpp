@@ -94,10 +94,7 @@ void RawImageData::createData() {
   assert(padding > 0);
 #endif
 
-  data = alignedMallocArray<uint8_t, alignment>(dim.y, pitch);
-
-  if (!data)
-    ThrowRDE("Memory Allocation failed.");
+  data.resize(static_cast<size_t>(pitch) * dim.y);
 
   uncropped_dim = dim;
 
@@ -120,7 +117,7 @@ void RawImageData::createData() {
 }
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::poisonPadding() const {
+void RawImageData::poisonPadding() {
   if (padding <= 0)
     return;
 
@@ -131,7 +128,7 @@ void RawImageData::poisonPadding() const {
   }
 }
 #else
-void RawImageData::poisonPadding() const {
+void RawImageData::poisonPadding() {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
@@ -139,7 +136,7 @@ void RawImageData::poisonPadding() const {
 #endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::unpoisonPadding() const {
+void RawImageData::unpoisonPadding() {
   if (padding <= 0)
     return;
 
@@ -150,14 +147,14 @@ void RawImageData::unpoisonPadding() const {
   }
 }
 #else
-void RawImageData::unpoisonPadding() const {
+void RawImageData::unpoisonPadding() {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
 }
 #endif
 
-void RawImageData::checkRowIsInitialized(int row) const {
+void RawImageData::checkRowIsInitialized(int row) {
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
 
   // and check that image line is initialized.
@@ -166,23 +163,19 @@ void RawImageData::checkRowIsInitialized(int row) const {
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-void RawImageData::checkMemIsInitialized() const {
+void RawImageData::checkMemIsInitialized() {
   for (int j = 0; j < uncropped_dim.y; j++)
     checkRowIsInitialized(j);
 }
 #else
-void RawImageData::checkMemIsInitialized() const {
+void RawImageData::checkMemIsInitialized() {
   // While we could use the same version for non-MSAN build, even though it
   // does not do anything, i don't think it will be fully optimized away,
   // the getDataUncropped() call may still be there. To be re-evaluated.
 }
 #endif
 
-void RawImageData::destroyData() {
-  if (data)
-    alignedFree(data);
-  data = nullptr;
-}
+void RawImageData::destroyData() { data.clear(); }
 
 void RawImageData::setCpp(uint32_t val) {
   if (isAllocated())
@@ -386,7 +379,7 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-void RawImageData::clearArea(iRectangle2D area) const {
+void RawImageData::clearArea(iRectangle2D area) {
   area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
 
   if (area.area() <= 0)

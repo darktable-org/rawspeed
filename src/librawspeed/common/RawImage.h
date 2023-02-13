@@ -112,29 +112,27 @@ public:
   [[nodiscard]] uint32_t getBpp() const { return bpp; }
   void setCpp(uint32_t val);
   void createData();
-  void poisonPadding() const;
-  void unpoisonPadding() const;
-  void checkRowIsInitialized(int row) const;
-  void checkMemIsInitialized() const;
+  void poisonPadding();
+  void unpoisonPadding();
+  void checkRowIsInitialized(int row);
+  void checkMemIsInitialized();
   void destroyData();
 
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
 
-  [[nodiscard]] Array2DRef<uint16_t>
-  getU16DataAsUncroppedArray2DRef() const noexcept;
+  [[nodiscard]] Array2DRef<uint16_t> getU16DataAsUncroppedArray2DRef() noexcept;
   [[nodiscard]] CroppedArray2DRef<uint16_t>
-  getU16DataAsCroppedArray2DRef() const noexcept;
-  [[nodiscard]] Array2DRef<float>
-  getF32DataAsUncroppedArray2DRef() const noexcept;
+  getU16DataAsCroppedArray2DRef() noexcept;
+  [[nodiscard]] Array2DRef<float> getF32DataAsUncroppedArray2DRef() noexcept;
   [[nodiscard]] CroppedArray2DRef<float>
-  getF32DataAsCroppedArray2DRef() const noexcept;
+  getF32DataAsCroppedArray2DRef() noexcept;
 
   // WARNING: this is most certainly not what you want!
   [[nodiscard]] Array2DRef<std::byte>
-  getByteDataAsUncroppedArray2DRef() const noexcept;
+  getByteDataAsUncroppedArray2DRef() noexcept;
 
   void subFrame(iRectangle2D cropped);
-  void clearArea(iRectangle2D area) const;
+  void clearArea(iRectangle2D area);
   [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
   [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
@@ -147,7 +145,7 @@ public:
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
-  [[nodiscard]] bool isAllocated() const { return !!data; }
+  [[nodiscard]] bool isAllocated() const { return !data.empty(); }
   void createBadPixelMap();
   iPoint2D dim;
   int pitch = 0;
@@ -188,7 +186,7 @@ protected:
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
   void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uint8_t* data = nullptr;
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> data;
   int cpp = 1; // Components per pixel
   int bpp = 0; // Bytes per pixel.
   friend class RawImage;
@@ -279,37 +277,37 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
 }
 
 inline Array2DRef<uint16_t>
-RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
+RawImageData::getU16DataAsUncroppedArray2DRef() noexcept {
   assert(dataType == RawImageType::UINT16 &&
          "Attempting to access floating-point buffer as uint16_t.");
-  assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
+  assert(!data.empty() && "Data not yet allocated.");
+  return {reinterpret_cast<uint16_t*>(data.data()), cpp * uncropped_dim.x,
           uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
 }
 
 inline CroppedArray2DRef<uint16_t>
-RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
+RawImageData::getU16DataAsCroppedArray2DRef() noexcept {
   return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
 }
 
 inline Array2DRef<float>
-RawImageData::getF32DataAsUncroppedArray2DRef() const noexcept {
+RawImageData::getF32DataAsUncroppedArray2DRef() noexcept {
   assert(dataType == RawImageType::F32 &&
          "Attempting to access integer buffer as float.");
-  assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<float*>(data), cpp * uncropped_dim.x,
+  assert(!data.empty() && "Data not yet allocated.");
+  return {reinterpret_cast<float*>(data.data()), cpp * uncropped_dim.x,
           uncropped_dim.y, static_cast<int>(pitch / sizeof(float))};
 }
 
 inline CroppedArray2DRef<float>
-RawImageData::getF32DataAsCroppedArray2DRef() const noexcept {
+RawImageData::getF32DataAsCroppedArray2DRef() noexcept {
   return {getF32DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
 }
 
 inline Array2DRef<std::byte>
-RawImageData::getByteDataAsUncroppedArray2DRef() const noexcept {
+RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
   switch (dataType) {
   case RawImageType::UINT16:
     return getU16DataAsUncroppedArray2DRef();
