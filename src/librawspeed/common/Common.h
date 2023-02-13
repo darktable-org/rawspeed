@@ -99,13 +99,14 @@ constexpr size_t __attribute__((const)) getMisalignmentOffset(
   return value % multiple;
 }
 
-constexpr size_t __attribute__((const))
-roundToMultiple(size_t value, size_t multiple, bool roundDown) {
+template <typename T>
+constexpr T __attribute__((const))
+roundToMultiple(T value, size_t multiple, bool roundDown) {
   size_t offset = getMisalignmentOffset(value, multiple);
   if (offset == 0)
     return value;
   // Drop remainder.
-  size_t roundedDown = value - offset;
+  T roundedDown = value - offset;
   if (roundDown) // If we were rounding down, then that's it.
     return roundedDown;
   // Else, just add one multiple.
