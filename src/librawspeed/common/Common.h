@@ -78,8 +78,22 @@ template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
   return CHAR_BIT * sizeof(T);
 }
 
-constexpr size_t __attribute__((const))
-getMisalignmentOffset(size_t value, size_t multiple) {
+template <typename T>
+constexpr size_t __attribute__((const)) getMisalignmentOffset(
+    T value, size_t multiple,
+    typename std::enable_if<std::is_pointer_v<T>>::type* /*unused*/ = nullptr) {
+  if (multiple == 0)
+    return 0;
+  static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
+                "uintptr_t can not represent all pointer values?");
+  return reinterpret_cast<uintptr_t>(value) % multiple;
+}
+
+template <typename T>
+constexpr size_t __attribute__((const)) getMisalignmentOffset(
+    T value, size_t multiple,
+    typename std::enable_if<std::is_integral_v<T>>::type* /*unused*/ =
+        nullptr) {
   if (multiple == 0)
     return 0;
   return value % multiple;
@@ -113,18 +127,7 @@ roundUpDivision(size_t value, size_t div) {
 }
 
 template <class T>
-constexpr __attribute__((const)) bool isAligned(
-    T value, size_t multiple,
-    typename std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
-  return (multiple == 0) ||
-         (getMisalignmentOffset(reinterpret_cast<std::uintptr_t>(value),
-                                multiple) == 0);
-}
-
-template <class T>
-constexpr __attribute__((const)) bool isAligned(
-    T value, size_t multiple,
-    typename std::enable_if_t<!std::is_pointer_v<T>>* /*unused*/ = nullptr) {
+constexpr __attribute__((const)) bool isAligned(T value, size_t multiple) {
   return (multiple == 0) || (getMisalignmentOffset(value, multiple) == 0);
 }
 
