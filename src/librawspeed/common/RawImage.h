@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"            // for WITH_SSE2
 #include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
+#include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"            // for Array2DRef
 #include "adt/CroppedArray2DRef.h"     // for CroppedArray2DRef
 #include "adt/Mutex.h"                 // for Mutex
@@ -166,7 +167,7 @@ public:
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   // Positions of zeroes that must be interpolated
   std::vector<uint32_t> mBadPixelPositions GUARDED_BY(mBadPixelMutex);
-  uint8_t* mBadPixelMap = nullptr;
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> mBadPixelMap;
   uint32_t mBadPixelMapPitch = 0;
   bool mDitherScale =
       true; // Should upscaling be done with dither to minimize banding?

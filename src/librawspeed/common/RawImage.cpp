@@ -181,10 +181,7 @@ void RawImageData::checkMemIsInitialized() const {
 void RawImageData::destroyData() {
   if (data)
     alignedFree(data);
-  if (mBadPixelMap)
-    alignedFree(mBadPixelMap);
   data = nullptr;
-  mBadPixelMap = nullptr;
 }
 
 void RawImageData::setCpp(uint32_t val) {
@@ -237,12 +234,9 @@ void RawImageData::createBadPixelMap()
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch = roundUp(roundUpDivision(uncropped_dim.x, 8), 16);
-  mBadPixelMap =
-      alignedMallocArray<uint8_t, 16>(uncropped_dim.y, mBadPixelMapPitch);
-  memset(mBadPixelMap, 0,
-         static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y);
-  if (!mBadPixelMap)
-    ThrowRDE("Memory Allocation failed.");
+  assert(mBadPixelMap.empty());
+  mBadPixelMap.resize(static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y,
+                      uint8_t(0));
 }
 
 RawImage::RawImage(RawImageData* p) : p_(p) {
@@ -275,7 +269,7 @@ void RawImageData::transferBadPixelsToMap()
   if (mBadPixelPositions.empty())
     return;
 
-  if (!mBadPixelMap)
+  if (mBadPixelMap.empty())
     createBadPixelMap();
 
   for (unsigned int pos : mBadPixelPositions) {
@@ -308,7 +302,7 @@ void RawImageData::fixBadPixels()
 #endif
 
   /* Process bad pixels, if any */
-  if (mBadPixelMap)
+  if (!mBadPixelMap.empty())
     startWorker(RawImageWorker::RawImageWorkerTask::FIX_BAD_PIXELS, false);
 
 #else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
