@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "common/Common.h"
 #include "common/Memory.h"
 #include <cstddef> // for size_t
 #include <memory>  // for allocator_traits
@@ -37,13 +38,20 @@ public:
     using other = AlignedAllocator<U, alignment>;
   };
 
-  T* allocate(std::size_t n) {
-    if (n == 0)
+  T* allocate(std::size_t numElts) {
+    if (numElts == 0)
       return nullptr;
-    if (n > allocator_traits::max_size(*this))
+    if (numElts > allocator_traits::max_size(*this))
       throw std::bad_array_new_length();
-    auto* r =
-        alignedMallocArray<T, alignment, /*doRoundUp=*/true>(n, sizeof(T));
+
+    if (numElts > SIZE_MAX / sizeof(T))
+      throw std::bad_array_new_length();
+
+    std::size_t numBytes = sizeof(T) * numElts;
+    std::size_t numPaddedBytes = roundUp(numBytes, alignment);
+    assert(numPaddedBytes >= numBytes && "Alignment did not cause wraparound.");
+
+    auto* r = alignedMalloc<T, alignment>(numPaddedBytes);
     if (!r)
       throw std::bad_alloc();
     return r;
