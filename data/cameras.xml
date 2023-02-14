@@ -11385,8 +11385,29 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DC-GH6" supported="no">
+	<Camera make="Panasonic" model="DC-GH6">
 		<ID make="Panasonic" model="DC-GH6">Panasonic DC-GH6</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7949 -3491 -710</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3435 11681 1977</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-503 1622 5065</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH6" mode="4:3">
+		<ID make="Panasonic" model="DC-GH6">Panasonic DC-GH6</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7949 -3491 -710</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3435 11681 1977</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-503 1622 5065</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
