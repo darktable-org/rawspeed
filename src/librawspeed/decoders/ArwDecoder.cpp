@@ -446,7 +446,7 @@ void ArwDecoder::GetWB() const {
                 len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
-    Buffer decIFD(std::move(DecryptedBuffer), DecryptedBufferSize);
+    Buffer decIFD(DecryptedBuffer.get(), DecryptedBufferSize);
     const Buffer Padding(decIFD.getSubView(0, off));
     // The Decrypted Root Ifd can not point to preceding padding buffer.
     ifds_decoded.insert(Padding);
