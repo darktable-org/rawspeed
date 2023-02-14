@@ -44,17 +44,19 @@ static int usage() {
 
 static void process(const char* filename) noexcept {
   rawspeed::FileReader reader(filename);
-  std::unique_ptr<const rawspeed::Buffer> buf;
+  std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)> storage = {
+      nullptr, &rawspeed::alignedFree};
+  rawspeed::Buffer buf;
 
   try {
-    buf = reader.readFile();
+    std::tie(storage, buf) = reader.readFile();
   } catch (const rawspeed::FileIOException&) {
     // failed to read the file for some reason.
     // just ignore it.
     return;
   }
 
-  LLVMFuzzerTestOneInput(buf->getData(0, buf->getSize()), buf->getSize());
+  LLVMFuzzerTestOneInput(buf.getData(0, buf.getSize()), buf.getSize());
 }
 
 int main(int argc, char** argv) {

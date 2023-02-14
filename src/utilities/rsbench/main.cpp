@@ -94,14 +94,17 @@ template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
 // requested the first time.
 struct Entry {
   rawspeed::ChecksumFileEntry Name;
-  std::unique_ptr<const rawspeed::Buffer> Content;
+  std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)> Storage = {
+      nullptr, &rawspeed::alignedFree};
+  rawspeed::Buffer Content;
 
   const rawspeed::Buffer& getFileContents() {
-    if (Content)
-      return *Content;
+    if (Storage)
+      return Content;
 
-    Content = FileReader(Name.FullFileName.c_str()).readFile();
-    return *Content;
+    std::tie(Storage, Content) =
+        FileReader(Name.FullFileName.c_str()).readFile();
+    return Content;
   }
 };
 

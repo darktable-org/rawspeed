@@ -166,9 +166,9 @@ int main(int argc, char* argv[]) { // NOLINT
 
     FileReader f(imageFileName);
 
-    std::unique_ptr<const Buffer> m(f.readFile());
+    auto [storage, buf] = f.readFile();
 
-    RawParser t(*m);
+    RawParser t(buf);
 
     auto d(t.getDecoder(meta.get()));
 

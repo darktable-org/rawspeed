@@ -84,9 +84,9 @@ ReadChecksumFile(const std::string& RootDir,
   const std::string ChecksumFileName = RootDir + "/" + ChecksumFileBasename;
   FileReader FR(ChecksumFileName.c_str());
 
-  std::unique_ptr<const Buffer> buf = FR.readFile();
+  const auto [storage, buf] = FR.readFile();
   const std::string ChecksumFileContent(
-      reinterpret_cast<const char*>(buf->begin()), buf->getSize());
+      reinterpret_cast<const char*>(buf.begin()), buf.getSize());
 
   return ParseChecksumFileContent(ChecksumFileContent, RootDir);
 }

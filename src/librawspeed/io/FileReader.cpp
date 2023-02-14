@@ -41,7 +41,8 @@
 
 namespace rawspeed {
 
-std::unique_ptr<const Buffer> FileReader::readFile() {
+std::pair<std::unique_ptr<uint8_t, decltype(&alignedFree)>, Buffer>
+FileReader::readFile() {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)
@@ -114,7 +115,7 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
 #endif // __unix__
 
-  return std::make_unique<Buffer>(std::move(dest), fileSize);
+  return {std::move(dest), Buffer(dest.get(), fileSize)};
 }
 
 } // namespace rawspeed

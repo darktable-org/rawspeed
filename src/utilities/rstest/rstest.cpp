@@ -360,12 +360,11 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
   FileReader reader(filename.c_str());
 
-  auto map(reader.readFile());
-  // Buffer& map = readFile( argv[1] );
+  auto [storage, buf] = reader.readFile();
 
   Timer t;
 
-  RawParser parser(*map);
+  RawParser parser(buf);
   auto decoder(parser.getDecoder(metadata));
   // RawDecoder* decoder = parseRaw( map );
 
@@ -384,7 +383,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #pragma omp critical(io)
 #endif
   cout << left << setw(55) << filename << ": " << internal << setw(3)
-       << map->getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
+       << buf.getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
        << endl;
 #endif
 
