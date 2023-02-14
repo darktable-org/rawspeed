@@ -40,13 +40,11 @@ public:
   };
 
   T* allocate(std::size_t numElts) {
-    if (numElts == 0)
-      return nullptr;
-    if (numElts > allocator_traits::max_size(*this))
-      throw std::bad_array_new_length();
-
-    if (numElts > SIZE_MAX / sizeof(T))
-      throw std::bad_array_new_length();
+    assert(numElts > 0 && "Should not be trying to allocate no elements");
+    assert(numElts <= allocator_traits::max_size(*this) &&
+           "Can allocate this many elements.");
+    assert(numElts <= SIZE_MAX / sizeof(T) &&
+           "Byte count calculation will not overflow");
 
     std::size_t numBytes = sizeof(T) * numElts;
     std::size_t numPaddedBytes = roundUp(numBytes, alignment);
@@ -61,7 +59,10 @@ public:
     return r;
   }
 
-  void deallocate(T* p, std::size_t n) noexcept { alignedFree(p); }
+  void deallocate(T* p, std::size_t n) noexcept {
+    assert(n > 0);
+    alignedFree(p);
+  }
 
   using propagate_on_container_copy_assignment = std::true_type;
   using propagate_on_container_move_assignment = std::true_type;
