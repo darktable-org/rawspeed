@@ -43,15 +43,6 @@ alignedMalloc(size_t size, size_t alignment) {
 
   void* ptr = nullptr;
 
-#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-  // workaround ASAN's broken allocator_may_return_null option
-  // plus, avoidance of libFuzzer's rss_limit_mb option
-  // if trying to alloc more than 2GB, just return null.
-  // else it would abort() the whole program...
-  if (size > 2UL << 30UL)
-    return ptr;
-#endif
-
 #if defined(HAVE_ALIGNED_ALLOC)
   ptr = aligned_alloc(alignment, size);
 #elif defined(HAVE_POSIX_MEMALIGN)
