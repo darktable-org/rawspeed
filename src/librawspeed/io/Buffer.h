@@ -74,26 +74,6 @@ public:
   // constructs an empty buffer
   Buffer() = default;
 
-  // creates buffer from owning unique_ptr
-  Buffer(std::unique_ptr<uint8_t, decltype(&alignedFree)> data_,
-         size_type size_)
-      : size(size_) {
-    if (!size)
-      ThrowIOE("Buffer has zero size?");
-
-    if (data_.get_deleter() != &alignedFree)
-      ThrowIOE("Wrong deleter. Expected rawspeed::alignedFree()");
-
-    data = data_.release();
-    if (!data)
-      ThrowIOE("Memory buffer is nonexistent");
-
-    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                   size));
-
-    isOwner = true;
-  }
-
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
