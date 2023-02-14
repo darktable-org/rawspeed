@@ -207,7 +207,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   __m128i sse_full_scale_fp;
   __m128i sse_half_scale_fp;
 
-  std::array<uint32_t, 2 * 4> sub_mul;
+  std::array<uint32_t, 4 * 4> sub_mul;
 
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
