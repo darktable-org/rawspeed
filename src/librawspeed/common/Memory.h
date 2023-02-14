@@ -33,9 +33,40 @@ namespace rawspeed {
 #pragma GCC diagnostic ignored "-Wattributes"
 
 // coverity[+alloc]
-void* alignedMalloc(size_t size, size_t alignment)
-    __attribute__((malloc, warn_unused_result, alloc_size(1), alloc_align(2),
-                   deprecated("use alignedMalloc<alignment>(size)")));
+inline void* __attribute__((malloc, warn_unused_result, alloc_size(1),
+                            alloc_align(2),
+                            deprecated("use alignedMalloc<alignment>(size)")))
+alignedMalloc(size_t size, size_t alignment) {
+  assert(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
+  assert(isAligned(alignment, sizeof(void*))); // for posix_memalign
+  assert(isAligned(size, alignment));          // for aligned_alloc
+
+  void* ptr = nullptr;
+
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  // workaround ASAN's broken allocator_may_return_null option
+  // plus, avoidance of libFuzzer's rss_limit_mb option
+  // if trying to alloc more than 2GB, just return null.
+  // else it would abort() the whole program...
+  if (size > 2UL << 30UL)
+    return ptr;
+#endif
+
+#if defined(HAVE_ALIGNED_ALLOC)
+  ptr = aligned_alloc(alignment, size);
+#elif defined(HAVE_POSIX_MEMALIGN)
+  if (0 != posix_memalign(&ptr, alignment, size))
+    return nullptr;
+#elif defined(HAVE_ALIGNED_MALLOC)
+  ptr = _aligned_malloc(size, alignment);
+#else
+#error "No aligned malloc() implementation available!"
+#endif
+
+  assert(isAligned(ptr, alignment));
+
+  return ptr;
+}
 
 template <typename T, size_t alignment>
 // coverity[+alloc]
@@ -82,9 +113,19 @@ alignedMallocArray(size_t nmemb) {
 }
 
 // coverity[+free : arg-0]
-void alignedFree(void* ptr);
+inline void alignedFree(void* ptr) {
+#if defined(HAVE_ALIGNED_MALLOC)
+  _aligned_free(ptr);
+#else
+  free(ptr); // NOLINT
+#endif
+}
 
 // coverity[+free : arg-0]
-void alignedFreeConstPtr(const void* ptr);
+inline void alignedFreeConstPtr(const void* ptr) {
+  // an exception, specified by EXP05-C-EX1 and EXP55-CPP-EX1
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast): this is fine.
+  alignedFree(const_cast<void*>(ptr));
+}
 
 } // namespace rawspeed

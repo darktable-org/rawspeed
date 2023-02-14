@@ -12,7 +12,6 @@ FILE(GLOB SOURCES
   "ErrorLog.h"
   "FloatingPoint.h"
   "GetNumberOfProcessorCores.cpp"
-  "Memory.cpp"
   "Memory.h"
   "RawImage.cpp"
   "RawImage.h"

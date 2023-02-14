@@ -74,12 +74,39 @@ template <typename T> constexpr bool isPowerOfTwo(T val) {
   return (val & (~val+1)) == val;
 }
 
-constexpr size_t __attribute__((const))
-roundToMultiple(size_t value, size_t multiple, bool roundDown) {
-  if ((multiple == 0) || (value % multiple == 0))
+template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
+  return CHAR_BIT * sizeof(T);
+}
+
+template <typename T>
+constexpr size_t __attribute__((const)) getMisalignmentOffset(
+    T value, size_t multiple,
+    typename std::enable_if<std::is_pointer_v<T>>::type* /*unused*/ = nullptr) {
+  if (multiple == 0)
+    return 0;
+  static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
+                "uintptr_t can not represent all pointer values?");
+  return reinterpret_cast<uintptr_t>(value) % multiple;
+}
+
+template <typename T>
+constexpr size_t __attribute__((const)) getMisalignmentOffset(
+    T value, size_t multiple,
+    typename std::enable_if<std::is_integral_v<T>>::type* /*unused*/ =
+        nullptr) {
+  if (multiple == 0)
+    return 0;
+  return value % multiple;
+}
+
+template <typename T>
+constexpr T __attribute__((const))
+roundToMultiple(T value, size_t multiple, bool roundDown) {
+  size_t offset = getMisalignmentOffset(value, multiple);
+  if (offset == 0)
     return value;
   // Drop remainder.
-  size_t roundedDown = value - (value % multiple);
+  T roundedDown = value - offset;
   if (roundDown) // If we were rounding down, then that's it.
     return roundedDown;
   // Else, just add one multiple.
@@ -101,19 +128,8 @@ roundUpDivision(size_t value, size_t div) {
 }
 
 template <class T>
-constexpr __attribute__((const)) bool isAligned(
-    T value, size_t multiple,
-    typename std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
-  return (multiple == 0) ||
-         (reinterpret_cast<std::uintptr_t>(value) % multiple == 0);
-}
-
-template <class T>
-constexpr __attribute__((const)) bool isAligned(
-    T value, size_t multiple,
-    typename std::enable_if_t<!std::is_pointer_v<T>>* /*unused*/ = nullptr) {
-  return (multiple == 0) ||
-         (static_cast<std::uintptr_t>(value) % multiple == 0);
+constexpr __attribute__((const)) bool isAligned(T value, size_t multiple) {
+  return (multiple == 0) || (getMisalignmentOffset(value, multiple) == 0);
 }
 
 template <typename T, typename T2>
@@ -121,10 +137,6 @@ bool __attribute__((pure))
 isIn(const T value, const std::initializer_list<T2>& list) {
   return std::any_of(list.begin(), list.end(),
                      [value](const T2& t) { return t == value; });
-}
-
-template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
-  return CHAR_BIT * sizeof(T);
 }
 
 // Clamps the given value to the range 0 .. 2^n-1, with n <= 16

@@ -207,11 +207,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   __m128i sse_full_scale_fp;
   __m128i sse_half_scale_fp;
 
-  auto* sub_mul = alignedMallocArray<uint32_t, 16, __m128i>(4);
-  if (!sub_mul)
-    ThrowRDE("Out of memory, failed to allocate 128 bytes");
-
-  assert(sub_mul != nullptr);
+  std::array<uint32_t, 2 * 4> sub_mul;
 
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
@@ -273,11 +269,11 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
     __m128i ssescale;
     __m128i ssesub;
     if (((y + mOffset.y) & 1) == 0) {
-      ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[0]));
-      ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[4]));
+      ssesub = _mm_loadu_si128(reinterpret_cast<__m128i*>(&sub_mul[0]));
+      ssescale = _mm_loadu_si128(reinterpret_cast<__m128i*>(&sub_mul[4]));
     } else {
-      ssesub = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[8]));
-      ssescale = _mm_load_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
+      ssesub = _mm_loadu_si128(reinterpret_cast<__m128i*>(&sub_mul[8]));
+      ssescale = _mm_loadu_si128(reinterpret_cast<__m128i*>(&sub_mul[12]));
     }
 
     for (int x = 0; x < static_cast<int>(roundDown(uncropped_dim.x, 8));
@@ -326,7 +322,6 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
                       pix_low);
     }
   }
-  alignedFree(sub_mul);
 }
 #endif
 
