@@ -89,7 +89,7 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
   assert(cBuf != nullptr);
   assert(cBufSize > 0);
 
-  Buffer buf(std::move(cBuf), cBufSize);
+  Buffer buf(cBuf.get(), cBufSize);
   assert(buf.getSize() == cBufSize);
 
   int predictor = 0;
