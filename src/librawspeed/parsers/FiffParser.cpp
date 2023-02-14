@@ -41,12 +41,6 @@ using std::numeric_limits;
 
 namespace rawspeed {
 
-template <typename T> static Buffer getAsBuffer(T val) {
-  auto tmp = Buffer::Create(sizeof(T));
-  memcpy(tmp.get(), &val, sizeof(T));
-  return {std::move(tmp), sizeof(T)};
-}
-
 FiffParser::FiffParser(const Buffer& inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
@@ -80,15 +74,16 @@ void FiffParser::parseData() {
       if (second_ifd <= first_ifd)
         ThrowFPE("Fiff is corrupted: second IFD is not after the first IFD");
 
-      // FIXME: why are we hardcoding endianness here?
       uint32_t rawOffset = second_ifd - first_ifd;
-      subIFD->add(std::make_unique<TiffEntry>(
+      subIFD->add(std::make_unique<TiffEntryWithData>(
           subIFD.get(), TiffTag::FUJI_STRIPOFFSETS, TiffDataType::OFFSET, 1,
-          ByteStream(DataBuffer(getAsBuffer(rawOffset), Endianness::little))));
+          Buffer(reinterpret_cast<const uint8_t*>(&rawOffset),
+                 sizeof(rawOffset))));
       uint32_t max_size = mInput.getSize() - second_ifd;
-      subIFD->add(std::make_unique<TiffEntry>(
+      subIFD->add(std::make_unique<TiffEntryWithData>(
           subIFD.get(), TiffTag::FUJI_STRIPBYTECOUNTS, TiffDataType::LONG, 1,
-          ByteStream(DataBuffer(getAsBuffer(max_size), Endianness::little))));
+          Buffer(reinterpret_cast<const uint8_t*>(&max_size),
+                 sizeof(rawOffset))));
     }
   }
 

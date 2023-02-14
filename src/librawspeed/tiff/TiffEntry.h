@@ -1,4 +1,4 @@
-/*
+﻿/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -74,6 +74,9 @@ class TiffEntry
     return res;
   }
 
+protected:
+  void setData(ByteStream data_);
+
 public:
   TiffTag tag;
   TiffDataType type;
@@ -82,6 +85,8 @@ public:
   TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32_t count,
             ByteStream&& data);
   TiffEntry(TiffIFD* parent, ByteStream& bs);
+
+  virtual ~TiffEntry() = default;
 
   [[nodiscard]] bool __attribute__((pure)) isFloat() const;
   [[nodiscard]] bool __attribute__((pure)) isRational() const;
@@ -128,6 +133,14 @@ public:
 
 protected:
   static const std::array<uint32_t, 14> datashifts;
+};
+
+class TiffEntryWithData : public TiffEntry {
+  const std::vector<uint8_t> data;
+
+public:
+  TiffEntryWithData(TiffIFD* parent, TiffTag tag, TiffDataType type,
+                    uint32_t count, Buffer mirror);
 };
 
 } // namespace rawspeed

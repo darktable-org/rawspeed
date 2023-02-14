@@ -91,7 +91,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
               reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);
 
-  Buffer di(std::move(image_decoded), len);
+  Buffer di(image_decoded.get(), len);
 
   // And now decode as a normal 16bit raw
   mRaw->dim = iPoint2D(width, height);
@@ -446,7 +446,7 @@ void ArwDecoder::GetWB() const {
                 len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
-    Buffer decIFD(std::move(DecryptedBuffer), DecryptedBufferSize);
+    Buffer decIFD(DecryptedBuffer.get(), DecryptedBufferSize);
     const Buffer Padding(decIFD.getSubView(0, off));
     // The Decrypted Root Ifd can not point to preceding padding buffer.
     ifds_decoded.insert(Padding);

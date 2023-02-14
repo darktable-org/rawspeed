@@ -98,6 +98,18 @@ TiffEntry::TiffEntry(TiffIFD* parent_, TiffTag tag_, TiffDataType type_,
     ThrowTPE("data set larger than entry size given");
 }
 
+void TiffEntry::setData(ByteStream data_) { data = data_; }
+
+TiffEntryWithData::TiffEntryWithData(TiffIFD* parent_, TiffTag tag_,
+                                     TiffDataType type_, uint32_t count_,
+                                     Buffer mirror)
+    : TiffEntry(parent_, tag_, type_, /*count=*/0, ByteStream()),
+      data(mirror.begin(), mirror.end()) {
+  setData(ByteStream(
+      DataBuffer(Buffer(data.data(), data.size()), Endianness::little)));
+  count = count_;
+}
+
 bool __attribute__((pure)) TiffEntry::isInt() const {
   return type == TiffDataType::LONG || type == TiffDataType::SHORT ||
          type == TiffDataType::BYTE;
