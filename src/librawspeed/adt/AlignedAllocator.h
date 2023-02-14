@@ -23,6 +23,7 @@
 #include "AddressSanitizer.h"
 #include "common/Common.h"
 #include "common/Memory.h"
+#include "common/RawspeedException.h"
 #include <cstddef> // for size_t
 #include <memory>  // for allocator_traits
 
@@ -52,7 +53,8 @@ public:
 
     auto* r = alignedMalloc<T, alignment>(numPaddedBytes);
     if (!r)
-      throw std::bad_alloc();
+      ThrowRSE("Out of memory while trying to allocate %zu bytes",
+               numPaddedBytes);
     ASan::PoisonMemoryRegion(
         reinterpret_cast<const volatile std::byte*>(r + numElts),
         numPaddedBytes - numBytes);
