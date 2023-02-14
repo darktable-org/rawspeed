@@ -360,7 +360,10 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
   FileReader reader(filename.c_str());
 
-  auto [storage, buf] = reader.readFile();
+  std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)> storage = {
+      nullptr, &rawspeed::alignedFree};
+  rawspeed::Buffer buf;
+  std::tie(storage, buf) = reader.readFile();
 
   Timer t;
 
