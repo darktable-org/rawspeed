@@ -91,7 +91,7 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
               reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);
 
-  Buffer di(std::move(image_decoded), len);
+  Buffer di(image_decoded.get(), len);
 
   // And now decode as a normal 16bit raw
   mRaw->dim = iPoint2D(width, height);
