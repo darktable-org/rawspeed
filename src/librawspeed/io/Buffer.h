@@ -37,8 +37,7 @@ namespace rawspeed {
  * This is the buffer abstraction.
  *
  * It allows access to some piece of memory, typically a whole or part
- * of a raw file. The underlying memory may be owned by the buffer or not.
- * It supports move operations to properly deal with ownership transfer.
+ * of a raw file. The underlying memory is never owned by the buffer.
  * It intentionally supports only read/const access to the underlying memory.
  *
  *************************************************************************/
@@ -50,7 +49,6 @@ public:
 protected:
   const uint8_t* data = nullptr;
   size_type size = 0;
-  bool isOwner = false;
 
 public:
   // allocates the databuffer, and returns owning non-const pointer.
@@ -71,73 +69,17 @@ public:
     return data;
   }
 
-  // constructs an empty buffer
   Buffer() = default;
+  Buffer(const Buffer& rhs) = default;
+  Buffer(Buffer&& rhs) noexcept = default;
+  Buffer& operator=(const Buffer& rhs) = default;
+  Buffer& operator=(Buffer&& rhs) noexcept = default;
 
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
     assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
                                    size));
-  }
-
-  // creates a (non-owning) copy / view of rhs
-  Buffer(const Buffer& rhs) : data(rhs.data), size(rhs.size) {
-    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                   size));
-  }
-
-  // Move data and ownership from rhs to this
-  Buffer(Buffer&& rhs) noexcept
-      : data(rhs.data), size(rhs.size), isOwner(rhs.isOwner) {
-    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                   size));
-    rhs.isOwner = false;
-  }
-
-  // Frees memory if owned
-  ~Buffer() {
-    if (isOwner) {
-      alignedFreeConstPtr(data);
-    }
-  }
-
-  Buffer& operator=(Buffer&& rhs) noexcept {
-    if (this == &rhs) {
-      assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                     size));
-      return *this;
-    }
-
-    if (isOwner)
-      alignedFreeConstPtr(data);
-
-    data = rhs.data;
-    size = rhs.size;
-    isOwner = rhs.isOwner;
-
-    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                   size));
-
-    rhs.isOwner = false;
-
-    return *this;
-  }
-
-  Buffer& operator=(const Buffer& rhs) {
-    if (this == &rhs) {
-      assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                     size));
-      return *this;
-    }
-
-    Buffer unOwningTmp(rhs.data, rhs.size);
-    *this = std::move(unOwningTmp);
-    assert(!isOwner);
-    assert(!ASan::RegionIsPoisoned(reinterpret_cast<const std::byte*>(data),
-                                   size));
-
-    return *this;
   }
 
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
