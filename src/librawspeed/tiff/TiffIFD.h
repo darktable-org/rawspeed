@@ -98,7 +98,7 @@ class TiffIFD
 public:
   explicit TiffIFD(TiffIFD* parent);
 
-  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, const DataBuffer& data,
+  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, DataBuffer data,
           uint32_t offset);
 
   virtual ~TiffIFD() = default;
@@ -138,8 +138,8 @@ class TiffRootIFD final : public TiffIFD {
 public:
   const DataBuffer rootBuffer;
 
-  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-              const DataBuffer& data, uint32_t offset)
+  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds, DataBuffer data,
+              uint32_t offset)
       : TiffIFD(parent_, ifds, data, offset), rootBuffer(data) {}
 
   // find the MAKE and MODEL tags identifying the camera

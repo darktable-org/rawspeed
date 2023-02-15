@@ -97,8 +97,8 @@ TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {
   recursivelyIncrementSubIFDCount();
 }
 
-TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-                 const DataBuffer& data, uint32_t offset)
+TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds, DataBuffer data,
+                 uint32_t offset)
     : TiffIFD(parent_) {
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
   // TiffRootIFD in a tiff file

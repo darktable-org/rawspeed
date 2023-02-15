@@ -129,7 +129,7 @@ public:
 
   [[nodiscard]] ByteStream getData() const { return data; }
 
-  [[nodiscard]] const DataBuffer& getRootIfdData() const;
+  [[nodiscard]] DataBuffer getRootIfdData() const;
 
 protected:
   static const std::array<uint32_t, 14> datashifts;

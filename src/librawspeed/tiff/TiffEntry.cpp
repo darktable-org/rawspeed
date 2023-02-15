@@ -283,7 +283,7 @@ std::string TiffEntry::getString() const {
   return {s, strnlen(s, bufSize)};
 }
 
-const DataBuffer &TiffEntry::getRootIfdData() const {
+DataBuffer TiffEntry::getRootIfdData() const {
   const TiffIFD* p = parent;
   const TiffRootIFD* r = nullptr;
   while (p) {
