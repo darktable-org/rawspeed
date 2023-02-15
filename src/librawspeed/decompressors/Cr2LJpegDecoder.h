@@ -38,7 +38,7 @@ class Cr2LJpegDecoder final : public AbstractLJpegDecompressor
   void decodeScan() override;
 
 public:
-  Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img);
+  Cr2LJpegDecoder(ByteStream bs, const RawImage& img);
   void decode(const Cr2SliceWidths& slicing);
 };
 

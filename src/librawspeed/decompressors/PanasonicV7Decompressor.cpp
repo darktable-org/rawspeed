@@ -35,7 +35,7 @@
 namespace rawspeed {
 
 PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
-                                                 const ByteStream& input_)
+                                                 ByteStream input_)
     : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -61,7 +61,7 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
 
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-PanasonicV7Decompressor::decompressBlock(const ByteStream& block, int row,
+PanasonicV7Decompressor::decompressBlock(ByteStream block, int row,
                                          int col) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   BitPumpLSB pump(block);

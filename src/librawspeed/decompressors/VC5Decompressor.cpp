@@ -656,7 +656,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
   public:
-    DeRLVer(const ByteStream& bs, int16_t quant_) : bits(bs), quant(quant_) {}
+    DeRLVer(ByteStream bs, int16_t quant_) : bits(bs), quant(quant_) {}
 
     void verifyIsAtEnd() {
       if (numPixelsLeft != 0)
@@ -701,7 +701,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   return highpass;
 }
 
-void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
+void VC5Decompressor::parseLargeCodeblock(ByteStream bs) {
   static const auto subband_wavelet_index = []() {
     std::array<int, numSubbands> wavelets;
     int wavelet = 0;

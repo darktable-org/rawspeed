@@ -34,7 +34,7 @@
 
 namespace rawspeed {
 
-HasselbladDecompressor::HasselbladDecompressor(const ByteStream& bs,
+HasselbladDecompressor::HasselbladDecompressor(ByteStream bs,
                                                const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

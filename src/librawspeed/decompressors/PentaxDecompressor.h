@@ -39,7 +39,7 @@ class PentaxDecompressor final : public AbstractDecompressor {
 public:
   PentaxDecompressor(const RawImage& img, std::optional<ByteStream> metaData);
 
-  void decompress(const ByteStream& data) const;
+  void decompress(ByteStream data) const;
 
 private:
   static HuffmanTable<> SetupHuffmanTable_Legacy();

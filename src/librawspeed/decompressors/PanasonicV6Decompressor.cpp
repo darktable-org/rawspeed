@@ -70,9 +70,9 @@ template <int B> struct pana_cs6_page_decoder {
   std::array<uint16_t, BufferSize> pixelbuffer;
   unsigned char current = 0;
 
-  void fillBuffer(const ByteStream& bs) noexcept;
+  void fillBuffer(ByteStream bs) noexcept;
 
-  explicit pana_cs6_page_decoder(const ByteStream& bs) { fillBuffer(bs); }
+  explicit pana_cs6_page_decoder(ByteStream bs) { fillBuffer(bs); }
 
   uint16_t nextpixel() {
     uint16_t currPixel = pixelbuffer[current];
@@ -83,7 +83,7 @@ template <int B> struct pana_cs6_page_decoder {
 
 template <>
 inline void __attribute__((always_inline))
-pana_cs6_page_decoder<12>::fillBuffer(const ByteStream& bs_) noexcept {
+pana_cs6_page_decoder<12>::fillBuffer(ByteStream bs_) noexcept {
   BitPumpLSB bs(bs_);
   bs.fill(32);
   pixelbuffer[17] = bs.getBits(8);
@@ -108,7 +108,7 @@ pana_cs6_page_decoder<12>::fillBuffer(const ByteStream& bs_) noexcept {
 
 template <>
 inline void __attribute__((always_inline))
-pana_cs6_page_decoder<14>::fillBuffer(const ByteStream& bs_) noexcept {
+pana_cs6_page_decoder<14>::fillBuffer(ByteStream bs_) noexcept {
   BitPumpLSB bs(bs_);
   bs.fill(32);
   bs.skipBitsNoFill(4);
@@ -131,7 +131,7 @@ pana_cs6_page_decoder<14>::fillBuffer(const ByteStream& bs_) noexcept {
 } // namespace
 
 PanasonicV6Decompressor::PanasonicV6Decompressor(const RawImage& img,
-                                                 const ByteStream& input_,
+                                                 ByteStream input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||

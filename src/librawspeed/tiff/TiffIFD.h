@@ -147,7 +147,7 @@ public:
   [[nodiscard]] TiffID getID() const;
 };
 
-inline Endianness getTiffByteOrder(const ByteStream& bs, uint32_t pos,
+inline Endianness getTiffByteOrder(ByteStream bs, uint32_t pos,
                                    const char* context = "") {
   if (bs.hasPatternAt("II", 2, pos))
     return Endianness::little;

@@ -38,8 +38,7 @@
 namespace rawspeed {
 
 SamsungV0Decompressor::SamsungV0Decompressor(const RawImage& image,
-                                             const ByteStream& bso,
-                                             const ByteStream& bsr)
+                                             ByteStream bso, ByteStream bsr)
     : AbstractSamsungDecompressor(image) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -104,8 +103,7 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
   return signExtend(bits.getBits(nbits), nbits);
 }
 
-void SamsungV0Decompressor::decompressStrip(int row,
-                                            const ByteStream& bs) const {
+void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);
 

@@ -33,8 +33,8 @@ using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream dirEntry) {
+CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                     ByteStream dirEntry) {
   uint16_t p = dirEntry.getU16();
 
   // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer

@@ -98,7 +98,7 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
   template <const PacketDsc& dsc> void decompressInternal() const noexcept;
 
 public:
-  PanasonicV5Decompressor(const RawImage& img, const ByteStream& input_,
+  PanasonicV5Decompressor(const RawImage& img, ByteStream input_,
                           uint32_t bps_);
 
   void decompress() const noexcept;

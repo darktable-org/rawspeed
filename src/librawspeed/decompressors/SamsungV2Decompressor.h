@@ -66,8 +66,7 @@ private:
   void decompressRow(int row);
 
 public:
-  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs,
-                        unsigned bit);
+  SamsungV2Decompressor(const RawImage& image, ByteStream bs, unsigned bit);
 
   void decompress();
 };

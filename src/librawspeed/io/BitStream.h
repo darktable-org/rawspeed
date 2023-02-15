@@ -194,7 +194,7 @@ public:
 
   explicit BitStream(const Buffer& buf) : replenisher(buf) {}
 
-  explicit BitStream(const ByteStream& s)
+  explicit BitStream(ByteStream s)
       : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
 
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {

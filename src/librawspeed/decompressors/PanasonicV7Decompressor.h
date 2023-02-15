@@ -39,13 +39,13 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
 
   inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  decompressBlock(const ByteStream& block, int row, int col) const noexcept;
+  decompressBlock(ByteStream block, int row, int col) const noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   void decompressRow(int row) const noexcept;
 
 public:
-  PanasonicV7Decompressor(const RawImage& img, const ByteStream& input_);
+  PanasonicV7Decompressor(const RawImage& img, ByteStream input_);
 
   void decompress() const;
 };

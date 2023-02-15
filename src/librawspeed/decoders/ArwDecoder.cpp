@@ -261,7 +261,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
     u.decodeRawUnpacked<16, Endianness::little>(width, height);
 }
 
-void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
+void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
                             uint32_t bpp) {
 
   if (bpp == 8) {

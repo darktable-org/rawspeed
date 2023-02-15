@@ -210,7 +210,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   static inline std::pair<int16_t /*value*/, unsigned int /*count*/>
   getRLV(BitPumpMSB& bits);
 
-  void parseLargeCodeblock(const ByteStream& bs);
+  void parseLargeCodeblock(ByteStream bs);
 
   template <BayerPhase p> void combineFinalLowpassBandsImpl() const noexcept;
 

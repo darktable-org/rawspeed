@@ -511,8 +511,7 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   }
 }
 
-void NikonDecompressor::decompress(const ByteStream& data,
-                                   bool uncorrectedRawValues) {
+void NikonDecompressor::decompress(ByteStream data, bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
   BitPumpMSB bits(data);

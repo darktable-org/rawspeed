@@ -130,7 +130,7 @@ RawImage OrfDecoder::decodeRawInternal() {
   return mRaw;
 }
 
-bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
+bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
   UncompressedDecompressor u(s, mRaw);
   // FIXME: most of this logic should be in UncompressedDecompressor,

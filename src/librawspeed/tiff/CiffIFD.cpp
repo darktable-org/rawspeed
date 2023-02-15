@@ -40,8 +40,7 @@ using std::vector;
 namespace rawspeed {
 
 void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
-                            const ByteStream& valueData,
-                            ByteStream& dirEntries) {
+                            ByteStream valueData, ByteStream& dirEntries) {
   assert(valueDatas);
 
   ByteStream dirEntry = dirEntries.getStream(10); // Entry is 10 bytes.

@@ -36,7 +36,7 @@ class HasselbladDecompressor final : public AbstractLJpegDecompressor
   void decodeScan() override;
 
 public:
-  HasselbladDecompressor(const ByteStream& bs, const RawImage& img);
+  HasselbladDecompressor(ByteStream bs, const RawImage& img);
 
   void decode(int pixelBaseOffset_);
 

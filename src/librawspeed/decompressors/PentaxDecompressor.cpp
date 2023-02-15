@@ -142,7 +142,7 @@ PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
   return ht;
 }
 
-void PentaxDecompressor::decompress(const ByteStream& data) const {
+void PentaxDecompressor::decompress(ByteStream data) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   assert(out.height > 0);

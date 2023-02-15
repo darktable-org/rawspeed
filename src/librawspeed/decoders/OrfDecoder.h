@@ -50,8 +50,8 @@ private:
   void parseCFA() const;
 
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
-  [[nodiscard]] bool decodeUncompressed(const ByteStream& s, uint32_t w,
-                                        uint32_t h, uint32_t size) const;
+  [[nodiscard]] bool decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
+                                        uint32_t size) const;
 };
 
 } // namespace rawspeed

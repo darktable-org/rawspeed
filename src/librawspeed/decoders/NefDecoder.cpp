@@ -641,7 +641,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // We un-apply the whitebalance, so output matches lossless.
 // Note that values are scaled. See comment below on details.
 // OPTME: It would be trivial to run this multithreaded.
-void NefDecoder::DecodeNikonSNef(const ByteStream& input) const {
+void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   if (mRaw->dim.x < 6)
     ThrowIOE("got a %u wide sNEF, aborting", mRaw->dim.x);
 

@@ -56,10 +56,10 @@ class CiffEntry
   ByteStream data;
 
 public:
-  explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream dirEntry);
+  explicit CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                     ByteStream dirEntry);
 
-  [[nodiscard]] const ByteStream& getData() const { return data; }
+  [[nodiscard]] ByteStream getData() const { return data; }
 
   [[nodiscard]] uint8_t getByte(uint32_t num = 0) const;
   [[nodiscard]] uint32_t getU32(uint32_t num = 0) const;

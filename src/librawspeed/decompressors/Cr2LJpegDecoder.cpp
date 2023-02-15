@@ -38,7 +38,7 @@ namespace rawspeed {
 
 class ByteStream;
 
-Cr2LJpegDecoder::Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img)
+Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");

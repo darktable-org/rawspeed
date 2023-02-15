@@ -51,7 +51,7 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
   return HuffmanTable<>::extend(diff, len);
 }
 
-void SonyArw1Decompressor::decompress(const ByteStream& input) const {
+void SonyArw1Decompressor::decompress(ByteStream input) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   assert(out.width > 0);
   assert(out.height > 0);

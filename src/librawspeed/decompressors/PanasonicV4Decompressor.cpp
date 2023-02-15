@@ -42,7 +42,7 @@
 namespace rawspeed {
 
 PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
-                                                 const ByteStream& input_,
+                                                 ByteStream input_,
                                                  bool zero_is_not_bad,
                                                  uint32_t section_split_offset_)
     : mRaw(img), zero_is_bad(!zero_is_not_bad),
