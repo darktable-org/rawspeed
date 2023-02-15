@@ -41,7 +41,7 @@ namespace rawspeed {
 
 DeflateDecompressor::DeflateDecompressor(ByteStream bs, const RawImage& img,
                                          int predictor, int bps_)
-    : input(std::move(bs)), mRaw(img), bps(bps_) {
+    : input(bs), mRaw(img), bps(bps_) {
   switch (predictor) {
   case 3:
     predFactor = 1;

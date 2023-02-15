@@ -35,7 +35,7 @@ struct PhaseOneStrip {
   ByteStream bs;
 
   PhaseOneStrip() = default;
-  PhaseOneStrip(int block, ByteStream bs_) : n(block), bs(std::move(bs_)) {}
+  PhaseOneStrip(int block, ByteStream bs_) : n(block), bs(bs_) {}
 };
 
 class PhaseOneDecompressor final : public AbstractDecompressor {

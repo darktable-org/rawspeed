@@ -39,7 +39,7 @@ namespace rawspeed {
 
 AbstractLJpegDecompressor::AbstractLJpegDecompressor(ByteStream bs,
                                                      const RawImage& img)
-    : input(std::move(bs)), mRaw(img) {
+    : input(bs), mRaw(img) {
   input.setByteOrder(Endianness::big);
 
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0)

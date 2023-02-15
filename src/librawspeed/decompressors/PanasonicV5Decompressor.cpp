@@ -124,7 +124,7 @@ void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
                     iPoint2D beginCoord = pixelToCoordinate(currPixel);
                     currPixel += pixelsPerBlock;
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return Block(std::move(bs), beginCoord, endCoord);
+                    return Block(bs, beginCoord, endCoord);
                   });
   assert(blocks.size() == numBlocks);
   assert(currPixel >= mRaw->dim.area());
@@ -167,7 +167,7 @@ class PanasonicV5Decompressor::ProxyStream {
   }
 
 public:
-  explicit ProxyStream(ByteStream block_) : block(std::move(block_)) {}
+  explicit ProxyStream(ByteStream block_) : block(block_) {}
 
   ByteStream& getStream() {
     parseBlock();

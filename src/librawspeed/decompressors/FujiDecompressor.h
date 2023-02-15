@@ -84,7 +84,7 @@ private:
     FujiStrip& operator=(FujiStrip&&) noexcept = delete;
 
     FujiStrip(const FujiHeader& h_, int block, ByteStream bs_)
-        : h(h_), n(block), bs(std::move(bs_)) {
+        : h(h_), n(block), bs(bs_) {
       assert(n >= 0 && n < h.blocks_in_row);
     }
 

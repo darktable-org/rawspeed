@@ -377,7 +377,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
-    : mRaw(img), mBs(std::move(bs)) {
+    : mRaw(img), mBs(bs) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -610,7 +610,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
                                                    ByteStream bs_,
                                                    uint16_t lowpassPrecision_)
-    : AbstractDecodeableBand(wavelet_, std::move(bs_)),
+    : AbstractDecodeableBand(wavelet_, bs_),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.
   // It consists of width * height pixels, `lowpassPrecision` each.

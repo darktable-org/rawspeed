@@ -58,7 +58,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
 
 public:
   UncompressedDecompressor(ByteStream input_, const RawImage& img)
-      : input(std::move(input_)), mRaw(img) {}
+      : input(input_), mRaw(img) {}
 
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */

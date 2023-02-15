@@ -38,7 +38,7 @@ namespace rawspeed {
 
 KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
                                      int bps_, bool uncorrectedRawValues_)
-    : mRaw(img), input(std::move(bs)), bps(bps_),
+    : mRaw(img), input(bs), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))

@@ -57,7 +57,7 @@ template <> constexpr iPoint2D MCU<XTransTag> = {6, 6};
 } // namespace
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
-    : mRaw(img), input(std::move(input_)) {
+    : mRaw(img), input(input_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

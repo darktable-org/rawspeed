@@ -125,7 +125,7 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   OlympusDecompressor o(mRaw);
   mRaw->createData();
-  o.decompress(std::move(input));
+  o.decompress(input);
 
   return mRaw;
 }

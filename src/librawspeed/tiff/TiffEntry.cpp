@@ -86,8 +86,7 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
 
 TiffEntry::TiffEntry(TiffIFD* parent_, TiffTag tag_, TiffDataType type_,
                      uint32_t count_, ByteStream&& data_)
-    : parent(parent_), data(std::move(data_)), tag(tag_), type(type_),
-      count(count_) {
+    : parent(parent_), data(data_), tag(tag_), type(type_), count(count_) {
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[static_cast<uint32_t>(type)])
     ThrowTPE("integer overflow in size calculation.");
