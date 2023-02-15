@@ -62,6 +62,7 @@ public:
   }
 
   void deallocate(T* p, std::size_t n) const noexcept {
+    assert(p);
     assert(n > 0);
     alignedFree(p);
   }
