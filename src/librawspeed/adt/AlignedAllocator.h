@@ -29,7 +29,7 @@
 
 namespace rawspeed {
 
-template <class T, int alignment> struct AlignedAllocator {
+template <class T, int alignment> class AlignedAllocator {
   using self = AlignedAllocator<T, alignment>;
   using allocator_traits = std::allocator_traits<self>;
 
