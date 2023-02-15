@@ -170,9 +170,6 @@ public:
   explicit DataBuffer(const Buffer& data_, Endianness endianness_)
       : Buffer(data_), endianness(endianness_) {}
 
-  explicit DataBuffer(Buffer&& data_, Endianness endianness_)
-      : Buffer(data_), endianness(endianness_) {}
-
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
