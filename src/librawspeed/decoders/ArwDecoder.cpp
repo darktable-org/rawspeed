@@ -273,8 +273,8 @@ void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
 
   if (bpp == 12) {
     mRaw->createData();
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(input, Endianness::little)), mRaw);
+    input.setByteOrder(Endianness::little);
+    UncompressedDecompressor u(input, mRaw);
     u.decode12BitRaw<Endianness::little>(w, h);
 
     // Shift scales, since black and white are the same as compressed precision
