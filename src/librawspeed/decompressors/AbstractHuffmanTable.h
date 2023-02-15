@@ -203,7 +203,7 @@ public:
            codeValues == other.codeValues;
   }
 
-  uint32_t setNCodesPerLength(const Buffer& data) {
+  uint32_t setNCodesPerLength(Buffer data) {
     assert(data.getSize() == Traits::MaxCodeLenghtBits);
 
     nCodesPerLength.resize((1 + Traits::MaxCodeLenghtBits), 0);
@@ -255,7 +255,7 @@ public:
     return count;
   }
 
-  void setCodeValues(const Buffer& data) {
+  void setCodeValues(Buffer data) {
     assert(data.getSize() <= Traits::MaxNumCodeValues);
     assert(data.getSize() == maxCodesCount());
 

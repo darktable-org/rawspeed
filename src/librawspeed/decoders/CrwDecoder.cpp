@@ -48,7 +48,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-bool CrwDecoder::isCRW(const Buffer& input) {
+bool CrwDecoder::isCRW(Buffer input) {
   static const std::array<char, 8> magic = {
       {'H', 'E', 'A', 'P', 'C', 'C', 'D', 'R'}};
   static const size_t magic_offset = 6;
@@ -56,8 +56,7 @@ bool CrwDecoder::isCRW(const Buffer& input) {
   return 0 == memcmp(data, magic.data(), magic.size());
 }
 
-CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
-                       const Buffer& file)
+CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file)
     : RawDecoder(file), mRootIFD(std::move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {

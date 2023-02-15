@@ -46,8 +46,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file) {
   try {
     const auto id = rootIFD->getID();
     const std::string& make = id.make;
@@ -68,7 +67,7 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   }
 }
 
-MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
     : AbstractTiffDecoder(std::move(rootIFD), file) {
   if (mRootIFD->getEntryRecursive(TiffTag::MAKE)) {
     auto id = mRootIFD->getID();

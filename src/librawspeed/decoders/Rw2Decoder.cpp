@@ -49,7 +49,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 

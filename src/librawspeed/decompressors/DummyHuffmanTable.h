@@ -40,13 +40,13 @@ class DummyHuffmanTable final {
   bool fixDNGBug16 = false;
 
 public:
-  static uint32_t setNCodesPerLength(const Buffer& data) {
+  static uint32_t setNCodesPerLength(Buffer data) {
     (void)data;
     // No-op.
     return 0;
   }
 
-  static void setCodeValues(const Buffer& data) {
+  static void setCodeValues(Buffer data) {
     (void)data;
     // No-op.
   }

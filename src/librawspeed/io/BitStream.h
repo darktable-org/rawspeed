@@ -109,7 +109,7 @@ template <typename Tag> struct BitStreamReplenisherBase {
 
   BitStreamReplenisherBase() = default;
 
-  explicit BitStreamReplenisherBase(const Buffer& input)
+  explicit BitStreamReplenisherBase(Buffer input)
       : data(input.getData(0, input.getSize())), size(input.getSize()) {
     if (size < BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
@@ -192,7 +192,7 @@ public:
 
   BitStream() = default;
 
-  explicit BitStream(const Buffer& buf) : replenisher(buf) {}
+  explicit BitStream(Buffer buf) : replenisher(buf) {}
 
   explicit BitStream(ByteStream s)
       : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}

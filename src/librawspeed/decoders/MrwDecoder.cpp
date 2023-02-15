@@ -38,9 +38,9 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-MrwDecoder::MrwDecoder(const Buffer& file) : RawDecoder(file) { parseHeader(); }
+MrwDecoder::MrwDecoder(Buffer file) : RawDecoder(file) { parseHeader(); }
 
-int MrwDecoder::isMRW(const Buffer& input) {
+int MrwDecoder::isMRW(Buffer input) {
   static const std::array<char, 4> magic = {{0x00, 'M', 'R', 'M'}};
   const unsigned char* data = input.getData(0, magic.size());
   return 0 == memcmp(data, magic.data(), magic.size());

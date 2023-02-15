@@ -35,9 +35,8 @@ class MefDecoder final : public SimpleTiffDecoder {
   void checkImageDimensions() override;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  MefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  MefDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

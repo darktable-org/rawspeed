@@ -275,7 +275,7 @@ class NikonLASDecompressor {
   }
 
 public:
-  uint32_t setNCodesPerLength(const Buffer& data) {
+  uint32_t setNCodesPerLength(Buffer data) {
     uint32_t acc = 0;
     for (uint32_t i = 0; i < 16; i++) {
       dctbl1.bits[i + 1] = data[i];
@@ -285,7 +285,7 @@ public:
     return acc;
   }
 
-  void setCodeValues(const Buffer& data) {
+  void setCodeValues(Buffer data) {
     for (uint32_t i = 0; i < data.getSize(); i++)
       dctbl1.huffval[i] = data[i];
   }

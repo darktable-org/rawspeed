@@ -35,25 +35,25 @@ class RawDecoder;
 
 class TiffParser final : public RawParser {
 public:
-  explicit TiffParser(const Buffer& file);
+  explicit TiffParser(Buffer file);
 
   std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr) override;
 
   // TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it
   // may be deleted immediately
-  static TiffRootIFDOwner parse(TiffIFD* parent, const Buffer& data);
+  static TiffRootIFDOwner parse(TiffIFD* parent, Buffer data);
 
   // transfers ownership of TiffIFD into RawDecoder
   static std::unique_ptr<RawDecoder> makeDecoder(TiffRootIFDOwner root,
-                                                 const Buffer& data);
+                                                 Buffer data);
 
   template <class Decoder>
   static std::unique_ptr<RawDecoder> constructor(TiffRootIFDOwner&& root,
-                                                 const Buffer& data);
-  using checker_t = bool (*)(const TiffRootIFD* root, const Buffer& data);
+                                                 Buffer data);
+  using checker_t = bool (*)(const TiffRootIFD* root, Buffer data);
   using constructor_t = std::unique_ptr<RawDecoder> (*)(TiffRootIFDOwner&& root,
-                                                        const Buffer& data);
+                                                        Buffer data);
   static const std::array<std::pair<checker_t, constructor_t>, 16> Map;
 };
 

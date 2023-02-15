@@ -53,13 +53,13 @@
 namespace rawspeed {
 class RawDecoder;
 
-TiffParser::TiffParser(const Buffer& file) : RawParser(file) {}
+TiffParser::TiffParser(Buffer file) : RawParser(file) {}
 
 std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
   return TiffParser::makeDecoder(TiffParser::parse(nullptr, mInput), mInput);
 }
 
-TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
+TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, Buffer data) {
   ByteStream bs(DataBuffer(data, Endianness::unknown));
   bs.setByteOrder(getTiffByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
@@ -84,7 +84,7 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
 }
 
 std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
-                                                    const Buffer& data) {
+                                                    Buffer data) {
   if (!root)
     ThrowTPE("TiffIFD is null.");
 
@@ -108,7 +108,7 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
 
 template <class Decoder>
 std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
-                                                    const Buffer& data) {
+                                                    Buffer data) {
   return std::make_unique<Decoder>(std::move(root), data);
 }
 

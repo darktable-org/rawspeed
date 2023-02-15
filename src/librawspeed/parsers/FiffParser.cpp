@@ -41,7 +41,7 @@ using std::numeric_limits;
 
 namespace rawspeed {
 
-FiffParser::FiffParser(const Buffer& inputData) : RawParser(inputData) {}
+FiffParser::FiffParser(Buffer inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
   ByteStream bs(DataBuffer(mInput, Endianness::big));

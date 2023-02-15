@@ -35,9 +35,8 @@ class CameraMetaData;
 class MosDecoder final : public AbstractTiffDecoder
 {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;

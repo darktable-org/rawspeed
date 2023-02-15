@@ -37,7 +37,7 @@ class AbstractTiffDecoder : public RawDecoder
 protected:
   TiffRootIFDOwner mRootIFD;
 public:
-  AbstractTiffDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  AbstractTiffDecoder(TiffRootIFDOwner&& root, Buffer file)
       : RawDecoder(file), mRootIFD(std::move(root)) {}
 
   TiffIFD* getRootIFD() final { return mRootIFD.get(); }

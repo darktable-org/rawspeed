@@ -51,15 +51,14 @@
 
 namespace rawspeed {
 
-bool IiqDecoder::isAppropriateDecoder(const Buffer& file) {
+bool IiqDecoder::isAppropriateDecoder(Buffer file) {
   const DataBuffer db(file, Endianness::little);
 
   // The IIQ magic. Is present for all IIQ raws.
   return db.get<uint32_t>(8) == 0x49494949;
 }
 
-bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -69,8 +68,8 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
 std::vector<PhaseOneStrip>
-IiqDecoder::computeSripes(const Buffer& raw_data,
-                          std::vector<IiqOffset> offsets, uint32_t height) {
+IiqDecoder::computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
+                          uint32_t height) {
   assert(height > 0);
   assert(offsets.size() == (1 + height));
 

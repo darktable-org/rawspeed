@@ -23,13 +23,13 @@
 
 #include "common/Common.h"   // for BitOrder
 #include "common/RawImage.h" // for RawImage
+#include "io/Buffer.h"       // for Buffer
 #include "metadata/Camera.h" // for Hints
 #include <cstdint>           // for uint32_t
 #include <string>            // for string
 
 namespace rawspeed {
 
-class Buffer;
 class CameraMetaData;
 class TiffIFD;
 
@@ -41,7 +41,7 @@ public:
   /* The Buffer is not owned by this class, will not be deleted, and must remain
    */
   /* valid while this object exists */
-  explicit RawDecoder(const Buffer& file);
+  explicit RawDecoder(Buffer file);
   virtual ~RawDecoder() = default;
 
   /* Check if the decoder can decode the image from this camera */
@@ -141,7 +141,7 @@ protected:
   void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order) const;
 
   /* The Raw input file to be decoded */
-  const Buffer& mFile;
+  Buffer mFile;
 
   /* Decoder version */
   /* This can be used to avoid newer version of an xml file to indicate that a file */

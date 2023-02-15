@@ -146,7 +146,7 @@ public:
 };
 
 // WARNING: both buffers must belong to the same allocation, else this is UB!
-inline bool operator<(const Buffer& lhs, const Buffer& rhs) {
+inline bool operator<(Buffer lhs, Buffer rhs) {
   return std::pair(lhs.begin(), lhs.end()) < std::pair(rhs.begin(), rhs.end());
 }
 
@@ -163,7 +163,7 @@ class DataBuffer : public Buffer {
 public:
   DataBuffer() = default;
 
-  explicit DataBuffer(const Buffer& data_, Endianness endianness_)
+  explicit DataBuffer(Buffer data_, Endianness endianness_)
       : Buffer(data_), endianness(endianness_) {}
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap

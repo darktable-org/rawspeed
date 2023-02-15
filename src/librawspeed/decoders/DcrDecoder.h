@@ -35,9 +35,8 @@ class DcrDecoder final : public SimpleTiffDecoder {
   void checkImageDimensions() override;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  DcrDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  DcrDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

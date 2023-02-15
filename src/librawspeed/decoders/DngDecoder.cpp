@@ -56,11 +56,11 @@ namespace rawspeed {
 
 bool __attribute__((pure))
 DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                 [[maybe_unused]] const Buffer& file) {
+                                 [[maybe_unused]] Buffer file) {
   return rootIFD->hasEntryRecursive(TiffTag::DNGVERSION);
 }
 
-DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
+DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
     : AbstractTiffDecoder(std::move(rootIFD), file) {
   if (!mRootIFD->hasEntryRecursive(TiffTag::DNGVERSION))
     ThrowRDE("DNG, but version tag is missing. Will not guess.");

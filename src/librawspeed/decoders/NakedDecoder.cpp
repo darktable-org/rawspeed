@@ -39,7 +39,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
+NakedDecoder::NakedDecoder(Buffer file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
 static std::optional<BitOrder> getAsBitOrder(std::string_view s) {
