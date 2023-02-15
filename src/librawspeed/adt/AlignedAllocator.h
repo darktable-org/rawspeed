@@ -40,7 +40,7 @@ public:
     using other = AlignedAllocator<U, alignment>;
   };
 
-  T* allocate(std::size_t numElts) const {
+  [[nodiscard]] T* allocate(std::size_t numElts) const {
     assert(numElts > 0 && "Should not be trying to allocate no elements");
     assert(numElts <= allocator_traits::max_size(*this) &&
            "Can allocate this many elements.");
