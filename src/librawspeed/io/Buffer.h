@@ -70,10 +70,6 @@ public:
   }
 
   Buffer() = default;
-  Buffer(const Buffer& rhs) = default;
-  Buffer(Buffer&& rhs) noexcept = default;
-  Buffer& operator=(const Buffer& rhs) = default;
-  Buffer& operator=(Buffer&& rhs) noexcept = default;
 
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
