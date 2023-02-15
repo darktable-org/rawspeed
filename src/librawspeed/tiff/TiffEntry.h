@@ -83,7 +83,7 @@ public:
   uint32_t count;
 
   TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32_t count,
-            ByteStream&& data);
+            ByteStream data);
   TiffEntry(TiffIFD* parent, ByteStream& bs);
 
   virtual ~TiffEntry() = default;
