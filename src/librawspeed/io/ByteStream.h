@@ -40,7 +40,6 @@ public:
   ByteStream() = default;
 
   explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
-  explicit ByteStream(DataBuffer&& buffer) : DataBuffer(buffer) {}
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
