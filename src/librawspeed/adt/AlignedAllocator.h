@@ -40,7 +40,7 @@ public:
     using other = AlignedAllocator<U, alignment>;
   };
 
-  T* allocate(std::size_t numElts) {
+  T* allocate(std::size_t numElts) const {
     assert(numElts > 0 && "Should not be trying to allocate no elements");
     assert(numElts <= allocator_traits::max_size(*this) &&
            "Can allocate this many elements.");
@@ -61,7 +61,7 @@ public:
     return r;
   }
 
-  void deallocate(T* p, std::size_t n) noexcept {
+  void deallocate(T* p, std::size_t n) const noexcept {
     assert(n > 0);
     alignedFree(p);
   }
