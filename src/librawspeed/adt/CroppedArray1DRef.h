@@ -92,7 +92,7 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
     : base(base_), offset(offset_), numElts(numElts_) {
   assert(offset >= 0);
   assert(numElts >= 0);
-  // assert(offset + numElts <= base.numElts);
+  assert(offset + numElts <= std::size(base));
 }
 
 template <class T>

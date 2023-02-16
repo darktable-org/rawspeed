@@ -75,6 +75,8 @@ public:
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
 
+  [[nodiscard]] int size() const;
+
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
 
@@ -103,5 +105,7 @@ template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
   assert(eltIdx < numElts);
   return data[eltIdx];
 }
+
+template <class T> inline int Array1DRef<T>::size() const { return numElts; }
 
 } // namespace rawspeed
