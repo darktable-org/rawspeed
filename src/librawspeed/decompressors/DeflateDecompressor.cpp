@@ -87,12 +87,12 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
 template <typename T>
 static inline void decodeFPDeltaRow(const unsigned char* src,
                                     size_t realTileWidth,
-                                    CroppedArray2DRef<float> out, int row) {
+                                    CroppedArray1DRef<float> out) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
 
-  for (int col = 0; col < out.croppedWidth; ++col) {
+  for (int col = 0; col < out.size(); ++col) {
     std::array<unsigned char, storage_bytes> bytes;
     for (int c = 0; c != bytesps; ++c)
       bytes[c] = src[col + c * realTileWidth];
@@ -111,7 +111,7 @@ static inline void decodeFPDeltaRow(const unsigned char* src,
       break;
     }
 
-    out(row, col) = bit_cast<float>(tmp_expanded);
+    out(col) = bit_cast<float>(tmp_expanded);
   }
 }
 
@@ -146,13 +146,13 @@ void DeflateDecompressor::decode(
 
     switch (bytesps) {
     case 2:
-      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out, row);
+      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out[row]);
       break;
     case 3:
-      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out, row);
+      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out[row]);
       break;
     case 4:
-      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out, row);
+      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out[row]);
       break;
     }
   }
