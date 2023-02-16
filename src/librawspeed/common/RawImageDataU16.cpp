@@ -24,7 +24,6 @@
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for clampBits, roundDown, writ...
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "common/TableLookUp.h"           // for TableLookUp
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "metadata/BlackArea.h"           // for BlackArea

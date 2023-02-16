@@ -23,7 +23,6 @@
 
 #include "AddressSanitizer.h" // for ASan
 #include "common/Common.h"    // for roundUp
-#include "common/Memory.h"    // for alignedFree, alignedFreeConstPtr, aligne...
 #include "io/Endianness.h"    // for Endianness, getHostEndianness, Endiannes...
 #include "io/IOException.h"   // for ThrowException, ThrowIOE
 #include <cassert>            // for assert

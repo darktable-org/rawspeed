@@ -21,7 +21,6 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "common/RawImage.h"
 #include "MemorySanitizer.h"              // for MSan
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException

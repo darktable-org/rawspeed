@@ -23,7 +23,6 @@
 
 #include "AddressSanitizer.h" // for ASan
 #include "common/Common.h"    // for roundUp
-#include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
 #include "io/IOException.h"   // for ThrowException, ThrowIOE
 #include <cassert>            // for assert
