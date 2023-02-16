@@ -110,10 +110,13 @@ FileReader::readFile() {
   if (size.LowPart <= 0)
     ThrowFIE("File is 0 bytes.");
 
-  auto dest = Buffer::Create(size.LowPart);
+  auto dest = std::make_unique<std::vector<
+      uint8_t,
+      DefaultInitAllocatorAdaptor<uint8_t, AlignedAllocator<uint8_t, 16>>>>(
+      size.LowPart);
 
   DWORD bytes_read;
-  if (!ReadFile(file.get(), dest.get(), size.LowPart, &bytes_read, nullptr))
+  if (!ReadFile(file.get(), dest->data(), size.LowPart, &bytes_read, nullptr))
     ThrowFIE("Could not read file.");
 
   if (size.LowPart != bytes_read)
