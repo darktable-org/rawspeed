@@ -1,4 +1,4 @@
 codecov:
   max_report_age: off
   notify:
-    after_n_builds: 4
+    after_n_builds: 6
