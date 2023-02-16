@@ -61,20 +61,21 @@ static void CustomArguments(benchmark::internal::Benchmark* b) {
 #define BENCHMARK_CAPTURE_NAME(func, ...)                                      \
   BENCHMARK_CAPTURE(func, #__VA_ARGS__, __VA_ARGS__)
 
-BENCHMARK_CAPTURE_NAME(BM_std_vector, construct<std::allocator<int>>)
+BENCHMARK_CAPTURE_NAME(BM_std_vector, construct<std::allocator<Type>>)
     ->Apply(CustomArguments);
 BENCHMARK_CAPTURE_NAME(
     BM_std_vector,
-    construct<rawspeed::DefaultInitAllocatorAdaptor<int, std::allocator<int>>>)
+    construct<
+        rawspeed::DefaultInitAllocatorAdaptor<Type, std::allocator<Type>>>)
     ->Apply(CustomArguments);
 
 BENCHMARK_CAPTURE_NAME(BM_std_vector,
-                       construct_with_zeroinit<std::allocator<int>>)
+                       construct_with_zeroinit<std::allocator<Type>>)
     ->Apply(CustomArguments);
 BENCHMARK_CAPTURE_NAME(
     BM_std_vector,
     construct_with_zeroinit<
-        rawspeed::DefaultInitAllocatorAdaptor<int, std::allocator<int>>>)
+        rawspeed::DefaultInitAllocatorAdaptor<Type, std::allocator<Type>>>)
     ->Apply(CustomArguments);
 
 BENCHMARK_MAIN();
