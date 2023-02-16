@@ -191,8 +191,8 @@ RawImage ArwDecoder::decodeRawInternal() {
     }
   }
 
-  if (width == 0 || height == 0 || height % 2 != 0 || width > 9600 ||
-      height > 6376)
+  if (width == 0 || height == 0 || height % 2 != 0 || width > 9728 ||
+      height > 6656)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   bool arw1 = uint64_t(counts->getU32()) * 8 != width * height * bitPerPixel;
@@ -250,7 +250,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   mRaw->dim = iPoint2D(width, height);
 
-  if (width == 0 || height == 0 || width > 9600 || height > 6376)
+  if (width == 0 || height == 0 || width > 9728 || height > 6656)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (c2 == 0)
@@ -283,8 +283,8 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
     ThrowRDE("Unexpected bits per pixel: %u", bitPerPixel);
   }
 
-  if (width == 0 || height == 0 || height % 2 != 0 || width > 9600 ||
-      height > 6376)
+  if (width == 0 || height == 0 || height % 2 != 0 || width > 9728 ||
+      height > 6656)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
