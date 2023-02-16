@@ -90,9 +90,6 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
 
   int predictor = 0;
   switch (Pf::value) {
-  case 0:
-    predictor = 0;
-    break;
   case 1:
     predictor = 3;
     break;
@@ -136,7 +133,7 @@ static inline void CustomArgs(benchmark::internal::Benchmark* b) {
 
 #define GEN_E(s, f)                                                            \
   BENCHMARK_TEMPLATE(BM_DeflateDecompressor, BPS<s>, Pf<f>)->Apply(CustomArgs);
-#define GEN_PFS(s) GEN_E(s, 0) GEN_E(s, 1) GEN_E(s, 2) GEN_E(s, 4)
+#define GEN_PFS(s) GEN_E(s, 1) GEN_E(s, 2) GEN_E(s, 4)
 #define GEN_PSS() GEN_PFS(16) GEN_PFS(24) GEN_PFS(32)
 
 GEN_PSS()
