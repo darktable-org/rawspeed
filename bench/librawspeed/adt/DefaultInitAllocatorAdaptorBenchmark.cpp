@@ -45,7 +45,8 @@ void BM_std_vector(benchmark::State& state, Worker&& worker) {
     worker(state);
 
   const auto AllocSize = sizeof(Type) * state.range(0);
-  state.counters["Allocation,bytes"] = AllocSize;
+  state.counters["Allocation,bytes"] = benchmark::Counter(
+      AllocSize, benchmark::Counter::kDefaults, benchmark::Counter::kIs1024);
   state.SetComplexityN(AllocSize);
   state.SetBytesProcessed(AllocSize * state.iterations());
   state.SetItemsProcessed(state.range(0) * state.iterations());
