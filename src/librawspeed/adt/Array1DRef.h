@@ -94,7 +94,7 @@ template <class T>
   assert(offset >= 0);
   assert(size >= 0);
   assert(offset + size <= numElts);
-  return {data, offset, size};
+  return {*this, offset, size};
 }
 
 template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {

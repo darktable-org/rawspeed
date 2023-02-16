@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h" // for Array1DRef
 #include <cassert>     // for assert
 #include <type_traits> // for negation, is_const, remove_const_t, is_same
 #include <vector>      // for vector
@@ -27,7 +28,7 @@
 namespace rawspeed {
 
 template <class T> class CroppedArray1DRef {
-  T* data = nullptr;
+  const Array1DRef<T> base;
   int offset = 0;
   int numElts = 0;
 
@@ -40,7 +41,7 @@ public:
 
   CroppedArray1DRef() = default;
 
-  CroppedArray1DRef(T* data, int offset, int numElts);
+  CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts);
 
   // Can not cast away constness.
   template <
@@ -72,30 +73,30 @@ public:
           bool> = true>
   CroppedArray1DRef( // NOLINT google-explicit-constructor
       CroppedArray1DRef<T2> RHS)
-      : data(RHS.data), numElts(RHS.numElts) {}
+      : base(RHS.base), numElts(RHS.numElts) {}
 
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
 
 // CTAD deduction guide
 template <typename T>
-CroppedArray1DRef(T* data_, int offset_, int numElts_) -> CroppedArray1DRef<T>;
+CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts)
+    -> CroppedArray1DRef<T>;
 
 template <class T>
-CroppedArray1DRef<T>::CroppedArray1DRef(T* data_, const int offset_,
+CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
                                         const int numElts_)
-    : data(data_), offset(offset_), numElts(numElts_) {
-  assert(data);
+    : base(base_), offset(offset_), numElts(numElts_) {
   assert(offset >= 0);
   assert(numElts >= 0);
+  // assert(offset + numElts <= base.numElts);
 }
 
 template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
-  assert(data);
   assert(eltIdx >= 0);
   assert(eltIdx < numElts);
-  return data[offset + eltIdx];
+  return base(offset + eltIdx);
 }
 
 } // namespace rawspeed
