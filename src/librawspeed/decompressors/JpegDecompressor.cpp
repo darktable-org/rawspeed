@@ -26,7 +26,6 @@
 
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/JpegDecompressor.h"
 #include "io/ByteStream.h" // for ByteStream

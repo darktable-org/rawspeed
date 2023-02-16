@@ -20,6 +20,8 @@
 */
 
 #include "io/FileReader.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
 #include "io/Buffer.h"          // for Buffer, Buffer::size_type
 #include "io/FileIOException.h" // for ThrowException, ThrowFIE
 #include <cstdio>               // for fclose, fseek, feof, ferror, fopen
@@ -41,7 +43,10 @@
 
 namespace rawspeed {
 
-std::pair<std::unique_ptr<uint8_t, decltype(&alignedFree)>, Buffer>
+std::pair<std::unique_ptr<std::vector<
+              uint8_t, DefaultInitAllocatorAdaptor<
+                           uint8_t, AlignedAllocator<uint8_t, 16>>>>,
+          Buffer>
 FileReader::readFile() {
   size_t fileSize = 0;
 
@@ -65,9 +70,12 @@ FileReader::readFile() {
 
   fseek(file.get(), 0, SEEK_SET);
 
-  auto dest = Buffer::Create(fileSize);
+  auto dest = std::make_unique<std::vector<
+      uint8_t,
+      DefaultInitAllocatorAdaptor<uint8_t, AlignedAllocator<uint8_t, 16>>>>(
+      fileSize);
 
-  if (auto bytes_read = fread(dest.get(), 1, fileSize, file.get());
+  if (auto bytes_read = fread(dest->data(), 1, fileSize, file.get());
       fileSize != bytes_read) {
     ThrowFIE("Could not read file, %s.",
              feof(file.get()) ? "reached end-of-file"
@@ -115,7 +123,7 @@ FileReader::readFile() {
 
 #endif // __unix__
 
-  return {std::move(dest), Buffer(dest.get(), fileSize)};
+  return {std::move(dest), Buffer(dest->data(), fileSize)};
 }
 
 } // namespace rawspeed
