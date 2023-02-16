@@ -23,7 +23,7 @@
 #include <map>                               // for map<>::mapped_type
 #include <vector>                            // for allocator, vector
 
-using Type = int;
+using Type = std::byte;
 
 template <typename Allocator> static void construct(benchmark::State& state) {
   std::vector<Type, Allocator> vec(state.range(0));
