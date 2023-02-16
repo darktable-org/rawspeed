@@ -87,7 +87,7 @@ CroppedArray2DRef<T>::operator[](const int row) const {
   assert(row >= 0);
   assert(row < croppedHeight);
   const Array1DRef<T> fullLine = base.operator[](offsetRows + row);
-  return {&fullLine(/*col=*/0), offsetCols, croppedWidth};
+  return fullLine.getCrop(offsetCols, croppedWidth);
 }
 
 template <class T>

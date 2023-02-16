@@ -26,6 +26,8 @@
 
 namespace rawspeed {
 
+template <class T> class CroppedArray1DRef;
+
 template <class T> class Array1DRef {
   T* data = nullptr;
   int numElts = 0;
@@ -71,6 +73,8 @@ public:
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : data(RHS.data), numElts(RHS.numElts) {}
 
+  [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
+
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
 
@@ -82,6 +86,15 @@ Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
     : data(data_), numElts(numElts_) {
   assert(data);
   assert(numElts >= 0);
+}
+
+template <class T>
+[[nodiscard]] CroppedArray1DRef<T> Array1DRef<T>::getCrop(int offset,
+                                                          int size) const {
+  assert(offset >= 0);
+  assert(size >= 0);
+  assert(offset + size <= numElts);
+  return {data, offset, size};
 }
 
 template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
