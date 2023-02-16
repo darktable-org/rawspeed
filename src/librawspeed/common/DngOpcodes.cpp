@@ -55,7 +55,7 @@ namespace rawspeed {
 namespace {
 
 template <typename T>
-iRectangle2D getImageCropAsRectangle(const CroppedArray2DRef<T>& img) {
+iRectangle2D getImageCropAsRectangle(CroppedArray2DRef<T> img) {
   return {{img.offsetCols, img.offsetRows},
           {img.croppedWidth, img.croppedHeight}};
 }
