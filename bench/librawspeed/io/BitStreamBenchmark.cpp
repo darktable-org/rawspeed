@@ -46,8 +46,8 @@ using rawspeed::Endianness;
 static constexpr const size_t STEP_MAX = 32;
 
 template <typename Pump>
-static inline void BM_BitStream(benchmark::State& state, Endianness endianness,
-                                unsigned int fillSize, unsigned int Step) {
+static inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
+                                unsigned int Step) {
   assert(state.range(0) > 0);
   assert((size_t)state.range(0) <=
          std::numeric_limits<rawspeed::Buffer::size_type>::max());
@@ -68,7 +68,7 @@ static inline void BM_BitStream(benchmark::State& state, Endianness endianness,
   assert(b.getSize() > 0);
   assert(b.getSize() == (size_t)state.range(0));
 
-  const rawspeed::DataBuffer db(b, endianness);
+  const rawspeed::DataBuffer db(b, Endianness::unknown);
   const rawspeed::ByteStream bs(db);
 
   size_t processedBits = 0;
@@ -107,16 +107,11 @@ static inline void CustomArguments(benchmark::internal::Benchmark* b) {
   b->Unit(benchmark::kMillisecond);
 }
 
-using Big = std::integral_constant<Endianness, Endianness::big>;
-using Little = std::integral_constant<Endianness, Endianness::little>;
-
-template <typename BO, typename PUMP>
-void registerPump(const char* byteOrder, const char* pumpName) {
+template <typename PUMP> void registerPump(const char* pumpName) {
   for (size_t i = 1; i <= STEP_MAX; i *= 2) {
     for (size_t j = 1; j <= i && j <= STEP_MAX; j *= 2) {
-      std::string name("BM_BitStream<ByteOrder<");
-      name += byteOrder;
-      name += ">, Spec<";
+      std::string name("BM_BitStream<");
+      name += "Spec<";
       name += pumpName;
       name += ">, Fill<";
       name += std::to_string(i);
@@ -125,16 +120,13 @@ void registerPump(const char* byteOrder, const char* pumpName) {
       name += ">>";
 
       const auto Fn = BM_BitStream<PUMP>;
-      auto* b = benchmark::RegisterBenchmark(name.c_str(), Fn, BO::value, i, j);
+      auto* b = benchmark::RegisterBenchmark(name.c_str(), Fn, i, j);
       b->Apply(CustomArguments);
     }
   }
 }
 
-#define REG_PUMP_2(BO, PUMP) registerPump<BO, PUMP>(#BO, #PUMP)
-#define REGISTER_PUMP(PUMP)                                                    \
-  REG_PUMP_2(Big, PUMP);                                                       \
-  REG_PUMP_2(Little, PUMP)
+#define REGISTER_PUMP(PUMP) registerPump<PUMP>(#PUMP)
 
 int main(int argc, char** argv) {
   REGISTER_PUMP(BitPumpLSB);
