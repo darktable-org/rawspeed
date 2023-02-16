@@ -51,24 +51,6 @@ protected:
   size_type size = 0;
 
 public:
-  // allocates the databuffer, and returns owning non-const pointer.
-  static std::unique_ptr<uint8_t, decltype(&alignedFree)>
-  Create(size_type size) {
-    if (!size)
-      ThrowIOE("Trying to allocate 0 bytes sized buffer.");
-
-    std::unique_ptr<uint8_t, decltype(&alignedFree)> data(
-        alignedMalloc<uint8_t, 16>(roundUp(size, 16)),
-        &alignedFree);
-    if (!data)
-      ThrowIOE("Failed to allocate %uz bytes memory buffer.", size);
-
-    assert(!ASan::RegionIsPoisoned(reinterpret_cast<std::byte*>(data.get()),
-                                   size));
-
-    return data;
-  }
-
   Buffer() = default;
 
   // Data already allocated
