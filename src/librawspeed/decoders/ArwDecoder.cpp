@@ -439,14 +439,14 @@ void ArwDecoder::GetWB() const {
     const auto EncryptedBuffer = ifd_crypt.getSubView(off, len);
     // We do have to prepend 'off' padding, because TIFF uses absolute offsets.
     const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
-    auto DecryptedBuffer = Buffer::Create(DecryptedBufferSize);
+    std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
     SonyDecrypt(reinterpret_cast<const uint32_t*>(EncryptedBuffer.begin()),
-                reinterpret_cast<uint32_t*>(DecryptedBuffer.get() + off),
+                reinterpret_cast<uint32_t*>(DecryptedBuffer.data() + off),
                 len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
-    Buffer decIFD(DecryptedBuffer.get(), DecryptedBufferSize);
+    Buffer decIFD(DecryptedBuffer.data(), DecryptedBufferSize);
     const Buffer Padding(decIFD.getSubView(0, off));
     // The Decrypted Root Ifd can not point to preceding padding buffer.
     ifds_decoded.insert(Padding);
