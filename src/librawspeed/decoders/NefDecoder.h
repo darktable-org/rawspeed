@@ -23,6 +23,7 @@
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
+#include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <array>                          // for array
 #include <cstdint>                        // for uint8_t, uint16_t, uint32_t

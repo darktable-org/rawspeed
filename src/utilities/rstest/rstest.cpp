@@ -18,31 +18,34 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"        // for RawImage, RawImageData, ImageMetaData
-#include "adt/Array2DRef.h"      // for Array2DRef, Array2DRef<>::value_type
-#include "adt/NotARational.h"    // for NotARational
-#include "md5.h"                 // for md5_state, md5_hash, hash_to_string
-#include <algorithm>             // for fill, copy, fill_n, max
-#include <array>                 // for array
-#include <cassert>               // for assert
-#include <chrono>                // for milliseconds, steady_clock, duratio...
-#include <cstdarg>               // for va_end, va_list, va_start
-#include <cstddef>               // for size_t, byte
-#include <cstdint>               // for uint16_t, uint8_t, uint32_t
-#include <cstdio>                // for fclose, fprintf, fopen, fwrite, vsn...
-#include <cstdlib>               // for system
-#include <fstream>               // for operator<<, basic_ostream, endl
-#include <functional>            // for less
-#include <iostream>              // for cout, cerr
-#include <iterator>              // for istreambuf_iterator, operator!=
-#include <map>                   // for map, operator!=, _Rb_tree_const_ite...
-#include <memory>                // for allocator, unique_ptr
-#include <sstream>               // for basic_ostringstream
-#include <string>                // for string, operator+, basic_string
-#include <string_view>           // for operator!=, string_view
-#include <type_traits>           // for __type_identity_t
-#include <utility>               // for tuple_element<>::type
-#include <vector>                // for vector
+#include "RawSpeed-API.h"                    // for RawImage, RawImageData
+#include "adt/AlignedAllocator.h"            // for AlignedAllocator
+#include "adt/Array2DRef.h"                  // for Array2DRef, Array2DRef<...
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "adt/NotARational.h"                // for NotARational
+#include "md5.h"                             // for md5_state, md5_hash
+#include <algorithm>                         // for fill, copy, fill_n, max
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <chrono>                            // for milliseconds, steady_clock
+#include <cstdarg>                           // for va_end, va_list, va_start
+#include <cstddef>                           // for size_t, byte
+#include <cstdint>                           // for uint8_t, uint16_t, uint...
+#include <cstdio>                            // for fclose, fprintf, fopen
+#include <cstdlib>                           // for system
+#include <fstream>                           // for operator<<, basic_ostream
+#include <functional>                        // for less
+#include <iostream>                          // for cout, cerr
+#include <iterator>                          // for istreambuf_iterator
+#include <map>                               // for map, operator!=, _Rb_tr...
+#include <memory>                            // for allocator, unique_ptr
+#include <sstream>                           // for basic_ostringstream
+#include <string>                            // for string, operator+, basi...
+#include <string_view>                       // for operator!=, string_view
+#include <tuple>                             // for tie, tuple
+#include <type_traits>                       // for __type_identity_t
+#include <utility>                           // for tuple_element<>::type
+#include <vector>                            // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)

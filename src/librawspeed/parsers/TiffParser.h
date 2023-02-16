@@ -21,6 +21,7 @@
 #pragma once
 
 #include "decoders/RawDecoder.h" // for RawDecoder (ptr only)
+#include "io/Buffer.h"           // for Buffer
 #include "parsers/RawParser.h"   // for RawParser
 #include "tiff/TiffIFD.h"        // for TiffRootIFDOwner, TiffIFD (ptr only)
 #include <array>                 // for array

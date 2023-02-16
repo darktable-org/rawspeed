@@ -28,6 +28,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include <algorithm>                      // for fill_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <memory>                         // for allocator_traits<>::value_...

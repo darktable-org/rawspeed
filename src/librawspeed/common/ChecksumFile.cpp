@@ -21,11 +21,10 @@
 #include "common/ChecksumFile.h"
 #include "common/Common.h"            // for splitString
 #include "common/RawspeedException.h" // for ThrowException, ThrowRSE
-#include "io/Buffer.h"                // for Buffer
 #include "io/FileReader.h"            // for FileReader
 #include <cassert>                    // for assert
-#include <memory>                     // for unique_ptr
 #include <string>                     // for string, allocator, operator+
+#include <type_traits>                // for add_const<>::type
 #include <vector>                     // for vector
 
 namespace rawspeed {

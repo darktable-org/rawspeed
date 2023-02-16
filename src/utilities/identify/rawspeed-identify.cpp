@@ -17,16 +17,16 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "RawSpeed-API.h"      // for RawImage, RawImageData, iPoint2D, Cam...
-#include "adt/Array2DRef.h"    // for Array2DRef
-#include <array>               // for array
-#include <cstddef>             // for byte, size_t
-#include <cstdint>             // for uint16_t, uint32_t
-#include <cstdio>              // for fprintf, stdout, stderr
-#include <memory>              // for unique_ptr, allocator, make_unique
-#include <string>              // for string, operator+, basic_string
-#include <sys/stat.h>          // for stat
-#include <vector>              // for vector
+#include "RawSpeed-API.h"   // for RawImage, RawImageData, iPoint2D, Cam...
+#include "adt/Array2DRef.h" // for Array2DRef
+#include <array>            // for array
+#include <cstddef>          // for byte, size_t
+#include <cstdint>          // for uint16_t, uint32_t
+#include <cstdio>           // for fprintf, stdout, stderr
+#include <memory>           // for unique_ptr, allocator, make_unique
+#include <string>           // for string, operator+, basic_string
+#include <sys/stat.h>       // for stat
+#include <vector>           // for vector
 
 #ifdef _WIN32
 #ifndef NOMINMAX

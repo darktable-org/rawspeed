@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"            // for RawImage
 #include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
+#include "io/Buffer.h"                  // for Buffer
 #include "tiff/TiffIFD.h"               // for TiffRootIFD (ptr only), Tiff...
 #include <utility>                      // for move
 

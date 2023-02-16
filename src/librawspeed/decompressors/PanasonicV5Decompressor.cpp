@@ -35,7 +35,6 @@
 #include <cstdint>                        // for uint8_t, uint16_t, uint32_t
 #include <iterator>                       // for back_insert_iterator, back...
 #include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {

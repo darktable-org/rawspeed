@@ -44,7 +44,7 @@
 #include <optional>                       // for optional, operator==
 #include <string>                         // for string
 #include <tuple>                          // for tie, tuple
-#include <utility>                        // for move, pair
+#include <utility>                        // for pair
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace {

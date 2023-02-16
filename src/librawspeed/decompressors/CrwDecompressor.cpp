@@ -34,6 +34,7 @@
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t, uint8_t, int16_t
 #include <tuple>                          // for array
+#include <vector>                         // for vector
 
 using std::array;
 

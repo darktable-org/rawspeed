@@ -28,10 +28,9 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for max
+#include <algorithm>                      // for max, fill_n
 #include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <utility>                        // for move
+#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <vector>                         // for vector
 
 namespace rawspeed {

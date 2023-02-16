@@ -21,12 +21,17 @@
 #pragma once
 
 #include "adt/AlignedAllocator.h"
-#include "adt/DefaultInitAllocatorAdaptor.h"
-#include <memory> // for unique_ptr
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "io/Buffer.h"                       // for Buffer
+#include <cstdint>                           // for uint8_t
+#include <memory>                            // for unique_ptr
+#include <utility>                           // for pair
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
 class Buffer;
+template <class T, int alignment> class AlignedAllocator;
 
 class FileReader
 {

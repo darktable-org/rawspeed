@@ -27,7 +27,7 @@
 #include <algorithm>                    // for copy, fill_n, max
 #include <array>                        // for array
 #include <cstdint>                      // for uint8_t
-#include <gtest/gtest.h>                // for Test, Message, TestPartResult
+#include <gtest/gtest.h>                // for Test, TestInfo (ptr only)
 #include <initializer_list>             // for initializer_list
 #include <utility>                      // for move
 #include <vector>                       // for vector, allocator

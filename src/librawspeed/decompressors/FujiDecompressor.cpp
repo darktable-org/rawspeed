@@ -25,21 +25,24 @@
 #include "decompressors/FujiDecompressor.h"
 #include "MemorySanitizer.h"              // for MSan
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
+#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
-#include "common/BayerPhase.h"            // for BayerPhase
+#include "common/BayerPhase.h"            // for getAsCFAColors, BayerPhase
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/XTransPhase.h"           // for XTransPhase
+#include "common/XTransPhase.h"           // for XTransPhase, getAsCFAColors
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
-#include <algorithm>                      // for fill, min
+#include <algorithm>                      // for max, fill, min, minmax
 #include <cmath>                          // for abs
 #include <cstdint>                        // for uint16_t, uint32_t, int8_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
-#include <optional>
-#include <string> // for string
+#include <initializer_list>               // for initializer_list
+#include <optional>                       // for optional, operator!=
+#include <string>                         // for string
 
 namespace rawspeed {
 

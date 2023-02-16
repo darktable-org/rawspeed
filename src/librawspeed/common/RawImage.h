@@ -20,28 +20,28 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"            // for WITH_SSE2
-#include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "adt/AlignedAllocator.h"
-#include "adt/Array2DRef.h"            // for Array2DRef
-#include "adt/CroppedArray2DRef.h"     // for CroppedArray2DRef
-#include "adt/DefaultInitAllocatorAdaptor.h"
-#include "adt/Mutex.h"                 // for Mutex
-#include "adt/NotARational.h"          // for NotARational
-#include "adt/Point.h"                 // for iPoint2D, iRectangle2D (ptr o...
-#include "common/Common.h"             // for writeLog, DEBUG_PRIO, DEBUG_P...
-#include "common/ErrorLog.h"           // for ErrorLog
-#include "common/TableLookUp.h"        // for TableLookUp
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <array>                       // for array
-#include <cassert>                     // for assert
-#include <cmath>                       // for NAN
-#include <cstddef>                     // for byte
-#include <cstdint>                     // for uint32_t, uint16_t, uint8_t
-#include <memory>                      // for unique_ptr, operator==, defau...
-#include <string>                      // for string
-#include <vector>                      // for vector
+#include "rawspeedconfig.h"                  // for WITH_SSE2
+#include "ThreadSafetyAnalysis.h"            // for GUARDED_BY, REQUIRES
+#include "adt/AlignedAllocator.h"            // for AlignedAllocator
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/CroppedArray2DRef.h"           // for CroppedArray2DRef
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "adt/Mutex.h"                       // for Mutex
+#include "adt/NotARational.h"                // for NotARational
+#include "adt/Point.h"                       // for iPoint2D, iRectangle2D ...
+#include "common/Common.h"                   // for writeLog, DEBUG_PRIO
+#include "common/ErrorLog.h"                 // for ErrorLog
+#include "common/TableLookUp.h"              // for TableLookUp
+#include "metadata/BlackArea.h"              // for BlackArea
+#include "metadata/ColorFilterArray.h"       // for ColorFilterArray
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <cmath>                             // for NAN
+#include <cstddef>                           // for byte
+#include <cstdint>                           // for uint32_t, uint16_t, uin...
+#include <memory>                            // for unique_ptr, operator==
+#include <string>                            // for string
+#include <vector>                            // for vector
 
 namespace rawspeed {
 

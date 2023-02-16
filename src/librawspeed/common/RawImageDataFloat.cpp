@@ -20,6 +20,7 @@
 
 #include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
@@ -27,7 +28,7 @@
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for fill_n, max, min
 #include <array>                          // for array
-#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
+#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 #include <memory>                         // for operator==, default_delete
 #include <vector>                         // for vector
 

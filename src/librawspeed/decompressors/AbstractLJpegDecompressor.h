@@ -27,7 +27,7 @@
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/ByteStream.h"                      // for ByteStream
-#include <algorithm>                            // for fill
+#include <algorithm>                            // for fill_n, fill
 #include <array>                                // for array
 #include <cstdint>                              // for uint16_t, uint32_t
 #include <memory>                               // for unique_ptr

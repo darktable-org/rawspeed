@@ -21,14 +21,14 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "common/RawImage.h"
 #include "MemorySanitizer.h"              // for MSan
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
-#include <algorithm>                      // for min, fill_n
+#include <algorithm>                      // for min, fill, max, fill_n
 #include <cassert>                        // for assert
-#include <cstring>                        // for memset
 #include <limits>                         // for numeric_limits
-#include <memory>                         // for unique_ptr, allocator, mak...
+#include <memory>                         // for allocator, unique_ptr, mak...
 #include <utility>                        // for move, swap
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)

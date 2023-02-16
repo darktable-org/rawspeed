@@ -22,18 +22,17 @@
 
 #include "tiff/TiffEntry.h"
 #include "common/Common.h"               // for isIn
+#include "io/Buffer.h"                   // for Buffer, DataBuffer
+#include "io/Endianness.h"               // for Endianness, Endianness::little
 #include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::DNGPRIVAT...
 #include <cassert>                       // for assert
-#include <cstdint>                       // for uint32_t, int16_t, uint16_t
+#include <cstdint>                       // for uint32_t, uint8_t, int32_t
 #include <cstring>                       // for strnlen
 #include <string>                        // for string
-#include <utility>                       // for move
 
 namespace rawspeed {
-
-class DataBuffer;
 
 // order see TiffDataType
 const std::array<uint32_t, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,

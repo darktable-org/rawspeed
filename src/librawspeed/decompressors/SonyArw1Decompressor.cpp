@@ -28,6 +28,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include "io/ByteStream.h"                // for ByteStream
 #include <cassert>                        // for assert
 
 namespace rawspeed {

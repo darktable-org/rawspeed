@@ -26,13 +26,14 @@
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
 #include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include <algorithm>                           // for fill_n
 #include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
 #include <cstdint>                             // for uint8_t
 #include <memory>                              // for unique_ptr
 #include <type_traits>                         // for integral_constant
-#include <utility>                             // for move
+#include <vector>                              // for vector
 #include <zlib.h>                              // for compress, compressBound
 
 #ifndef NDEBUG

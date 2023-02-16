@@ -37,13 +37,12 @@
 #include "tiff/TiffEntry.h"                        // for TiffEntry, TiffDa...
 #include "tiff/TiffIFD.h"                          // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                          // for TiffTag, TiffTag:...
-#include <algorithm>                               // for transform, max
+#include <algorithm>                               // for max, transform
 #include <array>                                   // for array, array<>::v...
 #include <cassert>                                 // for assert
 #include <limits>                                  // for numeric_limits
 #include <map>                                     // for map
 #include <memory>                                  // for unique_ptr, alloc...
-#include <stdexcept>                               // for out_of_range
 #include <string>                                  // for char_traits, string
 #include <utility>                                 // for move
 #include <vector>                                  // for vector, allocator

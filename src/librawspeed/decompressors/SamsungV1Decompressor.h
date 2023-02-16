@@ -22,6 +22,7 @@
 
 #include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
 #include "io/BitPumpMSB.h"                             // for BitPumpMSB
+#include "io/ByteStream.h"                             // for ByteStream
 #include <cstdint>                                     // for int32_t
 #include <vector>                                      // for vector
 

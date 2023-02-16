@@ -19,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
+#include "rawspeedconfig.h"       // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
 #include "adt/AlignedAllocator.h" // for AlignedAllocator
 
 #ifdef HAVE_JPEG
@@ -29,10 +29,11 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/JpegDecompressor.h"
 #include "io/ByteStream.h" // for ByteStream
-#include <algorithm>       // for min, fill_n
+#include <algorithm>       // for min, fill_n, max
 #include <array>           // for array
 #include <jpeglib.h>       // for jpeg_destroy_decompress
 #include <memory>          // for unique_ptr
+#include <vector>          // for vector
 
 #ifndef HAVE_JPEG_MEM_SRC
 #include "io/IOException.h" // for ThrowIOE

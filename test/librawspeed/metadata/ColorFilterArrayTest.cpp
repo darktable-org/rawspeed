@@ -21,8 +21,9 @@
 
 #include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
 #include "adt/Point.h"                 // for iPoint2D
+#include <algorithm>                   // for copy
 #include <cstdint>                     // for uint32_t
-#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
+#include <gtest/gtest.h>               // for Test, ASSERT_EQ, ASSERT_NO_THROW
 #include <iosfwd>                      // for ostream
 #include <string>                      // for allocator, basic_string, oper...
 #include <tuple>                       // for get, make_tuple, tuple

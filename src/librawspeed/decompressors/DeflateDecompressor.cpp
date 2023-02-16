@@ -19,11 +19,11 @@
 */
 
 #include "rawspeedconfig.h"        // for HAVE_ZLIB
+#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
 #include "common/Common.h"         // for bit_cast
 #include <array>                   // for array
 #include <climits>                 // for CHAR_BIT
-#include <utility>                 // for move
 
 #ifdef HAVE_ZLIB
 

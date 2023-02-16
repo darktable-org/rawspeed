@@ -25,6 +25,7 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for generate_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
@@ -35,8 +36,6 @@
 #include <vector>                         // for vector
 
 namespace rawspeed {
-
-class ByteStream;
 
 Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {

@@ -30,6 +30,7 @@
 #include <cstdint>         // for uint8_t
 #include <cstdio>          // for size_t
 #include <iterator>        // for back_insert_iterator, back_ins...
+#include <utility>         // for move
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

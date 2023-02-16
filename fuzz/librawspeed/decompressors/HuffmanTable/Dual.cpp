@@ -50,6 +50,11 @@
 #include <cstdint>                             // for uint8_t
 #include <cstdio>                              // for size_t
 #include <initializer_list>                    // for initializer_list
+#include <vector>                              // for vector
+
+namespace rawspeed {
+struct BaselineHuffmanTableTag;
+} // namespace rawspeed
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

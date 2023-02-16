@@ -26,6 +26,7 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
+#include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for copy_n
 #include <array>                          // for array
 #include <cassert>                        // for assert

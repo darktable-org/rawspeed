@@ -28,6 +28,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for max
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint32_t, uint16_t, int32_t

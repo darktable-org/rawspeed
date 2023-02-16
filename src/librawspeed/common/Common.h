@@ -24,11 +24,12 @@
 #include <array>            // for array
 #include <cassert>          // for assert
 #include <climits>          // for CHAR_BIT
-#include <cstdint>          // for uint8_t, uintptr_t, uint16_t
+#include <cstdint>          // for uintptr_t, uint8_t, uint16_t
 #include <cstring>          // for size_t, memcpy
 #include <initializer_list> // for initializer_list
 #include <string>           // for string, basic_string, allocator
-#include <type_traits>      // for enable_if_t, is_trivially_copyable, make...
+#include <string_view>      // for string_view
+#include <type_traits>      // for enable_if_t, enable_if, make_signed_t
 #include <vector>           // for vector
 
 extern "C" int rawspeed_get_number_of_processor_cores();

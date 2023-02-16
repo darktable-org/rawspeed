@@ -29,9 +29,9 @@
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include <map>                                      // for map
-#include <optional>
-#include <stdexcept>                                // for out_of_range
-#include <string>                                   // for string, basic_st...
+#include <optional>                                 // for optional, nullopt
+#include <string>                                   // for string, char_traits
+#include <string_view>                              // for operator==, basi...
 
 using std::map;
 

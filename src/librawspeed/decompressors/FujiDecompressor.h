@@ -22,6 +22,7 @@
 #pragma once
 
 #include "adt/Array2DRef.h"                     // for Array2DRef
+#include "adt/Point.h"                          // for iPoint2D
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/BitPumpMSB.h"                      // for BitPumpMSB
@@ -29,8 +30,8 @@
 #include "metadata/ColorFilterArray.h"          // for CFAColor
 #include <array>                                // for array
 #include <cassert>                              // for assert
-#include <cstdint>                              // for int8_t, uint16_t
-#include <utility>                              // for move
+#include <cstdint>                              // for uint16_t, int8_t
+#include <utility>                              // for pair
 #include <vector>                               // for vector
 
 namespace rawspeed {

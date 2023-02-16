@@ -19,8 +19,8 @@
 */
 
 #include "ErrorLog.h"
-#include "adt/Mutex.h"    // for MutexLocker
-#include <utility>        // for move
+#include "adt/Mutex.h" // for MutexLocker
+#include <utility>     // for move
 
 namespace rawspeed {
 

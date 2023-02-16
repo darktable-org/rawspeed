@@ -21,6 +21,7 @@
 #include "rawspeedconfig.h"               // for WITH_SSE2
 #include "common/RawImage.h"              // for RawImageDataU16, RawImageType
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for clampBits, roundDown, writ...
@@ -29,7 +30,6 @@
 #include "metadata/BlackArea.h"           // for BlackArea
 #include <algorithm>                      // for fill_n, fill, max, min
 #include <array>                          // for array
-#include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t, uint32_t, uint8_t
 #include <memory>                         // for unique_ptr
 #include <tuple>                          // for array
@@ -37,7 +37,7 @@
 
 #ifdef WITH_SSE2
 #include "common/Cpuid.h" // for Cpuid
-#include <emmintrin.h>    // for __m128i, _mm_load_si128
+#include <emmintrin.h>    // for __m128i, _mm_set1_epi32
 #endif
 
 using std::vector;

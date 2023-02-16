@@ -35,6 +35,7 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
+#include <algorithm>                                // for fill_n
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t

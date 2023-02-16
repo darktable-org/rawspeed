@@ -27,11 +27,12 @@
 #include <cinttypes>                      // for PRId64
 #include <cmath>                          // for abs
 #include <cstdarg>                        // for va_arg, va_end, va_list
-#include <cstdlib>                        // for abs, size_t
+#include <cstdlib>                        // for size_t, abs
 #include <map>                            // for map
-#include <optional>
+#include <optional>                       // for optional, nullopt
 #include <stdexcept>                      // for out_of_range
-#include <string>                         // for string, basic_string
+#include <string>                         // for string
+#include <string_view>                    // for string_view, basic_string_...
 
 using std::vector;
 

@@ -40,7 +40,7 @@
 #include <array>                                // for array, array<>::valu...
 #include <cassert>                              // for assert
 #include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for lround, abs
+#include <cmath>                                // for abs, lround
 #include <cstdlib>                              // for abs
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin

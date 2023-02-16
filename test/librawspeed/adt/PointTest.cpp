@@ -18,15 +18,15 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/Point.h"   // for iPoint2D, iPoint2D::area_type
+#include "adt/Point.h"   // for iPoint2D, iPoint2D::area_type, iPoint2D::va...
 #include <algorithm>     // for find
-#include <gtest/gtest.h> // for Message, TestPartResult, Param...
+#include <gtest/gtest.h> // for ASSERT_EQ, ASSERT_NO_THROW, Test, UnitTest
 #include <iterator>      // for cend, cbegin, pair
 #include <limits>        // for numeric_limits
-#include <ostream>       // for operator<<, basic_ostream::ope...
+#include <ostream>       // for operator<<, basic_ostream::operator<<, ostream
 #include <string>        // for allocator, basic_string
 #include <tuple>         // for make_tuple, get, tuple
-#include <type_traits>   // for __strip_reference_wrapper<>::_...
+#include <type_traits>   // for __strip_reference_wrapper<>::__type
 #include <utility>       // for make_pair, pair, move
 #include <variant>       // for tuple
 // IWYU pragma: no_include <pstl/glue_algorithm_defs.h>

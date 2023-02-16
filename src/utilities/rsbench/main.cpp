@@ -18,17 +18,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"        // for RawDecoder, Buffer, FileReader, HAV...
-#include "common/ChecksumFile.h" // for ChecksumFileEntry, ReadChecksumFile
-#include <algorithm>             // for max
-#include <benchmark/benchmark.h> // for Counter, Counter::Flags, Counter::k...
-#include <chrono>                // for duration, high_resolution_clock
-#include <ctime>                 // for clock, clock_t, CLOCKS_PER_SEC
-#include <memory>                // for unique_ptr, allocator
-#include <ratio>                 // for ratio
-#include <string>                // for string, operator!=, to_string
-#include <utility>               // for move
-#include <vector>                // for vector
+#include "RawSpeed-API.h"                    // for Buffer, RawDecoder, Fil...
+#include "adt/AlignedAllocator.h"            // for AlignedAllocator
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "common/ChecksumFile.h"             // for ChecksumFileEntry, Read...
+#include <algorithm>                         // for max
+#include <benchmark/benchmark.h>             // for Counter, Counter::Flags
+#include <chrono>                            // for duration, high_resoluti...
+#include <cstdint>                           // for uint8_t
+#include <ctime>                             // for clock, clock_t, CLOCKS_...
+#include <memory>                            // for unique_ptr, allocator
+#include <ratio>                             // for ratio
+#include <string>                            // for string, to_string, char...
+#include <string_view>                       // for operator!=, string_view
+#include <tuple>                             // for tie, tuple
+#include <type_traits>                       // for __type_identity_t
+#include <utility>                           // for move
+#include <vector>                            // for vector
 
 #ifdef HAVE_OPENMP
 #include <omp.h> // for omp_get_max_threads

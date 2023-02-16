@@ -23,9 +23,12 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
+#include <climits>                              // for CHAR_BIT
+#include <cstdint>                              // for uint16_t
 #include <functional>
 
 namespace rawspeed {
+template <class T> class CroppedArray1DRef;
 
 class PanasonicV7Decompressor final : public AbstractDecompressor {
   RawImage mRaw;

@@ -21,9 +21,10 @@
 #pragma once
 
 #include "decoders/RawDecoder.h" // for RawDecoder
+#include "io/Buffer.h"           // for Buffer
 #include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
 #include "tiff/TiffTag.h"        // for TiffTag, TiffTag::IMAGEWIDTH
-#include <memory>                // for unique_ptr, allocator
+#include <memory>                // for allocator, unique_ptr
 #include <string>                // for string
 #include <utility>               // for move
 

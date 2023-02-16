@@ -22,19 +22,20 @@
 
 #pragma once
 
-#include "adt/NotARational.h"    // for NotARational
-#include "io/ByteStream.h"       // for ByteStream
-#include "tiff/TiffTag.h"        // for TiffTag
-#include <algorithm>             // for fill_n
-#include <array>                 // for array
-#include <cstdint>               // for uint32_t, uint16_t, int16_t, int32_t
-#include <string>                // for string
-#include <vector>                // for vector
+#include "adt/NotARational.h" // for NotARational
+#include "io/ByteStream.h"    // for ByteStream
+#include "tiff/TiffTag.h"     // for TiffTag
+#include <algorithm>          // for fill_n
+#include <array>              // for array
+#include <cstdint>            // for uint32_t, uint16_t, uint8_t, int32_t
+#include <string>             // for string
+#include <vector>             // for vector
 
 namespace rawspeed {
 
 class DataBuffer;
 class TiffIFD;
+class Buffer;
 
 /*
  * Tag data type information.

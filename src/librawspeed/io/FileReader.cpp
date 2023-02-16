@@ -20,15 +20,17 @@
 */
 
 #include "io/FileReader.h"
-#include "adt/AlignedAllocator.h"
-#include "adt/DefaultInitAllocatorAdaptor.h"
-#include "io/Buffer.h"          // for Buffer, Buffer::size_type
-#include "io/FileIOException.h" // for ThrowException, ThrowFIE
-#include <cstdio>               // for fclose, fseek, feof, ferror, fopen
-#include <fcntl.h>              // for SEEK_END, SEEK_SET
-#include <limits>               // for numeric_limits
-#include <memory>               // for unique_ptr, make_unique, operator==
-#include <utility>              // for move
+#include "adt/AlignedAllocator.h"            // for AlignedAllocator
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "io/Buffer.h"                       // for Buffer, Buffer::size_type
+#include "io/FileIOException.h"              // for ThrowException, ThrowFIE
+#include <cstdint>                           // for uint8_t
+#include <cstdio>                            // for fclose, fseek, feof
+#include <fcntl.h>                           // for SEEK_END, SEEK_SET
+#include <limits>                            // for numeric_limits
+#include <memory>                            // for unique_ptr, make_unique
+#include <type_traits>                       // for remove_reference<>::type
+#include <utility>                           // for move, pair
 
 #if !(defined(__unix__) || defined(__APPLE__))
 #ifndef NOMINMAX

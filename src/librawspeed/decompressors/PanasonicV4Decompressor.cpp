@@ -36,7 +36,6 @@
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
 #include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
 #include <vector>                         // for vector, vector<>::iterator
 
 namespace rawspeed {

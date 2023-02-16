@@ -27,7 +27,7 @@
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, getH...
 #include "metadata/BlackArea.h"                     // for BlackArea
@@ -38,6 +38,7 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
+#include <algorithm>                                // for copy
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstdint>                                  // for uint32_t

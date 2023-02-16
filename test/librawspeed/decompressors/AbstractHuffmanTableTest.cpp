@@ -24,7 +24,7 @@
 #include <bitset>                               // for bitset
 #include <cassert>                              // for assert
 #include <cstdint>                              // for uint8_t, uint32_t
-#include <gtest/gtest.h>                        // for Test, ParamIteratorI...
+#include <gtest/gtest.h>                        // for Test, CmpHelperNE
 #include <initializer_list>                     // for initializer_list
 #include <ostream>                              // for operator<<, ostream
 #include <string>                               // for allocator, basic_string
@@ -32,6 +32,10 @@
 #include <type_traits>                          // for __decay_and_strip
 #include <utility>                              // for move
 #include <vector>                               // for vector
+
+namespace rawspeed {
+struct BaselineHuffmanTableTag;
+} // namespace rawspeed
 
 using rawspeed::AbstractHuffmanTable;
 using rawspeed::BaselineHuffmanTableTag;

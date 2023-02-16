@@ -26,7 +26,7 @@
 #include <cmath>           // for lround, acos, sin
 #include <cstdint>         // for uint16_t
 #include <cstdlib>         // for exit
-#include <gtest/gtest.h>   // for ParamIteratorInterface, ParamGeneratorInt...
+#include <gtest/gtest.h>   // for Test, ASSERT_EQ, UnitTest, TestInfo (ptr ...
 #include <iterator>        // for begin, end, back_inserter
 #include <limits>          // for numeric_limits
 #include <memory>          // for allocator, allocator_traits<>::value_type

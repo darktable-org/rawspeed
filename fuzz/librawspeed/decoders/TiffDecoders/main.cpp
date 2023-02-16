@@ -39,7 +39,7 @@
 #include "decoders/RafDecoder.h"      // IWYU pragma: keep
 #include "decoders/Rw2Decoder.h"      // IWYU pragma: keep
 #include "decoders/SrwDecoder.h"      // IWYU pragma: keep
-#include "decoders/ThreefrDecoder.h"  // for ThreefrDecoder
+#include "decoders/ThreefrDecoder.h"  // IWYU pragma: keep
 #include "io/Buffer.h"                // for Buffer
 #include "metadata/CameraMetaData.h"  // for CameraMetaData
 #include "parsers/TiffParser.h"       // for TiffParser

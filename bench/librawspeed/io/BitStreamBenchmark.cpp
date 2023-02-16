@@ -27,12 +27,14 @@
 #include "io/Buffer.h"           // for Buffer, DataBuffer
 #include "io/ByteStream.h"       // for ByteStream
 #include "io/Endianness.h"       // for Endianness, Endianness::big, Endian...
+#include <algorithm>             // for fill_n
 #include <benchmark/benchmark.h> // for State, Benchmark, Initialize, RunSp...
 #include <cassert>               // for assert
 #include <cstddef>               // for size_t
-#include <memory>                // for allocator, unique_ptr
-#include <string>                // for string, to_string
+#include <cstdint>               // for uint8_t
+#include <string>                // for string, to_string, allocator
 #include <type_traits>           // for integral_constant
+#include <vector>                // for vector
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::BitPumpLSB;

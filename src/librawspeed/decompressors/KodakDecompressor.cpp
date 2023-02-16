@@ -28,11 +28,10 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min
+#include <algorithm>                      // for min, fill_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <utility>                        // for move
 
 namespace rawspeed {
 

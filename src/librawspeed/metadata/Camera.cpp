@@ -27,9 +27,8 @@
 #include <cctype>                             // for tolower
 #include <cstdio>                             // for size_t
 #include <map>                                // for map
-#include <optional>
-#include <stdexcept>                          // for out_of_range
-#include <string>                             // for string, operator==
+#include <optional>                           // for optional, nullopt
+#include <string>                             // for string, allocator, ope...
 #include <string_view>                        // for operator==, basic_stri...
 #include <vector>                             // for vector
 
