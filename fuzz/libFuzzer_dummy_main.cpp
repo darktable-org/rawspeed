@@ -44,8 +44,10 @@ static int usage() {
 
 static void process(const char* filename) noexcept {
   rawspeed::FileReader reader(filename);
-  std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)> storage = {
-      nullptr, &rawspeed::alignedFree};
+  std::unique_ptr<std::vector<
+      uint8_t, rawspeed::DefaultInitAllocatorAdaptor<
+                   uint8_t, rawspeed::AlignedAllocator<uint8_t, 16>>>>
+      storage;
   rawspeed::Buffer buf;
 
   try {

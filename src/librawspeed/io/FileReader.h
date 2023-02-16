@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "common/Memory.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
 #include <memory> // for unique_ptr
 
 namespace rawspeed {
@@ -34,7 +35,10 @@ class FileReader
 public:
   explicit FileReader(const char* fileName_) : fileName(fileName_) {}
 
-  std::pair<std::unique_ptr<uint8_t, decltype(&alignedFree)>, Buffer>
+  std::pair<std::unique_ptr<std::vector<
+                uint8_t, DefaultInitAllocatorAdaptor<
+                             uint8_t, AlignedAllocator<uint8_t, 16>>>>,
+            Buffer>
   readFile();
 };
 

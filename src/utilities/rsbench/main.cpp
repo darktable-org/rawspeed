@@ -94,8 +94,10 @@ template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
 // requested the first time.
 struct Entry {
   rawspeed::ChecksumFileEntry Name;
-  std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)> Storage = {
-      nullptr, &rawspeed::alignedFree};
+  std::unique_ptr<std::vector<
+      uint8_t, rawspeed::DefaultInitAllocatorAdaptor<
+                   uint8_t, rawspeed::AlignedAllocator<uint8_t, 16>>>>
+      Storage;
   rawspeed::Buffer Content;
 
   const rawspeed::Buffer& getFileContents() {
