@@ -37,9 +37,9 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
   static constexpr int PixelsPerBlock =
       (CHAR_BIT * BytesPerBlock) / BitsPerSample;
 
-  inline void __attribute__((always_inline))
+  static inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  decompressBlock(ByteStream block, int row, int col) const noexcept;
+  decompressBlock(ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   void decompressRow(int row) const noexcept;
