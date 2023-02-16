@@ -103,9 +103,7 @@ public:
     if (!r)
       ThrowRSE("Out of memory while trying to allocate %zu bytes",
                numPaddedBytes);
-    ASan::PoisonMemoryRegion(
-        reinterpret_cast<const volatile std::byte*>(r + numElts),
-        numPaddedBytes - numBytes);
+    ASan::PoisonMemoryRegion(r + numElts, numPaddedBytes - numBytes);
     return r;
   }
 

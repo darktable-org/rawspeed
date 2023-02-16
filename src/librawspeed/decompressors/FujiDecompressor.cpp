@@ -174,8 +174,7 @@ void FujiDecompressor::fuji_compressed_block::reset(
 
   linealloc.resize(ltotal * (params.line_width + 2), 0);
 
-  MSan::Allocated(reinterpret_cast<const std::byte*>(&linealloc[0]),
-                  ltotal * line_size);
+  MSan::Allocated(&linealloc[0], ltotal * line_size);
 
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
 
@@ -186,11 +185,8 @@ void FujiDecompressor::fuji_compressed_block::reset(
     memset(&lines(color, 0), 0, 2 * line_size);
 
     // On the first row, we don't need to zero-init helper columns.
-    MSan::Allocated(reinterpret_cast<const std::byte*>(&lines(color, 0)),
-                    sizeof(uint16_t));
-    MSan::Allocated(
-        reinterpret_cast<const std::byte*>(&lines(color, lines.width - 1)),
-        sizeof(uint16_t));
+    MSan::Allocated(&lines(color, 0), sizeof(uint16_t));
+    MSan::Allocated(&lines(color, lines.width - 1), sizeof(uint16_t));
   }
 
   // And the first (real, uninitialized) line of each color gets the content
@@ -652,9 +648,7 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
 
     for (auto i : colors) {
       // All other lines of each color become uninitialized.
-      MSan::Allocated(
-          reinterpret_cast<const std::byte*>(&info_block.lines(i.a + 2, 0)),
-          (i.b - 2) * line_size);
+      MSan::Allocated(&info_block.lines(i.a + 2, 0), (i.b - 2) * line_size);
 
       // And the first (real, uninitialized) line of each color gets the content
       // of the last helper column from the last decoded sample of previous

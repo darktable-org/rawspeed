@@ -46,19 +46,19 @@ struct MSan final {
   ~MSan() = delete;
 
   /* Declare memory chunk as being newly-allocated. */
-  static void Allocated(const std::byte* addr, size_t size);
+  static void Allocated(const void* addr, size_t size);
 
   /* Checks that memory range is fully initialized, and reports an error if it
    * is not. */
-  static void CheckMemIsInitialized(const std::byte* addr, size_t size);
+  static void CheckMemIsInitialized(const void* addr, size_t size);
 };
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-inline void MSan::Allocated(const std::byte* addr, size_t size) {
+inline void MSan::Allocated(const void* addr, size_t size) {
   __msan_allocated_memory(addr, size);
 }
 #else
-inline void MSan::Allocated([[maybe_unused]] const std::byte* addr,
+inline void MSan::Allocated([[maybe_unused]] const void* addr,
                             [[maybe_unused]] size_t size) {
   // If we are building without MSAN, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
@@ -67,11 +67,11 @@ inline void MSan::Allocated([[maybe_unused]] const std::byte* addr,
 #endif
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-inline void MSan::CheckMemIsInitialized(const std::byte* addr, size_t size) {
+inline void MSan::CheckMemIsInitialized(const void* addr, size_t size) {
   __msan_check_mem_is_initialized(addr, size);
 }
 #else
-inline void MSan::CheckMemIsInitialized([[maybe_unused]] const std::byte* addr,
+inline void MSan::CheckMemIsInitialized([[maybe_unused]] const void* addr,
                                         [[maybe_unused]] size_t size) {
   // If we are building without MSAN, then there is no way to have a non-empty
   // body of this function. It's better than to have a macros, or to use
