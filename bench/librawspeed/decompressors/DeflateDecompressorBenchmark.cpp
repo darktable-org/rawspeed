@@ -47,8 +47,8 @@ template <size_t N> using BPS = std::integral_constant<size_t, N>;
 template <int N> using Pf = std::integral_constant<int, N>;
 
 template <typename BPS>
-static std::unique_ptr<uint8_t, decltype(&rawspeed::alignedFree)>
-compressChunk(const rawspeed::RawImage& mRaw, uLong* bufSize) {
+static std::vector<uint8_t> compressChunk(const rawspeed::RawImage& mRaw,
+                                          uLong* bufSize) {
   static_assert(BPS::value > 0, "bad bps");
   static_assert(rawspeed::isAligned(BPS::value, 8), "not byte count");
 
@@ -60,14 +60,11 @@ compressChunk(const rawspeed::RawImage& mRaw, uLong* bufSize) {
   assert(*bufSize > 0);
   assert(*bufSize <= std::numeric_limits<Buffer::size_type>::max());
 
-  // will contain some random garbage
-  auto uBuf = Buffer::Create(uncompressedLength);
-  assert(uBuf != nullptr);
+  const std::vector<uint8_t> uBuf(uncompressedLength);
+  std::vector<uint8_t> cBuf(*bufSize);
 
-  auto cBuf = Buffer::Create(*bufSize);
-  assert(cBuf != nullptr);
-
-  const int err = compress(cBuf.get(), bufSize, uBuf.get(), uncompressedLength);
+  const int err =
+      compress(cBuf.data(), bufSize, uBuf.data(), uncompressedLength);
   if (err != Z_OK)
     throw;
 
@@ -85,11 +82,10 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
   auto mRaw = rawspeed::RawImage::create(dim, rawspeed::RawImageType::F32, 1);
 
   uLong cBufSize;
-  auto cBuf = compressChunk<BPS>(mRaw, &cBufSize);
-  assert(cBuf != nullptr);
+  const std::vector<uint8_t> cBuf = compressChunk<BPS>(mRaw, &cBufSize);
   assert(cBufSize > 0);
 
-  Buffer buf(cBuf.get(), cBufSize);
+  Buffer buf(cBuf.data(), cBufSize);
   assert(buf.getSize() == cBufSize);
 
   int predictor = 0;
