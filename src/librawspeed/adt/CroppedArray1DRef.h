@@ -35,13 +35,16 @@ template <class T> class CroppedArray1DRef {
   friend CroppedArray1DRef<const T>; // We need to be able to convert to const
                                      // version.
 
+  // Only allow construction from `Array1DRef<T>::getCrop()`.
+  friend CroppedArray1DRef<T> Array1DRef<T>::getCrop(int offset,
+                                                     int numElts) const;
+  CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts);
+
 public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
   CroppedArray1DRef() = default;
-
-  CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts);
 
   // Can not cast away constness.
   template <
