@@ -269,6 +269,22 @@ jobs:
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'Coverage'
+        name: Upload coverage to Codecov (unit tests)
+        uses: codecov/codecov-action@v3
+        env:
+          OS: linux
+          ARCH: x86_64
+          CXX: ${{ inputs.compiler-family }}
+          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,ARCH,CXX
+          flags: unittests
+          name: ${{ env.JOB_NAME }}.Unittests
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
+          fail_ci_if_error: true
+      - if: inputs.flavor == 'Coverage'
         name: Test (integration)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
@@ -288,6 +304,22 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Upload coverage to Codecov (integration)
+        uses: codecov/codecov-action@v3
+        env:
+          OS: linux
+          ARCH: x86_64
+          CXX: ${{ inputs.compiler-family }}
+          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,ARCH,CXX
+          flags: integration,rpu_u
+          name: ${{ env.JOB_NAME }}.Integration
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-rsa
+          fail_ci_if_error: true
       - name: Install
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
@@ -324,35 +356,3 @@ jobs:
           set -xe
           cd "${SRC_DIR}"
           sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
-      - if: inputs.flavor == 'Coverage'
-        name: Upload coverage to Codecov (unit tests)
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: unittests
-          name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
-          fail_ci_if_error: true
-      - if: inputs.flavor == 'Coverage'
-        name: Upload coverage to Codecov (integration)
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: integration,rpu_u
-          name: ${{ env.JOB_NAME }}.Integration
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-rsa
-          fail_ci_if_error: true

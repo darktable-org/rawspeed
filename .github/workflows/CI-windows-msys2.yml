@@ -103,15 +103,6 @@ jobs:
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
-      - name: Install
-        env:
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
-          TARGET: install
-        run: |
-          set -xe
-          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v3
@@ -128,3 +119,12 @@ jobs:
           root_dir: ${{ github.workspace }}\rawspeed
           directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest
           fail_ci_if_error: true
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
