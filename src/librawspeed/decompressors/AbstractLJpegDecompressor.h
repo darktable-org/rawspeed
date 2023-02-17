@@ -164,7 +164,46 @@ public:
 protected:
   bool fixDng16Bug = false;  // DNG v1.0.x compatibility
   bool fullDecodeHT = true;  // FullDecode Huffman
-  bool sonyArrange = false;  // Rows are interleaved
+
+  /**
+   * Whether or not to interleave rows;
+   * Until this was added we assumed that pixels were in order,
+   * from left to right then top to bottom. However, the JFIF specification
+   * does not require this. An interleave has a specified width (H, horizontal)
+   * and height (V, vertical). Within each rectangle of the specified size pixels
+   * are arranged from left to right then top to bottom. These rectanges are then
+   * arranged to fill the image.
+   *
+   * If this bool is false then V=1 and H=N_COMP, if this is true then V=2 and H=N_COMP/2.
+   *
+   * With V=1 then any H value will be in the order you expect (here is a 4x4 image)
+   * 0  1  2  3
+   * 4  5  6  7
+   * 8  9  10 11
+   * 12 13 14 15
+   *
+   * However, this isn't true on all cameras.
+   * Some Sony cameras have V=2 and H=2
+   * 0  1  4  5
+   * 2  3  6  7
+   * 8  9  12 13
+   * 10 11 14 15
+   *
+   * This looks weird but makes some sense because all pixels will be predicted based on
+   * the same color (Red, Green 1, Green 2, or Blue). With interleaveHeight=1 this property
+   * won't hold on the first pixel of each row.
+   *
+   * Some Blackmagic cameras layout with V=2 and H=1 which looks like
+   * 0  2  4  6
+   * 1  3  5  7
+   * 8  10 12 14
+   * 9  11 13 15
+   * This is about as efficient as V=1,H=2 so it's unclear why they did this but
+   * I don't get to decide.
+   *
+   * Also see section A.2.3 of ITU standard T.81 (Section 1 of the JPEG JFIF standard)
+   */ 
+  bool interleaveRows = false;
 
   void decode();
   void parseSOF(ByteStream data, SOFInfo* i);

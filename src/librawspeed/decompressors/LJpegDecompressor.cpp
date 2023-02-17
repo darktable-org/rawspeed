@@ -58,7 +58,7 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
 
 void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
                                uint32_t width, uint32_t height,
-                               bool fixDng16Bug_, bool sonyArrange_) {
+                               bool fixDng16Bug_, bool interleaveRows_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -83,7 +83,7 @@ void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
   h = height;
 
   fixDng16Bug = fixDng16Bug_;
-  sonyArrange = sonyArrange_;
+  interleaveRows = interleaveRows_;
 
   AbstractLJpegDecompressor::decode();
 }
@@ -103,9 +103,9 @@ void LJpegDecompressor::decodeScan() {
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const auto tileRequiredWidth = mRaw->getCpp() * w * (sonyArrange ? 2 : 1);
+  const auto tileRequiredWidth = mRaw->getCpp() * w * (interleaveRows ? 2 : 1);
   // How many of these rows do we need?
-  const auto numRows = h / (sonyArrange ? 2 : 1);
+  const auto numRows = h / (interleaveRows ? 2 : 1);
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
@@ -165,10 +165,13 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(N_COMP > 0);
   assert(N_COMP >= mRaw->getCpp());
   assert((N_COMP / mRaw->getCpp()) > 0);
-  assert(N_COMP == 4 || !sonyArrange);
+  assert(N_COMP & 1 == 0 | !interleaveRows);
 
   assert(mRaw->dim.x >= N_COMP);
   assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
+
+  auto interleaveHeight = (interleaveRows ? 2 : 1);
+  auto interleaveWidth = N_COMP / interleaveHeight;
 
   const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
                               mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
@@ -190,7 +193,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   assert(offY + h <= static_cast<unsigned>(mRaw->dim.y));
   assert(offX + w <= static_cast<unsigned>(mRaw->dim.x));
 
-  const auto numRows = h / (sonyArrange ? 2 : 1);
+  const auto numRows = h / interleaveHeight;
 
   // For y, we can simply stop decoding when we reached the border.
   for (unsigned row = 0; row < numRows; ++row) {
@@ -203,8 +206,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     for (; col < N_COMP * fullBlocks; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(pred[i] + ht[i]->decodeDifference(bitStream));
-        if (sonyArrange) {
-          img((row * 2) + (i >> 1), (col / 2) + (i & 1)) = pred[i];
+        if (interleaveRows) {
+          img((row * interleaveHeight) + (i / interleaveHeight), (col / interleaveWidth) + (i % interleaveWidth)) = pred[i];
         } else {
           img(row, col + i) = pred[i];
         }
@@ -239,9 +242,11 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
         ht[i]->decodeDifference(bitStream);
     }
 
-    if (sonyArrange) {
-      copy_n(&img(row * 2, 0), 2, pred.data());
-      copy_n(&img(row * 2 + 1, 0), 2, pred.data() + 2);
+    // The first sample of the next row is calculated based on the first sample of this row,
+    // so copy it for the next iteration
+    if (interleaveRows) {
+      copy_n(&img(row * interleaveHeight, 0), interleaveWidth, pred.data());
+      copy_n(&img(row * interleaveHeight + 1, 0), interleaveWidth, pred.data() + interleaveWidth);
     } else {
       copy_n(&img(row, 0), N_COMP, pred.data());
     }
