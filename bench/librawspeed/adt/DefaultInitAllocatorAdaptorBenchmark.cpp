@@ -19,6 +19,7 @@
 */
 
 #include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
+#include "bench/Common.h"                    // for benchmarkDryRun
 #include <benchmark/benchmark.h>             // for State, Benchmark
 #include <map>                               // for map<>::mapped_type
 #include <vector>                            // for allocator, vector
@@ -53,6 +54,11 @@ void BM_std_vector(benchmark::State& state, Worker&& worker) {
 }
 
 static void CustomArguments(benchmark::internal::Benchmark* b) {
+  if (benchmarkDryRun()) {
+    b->Arg(512U * (1U << 10U)); // 512 KiB
+    return;
+  }
+
   b->RangeMultiplier(2)
       ->Range(1U << 0U, 1U << 31U)
       ->Complexity(benchmark::BigO::oN);
