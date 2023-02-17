@@ -84,7 +84,7 @@ jobs:
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
-      - name: Test
+      - name: Test (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -94,7 +94,7 @@ jobs:
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data
+        name: Collect source coverage data (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -114,7 +114,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: unittests
+          flags: windows,unittests
           name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}\rawspeed
           directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest

@@ -249,7 +249,7 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - name: Test
+      - name: Test (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -259,7 +259,7 @@ jobs:
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data
+        name: Collect source coverage data (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -279,10 +279,45 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: unittests
+          flags: linux,unittests
           name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
+          fail_ci_if_error: true
+      - name: Test (benchmarks)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test_benchmarks
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage data (benchmarks)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage_benchmarks
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Upload coverage to Codecov (benchmarks)
+        uses: codecov/codecov-action@v3
+        env:
+          OS: linux
+          ARCH: x86_64
+          CXX: ${{ inputs.compiler-family }}
+          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,ARCH,CXX
+          flags: linux,benchmarks
+          name: ${{ env.JOB_NAME }}.Benchmarks
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-benchmarks
           fail_ci_if_error: true
       - if: inputs.flavor == 'Coverage'
         name: Test (integration)
@@ -295,7 +330,7 @@ jobs:
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage (integration) data
+        name: Collect source coverage data (integration)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -315,7 +350,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: integration,rpu_u
+          flags: linux,integration,rpu_u
           name: ${{ env.JOB_NAME }}.Integration
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-rsa

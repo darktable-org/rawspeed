@@ -55,7 +55,20 @@ target_build()
 
 target_test()
 {
-  ctest --output-on-failure || ctest --rerun-failed -V -VV
+  # We don't really want to always provide gcov-clean CMake target,
+  # but also don't really want to complicate this script,
+  # so just consume the error if the target is not there.
+  cmake --build "$BUILD_DIR" --target gcov-clean || true
+  ctest --label-exclude benchmark --output-on-failure || ctest --label-exclude benchmark --rerun-failed -V -VV
+}
+
+target_test_benchmarks()
+{
+  # We don't really want to always provide gcov-clean CMake target,
+  # but also don't really want to complicate this script,
+  # so just consume the error if the target is not there.
+  cmake --build "$BUILD_DIR" --target gcov-clean || true
+  ctest --label-regex benchmark --output-on-failure || ctest --label-regex benchmark --rerun-failed -V -VV
 }
 
 target_test_integration()
@@ -71,6 +84,15 @@ handle_coverage_data()
   # Can't use \+ because OSX's mv does not have --target-directory, and \+ must
   # come right after {} (the target directory can not be specified inbetween)
   find "$BUILD_DIR" -maxdepth 1 -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-unittest" \;
+}
+
+target_coverage_benchmarks_data()
+{
+  cmake --build "$BUILD_DIR" --target gcov
+  mkdir "$BUILD_DIR/gcov-reports-benchmarks"
+  # Can't use \+ because OSX's mv does not have --target-directory, and \+ must
+  # come right after {} (the target directory can not be specified inbetween)
+  find "$BUILD_DIR" -maxdepth 1 -iname '*.gcov' -exec mv "{}" "$BUILD_DIR/gcov-reports-benchmarks" \;
 }
 
 target_coverage_integration_data()
@@ -115,11 +137,17 @@ case "$TARGET" in
   "test")
     target_test
     ;;
+  "test_benchmarks")
+    target_test_benchmarks
+    ;;
   "test_integration")
     target_test_integration
     ;;
   "coverage")
     handle_coverage_data
+    ;;
+  "coverage_benchmarks")
+    target_coverage_benchmarks_data
     ;;
   "coverage_integration")
     target_coverage_integration_data

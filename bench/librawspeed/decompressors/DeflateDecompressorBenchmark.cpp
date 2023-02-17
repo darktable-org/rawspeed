@@ -121,6 +121,12 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
 }
 
 static inline void CustomArgs(benchmark::internal::Benchmark* b) {
+  if (benchmarkDryRun()) {
+    static constexpr int L2dByteSize = 512U * (1U << 10U);
+    b->Arg((L2dByteSize / (32 / 8)) / 4);
+    return;
+  }
+
   b->RangeMultiplier(2);
 // FIXME: appears to not like 1GPix+ buffers
 #if 1
