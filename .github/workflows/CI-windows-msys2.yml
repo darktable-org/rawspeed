@@ -125,6 +125,6 @@ jobs:
           env_vars: OS,ARCH,CXX
           flags: unittests
           name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
+          root_dir: ${{ github.workspace }}\rawspeed
           directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest
           fail_ci_if_error: true
