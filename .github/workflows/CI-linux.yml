@@ -279,7 +279,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: unittests
+          flags: linux,unittests
           name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
@@ -314,7 +314,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: benchmarks
+          flags: linux,benchmarks
           name: ${{ env.JOB_NAME }}.Benchmarks
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-benchmarks
@@ -350,7 +350,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: integration,rpu_u
+          flags: linux,integration,rpu_u
           name: ${{ env.JOB_NAME }}.Integration
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-rsa

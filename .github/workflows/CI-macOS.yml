@@ -110,7 +110,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: unittests
+          flags: macOS,unittests
           name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
@@ -145,7 +145,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: benchmarks
+          flags: macOS,benchmarks
           name: ${{ env.JOB_NAME }}.benchmarks
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-benchmarks
