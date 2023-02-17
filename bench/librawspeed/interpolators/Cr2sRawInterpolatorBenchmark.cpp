@@ -83,6 +83,13 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {
   b->MeasureProcessCPUTime();
   b->UseRealTime();
+
+  if (benchmarkDryRun()) {
+    static constexpr int L2dByteSize = 512U * (1U << 10U);
+    b->Arg((L2dByteSize / (16 / 8)) / (3 * 2));
+    return;
+  }
+
   b->RangeMultiplier(2);
 #if 1
   b->Arg(2 * 3 * 2 * 1'000'000);

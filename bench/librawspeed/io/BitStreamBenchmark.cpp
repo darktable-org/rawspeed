@@ -19,6 +19,7 @@
 */
 
 #include "io/BitStream.h"        // for BitStream
+#include "bench/Common.h"
 #include "io/BitPumpJPEG.h"      // for BitPumpJPEG, BitStream<>::fillCache
 #include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache
 #include "io/BitPumpMSB.h"       // for BitPumpMSB, BitStream<>::fillCache
@@ -97,6 +98,11 @@ static inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
 }
 
 static inline void CustomArguments(benchmark::internal::Benchmark* b) {
+  if (benchmarkDryRun()) {
+    b->Arg((512U * (1U << 10U)) / 10);
+    return;
+  }
+
   b->RangeMultiplier(2);
 #if 1
   b->Arg(256 << 20);
