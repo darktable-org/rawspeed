@@ -89,15 +89,6 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - name: Install
-        env:
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
-          TARGET: install
-        run: |
-          set -xe
-          "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'Coverage'
         name: Collect source coverage data
         env:
@@ -105,6 +96,15 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
