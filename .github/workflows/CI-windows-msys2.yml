@@ -29,6 +29,7 @@ on:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+  COVERAGE_REPORT_PREFIX: rawspeed-coverage # relative to the workspace!
 
 jobs:
   windows-msys2:
@@ -98,11 +99,14 @@ jobs:
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v3
@@ -116,9 +120,16 @@ jobs:
           env_vars: OS,ARCH,CXX
           flags: windows,unittests
           name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}\rawspeed
-          directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/unittests
           fail_ci_if_error: true
+      - if: inputs.flavor == 'Coverage'
+        name: Cache code coverage (windows reports)
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
+          key: coverage-${{ github.sha }}-windows
+          enableCrossOsArchive: true
       - name: Install
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
