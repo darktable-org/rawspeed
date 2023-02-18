@@ -1,6 +1,7 @@
 if(HAVE_ZLIB)
   FILE(GLOB RAWSPEED_BENCHS_SOURCES
     "DeflateDecompressorBenchmark.cpp"
+    "UncompressedDecompressorBenchmark.cpp"
   )
 
   foreach(SRC ${RAWSPEED_BENCHS_SOURCES})
