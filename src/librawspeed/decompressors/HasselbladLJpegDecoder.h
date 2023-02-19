@@ -30,14 +30,12 @@ class ByteStream;
 class RawImage;
 
 class HasselbladLJpegDecoder final : public AbstractLJpegDecompressor {
-  int pixelBaseOffset = 0;
-
   void decodeScan() override;
 
 public:
   HasselbladLJpegDecoder(ByteStream bs, const RawImage& img);
 
-  void decode(int pixelBaseOffset_);
+  void decode();
 };
 
 } // namespace rawspeed

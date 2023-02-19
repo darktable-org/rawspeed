@@ -41,11 +41,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const auto pixelBaseOffset = bs.get<int>();
-
     rawspeed::HasselbladLJpegDecoder h(bs, mRaw);
     mRaw->createData();
-    h.decode(pixelBaseOffset);
+    h.decode();
 
     mRaw->checkMemIsInitialized();
   } catch (const rawspeed::RawspeedException&) {
