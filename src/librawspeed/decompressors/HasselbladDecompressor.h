@@ -46,7 +46,7 @@ class HasselbladDecompressor final {
 public:
   struct PerComponentRecipe {
     const HuffmanTable<>& ht;
-    const int initPred;
+    const uint16_t initPred;
   };
 
 private:

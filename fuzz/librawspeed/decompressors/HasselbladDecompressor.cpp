@@ -47,7 +47,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const rawspeed::HuffmanTable<> ht =
         createHuffmanTable<rawspeed::HuffmanTable<>>(bs);
-    const int initPred = bs.get<int>();
+    const uint16_t initPred = bs.get<uint16_t>();
 
     rawspeed::HasselbladDecompressor::PerComponentRecipe rec = {ht, initPred};
 

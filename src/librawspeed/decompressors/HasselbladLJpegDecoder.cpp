@@ -58,7 +58,7 @@ void HasselbladLJpegDecoder::decodeScan() {
   }
 
   const HasselbladDecompressor::PerComponentRecipe rec = {
-      *getHuffmanTables(1)[0], /*initPred=*/0x8000 + pixelBaseOffset};
+      *getHuffmanTables(1)[0], getInitialPredictors(1)[0]};
 
   HasselbladDecompressor d(mRaw, rec, input);
   input.skipBytes(d.decompress());
