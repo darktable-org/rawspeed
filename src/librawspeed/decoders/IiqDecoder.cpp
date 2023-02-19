@@ -45,6 +45,7 @@
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
+#include <optional>
 #include <string>                               // for operator==, string
 #include <utility>                              // for move
 #include <vector>                               // for vector, allocator
@@ -110,6 +111,38 @@ IiqDecoder::computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
   return slices;
 }
 
+namespace {
+
+enum class IIQFormat {
+  RAW_1,
+  RAW_2,
+  IIQ_L,
+  IIQ_S,
+  IIQ_Sv2,
+  IIQ_L16
+
+};
+
+std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
+  switch (v) {
+  case 1:
+    return IIQFormat::RAW_1;
+  case 2:
+    return IIQFormat::RAW_2;
+  case 3:
+    return IIQFormat::IIQ_L;
+  case 5:
+    return IIQFormat::IIQ_S;
+  case 6:
+    return IIQFormat::IIQ_Sv2;
+  case 8:
+    return IIQFormat::IIQ_L16;
+  default:
+    return std::nullopt;
+  }
+}
+} // namespace
+
 RawImage IiqDecoder::decodeRawInternal() {
   const Buffer buf(mFile.getSubView(8));
   const DataBuffer db(buf, Endianness::little);
@@ -137,6 +170,7 @@ RawImage IiqDecoder::decodeRawInternal() {
   uint32_t split_row = 0;
   uint32_t split_col = 0;
 
+  std::optional<IIQFormat> format;
   Buffer raw_data;
   ByteStream block_offsets;
   ByteStream wb;
@@ -157,6 +191,13 @@ RawImage IiqDecoder::decodeRawInternal() {
       break;
     case 0x109:
       height = data;
+      break;
+    case 0x10e: // RawFormat
+      if (format)
+        ThrowRDE("Duplicate RawFormat tag.");
+      format = getAsIIQFormat(data);
+      if (!format || *format != IIQFormat::IIQ_L)
+        ThrowRDE("Unsupported RawFormat: %u", data);
       break;
     case 0x10f:
       raw_data = bs.getSubView(data, len);
@@ -186,6 +227,9 @@ RawImage IiqDecoder::decodeRawInternal() {
   // FIXME: could be wrong. max "active pixels" in "Sensor+" mode - "101 MP"
   if (width == 0 || height == 0 || width > 11976 || height > 8854)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  if (!format)
+    ThrowRDE("Unspecified RawFormat");
 
   if (split_col > width || split_row > height)
     ThrowRDE("Invalid sensor quadrant split values (%u, %u)", split_row,
