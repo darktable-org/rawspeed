@@ -333,6 +333,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: test_integration
+          OMP_NUM_THREADS: 1
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
