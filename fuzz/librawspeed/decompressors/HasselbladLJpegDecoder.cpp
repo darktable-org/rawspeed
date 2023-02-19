@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompressor
+#include "decompressors/HasselbladLJpegDecoder.h" // for HasselbladDecompressor
 #include "common/RawImage.h"                      // for RawImage, RawImageData
 #include "common/RawspeedException.h"             // for RawspeedException
 #include "fuzz/Common.h"                          // for CreateRawImage
@@ -43,7 +43,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const auto pixelBaseOffset = bs.get<int>();
 
-    rawspeed::HasselbladDecompressor h(bs, mRaw);
+    rawspeed::HasselbladLJpegDecoder h(bs, mRaw);
     mRaw->createData();
     h.decode(pixelBaseOffset);
 

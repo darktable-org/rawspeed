@@ -22,7 +22,7 @@
 #include "decoders/ThreefrDecoder.h"
 #include "adt/Point.h"                            // for iPoint2D
 #include "decoders/RawDecoderException.h"         // for ThrowException
-#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
+#include "decompressors/HasselbladLJpegDecoder.h" // for HasselbladDecompre...
 #include "io/Buffer.h"                            // for Buffer, DataBuffer
 #include "io/ByteStream.h"                        // for ByteStream
 #include "io/Endianness.h"                        // for Endianness, Endian...
@@ -61,7 +61,7 @@ RawImage ThreefrDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  HasselbladDecompressor l(bs, mRaw);
+  HasselbladLJpegDecoder l(bs, mRaw);
   mRaw->createData();
 
   int pixelBaseOffset = hints.get("pixelBaseOffset", 0);

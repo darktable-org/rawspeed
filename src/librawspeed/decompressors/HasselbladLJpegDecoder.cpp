@@ -19,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HasselbladDecompressor.h"
+#include "decompressors/HasselbladLJpegDecoder.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for to_array
@@ -34,7 +34,7 @@
 
 namespace rawspeed {
 
-HasselbladDecompressor::HasselbladDecompressor(ByteStream bs,
+HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
                                                const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
@@ -51,7 +51,7 @@ HasselbladDecompressor::HasselbladDecompressor(ByteStream bs,
 
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
-inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
+inline int HasselbladLJpegDecoder::getBits(BitPumpMSB32& bs, int len) {
   if (!len)
     return 0;
   int diff = bs.getBits(len);
@@ -61,7 +61,7 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
   return diff;
 }
 
-void HasselbladDecompressor::decodeScan() {
+void HasselbladLJpegDecoder::decodeScan() {
   if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
       frame.h != static_cast<unsigned>(mRaw->dim.y)) {
     ThrowRDE("LJPEG frame does not match EXIF dimensions: (%u; %u) vs (%i; %i)",
@@ -79,7 +79,8 @@ void HasselbladDecompressor::decodeScan() {
 
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
-  // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
+  // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT
+  // PIXELS
   for (int row = 0; row < out.height; row++) {
     int p1 = 0x8000 + pixelBaseOffset;
     int p2 = 0x8000 + pixelBaseOffset;
@@ -97,8 +98,7 @@ void HasselbladDecompressor::decodeScan() {
   input.skipBytes(bitStream.getStreamPosition());
 }
 
-void HasselbladDecompressor::decode(int pixelBaseOffset_)
-{
+void HasselbladLJpegDecoder::decode(int pixelBaseOffset_) {
   pixelBaseOffset = pixelBaseOffset_;
 
   if (pixelBaseOffset < -65536 || pixelBaseOffset > 65535)
