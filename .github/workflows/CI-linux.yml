@@ -36,6 +36,7 @@ on:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+  COVERAGE_REPORT_PREFIX: rawspeed-coverage # relative to the workspace!
 
 jobs:
   linux:
@@ -263,11 +264,14 @@ jobs:
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v3
@@ -282,7 +286,7 @@ jobs:
           flags: linux,unittests
           name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/unittests
           fail_ci_if_error: true
       - name: Test (benchmarks)
         env:
@@ -298,11 +302,14 @@ jobs:
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage_benchmarks
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (benchmarks)
         uses: codecov/codecov-action@v3
@@ -317,7 +324,7 @@ jobs:
           flags: linux,benchmarks
           name: ${{ env.JOB_NAME }}.Benchmarks
           root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-benchmarks
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/benchmarks
           fail_ci_if_error: true
       - if: inputs.flavor == 'Coverage'
         name: Test (integration)
@@ -334,11 +341,14 @@ jobs:
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage_integration
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-rsa" "${COVERAGE_REPORT_PREFIX}/integration"
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (integration)
         uses: codecov/codecov-action@v3
@@ -353,7 +363,7 @@ jobs:
           flags: linux,integration,rpu_u
           name: ${{ env.JOB_NAME }}.Integration
           root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-rsa
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/integration
           fail_ci_if_error: true
       - name: Install
         env:
@@ -364,6 +374,37 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Cache code coverage (linux reports)
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
+          key: coverage-${{ github.sha }}-linux
+          enableCrossOsArchive: true
+      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
+        name: Fetch code coverage reports (linux reports)
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
+          key: coverage-${{ github.sha }}-linux
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
+        name: Fetch code coverage reports (macOS reports)
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/macOS # relative path!
+          key: coverage-${{ github.sha }}-macOS
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
+        name: Fetch code coverage reports (windows reports)
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
+          key: coverage-${{ github.sha }}-windows
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
       - if: inputs.flavor == 'ClangStaticAnalysis'
         name: Perform clang static analysis
         env:
@@ -379,7 +420,7 @@ jobs:
       - if: inputs.flavor == 'CodeQLAnalysis'
         name: Perform CodeQL static analysis
         uses: github/codeql-action/analyze@v2
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
+      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
         name: Perform SonarCloud static analysis
         env:
           SONAR_SERVER_URL: "https://sonarcloud.io"
@@ -387,7 +428,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}
         run: |
           set -xe
           cd "${SRC_DIR}"
-          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
+          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false --define sonar.cfamily.gcov.reportsPath="${COVERAGE_REPORT_PREFIX}"
