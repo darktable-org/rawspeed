@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2023 Roman Lebedev
+    Copyright (C) 2017 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,20 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HasselbladDecompressor.h"
-#include "HuffmanTable/Common.h"        // for createHuffmanTable
-#include "common/RawImage.h"            // for RawImage, RawImageData
-#include "common/RawspeedException.h"   // for ThrowException, Rawsp...
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "fuzz/Common.h"                // for CreateRawImage
-#include "io/Buffer.h"                  // for Buffer, DataBuffer
-#include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for Endianness, Endiannes...
-#include <algorithm>                    // for generate_n, copy
-#include <cassert>                      // for assert
-#include <cstdint>                      // for uint16_t, uint8_t
-#include <initializer_list>             // for initializer_list
-#include <iterator>                     // for back_insert_iterator
+#include "decompressors/HasselbladLJpegDecoder.h" // for HasselbladDecompressor
+#include "common/RawImage.h"                      // for RawImage, RawImageData
+#include "common/RawspeedException.h"             // for RawspeedException
+#include "fuzz/Common.h"                          // for CreateRawImage
+#include "io/Buffer.h"                            // for Buffer, DataBuffer
+#include "io/ByteStream.h"                        // for ByteStream
+#include "io/Endianness.h" // for Endianness, Endianness::little
+#include <cassert>         // for assert
+#include <cstdint>         // for uint8_t
+#include <cstdio>          // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -45,16 +41,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const rawspeed::HuffmanTable<> ht =
-        createHuffmanTable<rawspeed::HuffmanTable<>>(bs);
-    const int initPred = bs.get<int>();
+    const auto pixelBaseOffset = bs.get<int>();
 
-    rawspeed::HasselbladDecompressor::PerComponentRecipe rec = {ht, initPred};
-
-    rawspeed::HasselbladDecompressor d(mRaw, rec,
-                                       bs.getSubStream(/*offset=*/0));
+    rawspeed::HasselbladLJpegDecoder h(bs, mRaw);
     mRaw->createData();
-    (void)d.decompress();
+    h.decode(pixelBaseOffset);
 
     mRaw->checkMemIsInitialized();
   } catch (const rawspeed::RawspeedException&) {

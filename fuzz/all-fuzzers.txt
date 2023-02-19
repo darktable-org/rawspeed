@@ -10,6 +10,7 @@ FiffParserFuzzer-GetDecoder
 FiffParserFuzzer-GetDecoder-Decode
 FujiDecompressorFuzzer
 HasselbladDecompressorFuzzer
+HasselbladLJpegDecoderFuzzer
 HuffmanTableFuzzer-LUTVsLookup-BitPumpJPEG-FullDecode
 HuffmanTableFuzzer-LUTVsLookup-BitPumpJPEG-NoFullDecode
 HuffmanTableFuzzer-LUTVsLookup-BitPumpMSB-FullDecode

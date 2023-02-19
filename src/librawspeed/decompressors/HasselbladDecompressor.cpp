@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,27 +20,41 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HasselbladDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for to_array
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTableLUT, HuffmanTable
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
-#include "io/ByteStream.h"                // for ByteStream
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t
+#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompressor, HasselbladSliceWidths
+#include "adt/Array2DRef.h"                       // for Array2DRef
+#include "adt/Point.h"                       // for iPoint2D, iPoint2D::area_...
+#include "adt/iterator_range.h"              // for iterator_range
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
+#include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
+#include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStream<>:...
+#include "io/ByteStream.h"                   // for ByteStream
+#include <algorithm>                         // for min, transform
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <cstddef>                           // for size_t
+#include <cstdint>                           // for uint16_t
+#include <functional>                        // for cref, reference_wrapper
+#include <initializer_list>                  // for initializer_list
+#include <optional>                          // for optional
+#include <tuple>                             // for make_tuple, operator==, get
+#include <utility>                           // for move, index_sequence, mak...
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
-HasselbladDecompressor::HasselbladDecompressor(ByteStream bs,
-                                               const RawImage& img)
-    : AbstractLJpegDecompressor(bs, img) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
-      mRaw->getBpp() != sizeof(uint16_t))
-    ThrowRDE("Unexpected component count / data type");
+class ByteStream;
+
+HasselbladDecompressor::HasselbladDecompressor(const RawImage& mRaw_,
+                                               const PerComponentRecipe& rec_,
+                                               ByteStream input_)
+    : mRaw(mRaw_), rec(rec_), input(input_) {
+  if (mRaw->getDataType() != RawImageType::UINT16)
+    ThrowRDE("Unexpected data type");
+
+  if (mRaw->getCpp() != 1 || mRaw->getBpp() != sizeof(uint16_t))
+    ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
 
   // FIXME: could be wrong. max "active pixels" - "100 MP"
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
@@ -47,6 +62,9 @@ HasselbladDecompressor::HasselbladDecompressor(ByteStream bs,
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
+
+  if (rec.ht.isFullDecode())
+    ThrowRDE("Huffman table is of a full decoding variety");
 }
 
 // Returns len bits as a signed value.
@@ -61,31 +79,26 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
   return diff;
 }
 
-void HasselbladDecompressor::decodeScan() {
-  if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
-      frame.h != static_cast<unsigned>(mRaw->dim.y)) {
-    ThrowRDE("LJPEG frame does not match EXIF dimensions: (%u; %u) vs (%i; %i)",
-             frame.w, frame.h, mRaw->dim.x, mRaw->dim.y);
-  }
-
+ByteStream::size_type HasselbladDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   assert(out.height > 0);
   assert(out.width > 0);
   assert(out.width % 2 == 0);
 
-  const auto ht = to_array<1>(getHuffmanTables(1));
-  ht[0]->verifyCodeSymbolsAreValidDiffLenghts();
+  const auto ht = rec.ht;
+  ht.verifyCodeSymbolsAreValidDiffLenghts();
 
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
-  // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT PIXELS
+  // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT
+  // PIXELS
   for (int row = 0; row < out.height; row++) {
-    int p1 = 0x8000 + pixelBaseOffset;
-    int p2 = 0x8000 + pixelBaseOffset;
+    int p1 = rec.initPred;
+    int p2 = rec.initPred;
     for (int col = 0; col < out.width; col += 2) {
-      int len1 = ht[0]->decodeCodeValue(bitStream);
-      int len2 = ht[0]->decodeCodeValue(bitStream);
+      int len1 = ht.decodeCodeValue(bitStream);
+      int len2 = ht.decodeCodeValue(bitStream);
       p1 += getBits(bitStream, len1);
       p2 += getBits(bitStream, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.
@@ -94,21 +107,7 @@ void HasselbladDecompressor::decodeScan() {
       out(row, col + 1) = uint16_t(p2);
     }
   }
-  input.skipBytes(bitStream.getStreamPosition());
-}
-
-void HasselbladDecompressor::decode(int pixelBaseOffset_)
-{
-  pixelBaseOffset = pixelBaseOffset_;
-
-  if (pixelBaseOffset < -65536 || pixelBaseOffset > 65535)
-    ThrowRDE("Either the offset %i or the bounds are wrong.", pixelBaseOffset);
-
-  // We cannot use fully decoding huffman table,
-  // because values are packed two pixels at the time.
-  fullDecodeHT = false;
-
-  AbstractLJpegDecompressor::decode();
+  return bitStream.getStreamPosition();
 }
 
 } // namespace rawspeed

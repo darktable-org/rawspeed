@@ -19,6 +19,8 @@ FILE(GLOB SOURCES
   "FujiDecompressor.h"
   "HasselbladDecompressor.cpp"
   "HasselbladDecompressor.h"
+  "HasselbladLJpegDecoder.cpp"
+  "HasselbladLJpegDecoder.h"
   "HuffmanTable.h"
   "HuffmanTableLUT.h"
   "HuffmanTableLookup.h"
