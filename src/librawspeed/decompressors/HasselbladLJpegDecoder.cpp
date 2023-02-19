@@ -25,12 +25,13 @@
 #include "common/Common.h"                // for to_array
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTableLUT, HuffmanTable
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
-#include "io/ByteStream.h"                // for ByteStream
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t
+#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompressor
+#include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
+#include "io/BitPumpMSB32.h"            // for BitPumpMSB32, BitStream<>:...
+#include "io/ByteStream.h"              // for ByteStream
+#include <array>                        // for array
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint16_t
 
 namespace rawspeed {
 
@@ -49,18 +50,6 @@ HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
   }
 }
 
-// Returns len bits as a signed value.
-// Highest bit is a sign bit
-inline int HasselbladLJpegDecoder::getBits(BitPumpMSB32& bs, int len) {
-  if (!len)
-    return 0;
-  int diff = bs.getBits(len);
-  diff = HuffmanTable<>::extend(diff, len);
-  if (diff == 65535)
-    return -32768;
-  return diff;
-}
-
 void HasselbladLJpegDecoder::decodeScan() {
   if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
       frame.h != static_cast<unsigned>(mRaw->dim.y)) {
@@ -68,34 +57,11 @@ void HasselbladLJpegDecoder::decodeScan() {
              frame.w, frame.h, mRaw->dim.x, mRaw->dim.y);
   }
 
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  const HasselbladDecompressor::PerComponentRecipe rec = {
+      *getHuffmanTables(1)[0], /*initPred=*/0x8000 + pixelBaseOffset};
 
-  assert(out.height > 0);
-  assert(out.width > 0);
-  assert(out.width % 2 == 0);
-
-  const auto ht = to_array<1>(getHuffmanTables(1));
-  ht[0]->verifyCodeSymbolsAreValidDiffLenghts();
-
-  BitPumpMSB32 bitStream(input);
-  // Pixels are packed two at a time, not like LJPEG:
-  // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT
-  // PIXELS
-  for (int row = 0; row < out.height; row++) {
-    int p1 = 0x8000 + pixelBaseOffset;
-    int p2 = 0x8000 + pixelBaseOffset;
-    for (int col = 0; col < out.width; col += 2) {
-      int len1 = ht[0]->decodeCodeValue(bitStream);
-      int len2 = ht[0]->decodeCodeValue(bitStream);
-      p1 += getBits(bitStream, len1);
-      p2 += getBits(bitStream, len2);
-      // NOTE: this is rather unusual and weird, but appears to be correct.
-      // clampBits(p, 16) results in completely garbled images.
-      out(row, col) = uint16_t(p1);
-      out(row, col + 1) = uint16_t(p2);
-    }
-  }
-  input.skipBytes(bitStream.getStreamPosition());
+  HasselbladDecompressor d(mRaw, rec, input);
+  input.skipBytes(d.decompress());
 }
 
 void HasselbladLJpegDecoder::decode(int pixelBaseOffset_) {

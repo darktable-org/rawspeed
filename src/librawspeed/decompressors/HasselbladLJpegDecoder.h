@@ -38,8 +38,6 @@ public:
   HasselbladLJpegDecoder(ByteStream bs, const RawImage& img);
 
   void decode(int pixelBaseOffset_);
-
-  static int getBits(BitPumpMSB32& bs, int len);
 };
 
 } // namespace rawspeed
