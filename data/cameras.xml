@@ -16502,6 +16502,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Phase One A/S" model="P45">
+		<ID make="Phase One" model="P45">Phase One P45</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="44" y="26" width="-24" height="-32"/>
+		<Sensor black="0" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">5053 -24 -117</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5685 14077 1703</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-2619 4491 5850</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Phase One A/S" model="P65+">
 		<ID make="Phase One" model="P65+">Phase One P65+</ID>
 		<CFA width="2" height="2">
@@ -16535,6 +16553,24 @@
 				<ColorMatrixRow plane="0">8035 435 -962</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-6001 13872 2320</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-1159 3065 5434</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Phase One A/S" model="IQ180">
+		<ID make="Phase One" model="IQ180">Phase One IQ180</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="36" y="8" width="-16" height="-48"/>
+		<Sensor black="257" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">6294 686 -712</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5435 13417 2211</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1006 2435 5042</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
