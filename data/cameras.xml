@@ -17197,6 +17197,15 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX10 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX10 IS">Canon PowerShot SX10 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX20 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX20 IS">Canon PowerShot SX20 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX30 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX30 IS">Canon PowerShot SX30 IS</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX40 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX40 HS">Canon PowerShot SX40 HS</ID>
 	</Camera>
@@ -17209,11 +17218,26 @@
 	<Camera make="Canon" model="Canon PowerShot SX160 IS" mode="dng">
 		<ID make="Canon" model="PowerShot SX160 IS">Canon PowerShot SX160 IS</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX220 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX220 HS">Canon PowerShot SX220 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX230 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX230 HS">Canon PowerShot SX230 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX240 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX240 HS">Canon PowerShot SX240 HS</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX260 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX260 HS">Canon PowerShot SX260 HS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX510 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX510 HS">Canon PowerShot SX510 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX530 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX530 HS">Canon PowerShot SX530 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX710 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX710 HS">Canon PowerShot SX710 HS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A3200 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A3200 IS">Canon PowerShot A3200 IS</ID>
