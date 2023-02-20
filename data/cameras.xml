@@ -17209,11 +17209,17 @@
 	<Camera make="Canon" model="Canon PowerShot SX160 IS" mode="dng">
 		<ID make="Canon" model="PowerShot SX160 IS">Canon PowerShot SX160 IS</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX220 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX220 HS">Canon PowerShot SX220 HS</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX260 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX260 HS">Canon PowerShot SX260 HS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX510 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX510 HS">Canon PowerShot SX510 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX530 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX530 HS">Canon PowerShot SX530 HS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A3200 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A3200 IS">Canon PowerShot A3200 IS</ID>
