@@ -114,7 +114,7 @@ jobs:
             eatmydata apt-get install rsync
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
-            eatmydata apt-get install clang-tidy-${{ inputs.compiler-version }}
+            eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
           fi
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
             eatmydata apt-get install curl \
@@ -219,6 +219,14 @@ jobs:
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
           echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
+      - if: inputs.flavor == 'ClangTidy'
+        name: Verify that the source code is properly formatted
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+        run: |
+          set -xe
+          cd "$SRC_DIR"
+          git ls-tree -r --name-only HEAD | grep -vf .clang-format-ignore | xargs clang-format-${{ inputs.compiler-version }} --verbose --dry-run -Werror
       - name: Configure
         env:
           CC: ${{ inputs.compiler-CC }}
