@@ -18,16 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for RawspeedException
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h" // for Endianness, Endianness::little
-#include <cassert>         // for assert
-#include <cstdint>         // for uint8_t
-#include <cstdio>          // for size_t
+#include "decompressors/LJpegDecoder.h" // for LJpegDecoder
+#include "common/RawImage.h"            // for RawImage, RawImageData
+#include "common/RawspeedException.h"   // for RawspeedException
+#include "fuzz/Common.h"                // for CreateRawImage
+#include "io/Buffer.h"                  // for Buffer, DataBuffer
+#include "io/ByteStream.h"              // for ByteStream
+#include "io/Endianness.h"              // for Endianness, Endianness::little
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint8_t
+#include <cstdio>                       // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -47,12 +47,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto height = bs.getU32();
     const auto fixDng16Bug = bs.getU32();
 
-    rawspeed::LJpegDecompressor j(bs, mRaw);
+    rawspeed::LJpegDecoder j(bs, mRaw);
     mRaw->createData();
     j.decode(offsetX, offsetY, width, height, fixDng16Bug);
 
     // we can not check that all the image was initialized, because normally
-    // LJpegDecompressor decodes just some one tile/slice.
+    // LJpegDecoder decodes just some one tile/slice.
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }

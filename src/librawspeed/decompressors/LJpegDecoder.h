@@ -30,7 +30,7 @@ class RawImage;
 
 // Decompresses Lossless JPEGs, with 2-4 components
 
-class LJpegDecompressor final : public AbstractLJpegDecompressor {
+class LJpegDecoder final : public AbstractLJpegDecompressor {
   void decodeScan() override;
   template <int N_COMP, bool WeirdWidth = false> void decodeN();
 
@@ -43,7 +43,7 @@ class LJpegDecompressor final : public AbstractLJpegDecompressor {
   uint32_t trailingPixels = 0;
 
 public:
-  LJpegDecompressor(ByteStream bs, const RawImage& img);
+  LJpegDecoder(ByteStream bs, const RawImage& img);
 
   void decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
               uint32_t height, bool fixDng16Bug_);

@@ -19,7 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/LJpegDecompressor.h"
+#include "decompressors/LJpegDecoder.h"
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for to_array, roundUpDivision
@@ -35,7 +35,7 @@ using std::copy_n;
 
 namespace rawspeed {
 
-LJpegDecompressor::LJpegDecompressor(ByteStream bs, const RawImage& img)
+LJpegDecoder::LJpegDecoder(ByteStream bs, const RawImage& img)
     : AbstractLJpegDecompressor(bs, img) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -58,9 +58,8 @@ LJpegDecompressor::LJpegDecompressor(ByteStream bs, const RawImage& img)
 #endif
 }
 
-void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
-                               uint32_t width, uint32_t height,
-                               bool fixDng16Bug_) {
+void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
+                          uint32_t height, bool fixDng16Bug_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -89,7 +88,7 @@ void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
   AbstractLJpegDecompressor::decode();
 }
 
-void LJpegDecompressor::decodeScan() {
+void LJpegDecoder::decodeScan() {
   assert(frame.cps > 0);
 
   if (predictorMode != 1)
@@ -159,7 +158,7 @@ void LJpegDecompressor::decodeScan() {
 
 // N_COMP == number of components (2, 3 or 4)
 
-template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
+template <int N_COMP, bool WeirdWidth> void LJpegDecoder::decodeN() {
   assert(mRaw->getCpp() > 0);
   assert(N_COMP > 0);
   assert(N_COMP >= mRaw->getCpp());

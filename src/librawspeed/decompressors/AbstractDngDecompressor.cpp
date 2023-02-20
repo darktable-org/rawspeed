@@ -27,7 +27,7 @@
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
 #include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
-#include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
+#include "decompressors/LJpegDecoder.h"             // for LJpegDecoder
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "decompressors/VC5Decompressor.h"          // for VC5Decompressor
 #include "io/ByteStream.h"                          // for ByteStream
@@ -102,7 +102,7 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     try {
-      LJpegDecompressor d(e->bs, mRaw);
+      LJpegDecoder d(e->bs, mRaw);
       d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
