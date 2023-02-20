@@ -30,6 +30,7 @@ using rawspeed::roundUp;
 using std::sqrt;
 
 bool __attribute__((const, visibility("default"))) benchmarkDryRun() {
+  // NOLINTNEXTLINE(concurrency-mt-unsafe)
   return std::getenv("RAWSPEED_BENCHMARK_DRYRUN") != nullptr;
 }
 
