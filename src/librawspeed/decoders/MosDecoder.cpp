@@ -90,14 +90,14 @@ std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
   std::string::size_type end = xmp.find("</tiff:" + std::string(tag) + ">");
   if (start == std::string::npos || end == std::string::npos || end <= start)
     ThrowRDE("Couldn't find tag '%s' in the XMP", tag.data());
-  int startlen = tag.size()+7;
+  int startlen = tag.size() + 7;
   return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 
 RawImage MosDecoder::decodeRawInternal() {
   uint32_t off = 0;
 
-  const TiffIFD *raw = nullptr;
+  const TiffIFD* raw = nullptr;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::TILEOFFSETS)) {
     raw = mRootIFD->getIFDWithTag(TiffTag::TILEOFFSETS);
@@ -149,7 +149,8 @@ void MosDecoder::checkSupportInternal(const CameraMetaData* meta) {
 void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   RawDecoder::setMetaData(meta, make, model, "", 0);
 
-  // Fetch the white balance (see dcraw.c parse_mos for more metadata that can be gotten)
+  // Fetch the white balance (see dcraw.c parse_mos for more metadata that can
+  // be gotten)
   if (mRootIFD->hasEntryRecursive(TiffTag::LEAFMETADATA)) {
     ByteStream bs =
         mRootIFD->getEntryRecursive(TiffTag::LEAFMETADATA)->getData();

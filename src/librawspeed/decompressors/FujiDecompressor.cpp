@@ -108,7 +108,6 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
     ThrowRDE("fuji_block_checks");
   }
 
-
   if (d.header.raw_type == 16) {
     line_width = (d.header.block_size * 2) / 3;
   } else {

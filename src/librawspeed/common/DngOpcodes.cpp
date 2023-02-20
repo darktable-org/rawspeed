@@ -46,9 +46,9 @@
 #include <exception>
 #endif
 
-using std::vector;
 using std::fill_n;
 using std::make_pair;
+using std::vector;
 
 namespace rawspeed {
 

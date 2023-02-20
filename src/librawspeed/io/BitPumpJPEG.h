@@ -68,7 +68,8 @@ inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
     ++p;
     cache.push(c0, 8);
     if (c0 == 0xFF) {
-      // Found FF -> pre-execute case of FF/00, which represents an FF data byte -> ignore the 00
+      // Found FF -> pre-execute case of FF/00, which represents an FF data byte
+      // -> ignore the 00
       const int c1 = prefetch[p];
       ++p;
       if (c1 != 0) {

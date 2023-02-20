@@ -64,7 +64,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
   bool isOldPanasonic =
       !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
 
-  if (! isOldPanasonic)
+  if (!isOldPanasonic)
     raw = mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET);
   else
     raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
@@ -93,11 +93,11 @@ RawImage Rw2Decoder::decodeRawInternal() {
         ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
         mRaw);
 
-    if (size >= width*height*2) {
+    if (size >= width * height * 2) {
       // It's completely unpacked little-endian
       mRaw->createData();
       u.decodeRawUnpacked<12, Endianness::little>(width, height);
-    } else if (size >= width*height*3/2) {
+    } else if (size >= width * height * 3 / 2) {
       // It's a packed format
       mRaw->createData();
       u.decode12BitRaw<Endianness::little, false, true>(width, height);
@@ -260,8 +260,8 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
     const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
 
-    for(int i = 0; i < 2; i++) {
-      for(int j = 0; j < 2; j++) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
         const int k = i + 2 * j;
         const CFAColor c = mRaw->cfa.getColorAt(i, j);
         switch (c) {
@@ -316,19 +316,19 @@ std::string Rw2Decoder::guessMode() const {
   float t = fabs(ratio - 3.0F / 2.0F);
   if (t < min_diff) {
     closest_match = "3:2";
-    min_diff  = t;
+    min_diff = t;
   }
 
   t = fabs(ratio - 4.0F / 3.0F);
   if (t < min_diff) {
-    closest_match =  "4:3";
-    min_diff  = t;
+    closest_match = "4:3";
+    min_diff = t;
   }
 
   t = fabs(ratio - 1.0F);
   if (t < min_diff) {
     closest_match = "1:1";
-    min_diff  = t;
+    min_diff = t;
   }
   writeLog(DEBUG_PRIO::EXTRA, "Mode guess: '%s'", closest_match.c_str());
   return closest_match;

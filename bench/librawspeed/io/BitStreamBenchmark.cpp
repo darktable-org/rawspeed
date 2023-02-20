@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitStream.h"        // for BitStream
+#include "io/BitStream.h" // for BitStream
 #include "bench/Common.h"
 #include "io/BitPumpJPEG.h"      // for BitPumpJPEG, BitStream<>::fillCache
 #include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache

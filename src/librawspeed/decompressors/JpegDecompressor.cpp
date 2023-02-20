@@ -39,8 +39,8 @@
 #include "io/IOException.h" // for ThrowIOE
 #endif
 
-using std::unique_ptr;
 using std::min;
+using std::unique_ptr;
 
 namespace rawspeed {
 

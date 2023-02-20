@@ -202,7 +202,8 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     bool double_width = hints.has("double_width_unpacked");
     // If crop size is negative, use relative cropping
     if (new_size.x <= 0)
-      new_size.x = mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
+      new_size.x =
+          mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
     else
       new_size.x /= (double_width ? 2 : 1);
     if (new_size.y <= 0)
@@ -218,17 +219,16 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     uint32_t rotatedsize;
     uint32_t rotationPos;
     if (alt_layout) {
-      rotatedsize = new_size.y+new_size.x/2;
-      rotationPos = new_size.x/2 - 1;
-    }
-    else {
-      rotatedsize = new_size.x+new_size.y/2;
+      rotatedsize = new_size.y + new_size.x / 2;
+      rotationPos = new_size.x / 2 - 1;
+    } else {
+      rotatedsize = new_size.x + new_size.y / 2;
       rotationPos = new_size.x - 1;
     }
 
-    iPoint2D final_size(rotatedsize, rotatedsize-1);
+    iPoint2D final_size(rotatedsize, rotatedsize - 1);
     RawImage rotated = RawImage::create(final_size, RawImageType::UINT16, 1);
-    rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
+    rotated->clearArea(iRectangle2D(iPoint2D(0, 0), rotated->dim));
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
@@ -241,10 +241,10 @@ void RafDecoder::applyCorrections(const Camera* cam) {
         int w;
         if (alt_layout) { // Swapped x and y
           h = rotatedsize - (new_size.y + 1 - y + (x >> 1));
-          w = ((x+1) >> 1) + y;
+          w = ((x + 1) >> 1) + y;
         } else {
           h = new_size.x - 1 - x + (y >> 1);
-          w = ((y+1) >> 1) + x;
+          w = ((y + 1) >> 1) + x;
         }
         if (h < rotated->dim.y && w < rotated->dim.x)
           dstImg(h, w) = srcImg(crop_offset.y + y, crop_offset.x + x);
@@ -289,9 +289,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
     const TiffEntry* sep_black =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
-    if (sep_black->count == 4)
-    {
-      for(int k=0;k<4;k++)
+    if (sep_black->count == 4) {
+      for (int k = 0; k < 4; k++)
         mRaw->blackLevelSeparate[k] = sep_black->getU32(k);
     } else if (sep_black->count == 36) {
       for (int& k : mRaw->blackLevelSeparate)
@@ -314,7 +313,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = (sum + 2) >> 2;
   }
 
-  const CameraSensorInfo *sensor = cam->getSensorInfo(iso);
+  const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
   if (sensor->mWhiteLevel > 0) {
     mRaw->blackLevel = sensor->mBlackLevel;
     mRaw->whitePoint = sensor->mWhiteLevel;

@@ -46,9 +46,9 @@
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
 #include <optional>
-#include <string>                               // for operator==, string
-#include <utility>                              // for move
-#include <vector>                               // for vector, allocator
+#include <string>  // for operator==, string
+#include <utility> // for move
+#include <vector>  // for vector, allocator
 
 namespace rawspeed {
 

@@ -46,8 +46,7 @@ using TiffIFDOwner = std::unique_ptr<TiffIFD>;
 using TiffRootIFDOwner = std::unique_ptr<TiffRootIFD>;
 using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 
-class TiffIFD
-{
+class TiffIFD {
   uint32_t nextIFD = 0;
 
   TiffIFD* const parent;
@@ -125,11 +124,11 @@ public:
   [[nodiscard]] const std::vector<TiffIFDOwner>& getSubIFDs() const {
     return subIFDs;
   }
-//  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
+  //  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries;
+  //  }
 };
 
-struct TiffID
-{
+struct TiffID {
   std::string make;
   std::string model;
 };

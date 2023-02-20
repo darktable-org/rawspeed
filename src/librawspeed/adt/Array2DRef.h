@@ -22,10 +22,10 @@
 #pragma once
 
 #include "adt/Array1DRef.h" // for Array1DRef
-#include <cassert>     // for assert
-#include <cstddef>     // for byte
-#include <type_traits> // for negation, is_const, remove_const_t, is_same
-#include <vector>      // for vector
+#include <cassert>          // for assert
+#include <cstddef>          // for byte
+#include <type_traits>      // for negation, is_const, remove_const_t, is_same
+#include <vector>           // for vector
 
 namespace rawspeed {
 

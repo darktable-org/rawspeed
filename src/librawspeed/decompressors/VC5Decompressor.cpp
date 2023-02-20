@@ -601,7 +601,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 #ifdef HAVE_OPENMP
 #pragma omp atomic write
 #endif
-      exceptionThrown = true;
+        exceptionThrown = true;
       }
     }
   }

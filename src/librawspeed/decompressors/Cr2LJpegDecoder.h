@@ -31,8 +31,7 @@ namespace rawspeed {
 class ByteStream;
 class RawImage;
 
-class Cr2LJpegDecoder final : public AbstractLJpegDecompressor
-{
+class Cr2LJpegDecoder final : public AbstractLJpegDecompressor {
   Cr2SliceWidths slicing;
 
   void decodeScan() override;

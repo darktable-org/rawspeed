@@ -33,8 +33,7 @@ namespace rawspeed {
 class Buffer;
 template <class T, int alignment> class AlignedAllocator;
 
-class FileReader
-{
+class FileReader {
   const char* fileName;
 
 public:

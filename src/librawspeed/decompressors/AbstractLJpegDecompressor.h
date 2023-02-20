@@ -120,19 +120,19 @@ enum class JpegMarker { /* JPEG marker codes			*/
 };
 
 /*
-* The following structure stores basic information about one component.
-*/
+ * The following structure stores basic information about one component.
+ */
 struct JpegComponentInfo {
   /*
-  * These values are fixed over the whole image.
-  * They are read from the SOF marker.
-  */
+   * These values are fixed over the whole image.
+   * They are read from the SOF marker.
+   */
   uint32_t componentId = ~0U; /* identifier for this component (0..255) */
 
   /*
-  * Huffman table selector (0..3). The value may vary
-  * between scans. It is read from the SOS marker.
-  */
+   * Huffman table selector (0..3). The value may vary
+   * between scans. It is read from the SOS marker.
+   */
   uint32_t dcTblNo = ~0U;
   uint32_t superH = ~0U; // Horizontal Supersampling
   uint32_t superV = ~0U; // Vertical Supersampling
@@ -162,8 +162,8 @@ public:
   virtual ~AbstractLJpegDecompressor() = default;
 
 protected:
-  bool fixDng16Bug = false;  // DNG v1.0.x compatibility
-  bool fullDecodeHT = true;  // FullDecode Huffman
+  bool fixDng16Bug = false; // DNG v1.0.x compatibility
+  bool fullDecodeHT = true; // FullDecode Huffman
 
   void decode();
   void parseSOF(ByteStream data, SOFInfo* i);

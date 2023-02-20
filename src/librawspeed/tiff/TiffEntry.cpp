@@ -43,7 +43,8 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
     : parent(parent_), tag(static_cast<TiffTag>(bs.getU16())) {
   const uint16_t numType = bs.getU16();
   if (numType > static_cast<uint16_t>(TiffDataType::OFFSET))
-    ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", numType);
+    ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.",
+             numType);
   type = static_cast<TiffDataType>(numType);
   count = bs.getU32();
 

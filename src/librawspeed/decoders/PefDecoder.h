@@ -31,8 +31,7 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 
-class PefDecoder final : public AbstractTiffDecoder
-{
+class PefDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   PefDecoder(TiffRootIFDOwner&& root, Buffer file)

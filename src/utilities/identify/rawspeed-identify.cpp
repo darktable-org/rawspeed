@@ -40,7 +40,7 @@ namespace rawspeed::identify {
 
 std::string find_cameras_xml(const char* argv0);
 
-std::string find_cameras_xml(const char *argv0) {
+std::string find_cameras_xml(const char* argv0) {
   struct stat statbuf;
 
 #ifdef RS_CAMERAS_XML_PATH

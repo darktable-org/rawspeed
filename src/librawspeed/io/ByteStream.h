@@ -33,7 +33,8 @@
 namespace rawspeed {
 
 class ByteStream final : public DataBuffer {
-  size_type pos = 0; // position of stream in bytes (this is next byte to deliver)
+  size_type pos =
+      0; // position of stream in bytes (this is next byte to deliver)
 
 public:
   ByteStream() = default;
@@ -114,7 +115,7 @@ public:
   [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
     assert(data);
     (void)check(i + 1);
-    return data[pos+i];
+    return data[pos + i];
   }
 
   inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
@@ -122,7 +123,7 @@ public:
     pos += check(nmemb, size_);
   }
 
-  inline bool hasPatternAt(const char *pattern, size_type size_,
+  inline bool hasPatternAt(const char* pattern, size_type size_,
                            size_type relPos) const {
     assert(data);
     if (!isValid(pos + relPos, size_))
@@ -130,11 +131,11 @@ public:
     return memcmp(&data[pos + relPos], pattern, size_) == 0;
   }
 
-  inline bool hasPrefix(const char *prefix, size_type size_) const {
+  inline bool hasPrefix(const char* prefix, size_type size_) const {
     return hasPatternAt(prefix, size_, 0);
   }
 
-  inline bool skipPrefix(const char *prefix, size_type size_) {
+  inline bool skipPrefix(const char* prefix, size_type size_) {
     bool has_prefix = hasPrefix(prefix, size_);
     if (has_prefix)
       pos += size_;
@@ -155,7 +156,7 @@ public:
 
   [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
 
-  template<typename T> inline T get() {
+  template <typename T> inline T get() {
     auto ret = peek<T>();
     pos += sizeof(T);
     return ret;
@@ -173,8 +174,8 @@ public:
     return reinterpret_cast<const char*>(&data[pos]);
   }
 
-  // Increments the stream to after the next zero byte and returns the bytes in between (not a copy).
-  // If the first byte is zero, stream is incremented one.
+  // Increments the stream to after the next zero byte and returns the bytes in
+  // between (not a copy). If the first byte is zero, stream is incremented one.
   const char* getString() {
     assert(data);
     size_type start = pos;

@@ -167,9 +167,12 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
     askForSamples(meta, make, model, mode);
 
     if (failOnUnknown)
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
+      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
+               "guess. Sorry.",
+               make.c_str(), model.c_str(), mode.c_str());
 
-    // Assume the camera can be decoded, but return false, so decoders can see that we are unsure.
+    // Assume the camera can be decoded, but return false, so decoders can see
+    // that we are unsure.
     return false;
   }
 
@@ -189,7 +192,8 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   }
 
   if (cam->decoderVersion > getDecoderVersion())
-    ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
+    ThrowRDE(
+        "Camera not supported in this version. Update RawSpeed for support.");
 
   hints = cam->hints;
   return true;
@@ -204,7 +208,9 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     askForSamples(meta, make, model, mode);
 
     if (failOnUnknown)
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
+      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
+               "guess. Sorry.",
+               make.c_str(), model.c_str(), mode.c_str());
 
     return;
   }
@@ -238,7 +244,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
   }
 
-  const CameraSensorInfo *sensor = cam->getSensorInfo(iso_speed);
+  const CameraSensorInfo* sensor = cam->getSensorInfo(iso_speed);
   mRaw->blackLevel = sensor->mBlackLevel;
   mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
@@ -248,7 +254,8 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       for (auto i = 0UL; i < cfaArea; i++) {
         mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
-    } else if (!mRaw->isCFA && mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
+    } else if (!mRaw->isCFA &&
+               mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
       for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
         mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }

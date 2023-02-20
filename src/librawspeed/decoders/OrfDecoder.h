@@ -34,8 +34,7 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 
-class OrfDecoder final : public AbstractTiffDecoder
-{
+class OrfDecoder final : public AbstractTiffDecoder {
   [[nodiscard]] ByteStream handleSlices() const;
 
 public:

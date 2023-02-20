@@ -107,6 +107,7 @@ public:
 
 class RawImageData : public ErrorLog {
   friend class RawImageWorker;
+
 public:
   virtual ~RawImageData();
   [[nodiscard]] uint32_t getCpp() const { return cpp; }
@@ -185,7 +186,7 @@ protected:
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
-  void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
+  void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped);
   std::vector<uint8_t, DefaultInitAllocatorAdaptor<
                            uint8_t, AlignedAllocator<uint8_t, 16>>>
       data;
@@ -233,28 +234,28 @@ private:
   friend class RawImage;
 };
 
- class RawImage {
- public:
-   static RawImage create(RawImageType type = RawImageType::UINT16);
-   static RawImage create(const iPoint2D& dim,
-                          RawImageType type = RawImageType::UINT16,
-                          uint32_t componentsPerPixel = 1);
-   RawImageData* operator->() const { return p_; }
-   RawImageData& operator*() const { return *p_; }
-   explicit RawImage(RawImageData* p); // p must not be NULL
-   ~RawImage();
-   RawImage(const RawImage& p);
-   RawImage& operator=(const RawImage& p) noexcept;
-   RawImage& operator=(RawImage&& p) noexcept;
+class RawImage {
+public:
+  static RawImage create(RawImageType type = RawImageType::UINT16);
+  static RawImage create(const iPoint2D& dim,
+                         RawImageType type = RawImageType::UINT16,
+                         uint32_t componentsPerPixel = 1);
+  RawImageData* operator->() const { return p_; }
+  RawImageData& operator*() const { return *p_; }
+  explicit RawImage(RawImageData* p); // p must not be NULL
+  ~RawImage();
+  RawImage(const RawImage& p);
+  RawImage& operator=(const RawImage& p) noexcept;
+  RawImage& operator=(RawImage&& p) noexcept;
 
-   RawImageData* get() { return p_; }
- private:
-   RawImageData* p_;    // p_ is never NULL
- };
+  RawImageData* get() { return p_; }
 
-inline RawImage RawImage::create(RawImageType type)  {
-  switch (type)
-  {
+private:
+  RawImageData* p_; // p_ is never NULL
+};
+
+inline RawImage RawImage::create(RawImageType type) {
+  switch (type) {
   case RawImageType::UINT16:
     return RawImage(new RawImageDataU16());
   case RawImageType::F32:
@@ -321,9 +322,10 @@ RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
-// You must supply the destination where the value should be written, and a pointer to
-// a value that will be used to store a random counter that can be reused between calls.
-// this needs to be inline to speed up tight decompressor loops
+// You must supply the destination where the value should be written, and a
+// pointer to a value that will be used to store a random counter that can be
+// reused between calls. this needs to be inline to speed up tight decompressor
+// loops
 inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
                                            uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
@@ -339,7 +341,7 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
     uint32_t r = *random;
 
     uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);
-    *random = 15700 *(r & 65535) + (r >> 16);
+    *random = 15700 * (r & 65535) + (r >> 16);
     *dest = pix;
     return;
   }

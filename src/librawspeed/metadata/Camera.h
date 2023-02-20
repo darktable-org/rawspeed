@@ -45,13 +45,11 @@ class xml_node;
 
 namespace rawspeed {
 
-class Hints
-{
+class Hints {
   std::map<std::string, std::string, std::less<>> data;
 
 public:
-  void add(const std::string& key, const std::string& value)
-  {
+  void add(const std::string& key, const std::string& value) {
     data.try_emplace(key, value);
   }
 
@@ -77,8 +75,7 @@ public:
   }
 };
 
-class Camera
-{
+class Camera {
 public:
   enum class SupportStatus {
     Unsupported,
@@ -113,17 +110,17 @@ public:
 
 protected:
 #ifdef HAVE_PUGIXML
-  void parseCFA(const pugi::xml_node &node);
-  void parseCrop(const pugi::xml_node &node);
-  void parseBlackAreas(const pugi::xml_node &node);
-  void parseAliases(const pugi::xml_node &node);
-  void parseHints(const pugi::xml_node &node);
-  void parseID(const pugi::xml_node &node);
-  void parseSensor(const pugi::xml_node &node);
+  void parseCFA(const pugi::xml_node& node);
+  void parseCrop(const pugi::xml_node& node);
+  void parseBlackAreas(const pugi::xml_node& node);
+  void parseAliases(const pugi::xml_node& node);
+  void parseHints(const pugi::xml_node& node);
+  void parseID(const pugi::xml_node& node);
+  void parseSensor(const pugi::xml_node& node);
   void parseColorMatrix(const pugi::xml_node& node);
   void parseColorMatrices(const pugi::xml_node& node);
 
-  void parseCameraChild(const pugi::xml_node &node);
+  void parseCameraChild(const pugi::xml_node& node);
 #endif
 };
 

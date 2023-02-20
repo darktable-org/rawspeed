@@ -77,8 +77,8 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
   processPixelPacket(ProxyStream& bits, int row, int col,
                      std::vector<uint32_t>* zero_pos) const noexcept;
 
-  void processBlock(const Block& block, std::vector<uint32_t>* zero_pos) const
-      noexcept;
+  void processBlock(const Block& block,
+                    std::vector<uint32_t>* zero_pos) const noexcept;
 
   void decompressThread() const noexcept;
 
