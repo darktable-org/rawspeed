@@ -333,10 +333,11 @@ int Cr2Decoder::getHue() const {
   if (uint32_t model_id =
           mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
       model_id >= 0x80000281 || model_id == 0x80000218 ||
-      (hints.has("force_new_sraw_hue")))
+      (hints.has("force_new_sraw_hue"))) {
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) -
             1) >>
            1;
+  }
 
   return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 }

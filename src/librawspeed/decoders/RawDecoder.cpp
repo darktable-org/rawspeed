@@ -166,10 +166,11 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   if (!cam) {
     askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown)
+    if (failOnUnknown) {
       ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
                "guess. Sorry.",
                make.c_str(), model.c_str(), mode.c_str());
+    }
 
     // Assume the camera can be decoded, but return false, so decoders can see
     // that we are unsure.
@@ -207,10 +208,11 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   if (!cam) {
     askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown)
+    if (failOnUnknown) {
       ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
                "guess. Sorry.",
                make.c_str(), model.c_str(), mode.c_str());
+    }
 
     return;
   }

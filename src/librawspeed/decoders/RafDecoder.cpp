@@ -201,10 +201,10 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     crop_offset = cam->cropPos;
     bool double_width = hints.has("double_width_unpacked");
     // If crop size is negative, use relative cropping
-    if (new_size.x <= 0)
+    if (new_size.x <= 0) {
       new_size.x =
           mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
-    else
+    } else
       new_size.x /= (double_width ? 2 : 1);
     if (new_size.y <= 0)
       new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
