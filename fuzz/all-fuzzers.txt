@@ -5,7 +5,7 @@ Cr2DecompressorFuzzer-HuffmanTable
 Cr2LJpegDecoderFuzzer
 CrwDecompressorFuzzer
 DngOpcodesFuzzer
-DummyLJpegDecompressorFuzzer
+DummyLJpegDecoderFuzzer
 FiffParserFuzzer-GetDecoder
 FiffParserFuzzer-GetDecoder-Decode
 FujiDecompressorFuzzer
