@@ -72,7 +72,7 @@ inline T_TO bit_cast(const T_FROM& from) noexcept {
 
 // only works for positive values and zero
 template <typename T> constexpr bool isPowerOfTwo(T val) {
-  return (val & (~val+1)) == val;
+  return (val & (~val + 1)) == val;
 }
 
 template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
@@ -202,8 +202,7 @@ inline std::string trimSpaces(std::string_view str) {
 }
 
 inline std::vector<std::string> splitString(const std::string& input,
-                                            char c = ' ')
-{
+                                            char c = ' ') {
   std::vector<std::string> result;
   const char* str = input.c_str();
 

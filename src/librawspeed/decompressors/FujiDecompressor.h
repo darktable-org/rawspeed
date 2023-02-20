@@ -133,7 +133,7 @@ private:
     explicit fuji_compressed_params(const FujiDecompressor& d);
 
     std::vector<int8_t> q_table; /* quantization table */
-    std::array<int, 5> q_point; /* quantization points */
+    std::array<int, 5> q_point;  /* quantization points */
     int max_bits;
     int min_value;
     int raw_bits;

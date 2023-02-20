@@ -52,8 +52,7 @@ Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
   }
 }
 
-void Cr2LJpegDecoder::decodeScan()
-{
+void Cr2LJpegDecoder::decodeScan() {
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
 

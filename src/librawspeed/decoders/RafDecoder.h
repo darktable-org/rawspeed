@@ -33,8 +33,7 @@ class Buffer;
 class Camera;
 class CameraMetaData;
 
-class RafDecoder final : public AbstractTiffDecoder
-{
+class RafDecoder final : public AbstractTiffDecoder {
   bool alt_layout = false;
 
 public:

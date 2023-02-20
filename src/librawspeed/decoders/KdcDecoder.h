@@ -31,8 +31,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-class KdcDecoder final : public AbstractTiffDecoder
-{
+class KdcDecoder final : public AbstractTiffDecoder {
   [[nodiscard]] Buffer getInputBuffer() const;
 
 public:

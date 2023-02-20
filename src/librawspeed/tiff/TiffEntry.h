@@ -59,8 +59,7 @@ enum class TiffDataType {
   OFFSET = 13,    /* 32-bit unsigned offset used for IFD and other offsets */
 };
 
-class TiffEntry
-{
+class TiffEntry {
   TiffIFD* parent;
   ByteStream data;
 

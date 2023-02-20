@@ -36,17 +36,14 @@
 
 using std::vector;
 
-using std::out_of_range;
 using std::map;
+using std::out_of_range;
 
 namespace rawspeed {
 
-ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
-  setSize(_size);
-}
+ColorFilterArray::ColorFilterArray(const iPoint2D& _size) { setSize(_size); }
 
-void ColorFilterArray::setSize(const iPoint2D& _size)
-{
+void ColorFilterArray::setSize(const iPoint2D& _size) {
   if (_size == iPoint2D(0, 0))
     return;
 
@@ -68,8 +65,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
   fill(cfa.begin(), cfa.end(), CFAColor::UNKNOWN);
 }
 
-CFAColor ColorFilterArray::getColorAt( int x, int y ) const
-{
+CFAColor ColorFilterArray::getColorAt(int x, int y) const {
   if (cfa.empty())
     ThrowRDE("No CFA size set");
 
@@ -80,8 +76,7 @@ CFAColor ColorFilterArray::getColorAt( int x, int y ) const
   return cfa[x + static_cast<size_t>(y) * size.x];
 }
 
-void ColorFilterArray::setCFA( iPoint2D in_size, ... )
-{
+void ColorFilterArray::setCFA(iPoint2D in_size, ...) {
   if (in_size != size) {
     setSize(in_size);
   }
@@ -90,7 +85,7 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
   for (auto i = 0UL; i < size.area(); i++) {
     cfa[i] = static_cast<CFAColor>(va_arg(arguments, int));
   }
-  va_end (arguments);
+  va_end(arguments);
 }
 
 void ColorFilterArray::shiftRight(int n) {
@@ -133,7 +128,7 @@ std::string ColorFilterArray::asString() const {
   std::string dst;
   for (int y = 0; y < size.y; y++) {
     for (int x = 0; x < size.x; x++) {
-      dst += colorToString(getColorAt(x,y));
+      dst += colorToString(getColorAt(x, y));
       dst += (x == size.x - 1) ? "\n" : ",";
     }
   }
@@ -231,7 +226,7 @@ static uint32_t toDcrawColor(CFAColor c) {
 }
 
 uint32_t ColorFilterArray::getDcrawFilter() const {
-  //dcraw magic
+  // dcraw magic
   if (size.x == 6 && size.y == 6)
     return 9;
 
@@ -248,7 +243,7 @@ uint32_t ColorFilterArray::getDcrawFilter() const {
     for (int y = 0; y < 8; y++) {
       uint32_t c = toDcrawColor(getColorAt(x, y));
       int g = (x >> 1) * 8;
-      ret |= c << ((x&1)*2 + y*4 + g);
+      ret |= c << ((x & 1) * 2 + y * 4 + g);
     }
   }
 

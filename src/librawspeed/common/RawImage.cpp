@@ -213,8 +213,7 @@ void RawImageData::subFrame(iRectangle2D crop) {
   dim = crop.dim;
 }
 
-void RawImageData::createBadPixelMap()
-{
+void RawImageData::createBadPixelMap() {
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch = roundUp(roundUpDivision(uncropped_dim.x, 8), 16);
@@ -247,8 +246,7 @@ RawImage::~RawImage() {
   p_->mymutex.Unlock();
 }
 
-void RawImageData::transferBadPixelsToMap()
-{
+void RawImageData::transferBadPixelsToMap() {
   MutexLocker guard(&mBadPixelMutex);
   if (mBadPixelPositions.empty())
     return;
@@ -263,14 +261,13 @@ void RawImageData::transferBadPixelsToMap()
     assert(pos_x < static_cast<uint16_t>(uncropped_dim.x));
     assert(pos_y < static_cast<uint16_t>(uncropped_dim.y));
 
-    mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x&7);
+    mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x & 7);
   }
   mBadPixelPositions.clear();
 }
 
-void RawImageData::fixBadPixels()
-{
-#if !defined (EMULATE_DCRAW_BAD_PIXELS)
+void RawImageData::fixBadPixels() {
+#if !defined(EMULATE_DCRAW_BAD_PIXELS)
 
   /* Transfer if not already done */
   transferBadPixelsToMap();
@@ -289,7 +286,7 @@ void RawImageData::fixBadPixels()
   if (!mBadPixelMap.empty())
     startWorker(RawImageWorker::RawImageWorkerTask::FIX_BAD_PIXELS, false);
 
-#else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
+#else // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
   for (vector<uint32_t>::iterator i = mBadPixelPositions.begin();
        i != mBadPixelPositions.end(); ++i) {
@@ -316,7 +313,6 @@ void RawImageData::fixBadPixels()
     }
   }
 #endif
-
 }
 
 void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
@@ -371,7 +367,7 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
 }
 
 void RawImageData::clearArea(iRectangle2D area) {
-  area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
+  area = area.getOverlap(iRectangle2D(iPoint2D(0, 0), dim));
 
   if (area.area() <= 0)
     return;
@@ -411,8 +407,7 @@ RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
 
 void RawImageWorker::performTask() noexcept {
   try {
-    switch(task)
-    {
+    switch (task) {
     case RawImageWorkerTask::SCALE_VALUES:
       data->scaleValues(start_y, end_y);
       break;

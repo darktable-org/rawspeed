@@ -33,10 +33,10 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 
-class AbstractTiffDecoder : public RawDecoder
-{
+class AbstractTiffDecoder : public RawDecoder {
 protected:
   TiffRootIFDOwner mRootIFD;
+
 public:
   AbstractTiffDecoder(TiffRootIFDOwner&& root, Buffer file)
       : RawDecoder(file), mRootIFD(std::move(root)) {}

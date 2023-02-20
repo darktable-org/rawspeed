@@ -89,8 +89,7 @@ void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
   AbstractLJpegDecompressor::decode();
 }
 
-void LJpegDecompressor::decodeScan()
-{
+void LJpegDecompressor::decodeScan() {
   assert(frame.cps > 0);
 
   if (predictorMode != 1)
@@ -232,7 +231,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // ... and discard the rest.
     for (; col < N_COMP * frame.w; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i) ht[i]->decodeDifference(bitStream);
+      for (int i = 0; i != N_COMP; ++i)
+        ht[i]->decodeDifference(bitStream);
     }
   }
 }

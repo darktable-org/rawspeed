@@ -91,24 +91,23 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
   blocks.reserve(blocksTotal);
 
   unsigned currPixel = 0;
-  std::generate_n(std::back_inserter(blocks), blocksTotal,
-                  [&, pixelToCoordinate]() {
-                    assert(input.getRemainSize() != 0);
-                    const auto blockSize =
-                        std::min(input.getRemainSize(), BlockSize);
-                    assert(blockSize > 0);
-                    assert(blockSize % BytesPerPacket == 0);
-                    const auto packets = blockSize / BytesPerPacket;
-                    assert(packets > 0);
-                    const auto pixels = packets * PixelsPerPacket;
-                    assert(pixels > 0);
+  std::generate_n(
+      std::back_inserter(blocks), blocksTotal, [&, pixelToCoordinate]() {
+        assert(input.getRemainSize() != 0);
+        const auto blockSize = std::min(input.getRemainSize(), BlockSize);
+        assert(blockSize > 0);
+        assert(blockSize % BytesPerPacket == 0);
+        const auto packets = blockSize / BytesPerPacket;
+        assert(packets > 0);
+        const auto pixels = packets * PixelsPerPacket;
+        assert(pixels > 0);
 
-                    ByteStream bs = input.getStream(blockSize);
-                    iPoint2D beginCoord = pixelToCoordinate(currPixel);
-                    currPixel += pixels;
-                    iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return Block(bs, beginCoord, endCoord);
-                  });
+        ByteStream bs = input.getStream(blockSize);
+        iPoint2D beginCoord = pixelToCoordinate(currPixel);
+        currPixel += pixels;
+        iPoint2D endCoord = pixelToCoordinate(currPixel);
+        return Block(bs, beginCoord, endCoord);
+      });
   assert(blocks.size() == blocksTotal);
   assert(currPixel >= mRaw->dim.area());
   assert(input.getRemainSize() == 0);

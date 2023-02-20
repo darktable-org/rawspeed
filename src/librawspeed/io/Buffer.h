@@ -40,8 +40,7 @@ namespace rawspeed {
  * It intentionally supports only read/const access to the underlying memory.
  *
  *************************************************************************/
-class Buffer
-{
+class Buffer {
 public:
   using size_type = uint32_t;
 
@@ -73,7 +72,8 @@ public:
     return getSubView(offset, newSize);
   }
 
-  // get pointer to memory at 'offset', make sure at least 'count' bytes are accessible
+  // get pointer to memory at 'offset', make sure at least 'count' bytes are
+  // accessible
   [[nodiscard]] const uint8_t* getData(size_type offset,
                                        size_type count) const {
     if (!isValid(offset, count))
@@ -100,7 +100,8 @@ public:
     return data + size;
   }
 
-  // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap byte order if required
+  // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
+  // byte order if required
   template <typename T>
   [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
   get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {

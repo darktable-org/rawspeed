@@ -176,7 +176,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   // to detect it this way in the future.
   data = mRootIFD->getIFDsWithTag(TiffTag::MAKE);
   if (data.size() > 1) {
-    for (auto &i : data) {
+    for (auto& i : data) {
       std::string make = i->getEntry(TiffTag::MAKE)->getString();
       /* Check for maker "SONY" without spaces */
       if (make == "SONY")
@@ -199,14 +199,14 @@ RawImage ArwDecoder::decodeRawInternal() {
   std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32_t i = 0; i < 4; i++)
-    sony_curve[i+1] = (c->getU16(i) >> 2) & 0xfff;
+    sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
 
   for (uint32_t i = 0; i < 0x4001; i++)
     curve[i] = i;
 
   for (uint32_t i = 0; i < 5; i++)
     for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
-      curve[j] = curve[j-1] + (1 << i);
+      curve[j] = curve[j - 1] + (1 << i);
 
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
@@ -341,7 +341,7 @@ void ArwDecoder::ParseA100WB() const {
 }
 
 void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  //Default
+  // Default
   int iso = 0;
 
   mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
@@ -377,18 +377,18 @@ void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
   std::array<uint32_t, 128> pad;
 
   // Initialize the decryption pad from the key
-  for (int p=0; p < 4; p++)
+  for (int p = 0; p < 4; p++)
     pad[p] = key = uint32_t(key * 48828125UL + 1UL);
-  pad[3] = pad[3] << 1 | (pad[0]^pad[2]) >> 31;
-  for (int p=4; p < 127; p++)
-    pad[p] = (pad[p-4]^pad[p-2]) << 1 | (pad[p-3]^pad[p-1]) >> 31;
-  for (int p=0; p < 127; p++)
+  pad[3] = pad[3] << 1 | (pad[0] ^ pad[2]) >> 31;
+  for (int p = 4; p < 127; p++)
+    pad[p] = (pad[p - 4] ^ pad[p - 2]) << 1 | (pad[p - 3] ^ pad[p - 1]) >> 31;
+  for (int p = 0; p < 127; p++)
     pad[p] = getU32BE(&pad[p]);
 
   int p = 127;
   // Decrypt the buffer in place using the pad
   for (; len > 0; len--) {
-    pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+1+64) & 127];
+    pad[p & 127] = pad[(p + 1) & 127] ^ pad[(p + 1 + 64) & 127];
 
     uint32_t pv;
     memcpy(&pv, &(pad[p & 127]), sizeof(uint32_t));
@@ -422,7 +422,7 @@ void ArwDecoder::GetWB() const {
         makerNoteIFD.getEntryRecursive(TiffTag::SONY_LENGTH);
     const TiffEntry* sony_key =
         makerNoteIFD.getEntryRecursive(TiffTag::SONY_KEY);
-    if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
+    if (!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("couldn't find the correct metadata for WB decoding");
 
     assert(sony_offset != nullptr);

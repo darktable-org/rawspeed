@@ -31,15 +31,15 @@
 #ifdef HAVE_PUGIXML
 #include <pugixml.hpp> // for xml_document, xml_pars...
 
-using pugi::xml_node;
 using pugi::xml_document;
+using pugi::xml_node;
 using pugi::xml_parse_result;
 #endif
 
 namespace rawspeed {
 
 #ifdef HAVE_PUGIXML
-CameraMetaData::CameraMetaData(const char *docname) {
+CameraMetaData::CameraMetaData(const char* docname) {
   xml_document doc;
 
   if (xml_parse_result result =
@@ -91,12 +91,11 @@ const Camera* CameraMetaData::getCamera(const std::string& make,
                                         const std::string& model) const {
   auto id = getId(make, model, "");
 
-  auto iter = find_if(cameras.cbegin(), cameras.cend(),
-                      [&id](decltype(*cameras.cbegin())& i) {
-                        const auto& cid = i.first;
-                        return tie(id.make, id.model) ==
-                               tie(cid.make, cid.model);
-                      });
+  auto iter = find_if(
+      cameras.cbegin(), cameras.cend(), [&id](decltype(*cameras.cbegin())& i) {
+        const auto& cid = i.first;
+        return tie(id.make, id.model) == tie(cid.make, cid.model);
+      });
 
   if (iter == cameras.end())
     return nullptr;

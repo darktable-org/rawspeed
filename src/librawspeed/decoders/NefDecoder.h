@@ -38,8 +38,7 @@ class ByteStream;
 class CameraMetaData;
 class iPoint2D;
 
-class NefDecoder final : public AbstractTiffDecoder
-{
+class NefDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   NefDecoder(TiffRootIFDOwner&& root, Buffer file)

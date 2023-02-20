@@ -79,7 +79,7 @@ void MrwDecoder::parseHeader() {
     const auto origPos = bs.getPosition();
 
     switch (tag) {
-    case 0x505244: {            // PRD
+    case 0x505244: { // PRD
       foundPRD = true;
       bs.skipBytes(8);          // Version Number
       raw_height = bs.getU16(); // CCD Size Y
@@ -90,8 +90,8 @@ void MrwDecoder::parseHeader() {
                  raw_height);
       }
 
-      bs.skipBytes(2);          // Image Size Y
-      bs.skipBytes(2);          // Image Size X
+      bs.skipBytes(2); // Image Size Y
+      bs.skipBytes(2); // Image Size X
 
       bpp = bs.getByte(); // DataSize
       if (12 != bpp && 16 != bpp)
@@ -176,7 +176,7 @@ void MrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  //Default
+  // Default
   int iso = 0;
 
   if (!rootIFD)

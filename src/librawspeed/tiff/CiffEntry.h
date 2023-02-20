@@ -49,8 +49,7 @@ enum class CiffDataType {
 
 };
 
-class CiffEntry
-{
+class CiffEntry {
   friend class CiffIFD;
 
   ByteStream data;

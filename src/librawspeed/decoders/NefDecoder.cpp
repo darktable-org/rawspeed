@@ -260,7 +260,7 @@ void NefDecoder::DecodeUncompressed() const {
   assert(slices.size() == counts->count);
 
   mRaw->createData();
-  if (bitPerPixel == 14 && width*slices[0].h*2 == slices[0].count)
+  if (bitPerPixel == 14 && width * slices[0].h * 2 == slices[0].count)
     bitPerPixel = 16; // D3 & D810
 
   bitPerPixel = hints.get("real_bpp", bitPerPixel);
@@ -533,9 +533,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         uint32_t serialno = 0;
         for (unsigned char c : serial) {
           if (c >= '0' && c <= '9')
-            serialno = serialno*10 + c-'0';
+            serialno = serialno * 10 + c - '0';
           else
-            serialno = serialno*10 + c%10;
+            serialno = serialno * 10 + c % 10;
         }
 
         // Get the decryption key
@@ -598,8 +598,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   if (hints.has("nikon_wb_adjustment")) {
-    mRaw->metadata.wbCoeffs[0] *= 256/527.0;
-    mRaw->metadata.wbCoeffs[2] *= 256/317.0;
+    mRaw->metadata.wbCoeffs[0] *= 256 / 527.0;
+    mRaw->metadata.wbCoeffs[2] *= 256 / 317.0;
   }
 
   auto id = mRootIFD->getID();
@@ -636,11 +636,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = black;
 }
 
-
-// DecodeNikonYUY2 decodes 12 bit data in an YUY2-like pattern (2 Luma, 1 Chroma per 2 pixels).
-// We un-apply the whitebalance, so output matches lossless.
-// Note that values are scaled. See comment below on details.
-// OPTME: It would be trivial to run this multithreaded.
+// DecodeNikonYUY2 decodes 12 bit data in an YUY2-like pattern (2 Luma, 1 Chroma
+// per 2 pixels). We un-apply the whitebalance, so output matches lossless. Note
+// that values are scaled. See comment below on details. OPTME: It would be
+// trivial to run this multithreaded.
 void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   if (mRaw->dim.x < 6)
     ThrowIOE("got a %u wide sNEF, aborting", mRaw->dim.x);
@@ -673,7 +672,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   auto curve = gammaCurve(1 / 2.4, 12.92, 1, 4095);
 
   // Scale output values to 16 bits.
-  for (int i = 0 ; i < 4096; i++) {
+  for (int i = 0; i < 4096; i++) {
     curve[i] = clampBits(static_cast<int>(curve[i]) << 2, 16);
   }
 
@@ -697,7 +696,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       uint32_t g5 = in[4];
       uint32_t g6 = in[5];
 
-      in+=6;
+      in += 6;
       auto y1 = static_cast<float>(g1 | ((g2 & 0x0f) << 8));
       auto y2 = static_cast<float>((g2 >> 4) | (g3 << 4));
       auto cb = static_cast<float>(g4 | ((g5 & 0x0f) << 8));
@@ -705,7 +704,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
 
       float cb2 = cb;
       float cr2 = cr;
-      // Interpolate right pixel. We assume the sample is aligned with left pixel.
+      // Interpolate right pixel. We assume the sample is aligned with left
+      // pixel.
       if ((col + 6) < out.width) {
         g4 = in[3];
         g5 = in[4];
@@ -747,7 +747,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
 }
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
-#define SQR(x) ((x)*(x))
+#define SQR(x) ((x) * (x))
 std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
                                              int imax) {
   std::vector<uint16_t> curve(65536);
@@ -760,9 +760,9 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   g[1] = ts;
   g[2] = g[3] = g[4] = 0;
   bnd[g[1] >= 1] = 1;
-  if (g[1] && (g[1]-1)*(g[0]-1) <= 0) {
-    for (i=0; i < 48; i++) {
-      g[2] = (bnd[0] + bnd[1])/2;
+  if (g[1] && (g[1] - 1) * (g[0] - 1) <= 0) {
+    for (i = 0; i < 48; i++) {
+      g[2] = (bnd[0] + bnd[1]) / 2;
       if (g[0])
         bnd[(pow(g[2] / g[1], -g[0]) - 1) / g[0] - 1 / g[2] > -1] = g[2];
       else
@@ -787,7 +787,7 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
 
   mode--;
 
-  for (i=0; i < 0x10000; i++) {
+  for (i = 0; i < 0x10000; i++) {
     curve[i] = 0xffff;
     if ((r = static_cast<double>(i) / imax) < 1) {
       curve[i] = static_cast<uint16_t>(

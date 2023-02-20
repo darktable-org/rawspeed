@@ -32,8 +32,7 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 
-class MosDecoder final : public AbstractTiffDecoder
-{
+class MosDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);

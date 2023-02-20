@@ -34,8 +34,7 @@ class CameraMetaData;
 class iRectangle2D;
 struct DngTilingDescription;
 
-class DngDecoder final : public AbstractTiffDecoder
-{
+class DngDecoder final : public AbstractTiffDecoder {
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);
