@@ -108,4 +108,5 @@ TiffDecoderFuzzer-SrwDecoder
 TiffDecoderFuzzer-ThreefrDecoder
 TiffParserFuzzer-GetDecoder
 TiffParserFuzzer-GetDecoder-Decode
+UncompressedDecompressorFuzzer
 VC5DecompressorFuzzer
