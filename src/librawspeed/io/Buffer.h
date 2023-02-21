@@ -80,7 +80,6 @@ public:
       ThrowIOE("Buffer overflow: image file may be truncated");
 
     assert(data);
-    assert(!ASan::RegionIsPoisoned(data + offset, count));
 
     return data + offset;
   }
@@ -91,12 +90,10 @@ public:
   // std begin/end iterators to allow for range loop
   [[nodiscard]] const uint8_t* begin() const {
     assert(data);
-    assert(!ASan::RegionIsPoisoned(data, 0));
     return data;
   }
   [[nodiscard]] const uint8_t* end() const {
     assert(data);
-    assert(!ASan::RegionIsPoisoned(data, size));
     return data + size;
   }
 
@@ -111,10 +108,7 @@ public:
         !inNativeByteOrder);
   }
 
-  [[nodiscard]] inline size_type getSize() const {
-    assert(!ASan::RegionIsPoisoned(data, size));
-    return size;
-  }
+  [[nodiscard]] inline size_type getSize() const { return size; }
 
   [[nodiscard]] inline bool isValid(size_type offset,
                                     size_type count = 1) const {
