@@ -217,9 +217,7 @@ public:
     DummyROIOpcode::setup(ri);
   }
 
-  [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
-    return ROIOpcode::getRoi();
-  }
+  using ROIOpcode::getRoi;
 
   [[noreturn]] void apply(const RawImage& ri) override {
     assert(false && "You should not be calling this.");
