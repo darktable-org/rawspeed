@@ -119,7 +119,7 @@ class NikonLASDecompressor {
         huffsize[p] = static_cast<char>(l);
         ++p;
         if (p > 256)
-          ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too "
+          ThrowRDE("LJpegDecoder::createHuffmanTable: Code length too "
                    "long. Corrupt data.");
       }
     }

@@ -5,7 +5,7 @@ Cr2DecompressorFuzzer-HuffmanTable
 Cr2LJpegDecoderFuzzer
 CrwDecompressorFuzzer
 DngOpcodesFuzzer
-DummyLJpegDecompressorFuzzer
+DummyLJpegDecoderFuzzer
 FiffParserFuzzer-GetDecoder
 FiffParserFuzzer-GetDecoder-Decode
 FujiDecompressorFuzzer
@@ -72,6 +72,7 @@ HuffmanTableVectorFuzzer-BitPumpMSB-NoFullDecode
 HuffmanTableVectorFuzzer-BitPumpMSB32-FullDecode
 HuffmanTableVectorFuzzer-BitPumpMSB32-NoFullDecode
 KodakDecompressorFuzzer
+LJpegDecoderFuzzer
 LJpegDecompressorFuzzer
 NikonDecompressorFuzzer
 OlympusDecompressorFuzzer

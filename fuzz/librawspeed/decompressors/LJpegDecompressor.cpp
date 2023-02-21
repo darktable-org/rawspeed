@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,16 +18,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for RawspeedException
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h" // for Endianness, Endianness::little
-#include <cassert>         // for assert
-#include <cstdint>         // for uint8_t
-#include <cstdio>          // for size_t
+#include "decompressors/LJpegDecompressor.h"
+#include "HuffmanTable/Common.h"        // for createHuffmanTable
+#include "common/RawImage.h"            // for RawImage, RawImageData
+#include "common/RawspeedException.h"   // for ThrowException, Rawsp...
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "fuzz/Common.h"                // for CreateRawImage
+#include "io/Buffer.h"                  // for Buffer, DataBuffer
+#include "io/ByteStream.h"              // for ByteStream
+#include "io/Endianness.h"              // for Endianness, Endiannes...
+#include <algorithm>                    // for generate_n, copy
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint16_t, uint8_t
+#include <initializer_list>             // for initializer_list
+#include <iterator>                     // for back_insert_iterator
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -41,18 +45,49 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const auto offsetX = bs.getU32();
-    const auto offsetY = bs.getU32();
-    const auto width = bs.getU32();
-    const auto height = bs.getU32();
-    const auto fixDng16Bug = bs.getU32();
+    const int N_COMP = bs.getI32();
+    const int frame_w = bs.getI32();
+    const int frame_h = bs.getI32();
+    const rawspeed::LJpegDecompressor::Frame frame{
+        N_COMP, rawspeed::iPoint2D(frame_w, frame_h)};
 
-    rawspeed::LJpegDecompressor j(bs, mRaw);
+    const unsigned num_recips = bs.getU32();
+
+    const unsigned num_unique_hts = bs.getU32();
+    std::vector<rawspeed::HuffmanTable<>> uniqueHts;
+    std::generate_n(std::back_inserter(uniqueHts), num_unique_hts, [&bs]() {
+      return createHuffmanTable<rawspeed::HuffmanTable<>>(bs);
+    });
+
+    std::vector<const rawspeed::HuffmanTable<>*> hts;
+    std::generate_n(std::back_inserter(hts), num_recips, [&bs, &uniqueHts]() {
+      if (unsigned uniq_ht_idx = bs.getU32(); uniq_ht_idx < uniqueHts.size())
+        return &uniqueHts[uniq_ht_idx];
+      ThrowRSE("Unknown unique huffman table");
+    });
+
+    (void)bs.check(num_recips, sizeof(uint16_t));
+    std::vector<uint16_t> initPred;
+    initPred.reserve(num_recips);
+    std::generate_n(std::back_inserter(initPred), num_recips,
+                    [&bs]() { return bs.get<uint16_t>(); });
+
+    std::vector<rawspeed::LJpegDecompressor::PerComponentRecipe> rec;
+    rec.reserve(num_recips);
+    std::generate_n(std::back_inserter(rec), num_recips,
+                    [&rec, hts, initPred]()
+                        -> rawspeed::LJpegDecompressor::PerComponentRecipe {
+                      const int i = rec.size();
+                      return {*hts[i], initPred[i]};
+                    });
+
+    rawspeed::LJpegDecompressor d(
+        mRaw, rawspeed::iRectangle2D(mRaw->dim.x, mRaw->dim.y), frame, rec,
+        bs.getSubStream(/*offset=*/0));
     mRaw->createData();
-    j.decode(offsetX, offsetY, width, height, fixDng16Bug);
+    d.decode();
 
-    // we can not check that all the image was initialized, because normally
-    // LJpegDecompressor decodes just some one tile/slice.
+    mRaw->checkMemIsInitialized();
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }

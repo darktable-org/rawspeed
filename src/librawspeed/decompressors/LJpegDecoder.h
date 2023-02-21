@@ -1,7 +1,6 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
 
     This library is free software; you can redistribute it and/or
@@ -22,20 +21,28 @@
 #pragma once
 
 #include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDe...
-#include "io/BitPumpMSB32.h"                    // for BitPumpMSB32
+#include <cstdint>                              // for uint32_t
 
 namespace rawspeed {
 
 class ByteStream;
 class RawImage;
 
-class HasselbladLJpegDecoder final : public AbstractLJpegDecoder {
+// Decompresses Lossless JPEGs, with 2-4 components
+
+class LJpegDecoder final : public AbstractLJpegDecoder {
   void decodeScan() override;
 
-public:
-  HasselbladLJpegDecoder(ByteStream bs, const RawImage& img);
+  uint32_t offX = 0;
+  uint32_t offY = 0;
+  uint32_t w = 0;
+  uint32_t h = 0;
 
-  void decode();
+public:
+  LJpegDecoder(ByteStream bs, const RawImage& img);
+
+  void decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
+              uint32_t height, bool fixDng16Bug_);
 };
 
 } // namespace rawspeed

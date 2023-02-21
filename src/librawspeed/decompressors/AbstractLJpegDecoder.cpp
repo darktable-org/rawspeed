@@ -20,7 +20,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/AbstractLJpegDecompressor.h"
+#include "decompressors/AbstractLJpegDecoder.h"
 #include "adt/Point.h"                          // for iPoint2D
 #include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
@@ -37,8 +37,7 @@
 
 namespace rawspeed {
 
-AbstractLJpegDecompressor::AbstractLJpegDecompressor(ByteStream bs,
-                                                     const RawImage& img)
+AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, const RawImage& img)
     : input(bs), mRaw(img) {
   input.setByteOrder(Endianness::big);
 
@@ -54,7 +53,7 @@ AbstractLJpegDecompressor::AbstractLJpegDecompressor(ByteStream bs,
 #endif
 }
 
-void AbstractLJpegDecompressor::decode() {
+void AbstractLJpegDecoder::decode() {
   if (getNextMarker(false) != JpegMarker::SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
@@ -120,7 +119,7 @@ void AbstractLJpegDecompressor::decode() {
     ThrowRDE("Did not find SOS marker.");
 }
 
-void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
+void AbstractLJpegDecoder::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   sof->prec = sofInput.getByte();
   sof->h = sofInput.getU16();
   sof->w = sofInput.getU16();
@@ -174,7 +173,7 @@ void AbstractLJpegDecompressor::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   sof->initialized = true;
 }
 
-void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
+void AbstractLJpegDecoder::parseSOS(ByteStream sos) {
   assert(frame.initialized);
 
   if (sos.getRemainSize() != 1 + 2 * frame.cps + 3)
@@ -219,7 +218,7 @@ void AbstractLJpegDecompressor::parseSOS(ByteStream sos) {
   decodeScan();
 }
 
-void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
+void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
   while (dht.getRemainSize() > 0) {
     uint32_t b = dht.getByte();
 
@@ -258,14 +257,14 @@ void AbstractLJpegDecompressor::parseDHT(ByteStream dht) {
   }
 }
 
-void AbstractLJpegDecompressor::parseDRI(ByteStream dri) {
+void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
   if (dri.getRemainSize() != 2)
     ThrowRDE("Invalid DRI header length.");
   if (uint16_t Ri = dri.getU16(); Ri != 0)
     ThrowRDE("Non-zero restart interval not supported.");
 }
 
-JpegMarker AbstractLJpegDecompressor::getNextMarker(bool allowskip) {
+JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
   auto peekMarker = [&]() -> std::optional<JpegMarker> {
     uint8_t c0 = input.peekByte(0);
     uint8_t c1 = input.peekByte(1);

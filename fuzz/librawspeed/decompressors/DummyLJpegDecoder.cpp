@@ -18,31 +18,30 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawImage.h"                         // for RawImage, RawIm...
-#include "common/RawspeedException.h"                // for RawspeedException
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "fuzz/Common.h"                             // for CreateRawImage
-#include "io/Buffer.h"                               // for Buffer, DataBuffer
-#include "io/ByteStream.h"                           // for ByteStream
-#include "io/Endianness.h"                           // for Endianness, End...
-#include <cassert>                                   // for assert
-#include <cstdint>                                   // for uint8_t
-#include <cstdio>                                    // for size_t
+#include "common/RawImage.h"                    // for RawImage, RawIm...
+#include "common/RawspeedException.h"           // for RawspeedException
+#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDe...
+#include "fuzz/Common.h"                        // for CreateRawImage
+#include "io/Buffer.h"                          // for Buffer, DataBuffer
+#include "io/ByteStream.h"                      // for ByteStream
+#include "io/Endianness.h"                      // for Endianness, End...
+#include <cassert>                              // for assert
+#include <cstdint>                              // for uint8_t
+#include <cstdio>                               // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
 namespace {
 
-class DummyLJpegDecompressor final
-    : public rawspeed::AbstractLJpegDecompressor {
+class DummyLJpegDecoder final : public rawspeed::AbstractLJpegDecoder {
   void decodeScan() override {}
 
 public:
-  DummyLJpegDecompressor(const rawspeed::ByteStream& bs,
-                         const rawspeed::RawImage& img)
-      : AbstractLJpegDecompressor(bs, img) {}
+  DummyLJpegDecoder(const rawspeed::ByteStream& bs,
+                    const rawspeed::RawImage& img)
+      : AbstractLJpegDecoder(bs, img) {}
 
-  void decode() { AbstractLJpegDecompressor::decode(); }
+  void decode() { AbstractLJpegDecoder::decode(); }
 };
 
 } // namespace
@@ -57,7 +56,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    DummyLJpegDecompressor d(bs, mRaw);
+    DummyLJpegDecoder d(bs, mRaw);
     d.decode();
     mRaw->createData();
 
