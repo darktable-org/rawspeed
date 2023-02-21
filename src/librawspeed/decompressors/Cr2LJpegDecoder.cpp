@@ -38,7 +38,7 @@
 namespace rawspeed {
 
 Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
-    : AbstractLJpegDecompressor(bs, img) {
+    : AbstractLJpegDecoder(bs, img) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
@@ -152,7 +152,7 @@ void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
       ThrowRDE("Bad slice width: %i", sliceWidth);
   }
 
-  AbstractLJpegDecompressor::decode();
+  AbstractLJpegDecoder::decode();
 }
 
 } // namespace rawspeed

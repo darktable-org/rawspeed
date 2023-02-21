@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include <cstdint>                                   // for uint32_t
+#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDe...
+#include <cstdint>                              // for uint32_t
 
 namespace rawspeed {
 
@@ -30,7 +30,7 @@ class RawImage;
 
 // Decompresses Lossless JPEGs, with 2-4 components
 
-class LJpegDecoder final : public AbstractLJpegDecompressor {
+class LJpegDecoder final : public AbstractLJpegDecoder {
   void decodeScan() override;
 
   uint32_t offX = 0;

@@ -37,7 +37,7 @@ namespace rawspeed {
 
 HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
                                                const RawImage& img)
-    : AbstractLJpegDecompressor(bs, img) {
+    : AbstractLJpegDecoder(bs, img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -69,7 +69,7 @@ void HasselbladLJpegDecoder::decode() {
   // because values are packed two pixels at the time.
   fullDecodeHT = false;
 
-  AbstractLJpegDecompressor::decode();
+  AbstractLJpegDecoder::decode();
 }
 
 } // namespace rawspeed

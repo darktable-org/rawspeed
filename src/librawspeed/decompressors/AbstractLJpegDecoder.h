@@ -148,7 +148,7 @@ public:
   bool initialized = false;
 };
 
-class AbstractLJpegDecompressor : public AbstractDecompressor {
+class AbstractLJpegDecoder : public AbstractDecompressor {
   // std::vector of unique HTs, to not recreate HT, but cache them
   std::vector<std::unique_ptr<const HuffmanTable<>>> huffmanTableStore;
   HuffmanTable<> ht_; // temporary table, used during parsing LJpeg.
@@ -157,9 +157,9 @@ class AbstractLJpegDecompressor : public AbstractDecompressor {
   std::array<const HuffmanTable<>*, 4> huff{{}}; // 4 pointers into the store
 
 public:
-  AbstractLJpegDecompressor(ByteStream bs, const RawImage& img);
+  AbstractLJpegDecoder(ByteStream bs, const RawImage& img);
 
-  virtual ~AbstractLJpegDecompressor() = default;
+  virtual ~AbstractLJpegDecoder() = default;
 
 protected:
   bool fixDng16Bug = false; // DNG v1.0.x compatibility

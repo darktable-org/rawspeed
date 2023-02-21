@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
+#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDe...
+#include "io/BitPumpMSB32.h"                    // for BitPumpMSB32
 
 namespace rawspeed {
 
 class ByteStream;
 class RawImage;
 
-class HasselbladLJpegDecoder final : public AbstractLJpegDecompressor {
+class HasselbladLJpegDecoder final : public AbstractLJpegDecoder {
   void decodeScan() override;
 
 public:

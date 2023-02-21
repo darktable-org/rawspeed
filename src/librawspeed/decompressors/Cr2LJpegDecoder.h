@@ -21,17 +21,17 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "decompressors/Cr2Decompressor.h"           // for Cr2SliceWidths
-#include <cassert>                                   // for assert
-#include <cstdint>                                   // for uint16_t
+#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDe...
+#include "decompressors/Cr2Decompressor.h"      // for Cr2SliceWidths
+#include <cassert>                              // for assert
+#include <cstdint>                              // for uint16_t
 
 namespace rawspeed {
 
 class ByteStream;
 class RawImage;
 
-class Cr2LJpegDecoder final : public AbstractLJpegDecompressor {
+class Cr2LJpegDecoder final : public AbstractLJpegDecoder {
   Cr2SliceWidths slicing;
 
   void decodeScan() override;
