@@ -120,7 +120,8 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    DeflateDecompressor z(e->bs, mRaw, mPredictor, mBps);
+    DeflateDecompressor z(e->bs.peekBuffer(e->bs.getRemainSize()), mRaw,
+                          mPredictor, mBps);
     try {
       z.decode(&uBuffer, iPoint2D(mRaw->getCpp() * e->dsc.tileW, e->dsc.tileH),
                iPoint2D(mRaw->getCpp() * e->width, e->height),

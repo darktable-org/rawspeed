@@ -39,7 +39,7 @@
 
 namespace rawspeed {
 
-DeflateDecompressor::DeflateDecompressor(ByteStream bs, const RawImage& img,
+DeflateDecompressor::DeflateDecompressor(Buffer bs, const RawImage& img,
                                          int predictor, int bps_)
     : input(bs), mRaw(img), bps(bps_) {
   switch (predictor) {
@@ -127,10 +127,8 @@ void DeflateDecompressor::decode(
     *uBuffer =
         std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]); // NOLINT
 
-  const auto cSize = input.getRemainSize();
-  const unsigned char* cBuffer = input.getData(cSize);
-
-  if (int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
+  if (int err =
+          uncompress(uBuffer->get(), &dstLen, input.begin(), input.getSize());
       err != Z_OK) {
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }

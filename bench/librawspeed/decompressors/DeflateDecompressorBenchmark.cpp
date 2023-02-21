@@ -106,11 +106,8 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
 
   std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
 
-  const rawspeed::ByteStream bs(
-      rawspeed::DataBuffer(buf, rawspeed::Endianness::little));
-
   for (auto _ : state) {
-    DeflateDecompressor d(bs, mRaw, predictor, BPS::value);
+    DeflateDecompressor d(buf, mRaw, predictor, BPS::value);
 
     d.decode(&uBuffer, mRaw->dim, mRaw->dim, {0, 0});
   }
