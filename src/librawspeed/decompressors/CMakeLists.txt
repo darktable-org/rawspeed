@@ -32,6 +32,8 @@ FILE(GLOB SOURCES
   "KodakDecompressor.h"
   "LJpegDecoder.cpp"
   "LJpegDecoder.h"
+  "LJpegDecompressor.cpp"
+  "LJpegDecompressor.h"
   "NikonDecompressor.cpp"
   "NikonDecompressor.h"
   "OlympusDecompressor.cpp"

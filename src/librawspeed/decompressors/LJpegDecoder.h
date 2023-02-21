@@ -32,15 +32,11 @@ class RawImage;
 
 class LJpegDecoder final : public AbstractLJpegDecompressor {
   void decodeScan() override;
-  template <int N_COMP, bool WeirdWidth = false> void decodeN();
 
   uint32_t offX = 0;
   uint32_t offY = 0;
   uint32_t w = 0;
   uint32_t h = 0;
-
-  uint32_t fullBlocks = 0;
-  uint32_t trailingPixels = 0;
 
 public:
   LJpegDecoder(ByteStream bs, const RawImage& img);
