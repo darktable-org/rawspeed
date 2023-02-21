@@ -76,7 +76,8 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if (imgFrame.pos.y + imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile overflows image vertically");
 
-  assert(frame.cps > 0);
+  if (frame.cps < 1 || frame.cps > 4)
+    ThrowRDE("Unsupported number of components: %u", frame.cps);
 
   assert(mRaw->dim.x > imgFrame.pos.x);
   if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
@@ -222,7 +223,7 @@ void LJpegDecompressor::decode() {
       decodeN<4>();
       break;
     default:
-      ThrowRDE("Unsupported number of components: %u", frame.cps);
+      __builtin_unreachable();
     }
   } else /* trailingPixels != 0 */ {
     // FIXME: using different function just for one tile likely causes
@@ -240,7 +241,7 @@ void LJpegDecompressor::decode() {
       decodeN<4, /*WeirdWidth=*/true>();
       break;
     default:
-      ThrowRDE("Unsupported number of components: %u", frame.cps);
+      __builtin_unreachable();
     }
   }
 }
