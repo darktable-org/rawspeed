@@ -18,6 +18,7 @@ set(DECOMPRESSORS
   "HasselbladLJpegDecoder"
   "KodakDecompressor"
   "LJpegDecoder"
+  "LJpegDecompressor"
   "NikonDecompressor"
   "OlympusDecompressor"
   "PanasonicV4Decompressor"

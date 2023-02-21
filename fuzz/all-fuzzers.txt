@@ -73,6 +73,7 @@ HuffmanTableVectorFuzzer-BitPumpMSB32-FullDecode
 HuffmanTableVectorFuzzer-BitPumpMSB32-NoFullDecode
 KodakDecompressorFuzzer
 LJpegDecoderFuzzer
+LJpegDecompressorFuzzer
 NikonDecompressorFuzzer
 OlympusDecompressorFuzzer
 PanasonicV4DecompressorFuzzer
