@@ -87,8 +87,11 @@ public:
     pos += count;
     return ret;
   }
+  [[nodiscard]] inline Buffer peekBuffer(size_type size_) const {
+    return getSubView(pos, size_);
+  }
   inline Buffer getBuffer(size_type size_) {
-    Buffer ret = getSubView(pos, size_);
+    Buffer ret = peekBuffer(size_);
     pos += size_;
     return ret;
   }

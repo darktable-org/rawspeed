@@ -122,9 +122,7 @@ void JpegDecompressor::decode(uint32_t offX,
                               uint32_t offY) { /* Each slice is a JPEG image */
   struct JpegDecompressStruct dinfo;
 
-  const auto size = input.getRemainSize();
-
-  JPEG_MEMSRC(&dinfo, input.getData(size), size);
+  JPEG_MEMSRC(&dinfo, input.begin(), input.getSize());
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
     ThrowRDE("Unable to read JPEG header");

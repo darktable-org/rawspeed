@@ -157,7 +157,7 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    JpegDecompressor j(e->bs, mRaw);
+    JpegDecompressor j(e->bs.peekBuffer(e->bs.getRemainSize()), mRaw);
     try {
       j.decode(e->offX, e->offY);
     } catch (const RawDecoderException& err) {
