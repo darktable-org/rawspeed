@@ -151,9 +151,7 @@ public:
     return data[pos++];
   }
 
-  template <typename T>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
-  peek(size_type i = 0) const {
+  template <typename T> [[nodiscard]] inline T peek(size_type i = 0) const {
     return DataBuffer::get<T>(pos, i);
   }
 

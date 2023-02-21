@@ -103,8 +103,8 @@ public:
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
-  get(bool inNativeByteOrder, size_type offset, size_type index = 0) const {
+  [[nodiscard]] inline T get(bool inNativeByteOrder, size_type offset,
+                             size_type index = 0) const {
     return getByteSwapped<T>(
         getData(offset + index * static_cast<size_type>(sizeof(T)),
                 static_cast<size_type>(sizeof(T))),
@@ -146,8 +146,7 @@ public:
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
-  get(size_type offset, size_type index = 0) const {
+  [[nodiscard]] inline T get(size_type offset, size_type index = 0) const {
     assert(Endianness::unknown != endianness);
     assert(Endianness::little == endianness || Endianness::big == endianness);
 

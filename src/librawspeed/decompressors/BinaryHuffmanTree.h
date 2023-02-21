@@ -59,8 +59,7 @@ public:
     std::unique_ptr<Node> zero;
     std::unique_ptr<Node> one;
 
-    template <typename Lambda>
-    [[nodiscard]] [[nodiscard]] [[nodiscard]] bool forEachNode(Lambda l) const;
+    template <typename Lambda> [[nodiscard]] bool forEachNode(Lambda l) const;
     template <typename Lambda> bool forEachNode(Lambda l);
 
     [[nodiscard]] bool hasLeafs() const;

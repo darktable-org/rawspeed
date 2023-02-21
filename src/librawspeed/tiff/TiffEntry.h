@@ -66,8 +66,7 @@ class TiffEntry {
   friend class TiffIFD;
 
   template <typename T, T (TiffEntry::*getter)(uint32_t index) const>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::vector<T>
-  getArray(uint32_t count_) const {
+  [[nodiscard]] std::vector<T> getArray(uint32_t count_) const {
     std::vector<T> res(count_);
     for (uint32_t i = 0; i < count_; ++i)
       res[i] = (this->*getter)(i);
