@@ -157,13 +157,6 @@ jobs:
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/benchmarks
           fail_ci_if_error: true
-      - if: inputs.flavor == 'Coverage'
-        name: Cache code coverage (macOS reports)
-        uses: actions/cache/save@v3
-        with:
-          path: ${{ env.COVERAGE_REPORT_PREFIX }}/macOS # relative path!
-          key: coverage-${{ github.sha }}-macOS
-          enableCrossOsArchive: true
       - name: Install
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed

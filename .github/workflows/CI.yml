@@ -107,7 +107,6 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   linux-sonarcloud-static-analysis:
     if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
-    needs: [ linux-coverage, macOS-coverage, windows-msys2-coverage ]
     strategy:
       fail-fast: false
       matrix:

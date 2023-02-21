@@ -383,37 +383,6 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - if: inputs.flavor == 'Coverage'
-        name: Cache code coverage (linux reports)
-        uses: actions/cache/save@v3
-        with:
-          path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
-          key: coverage-${{ github.sha }}-linux
-          enableCrossOsArchive: true
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
-        name: Fetch code coverage reports (linux reports)
-        uses: actions/cache/restore@v3
-        with:
-          path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
-          key: coverage-${{ github.sha }}-linux
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
-        name: Fetch code coverage reports (macOS reports)
-        uses: actions/cache/restore@v3
-        with:
-          path: ${{ env.COVERAGE_REPORT_PREFIX }}/macOS # relative path!
-          key: coverage-${{ github.sha }}-macOS
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
-        name: Fetch code coverage reports (windows reports)
-        uses: actions/cache/restore@v3
-        with:
-          path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
-          key: coverage-${{ github.sha }}-windows
-          enableCrossOsArchive: true
-          fail-on-cache-miss: true
       - if: inputs.flavor == 'ClangStaticAnalysis'
         name: Perform clang static analysis
         env:
@@ -441,4 +410,4 @@ jobs:
         run: |
           set -xe
           cd "${SRC_DIR}"
-          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false --define sonar.cfamily.gcov.reportsPath="${COVERAGE_REPORT_PREFIX}"
+          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.threads="$(nproc --all)" --define sonar.cfamily.cache.enabled=false
