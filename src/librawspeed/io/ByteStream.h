@@ -53,7 +53,7 @@ public:
   }
 
   [[nodiscard]] inline size_type check(size_type bytes) const {
-    if (static_cast<uint64_t>(pos) + bytes > size)
+    if (static_cast<uint64_t>(pos) + bytes > getSize())
       ThrowIOE("Out of bounds access in ByteStream");
     assert(!ASan::RegionIsPoisoned(data + pos, bytes));
     return bytes;
@@ -66,7 +66,7 @@ public:
   }
 
   [[nodiscard]] inline size_type getPosition() const {
-    assert(size >= pos);
+    assert(getSize() >= pos);
     (void)check(0);
     return pos;
   }
@@ -75,9 +75,9 @@ public:
     (void)check(0);
   }
   [[nodiscard]] inline size_type getRemainSize() const {
-    assert(size >= pos);
+    assert(getSize() >= pos);
     (void)check(0);
-    return size - pos;
+    return getSize() - pos;
   }
   [[nodiscard]] inline const uint8_t* peekData(size_type count) const {
     return Buffer::getData(pos, count);
