@@ -165,7 +165,7 @@ protected:
   bool fixDng16Bug = false; // DNG v1.0.x compatibility
   bool fullDecodeHT = true; // FullDecode Huffman
 
-  void decode();
+  void decodeSOI();
   void parseSOF(ByteStream data, SOFInfo* i);
   void parseSOS(ByteStream data);
   void parseDHT(ByteStream data);

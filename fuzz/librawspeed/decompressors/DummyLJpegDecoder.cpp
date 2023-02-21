@@ -41,7 +41,7 @@ public:
                     const rawspeed::RawImage& img)
       : AbstractLJpegDecoder(bs, img) {}
 
-  void decode() { AbstractLJpegDecoder::decode(); }
+  void decode() { AbstractLJpegDecoder::decodeSOI(); }
 };
 
 } // namespace

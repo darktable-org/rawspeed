@@ -69,7 +69,7 @@ void HasselbladLJpegDecoder::decode() {
   // because values are packed two pixels at the time.
   fullDecodeHT = false;
 
-  AbstractLJpegDecoder::decode();
+  AbstractLJpegDecoder::decodeSOI();
 }
 
 } // namespace rawspeed

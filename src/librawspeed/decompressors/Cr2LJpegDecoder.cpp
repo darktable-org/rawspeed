@@ -152,7 +152,7 @@ void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
       ThrowRDE("Bad slice width: %i", sliceWidth);
   }
 
-  AbstractLJpegDecoder::decode();
+  AbstractLJpegDecoder::decodeSOI();
 }
 
 } // namespace rawspeed

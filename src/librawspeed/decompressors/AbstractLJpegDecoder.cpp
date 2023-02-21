@@ -53,7 +53,7 @@ AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, const RawImage& img)
 #endif
 }
 
-void AbstractLJpegDecoder::decode() {
+void AbstractLJpegDecoder::decodeSOI() {
   if (getNextMarker(false) != JpegMarker::SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 

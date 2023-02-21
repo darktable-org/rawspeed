@@ -84,7 +84,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 
   fixDng16Bug = fixDng16Bug_;
 
-  AbstractLJpegDecoder::decode();
+  AbstractLJpegDecoder::decodeSOI();
 }
 
 void LJpegDecoder::decodeScan() {
