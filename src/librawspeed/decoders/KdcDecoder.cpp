@@ -118,8 +118,8 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
-
-  u.decode12BitRaw<Endianness::big>(width, height);
+  u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 12 * width / 8, 12,
+                        BitOrder::MSB);
 
   return mRaw;
 }
