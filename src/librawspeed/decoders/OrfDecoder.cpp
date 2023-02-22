@@ -130,6 +130,14 @@ RawImage OrfDecoder::decodeRawInternal() {
   return mRaw;
 }
 
+void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
+                                               uint32_t h,
+                                               uint32_t size) const {
+  UncompressedDecompressor u(s, mRaw);
+  mRaw->createData();
+  u.decode12BitRaw<Endianness::big, true>(w, h);
+}
+
 bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
   UncompressedDecompressor u(s, mRaw);
@@ -161,10 +169,9 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
     return true;
   }
 
-  if (size >
-      w * h * 3 / 2) { // We're in one of those weird interlaced packed raws
-    mRaw->createData();
-    u.decode12BitRaw<Endianness::big, true>(w, h);
+  if (size > w * h * 3 / 2) {
+    // We're in one of those weird interlaced packed raws
+    decodeUncompressedInterleaved(s, w, h, size);
     return true;
   }
 
