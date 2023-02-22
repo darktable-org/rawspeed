@@ -21,7 +21,7 @@ jobs:
         uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
         with:
           oss-fuzz-project-name: 'librawspeed'
-          fuzz-seconds: 600
+          fuzz-seconds: 1200
           dry-run: false
           sanitizer: ${{ inputs.sanitizer }}
       - name: Upload Crash
