@@ -257,9 +257,10 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
   UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
                              mRaw);
 
-  if (hints.has("sr2_format"))
-    u.decodeRawUnpacked<14, Endianness::big>(width, height);
-  else {
+  if (hints.has("sr2_format")) {
+    u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
+                          BitOrder::MSB);
+  } else {
     u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
                           BitOrder::LSB);
   }
