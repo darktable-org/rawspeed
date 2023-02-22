@@ -282,7 +282,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
   // FIXME: maybe check size of interlaced data?
   const uint8_t* in = input.peekData(perline * h);
-  uint32_t half = (h + 1) >> 1;
+  uint32_t half = roundUpDivision(h, 2);
   for (uint32_t row = 0; row < h; row++) {
     uint32_t y = !interlaced ? row : row % half * 2 + row / half;
 
