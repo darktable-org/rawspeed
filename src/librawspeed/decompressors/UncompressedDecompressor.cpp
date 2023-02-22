@@ -229,11 +229,6 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
                  w * mRaw->getBpp(), h - y);
       return;
     }
-    if (bitPerPixel == 12 && static_cast<int>(w) == inputPitchBytes * 8 / 12 &&
-        getHostEndianness() == Endianness::little) {
-      decode12BitRaw<Endianness::little>(w, h);
-      return;
-    }
     decodePackedInt<BitPumpLSB>(size, offset, skipBytes, h, y, bitPerPixel);
   }
 }
@@ -269,6 +264,12 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
   static_assert(e == Endianness::little || e == Endianness::big,
                 "unknown endianness");
+
+  if (!interlaced && !skips) {
+    readUncompressedRaw(iPoint2D(w, h), {0, 0}, 12 * w / 8, 12,
+                        e == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
+    return;
+  }
 
   static constexpr const auto shift = 16 - bits;
   static constexpr const auto pack = 8 - shift;
