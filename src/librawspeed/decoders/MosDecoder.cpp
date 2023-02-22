@@ -127,11 +127,9 @@ RawImage MosDecoder::decodeRawInternal() {
       1 == compression) {
     const Endianness endianness =
         getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
-
-    if (Endianness::big == endianness)
-      u.decodeRawUnpacked<16, Endianness::big>(width, height);
-    else
-      u.decodeRawUnpacked<16, Endianness::little>(width, height);
+    u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
+                          endianness == Endianness::big ? BitOrder::MSB
+                                                        : BitOrder::LSB);
   } else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");
     // LJpegPlain l(mFile, mRaw);
