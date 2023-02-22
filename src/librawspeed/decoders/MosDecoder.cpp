@@ -167,7 +167,8 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
           break;
         std::array<uint32_t, 4> tmp = {{}};
-        std::istringstream iss(bs.peekString());
+        const std::string tmpString(bs.peekString());
+        std::istringstream iss(tmpString);
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {

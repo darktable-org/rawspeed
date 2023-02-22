@@ -168,25 +168,21 @@ public:
   inline uint32_t getU32() { return get<uint32_t>(); }
   inline float getFloat() { return get<float>(); }
 
-  [[nodiscard]] const char* peekString() const {
-    assert(data);
-    if (memchr(peekData(getRemainSize()), 0, getRemainSize()) == nullptr)
+  [[nodiscard]] std::string_view peekString() const {
+    Buffer tmp = peekBuffer(getRemainSize());
+    const auto* termIter = std::find(tmp.begin(), tmp.end(), '\0');
+    if (termIter == tmp.end())
       ThrowIOE("String is not null-terminated");
-    return reinterpret_cast<const char*>(&data[pos]);
+    std::string_view::size_type strlen = std::distance(tmp.begin(), termIter);
+    return {reinterpret_cast<const char*>(tmp.begin()), strlen};
   }
 
   // Increments the stream to after the next zero byte and returns the bytes in
   // between (not a copy). If the first byte is zero, stream is incremented one.
-  const char* getString() {
-    assert(data);
-    size_type start = pos;
-    bool isNullTerminator = false;
-    do {
-      (void)check(1);
-      isNullTerminator = (data[pos] == '\0');
-      pos++;
-    } while (!isNullTerminator);
-    return reinterpret_cast<const char*>(&data[start]);
+  [[nodiscard]] std::string_view getString() {
+    std::string_view str = peekString();
+    skipBytes(1 + str.size());
+    return str;
   }
 };
 

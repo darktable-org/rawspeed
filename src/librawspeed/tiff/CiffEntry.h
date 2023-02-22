@@ -64,7 +64,7 @@ public:
   [[nodiscard]] uint32_t getU32(uint32_t num = 0) const;
   [[nodiscard]] uint16_t getU16(uint32_t num = 0) const;
 
-  [[nodiscard]] std::string getString() const;
+  [[nodiscard]] std::string_view getString() const;
   [[nodiscard]] std::vector<std::string> getStrings() const;
 
   [[nodiscard]] uint32_t __attribute__((pure)) getElementSize() const;
