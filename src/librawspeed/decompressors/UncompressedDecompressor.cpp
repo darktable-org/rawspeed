@@ -136,8 +136,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
                                                    int inputPitchBytes,
                                                    int bitPerPixel,
                                                    BitOrder order) {
-  assert(inputPitchBytes > 0);
-  assert(bitPerPixel > 0);
+  if (inputPitchBytes < 1)
+    ThrowRDE("Input pitch is non-positive");
 
   uint32_t outPitch = mRaw->pitch;
   uint32_t w = size.x;
@@ -146,7 +146,8 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   uint64_t ox = offset.x;
   uint64_t oy = offset.y;
 
-  if (bitPerPixel > 16 && mRaw->getDataType() == RawImageType::UINT16)
+  if (bitPerPixel < 1 ||
+      (bitPerPixel > 16 && mRaw->getDataType() == RawImageType::UINT16))
     ThrowRDE("Unsupported bit depth");
 
   const int outPixelBits = w * cpp * bitPerPixel;
