@@ -345,8 +345,6 @@ UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
 template <Endianness e>
 void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
                                                                  uint32_t h) {
-  static_assert(e == Endianness::big, "unknown endianness");
-
   sanityCheck(w, &h, 2);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -357,14 +355,21 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
-      if (e == Endianness::big)
-        out(row, col) = (((g1 << 8) | (g2 & 0xf0)) >> 4);
+      uint16_t pix;
+      if (e == Endianness::little)
+        pix = (g2 << 8) | g1;
+      else
+        pix = (g1 << 8) | g2;
+      out(row, col) = pix >> 4;
     }
   }
 }
 
 template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
+    uint32_t w, uint32_t h);
+template void
+UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::little>(
     uint32_t w, uint32_t h);
 
 template <int bits, Endianness e>

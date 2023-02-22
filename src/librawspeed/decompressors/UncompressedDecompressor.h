@@ -113,6 +113,9 @@ UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
     uint32_t w, uint32_t h);
 
 extern template void
+UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::little>(
+    uint32_t w, uint32_t h);
+extern template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
     uint32_t w, uint32_t h);
 
