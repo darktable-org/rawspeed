@@ -258,13 +258,13 @@ template void UncompressedDecompressor::decode8BitRaw<false>(uint32_t w,
 template void UncompressedDecompressor::decode8BitRaw<true>(uint32_t w,
                                                             uint32_t h);
 
-template <Endianness e, bool interlaced, bool skips>
-void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
+template <Endianness e>
+void UncompressedDecompressor::decode12BitRawWithControl(uint32_t w,
+                                                         uint32_t h) {
   static constexpr const auto bits = 12;
 
   static_assert(e == Endianness::little || e == Endianness::big,
                 "unknown endianness");
-  static_assert(interlaced ^ skips, "only for special cases.");
 
   static constexpr const auto shift = 16 - bits;
   static constexpr const auto pack = 8 - shift;
@@ -274,37 +274,26 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
   static_assert(bits == 12 && mask == 0x0f, "wrong mask");
 
-  uint32_t perline = bytesPerLine(w, skips);
+  uint32_t perline = bytesPerLine(w, /*skips=*/true);
 
   sanityCheck(&h, perline);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  // FIXME: maybe check size of interlaced data?
   const uint8_t* in = input.peekData(perline * h);
-  uint32_t half = roundUpDivision(h, 2);
   for (uint32_t row = 0; row < h; row++) {
-    uint32_t y = !interlaced ? row : row % half * 2 + row / half;
-
-    if (interlaced && y == 1) {
-      // The second field starts at a 2048 byte alignment
-      const uint32_t offset = roundUp(half * w * 3 / 2, 1U << 11U);
-      input.skipBytes(offset);
-      in = input.peekData(perline * (h - row));
-    }
-
     for (uint32_t x = 0; x < w; x += 2) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
-      auto process = [out, y](uint32_t i, bool invert, uint32_t p1,
-                              uint32_t p2) {
+      auto process = [out, row](uint32_t i, bool invert, uint32_t p1,
+                                uint32_t p2) {
         uint16_t pix;
         if (!(invert ^ (e == Endianness::little)))
           pix = (p1 << pack) | (p2 >> pack);
         else
           pix = ((p2 & mask) << 8) | p1;
-        out(y, i) = pix;
+        out(row, i) = pix;
       };
 
       process(x, false, g1, g2);
@@ -315,7 +304,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
       in += 3;
 
-      if (skips && ((x % 10) == 8))
+      if ((x % 10) == 8)
         in++;
     }
   }
@@ -323,13 +312,10 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 }
 
 template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, true, false>(
+UncompressedDecompressor::decode12BitRawWithControl<Endianness::little>(
     uint32_t w, uint32_t h);
 template void
-UncompressedDecompressor::decode12BitRaw<Endianness::little, false, true>(
-    uint32_t w, uint32_t h);
-template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
+UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>(
     uint32_t w, uint32_t h);
 
 template <Endianness e>

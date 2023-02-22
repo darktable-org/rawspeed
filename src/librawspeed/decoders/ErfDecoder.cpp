@@ -58,7 +58,7 @@ RawImage ErfDecoder::decodeRawInternal() {
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
       mRaw);
 
-  u.decode12BitRaw<Endianness::big, false, true>(width, height);
+  u.decode12BitRawWithControl<Endianness::big>(width, height);
 
   return mRaw;
 }

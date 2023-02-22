@@ -75,11 +75,10 @@ public:
   template <bool uncorrectedRawValues>
   void decode8BitRaw(uint32_t w, uint32_t h);
 
-  /* Faster version for unpacking 12 bit data */
-  /* interlaced - is data with interlaced lines ? */
-  /* skips - is there control byte every 10 pixels ? */
-  template <Endianness e, bool interlaced = false, bool skips = false>
-  void decode12BitRaw(uint32_t w, uint32_t h);
+  /* Faster version for unpacking 12 bit data with control byte every 10 pixels
+   */
+  template <Endianness e>
+  void decode12BitRawWithControl(uint32_t w, uint32_t h);
 
   /* Faster version for reading unpacked 12 bit data that is left aligned
    * (needs >> 4 shift) */
@@ -93,13 +92,10 @@ extern template void UncompressedDecompressor::decode8BitRaw<true>(uint32_t w,
                                                                    uint32_t h);
 
 extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, true, false>(
+UncompressedDecompressor::decode12BitRawWithControl<Endianness::little>(
     uint32_t w, uint32_t h);
 extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::little, false, true>(
-    uint32_t w, uint32_t h);
-extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
+UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>(
     uint32_t w, uint32_t h);
 
 extern template void

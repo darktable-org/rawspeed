@@ -100,7 +100,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
     } else if (size >= width * height * 3 / 2) {
       // It's a packed format
       mRaw->createData();
-      u.decode12BitRaw<Endianness::little, false, true>(width, height);
+      u.decode12BitRawWithControl<Endianness::little>(width, height);
     } else {
       uint32_t section_split_offset = 0;
       PanasonicV4Decompressor p(

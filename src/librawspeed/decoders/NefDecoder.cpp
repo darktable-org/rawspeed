@@ -362,7 +362,7 @@ void NefDecoder::DecodeD100Uncompressed() const {
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
       mRaw);
 
-  u.decode12BitRaw<Endianness::big, false, true>(width, height);
+  u.decode12BitRawWithControl<Endianness::big>(width, height);
 }
 
 void NefDecoder::DecodeSNefUncompressed() const {
