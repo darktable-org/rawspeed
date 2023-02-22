@@ -133,9 +133,46 @@ RawImage OrfDecoder::decodeRawInternal() {
 void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
                                                uint32_t h,
                                                uint32_t size) const {
-  UncompressedDecompressor u(s, mRaw);
+  int inputPitchBits = 12 * w;
+  assert(inputPitchBits % 8 == 0);
+
+  int inputPitchBytes = inputPitchBits / 8;
+
+  const int numEvenLines = roundUpDivision(h, 2);
+  ByteStream evenLinesInput = s.getStream(numEvenLines, inputPitchBytes);
+
+  const uint32_t oddLinesInputBegin =
+      roundUp(evenLinesInput.getSize(), 1U << 11U);
+  assert(oddLinesInputBegin >= evenLinesInput.getSize());
+  int padding = oddLinesInputBegin - evenLinesInput.getSize();
+  assert(padding >= 0);
+  s.skipBytes(padding);
+
+  const int numOddLines = h - numEvenLines;
+  ByteStream oddLinesInput = s.getStream(numOddLines, inputPitchBytes);
+
+  // By now we know we have enough input to produce the image.
   mRaw->createData();
-  u.decode12BitRaw<Endianness::big, true>(w, h);
+
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  {
+    BitPumpMSB bs(evenLinesInput);
+    for (int i = 0; i != numEvenLines; ++i) {
+      for (unsigned col = 0; col != w; ++col) {
+        int row = 2 * i;
+        out(row, col) = bs.getBits(12);
+      }
+    }
+  }
+  {
+    BitPumpMSB bs(oddLinesInput);
+    for (int i = 0; i != numOddLines; ++i) {
+      for (unsigned col = 0; col != w; ++col) {
+        int row = 1 + 2 * i;
+        out(row, col) = bs.getBits(12);
+      }
+    }
+  }
 }
 
 bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
