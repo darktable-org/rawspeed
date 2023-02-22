@@ -93,12 +93,6 @@ extern template void UncompressedDecompressor::decode8BitRaw<true>(uint32_t w,
                                                                    uint32_t h);
 
 extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::little, false, false>(
-    uint32_t w, uint32_t h);
-extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, false, false>(
-    uint32_t w, uint32_t h);
-extern template void
 UncompressedDecompressor::decode12BitRaw<Endianness::big, true, false>(
     uint32_t w, uint32_t h);
 extern template void

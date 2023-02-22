@@ -264,12 +264,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
   static_assert(e == Endianness::little || e == Endianness::big,
                 "unknown endianness");
-
-  if (!interlaced && !skips) {
-    readUncompressedRaw(iPoint2D(w, h), {0, 0}, 12 * w / 8, 12,
-                        e == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
-    return;
-  }
+  static_assert(interlaced ^ skips, "only for special cases.");
 
   static constexpr const auto shift = 16 - bits;
   static constexpr const auto pack = 8 - shift;
@@ -327,12 +322,6 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
   input.skipBytes(input.getRemainSize());
 }
 
-template void
-UncompressedDecompressor::decode12BitRaw<Endianness::little, false, false>(
-    uint32_t w, uint32_t h);
-template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, false, false>(
-    uint32_t w, uint32_t h);
 template void
 UncompressedDecompressor::decode12BitRaw<Endianness::big, true, false>(
     uint32_t w, uint32_t h);
