@@ -288,7 +288,7 @@ void UncompressedDecompressor::decode12BitRaw(uint32_t w, uint32_t h) {
 
     if (interlaced && y == 1) {
       // The second field starts at a 2048 byte alignment
-      const uint32_t offset = ((half * w * 3 / 2 >> 11) + 1) << 11;
+      const uint32_t offset = roundUp(half * w * 3 / 2, 1U << 11U);
       input.skipBytes(offset);
       in = input.peekData(perline * (h - row));
     }
