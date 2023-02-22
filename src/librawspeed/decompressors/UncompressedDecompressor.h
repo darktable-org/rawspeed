@@ -85,10 +85,6 @@ public:
    * (needs >> 4 shift) */
   template <Endianness e>
   void decode12BitRawUnpackedLeftAligned(uint32_t w, uint32_t h);
-
-  /* Faster version for reading unpacked data */
-  template <int bits, Endianness e>
-  void decodeRawUnpacked(uint32_t w, uint32_t h);
 };
 
 extern template void UncompressedDecompressor::decode8BitRaw<false>(uint32_t w,
@@ -118,21 +114,5 @@ UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::little>(
 extern template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
     uint32_t w, uint32_t h);
-
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<12, Endianness::little>(uint32_t w,
-                                                                    uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<12, Endianness::big>(uint32_t w,
-                                                                 uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<14, Endianness::big>(uint32_t w,
-                                                                 uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<16, Endianness::little>(uint32_t w,
-                                                                    uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<16, Endianness::big>(uint32_t w,
-                                                                 uint32_t h);
 
 } // namespace rawspeed
