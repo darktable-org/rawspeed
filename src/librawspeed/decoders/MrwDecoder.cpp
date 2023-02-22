@@ -161,8 +161,10 @@ RawImage MrwDecoder::decodeRawInternal() {
 
   if (packed)
     u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
-  else
-    u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
+  else {
+    u.readUncompressedRaw(iPoint2D(raw_width, raw_height), {0, 0},
+                          2 * raw_width, 16, BitOrder::MSB);
+  }
 
   return mRaw;
 }
