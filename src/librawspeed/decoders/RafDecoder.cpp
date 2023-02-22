@@ -157,11 +157,13 @@ RawImage RafDecoder::decodeRawInternal() {
   UncompressedDecompressor u(input, mRaw);
 
   if (double_width) {
-    u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
+    u.readUncompressedRaw(iPoint2D(2 * width, height), {0, 0}, 2 * 2 * width,
+                          16, BitOrder::LSB);
   } else if (input.getByteOrder() == Endianness::big &&
              getHostEndianness() == Endianness::little) {
     // FIXME: ^ that if seems fishy
-    u.decodeRawUnpacked<16, Endianness::big>(width, height);
+    u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
+                          BitOrder::MSB);
   } else {
     iPoint2D pos(0, 0);
     if (hints.has("jpeg32_bitorder")) {
