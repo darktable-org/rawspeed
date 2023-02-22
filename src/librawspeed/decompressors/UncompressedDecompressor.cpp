@@ -149,7 +149,7 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
   if (cpp < 1 || cpp > 3)
     ThrowRDE("Unsupported number of components per pixel: %u", cpp);
 
-  if (bitPerPixel < 1 ||
+  if (bitPerPixel < 1 || bitPerPixel > 32 ||
       (bitPerPixel > 16 && mRaw->getDataType() == RawImageType::UINT16))
     ThrowRDE("Unsupported bit depth");
 
