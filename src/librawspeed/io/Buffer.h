@@ -46,6 +46,8 @@ public:
 
 protected:
   const uint8_t* data = nullptr;
+
+private:
   size_type size = 0;
 
 public:
