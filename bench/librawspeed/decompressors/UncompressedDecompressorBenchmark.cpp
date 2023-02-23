@@ -67,8 +67,10 @@ static inline void BM_UncompressedDecompressor(benchmark::State& state) {
                                          1);
 
   for (auto _ : state) {
-    UncompressedDecompressor d(bs, mRaw);
-    d.readUncompressedRaw(mRaw->dim, {0, 0}, inputPitchBytes, BPS::value, BO);
+    UncompressedDecompressor d(bs, mRaw,
+                               rawspeed::iRectangle2D({0, 0}, mRaw->dim),
+                               inputPitchBytes, BPS::value, BO);
+    d.readUncompressedRaw();
   }
 
   state.SetComplexityN(dim.area());

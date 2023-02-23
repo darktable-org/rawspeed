@@ -153,16 +153,23 @@ void MrwDecoder::parseHeader() {
 
 RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
-  mRaw->createData();
 
   DataBuffer db(imageData, Endianness::big);
   ByteStream bs(db);
-  UncompressedDecompressor u(bs, mRaw);
 
-  if (packed)
-    u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
-  else
-    u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
+  if (packed) {
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(raw_width, raw_height)),
+        12 * raw_width / 8, 12, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  } else {
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(raw_width, raw_height)),
+        2 * raw_width, 16, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  }
 
   return mRaw;
 }

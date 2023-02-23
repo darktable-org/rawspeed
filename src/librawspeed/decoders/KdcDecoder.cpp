@@ -114,12 +114,12 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   const Buffer inputBuffer = KdcDecoder::getInputBuffer();
 
-  mRaw->createData();
-
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
-
-  u.decode12BitRaw<Endianness::big>(width, height);
+      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw,
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 12 * width / 8, 12,
+      BitOrder::MSB);
+  mRaw->createData();
+  u.readUncompressedRaw();
 
   return mRaw;
 }

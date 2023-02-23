@@ -67,12 +67,14 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 8 * width / 8, 8,
+      BitOrder::LSB);
+  mRaw->createData();
 
   if (uncorrectedRawValues)
-    u.decode8BitRaw<true>(width, height);
+    u.decode8BitRaw<true>();
   else
-    u.decode8BitRaw<false>(width, height);
+    u.decode8BitRaw<false>();
 
   return mRaw;
 }

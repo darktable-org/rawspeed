@@ -125,10 +125,6 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
 
   offY = 0;
   for (const RawSlice& slice : slices) {
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
-                              Endianness::little)),
-        mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
@@ -136,7 +132,11 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");
 
-    u.readUncompressedRaw(size, pos, inputPitch, bitPerPixel, order);
+    UncompressedDecompressor u(
+        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
+                              Endianness::little)),
+        mRaw, iRectangle2D(pos, size), inputPitch, bitPerPixel, order);
+    u.readUncompressedRaw();
 
     offY += slice.h;
   }

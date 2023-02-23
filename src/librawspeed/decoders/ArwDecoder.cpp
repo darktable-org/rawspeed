@@ -96,11 +96,13 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
 
   // And now decode as a normal 16bit raw
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw);
-  u.decodeRawUnpacked<16, Endianness::big>(width, height);
+      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw,
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
+      BitOrder::MSB);
+  mRaw->createData();
+  u.readUncompressedRaw();
 
   return mRaw;
 }
@@ -251,15 +253,21 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   const Buffer buf(mFile.getSubView(off, c2));
 
-  mRaw->createData();
-
-  UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
-                             mRaw);
-
-  if (hints.has("sr2_format"))
-    u.decodeRawUnpacked<14, Endianness::big>(width, height);
-  else
-    u.decodeRawUnpacked<16, Endianness::little>(width, height);
+  if (hints.has("sr2_format")) {
+    UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
+                               mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  } else {
+    UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
+                               mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  }
 }
 
 void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
@@ -273,10 +281,12 @@ void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
   } // End bpp = 8
 
   if (bpp == 12) {
-    mRaw->createData();
     input.setByteOrder(Endianness::little);
-    UncompressedDecompressor u(input, mRaw);
-    u.decode12BitRaw<Endianness::little>(w, h);
+    UncompressedDecompressor u(input, mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(w, h)),
+                               bpp * w / 8, bpp, BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
 
     // Shift scales, since black and white are the same as compressed precision
     mShiftDownScale = 2;

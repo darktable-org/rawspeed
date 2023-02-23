@@ -152,24 +152,33 @@ RawImage RafDecoder::decodeRawInternal() {
   const uint32_t real_width = double_width ? 2U * width : width;
 
   mRaw->dim = iPoint2D(real_width, height);
-  mRaw->createData();
-
-  UncompressedDecompressor u(input, mRaw);
 
   if (double_width) {
-    u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
+    UncompressedDecompressor u(
+        input, mRaw, iRectangle2D({0, 0}, iPoint2D(2 * width, height)),
+        2 * 2 * width, 16, BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else if (input.getByteOrder() == Endianness::big &&
              getHostEndianness() == Endianness::little) {
     // FIXME: ^ that if seems fishy
-    u.decodeRawUnpacked<16, Endianness::big>(width, height);
+    UncompressedDecompressor u(input, mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else {
     iPoint2D pos(0, 0);
     if (hints.has("jpeg32_bitorder")) {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder::MSB32);
+      UncompressedDecompressor u(input, mRaw, iRectangle2D(pos, mRaw->dim),
+                                 width * bps / 8, bps, BitOrder::MSB32);
+      mRaw->createData();
+      u.readUncompressedRaw();
     } else {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder::LSB);
+      UncompressedDecompressor u(input, mRaw, iRectangle2D(pos, mRaw->dim),
+                                 width * bps / 8, bps, BitOrder::LSB);
+      mRaw->createData();
+      u.readUncompressedRaw();
     }
   }
 

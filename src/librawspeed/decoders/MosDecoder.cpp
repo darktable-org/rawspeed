@@ -115,23 +115,20 @@ RawImage MosDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
   if (bs.getRemainSize() == 0)
     ThrowRDE("Input buffer is empty");
 
-  UncompressedDecompressor u(bs, mRaw);
-
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
       1 == compression) {
     const Endianness endianness =
         getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
-
-    if (Endianness::big == endianness)
-      u.decodeRawUnpacked<16, Endianness::big>(width, height);
-    else
-      u.decodeRawUnpacked<16, Endianness::little>(width, height);
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
+        endianness == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");
     // LJpegPlain l(mFile, mRaw);

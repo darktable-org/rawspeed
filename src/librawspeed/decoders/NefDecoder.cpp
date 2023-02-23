@@ -259,10 +259,10 @@ void NefDecoder::DecodeUncompressed() const {
   assert(height == offY);
   assert(slices.size() == counts->count);
 
-  mRaw->createData();
   if (bitPerPixel == 14 && width * slices[0].h * 2 == slices[0].count)
     bitPerPixel = 16; // D3 & D810
 
+  mRaw->createData();
   bitPerPixel = hints.get("real_bpp", bitPerPixel);
 
   switch (bitPerPixel) {
@@ -282,14 +282,13 @@ void NefDecoder::DecodeUncompressed() const {
     iPoint2D pos(0, offY);
 
     if (hints.has("coolpixmangled")) {
-      UncompressedDecompressor u(in, mRaw);
-      u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
-                            BitOrder::MSB32);
+      UncompressedDecompressor u(in, mRaw, iRectangle2D(pos, size),
+                                 width * bitPerPixel / 8, 12, BitOrder::MSB32);
+      u.readUncompressedRaw();
     } else {
-      if (hints.has("coolpixsplit"))
+      if (hints.has("coolpixsplit")) {
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
-      else {
-        UncompressedDecompressor u(in, mRaw);
+      } else {
         if (in.getSize() % size.y != 0)
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
@@ -297,7 +296,9 @@ void NefDecoder::DecodeUncompressed() const {
                               hints.has("msb_override")
                           ? BitOrder::MSB
                           : BitOrder::LSB;
-        u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel, bo);
+        UncompressedDecompressor u(in, mRaw, iRectangle2D(pos, size),
+                                   inputPitchBytes, bitPerPixel, bo);
+        u.readUncompressedRaw();
       }
     }
 
@@ -352,7 +353,6 @@ void NefDecoder::DecodeD100Uncompressed() const {
   uint32_t height = 2024;
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   if (ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
       bs.getRemainSize() == 0)
@@ -360,9 +360,11 @@ void NefDecoder::DecodeD100Uncompressed() const {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw);
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
+      (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
+  mRaw->createData();
 
-  u.decode12BitRaw<Endianness::big, false, true>(width, height);
+  u.decode12BitRawWithControl<Endianness::big>();
 }
 
 void NefDecoder::DecodeSNefUncompressed() const {
