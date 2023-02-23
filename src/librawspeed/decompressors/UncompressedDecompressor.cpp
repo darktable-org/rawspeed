@@ -100,6 +100,9 @@ UncompressedDecompressor::UncompressedDecompressor(
     : input(input_.getStream(crop.dim.y, inputPitchBytes_)), mRaw(img_),
       size(crop.dim), offset(crop.pos), inputPitchBytes(inputPitchBytes_),
       bitPerPixel(bitPerPixel_), order(order_) {
+  if (!size.hasPositiveArea())
+    ThrowRDE("Empty tile.");
+
   if (inputPitchBytes < 1)
     ThrowRDE("Input pitch is non-positive");
 
