@@ -66,19 +66,7 @@ Buffer KdcDecoder::getInputBuffer() const {
   if (hints.has("easyshare_offset_hack"))
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
-  if (off > mFile.getSize())
-    ThrowRDE("offset is out of bounds");
-
-  const auto area = mRaw->dim.area();
-  if (area > std::numeric_limits<decltype(area)>::max() / 12) // round down
-    ThrowRDE("Image dimensions are way too large, potential for overflow");
-
-  const auto bits = 12 * area;
-  if (bits % 8 != 0)
-    ThrowRDE("Bad combination of image dims and bpp, bit count %% 8 != 0");
-  const auto bytes = bits / 8;
-
-  return mFile.getSubView(off, bytes);
+  return mFile.getSubView(off);
 }
 
 RawImage KdcDecoder::decodeRawInternal() {
@@ -111,6 +99,10 @@ RawImage KdcDecoder::decodeRawInternal() {
   uint32_t height = eh->getU32();
 
   mRaw->dim = iPoint2D(width, height);
+
+  if (!mRaw->dim.hasPositiveArea() || !(mRaw->dim <= iPoint2D(4304, 3221)))
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
 
   const Buffer inputBuffer = KdcDecoder::getInputBuffer();
 
