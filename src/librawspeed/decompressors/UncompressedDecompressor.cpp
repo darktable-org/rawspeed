@@ -234,7 +234,12 @@ void UncompressedDecompressor::readUncompressedRaw(const iPoint2D& size,
 }
 
 template <bool uncorrectedRawValues>
-void UncompressedDecompressor::decode8BitRaw(uint32_t w, uint32_t h) {
+void UncompressedDecompressor::decode8BitRaw(const iPoint2D& size,
+                                             const iPoint2D& offset,
+                                             int inputPitchBytes,
+                                             int bitPerPixel, BitOrder order) {
+  uint32_t w = size.x;
+  uint32_t h = size.y;
   sanityCheck(w, &h, 1);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -253,10 +258,12 @@ void UncompressedDecompressor::decode8BitRaw(uint32_t w, uint32_t h) {
   }
 }
 
-template void UncompressedDecompressor::decode8BitRaw<false>(uint32_t w,
-                                                             uint32_t h);
-template void UncompressedDecompressor::decode8BitRaw<true>(uint32_t w,
-                                                            uint32_t h);
+template void UncompressedDecompressor::decode8BitRaw<false>(
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
+template void UncompressedDecompressor::decode8BitRaw<true>(
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 
 template <Endianness e>
 void UncompressedDecompressor::decode12BitRawWithControl(uint32_t w,

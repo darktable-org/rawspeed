@@ -70,9 +70,11 @@ RawImage DcsDecoder::decodeRawInternal() {
       mRaw);
 
   if (uncorrectedRawValues)
-    u.decode8BitRaw<true>(width, height);
+    u.decode8BitRaw<true>(iPoint2D(width, height), iPoint2D(0, 0),
+                          8 * width / 8, 8, BitOrder::LSB);
   else
-    u.decode8BitRaw<false>(width, height);
+    u.decode8BitRaw<false>(iPoint2D(width, height), iPoint2D(0, 0),
+                           8 * width / 8, 8, BitOrder::LSB);
 
   return mRaw;
 }

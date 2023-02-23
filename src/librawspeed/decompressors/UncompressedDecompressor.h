@@ -73,7 +73,8 @@ public:
 
   /* Faster versions for unpacking 8 bit data */
   template <bool uncorrectedRawValues>
-  void decode8BitRaw(uint32_t w, uint32_t h);
+  void decode8BitRaw(const iPoint2D& size, const iPoint2D& offset,
+                     int inputPitchBytes, int bitPerPixel, BitOrder order);
 
   /* Faster version for unpacking 12 bit data with control byte every 10 pixels
    */
@@ -86,10 +87,12 @@ public:
   void decode12BitRawUnpackedLeftAligned(uint32_t w, uint32_t h);
 };
 
-extern template void UncompressedDecompressor::decode8BitRaw<false>(uint32_t w,
-                                                                    uint32_t h);
-extern template void UncompressedDecompressor::decode8BitRaw<true>(uint32_t w,
-                                                                   uint32_t h);
+extern template void UncompressedDecompressor::decode8BitRaw<false>(
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
+extern template void UncompressedDecompressor::decode8BitRaw<true>(
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 
 extern template void
 UncompressedDecompressor::decode12BitRawWithControl<Endianness::little>(
