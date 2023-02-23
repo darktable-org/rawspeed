@@ -200,9 +200,12 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
     mRaw->createData();
     // FIXME: seems fishy
     if (s.getByteOrder() == getHostEndianness()) {
-      u.decode12BitRawUnpackedLeftAligned<Endianness::little>(w, h);
-    } else
-      u.decode12BitRawUnpackedLeftAligned<Endianness::big>(w, h);
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>(
+          iPoint2D(w, h), iPoint2D(0, 0), 16 * w / 8, 16, BitOrder::LSB);
+    } else {
+      u.decode12BitRawUnpackedLeftAligned<Endianness::big>(
+          iPoint2D(w, h), iPoint2D(0, 0), 16 * w / 8, 16, BitOrder::MSB);
+    }
     return true;
   }
 

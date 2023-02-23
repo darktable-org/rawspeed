@@ -326,8 +326,11 @@ UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>(
     uint32_t w, uint32_t h);
 
 template <Endianness e>
-void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
-                                                                 uint32_t h) {
+void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order) {
+  uint32_t w = size.x;
+  uint32_t h = size.y;
   sanityCheck(w, &h, 2);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -350,9 +353,11 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(uint32_t w,
 
 template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::little>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 
 } // namespace rawspeed

@@ -84,7 +84,10 @@ public:
   /* Faster version for reading unpacked 12 bit data that is left aligned
    * (needs >> 4 shift) */
   template <Endianness e>
-  void decode12BitRawUnpackedLeftAligned(uint32_t w, uint32_t h);
+  void decode12BitRawUnpackedLeftAligned(const iPoint2D& size,
+                                         const iPoint2D& offset,
+                                         int inputPitchBytes, int bitPerPixel,
+                                         BitOrder order);
 };
 
 extern template void UncompressedDecompressor::decode8BitRaw<false>(
@@ -103,9 +106,11 @@ UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>(
 
 extern template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::little>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 extern template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 
 } // namespace rawspeed
