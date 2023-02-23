@@ -100,46 +100,10 @@ UncompressedDecompressor::UncompressedDecompressor(
     BitOrder order_)
     : input(input_), mRaw(img_), size(size_), offset(offset_),
       inputPitchBytes(inputPitchBytes_), bitPerPixel(bitPerPixel_),
-      order(order_) {}
-
-template <typename Pump, typename NarrowFpType>
-void UncompressedDecompressor::decodePackedFP(uint32_t skipBytes, int rows,
-                                              int row) const {
-  const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-  Pump bits(input);
-
-  int cols = size.x * mRaw->getCpp();
-  for (; row < rows; row++) {
-    for (int col = 0; col < cols; col++) {
-      uint32_t b = bits.getBits(NarrowFpType::StorageWidth);
-      uint32_t f =
-          extendBinaryFloatingPoint<NarrowFpType, ieee_754_2008::Binary32>(b);
-      out(row, offset.x + col) = bit_cast<float>(f);
-    }
-    bits.skipBytes(skipBytes);
-  }
-}
-
-template <typename Pump>
-void UncompressedDecompressor::decodePackedInt(uint32_t skipBytes, int rows,
-                                               int row) const {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  Pump bits(input);
-
-  int cols = size.x * mRaw->getCpp();
-  for (; row < rows; row++) {
-    for (int x = 0; x < cols; x++) {
-      out(row, x) = bits.getBits(bitPerPixel);
-    }
-    bits.skipBytes(skipBytes);
-  }
-}
-
-void UncompressedDecompressor::readUncompressedRaw() {
+      order(order_) {
   if (inputPitchBytes < 1)
     ThrowRDE("Input pitch is non-positive");
 
-  uint32_t outPitch = mRaw->pitch;
   uint32_t w = size.x;
   uint32_t h = size.y;
   uint32_t cpp = mRaw->getCpp();
@@ -173,12 +137,51 @@ void UncompressedDecompressor::readUncompressedRaw() {
   sanityCheck(&h, inputPitchBytes);
 
   assert(inputPitchBytes >= outPixelBytes);
-  uint32_t skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
+  skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
 
   if (oy > static_cast<uint64_t>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
   if (ox + size.x > static_cast<uint64_t>(mRaw->dim.x))
     ThrowRDE("Invalid x offset");
+}
+
+template <typename Pump, typename NarrowFpType>
+void UncompressedDecompressor::decodePackedFP(int rows, int row) const {
+  const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
+  Pump bits(input);
+
+  int cols = size.x * mRaw->getCpp();
+  for (; row < rows; row++) {
+    for (int col = 0; col < cols; col++) {
+      uint32_t b = bits.getBits(NarrowFpType::StorageWidth);
+      uint32_t f =
+          extendBinaryFloatingPoint<NarrowFpType, ieee_754_2008::Binary32>(b);
+      out(row, offset.x + col) = bit_cast<float>(f);
+    }
+    bits.skipBytes(skipBytes);
+  }
+}
+
+template <typename Pump>
+void UncompressedDecompressor::decodePackedInt(int rows, int row) const {
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  Pump bits(input);
+
+  int cols = size.x * mRaw->getCpp();
+  for (; row < rows; row++) {
+    for (int x = 0; x < cols; x++) {
+      out(row, x) = bits.getBits(bitPerPixel);
+    }
+    bits.skipBytes(skipBytes);
+  }
+}
+
+void UncompressedDecompressor::readUncompressedRaw() {
+  uint32_t outPitch = mRaw->pitch;
+  uint32_t w = size.x;
+  uint32_t h = size.y;
+  uint32_t cpp = mRaw->getCpp();
+  uint64_t oy = offset.y;
 
   uint64_t y = oy;
   h = min(h + oy, static_cast<uint64_t>(mRaw->dim.y));
@@ -192,19 +195,19 @@ void UncompressedDecompressor::readUncompressedRaw() {
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(skipBytes, h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(h, y);
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(skipBytes, h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(h, y);
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(skipBytes, h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(h, y);
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(skipBytes, h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(h, y);
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
@@ -212,11 +215,11 @@ void UncompressedDecompressor::readUncompressedRaw() {
   }
 
   if (BitOrder::MSB == order) {
-    decodePackedInt<BitPumpMSB>(skipBytes, h, y);
+    decodePackedInt<BitPumpMSB>(h, y);
   } else if (BitOrder::MSB16 == order) {
-    decodePackedInt<BitPumpMSB16>(skipBytes, h, y);
+    decodePackedInt<BitPumpMSB16>(h, y);
   } else if (BitOrder::MSB32 == order) {
-    decodePackedInt<BitPumpMSB32>(skipBytes, h, y);
+    decodePackedInt<BitPumpMSB32>(h, y);
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -225,7 +228,7 @@ void UncompressedDecompressor::readUncompressedRaw() {
                  w * mRaw->getBpp(), h - y);
       return;
     }
-    decodePackedInt<BitPumpLSB>(skipBytes, h, y);
+    decodePackedInt<BitPumpLSB>(h, y);
   }
 }
 

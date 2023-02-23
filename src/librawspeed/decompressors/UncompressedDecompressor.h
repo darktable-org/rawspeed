@@ -44,6 +44,8 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   int bitPerPixel;
   BitOrder order;
 
+  uint32_t skipBytes;
+
   // check buffer size, throw, or compute minimal height that can be decoded
   void sanityCheck(const uint32_t* h, int bytesPerLine) const;
 
@@ -54,10 +56,9 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   static int bytesPerLine(int w, bool skips);
 
   template <typename Pump, typename NarrowFpType>
-  void decodePackedFP(uint32_t skipBytes, int rows, int row) const;
+  void decodePackedFP(int rows, int row) const;
 
-  template <typename Pump>
-  void decodePackedInt(uint32_t skipBytes, int rows, int row) const;
+  template <typename Pump> void decodePackedInt(int rows, int row) const;
 
 public:
   UncompressedDecompressor(ByteStream input, const RawImage& img,
