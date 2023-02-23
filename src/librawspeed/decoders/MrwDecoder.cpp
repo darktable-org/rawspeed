@@ -157,14 +157,15 @@ RawImage MrwDecoder::decodeRawInternal() {
 
   DataBuffer db(imageData, Endianness::big);
   ByteStream bs(db);
-  UncompressedDecompressor u(bs, mRaw);
 
   if (packed) {
-    u.readUncompressedRaw(iPoint2D(raw_width, raw_height), {0, 0},
-                          12 * raw_width / 8, 12, BitOrder::MSB);
+    UncompressedDecompressor u(bs, mRaw, iPoint2D(raw_width, raw_height),
+                               {0, 0}, 12 * raw_width / 8, 12, BitOrder::MSB);
+    u.readUncompressedRaw();
   } else {
-    u.readUncompressedRaw(iPoint2D(raw_width, raw_height), {0, 0},
-                          2 * raw_width, 16, BitOrder::MSB);
+    UncompressedDecompressor u(bs, mRaw, iPoint2D(raw_width, raw_height),
+                               {0, 0}, 2 * raw_width, 16, BitOrder::MSB);
+    u.readUncompressedRaw();
   }
 
   return mRaw;

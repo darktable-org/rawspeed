@@ -282,14 +282,13 @@ void NefDecoder::DecodeUncompressed() const {
     iPoint2D pos(0, offY);
 
     if (hints.has("coolpixmangled")) {
-      UncompressedDecompressor u(in, mRaw);
-      u.readUncompressedRaw(size, pos, width * bitPerPixel / 8, 12,
-                            BitOrder::MSB32);
+      UncompressedDecompressor u(in, mRaw, size, pos, width * bitPerPixel / 8,
+                                 12, BitOrder::MSB32);
+      u.readUncompressedRaw();
     } else {
       if (hints.has("coolpixsplit"))
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
       else {
-        UncompressedDecompressor u(in, mRaw);
         if (in.getSize() % size.y != 0)
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
@@ -297,7 +296,9 @@ void NefDecoder::DecodeUncompressed() const {
                               hints.has("msb_override")
                           ? BitOrder::MSB
                           : BitOrder::LSB;
-        u.readUncompressedRaw(size, pos, inputPitchBytes, bitPerPixel, bo);
+        UncompressedDecompressor u(in, mRaw, size, pos, inputPitchBytes,
+                                   bitPerPixel, bo);
+        u.readUncompressedRaw();
       }
     }
 
@@ -360,11 +361,10 @@ void NefDecoder::DecodeD100Uncompressed() const {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw);
-
-  u.decode12BitRawWithControl<Endianness::big>(
-      iPoint2D(width, height), iPoint2D(0, 0),
+      mRaw, iPoint2D(width, height), iPoint2D(0, 0),
       (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
+
+  u.decode12BitRawWithControl<Endianness::big>();
 }
 
 void NefDecoder::DecodeSNefUncompressed() const {

@@ -89,22 +89,22 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32_t size = mFile.getSize() - offset;
 
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-        mRaw);
-
     if (size >= width * height * 2) {
       // It's completely unpacked little-endian
-      mRaw->createData();
-      u.decode12BitRawUnpackedLeftAligned<Endianness::little>(
-          iPoint2D(width, height), iPoint2D(0, 0), 16 * width / 8, 16,
+      UncompressedDecompressor u(
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+          mRaw, iPoint2D(width, height), iPoint2D(0, 0), 16 * width / 8, 16,
           BitOrder::LSB);
+      mRaw->createData();
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
     } else if (size >= width * height * 3 / 2) {
       // It's a packed format
-      mRaw->createData();
-      u.decode12BitRawWithControl<Endianness::little>(
-          iPoint2D(width, height), iPoint2D(0, 0),
+      UncompressedDecompressor u(
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+          mRaw, iPoint2D(width, height), iPoint2D(0, 0),
           (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::LSB);
+      mRaw->createData();
+      u.decode12BitRawWithControl<Endianness::little>();
     } else {
       uint32_t section_split_offset = 0;
       PanasonicV4Decompressor p(

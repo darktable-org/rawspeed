@@ -99,9 +99,9 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   mRaw->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw);
-  u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
-                        BitOrder::MSB);
+      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw,
+      iPoint2D(width, height), {0, 0}, 2 * width, 16, BitOrder::MSB);
+  u.readUncompressedRaw();
 
   return mRaw;
 }
@@ -254,15 +254,16 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   mRaw->createData();
 
-  UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
-                             mRaw);
-
   if (hints.has("sr2_format")) {
-    u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
-                          BitOrder::MSB);
+    UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
+                               mRaw, iPoint2D(width, height), {0, 0}, 2 * width,
+                               16, BitOrder::MSB);
+    u.readUncompressedRaw();
   } else {
-    u.readUncompressedRaw(iPoint2D(width, height), {0, 0}, 2 * width, 16,
-                          BitOrder::LSB);
+    UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
+                               mRaw, iPoint2D(width, height), {0, 0}, 2 * width,
+                               16, BitOrder::LSB);
+    u.readUncompressedRaw();
   }
 }
 
@@ -279,9 +280,9 @@ void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
   if (bpp == 12) {
     mRaw->createData();
     input.setByteOrder(Endianness::little);
-    UncompressedDecompressor u(input, mRaw);
-    u.readUncompressedRaw(iPoint2D(w, h), {0, 0}, bpp * w / 8, bpp,
-                          BitOrder::LSB);
+    UncompressedDecompressor u(input, mRaw, iPoint2D(w, h), {0, 0}, bpp * w / 8,
+                               bpp, BitOrder::LSB);
+    u.readUncompressedRaw();
 
     // Shift scales, since black and white are the same as compressed precision
     mShiftDownScale = 2;

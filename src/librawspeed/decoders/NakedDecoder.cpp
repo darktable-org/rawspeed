@@ -96,12 +96,12 @@ RawImage NakedDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
   mRaw->createData();
 
+  iPoint2D pos(0, 0);
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw);
+      mRaw, mRaw->dim, pos, width * bits / 8, bits, bo);
 
-  iPoint2D pos(0, 0);
-  u.readUncompressedRaw(mRaw->dim, pos, width * bits / 8, bits, bo);
+  u.readUncompressedRaw();
 
   return mRaw;
 }

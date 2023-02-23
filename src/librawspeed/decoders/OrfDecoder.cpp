@@ -177,24 +177,26 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
 bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
-  UncompressedDecompressor u(s, mRaw);
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
 
   if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
     // 12-bit  packed 'with control' raw
+    UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
+                               (12 * w / 8) + ((w + 2) / 10), 12,
+                               BitOrder::LSB);
     mRaw->createData();
-    u.decode12BitRawWithControl<Endianness::little>(
-        iPoint2D(w, h), iPoint2D(0, 0), (12 * w / 8) + ((w + 2) / 10), 12,
-        BitOrder::LSB);
+    u.decode12BitRawWithControl<Endianness::little>();
     return true;
   }
 
   iPoint2D dimensions(w, h);
   iPoint2D pos(0, 0);
   if (size == w * h * 12 / 8) { // We're in a 12-bit packed raw
+    UncompressedDecompressor u(s, mRaw, dimensions, pos, w * 12 / 8, 12,
+                               BitOrder::MSB32);
     mRaw->createData();
-    u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder::MSB32);
+    u.readUncompressedRaw();
     return true;
   }
 
@@ -202,11 +204,13 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
     mRaw->createData();
     // FIXME: seems fishy
     if (s.getByteOrder() == getHostEndianness()) {
-      u.decode12BitRawUnpackedLeftAligned<Endianness::little>(
-          iPoint2D(w, h), iPoint2D(0, 0), 16 * w / 8, 16, BitOrder::LSB);
+      UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
+                                 16 * w / 8, 16, BitOrder::LSB);
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
     } else {
-      u.decode12BitRawUnpackedLeftAligned<Endianness::big>(
-          iPoint2D(w, h), iPoint2D(0, 0), 16 * w / 8, 16, BitOrder::MSB);
+      UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
+                                 16 * w / 8, 16, BitOrder::MSB);
+      u.decode12BitRawUnpackedLeftAligned<Endianness::big>();
     }
     return true;
   }

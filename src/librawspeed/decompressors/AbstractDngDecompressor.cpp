@@ -46,7 +46,6 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    UncompressedDecompressor decompressor(e->bs, mRaw);
 
     iPoint2D tileSize(e->width, e->height);
     iPoint2D pos(e->offX, e->offY);
@@ -85,9 +84,10 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
       if (inputPitch == 0)
         ThrowRDE("Data input pitch is too short. Can not decode!");
 
-      decompressor.readUncompressedRaw(tileSize, pos, inputPitch, mBps,
-                                       big_endian ? BitOrder::MSB
-                                                  : BitOrder::LSB);
+      UncompressedDecompressor decompressor(
+          e->bs, mRaw, tileSize, pos, inputPitch, mBps,
+          big_endian ? BitOrder::MSB : BitOrder::LSB);
+      decompressor.readUncompressedRaw();
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
