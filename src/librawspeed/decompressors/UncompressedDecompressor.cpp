@@ -119,26 +119,26 @@ UncompressedDecompressor::UncompressedDecompressor(
       (bitPerPixel > 16 && mRaw->getDataType() == RawImageType::UINT16))
     ThrowRDE("Unsupported bit depth");
 
-  const int outPixelBits = w * cpp * bitPerPixel;
+  const auto outPixelBits = (uint64_t)w * cpp * bitPerPixel;
   assert(outPixelBits > 0);
 
   if (outPixelBits % 8 != 0) {
     ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
-             "pitch is %u bits, which is not a multiple of 8 (1 byte)",
+             "pitch is %lu bits, which is not a multiple of 8 (1 byte)",
              cpp, bitPerPixel, w, outPixelBits);
   }
 
-  const int outPixelBytes = outPixelBits / 8;
+  const auto outPixelBytes = outPixelBits / 8;
 
   // The input pitch might be larger than needed (i.e. have some padding),
   // but it can *not* be smaller than needed.
-  if (inputPitchBytes < outPixelBytes)
+  if ((unsigned)inputPitchBytes < outPixelBytes)
     ThrowRDE("Specified pitch is smaller than minimally-required pitch");
 
   // Check the specified pitch, not the minimally-required pitch.
   sanityCheck(&h, inputPitchBytes);
 
-  assert(inputPitchBytes >= outPixelBytes);
+  assert((unsigned)inputPitchBytes >= outPixelBytes);
   skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
 
   if (oy > static_cast<uint64_t>(mRaw->dim.y))
