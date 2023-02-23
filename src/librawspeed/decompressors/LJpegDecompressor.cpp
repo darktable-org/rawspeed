@@ -82,6 +82,9 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if (rec.size() != (unsigned)frame.cps)
     ThrowRDE("Must have exactly one recepie per component");
 
+  if ((unsigned)frame.cps < mRaw->getCpp())
+    ThrowRDE("Unexpected number of components");
+
   assert(mRaw->dim.x > imgFrame.pos.x);
   if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
