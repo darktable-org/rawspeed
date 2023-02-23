@@ -124,7 +124,7 @@ UncompressedDecompressor::UncompressedDecompressor(
 
   if (outPixelBits % 8 != 0) {
     ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
-             "pitch is %lu bits, which is not a multiple of 8 (1 byte)",
+             "pitch is %zu bits, which is not a multiple of 8 (1 byte)",
              cpp, bitPerPixel, w, outPixelBits);
   }
 
