@@ -99,7 +99,8 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw,
-      iPoint2D(width, height), {0, 0}, 2 * width, 16, BitOrder::MSB);
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
+      BitOrder::MSB);
   mRaw->createData();
   u.readUncompressedRaw();
 
@@ -254,14 +255,16 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   if (hints.has("sr2_format")) {
     UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
-                               mRaw, iPoint2D(width, height), {0, 0}, 2 * width,
-                               16, BitOrder::MSB);
+                               mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::MSB);
     mRaw->createData();
     u.readUncompressedRaw();
   } else {
     UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
-                               mRaw, iPoint2D(width, height), {0, 0}, 2 * width,
-                               16, BitOrder::LSB);
+                               mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::LSB);
     mRaw->createData();
     u.readUncompressedRaw();
   }
@@ -279,8 +282,9 @@ void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
 
   if (bpp == 12) {
     input.setByteOrder(Endianness::little);
-    UncompressedDecompressor u(input, mRaw, iPoint2D(w, h), {0, 0}, bpp * w / 8,
-                               bpp, BitOrder::LSB);
+    UncompressedDecompressor u(input, mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(w, h)),
+                               bpp * w / 8, bpp, BitOrder::LSB);
     mRaw->createData();
     u.readUncompressedRaw();
 

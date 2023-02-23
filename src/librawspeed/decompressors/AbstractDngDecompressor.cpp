@@ -85,7 +85,7 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
         ThrowRDE("Data input pitch is too short. Can not decode!");
 
       UncompressedDecompressor decompressor(
-          e->bs, mRaw, tileSize, pos, inputPitch, mBps,
+          e->bs, mRaw, iRectangle2D(pos, tileSize), inputPitch, mBps,
           big_endian ? BitOrder::MSB : BitOrder::LSB);
       decompressor.readUncompressedRaw();
     } catch (const RawDecoderException& err) {

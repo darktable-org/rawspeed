@@ -135,7 +135,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
     UncompressedDecompressor u(
         ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
                               Endianness::little)),
-        mRaw, size, pos, inputPitch, bitPerPixel, order);
+        mRaw, iRectangle2D(pos, size), inputPitch, bitPerPixel, order);
     u.readUncompressedRaw();
 
     offY += slice.h;

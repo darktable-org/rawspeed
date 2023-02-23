@@ -93,15 +93,15 @@ RawImage Rw2Decoder::decodeRawInternal() {
       // It's completely unpacked little-endian
       UncompressedDecompressor u(
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-          mRaw, iPoint2D(width, height), iPoint2D(0, 0), 16 * width / 8, 16,
-          BitOrder::LSB);
+          mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 16 * width / 8,
+          16, BitOrder::LSB);
       mRaw->createData();
       u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
     } else if (size >= width * height * 3 / 2) {
       // It's a packed format
       UncompressedDecompressor u(
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-          mRaw, iPoint2D(width, height), iPoint2D(0, 0),
+          mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
           (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::LSB);
       mRaw->createData();
       u.decode12BitRawWithControl<Endianness::little>();

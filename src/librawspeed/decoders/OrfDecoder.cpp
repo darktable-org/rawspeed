@@ -182,7 +182,7 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
 
   if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
     // 12-bit  packed 'with control' raw
-    UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
+    UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
                                (12 * w / 8) + ((w + 2) / 10), 12,
                                BitOrder::LSB);
     mRaw->createData();
@@ -193,8 +193,8 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
   iPoint2D dimensions(w, h);
   iPoint2D pos(0, 0);
   if (size == w * h * 12 / 8) { // We're in a 12-bit packed raw
-    UncompressedDecompressor u(s, mRaw, dimensions, pos, w * 12 / 8, 12,
-                               BitOrder::MSB32);
+    UncompressedDecompressor u(s, mRaw, iRectangle2D(pos, dimensions),
+                               w * 12 / 8, 12, BitOrder::MSB32);
     mRaw->createData();
     u.readUncompressedRaw();
     return true;
@@ -203,12 +203,12 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
   if (size == w * h * 2) { // We're in an unpacked raw
     // FIXME: seems fishy
     if (s.getByteOrder() == getHostEndianness()) {
-      UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
+      UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
                                  16 * w / 8, 16, BitOrder::LSB);
       mRaw->createData();
       u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
     } else {
-      UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
+      UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
                                  16 * w / 8, 16, BitOrder::MSB);
       mRaw->createData();
       u.decode12BitRawUnpackedLeftAligned<Endianness::big>();

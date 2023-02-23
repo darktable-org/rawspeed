@@ -62,9 +62,8 @@ class UncompressedDecompressor final : public AbstractDecompressor {
 
 public:
   UncompressedDecompressor(ByteStream input, const RawImage& img,
-                           const iPoint2D& size, const iPoint2D& offset,
-                           int inputPitchBytes, int bitPerPixel,
-                           BitOrder order);
+                           const iRectangle2D& crop, int inputPitchBytes,
+                           int bitPerPixel, BitOrder order);
 
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */

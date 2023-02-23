@@ -59,9 +59,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       __builtin_unreachable();
     }();
 
-    rawspeed::UncompressedDecompressor d(bs.getSubStream(/*offset=*/0), mRaw,
-                                         mRaw->dim, /*offset=*/{0, 0},
-                                         inputPitchBytes, bitPerPixel, order);
+    rawspeed::UncompressedDecompressor d(
+        bs.getSubStream(/*offset=*/0), mRaw,
+        rawspeed::iRectangle2D({0, 0}, mRaw->dim), inputPitchBytes, bitPerPixel,
+        order);
     mRaw->createData();
     d.readUncompressedRaw();
 

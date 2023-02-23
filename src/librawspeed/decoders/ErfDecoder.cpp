@@ -56,7 +56,7 @@ RawImage ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw, iPoint2D(width, height), iPoint2D(0, 0),
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
       (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
   mRaw->createData();
 

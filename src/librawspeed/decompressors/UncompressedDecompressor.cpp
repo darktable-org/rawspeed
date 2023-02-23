@@ -95,11 +95,10 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
 }
 
 UncompressedDecompressor::UncompressedDecompressor(
-    ByteStream input_, const RawImage& img_, const iPoint2D& size_,
-    const iPoint2D& offset_, int inputPitchBytes_, int bitPerPixel_,
-    BitOrder order_)
-    : input(input_.getStream(size_.y, inputPitchBytes_)), mRaw(img_),
-      size(size_), offset(offset_), inputPitchBytes(inputPitchBytes_),
+    ByteStream input_, const RawImage& img_, const iRectangle2D& crop,
+    int inputPitchBytes_, int bitPerPixel_, BitOrder order_)
+    : input(input_.getStream(crop.dim.y, inputPitchBytes_)), mRaw(img_),
+      size(crop.dim), offset(crop.pos), inputPitchBytes(inputPitchBytes_),
       bitPerPixel(bitPerPixel_), order(order_) {
   if (inputPitchBytes < 1)
     ThrowRDE("Input pitch is non-positive");

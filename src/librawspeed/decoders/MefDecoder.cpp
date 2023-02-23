@@ -49,7 +49,8 @@ RawImage MefDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw,
-      iPoint2D(width, height), {0, 0}, 12 * width / 8, 12, BitOrder::MSB);
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 12 * width / 8, 12,
+      BitOrder::MSB);
   mRaw->createData();
   u.readUncompressedRaw();
 

@@ -125,7 +125,7 @@ RawImage MosDecoder::decodeRawInternal() {
     const Endianness endianness =
         getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
     UncompressedDecompressor u(
-        bs, mRaw, iPoint2D(width, height), {0, 0}, 2 * width, 16,
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
         endianness == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
     mRaw->createData();
     u.readUncompressedRaw();

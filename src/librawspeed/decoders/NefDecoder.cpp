@@ -282,8 +282,8 @@ void NefDecoder::DecodeUncompressed() const {
     iPoint2D pos(0, offY);
 
     if (hints.has("coolpixmangled")) {
-      UncompressedDecompressor u(in, mRaw, size, pos, width * bitPerPixel / 8,
-                                 12, BitOrder::MSB32);
+      UncompressedDecompressor u(in, mRaw, iRectangle2D(pos, size),
+                                 width * bitPerPixel / 8, 12, BitOrder::MSB32);
       u.readUncompressedRaw();
     } else {
       if (hints.has("coolpixsplit")) {
@@ -296,8 +296,8 @@ void NefDecoder::DecodeUncompressed() const {
                               hints.has("msb_override")
                           ? BitOrder::MSB
                           : BitOrder::LSB;
-        UncompressedDecompressor u(in, mRaw, size, pos, inputPitchBytes,
-                                   bitPerPixel, bo);
+        UncompressedDecompressor u(in, mRaw, iRectangle2D(pos, size),
+                                   inputPitchBytes, bitPerPixel, bo);
         u.readUncompressedRaw();
       }
     }
@@ -360,7 +360,7 @@ void NefDecoder::DecodeD100Uncompressed() const {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw, iPoint2D(width, height), iPoint2D(0, 0),
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
       (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
   mRaw->createData();
 
