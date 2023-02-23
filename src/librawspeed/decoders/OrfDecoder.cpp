@@ -184,7 +184,9 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
   if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
     // 12-bit  packed 'with control' raw
     mRaw->createData();
-    u.decode12BitRawWithControl<Endianness::little>(w, h);
+    u.decode12BitRawWithControl<Endianness::little>(
+        iPoint2D(w, h), iPoint2D(0, 0), (12 * w / 8) + ((w + 2) / 10), 12,
+        BitOrder::LSB);
     return true;
   }
 

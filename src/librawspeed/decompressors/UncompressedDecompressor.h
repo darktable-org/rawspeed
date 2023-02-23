@@ -79,7 +79,9 @@ public:
   /* Faster version for unpacking 12 bit data with control byte every 10 pixels
    */
   template <Endianness e>
-  void decode12BitRawWithControl(uint32_t w, uint32_t h);
+  void decode12BitRawWithControl(const iPoint2D& size, const iPoint2D& offset,
+                                 int inputPitchBytes, int bitPerPixel,
+                                 BitOrder order);
 
   /* Faster version for reading unpacked 12 bit data that is left aligned
    * (needs >> 4 shift) */
@@ -99,10 +101,12 @@ extern template void UncompressedDecompressor::decode8BitRaw<true>(
 
 extern template void
 UncompressedDecompressor::decode12BitRawWithControl<Endianness::little>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 extern template void
 UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 
 extern template void
 UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::little>(

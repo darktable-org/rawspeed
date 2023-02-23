@@ -266,8 +266,13 @@ template void UncompressedDecompressor::decode8BitRaw<true>(
     int bitPerPixel, BitOrder order);
 
 template <Endianness e>
-void UncompressedDecompressor::decode12BitRawWithControl(uint32_t w,
-                                                         uint32_t h) {
+void UncompressedDecompressor::decode12BitRawWithControl(const iPoint2D& size,
+                                                         const iPoint2D& offset,
+                                                         int inputPitchBytes,
+                                                         int bitPerPixel,
+                                                         BitOrder order) {
+  uint32_t w = size.x;
+  uint32_t h = size.y;
   static constexpr const auto bits = 12;
 
   static_assert(e == Endianness::little || e == Endianness::big,
@@ -320,10 +325,12 @@ void UncompressedDecompressor::decode12BitRawWithControl(uint32_t w,
 
 template void
 UncompressedDecompressor::decode12BitRawWithControl<Endianness::little>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 template void
 UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>(
-    uint32_t w, uint32_t h);
+    const iPoint2D& size, const iPoint2D& offset, int inputPitchBytes,
+    int bitPerPixel, BitOrder order);
 
 template <Endianness e>
 void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned(
