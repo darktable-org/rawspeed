@@ -115,7 +115,6 @@ RawImage MosDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
   if (bs.getRemainSize() == 0)
@@ -128,6 +127,7 @@ RawImage MosDecoder::decodeRawInternal() {
     UncompressedDecompressor u(
         bs, mRaw, iPoint2D(width, height), {0, 0}, 2 * width, 16,
         endianness == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
+    mRaw->createData();
     u.readUncompressedRaw();
   } else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");

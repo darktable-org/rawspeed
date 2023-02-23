@@ -201,15 +201,16 @@ bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
   }
 
   if (size == w * h * 2) { // We're in an unpacked raw
-    mRaw->createData();
     // FIXME: seems fishy
     if (s.getByteOrder() == getHostEndianness()) {
       UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
                                  16 * w / 8, 16, BitOrder::LSB);
+      mRaw->createData();
       u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
     } else {
       UncompressedDecompressor u(s, mRaw, iPoint2D(w, h), iPoint2D(0, 0),
                                  16 * w / 8, 16, BitOrder::MSB);
+      mRaw->createData();
       u.decode12BitRawUnpackedLeftAligned<Endianness::big>();
     }
     return true;

@@ -152,27 +152,30 @@ RawImage RafDecoder::decodeRawInternal() {
   const uint32_t real_width = double_width ? 2U * width : width;
 
   mRaw->dim = iPoint2D(real_width, height);
-  mRaw->createData();
 
   if (double_width) {
     UncompressedDecompressor u(input, mRaw, iPoint2D(2 * width, height), {0, 0},
                                2 * 2 * width, 16, BitOrder::LSB);
+    mRaw->createData();
     u.readUncompressedRaw();
   } else if (input.getByteOrder() == Endianness::big &&
              getHostEndianness() == Endianness::little) {
     // FIXME: ^ that if seems fishy
     UncompressedDecompressor u(input, mRaw, iPoint2D(width, height), {0, 0},
                                2 * width, 16, BitOrder::MSB);
+    mRaw->createData();
     u.readUncompressedRaw();
   } else {
     iPoint2D pos(0, 0);
     if (hints.has("jpeg32_bitorder")) {
       UncompressedDecompressor u(input, mRaw, mRaw->dim, pos, width * bps / 8,
                                  bps, BitOrder::MSB32);
+      mRaw->createData();
       u.readUncompressedRaw();
     } else {
       UncompressedDecompressor u(input, mRaw, mRaw->dim, pos, width * bps / 8,
                                  bps, BitOrder::LSB);
+      mRaw->createData();
       u.readUncompressedRaw();
     }
   }

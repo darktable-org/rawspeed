@@ -259,10 +259,10 @@ void NefDecoder::DecodeUncompressed() const {
   assert(height == offY);
   assert(slices.size() == counts->count);
 
-  mRaw->createData();
   if (bitPerPixel == 14 && width * slices[0].h * 2 == slices[0].count)
     bitPerPixel = 16; // D3 & D810
 
+  mRaw->createData();
   bitPerPixel = hints.get("real_bpp", bitPerPixel);
 
   switch (bitPerPixel) {
@@ -286,9 +286,9 @@ void NefDecoder::DecodeUncompressed() const {
                                  12, BitOrder::MSB32);
       u.readUncompressedRaw();
     } else {
-      if (hints.has("coolpixsplit"))
+      if (hints.has("coolpixsplit")) {
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
-      else {
+      } else {
         if (in.getSize() % size.y != 0)
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
@@ -353,7 +353,6 @@ void NefDecoder::DecodeD100Uncompressed() const {
   uint32_t height = 2024;
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   if (ByteStream bs(DataBuffer(mFile.getSubView(offset), Endianness::little));
       bs.getRemainSize() == 0)
@@ -363,6 +362,7 @@ void NefDecoder::DecodeD100Uncompressed() const {
       ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
       mRaw, iPoint2D(width, height), iPoint2D(0, 0),
       (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
+  mRaw->createData();
 
   u.decode12BitRawWithControl<Endianness::big>();
 }

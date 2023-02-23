@@ -96,11 +96,11 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
 
   // And now decode as a normal 16bit raw
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw,
       iPoint2D(width, height), {0, 0}, 2 * width, 16, BitOrder::MSB);
+  mRaw->createData();
   u.readUncompressedRaw();
 
   return mRaw;
@@ -252,17 +252,17 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   const Buffer buf(mFile.getSubView(off, c2));
 
-  mRaw->createData();
-
   if (hints.has("sr2_format")) {
     UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
                                mRaw, iPoint2D(width, height), {0, 0}, 2 * width,
                                16, BitOrder::MSB);
+    mRaw->createData();
     u.readUncompressedRaw();
   } else {
     UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
                                mRaw, iPoint2D(width, height), {0, 0}, 2 * width,
                                16, BitOrder::LSB);
+    mRaw->createData();
     u.readUncompressedRaw();
   }
 }
@@ -278,10 +278,10 @@ void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
   } // End bpp = 8
 
   if (bpp == 12) {
-    mRaw->createData();
     input.setByteOrder(Endianness::little);
     UncompressedDecompressor u(input, mRaw, iPoint2D(w, h), {0, 0}, bpp * w / 8,
                                bpp, BitOrder::LSB);
+    mRaw->createData();
     u.readUncompressedRaw();
 
     // Shift scales, since black and white are the same as compressed precision

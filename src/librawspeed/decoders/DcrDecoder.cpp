@@ -112,6 +112,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   }();
 
   KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
+  mRaw->createData();
   k.decompress();
 
   return mRaw;
