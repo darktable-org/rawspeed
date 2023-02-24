@@ -35,6 +35,7 @@
 #include "io/IOException.h"               // for ThrowException, ThrowIOE
 #include <algorithm>                      // for min
 #include <cassert>                        // for assert
+#include <cinttypes>                      // for PRIu64
 
 using std::min;
 
@@ -124,7 +125,7 @@ UncompressedDecompressor::UncompressedDecompressor(
 
   if (outPixelBits % 8 != 0) {
     ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
-             "pitch is %llu bits, which is not a multiple of 8 (1 byte)",
+             "pitch is %" PRIu64 " bits, which is not a multiple of 8 (1 byte)",
              cpp, bitPerPixel, w, outPixelBits);
   }
 
