@@ -48,11 +48,9 @@ template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   // and one more byte as 'fixDNGBug16' boolean
   const bool fixDNGBug16 = bs.getByte() != 0;
 
-#ifndef FULLDECODE
-  const bool FULLDECODE = bs.getByte() != 0;
-#endif
+  const bool fullDecode = bs.getByte() != 0;
 
-  ht.setup(FULLDECODE, fixDNGBug16);
+  ht.setup(fullDecode, fixDNGBug16);
 
   return ht;
 }

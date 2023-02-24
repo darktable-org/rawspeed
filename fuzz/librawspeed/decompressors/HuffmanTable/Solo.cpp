@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017-2018 Roman Lebedev
+    Copyright (C) 2017-2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,7 @@
 */
 
 #ifndef IMPL
-#error IMPL must be defined to one of rawspeeds pumps
-#endif
-#ifndef PUMP
-#error PUMP must be defined to one of rawspeeds pumps
-#endif
-#ifndef FULLDECODE
-#error FULLDECODE must be defined as bool
+#error IMPL must be defined to one of rawspeeds huffman table implementations
 #endif
 
 #include "common/RawspeedException.h"          // for RawspeedException
@@ -53,6 +47,22 @@ namespace rawspeed {
 struct BaselineHuffmanTableTag;
 } // namespace rawspeed
 
+template <typename Pump, bool IsFullDecode, typename HT>
+static void workloop(rawspeed::ByteStream bs, const HT& ht) {
+  Pump bits(bs);
+  while (true)
+    ht.template decode<Pump, IsFullDecode>(bits);
+  // FIXME: do we need to escape the result to avoid dead code elimination?
+}
+
+template <typename Pump, typename HT>
+static void checkHuffmanTable(rawspeed::ByteStream bs, const HT& ht) {
+  if (ht.isFullDecode())
+    workloop<Pump, /*IsFullDecode=*/true>(bs, ht);
+  else
+    workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
@@ -67,19 +77,27 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
         createHuffmanTable<rawspeed::IMPL<rawspeed::BaselineHuffmanTableTag>>(
             bs);
 
-    // should have consumed 16 bytes for n-codes-per-length,
-    // at *least* 1 byte as code value, and 1 byte as 'fixDNGBug16' boolean
-    assert(bs.getPosition() >= 18);
+    // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
+    // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
+    assert(bs.getPosition() >= 19);
 
-    rawspeed::PUMP bits(bs);
-
-    while (true)
-      ht.decode<decltype(bits), FULLDECODE>(bits);
+    // Which bit pump should we use?
+    switch (bs.getByte()) {
+    case 0:
+      checkHuffmanTable<rawspeed::BitPumpMSB>(bs, ht);
+      break;
+    case 1:
+      checkHuffmanTable<rawspeed::BitPumpMSB32>(bs, ht);
+      break;
+    case 2:
+      checkHuffmanTable<rawspeed::BitPumpJPEG>(bs, ht);
+      break;
+    default:
+      ThrowRSE("Unknown bit pump");
+    }
   } catch (const rawspeed::RawspeedException&) {
     return 0;
   }
 
   __builtin_unreachable();
 }
-
-// for i in $(seq -w 0 64); do dd if=/dev/urandom bs=1024 count=1024 of=$i; done
