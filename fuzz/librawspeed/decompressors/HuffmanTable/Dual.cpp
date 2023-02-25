@@ -85,7 +85,7 @@ static void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
 
     // If any failed, we can't continue.
     if (failure0 || failure1)
-      return;
+      ThrowRSE("Failure detected");
 
     (void)decoded0;
     (void)decoded1;
