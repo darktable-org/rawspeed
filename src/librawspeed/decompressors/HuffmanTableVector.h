@@ -35,15 +35,16 @@ namespace rawspeed {
 
 template <typename HuffmanTableTag>
 class HuffmanTableVector final : public AbstractHuffmanTable<HuffmanTableTag> {
+public:
   using Base = AbstractHuffmanTable<HuffmanTableTag>;
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
+private:
   std::vector<typename Base::CodeSymbol> symbols;
 
   // Given this code len, which code id is the minimal?
   std::vector<unsigned int> extrCodeIdForLen; // index is length of code
 
-protected:
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {

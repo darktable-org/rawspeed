@@ -38,12 +38,13 @@ namespace rawspeed {
 
 template <typename HuffmanTableTag>
 class HuffmanTableTree final : public AbstractHuffmanTable<HuffmanTableTag> {
+public:
   using Base = AbstractHuffmanTable<HuffmanTableTag>;
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
+private:
   BinaryHuffmanTree<typename Traits::CodeValueTy> tree;
 
-protected:
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol,
                    typename Traits::CodeValueTy /*codeValue*/>

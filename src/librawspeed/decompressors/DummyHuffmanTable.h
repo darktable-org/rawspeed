@@ -34,8 +34,10 @@ class Buffer;
 
 template <typename HuffmanTableTag = BaselineHuffmanTableTag>
 class DummyHuffmanTable final {
+public:
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
+private:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 

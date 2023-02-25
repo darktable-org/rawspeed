@@ -32,7 +32,7 @@ template <typename HuffmanTableTag> class DummyHuffmanTable;
 template <typename T> static constexpr int getHuffmanTableMaxLength() {
   if constexpr (std::is_same<T, rawspeed::DummyHuffmanTable<>>())
     return 0;
-  return 16;
+  return T::Traits::MaxCodeLenghtBits;
 }
 
 template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {

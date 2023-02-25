@@ -70,9 +70,11 @@ namespace rawspeed {
 
 template <typename HuffmanTableTag>
 class HuffmanTableLUT final : public HuffmanTableLookup<HuffmanTableTag> {
+public:
   using Base = HuffmanTableLookup<HuffmanTableTag>;
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
+private:
   // The code can be compiled with two different decode lookup table layouts.
   // The idea is that different CPU architectures may perform better with
   // one or the other, depending on the relative performance of their arithmetic

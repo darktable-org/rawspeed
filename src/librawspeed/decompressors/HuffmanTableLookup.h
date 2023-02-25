@@ -68,6 +68,7 @@ namespace rawspeed {
 
 template <typename HuffmanTableTag>
 class HuffmanTableLookup : public AbstractHuffmanTable<HuffmanTableTag> {
+public:
   using Base = AbstractHuffmanTable<HuffmanTableTag>;
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
