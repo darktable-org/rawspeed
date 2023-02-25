@@ -82,6 +82,11 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if (rec.size() != (unsigned)frame.cps)
     ThrowRDE("Must have exactly one recepie per component");
 
+  for (const auto& recip : rec) {
+    if (!recip.ht.isFullDecode())
+      ThrowRDE("Huffman table is not of a full decoding variety");
+  }
+
   if ((unsigned)frame.cps < mRaw->getCpp())
     ThrowRDE("Unexpected number of components");
 
