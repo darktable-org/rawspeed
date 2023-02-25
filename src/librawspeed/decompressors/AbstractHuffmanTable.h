@@ -43,6 +43,8 @@ template <typename HuffmanTableTag> struct HuffmanTableTraits final {
   // using CodeValueTy = uint<???>_t;
   // static constexpr int MaxCodeValueLenghtBits = <???>;
   // static constexpr CodeValueTy MaxCodeValue = <???>;
+
+  // static constexpr bool SupportsFullDecode = <???>;
 };
 
 struct BaselineHuffmanTableTag;
@@ -55,6 +57,8 @@ template <> struct HuffmanTableTraits<BaselineHuffmanTableTag> final {
   using CodeValueTy = uint8_t;
   static constexpr int MaxCodeValueLenghtBits = 5;
   static constexpr CodeValueTy MaxCodeValue = 16;
+
+  static constexpr bool SupportsFullDecode = true;
 };
 
 template <typename HuffmanTableTag> class AbstractHuffmanTable {
@@ -129,6 +133,8 @@ protected:
       codeValues; // index is just sequential number
 
   void setup(bool fullDecode_, bool fixDNGBug16_) {
+    assert(!fullDecode_ || Traits::SupportsFullDecode);
+
     this->fullDecode = fullDecode_;
     this->fixDNGBug16 = fixDNGBug16_;
 

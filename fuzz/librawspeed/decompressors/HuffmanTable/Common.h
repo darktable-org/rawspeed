@@ -48,7 +48,9 @@ template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   // and one more byte as 'fixDNGBug16' boolean
   const bool fixDNGBug16 = bs.getByte() != 0;
 
-  const bool fullDecode = bs.getByte() != 0;
+  bool fullDecode = false;
+  if (T::Traits::SupportsFullDecode)
+    fullDecode = bs.getByte() != 0;
 
   ht.setup(fullDecode, fixDNGBug16);
 
