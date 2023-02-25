@@ -56,11 +56,34 @@ static void workloop(rawspeed::ByteStream bs, const HT& ht) {
 }
 
 template <typename Pump, typename HT>
-static void checkHuffmanTable(rawspeed::ByteStream bs, const HT& ht) {
+static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
   if (ht.isFullDecode())
     workloop<Pump, /*IsFullDecode=*/true>(bs, ht);
   else
     workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
+}
+
+template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
+  const auto ht = createHuffmanTable<rawspeed::IMPL<Tag>>(bs);
+
+  // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
+  // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
+  assert(bs.getPosition() >= 19);
+
+  // Which bit pump should we use?
+  switch (bs.getByte()) {
+  case 0:
+    checkPump<rawspeed::BitPumpMSB>(bs, ht);
+    break;
+  case 1:
+    checkPump<rawspeed::BitPumpMSB32>(bs, ht);
+    break;
+  case 2:
+    checkPump<rawspeed::BitPumpJPEG>(bs, ht);
+    break;
+  default:
+    ThrowRSE("Unknown bit pump");
+  }
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
@@ -73,27 +96,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    const auto ht =
-        createHuffmanTable<rawspeed::IMPL<rawspeed::BaselineHuffmanTableTag>>(
-            bs);
-
-    // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
-    // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
-    assert(bs.getPosition() >= 19);
-
-    // Which bit pump should we use?
+    // Which flavor?
     switch (bs.getByte()) {
     case 0:
-      checkHuffmanTable<rawspeed::BitPumpMSB>(bs, ht);
-      break;
-    case 1:
-      checkHuffmanTable<rawspeed::BitPumpMSB32>(bs, ht);
-      break;
-    case 2:
-      checkHuffmanTable<rawspeed::BitPumpJPEG>(bs, ht);
+      checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
       break;
     default:
-      ThrowRSE("Unknown bit pump");
+      ThrowRSE("Unknown flavor");
     }
   } catch (const rawspeed::RawspeedException&) {
     return 0;

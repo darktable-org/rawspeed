@@ -96,15 +96,64 @@ static void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
 }
 
 template <typename Pump, typename HT0, typename HT1>
-static void checkHuffmanTable(rawspeed::ByteStream bs0,
-                              rawspeed::ByteStream bs1, const HT0& ht0,
-                              const HT1& ht1) {
+static void checkPump(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
+                      const HT0& ht0, const HT1& ht1) {
   assert(bs0.getPosition() == bs1.getPosition());
   assert(ht0.isFullDecode() == ht1.isFullDecode());
   if (ht0.isFullDecode())
     workloop<Pump, /*IsFullDecode=*/true>(bs0, bs1, ht0, ht1);
   else
     workloop<Pump, /*IsFullDecode=*/false>(bs0, bs1, ht0, ht1);
+}
+
+template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
+  rawspeed::ByteStream bs0 = bs;
+  rawspeed::ByteStream bs1 = bs;
+
+  bool failure0 = false;
+  bool failure1 = false;
+
+  rawspeed::IMPL0<Tag> ht0;
+  rawspeed::IMPL1<Tag> ht1;
+
+  try {
+    ht0 = createHuffmanTable<decltype(ht0)>(bs0);
+  } catch (const rawspeed::RawspeedException&) {
+    failure0 = true;
+  }
+  try {
+    ht1 = createHuffmanTable<decltype(ht1)>(bs1);
+  } catch (const rawspeed::RawspeedException&) {
+    failure1 = true;
+  }
+
+  // They both should either fail or succeed, else there is a bug.
+  assert(failure0 == failure1);
+
+  // If any failed, we can't continue.
+  if (failure0 || failure1)
+    ThrowRSE("Failure detected");
+
+  // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
+  // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
+  assert(bs0.getPosition() == bs1.getPosition());
+  assert(bs0.getPosition() >= 19);
+
+  // Which bit pump should we use?
+  bs1.skipBytes(1);
+  switch (bs0.getByte()) {
+  case 0:
+    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, ht0, ht1);
+    break;
+  case 1:
+    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, ht0, ht1);
+    break;
+  case 2:
+    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, ht0, ht1);
+    break;
+  default:
+    ThrowRSE("Unknown bit pump");
+  }
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
@@ -115,53 +164,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   try {
     const rawspeed::Buffer b(Data, Size);
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
+    rawspeed::ByteStream bs(db);
 
-    rawspeed::ByteStream bs0(db);
-    rawspeed::ByteStream bs1(db);
-
-    bool failure0 = false;
-    bool failure1 = false;
-
-    rawspeed::IMPL0<rawspeed::BaselineHuffmanTableTag> ht0;
-    rawspeed::IMPL1<rawspeed::BaselineHuffmanTableTag> ht1;
-
-    try {
-      ht0 = createHuffmanTable<decltype(ht0)>(bs0);
-    } catch (const rawspeed::RawspeedException&) {
-      failure0 = true;
-    }
-    try {
-      ht1 = createHuffmanTable<decltype(ht1)>(bs1);
-    } catch (const rawspeed::RawspeedException&) {
-      failure1 = true;
-    }
-
-    // They both should either fail or succeed, else there is a bug.
-    assert(failure0 == failure1);
-
-    // If any failed, we can't continue.
-    if (failure0 || failure1)
-      return 0;
-
-    // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
-    // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
-    assert(bs0.getPosition() == bs1.getPosition());
-    assert(bs0.getPosition() >= 19);
-
-    // Which bit pump should we use?
-    bs1.skipBytes(1);
-    switch (bs0.getByte()) {
+    // Which flavor?
+    switch (bs.getByte()) {
     case 0:
-      checkHuffmanTable<rawspeed::BitPumpMSB>(bs0, bs1, ht0, ht1);
-      break;
-    case 1:
-      checkHuffmanTable<rawspeed::BitPumpMSB32>(bs0, bs1, ht0, ht1);
-      break;
-    case 2:
-      checkHuffmanTable<rawspeed::BitPumpJPEG>(bs0, bs1, ht0, ht1);
+      checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
       break;
     default:
-      ThrowRSE("Unknown bit pump");
+      ThrowRSE("Unknown flavor");
     }
   } catch (const rawspeed::RawspeedException&) {
     return 0;
