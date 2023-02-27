@@ -91,11 +91,10 @@ public:
     assert(symbols.size() == Base::maxCodesCount());
 
     // Figure F.15: generate decoding tables
-    unsigned int maxCodeLength = Base::nCodesPerLength.size() - 1U;
-    codeOffsetOL.resize(maxCodeLength + 1UL, 0xFFFF);
-    maxCodeOL.resize(maxCodeLength + 1UL, 0xFFFFFFFF);
-    for (unsigned int numCodesSoFar = 0, codeLen = 1; codeLen <= maxCodeLength;
-         codeLen++) {
+    codeOffsetOL.resize(Base::maxCodeLength() + 1UL, 0xFFFF);
+    maxCodeOL.resize(Base::maxCodeLength() + 1UL, 0xFFFFFFFF);
+    for (unsigned int numCodesSoFar = 0, codeLen = 1;
+         codeLen <= Base::maxCodeLength(); codeLen++) {
       if (!Base::nCodesPerLength[codeLen])
         continue;
       codeOffsetOL[codeLen] = symbols[numCodesSoFar].code - numCodesSoFar;
