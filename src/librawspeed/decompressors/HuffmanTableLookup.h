@@ -137,16 +137,16 @@ protected:
       partial.code_len++;
     }
 
-    if (partial.code_len >= maxCodeOL.size() ||
-        (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
-         partial.code > maxCodeOL[partial.code_len]) ||
-        partial.code < codeOffsetOL[partial.code_len])
+    if (partial.code > maxCodeOL[partial.code_len])
       ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
                partial.code_len);
 
-    typename Traits::CodeValueTy codeValue =
-        Base::codeValues[partial.code - codeOffsetOL[partial.code_len]];
+    assert(0xFFFF != codeOffsetOL[partial.code_len]);
+    assert(partial.code >= codeOffsetOL[partial.code_len]);
+    unsigned codeIndex = partial.code - codeOffsetOL[partial.code_len];
+    assert(codeIndex < Base::codeValues.size());
 
+    typename Traits::CodeValueTy codeValue = Base::codeValues[codeIndex];
     return {partial, codeValue};
   }
 
