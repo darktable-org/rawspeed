@@ -137,7 +137,11 @@ protected:
       partial.code_len++;
     }
 
-    if (partial.code > maxCodeOL[partial.code_len])
+    // NOTE: when we are called from HuffmanTableLUT, the partial.code_len
+    // *could* be larger than the largest code lenght for this huffman table,
+    // which is a symptom of a corrupt code.
+    if (partial.code_len > Base::maxCodeLength() ||
+        partial.code > maxCodeOL[partial.code_len])
       ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
                partial.code_len);
 
