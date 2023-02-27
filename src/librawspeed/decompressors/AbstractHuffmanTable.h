@@ -108,9 +108,13 @@ protected:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
+  [[nodiscard]] inline size_t __attribute__((pure)) maxCodeLength() const {
+    return nCodesPerLength.size() - 1;
+  }
+
   [[nodiscard]] inline size_t __attribute__((pure))
   maxCodePlusDiffLength() const {
-    return nCodesPerLength.size() - 1 +
+    return maxCodeLength() +
            *(std::max_element(codeValues.cbegin(), codeValues.cend()));
   }
 
@@ -177,7 +181,6 @@ protected:
     assert(!nCodesPerLength.empty());
     assert(maxCodesCount() > 0);
 
-    const auto maxCodeLength = nCodesPerLength.size() - 1U;
     assert(codeValues.size() == maxCodesCount());
 
     // reserve all the memory. avoids lots of small allocs
@@ -186,7 +189,7 @@ protected:
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves
     uint32_t code = 0;
-    for (unsigned int l = 1; l <= maxCodeLength; ++l) {
+    for (unsigned int l = 1; l <= maxCodeLength(); ++l) {
       for (unsigned int i = 0; i < nCodesPerLength[l]; ++i) {
         symbols.emplace_back(code, l);
         code++;
