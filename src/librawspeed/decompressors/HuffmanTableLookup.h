@@ -128,7 +128,7 @@ protected:
   inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   finishReadingPartialSymbol(BIT_STREAM& bs,
                              typename Base::CodeSymbol partial) const {
-    while (partial.code_len < maxCodeOL.size() &&
+    while (partial.code_len < Base::maxCodeLength() &&
            (0xFFFFFFFF == maxCodeOL[partial.code_len] ||
             partial.code > maxCodeOL[partial.code_len])) {
       uint32_t temp = bs.getBitsNoFill(1);
