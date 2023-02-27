@@ -98,6 +98,7 @@ public:
       if (!Base::nCodesPerLength[codeLen])
         continue;
       codeOffsetOL[codeLen] = symbols[numCodesSoFar].code - numCodesSoFar;
+      assert(codeOffsetOL[codeLen] != 0xFFFF);
       numCodesSoFar += Base::nCodesPerLength[codeLen];
       maxCodeOL[codeLen] = symbols[numCodesSoFar - 1].code;
     }
