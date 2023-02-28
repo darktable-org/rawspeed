@@ -99,7 +99,8 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
 
   // How many full pixel blocks do we need to consume for that?
   if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
-      frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y) {
+      frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
+      frame.cps * frame.dim.x < (int)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
              imgFrame.dim.y);
