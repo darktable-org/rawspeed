@@ -177,7 +177,7 @@ void FujiDecompressor::fuji_compressed_block::reset(
   linealloc.resize(ltotal * (params.line_width + 2), 0);
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
 
-  MSan::Allocated(lines);
+  MSan::Allocated(CroppedArray2DRef(lines));
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
   // including first and last helper columns of the second row.
