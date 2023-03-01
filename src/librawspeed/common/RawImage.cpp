@@ -20,8 +20,6 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "common/RawImage.h"
-#include "MemorySanitizer.h"              // for MSan
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
@@ -146,10 +144,6 @@ void RawImageData::unpoisonPadding() {
   // than making this whole function not exist in ASAN-less builds
 }
 #endif
-
-void RawImageData::checkMemIsInitialized() {
-  MSan::CheckMemIsInitialized(getByteDataAsUncroppedArray2DRef());
-}
 
 void RawImageData::setCpp(uint32_t val) {
   if (isAllocated())

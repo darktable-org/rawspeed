@@ -116,7 +116,6 @@ public:
   void createData();
   void poisonPadding();
   void unpoisonPadding();
-  void checkMemIsInitialized();
 
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
 

@@ -19,6 +19,7 @@
 */
 
 #include "common/DngOpcodes.h"
+#include "MemorySanitizer.h"           // for MSan
 #include "adt/Array2DRef.h"            // for Array2DRef
 #include "adt/Point.h"                 // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
@@ -91,7 +92,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::DngOpcodes codes(mRaw, bs.getSubStream(/*offset=*/0));
     codes.applyOpCodes(mRaw);
-    mRaw->checkMemIsInitialized();
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
 
     mRaw->transferBadPixelsToMap();
   } catch (const rawspeed::RawspeedException&) {

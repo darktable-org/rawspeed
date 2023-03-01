@@ -42,6 +42,7 @@
 #include <string>                              // for operator==, string
 #include <vector>                              // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
+#include "MemorySanitizer.h" // for MSan
 
 namespace rawspeed {
 class CameraMetaData;
@@ -365,7 +366,7 @@ void Cr2Decoder::sRawInterpolate() {
         1024.0F / (static_cast<float>(sraw_coeffs[2]) / 1024.0F));
   }
 
-  mRaw->checkMemIsInitialized();
+  MSan::CheckMemIsInitialized(mRaw->getByteDataAsUncroppedArray2DRef());
   RawImage subsampledRaw = mRaw;
   int hue = getHue();
 

@@ -19,6 +19,7 @@
 */
 
 #include "decompressors/SonyArw2Decompressor.h" // for SonyArw1Decompre...
+#include "MemorySanitizer.h"                    // for MSan
 #include "common/RawImage.h"                    // for RawImage, RawImageData
 #include "common/RawspeedException.h"           // for RawspeedException
 #include "fuzz/Common.h"                        // for CreateRawImage
@@ -47,7 +48,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     a.decompress();
 
-    mRaw->checkMemIsInitialized();
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }

@@ -20,6 +20,7 @@
 */
 
 #include "decoders/RawDecoder.h"
+#include "MemorySanitizer.h"                        // for MSan
 #include "adt/NotARational.h"                       // for NotARational
 #include "adt/Point.h"                              // for iPoint2D, iRecta...
 #include "common/Common.h"                          // for writeLog, roundU...
@@ -285,13 +286,13 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
 rawspeed::RawImage RawDecoder::decodeRaw() {
   try {
     RawImage raw = decodeRawInternal();
-    raw->checkMemIsInitialized();
+    MSan::CheckMemIsInitialized(raw->getByteDataAsUncroppedArray2DRef());
 
     raw->metadata.pixelAspectRatio =
         hints.get("pixel_aspect_ratio", raw->metadata.pixelAspectRatio);
     if (interpolateBadPixels) {
       raw->fixBadPixels();
-      raw->checkMemIsInitialized();
+      MSan::CheckMemIsInitialized(raw->getByteDataAsUncroppedArray2DRef());
     }
 
     return raw;

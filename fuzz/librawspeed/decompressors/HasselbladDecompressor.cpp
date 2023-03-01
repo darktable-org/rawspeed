@@ -20,6 +20,7 @@
 
 #include "decompressors/HasselbladDecompressor.h"
 #include "HuffmanTable/Common.h"        // for createHuffmanTable
+#include "MemorySanitizer.h"            // for MSan
 #include "common/RawImage.h"            // for RawImage, RawImageData
 #include "common/RawspeedException.h"   // for ThrowException, Rawsp...
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
@@ -55,7 +56,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     mRaw->createData();
     (void)d.decompress();
 
-    mRaw->checkMemIsInitialized();
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }
