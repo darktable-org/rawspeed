@@ -20,7 +20,9 @@
 
 #pragma once
 
-#include <cstddef> // for byte, size_t
+#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
+#include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
+#include <cstddef>                 // for byte, size_t
 
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.
@@ -48,9 +50,16 @@ struct MSan final {
   /* Declare memory chunk as being newly-allocated. */
   static void Allocated(const void* addr, size_t size);
 
-  /* Checks that memory range is fully initialized, and reports an error if it
-   * is not. */
+private:
+  // Checks that memory range is fully initialized,
+  // and reports an error if it
   static void CheckMemIsInitialized(const void* addr, size_t size);
+  static void CheckMemIsInitialized(CroppedArray1DRef<std::byte> row);
+
+public:
+  // Checks that memory range is fully initialized,
+  // and reports an error if it
+  static void CheckMemIsInitialized(CroppedArray2DRef<std::byte> frame);
 };
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
@@ -78,5 +87,13 @@ inline void MSan::CheckMemIsInitialized([[maybe_unused]] const void* addr,
   // preprocessor in every place it is called.
 }
 #endif
+
+inline void MSan::CheckMemIsInitialized(CroppedArray1DRef<std::byte> row) {
+  MSan::CheckMemIsInitialized(row.begin(), row.size());
+}
+inline void MSan::CheckMemIsInitialized(CroppedArray2DRef<std::byte> frame) {
+  for (int row = 0; row < frame.croppedHeight; row++)
+    CheckMemIsInitialized(frame[row]);
+}
 
 } // namespace rawspeed

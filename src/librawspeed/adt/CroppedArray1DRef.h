@@ -78,6 +78,8 @@ public:
       CroppedArray1DRef<T2> RHS)
       : base(RHS.base), numElts(RHS.numElts) {}
 
+  [[nodiscard]] const T* begin() const;
+
   [[nodiscard]] int size() const;
 
   [[nodiscard]] T& operator()(int eltIdx) const;
@@ -95,6 +97,10 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
   assert(offset >= 0);
   assert(numElts >= 0);
   assert(offset + numElts <= std::size(base));
+}
+
+template <class T> inline const T* CroppedArray1DRef<T>::begin() const {
+  return &operator()(/*eltIdx=*/0);
 }
 
 template <class T> inline int CroppedArray1DRef<T>::size() const {

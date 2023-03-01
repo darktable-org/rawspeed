@@ -147,26 +147,9 @@ void RawImageData::unpoisonPadding() {
 }
 #endif
 
-void RawImageData::checkRowIsInitialized(int row) {
-  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
-
-  // and check that image line is initialized.
-  // do note that we are avoiding padding here.
-  MSan::CheckMemIsInitialized(&img(row, 0), img.width);
-}
-
-#if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
 void RawImageData::checkMemIsInitialized() {
-  for (int j = 0; j < uncropped_dim.y; j++)
-    checkRowIsInitialized(j);
+  MSan::CheckMemIsInitialized(getByteDataAsUncroppedArray2DRef());
 }
-#else
-void RawImageData::checkMemIsInitialized() {
-  // While we could use the same version for non-MSAN build, even though it
-  // does not do anything, i don't think it will be fully optimized away,
-  // the getDataUncropped() call may still be there. To be re-evaluated.
-}
-#endif
 
 void RawImageData::setCpp(uint32_t val) {
   if (isAllocated())
