@@ -175,10 +175,9 @@ void FujiDecompressor::fuji_compressed_block::reset(
   const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
 
   linealloc.resize(ltotal * (params.line_width + 2), 0);
-
-  MSan::Allocated(&linealloc[0], ltotal * line_size);
-
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
+
+  MSan::Allocated(lines);
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
   // including first and last helper columns of the second row.
@@ -649,8 +648,12 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
     }
 
     for (auto i : colors) {
+      const auto out = CroppedArray2DRef(
+          info_block.lines, /*offsetCols=*/0, /*offsetRows=*/i.a + 2,
+          /*croppedWidth=*/info_block.lines.width, /*croppedHeight=*/i.b - 2);
+
       // All other lines of each color become uninitialized.
-      MSan::Allocated(&info_block.lines(i.a + 2, 0), (i.b - 2) * line_size);
+      MSan::Allocated(out);
 
       // And the first (real, uninitialized) line of each color gets the content
       // of the last helper column from the last decoded sample of previous

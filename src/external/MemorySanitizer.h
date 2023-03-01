@@ -47,10 +47,14 @@ struct MSan final {
   MSan& operator=(MSan&&) = delete;
   ~MSan() = delete;
 
-  /* Declare memory chunk as being newly-allocated. */
+private:
+  // Declare memory chunk as being newly-allocated.
   static void Allocated(const void* addr, size_t size);
+  static void Allocated(CroppedArray1DRef<std::byte> row);
 
+public:
   template <typename T> static void Allocated(const T& elt);
+  static void Allocated(CroppedArray2DRef<std::byte> frame);
 
 private:
   // Checks that memory range is fully initialized,
@@ -79,6 +83,13 @@ inline void MSan::Allocated([[maybe_unused]] const void* addr,
 
 template <typename T> inline void MSan::Allocated(const T& elt) {
   Allocated(&elt, sizeof(T));
+}
+inline void MSan::Allocated(CroppedArray1DRef<std::byte> row) {
+  MSan::Allocated(row.begin(), row.size());
+}
+inline void MSan::Allocated(CroppedArray2DRef<std::byte> frame) {
+  for (int row = 0; row < frame.croppedHeight; row++)
+    Allocated(frame[row]);
 }
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
