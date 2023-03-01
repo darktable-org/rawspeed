@@ -50,6 +50,8 @@ struct MSan final {
   /* Declare memory chunk as being newly-allocated. */
   static void Allocated(const void* addr, size_t size);
 
+  template <typename T> static void Allocated(const T& elt);
+
 private:
   // Checks that memory range is fully initialized,
   // and reports an error if it
@@ -74,6 +76,10 @@ inline void MSan::Allocated([[maybe_unused]] const void* addr,
   // preprocessor in every place it is called.
 }
 #endif
+
+template <typename T> inline void MSan::Allocated(const T& elt) {
+  Allocated(&elt, sizeof(T));
+}
 
 #if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
 inline void MSan::CheckMemIsInitialized(const void* addr, size_t size) {

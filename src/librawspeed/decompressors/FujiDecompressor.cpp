@@ -187,8 +187,8 @@ void FujiDecompressor::fuji_compressed_block::reset(
     memset(&lines(color, 0), 0, 2 * line_size);
 
     // On the first row, we don't need to zero-init helper columns.
-    MSan::Allocated(&lines(color, 0), sizeof(uint16_t));
-    MSan::Allocated(&lines(color, lines.width - 1), sizeof(uint16_t));
+    MSan::Allocated(lines(color, 0));
+    MSan::Allocated(lines(color, lines.width - 1));
   }
 
   // And the first (real, uninitialized) line of each color gets the content
