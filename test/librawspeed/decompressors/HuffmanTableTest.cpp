@@ -61,7 +61,7 @@ auto genHTFull =
        std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable<> {
   auto ht = genHT(std::move(nCodesPerLength));
   std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
-  Buffer b(v.data(), v.size());
+  rawspeed::Array1DRef<uint8_t> b(v.data(), v.size());
   ht.setCodeValues(b);
   return ht;
 };

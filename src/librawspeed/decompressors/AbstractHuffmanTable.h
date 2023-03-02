@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"               // for Array1DRef
 #include "common/Common.h"                // for extractHighBits
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
@@ -316,9 +317,9 @@ public:
     return count;
   }
 
-  void setCodeValues(Buffer data) {
-    assert(data.getSize() <= Traits::MaxNumCodeValues);
-    assert(data.getSize() == maxCodesCount());
+  void setCodeValues(Array1DRef<const typename Traits::CodeValueTy> data) {
+    assert(data.size() <= Traits::MaxNumCodeValues);
+    assert((unsigned)data.size() == maxCodesCount());
 
     codeValues.clear();
     codeValues.reserve(maxCodesCount());

@@ -42,8 +42,12 @@ template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   const auto count =
       ht.setNCodesPerLength(bs.getBuffer(getHuffmanTableMaxLength<T>()));
 
-  // and then count more bytes consumed as code values
-  ht.setCodeValues(bs.getBuffer(count));
+  if (count) {
+    // and then count more bytes consumed as code values
+    const auto codesBuf = bs.getBuffer(count);
+    ht.setCodeValues(rawspeed::Array1DRef<const uint8_t>(codesBuf.begin(),
+                                                         codesBuf.getSize()));
+  }
 
   // and one more byte as 'fixDNGBug16' boolean
   const bool fixDNGBug16 = bs.getByte() != 0;

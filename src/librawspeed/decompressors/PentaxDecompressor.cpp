@@ -63,7 +63,7 @@ HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Legacy() {
   /* Initialize with legacy data */
   auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
   assert(nCodes == 13); // see pentax_tree definition
-  ht.setCodeValues(Buffer(pentax_tree[0][1].data(), nCodes));
+  ht.setCodeValues(Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
 
   return ht;
 }
@@ -122,7 +122,7 @@ HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   }
 
   assert(codeValues.size() == nCodes);
-  ht.setCodeValues(Buffer(codeValues.data(), nCodes));
+  ht.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
 
   return ht;
 }
