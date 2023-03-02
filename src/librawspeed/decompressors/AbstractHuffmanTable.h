@@ -31,6 +31,7 @@
 #include <functional>                     // for less, less_equal
 #include <iterator>                       // for back_insert_iterator, back...
 #include <numeric>                        // for accumulate
+#include <type_traits>                    // for is_integral
 #include <vector>                         // for vector, vector<>::const_it...
 
 namespace rawspeed {
@@ -61,9 +62,47 @@ template <> struct HuffmanTableTraits<BaselineHuffmanTableTag> final {
   static constexpr bool SupportsFullDecode = true;
 };
 
+template <typename HuffmanTableTag> struct HuffmanTableTraitsValidator final {
+  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+
+  static_assert(std::is_integral<typename Traits::CodeTy>::value);
+  static_assert(std::is_unsigned<typename Traits::CodeTy>::value);
+  static_assert(std::is_same<typename Traits::CodeTy, uint16_t>::value);
+
+  static_assert(Traits::MaxCodeLenghtBits > 0 &&
+                Traits::MaxCodeLenghtBits <=
+                    bitwidth<typename Traits::CodeTy>());
+  static_assert(Traits::MaxCodeLenghtBits == 16);
+
+  static_assert(Traits::MaxNumCodeValues > 0 &&
+                Traits::MaxNumCodeValues <=
+                    ((1ULL << Traits::MaxCodeLenghtBits) - 1ULL));
+  static_assert(Traits::MaxNumCodeValues == 162);
+
+  static_assert(std::is_integral<typename Traits::CodeValueTy>::value);
+  static_assert(std::is_unsigned<typename Traits::CodeValueTy>::value);
+  static_assert(std::is_same<typename Traits::CodeValueTy, uint8_t>::value);
+
+  static_assert(Traits::MaxCodeValueLenghtBits > 0 &&
+                Traits::MaxCodeValueLenghtBits <=
+                    bitwidth<typename Traits::CodeValueTy>());
+  static_assert(Traits::MaxCodeValueLenghtBits == 5);
+
+  static_assert(Traits::MaxCodeValue > 0 &&
+                Traits::MaxCodeValue <=
+                    ((1ULL << Traits::MaxCodeValueLenghtBits) - 1ULL));
+  static_assert(Traits::MaxCodeValue == 16);
+
+  static_assert(
+      std::is_same<decltype(Traits::SupportsFullDecode), const bool>::value);
+
+  static constexpr bool validate() { return true; }
+};
+
 template <typename HuffmanTableTag> class AbstractHuffmanTable {
 public:
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  static_assert(HuffmanTableTraitsValidator<HuffmanTableTag>::validate());
 
   struct CodeSymbol final {
     typename Traits::CodeTy code; // the code (bit pattern)
