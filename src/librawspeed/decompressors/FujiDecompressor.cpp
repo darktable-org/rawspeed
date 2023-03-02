@@ -233,29 +233,29 @@ void FujiDecompressor::copy_line(const fuji_compressed_block& info,
                             MCU<Tag>.x, MCU<Tag>.y);
       for (int MCURow = 0; MCURow != MCU<Tag>.y; ++MCURow) {
         for (int MCUCol = 0; MCUCol != MCU<Tag>.x; ++MCUCol) {
-          int row_count = MCU<Tag>.y * MCUIdx.y + MCURow;
-          int pixel_count = MCU<Tag>.x * MCUIdx.x + MCUCol;
+          int imgRow = MCU<Tag>.y * MCUIdx.y + MCURow;
+          int imgCol = MCU<Tag>.x * MCUIdx.x + MCUCol;
 
           int row;
 
           switch (CFA(MCURow, MCUCol)) {
           case CFAColor::RED: // red
-            row = R2 + (row_count >> 1);
+            row = R2 + (imgRow >> 1);
             break;
 
           case CFAColor::GREEN: // green
-            row = G2 + row_count;
+            row = G2 + imgRow;
             break;
 
           case CFAColor::BLUE: // blue
-            row = B2 + (row_count >> 1);
+            row = B2 + (imgRow >> 1);
             break;
 
           default:
             __builtin_unreachable();
           }
 
-          out(MCURow, MCUCol) = info.lines(row, 1 + idx(pixel_count));
+          out(MCURow, MCUCol) = info.lines(row, 1 + idx(imgCol));
         }
       }
     }
@@ -265,9 +265,9 @@ void FujiDecompressor::copy_line(const fuji_compressed_block& info,
 void FujiDecompressor::copy_line_to_xtrans(const fuji_compressed_block& info,
                                            const FujiStrip& strip,
                                            int cur_line) const {
-  auto index = [](int pixel_count) {
-    return (((pixel_count * 2 / 3) & 0x7FFFFFFE) | ((pixel_count % 3) & 1)) +
-           ((pixel_count % 3) >> 1);
+  auto index = [](int imgCol) {
+    return (((imgCol * 2 / 3) & 0x7FFFFFFE) | ((imgCol % 3) & 1)) +
+           ((imgCol % 3) >> 1);
   };
 
   copy_line<XTransTag>(info, strip, cur_line, index);
@@ -276,7 +276,7 @@ void FujiDecompressor::copy_line_to_xtrans(const fuji_compressed_block& info,
 void FujiDecompressor::copy_line_to_bayer(const fuji_compressed_block& info,
                                           const FujiStrip& strip,
                                           int cur_line) const {
-  auto index = [](int pixel_count) { return pixel_count >> 1; };
+  auto index = [](int imgCol) { return imgCol >> 1; };
 
   copy_line<BayerTag>(info, strip, cur_line, index);
 }
@@ -286,10 +286,11 @@ inline int FujiDecompressor::fuji_zerobits(BitPumpMSB& pump) {
 
   // Count-and-skip all the leading `0`s.
   while (true) {
-    uint32_t batch = (pump.peekBits(31) << 1) | 0b1;
-    int numZerosInThisBatch = __builtin_clz(batch);
+    constexpr int batchSize = 32;
+    uint32_t batch = pump.peekBits(batchSize);
+    int numZerosInThisBatch = countl_zero(batch);
     count += numZerosInThisBatch;
-    bool allZeroes = numZerosInThisBatch == 31;
+    bool allZeroes = numZerosInThisBatch == batchSize;
     int numBitsToSkip = numZerosInThisBatch;
     if (!allZeroes)
       numBitsToSkip += 1; // Also skip the first `1`.

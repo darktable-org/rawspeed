@@ -164,6 +164,13 @@ constexpr bool __attribute__((const)) isIntN(
   return highBits == 0;
 }
 
+template <class T, typename std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
+constexpr int countl_zero(T x) noexcept {
+  if (x == T(0))
+    return bitwidth<T>();
+  return __builtin_clz(x);
+}
+
 template <class T>
 constexpr __attribute__((const)) T extractHighBits(
     T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>(),
