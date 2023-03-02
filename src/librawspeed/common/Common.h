@@ -166,7 +166,8 @@ constexpr bool __attribute__((const)) isIntN(
 
 template <class T, typename std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
 constexpr int countl_zero(T x) noexcept {
-  assert(x != T(0));
+  if (x == T(0))
+    return bitwidth<T>();
   return __builtin_clz(x);
 }
 

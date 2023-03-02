@@ -224,7 +224,7 @@ public:
 
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);
-    assert(nbits < Cache::MaxGetBits);
+    assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     return cache.peek(nbits);
   }
