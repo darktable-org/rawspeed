@@ -302,20 +302,19 @@ inline int FujiDecompressor::fuji_zerobits(BitPumpMSB& pump) {
   return count;
 }
 
+// Given two non-negative numbers, how many times must the second number
+// be multiplied by 2, for it to become not smaller than the first number?
+// We are operating on arithmetical numbers here, without overflows.
 int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
-  int decBits = 0;
+  assert(value1 >= 0);
+  assert(value2 > 0);
 
-  if (value2 >= value1)
-    return decBits;
-
-  while (decBits <= 14) {
+  int lz1 = countl_zero((unsigned)value1);
+  int lz2 = countl_zero((unsigned)value2);
+  int decBits = std::max(lz2 - lz1, 0);
+  if ((value2 << decBits) < value1)
     ++decBits;
-
-    if ((value2 << decBits) >= value1)
-      return decBits;
-  }
-
-  return decBits;
+  return std::min(decBits, 15);
 }
 
 __attribute__((always_inline)) int
