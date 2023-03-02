@@ -287,7 +287,8 @@ inline int FujiDecompressor::fuji_zerobits(BitPumpMSB& pump) {
   // Count-and-skip all the leading `0`s.
   while (true) {
     constexpr int batchSize = 32;
-    uint32_t batch = pump.peekBits(batchSize);
+    pump.fill(batchSize);
+    uint32_t batch = pump.peekBitsNoFill(batchSize);
     int numZerosInThisBatch = countl_zero(batch);
     count += numZerosInThisBatch;
     bool allZeroes = numZerosInThisBatch == batchSize;
@@ -321,23 +322,25 @@ __attribute__((always_inline)) int
 FujiDecompressor::fuji_decode_sample(fuji_compressed_block& info, int grad,
                                      int interp_val,
                                      std::array<int_pair, 41>& grads) const {
-  int sample = 0;
-  int code = 0;
-
   int gradient = std::abs(grad);
 
-  sample = fuji_zerobits(info.pump);
+  int sampleBits = fuji_zerobits(info.pump);
 
-  if (sample < common_info.max_bits - common_info.raw_bits - 1) {
-    int decBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
-    code = 0;
-    if (decBits)
-      code = info.pump.getBits(decBits);
-    code += sample << decBits;
+  int codeBits;
+  int codeDelta;
+  if (sampleBits < common_info.max_bits - common_info.raw_bits - 1) {
+    codeBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
+    codeDelta = sampleBits << codeBits;
   } else {
-    code = info.pump.getBits(common_info.raw_bits);
-    code++;
+    codeBits = common_info.raw_bits;
+    codeDelta = 1;
   }
+
+  int code = 0;
+  info.pump.fill(32);
+  if (codeBits)
+    code = info.pump.getBitsNoFill(codeBits);
+  code += codeDelta;
 
   if (code < 0 || code >= common_info.total_values) {
     ThrowRDE("fuji_decode_sample");
