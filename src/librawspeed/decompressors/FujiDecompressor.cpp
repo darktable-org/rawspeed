@@ -287,7 +287,7 @@ inline int FujiDecompressor::fuji_zerobits(BitPumpMSB& pump) {
   // Count-and-skip all the leading `0`s.
   while (true) {
     uint32_t batch = (pump.peekBits(31) << 1) | 0b1;
-    int numZerosInThisBatch = __builtin_clz(batch);
+    int numZerosInThisBatch = countl_zero(batch);
     count += numZerosInThisBatch;
     bool allZeroes = numZerosInThisBatch == 31;
     int numBitsToSkip = numZerosInThisBatch;
