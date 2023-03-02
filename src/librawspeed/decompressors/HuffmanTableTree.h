@@ -94,6 +94,12 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
+    assert((!std::is_same_v<
+            HuffmanTableTag,
+            VC5HuffmanTableTag>)&&"FIXME: this implementation allocates too "
+                                  "much memory when used with that flavour "
+                                  "during fuzzing");
+
     AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
 
     auto currValue = Base::codeValues.cbegin();

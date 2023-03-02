@@ -66,49 +66,74 @@ template <> struct HuffmanTableTraits<BaselineHuffmanTableTag> final {
   static constexpr bool SupportsFullDecode = true;
 };
 
+struct VC5HuffmanTableTag;
+
+template <> struct HuffmanTableTraits<VC5HuffmanTableTag> final {
+  using CodeTy = uint32_t;
+  static constexpr int MaxCodeLenghtBits = 26;
+  static constexpr int MaxNumCodeValues = 264;
+
+  using CodeValueTy = uint16_t;
+  static constexpr int MaxCodeValueLenghtBits = 9;
+  static constexpr CodeValueTy MaxCodeValue = MaxNumCodeValues;
+
+  static constexpr int MaxDiffLengthBits = -1;     // unused
+  static constexpr CodeValueTy MaxDiffLength = -1; // unused
+
+  static constexpr bool SupportsFullDecode = false;
+};
+
 template <typename HuffmanTableTag> struct HuffmanTableTraitsValidator final {
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
   static_assert(std::is_integral<typename Traits::CodeTy>::value);
   static_assert(std::is_unsigned<typename Traits::CodeTy>::value);
-  static_assert(std::is_same<typename Traits::CodeTy, uint16_t>::value);
+  static_assert(std::is_same<typename Traits::CodeTy, uint16_t>::value ||
+                std::is_same<typename Traits::CodeTy, uint32_t>::value);
 
   static_assert(Traits::MaxCodeLenghtBits > 0 &&
                 Traits::MaxCodeLenghtBits <=
                     bitwidth<typename Traits::CodeTy>());
-  static_assert(Traits::MaxCodeLenghtBits == 16);
+  static_assert(Traits::MaxCodeLenghtBits == 16 ||
+                Traits::MaxCodeLenghtBits == 26);
 
   static_assert(Traits::MaxNumCodeValues > 0 &&
                 Traits::MaxNumCodeValues <=
                     ((1ULL << Traits::MaxCodeLenghtBits) - 1ULL));
-  static_assert(Traits::MaxNumCodeValues == 162);
+  static_assert(Traits::MaxNumCodeValues == 162 ||
+                Traits::MaxNumCodeValues == 264);
 
   static_assert(std::is_integral<typename Traits::CodeValueTy>::value);
   static_assert(std::is_unsigned<typename Traits::CodeValueTy>::value);
-  static_assert(std::is_same<typename Traits::CodeValueTy, uint8_t>::value);
+  static_assert(std::is_same<typename Traits::CodeValueTy, uint8_t>::value ||
+                std::is_same<typename Traits::CodeValueTy, uint16_t>::value);
 
   static_assert(Traits::MaxCodeValueLenghtBits > 0 &&
                 Traits::MaxCodeValueLenghtBits <=
                     bitwidth<typename Traits::CodeValueTy>());
-  static_assert(Traits::MaxCodeValueLenghtBits == 8);
+  static_assert(Traits::MaxCodeValueLenghtBits == 8 ||
+                Traits::MaxCodeValueLenghtBits == 9);
 
   static_assert(Traits::MaxCodeValue > 0 &&
                 Traits::MaxCodeValue <=
                     ((1ULL << Traits::MaxCodeValueLenghtBits) - 1ULL));
-  static_assert(Traits::MaxCodeValue == 255);
-
-  static_assert(Traits::MaxDiffLengthBits > 0 &&
-                Traits::MaxDiffLengthBits <=
-                    bitwidth<typename Traits::CodeValueTy>());
-  static_assert(Traits::MaxDiffLengthBits == 5);
-
-  static_assert(Traits::MaxDiffLength > 0 &&
-                Traits::MaxDiffLength <=
-                    ((1ULL << Traits::MaxDiffLengthBits) - 1ULL));
-  static_assert(Traits::MaxDiffLength == 16);
+  static_assert(Traits::MaxCodeValue == 255 || Traits::MaxCodeValue == 264);
 
   static_assert(
       std::is_same<decltype(Traits::SupportsFullDecode), const bool>::value);
+
+  static_assert(!Traits::SupportsFullDecode ||
+                (Traits::MaxDiffLengthBits > 0 &&
+                 Traits::MaxDiffLengthBits <=
+                     bitwidth<typename Traits::CodeValueTy>()));
+  static_assert(!Traits::SupportsFullDecode ||
+                (Traits::MaxDiffLengthBits == 5));
+
+  static_assert(!Traits::SupportsFullDecode ||
+                (Traits::MaxDiffLength > 0 &&
+                 Traits::MaxDiffLength <=
+                     ((1ULL << Traits::MaxDiffLengthBits) - 1ULL)));
+  static_assert(!Traits::SupportsFullDecode || (Traits::MaxDiffLength == 16));
 
   static constexpr bool validate() { return true; }
 };
