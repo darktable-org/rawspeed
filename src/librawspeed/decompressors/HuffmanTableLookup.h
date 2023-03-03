@@ -76,8 +76,11 @@ protected:
   // private fields calculated from codesPerBits and codeValues
   // they are index '1' based, so we can directly lookup the value
   // for code length l without decrementing
-  std::vector<uint16_t> maxCodeOL;    // index is length of code
-  std::vector<uint16_t> codeOffsetOL; // index is length of code
+  std::vector<typename Traits::CodeTy> maxCodeOL;    // index is length of code
+  std::vector<typename Traits::CodeTy> codeOffsetOL; // index is length of code
+
+  static constexpr auto MaxCodeValue =
+      std::numeric_limits<typename Traits::CodeTy>::max();
 
 public:
   std::vector<typename Base::CodeSymbol> setup(bool fullDecode_,
@@ -91,14 +94,14 @@ public:
     assert(symbols.size() == Base::maxCodesCount());
 
     // Figure F.15: generate decoding tables
-    codeOffsetOL.resize(Base::maxCodeLength() + 1UL, 0xFFFF);
-    maxCodeOL.resize(Base::maxCodeLength() + 1UL, 0xFFFF);
+    codeOffsetOL.resize(Base::maxCodeLength() + 1UL, MaxCodeValue);
+    maxCodeOL.resize(Base::maxCodeLength() + 1UL, MaxCodeValue);
     for (unsigned int numCodesSoFar = 0, codeLen = 1;
          codeLen <= Base::maxCodeLength(); codeLen++) {
       if (!Base::nCodesPerLength[codeLen])
         continue;
       codeOffsetOL[codeLen] = symbols[numCodesSoFar].code - numCodesSoFar;
-      assert(codeOffsetOL[codeLen] != 0xFFFF);
+      assert(codeOffsetOL[codeLen] != MaxCodeValue);
       numCodesSoFar += Base::nCodesPerLength[codeLen];
       maxCodeOL[codeLen] = symbols[numCodesSoFar - 1].code;
     }
@@ -130,7 +133,7 @@ protected:
   finishReadingPartialSymbol(BIT_STREAM& bs,
                              typename Base::CodeSymbol partial) const {
     while (partial.code_len < Base::maxCodeLength() &&
-           (0xFFFF == maxCodeOL[partial.code_len] ||
+           (MaxCodeValue == maxCodeOL[partial.code_len] ||
             partial.code > maxCodeOL[partial.code_len])) {
       uint32_t temp = bs.getBitsNoFill(1);
       partial.code = (partial.code << 1) | temp;
@@ -145,7 +148,7 @@ protected:
       ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
                partial.code_len);
 
-    assert(0xFFFF != codeOffsetOL[partial.code_len]);
+    assert(MaxCodeValue != codeOffsetOL[partial.code_len]);
     assert(partial.code >= codeOffsetOL[partial.code_len]);
     unsigned codeIndex = partial.code - codeOffsetOL[partial.code_len];
     assert(codeIndex < Base::codeValues.size());
