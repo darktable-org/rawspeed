@@ -115,6 +115,7 @@ public:
 
       uint16_t ll = symbols[i].code << (LookupDepth - code_l);
       uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
+      static_assert(Traits::MaxCodeValueLenghtBits <= 16);
       uint16_t diff_l = Base::codeValues[i];
       for (uint16_t c = ll; c <= ul; c++) {
         if (!(c < decodeLookup.size()))

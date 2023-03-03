@@ -56,8 +56,11 @@ template <> struct HuffmanTableTraits<BaselineHuffmanTableTag> final {
   static constexpr int MaxNumCodeValues = 162;
 
   using CodeValueTy = uint8_t;
-  static constexpr int MaxCodeValueLenghtBits = 5;
-  static constexpr CodeValueTy MaxCodeValue = 16;
+  static constexpr int MaxCodeValueLenghtBits = 8;
+  static constexpr CodeValueTy MaxCodeValue = 255;
+
+  static constexpr int MaxDiffLengthBits = 5;
+  static constexpr CodeValueTy MaxDiffLength = 16;
 
   static constexpr bool SupportsFullDecode = true;
 };
@@ -86,12 +89,22 @@ template <typename HuffmanTableTag> struct HuffmanTableTraitsValidator final {
   static_assert(Traits::MaxCodeValueLenghtBits > 0 &&
                 Traits::MaxCodeValueLenghtBits <=
                     bitwidth<typename Traits::CodeValueTy>());
-  static_assert(Traits::MaxCodeValueLenghtBits == 5);
+  static_assert(Traits::MaxCodeValueLenghtBits == 8);
 
   static_assert(Traits::MaxCodeValue > 0 &&
                 Traits::MaxCodeValue <=
                     ((1ULL << Traits::MaxCodeValueLenghtBits) - 1ULL));
-  static_assert(Traits::MaxCodeValue == 16);
+  static_assert(Traits::MaxCodeValue == 255);
+
+  static_assert(Traits::MaxDiffLengthBits > 0 &&
+                Traits::MaxDiffLengthBits <=
+                    bitwidth<typename Traits::CodeValueTy>());
+  static_assert(Traits::MaxDiffLengthBits == 5);
+
+  static_assert(Traits::MaxDiffLength > 0 &&
+                Traits::MaxDiffLength <=
+                    ((1ULL << Traits::MaxDiffLengthBits) - 1ULL));
+  static_assert(Traits::MaxDiffLength == 16);
 
   static_assert(
       std::is_same<decltype(Traits::SupportsFullDecode), const bool>::value);
@@ -133,12 +146,12 @@ public:
     }
   };
 
-  void verifyCodeSymbolsAreValidDiffLenghts() const {
+  void verifyCodeValuesAsDiffLengths() const {
     for (const auto cValue : codeValues) {
-      if (cValue <= Traits::MaxCodeValue)
+      if (cValue <= Traits::MaxDiffLength)
         continue;
       ThrowRDE("Corrupt Huffman code: difference length %u longer than %u",
-               cValue, Traits::MaxCodeValue);
+               cValue, Traits::MaxDiffLength);
     }
     assert(maxCodePlusDiffLength() <= 32U);
   }
@@ -186,7 +199,7 @@ protected:
       // as bit length of the following difference, which incurs hard limit
       // of 16 (since we want to need to read at most 32 bits max for a symbol
       // plus difference). Though we could enforce it per-code instead?
-      verifyCodeSymbolsAreValidDiffLenghts();
+      verifyCodeValuesAsDiffLengths();
     }
   }
 
@@ -311,6 +324,13 @@ public:
     codeValues.reserve(maxCodesCount());
     std::copy(data.begin(), data.end(), std::back_inserter(codeValues));
     assert(codeValues.size() == maxCodesCount());
+
+    for (const auto& cValue : codeValues) {
+      if (cValue <= Traits::MaxCodeValue)
+        continue;
+      ThrowRDE("Corrupt Huffman code: code value %u is larger than maximum %u",
+               cValue, Traits::MaxCodeValue);
+    }
   }
 
   template <typename BIT_STREAM, bool FULL_DECODE>
