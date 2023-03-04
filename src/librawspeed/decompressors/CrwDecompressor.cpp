@@ -77,7 +77,7 @@ HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
 
   HuffmanTable<> ht;
   auto count = ht.setNCodesPerLength(Buffer(ncpl, 16));
-  ht.setCodeValues(Buffer(values, count));
+  ht.setCodeValues(Array1DRef<const uint8_t>(values, count));
   ht.setup(/*fullDecode_=*/false, false);
 
   return ht;

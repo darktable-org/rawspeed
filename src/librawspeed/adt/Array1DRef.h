@@ -78,6 +78,9 @@ public:
   [[nodiscard]] int size() const;
 
   [[nodiscard]] T& operator()(int eltIdx) const;
+
+  [[nodiscard]] T* begin() const;
+  [[nodiscard]] T* end() const;
 };
 
 // CTAD deduction guide
@@ -107,5 +110,12 @@ template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
 }
 
 template <class T> inline int Array1DRef<T>::size() const { return numElts; }
+
+template <class T> inline T* Array1DRef<T>::begin() const {
+  return &operator()(0);
+}
+template <class T> inline T* Array1DRef<T>::end() const {
+  return &operator()(size() - 1) + 1;
+}
 
 } // namespace rawspeed

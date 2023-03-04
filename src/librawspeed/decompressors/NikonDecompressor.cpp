@@ -285,9 +285,9 @@ public:
     return acc;
   }
 
-  void setCodeValues(Buffer data) {
-    for (uint32_t i = 0; i < data.getSize(); i++)
-      dctbl1.huffval[i] = data[i];
+  void setCodeValues(Array1DRef<const uint8_t> data) {
+    for (int i = 0; i < data.size(); i++)
+      dctbl1.huffval[i] = data(i);
   }
 
   void setup([[maybe_unused]] bool fullDecode_,
@@ -437,7 +437,8 @@ Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
   Huffman ht;
   uint32_t count =
       ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
-  ht.setCodeValues(Buffer(nikon_tree[huffSelect][1].data(), count));
+  ht.setCodeValues(
+      Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
   ht.setup(true, false);
   return ht;
 }

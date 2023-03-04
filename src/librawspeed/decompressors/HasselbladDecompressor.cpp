@@ -87,7 +87,7 @@ ByteStream::size_type HasselbladDecompressor::decompress() {
   assert(out.width % 2 == 0);
 
   const auto ht = rec.ht;
-  ht.verifyCodeSymbolsAreValidDiffLenghts();
+  ht.verifyCodeValuesAsDiffLengths();
 
   BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:

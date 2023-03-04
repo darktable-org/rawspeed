@@ -21,6 +21,7 @@
 #pragma once
 
 #include "decompressors/DummyHuffmanTable.h"
+#include "decompressors/HuffmanTableTree.h"
 #include "io/Buffer.h"     // for Buffer
 #include "io/ByteStream.h" // for ByteStream
 #include <type_traits>     // for is_same
@@ -35,15 +36,35 @@ template <typename T> static constexpr int getHuffmanTableMaxLength() {
   return T::Traits::MaxCodeLenghtBits;
 }
 
+template <typename T>
+std::vector<typename T::Traits::CodeValueTy>
+getCodeValues(rawspeed::ByteStream& bs, unsigned numCodeValues) {
+  std::vector<typename T::Traits::CodeValueTy> values;
+  values.reserve(numCodeValues);
+  std::generate_n(std::back_inserter(values), numCodeValues, [&bs]() {
+    return bs.get<typename T::Traits::CodeValueTy>();
+  });
+  return values;
+}
+
 template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   T ht;
 
-  // first 16 bytes are consumed as n-codes-per-length
+  if (std::is_same_v<T,
+                     rawspeed::HuffmanTableTree<rawspeed::VC5HuffmanTableTag>>)
+    ThrowRSE("FIXME: impl+flavor combination not supported.");
+
+  // first bytes are consumed as n-codes-per-length
   const auto count =
       ht.setNCodesPerLength(bs.getBuffer(getHuffmanTableMaxLength<T>()));
 
-  // and then count more bytes consumed as code values
-  ht.setCodeValues(bs.getBuffer(count));
+  if (count) {
+    // and then count more bytes consumed as code values
+    const auto codesBuf = getCodeValues<T>(bs, count);
+    ht.setCodeValues(
+        rawspeed::Array1DRef<const typename T::Traits::CodeValueTy>(
+            codesBuf.data(), codesBuf.size()));
+  }
 
   // and one more byte as 'fixDNGBug16' boolean
   const bool fixDNGBug16 = bs.getByte() != 0;

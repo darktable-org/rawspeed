@@ -302,7 +302,7 @@ auto genHTFull = [](std::initializer_list<uint8_t>&& nCodesPerLength,
     -> AbstractHuffmanTable<BaselineHuffmanTableTag> {
   auto ht = genHT(std::move(nCodesPerLength));
   std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
-  Buffer b(v.data(), v.size());
+  rawspeed::Array1DRef<const uint8_t> b(v.data(), v.size());
   ht.setCodeValues(b);
   return ht;
 };
@@ -415,10 +415,10 @@ TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresCount) {
     v.reserve(count + 1);
     for (auto cnt = count - 1; cnt <= count + 1; cnt++) {
       v.resize(cnt);
-      Buffer bv(v.data(), v.size());
+      rawspeed::Array1DRef<const uint8_t> bv(v.data(), v.size());
       if (cnt != count) {
         ASSERT_DEATH({ ht.setCodeValues(bv); },
-                     "data.getSize\\(\\) == maxCodesCount\\(\\)");
+                     "\\(unsigned\\)data.size\\(\\) == maxCodesCount\\(\\)");
       } else {
         ASSERT_EXIT(
             {
@@ -434,9 +434,9 @@ TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresCount) {
 TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresLessThan162) {
   auto ht = genHT({0, 0, 0, 0, 0, 0, 0, 162});
   std::vector<uint8_t> v(163, 0);
-  Buffer bv(v.data(), v.size());
+  rawspeed::Array1DRef<const uint8_t> bv(v.data(), v.size());
   ASSERT_DEATH({ ht.setCodeValues(bv); },
-               "data.getSize\\(\\) <= Traits::MaxNumCodeValues");
+               "data.size\\(\\) <= Traits::MaxNumCodeValues");
 }
 #endif
 
@@ -446,7 +446,7 @@ TEST(AbstractHuffmanTableTest, setCodeValuesValueLessThan16) {
 
   for (int i = 0; i < 256; i++) {
     v[0] = i;
-    Buffer b(v.data(), v.size());
+    rawspeed::Array1DRef<const uint8_t> b(v.data(), v.size());
     ASSERT_NO_THROW(ht.setCodeValues(b););
   }
 }
@@ -629,7 +629,7 @@ TEST_P(generateCodeSymbolsTest, generateCodeSymbolsTest) {
   Buffer bl(ncpl.data(), ncpl.size());
   const auto cnt = setNCodesPerLength(bl);
   std::vector<uint8_t> cv(cnt, 0);
-  Buffer bv(cv.data(), cv.size());
+  rawspeed::Array1DRef<const uint8_t> bv(cv.data(), cv.size());
   setCodeValues(bv);
 
   ASSERT_EQ(generateCodeSymbols(), expectedSymbols);

@@ -48,7 +48,7 @@ public:
     return 0;
   }
 
-  static void setCodeValues(Buffer data) {
+  static void setCodeValues(Array1DRef<const uint8_t> data) {
     (void)data;
     // No-op.
   }

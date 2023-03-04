@@ -107,6 +107,12 @@ static void checkPump(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
 }
 
 template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
+  if (std::is_same_v<rawspeed::IMPL0<Tag>, rawspeed::HuffmanTableTree<
+                                               rawspeed::VC5HuffmanTableTag>> ||
+      std::is_same_v<rawspeed::IMPL1<Tag>,
+                     rawspeed::HuffmanTableTree<rawspeed::VC5HuffmanTableTag>>)
+    ThrowRSE("FIXME: impl+flavor combination not supported.");
+
   rawspeed::ByteStream bs0 = bs;
   rawspeed::ByteStream bs1 = bs;
 
@@ -170,6 +176,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     switch (bs.getByte()) {
     case 0:
       checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
+      break;
+    case 1:
+      checkFlavour<rawspeed::VC5HuffmanTableTag>(bs);
       break;
     default:
       ThrowRSE("Unknown flavor");

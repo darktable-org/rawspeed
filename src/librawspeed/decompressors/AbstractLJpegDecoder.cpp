@@ -240,7 +240,9 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
       ThrowRDE("Invalid DHT table.");
 
     // copy nCodes bytes from input stream to code values table
-    ht_.setCodeValues(dht.getBuffer(nCodes));
+    const auto codesBuf = dht.getBuffer(nCodes);
+    ht_.setCodeValues(
+        Array1DRef<const uint8_t>(codesBuf.begin(), codesBuf.getSize()));
 
     // see if we already have a HuffmanTable with the same codes
     for (const auto& i : huffmanTableStore)
