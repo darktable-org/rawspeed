@@ -23,7 +23,6 @@
 
 #include "AddressSanitizer.h" // for ASan
 #include "common/Common.h"    // for roundUp
-#include "common/Memory.h"    // for alignedMalloc
 #include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
 #include "io/IOException.h"   // for ThrowException, ThrowIOE
 #include <cassert>            // for assert
@@ -34,12 +33,13 @@
 namespace rawspeed {
 
 class ByteStream final : public DataBuffer {
-  size_type pos = 0; // position of stream in bytes (this is next byte to deliver)
+  size_type pos =
+      0; // position of stream in bytes (this is next byte to deliver)
 
 public:
   ByteStream() = default;
 
-  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
+  explicit ByteStream(DataBuffer buffer) : DataBuffer(buffer) {}
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
@@ -53,10 +53,9 @@ public:
   }
 
   [[nodiscard]] inline size_type check(size_type bytes) const {
-    if (static_cast<uint64_t>(pos) + bytes > size)
+    if (static_cast<uint64_t>(pos) + bytes > getSize())
       ThrowIOE("Out of bounds access in ByteStream");
-    assert(!ASan::RegionIsPoisoned(
-        reinterpret_cast<const std::byte*>(data) + pos, bytes));
+    assert(!ASan::RegionIsPoisoned(data + pos, bytes));
     return bytes;
   }
 
@@ -67,7 +66,7 @@ public:
   }
 
   [[nodiscard]] inline size_type getPosition() const {
-    assert(size >= pos);
+    assert(getSize() >= pos);
     (void)check(0);
     return pos;
   }
@@ -76,9 +75,9 @@ public:
     (void)check(0);
   }
   [[nodiscard]] inline size_type getRemainSize() const {
-    assert(size >= pos);
+    assert(getSize() >= pos);
     (void)check(0);
-    return size - pos;
+    return getSize() - pos;
   }
   [[nodiscard]] inline const uint8_t* peekData(size_type count) const {
     return Buffer::getData(pos, count);
@@ -88,8 +87,11 @@ public:
     pos += count;
     return ret;
   }
+  [[nodiscard]] inline Buffer peekBuffer(size_type size_) const {
+    return getSubView(pos, size_);
+  }
   inline Buffer getBuffer(size_type size_) {
-    Buffer ret = getSubView(pos, size_);
+    Buffer ret = peekBuffer(size_);
     pos += size_;
     return ret;
   }
@@ -116,7 +118,7 @@ public:
   [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
     assert(data);
     (void)check(i + 1);
-    return data[pos+i];
+    return data[pos + i];
   }
 
   inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
@@ -124,7 +126,7 @@ public:
     pos += check(nmemb, size_);
   }
 
-  inline bool hasPatternAt(const char *pattern, size_type size_,
+  inline bool hasPatternAt(const char* pattern, size_type size_,
                            size_type relPos) const {
     assert(data);
     if (!isValid(pos + relPos, size_))
@@ -132,11 +134,11 @@ public:
     return memcmp(&data[pos + relPos], pattern, size_) == 0;
   }
 
-  inline bool hasPrefix(const char *prefix, size_type size_) const {
+  inline bool hasPrefix(const char* prefix, size_type size_) const {
     return hasPatternAt(prefix, size_, 0);
   }
 
-  inline bool skipPrefix(const char *prefix, size_type size_) {
+  inline bool skipPrefix(const char* prefix, size_type size_) {
     bool has_prefix = hasPrefix(prefix, size_);
     if (has_prefix)
       pos += size_;
@@ -149,15 +151,13 @@ public:
     return data[pos++];
   }
 
-  template <typename T>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
-  peek(size_type i = 0) const {
+  template <typename T> [[nodiscard]] inline T peek(size_type i = 0) const {
     return DataBuffer::get<T>(pos, i);
   }
 
   [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
 
-  template<typename T> inline T get() {
+  template <typename T> inline T get() {
     auto ret = peek<T>();
     pos += sizeof(T);
     return ret;
@@ -168,37 +168,21 @@ public:
   inline uint32_t getU32() { return get<uint32_t>(); }
   inline float getFloat() { return get<float>(); }
 
-  [[nodiscard]] const char* peekString() const {
-    assert(data);
-    if (memchr(peekData(getRemainSize()), 0, getRemainSize()) == nullptr)
+  [[nodiscard]] std::string_view peekString() const {
+    Buffer tmp = peekBuffer(getRemainSize());
+    const auto* termIter = std::find(tmp.begin(), tmp.end(), '\0');
+    if (termIter == tmp.end())
       ThrowIOE("String is not null-terminated");
-    return reinterpret_cast<const char*>(&data[pos]);
+    std::string_view::size_type strlen = std::distance(tmp.begin(), termIter);
+    return {reinterpret_cast<const char*>(tmp.begin()), strlen};
   }
 
-  // Increments the stream to after the next zero byte and returns the bytes in between (not a copy).
-  // If the first byte is zero, stream is incremented one.
-  const char* getString() {
-    assert(data);
-    size_type start = pos;
-    bool isNullTerminator = false;
-    do {
-      (void)check(1);
-      isNullTerminator = (data[pos] == '\0');
-      pos++;
-    } while (!isNullTerminator);
-    return reinterpret_cast<const char*>(&data[start]);
-  }
-
-  // special factory function to set up internal buffer with copy of passed data.
-  // only necessary to create 'fake' TiffEntries (see e.g. RAF)
-  static ByteStream createCopy(const std::byte* data_, size_type size_) {
-    ByteStream bs;
-    auto* new_data = alignedMalloc<std::byte, 8>(roundUp(size_, 8));
-    memcpy(new_data, data_, size_);
-    bs.data = reinterpret_cast<const uint8_t*>(new_data);
-    bs.size = size_;
-    bs.isOwner = true;
-    return bs; // hint: copy elision or move will happen
+  // Increments the stream to after the next zero byte and returns the bytes in
+  // between (not a copy). If the first byte is zero, stream is incremented one.
+  [[nodiscard]] std::string_view getString() {
+    std::string_view str = peekString();
+    skipBytes(1 + str.size());
+    return str;
   }
 };
 

@@ -19,7 +19,7 @@
 */
 
 #include "adt/Range.h"   // for Range
-#include <gtest/gtest.h> // for ParamIteratorInterface, AssertionFailure
+#include <gtest/gtest.h> // for TestWithParam, UnitTest
 #include <ostream>       // for basic_ostream::operator<<, operator<<, ost...
 #include <set>           // for allocator, set
 #include <tuple>         // for make_tuple, tuple, get

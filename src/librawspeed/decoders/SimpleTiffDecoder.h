@@ -23,6 +23,7 @@
 #pragma once
 
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <cstdint>                        // for uint32_t
 #include <utility>                        // for move
@@ -35,7 +36,7 @@ class SimpleTiffDecoder : public AbstractTiffDecoder {
   virtual void checkImageDimensions() = 0;
 
 public:
-  SimpleTiffDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  SimpleTiffDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   void prepareForRawDecoding();

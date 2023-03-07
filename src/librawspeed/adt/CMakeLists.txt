@@ -1,5 +1,8 @@
 FILE(GLOB SOURCES
+  "AlignedAllocator.h"
+  "Array1DRef.h"
   "Array2DRef.h"
+  "CroppedArray1DRef.h"
   "CroppedArray2DRef.h"
   "DefaultInitAllocatorAdaptor.h"
   "Mutex.h"

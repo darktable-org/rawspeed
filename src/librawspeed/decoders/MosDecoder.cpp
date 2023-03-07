@@ -46,8 +46,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file) {
   try {
     const auto id = rootIFD->getID();
     const std::string& make = id.make;
@@ -68,7 +67,7 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   }
 }
 
-MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
     : AbstractTiffDecoder(std::move(rootIFD), file) {
   if (mRootIFD->getEntryRecursive(TiffTag::MAKE)) {
     auto id = mRootIFD->getID();
@@ -91,14 +90,14 @@ std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
   std::string::size_type end = xmp.find("</tiff:" + std::string(tag) + ">");
   if (start == std::string::npos || end == std::string::npos || end <= start)
     ThrowRDE("Couldn't find tag '%s' in the XMP", tag.data());
-  int startlen = tag.size()+7;
+  int startlen = tag.size() + 7;
   return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 
 RawImage MosDecoder::decodeRawInternal() {
   uint32_t off = 0;
 
-  const TiffIFD *raw = nullptr;
+  const TiffIFD* raw = nullptr;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::TILEOFFSETS)) {
     raw = mRootIFD->getIFDWithTag(TiffTag::TILEOFFSETS);
@@ -116,23 +115,20 @@ RawImage MosDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
   if (bs.getRemainSize() == 0)
     ThrowRDE("Input buffer is empty");
 
-  UncompressedDecompressor u(bs, mRaw);
-
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
       1 == compression) {
     const Endianness endianness =
         getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
-
-    if (Endianness::big == endianness)
-      u.decodeRawUnpacked<16, Endianness::big>(width, height);
-    else
-      u.decodeRawUnpacked<16, Endianness::little>(width, height);
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
+        endianness == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");
     // LJpegPlain l(mFile, mRaw);
@@ -150,7 +146,8 @@ void MosDecoder::checkSupportInternal(const CameraMetaData* meta) {
 void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   RawDecoder::setMetaData(meta, make, model, "", 0);
 
-  // Fetch the white balance (see dcraw.c parse_mos for more metadata that can be gotten)
+  // Fetch the white balance (see dcraw.c parse_mos for more metadata that can
+  // be gotten)
   if (mRootIFD->hasEntryRecursive(TiffTag::LEAFMETADATA)) {
     ByteStream bs =
         mRootIFD->getEntryRecursive(TiffTag::LEAFMETADATA)->getData();
@@ -167,7 +164,8 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
           break;
         std::array<uint32_t, 4> tmp = {{}};
-        std::istringstream iss(bs.peekString());
+        const std::string tmpString(bs.peekString());
+        std::istringstream iss(tmpString);
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {

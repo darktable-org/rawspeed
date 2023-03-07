@@ -46,8 +46,7 @@ using TiffIFDOwner = std::unique_ptr<TiffIFD>;
 using TiffRootIFDOwner = std::unique_ptr<TiffRootIFD>;
 using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 
-class TiffIFD
-{
+class TiffIFD {
   uint32_t nextIFD = 0;
 
   TiffIFD* const parent;
@@ -98,7 +97,7 @@ class TiffIFD
 public:
   explicit TiffIFD(TiffIFD* parent);
 
-  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, const DataBuffer& data,
+  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, DataBuffer data,
           uint32_t offset);
 
   virtual ~TiffIFD() = default;
@@ -125,11 +124,11 @@ public:
   [[nodiscard]] const std::vector<TiffIFDOwner>& getSubIFDs() const {
     return subIFDs;
   }
-//  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
+  //  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries;
+  //  }
 };
 
-struct TiffID
-{
+struct TiffID {
   std::string make;
   std::string model;
 };
@@ -138,8 +137,8 @@ class TiffRootIFD final : public TiffIFD {
 public:
   const DataBuffer rootBuffer;
 
-  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-              const DataBuffer& data, uint32_t offset)
+  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds, DataBuffer data,
+              uint32_t offset)
       : TiffIFD(parent_, ifds, data, offset), rootBuffer(data) {}
 
   // find the MAKE and MODEL tags identifying the camera
@@ -147,7 +146,7 @@ public:
   [[nodiscard]] TiffID getID() const;
 };
 
-inline Endianness getTiffByteOrder(const ByteStream& bs, uint32_t pos,
+inline Endianness getTiffByteOrder(ByteStream bs, uint32_t pos,
                                    const char* context = "") {
   if (bs.hasPatternAt("II", 2, pos))
     return Endianness::little;

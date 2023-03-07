@@ -18,15 +18,19 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"     // for HAVE_OPENMP
-#include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for FileIOException
-#include "io/FileReader.h"      // for FileReader
-#include <cstdint>              // for uint8_t
-#include <cstdlib>              // for EXIT_SUCCESS, size_t
-#include <iostream>             // for operator<<, cout, ostream
-#include <memory>               // for unique_ptr, allocator
-#include <string>               // for operator==, string
+#include "rawspeedconfig.h"                  // for HAVE_OPENMP
+#include "adt/AlignedAllocator.h"            // for AlignedAllocator
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "io/Buffer.h"                       // for Buffer
+#include "io/FileIOException.h"              // for FileIOException
+#include "io/FileReader.h"                   // for FileReader
+#include <cstdint>                           // for uint8_t
+#include <cstdlib>                           // for EXIT_SUCCESS, size_t
+#include <iostream>                          // for operator<<, cout, ostream
+#include <memory>                            // for unique_ptr, allocator
+#include <string>                            // for operator==, string
+#include <tuple>                             // for tie, tuple
+#include <vector>                            // for vector
 
 #ifdef HAVE_OPENMP
 #include <omp.h> // for omp_get_num_threads
@@ -44,17 +48,21 @@ static int usage() {
 
 static void process(const char* filename) noexcept {
   rawspeed::FileReader reader(filename);
-  std::unique_ptr<const rawspeed::Buffer> buf;
+  std::unique_ptr<std::vector<
+      uint8_t, rawspeed::DefaultInitAllocatorAdaptor<
+                   uint8_t, rawspeed::AlignedAllocator<uint8_t, 16>>>>
+      storage;
+  rawspeed::Buffer buf;
 
   try {
-    buf = reader.readFile();
+    std::tie(storage, buf) = reader.readFile();
   } catch (const rawspeed::FileIOException&) {
     // failed to read the file for some reason.
     // just ignore it.
     return;
   }
 
-  LLVMFuzzerTestOneInput(buf->getData(0, buf->getSize()), buf->getSize());
+  LLVMFuzzerTestOneInput(buf.getData(0, buf.getSize()), buf.getSize());
 }
 
 int main(int argc, char** argv) {

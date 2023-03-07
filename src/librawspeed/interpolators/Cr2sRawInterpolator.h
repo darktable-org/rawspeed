@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "adt/Array2DRef.h"    // for Array2DRef
-#include <array>               // for array
-#include <cstdint>             // for uint16_t
+#include "adt/Array2DRef.h" // for Array2DRef
+#include <array>            // for array
+#include <cstdint>          // for uint16_t
 
 namespace rawspeed {
 

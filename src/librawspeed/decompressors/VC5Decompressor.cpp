@@ -44,7 +44,7 @@
 #include <optional>                       // for optional, operator==
 #include <string>                         // for string
 #include <tuple>                          // for tie, tuple
-#include <utility>                        // for move, pair
+#include <utility>                        // for pair
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace {
@@ -377,7 +377,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::createDecodingTasks(
 }
 
 VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
-    : mRaw(img), mBs(std::move(bs)) {
+    : mRaw(img), mBs(bs) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -601,7 +601,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 #ifdef HAVE_OPENMP
 #pragma omp atomic write
 #endif
-      exceptionThrown = true;
+        exceptionThrown = true;
       }
     }
   }
@@ -610,7 +610,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
                                                    ByteStream bs_,
                                                    uint16_t lowpassPrecision_)
-    : AbstractDecodeableBand(wavelet_, std::move(bs_)),
+    : AbstractDecodeableBand(wavelet_, bs_),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.
   // It consists of width * height pixels, `lowpassPrecision` each.
@@ -656,7 +656,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
   public:
-    DeRLVer(const ByteStream& bs, int16_t quant_) : bits(bs), quant(quant_) {}
+    DeRLVer(ByteStream bs, int16_t quant_) : bits(bs), quant(quant_) {}
 
     void verifyIsAtEnd() {
       if (numPixelsLeft != 0)
@@ -701,7 +701,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   return highpass;
 }
 
-void VC5Decompressor::parseLargeCodeblock(const ByteStream& bs) {
+void VC5Decompressor::parseLargeCodeblock(ByteStream bs) {
   static const auto subband_wavelet_index = []() {
     std::array<int, numSubbands> wavelets;
     int wavelet = 0;

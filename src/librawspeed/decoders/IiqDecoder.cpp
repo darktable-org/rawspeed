@@ -40,26 +40,26 @@
 #include <array>                                // for array, array<>::valu...
 #include <cassert>                              // for assert
 #include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for lround, abs
+#include <cmath>                                // for abs, lround
 #include <cstdlib>                              // for abs
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
-#include <string>                               // for operator==, string
-#include <utility>                              // for move
-#include <vector>                               // for vector, allocator
+#include <optional>
+#include <string>  // for operator==, string
+#include <utility> // for move
+#include <vector>  // for vector, allocator
 
 namespace rawspeed {
 
-bool IiqDecoder::isAppropriateDecoder(const Buffer& file) {
+bool IiqDecoder::isAppropriateDecoder(Buffer file) {
   const DataBuffer db(file, Endianness::little);
 
   // The IIQ magic. Is present for all IIQ raws.
   return db.get<uint32_t>(8) == 0x49494949;
 }
 
-bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -69,8 +69,8 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
 std::vector<PhaseOneStrip>
-IiqDecoder::computeSripes(const Buffer& raw_data,
-                          std::vector<IiqOffset> offsets, uint32_t height) {
+IiqDecoder::computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
+                          uint32_t height) {
   assert(height > 0);
   assert(offsets.size() == (1 + height));
 
@@ -111,6 +111,38 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
   return slices;
 }
 
+namespace {
+
+enum class IIQFormat {
+  RAW_1,
+  RAW_2,
+  IIQ_L,
+  IIQ_S,
+  IIQ_Sv2,
+  IIQ_L16
+
+};
+
+std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
+  switch (v) {
+  case 1:
+    return IIQFormat::RAW_1;
+  case 2:
+    return IIQFormat::RAW_2;
+  case 3:
+    return IIQFormat::IIQ_L;
+  case 5:
+    return IIQFormat::IIQ_S;
+  case 6:
+    return IIQFormat::IIQ_Sv2;
+  case 8:
+    return IIQFormat::IIQ_L16;
+  default:
+    return std::nullopt;
+  }
+}
+} // namespace
+
 RawImage IiqDecoder::decodeRawInternal() {
   const Buffer buf(mFile.getSubView(8));
   const DataBuffer db(buf, Endianness::little);
@@ -138,6 +170,7 @@ RawImage IiqDecoder::decodeRawInternal() {
   uint32_t split_row = 0;
   uint32_t split_col = 0;
 
+  std::optional<IIQFormat> format;
   Buffer raw_data;
   ByteStream block_offsets;
   ByteStream wb;
@@ -158,6 +191,13 @@ RawImage IiqDecoder::decodeRawInternal() {
       break;
     case 0x109:
       height = data;
+      break;
+    case 0x10e: // RawFormat
+      if (format)
+        ThrowRDE("Duplicate RawFormat tag.");
+      format = getAsIIQFormat(data);
+      if (!format || *format != IIQFormat::IIQ_L)
+        ThrowRDE("Unsupported RawFormat: %u", data);
       break;
     case 0x10f:
       raw_data = bs.getSubView(data, len);
@@ -187,6 +227,9 @@ RawImage IiqDecoder::decodeRawInternal() {
   // FIXME: could be wrong. max "active pixels" in "Sensor+" mode - "101 MP"
   if (width == 0 || height == 0 || width > 11976 || height > 8854)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  if (!format)
+    ThrowRDE("Unspecified RawFormat");
 
   if (split_col > width || split_row > height)
     ThrowRDE("Invalid sensor quadrant split values (%u, %u)", split_row,

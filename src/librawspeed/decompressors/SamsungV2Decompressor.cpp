@@ -80,8 +80,7 @@ SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
-                                             const ByteStream& bs,
-                                             unsigned bits)
+                                             ByteStream bs, unsigned bits)
     : AbstractSamsungDecompressor(image) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))

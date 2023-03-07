@@ -28,17 +28,16 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min
+#include <algorithm>                      // for min, fill_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <utility>                        // for move
 
 namespace rawspeed {
 
 KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
                                      int bps_, bool uncorrectedRawValues_)
-    : mRaw(img), input(std::move(bs)), bps(bps_),
+    : mRaw(img), input(bs), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -103,7 +102,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = len != 0 ? HuffmanTable::extend(diff, len) : int(diff);
+    out[i] = len != 0 ? HuffmanTable<>::extend(diff, len) : int(diff);
   }
 
   return out;

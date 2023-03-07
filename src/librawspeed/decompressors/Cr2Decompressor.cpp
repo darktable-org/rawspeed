@@ -24,6 +24,6 @@
 
 namespace rawspeed {
 
-template class Cr2Decompressor<HuffmanTable>;
+template class Cr2Decompressor<HuffmanTable<>>;
 
 } // namespace rawspeed

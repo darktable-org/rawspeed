@@ -22,12 +22,12 @@
 
 #pragma once
 
-#include "adt/NORangesSet.h"    // for set
-#include "io/ByteStream.h"      // for ByteStream
-#include "tiff/CiffTag.h"       // for CiffTag
-#include <cstdint>              // for uint32_t, uint16_t, uint8_t
-#include <string>               // for string
-#include <vector>               // for vector
+#include "adt/NORangesSet.h" // for set
+#include "io/ByteStream.h"   // for ByteStream
+#include "tiff/CiffTag.h"    // for CiffTag
+#include <cstdint>           // for uint32_t, uint16_t, uint8_t
+#include <string>            // for string
+#include <vector>            // for vector
 
 namespace rawspeed {
 
@@ -49,23 +49,22 @@ enum class CiffDataType {
 
 };
 
-class CiffEntry
-{
+class CiffEntry {
   friend class CiffIFD;
 
   ByteStream data;
 
 public:
-  explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream dirEntry);
+  explicit CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                     ByteStream dirEntry);
 
-  [[nodiscard]] const ByteStream& getData() const { return data; }
+  [[nodiscard]] ByteStream getData() const { return data; }
 
   [[nodiscard]] uint8_t getByte(uint32_t num = 0) const;
   [[nodiscard]] uint32_t getU32(uint32_t num = 0) const;
   [[nodiscard]] uint16_t getU16(uint32_t num = 0) const;
 
-  [[nodiscard]] std::string getString() const;
+  [[nodiscard]] std::string_view getString() const;
   [[nodiscard]] std::vector<std::string> getStrings() const;
 
   [[nodiscard]] uint32_t __attribute__((pure)) getElementSize() const;

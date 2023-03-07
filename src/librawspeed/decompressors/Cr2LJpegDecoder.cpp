@@ -25,6 +25,7 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
+#include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for generate_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
@@ -36,10 +37,8 @@
 
 namespace rawspeed {
 
-class ByteStream;
-
-Cr2LJpegDecoder::Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img)
-    : AbstractLJpegDecompressor(bs, img) {
+Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
+    : AbstractLJpegDecoder(bs, img) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
@@ -53,8 +52,7 @@ Cr2LJpegDecoder::Cr2LJpegDecoder(const ByteStream& bs, const RawImage& img)
   }
 }
 
-void Cr2LJpegDecoder::decodeScan()
-{
+void Cr2LJpegDecoder::decodeScan() {
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
 
@@ -131,18 +129,18 @@ void Cr2LJpegDecoder::decodeScan()
 
   int N_COMP = std::get<0>(format);
 
-  std::vector<Cr2Decompressor<HuffmanTable>::PerComponentRecipe> rec;
+  std::vector<Cr2Decompressor<HuffmanTable<>>::PerComponentRecipe> rec;
   rec.reserve(N_COMP);
   std::generate_n(std::back_inserter(rec), N_COMP,
                   [&rec, hts = getHuffmanTables(N_COMP),
                    initPred = getInitialPredictors(N_COMP)]()
-                      -> Cr2Decompressor<HuffmanTable>::PerComponentRecipe {
+                      -> Cr2Decompressor<HuffmanTable<>>::PerComponentRecipe {
                     const int i = rec.size();
                     return {*hts[i], initPred[i]};
                   });
 
-  Cr2Decompressor<HuffmanTable> d(mRaw, format, iPoint2D(frame.w, frame.h),
-                                  slicing, rec, input);
+  Cr2Decompressor<HuffmanTable<>> d(mRaw, format, iPoint2D(frame.w, frame.h),
+                                    slicing, rec, input);
   d.decompress();
 }
 
@@ -154,7 +152,7 @@ void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
       ThrowRDE("Bad slice width: %i", sliceWidth);
   }
 
-  AbstractLJpegDecompressor::decode();
+  AbstractLJpegDecoder::decodeSOI();
 }
 
 } // namespace rawspeed

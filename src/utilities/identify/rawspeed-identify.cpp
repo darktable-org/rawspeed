@@ -17,16 +17,16 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "RawSpeed-API.h"      // for RawImage, RawImageData, iPoint2D, Cam...
-#include "adt/Array2DRef.h"    // for Array2DRef
-#include <array>               // for array
-#include <cstddef>             // for byte, size_t
-#include <cstdint>             // for uint16_t, uint32_t
-#include <cstdio>              // for fprintf, stdout, stderr
-#include <memory>              // for unique_ptr, allocator, make_unique
-#include <string>              // for string, operator+, basic_string
-#include <sys/stat.h>          // for stat
-#include <vector>              // for vector
+#include "RawSpeed-API.h"   // for RawImage, RawImageData, iPoint2D, Cam...
+#include "adt/Array2DRef.h" // for Array2DRef
+#include <array>            // for array
+#include <cstddef>          // for byte, size_t
+#include <cstdint>          // for uint16_t, uint32_t
+#include <cstdio>           // for fprintf, stdout, stderr
+#include <memory>           // for unique_ptr, allocator, make_unique
+#include <string>           // for string, operator+, basic_string
+#include <sys/stat.h>       // for stat
+#include <vector>           // for vector
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -40,7 +40,7 @@ namespace rawspeed::identify {
 
 std::string find_cameras_xml(const char* argv0);
 
-std::string find_cameras_xml(const char *argv0) {
+std::string find_cameras_xml(const char* argv0) {
   struct stat statbuf;
 
 #ifdef RS_CAMERAS_XML_PATH
@@ -166,9 +166,9 @@ int main(int argc, char* argv[]) { // NOLINT
 
     FileReader f(imageFileName);
 
-    std::unique_ptr<const Buffer> m(f.readFile());
+    auto [storage, buf] = f.readFile();
 
-    RawParser t(*m);
+    RawParser t(buf);
 
     auto d(t.getDecoder(meta.get()));
 

@@ -19,11 +19,12 @@
 */
 
 #include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
+#include "bench/Common.h"                    // for benchmarkDryRun
 #include <benchmark/benchmark.h>             // for State, Benchmark
 #include <map>                               // for map<>::mapped_type
 #include <vector>                            // for allocator, vector
 
-using Type = int;
+using Type = std::byte;
 
 template <typename Allocator> static void construct(benchmark::State& state) {
   std::vector<Type, Allocator> vec(state.range(0));
@@ -45,13 +46,19 @@ void BM_std_vector(benchmark::State& state, Worker&& worker) {
     worker(state);
 
   const auto AllocSize = sizeof(Type) * state.range(0);
-  state.counters["Allocation,bytes"] = AllocSize;
+  state.counters["Allocation,bytes"] = benchmark::Counter(
+      AllocSize, benchmark::Counter::kDefaults, benchmark::Counter::kIs1024);
   state.SetComplexityN(AllocSize);
   state.SetBytesProcessed(AllocSize * state.iterations());
   state.SetItemsProcessed(state.range(0) * state.iterations());
 }
 
 static void CustomArguments(benchmark::internal::Benchmark* b) {
+  if (benchmarkDryRun()) {
+    b->Arg(512U * (1U << 10U)); // 512 KiB
+    return;
+  }
+
   b->RangeMultiplier(2)
       ->Range(1U << 0U, 1U << 31U)
       ->Complexity(benchmark::BigO::oN);
@@ -60,20 +67,21 @@ static void CustomArguments(benchmark::internal::Benchmark* b) {
 #define BENCHMARK_CAPTURE_NAME(func, ...)                                      \
   BENCHMARK_CAPTURE(func, #__VA_ARGS__, __VA_ARGS__)
 
-BENCHMARK_CAPTURE_NAME(BM_std_vector, construct<std::allocator<int>>)
+BENCHMARK_CAPTURE_NAME(BM_std_vector, construct<std::allocator<Type>>)
     ->Apply(CustomArguments);
 BENCHMARK_CAPTURE_NAME(
     BM_std_vector,
-    construct<rawspeed::DefaultInitAllocatorAdaptor<int, std::allocator<int>>>)
+    construct<
+        rawspeed::DefaultInitAllocatorAdaptor<Type, std::allocator<Type>>>)
     ->Apply(CustomArguments);
 
 BENCHMARK_CAPTURE_NAME(BM_std_vector,
-                       construct_with_zeroinit<std::allocator<int>>)
+                       construct_with_zeroinit<std::allocator<Type>>)
     ->Apply(CustomArguments);
 BENCHMARK_CAPTURE_NAME(
     BM_std_vector,
     construct_with_zeroinit<
-        rawspeed::DefaultInitAllocatorAdaptor<int, std::allocator<int>>>)
+        rawspeed::DefaultInitAllocatorAdaptor<Type, std::allocator<Type>>>)
     ->Apply(CustomArguments);
 
 BENCHMARK_MAIN();

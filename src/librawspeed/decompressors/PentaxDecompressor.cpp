@@ -28,10 +28,9 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for max
+#include <algorithm>                      // for max, fill_n
 #include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <utility>                        // for move
+#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -46,7 +45,7 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
 
 PentaxDecompressor::PentaxDecompressor(const RawImage& img,
                                        std::optional<ByteStream> metaData)
-    : mRaw(img), ht(SetupHuffmanTable(std::move(metaData))) {
+    : mRaw(img), ht(SetupHuffmanTable(metaData)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -58,19 +57,19 @@ PentaxDecompressor::PentaxDecompressor(const RawImage& img,
   }
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable_Legacy() {
-  HuffmanTable ht;
+HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Legacy() {
+  HuffmanTable<> ht;
 
   /* Initialize with legacy data */
   auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
   assert(nCodes == 13); // see pentax_tree definition
-  ht.setCodeValues(Buffer(pentax_tree[0][1].data(), nCodes));
+  ht.setCodeValues(Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
 
   return ht;
 }
 
-HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
-  HuffmanTable ht;
+HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
+  HuffmanTable<> ht;
 
   const uint32_t depth = stream.getU16() + 12;
   if (depth > 15)
@@ -117,19 +116,20 @@ HuffmanTable PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
         sm_val = v2[j];
       }
     }
+    assert(sm_num < 16);
     codeValues.push_back(sm_num);
     v2[sm_num] = 0xffffffff;
   }
 
   assert(codeValues.size() == nCodes);
-  ht.setCodeValues(Buffer(codeValues.data(), nCodes));
+  ht.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
 
   return ht;
 }
 
-HuffmanTable
+HuffmanTable<>
 PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
-  HuffmanTable ht;
+  HuffmanTable<> ht;
 
   if (metaData)
     ht = SetupHuffmanTable_Modern(*metaData);
@@ -141,7 +141,7 @@ PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
   return ht;
 }
 
-void PentaxDecompressor::decompress(const ByteStream& data) const {
+void PentaxDecompressor::decompress(ByteStream data) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   assert(out.height > 0);

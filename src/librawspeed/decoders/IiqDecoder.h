@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
 #include <cstdint>                        // for uint32_t, uint16_t
 #include <utility>                        // for move
@@ -45,15 +46,14 @@ class IiqDecoder final : public AbstractTiffDecoder {
   };
 
   static std::vector<PhaseOneStrip>
-  computeSripes(const Buffer& raw_data, std::vector<IiqOffset> offsets,
+  computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
                 uint32_t height);
 
 public:
-  static bool isAppropriateDecoder(const Buffer& file);
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
+  static bool isAppropriateDecoder(Buffer file);
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
 
-  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
+  IiqDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
       : AbstractTiffDecoder(std::move(rootIFD), file) {}
 
   RawImage decodeRawInternal() override;

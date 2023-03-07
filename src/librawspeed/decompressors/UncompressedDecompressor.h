@@ -38,6 +38,14 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   ByteStream input;
   RawImage mRaw;
 
+  const iPoint2D size;
+  const iPoint2D offset;
+  int inputPitchBytes;
+  int bitPerPixel;
+  BitOrder order;
+
+  uint32_t skipBytes;
+
   // check buffer size, throw, or compute minimal height that can be decoded
   void sanityCheck(const uint32_t* h, int bytesPerLine) const;
 
@@ -48,17 +56,14 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   static int bytesPerLine(int w, bool skips);
 
   template <typename Pump, typename NarrowFpType>
-  void decodePackedFP(const iPoint2D& size, const iPoint2D& offset,
-                      uint32_t skipBytes, int rows, int row) const;
+  void decodePackedFP(int rows, int row) const;
 
-  template <typename Pump>
-  void decodePackedInt(const iPoint2D& size, const iPoint2D& offset,
-                       uint32_t skipBytes, int rows, int row,
-                       int bitPerPixel) const;
+  template <typename Pump> void decodePackedInt(int rows, int row) const;
 
 public:
-  UncompressedDecompressor(ByteStream input_, const RawImage& img)
-      : input(std::move(input_)), mRaw(img) {}
+  UncompressedDecompressor(ByteStream input, const RawImage& img,
+                           const iRectangle2D& crop, int inputPitchBytes,
+                           int bitPerPixel, BitOrder order);
 
   /* Helper function for decoders, that will unpack uncompressed image data */
   /* input: Input image, positioned at first pixel */
@@ -67,69 +72,32 @@ public:
   /* inputPitch: Number of bytes between each line in the input image */
   /* bitPerPixel: Number of bits to read for each input pixel. */
   /* order: Order of the bits - see Common.h for possibilities. */
-  void readUncompressedRaw(const iPoint2D& size, const iPoint2D& offset,
-                           int inputPitchBytes, int bitPerPixel,
-                           BitOrder order);
+  void readUncompressedRaw();
 
   /* Faster versions for unpacking 8 bit data */
-  template <bool uncorrectedRawValues>
-  void decode8BitRaw(uint32_t w, uint32_t h);
+  template <bool uncorrectedRawValues> void decode8BitRaw();
 
-  /* Faster version for unpacking 12 bit data */
-  /* interlaced - is data with interlaced lines ? */
-  /* skips - is there control byte every 10 pixels ? */
-  template <Endianness e, bool interlaced = false, bool skips = false>
-  void decode12BitRaw(uint32_t w, uint32_t h);
+  /* Faster version for unpacking 12 bit data with control byte every 10 pixels
+   */
+  template <Endianness e> void decode12BitRawWithControl();
 
   /* Faster version for reading unpacked 12 bit data that is left aligned
    * (needs >> 4 shift) */
-  template <Endianness e>
-  void decode12BitRawUnpackedLeftAligned(uint32_t w, uint32_t h);
-
-  /* Faster version for reading unpacked data */
-  template <int bits, Endianness e>
-  void decodeRawUnpacked(uint32_t w, uint32_t h);
+  template <Endianness e> void decode12BitRawUnpackedLeftAligned();
 };
 
-extern template void UncompressedDecompressor::decode8BitRaw<false>(uint32_t w,
-                                                                    uint32_t h);
-extern template void UncompressedDecompressor::decode8BitRaw<true>(uint32_t w,
-                                                                   uint32_t h);
+extern template void UncompressedDecompressor::decode8BitRaw<false>();
+extern template void UncompressedDecompressor::decode8BitRaw<true>();
 
 extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::little, false, false>(
-    uint32_t w, uint32_t h);
+UncompressedDecompressor::decode12BitRawWithControl<Endianness::little>();
 extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, false, false>(
-    uint32_t w, uint32_t h);
-extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, true, false>(
-    uint32_t w, uint32_t h);
-extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::little, false, true>(
-    uint32_t w, uint32_t h);
-extern template void
-UncompressedDecompressor::decode12BitRaw<Endianness::big, false, true>(
-    uint32_t w, uint32_t h);
+UncompressedDecompressor::decode12BitRawWithControl<Endianness::big>();
 
 extern template void
-UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>(
-    uint32_t w, uint32_t h);
-
+UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<
+    Endianness::little>();
 extern template void
-UncompressedDecompressor::decodeRawUnpacked<12, Endianness::little>(uint32_t w,
-                                                                    uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<12, Endianness::big>(uint32_t w,
-                                                                 uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<14, Endianness::big>(uint32_t w,
-                                                                 uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<16, Endianness::little>(uint32_t w,
-                                                                    uint32_t h);
-extern template void
-UncompressedDecompressor::decodeRawUnpacked<16, Endianness::big>(uint32_t w,
-                                                                 uint32_t h);
+UncompressedDecompressor::decode12BitRawUnpackedLeftAligned<Endianness::big>();
 
 } // namespace rawspeed

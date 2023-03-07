@@ -44,7 +44,7 @@
 namespace rawspeed {
 
 bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -62,7 +62,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (12 != bits && 14 != bits)
     ThrowRDE("Unsupported bits per sample");
 
-  if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
+  if (32769 != compression && 32770 != compression && 32772 != compression &&
+      32773 != compression)
     ThrowRDE("Unsupported compression");
 
   if (uint32_t nslices = raw->getEntry(TiffTag::STRIPOFFSETS)->count;
@@ -81,8 +82,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   const uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   mRaw->dim = iPoint2D(width, height);
 
-  if (32770 == compression)
-  {
+  if (32770 == compression) {
     const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
     if (sliceOffsets->type != TiffDataType::LONG || sliceOffsets->count != 1)
       ThrowRDE("Entry 40976 is corrupt");
@@ -104,8 +104,7 @@ RawImage SrwDecoder::decodeRawInternal() {
 
     return mRaw;
   }
-  if (32772 == compression)
-  {
+  if (32772 == compression) {
     uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
@@ -119,8 +118,7 @@ RawImage SrwDecoder::decodeRawInternal() {
 
     return mRaw;
   }
-  if (32773 == compression)
-  {
+  if (32773 == compression) {
     uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
@@ -177,9 +175,12 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb_black =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
-      mRaw->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
-      mRaw->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
+      mRaw->metadata.wbCoeffs[0] =
+          wb_levels->getFloat(0) - wb_black->getFloat(0);
+      mRaw->metadata.wbCoeffs[1] =
+          wb_levels->getFloat(1) - wb_black->getFloat(1);
+      mRaw->metadata.wbCoeffs[2] =
+          wb_levels->getFloat(3) - wb_black->getFloat(3);
     }
   }
 }

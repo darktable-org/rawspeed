@@ -27,7 +27,7 @@
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/ByteStream.h"                      // for ByteStream
-#include <algorithm>                            // for fill
+#include <algorithm>                            // for fill_n, fill
 #include <array>                                // for array
 #include <cstdint>                              // for uint16_t, uint32_t
 #include <memory>                               // for unique_ptr
@@ -120,19 +120,19 @@ enum class JpegMarker { /* JPEG marker codes			*/
 };
 
 /*
-* The following structure stores basic information about one component.
-*/
+ * The following structure stores basic information about one component.
+ */
 struct JpegComponentInfo {
   /*
-  * These values are fixed over the whole image.
-  * They are read from the SOF marker.
-  */
+   * These values are fixed over the whole image.
+   * They are read from the SOF marker.
+   */
   uint32_t componentId = ~0U; /* identifier for this component (0..255) */
 
   /*
-  * Huffman table selector (0..3). The value may vary
-  * between scans. It is read from the SOS marker.
-  */
+   * Huffman table selector (0..3). The value may vary
+   * between scans. It is read from the SOS marker.
+   */
   uint32_t dcTblNo = ~0U;
   uint32_t superH = ~0U; // Horizontal Supersampling
   uint32_t superV = ~0U; // Vertical Supersampling
@@ -148,33 +148,33 @@ public:
   bool initialized = false;
 };
 
-class AbstractLJpegDecompressor : public AbstractDecompressor {
+class AbstractLJpegDecoder : public AbstractDecompressor {
   // std::vector of unique HTs, to not recreate HT, but cache them
-  std::vector<std::unique_ptr<const HuffmanTable>> huffmanTableStore;
-  HuffmanTable ht_; // temporary table, used during parsing LJpeg.
+  std::vector<std::unique_ptr<const HuffmanTable<>>> huffmanTableStore;
+  HuffmanTable<> ht_; // temporary table, used during parsing LJpeg.
 
   uint32_t Pt = 0;
-  std::array<const HuffmanTable*, 4> huff{{}}; // 4 pointers into the store
+  std::array<const HuffmanTable<>*, 4> huff{{}}; // 4 pointers into the store
 
 public:
-  AbstractLJpegDecompressor(ByteStream bs, const RawImage& img);
+  AbstractLJpegDecoder(ByteStream bs, const RawImage& img);
 
-  virtual ~AbstractLJpegDecompressor() = default;
+  virtual ~AbstractLJpegDecoder() = default;
 
 protected:
-  bool fixDng16Bug = false;  // DNG v1.0.x compatibility
-  bool fullDecodeHT = true;  // FullDecode Huffman
+  bool fixDng16Bug = false; // DNG v1.0.x compatibility
+  bool fullDecodeHT = true; // FullDecode Huffman
 
-  void decode();
+  void decodeSOI();
   void parseSOF(ByteStream data, SOFInfo* i);
   void parseSOS(ByteStream data);
   void parseDHT(ByteStream data);
   static void parseDRI(ByteStream dri);
   JpegMarker getNextMarker(bool allowskip);
 
-  [[nodiscard]] std::vector<const HuffmanTable*>
+  [[nodiscard]] std::vector<const HuffmanTable<>*>
   getHuffmanTables(int N_COMP) const {
-    std::vector<const HuffmanTable*> ht(N_COMP);
+    std::vector<const HuffmanTable<>*> ht(N_COMP);
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
       if (const unsigned dcTbls = huff.size(); dcTblNo >= dcTbls) {

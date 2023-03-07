@@ -22,6 +22,7 @@
 
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
 #include <string>                         // for string
 #include <utility>                        // for move
@@ -31,12 +32,10 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 
-class SrwDecoder final : public AbstractTiffDecoder
-{
+class SrwDecoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  SrwDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  SrwDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

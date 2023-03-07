@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017-2018 Roman Lebedev
+    Copyright (C) 2017-2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,7 @@
 */
 
 #ifndef IMPL
-#error IMPL must be defined to one of rawspeeds pumps
-#endif
-#ifndef PUMP
-#error PUMP must be defined to one of rawspeeds pumps
-#endif
-#ifndef FULLDECODE
-#error FULLDECODE must be defined as bool
+#error IMPL must be defined to one of rawspeeds huffman table implementations
 #endif
 
 #include "common/RawspeedException.h"          // for RawspeedException
@@ -47,6 +41,51 @@
 #include <cstdint>                             // for uint8_t
 #include <cstdio>                              // for size_t
 #include <initializer_list>                    // for initializer_list
+#include <vector>                              // for vector
+
+namespace rawspeed {
+struct BaselineHuffmanTableTag;
+struct VC5HuffmanTableTag;
+} // namespace rawspeed
+
+template <typename Pump, bool IsFullDecode, typename HT>
+static void workloop(rawspeed::ByteStream bs, const HT& ht) {
+  Pump bits(bs);
+  while (true)
+    ht.template decode<Pump, IsFullDecode>(bits);
+  // FIXME: do we need to escape the result to avoid dead code elimination?
+}
+
+template <typename Pump, typename HT>
+static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
+  if (ht.isFullDecode())
+    workloop<Pump, /*IsFullDecode=*/true>(bs, ht);
+  else
+    workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
+}
+
+template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
+  const auto ht = createHuffmanTable<rawspeed::IMPL<Tag>>(bs);
+
+  // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
+  // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
+  assert(bs.getPosition() >= 19);
+
+  // Which bit pump should we use?
+  switch (bs.getByte()) {
+  case 0:
+    checkPump<rawspeed::BitPumpMSB>(bs, ht);
+    break;
+  case 1:
+    checkPump<rawspeed::BitPumpMSB32>(bs, ht);
+    break;
+  case 2:
+    checkPump<rawspeed::BitPumpJPEG>(bs, ht);
+    break;
+  default:
+    ThrowRSE("Unknown bit pump");
+  }
+}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -58,21 +97,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
-    const auto ht = createHuffmanTable<rawspeed::IMPL>(bs);
-
-    // should have consumed 16 bytes for n-codes-per-length,
-    // at *least* 1 byte as code value, and 1 byte as 'fixDNGBug16' boolean
-    assert(bs.getPosition() >= 18);
-
-    rawspeed::PUMP bits(bs);
-
-    while (true)
-      ht.decode<decltype(bits), FULLDECODE>(bits);
+    // Which flavor?
+    switch (bs.getByte()) {
+    case 0:
+      checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
+      break;
+    case 1:
+      checkFlavour<rawspeed::VC5HuffmanTableTag>(bs);
+      break;
+    default:
+      ThrowRSE("Unknown flavor");
+    }
   } catch (const rawspeed::RawspeedException&) {
     return 0;
   }
 
   __builtin_unreachable();
 }
-
-// for i in $(seq -w 0 64); do dd if=/dev/urandom bs=1024 count=1024 of=$i; done

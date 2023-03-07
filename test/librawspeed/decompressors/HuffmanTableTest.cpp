@@ -27,7 +27,7 @@
 #include <algorithm>                    // for copy, fill_n, max
 #include <array>                        // for array
 #include <cstdint>                      // for uint8_t
-#include <gtest/gtest.h>                // for Test, Message, TestPartResult
+#include <gtest/gtest.h>                // for Test, TestInfo (ptr only)
 #include <initializer_list>             // for initializer_list
 #include <utility>                      // for move
 #include <vector>                       // for vector, allocator
@@ -46,8 +46,8 @@ using rawspeed::HuffmanTable;
 namespace rawspeed_test {
 
 auto genHT =
-    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> HuffmanTable {
-  HuffmanTable ht;
+    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> HuffmanTable<> {
+  HuffmanTable<> ht;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
   Buffer b(v.data(), v.size());
@@ -58,10 +58,10 @@ auto genHT =
 
 auto genHTFull =
     [](std::initializer_list<uint8_t>&& nCodesPerLength,
-       std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable {
+       std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable<> {
   auto ht = genHT(std::move(nCodesPerLength));
   std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
-  Buffer b(v.data(), v.size());
+  rawspeed::Array1DRef<uint8_t> b(v.data(), v.size());
   ht.setCodeValues(b);
   return ht;
 };

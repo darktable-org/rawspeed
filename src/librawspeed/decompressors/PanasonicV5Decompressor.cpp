@@ -35,7 +35,6 @@
 #include <cstdint>                        // for uint8_t, uint16_t, uint32_t
 #include <iterator>                       // for back_insert_iterator, back...
 #include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -60,7 +59,7 @@ constexpr PanasonicV5Decompressor::PacketDsc
         PanasonicV5Decompressor::PacketDsc(/*bps=*/14);
 
 PanasonicV5Decompressor::PanasonicV5Decompressor(const RawImage& img,
-                                                 const ByteStream& input_,
+                                                 ByteStream input_,
                                                  uint32_t bps_)
     : mRaw(img), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
@@ -124,7 +123,7 @@ void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
                     iPoint2D beginCoord = pixelToCoordinate(currPixel);
                     currPixel += pixelsPerBlock;
                     iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return Block(std::move(bs), beginCoord, endCoord);
+                    return Block(bs, beginCoord, endCoord);
                   });
   assert(blocks.size() == numBlocks);
   assert(currPixel >= mRaw->dim.area());
@@ -167,7 +166,7 @@ class PanasonicV5Decompressor::ProxyStream {
   }
 
 public:
-  explicit ProxyStream(ByteStream block_) : block(std::move(block_)) {}
+  explicit ProxyStream(ByteStream block_) : block(block_) {}
 
   ByteStream& getStream() {
     parseBlock();

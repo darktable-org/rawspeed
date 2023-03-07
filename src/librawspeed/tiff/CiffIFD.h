@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include "adt/NORangesSet.h"    // for set
-#include "tiff/CiffEntry.h"     // for CiffEntry (ptr only)
-#include "tiff/CiffTag.h"       // for CiffTag
-#include <cstdint>              // for uint32_t
-#include <map>                  // for map
-#include <memory>               // for unique_ptr
-#include <string>               // for string
-#include <vector>               // for vector
+#include "adt/NORangesSet.h" // for set
+#include "tiff/CiffEntry.h"  // for CiffEntry (ptr only)
+#include "tiff/CiffTag.h"    // for CiffTag
+#include <cstdint>           // for uint32_t
+#include <map>               // for map
+#include <memory>            // for unique_ptr
+#include <string>            // for string
+#include <vector>            // for vector
 
 namespace rawspeed {
 
@@ -76,8 +76,8 @@ class CiffIFD final {
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
 
-  void parseIFDEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream& dirEntries);
+  void parseIFDEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                     ByteStream& dirEntries);
 
   template <typename Lambda>
   std::vector<const CiffIFD*> __attribute__((pure))

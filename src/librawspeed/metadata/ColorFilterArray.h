@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "adt/Point.h"    // for iPoint2D
-#include <algorithm>      // for copy
-#include <cstdint>        // for uint32_t, uint8_t
-#include <map>            // for map
-#include <string>         // for string
-#include <vector>         // for vector
+#include "adt/Point.h" // for iPoint2D
+#include <algorithm>   // for copy
+#include <cstdint>     // for uint32_t, uint8_t
+#include <map>         // for map
+#include <string>      // for string
+#include <vector>      // for vector
 
 namespace rawspeed {
 
@@ -44,8 +44,7 @@ enum class CFAColor : uint8_t {
 
 };
 
-class ColorFilterArray
-{
+class ColorFilterArray {
   std::vector<CFAColor> cfa;
   iPoint2D size;
 
@@ -74,6 +73,7 @@ public:
 
 // FC macro from dcraw outputs, given the filters definition, the dcraw color
 // number for that given position in the CFA pattern
-// #define FC(filters,row,col) ((filters) >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
+// #define FC(filters,row,col) ((filters) >> ((((row) << 1 & 14) + ((col) & 1))
+// << 1) & 3)
 
 } // namespace rawspeed

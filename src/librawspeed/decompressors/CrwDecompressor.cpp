@@ -34,6 +34,7 @@
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t, uint8_t, int16_t
 #include <tuple>                          // for array
+#include <vector>                         // for vector
 
 using std::array;
 
@@ -70,13 +71,13 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
   mHuff = initHuffTables(dec_table);
 }
 
-HuffmanTable CrwDecompressor::makeDecoder(const uint8_t* ncpl,
-                                          const uint8_t* values) {
+HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
+                                            const uint8_t* values) {
   assert(ncpl);
 
-  HuffmanTable ht;
+  HuffmanTable<> ht;
   auto count = ht.setNCodesPerLength(Buffer(ncpl, 16));
-  ht.setCodeValues(Buffer(values, count));
+  ht.setCodeValues(Array1DRef<const uint8_t>(values, count));
   ht.setup(/*fullDecode_=*/false, false);
 
   return ht;
@@ -153,7 +154,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
          0xf2, 0xb1, 0xe4, 0xd1, 0x83, 0x63, 0xea, 0xc3, 0xe2, 0x82, 0xf1, 0xa3,
          0xc2, 0xa1, 0xc1, 0xe3, 0xa2, 0xe1, 0xff, 0xff}}};
 
-  std::array<HuffmanTable, 2> mHuff = {
+  std::array<HuffmanTable<>, 2> mHuff = {
       {makeDecoder(first_tree_ncpl[table].data(),
                    first_tree_codevalues[table].data()),
        makeDecoder(second_tree_ncpl[table].data(),
@@ -196,7 +197,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (i >= 64)
       break;
 
-    diff = HuffmanTable::extend(diff, len);
+    diff = HuffmanTable<>::extend(diff, len);
 
     (*diffBuf)[i] = diff;
     ++i;

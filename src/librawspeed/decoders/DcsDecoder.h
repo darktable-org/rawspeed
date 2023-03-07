@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"            // for RawImage
 #include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
+#include "io/Buffer.h"                  // for Buffer
 #include "tiff/TiffIFD.h"               // for TiffRootIFD (ptr only), Tiff...
 #include <utility>                      // for move
 
@@ -36,8 +37,8 @@ class DcsDecoder final : public SimpleTiffDecoder {
 
 public:
   static bool __attribute__((pure))
-  isAppropriateDecoder(const TiffRootIFD* rootIFD, const Buffer& file);
-  DcsDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  DcsDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

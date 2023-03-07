@@ -20,6 +20,7 @@
 */
 
 #include "decoders/RawDecoder.h"
+#include "MemorySanitizer.h"                        // for MSan
 #include "adt/NotARational.h"                       // for NotARational
 #include "adt/Point.h"                              // for iPoint2D, iRecta...
 #include "common/Common.h"                          // for writeLog, roundU...
@@ -48,7 +49,7 @@ using std::vector;
 
 namespace rawspeed {
 
-RawDecoder::RawDecoder(const Buffer& file)
+RawDecoder::RawDecoder(Buffer file)
     : mRaw(RawImage::create()), failOnUnknown(false),
       interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
       uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
@@ -125,10 +126,6 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
 
   offY = 0;
   for (const RawSlice& slice : slices) {
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
-                              Endianness::little)),
-        mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
     bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
@@ -136,7 +133,11 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");
 
-    u.readUncompressedRaw(size, pos, inputPitch, bitPerPixel, order);
+    UncompressedDecompressor u(
+        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
+                              Endianness::little)),
+        mRaw, iRectangle2D(pos, size), inputPitch, bitPerPixel, order);
+    u.readUncompressedRaw();
 
     offY += slice.h;
   }
@@ -166,10 +167,14 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   if (!cam) {
     askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown)
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
+    if (failOnUnknown) {
+      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
+               "guess. Sorry.",
+               make.c_str(), model.c_str(), mode.c_str());
+    }
 
-    // Assume the camera can be decoded, but return false, so decoders can see that we are unsure.
+    // Assume the camera can be decoded, but return false, so decoders can see
+    // that we are unsure.
     return false;
   }
 
@@ -189,7 +194,8 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   }
 
   if (cam->decoderVersion > getDecoderVersion())
-    ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
+    ThrowRDE(
+        "Camera not supported in this version. Update RawSpeed for support.");
 
   hints = cam->hints;
   return true;
@@ -203,8 +209,11 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   if (!cam) {
     askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown)
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
+    if (failOnUnknown) {
+      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
+               "guess. Sorry.",
+               make.c_str(), model.c_str(), mode.c_str());
+    }
 
     return;
   }
@@ -238,7 +247,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
   }
 
-  const CameraSensorInfo *sensor = cam->getSensorInfo(iso_speed);
+  const CameraSensorInfo* sensor = cam->getSensorInfo(iso_speed);
   mRaw->blackLevel = sensor->mBlackLevel;
   mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
@@ -248,7 +257,8 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       for (auto i = 0UL; i < cfaArea; i++) {
         mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
-    } else if (!mRaw->isCFA && mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
+    } else if (!mRaw->isCFA &&
+               mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
       for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
         mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
       }
@@ -276,13 +286,13 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
 rawspeed::RawImage RawDecoder::decodeRaw() {
   try {
     RawImage raw = decodeRawInternal();
-    raw->checkMemIsInitialized();
+    MSan::CheckMemIsInitialized(raw->getByteDataAsUncroppedArray2DRef());
 
     raw->metadata.pixelAspectRatio =
         hints.get("pixel_aspect_ratio", raw->metadata.pixelAspectRatio);
     if (interpolateBadPixels) {
       raw->fixBadPixels();
-      raw->checkMemIsInitialized();
+      MSan::CheckMemIsInitialized(raw->getByteDataAsUncroppedArray2DRef());
     }
 
     return raw;

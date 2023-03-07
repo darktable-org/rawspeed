@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"            // for RawImage
 #include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
+#include "io/Buffer.h"                  // for Buffer
 #include "tiff/TiffIFD.h"               // for TiffRootIFD (ptr only), Tiff...
 #include <utility>                      // for move
 
@@ -35,9 +36,8 @@ class ErfDecoder final : public SimpleTiffDecoder {
   void checkImageDimensions() override;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  ErfDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  ErfDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

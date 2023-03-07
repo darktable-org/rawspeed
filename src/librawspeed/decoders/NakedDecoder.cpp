@@ -29,9 +29,9 @@
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include <map>                                      // for map
-#include <optional>
-#include <stdexcept>                                // for out_of_range
-#include <string>                                   // for string, basic_st...
+#include <optional>                                 // for optional, nullopt
+#include <string>                                   // for string, char_traits
+#include <string_view>                              // for operator==, basi...
 
 using std::map;
 
@@ -39,7 +39,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
+NakedDecoder::NakedDecoder(Buffer file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
 static std::optional<BitOrder> getAsBitOrder(std::string_view s) {
@@ -77,7 +77,7 @@ void NakedDecoder::parseHints() {
   if (filesize == 0 || offset >= filesize)
     ThrowRDE("%s %s: no image data found", make, model);
 
-  bits = cHints.get("bits", (filesize-offset)*8/width/height);
+  bits = cHints.get("bits", (filesize - offset) * 8 / width / height);
   if (bits == 0)
     ThrowRDE("%s %s: image bpp is invalid: %u", make, model, bits);
 
@@ -94,14 +94,14 @@ RawImage NakedDecoder::decodeRawInternal() {
   parseHints();
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
-
-  UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw);
 
   iPoint2D pos(0, 0);
-  u.readUncompressedRaw(mRaw->dim, pos, width * bits / 8, bits, bo);
+  UncompressedDecompressor u(
+      ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+      mRaw, iRectangle2D(pos, mRaw->dim), width * bits / 8, bits, bo);
+  mRaw->createData();
+
+  u.readUncompressedRaw();
 
   return mRaw;
 }

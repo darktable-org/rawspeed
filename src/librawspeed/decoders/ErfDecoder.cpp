@@ -37,7 +37,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool ErfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -56,9 +56,11 @@ RawImage ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
+      (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
+  mRaw->createData();
 
-  u.decode12BitRaw<Endianness::big, false, true>(width, height);
+  u.decode12BitRawWithControl<Endianness::big>();
 
   return mRaw;
 }

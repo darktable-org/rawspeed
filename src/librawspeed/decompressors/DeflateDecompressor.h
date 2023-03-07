@@ -26,7 +26,7 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
+#include "io/Buffer.h"                          // for Buffer
 #include <memory>                               // for unique_ptr
 #include <utility>                              // for move
 
@@ -35,14 +35,13 @@ namespace rawspeed {
 class iPoint2D;
 
 class DeflateDecompressor final : public AbstractDecompressor {
-  ByteStream input;
+  Buffer input;
   RawImage mRaw;
   int predFactor;
   int bps;
 
 public:
-  DeflateDecompressor(ByteStream bs, const RawImage& img, int predictor,
-                      int bps_);
+  DeflateDecompressor(Buffer bs, const RawImage& img, int predictor, int bps_);
 
   void decode(std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
               iPoint2D maxDim, iPoint2D dim, iPoint2D off);

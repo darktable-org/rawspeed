@@ -21,6 +21,7 @@
 */
 
 #include "common/DngOpcodes.h"
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Mutex.h"                    // for MutexLocker
 #include "adt/Point.h"                    // for iRectangle2D, iPoint2D
@@ -36,8 +37,7 @@
 #include <initializer_list>               // for initializer_list
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
-#include <optional>
-#include <stdexcept>                      // for out_of_range
+#include <optional>                       // for optional, nullopt
 #include <tuple>                          // for tie, tuple
 // IWYU pragma: no_include <ext/alloc_traits.h>
 // IWYU pragma: no_include <type_traits>
@@ -46,16 +46,16 @@
 #include <exception>
 #endif
 
-using std::vector;
 using std::fill_n;
 using std::make_pair;
+using std::vector;
 
 namespace rawspeed {
 
 namespace {
 
 template <typename T>
-iRectangle2D getImageCropAsRectangle(const CroppedArray2DRef<T>& img) {
+iRectangle2D getImageCropAsRectangle(CroppedArray2DRef<T> img) {
   return {{img.offsetCols, img.offsetRows},
           {img.croppedWidth, img.croppedHeight}};
 }
@@ -217,9 +217,7 @@ public:
     DummyROIOpcode::setup(ri);
   }
 
-  [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
-    return ROIOpcode::getRoi();
-  }
+  using ROIOpcode::getRoi;
 
   [[noreturn]] void apply(const RawImage& ri) override {
     assert(false && "You should not be calling this.");

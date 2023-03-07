@@ -20,11 +20,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D, iPoint2D::area_...
-#include "adt/iterator_range.h"           // for iterator_range
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "adt/Array2DRef.h"                // for Array2DRef
+#include "adt/Point.h"                     // for iPoint2D, iPoint2D::area_...
+#include "adt/iterator_range.h"            // for iterator_range
+#include "common/RawImage.h"               // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor, Cr2SliceWidths
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
@@ -281,7 +281,7 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     iPoint2D frame_, Cr2SliceWidths slicing_,
     std::vector<PerComponentRecipe> rec_, ByteStream input_)
     : mRaw(mRaw_), format(std::move(format_)), frame(frame_), slicing(slicing_),
-      rec(std::move(rec_)), input(std::move(input_)) {
+      rec(std::move(rec_)), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 

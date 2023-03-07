@@ -42,12 +42,13 @@
 #include <string>                              // for operator==, string
 #include <vector>                              // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
+#include "MemorySanitizer.h" // for MSan
 
 namespace rawspeed {
 class CameraMetaData;
 
 bool Cr2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
   const std::string& model = id.model;
@@ -79,7 +80,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
 
   // some old models (1D/1DS/D2000C) encode two lines as one
   // see: FIX_CANON_HALF_HEIGHT_DOUBLE_WIDTH
-  if (width > 2*height) {
+  if (width > 2 * height) {
     height *= 2;
     width /= 2;
   }
@@ -231,7 +232,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
-  if(65535 == iso) {
+  if (65535 == iso) {
     // ISOSPEEDRATINGS is a SHORT EXIF value. For larger values, we have to look
     // at RECOMMENDEDEXPOSUREINDEX (maybe Canon specific).
     if (mRootIFD->hasEntryRecursive(TiffTag::RECOMMENDEDEXPOSUREINDEX))
@@ -240,7 +241,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   // Fetch the white balance
-  try{
+  try {
     if (mRootIFD->hasEntryRecursive(TiffTag::CANONCOLORDATA)) {
       const TiffEntry* wb =
           mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
@@ -261,8 +262,9 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
 
         uint16_t wb_index = shot_info->getU16(7);
-        int wb_offset = (wb_index < 18) ? "012347800000005896"[wb_index]-'0' : 0;
-        wb_offset = wb_offset*8 + 2;
+        int wb_offset =
+            (wb_index < 18) ? "012347800000005896"[wb_index] - '0' : 0;
+        wb_offset = wb_offset * 8 + 2;
 
         mRaw->metadata.wbCoeffs[0] =
             static_cast<float>(g9_wb->getU32(wb_offset + 1));
@@ -332,8 +334,11 @@ int Cr2Decoder::getHue() const {
   if (uint32_t model_id =
           mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
       model_id >= 0x80000281 || model_id == 0x80000218 ||
-      (hints.has("force_new_sraw_hue")))
-    return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) - 1) >> 1;
+      (hints.has("force_new_sraw_hue"))) {
+    return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) -
+            1) >>
+           1;
+  }
 
   return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 }
@@ -351,8 +356,7 @@ void Cr2Decoder::sRawInterpolate() {
 
   assert(wb != nullptr);
   sraw_coeffs[0] = wb->getU16(offset + 0);
-  sraw_coeffs[1] =
-      (wb->getU16(offset + 1) + wb->getU16(offset + 2) + 1) >> 1;
+  sraw_coeffs[1] = (wb->getU16(offset + 1) + wb->getU16(offset + 2) + 1) >> 1;
   sraw_coeffs[2] = wb->getU16(offset + 3);
 
   if (hints.has("invert_sraw_wb")) {
@@ -362,7 +366,7 @@ void Cr2Decoder::sRawInterpolate() {
         1024.0F / (static_cast<float>(sraw_coeffs[2]) / 1024.0F));
   }
 
-  mRaw->checkMemIsInitialized();
+  MSan::CheckMemIsInitialized(mRaw->getByteDataAsUncroppedArray2DRef());
   RawImage subsampledRaw = mRaw;
   int hue = getHue();
 

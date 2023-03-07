@@ -19,7 +19,7 @@
 */
 
 #include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree, Bina...
-#include <gtest/gtest.h>                     // for AssertionResult, Test
+#include <gtest/gtest.h>                     // for Test, ASSERT_EQ, ASSERT...
 #include <initializer_list>                  // for initializer_list
 #include <memory>                            // for unique_ptr, allocator
 #include <string>                            // for string

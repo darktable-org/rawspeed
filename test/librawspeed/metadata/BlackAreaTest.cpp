@@ -20,7 +20,7 @@
 */
 
 #include "metadata/BlackArea.h" // for BlackArea
-#include <gtest/gtest.h>        // for ParamIteratorInterface, Message, Tes...
+#include <gtest/gtest.h>        // for ASSERT_NO_THROW, UnitTest, ASSERT_EQ
 #include <memory>               // for unique_ptr, allocator
 #include <string>               // for basic_string
 #include <tuple>                // for get, tuple

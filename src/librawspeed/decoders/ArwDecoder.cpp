@@ -35,6 +35,7 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
+#include <algorithm>                                // for fill_n
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstring>                                  // for memcpy, size_t
@@ -47,7 +48,7 @@ using std::vector;
 namespace rawspeed {
 
 bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -87,19 +88,21 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
 
   // "Decrypt" the whole image buffer
   const auto* image_data = mFile.getData(off, len);
-  auto image_decoded = Buffer::Create(len);
+  std::vector<uint8_t> image_decoded(len);
   SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
-              reinterpret_cast<uint32_t*>(image_decoded.get()), len / 4, key);
+              reinterpret_cast<uint32_t*>(image_decoded.data()), len / 4, key);
 
-  Buffer di(std::move(image_decoded), len);
+  Buffer di(image_decoded.data(), len);
 
   // And now decode as a normal 16bit raw
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw);
-  u.decodeRawUnpacked<16, Endianness::big>(width, height);
+      ByteStream(DataBuffer(di.getSubView(0, len), Endianness::little)), mRaw,
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
+      BitOrder::MSB);
+  mRaw->createData();
+  u.readUncompressedRaw();
 
   return mRaw;
 }
@@ -175,7 +178,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   // to detect it this way in the future.
   data = mRootIFD->getIFDsWithTag(TiffTag::MAKE);
   if (data.size() > 1) {
-    for (auto &i : data) {
+    for (auto& i : data) {
       std::string make = i->getEntry(TiffTag::MAKE)->getString();
       /* Check for maker "SONY" without spaces */
       if (make == "SONY")
@@ -198,14 +201,14 @@ RawImage ArwDecoder::decodeRawInternal() {
   std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32_t i = 0; i < 4; i++)
-    sony_curve[i+1] = (c->getU16(i) >> 2) & 0xfff;
+    sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
 
   for (uint32_t i = 0; i < 0x4001; i++)
     curve[i] = i;
 
   for (uint32_t i = 0; i < 5; i++)
     for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
-      curve[j] = curve[j-1] + (1 << i);
+      curve[j] = curve[j - 1] + (1 << i);
 
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
@@ -250,18 +253,24 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   const Buffer buf(mFile.getSubView(off, c2));
 
-  mRaw->createData();
-
-  UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
-                             mRaw);
-
-  if (hints.has("sr2_format"))
-    u.decodeRawUnpacked<14, Endianness::big>(width, height);
-  else
-    u.decodeRawUnpacked<16, Endianness::little>(width, height);
+  if (hints.has("sr2_format")) {
+    UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
+                               mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  } else {
+    UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
+                               mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  }
 }
 
-void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
+void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
                             uint32_t bpp) {
 
   if (bpp == 8) {
@@ -272,10 +281,12 @@ void ArwDecoder::DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
   } // End bpp = 8
 
   if (bpp == 12) {
+    input.setByteOrder(Endianness::little);
+    UncompressedDecompressor u(input, mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(w, h)),
+                               bpp * w / 8, bpp, BitOrder::LSB);
     mRaw->createData();
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(input, Endianness::little)), mRaw);
-    u.decode12BitRaw<Endianness::little>(w, h);
+    u.readUncompressedRaw();
 
     // Shift scales, since black and white are the same as compressed precision
     mShiftDownScale = 2;
@@ -340,7 +351,7 @@ void ArwDecoder::ParseA100WB() const {
 }
 
 void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  //Default
+  // Default
   int iso = 0;
 
   mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
@@ -376,18 +387,18 @@ void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
   std::array<uint32_t, 128> pad;
 
   // Initialize the decryption pad from the key
-  for (int p=0; p < 4; p++)
+  for (int p = 0; p < 4; p++)
     pad[p] = key = uint32_t(key * 48828125UL + 1UL);
-  pad[3] = pad[3] << 1 | (pad[0]^pad[2]) >> 31;
-  for (int p=4; p < 127; p++)
-    pad[p] = (pad[p-4]^pad[p-2]) << 1 | (pad[p-3]^pad[p-1]) >> 31;
-  for (int p=0; p < 127; p++)
+  pad[3] = pad[3] << 1 | (pad[0] ^ pad[2]) >> 31;
+  for (int p = 4; p < 127; p++)
+    pad[p] = (pad[p - 4] ^ pad[p - 2]) << 1 | (pad[p - 3] ^ pad[p - 1]) >> 31;
+  for (int p = 0; p < 127; p++)
     pad[p] = getU32BE(&pad[p]);
 
   int p = 127;
   // Decrypt the buffer in place using the pad
   for (; len > 0; len--) {
-    pad[p & 127] = pad[(p+1) & 127] ^ pad[(p+1+64) & 127];
+    pad[p & 127] = pad[(p + 1) & 127] ^ pad[(p + 1 + 64) & 127];
 
     uint32_t pv;
     memcpy(&pv, &(pad[p & 127]), sizeof(uint32_t));
@@ -421,7 +432,7 @@ void ArwDecoder::GetWB() const {
         makerNoteIFD.getEntryRecursive(TiffTag::SONY_LENGTH);
     const TiffEntry* sony_key =
         makerNoteIFD.getEntryRecursive(TiffTag::SONY_KEY);
-    if(!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
+    if (!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("couldn't find the correct metadata for WB decoding");
 
     assert(sony_offset != nullptr);
@@ -430,6 +441,8 @@ void ArwDecoder::GetWB() const {
     assert(sony_length != nullptr);
     // The Decryption is done in blocks of 4 bytes.
     uint32_t len = roundDown(sony_length->getU32(), 4);
+    if (!len)
+      ThrowRDE("No buffer to decrypt?");
 
     assert(sony_key != nullptr);
     uint32_t key = getU32LE(sony_key->getData().getData(4));
@@ -439,14 +452,14 @@ void ArwDecoder::GetWB() const {
     const auto EncryptedBuffer = ifd_crypt.getSubView(off, len);
     // We do have to prepend 'off' padding, because TIFF uses absolute offsets.
     const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
-    auto DecryptedBuffer = Buffer::Create(DecryptedBufferSize);
+    std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
     SonyDecrypt(reinterpret_cast<const uint32_t*>(EncryptedBuffer.begin()),
-                reinterpret_cast<uint32_t*>(DecryptedBuffer.get() + off),
+                reinterpret_cast<uint32_t*>(DecryptedBuffer.data() + off),
                 len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
-    Buffer decIFD(std::move(DecryptedBuffer), DecryptedBufferSize);
+    Buffer decIFD(DecryptedBuffer.data(), DecryptedBufferSize);
     const Buffer Padding(decIFD.getSubView(0, off));
     // The Decrypted Root Ifd can not point to preceding padding buffer.
     ifds_decoded.insert(Padding);

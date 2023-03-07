@@ -33,8 +33,8 @@ using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream dirEntry) {
+CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                     ByteStream dirEntry) {
   uint16_t p = dirEntry.getU16();
 
   // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
@@ -138,7 +138,7 @@ uint8_t CiffEntry::getByte(uint32_t num) const {
   return data.peek<uint8_t>(num);
 }
 
-std::string CiffEntry::getString() const {
+std::string_view CiffEntry::getString() const {
   if (type != CiffDataType::ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii",
              static_cast<unsigned>(type));

@@ -19,27 +19,28 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
+#include "rawspeedconfig.h"       // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
+#include "adt/AlignedAllocator.h" // for AlignedAllocator
 
 #ifdef HAVE_JPEG
 
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/Point.h"                    // for iPoint2D
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/JpegDecompressor.h"
 #include "io/ByteStream.h" // for ByteStream
-#include <algorithm>       // for min, fill_n
+#include <algorithm>       // for min, fill_n, max
 #include <array>           // for array
 #include <jpeglib.h>       // for jpeg_destroy_decompress
 #include <memory>          // for unique_ptr
+#include <vector>          // for vector
 
 #ifndef HAVE_JPEG_MEM_SRC
 #include "io/IOException.h" // for ThrowIOE
 #endif
 
-using std::unique_ptr;
 using std::min;
+using std::unique_ptr;
 
 namespace rawspeed {
 
@@ -121,9 +122,7 @@ void JpegDecompressor::decode(uint32_t offX,
                               uint32_t offY) { /* Each slice is a JPEG image */
   struct JpegDecompressStruct dinfo;
 
-  const auto size = input.getRemainSize();
-
-  JPEG_MEMSRC(&dinfo, input.getData(size), size);
+  JPEG_MEMSRC(&dinfo, input.begin(), input.getSize());
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
     ThrowRDE("Unable to read JPEG header");
@@ -133,11 +132,8 @@ void JpegDecompressor::decode(uint32_t offX,
     ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
-  unique_ptr<uint8_t[], // NOLINT
-             decltype(&alignedFree)>
-      complete_buffer(
-          alignedMallocArray<uint8_t, 16>(dinfo.output_height, row_stride),
-          &alignedFree);
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> complete_buffer;
+  complete_buffer.resize(dinfo.output_height * row_stride);
 
   const Array2DRef<uint8_t> tmp(&complete_buffer[0],
                                 dinfo.output_components * dinfo.output_width,

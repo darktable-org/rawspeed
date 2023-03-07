@@ -41,7 +41,7 @@ using std::numeric_limits;
 
 namespace rawspeed {
 
-FiffParser::FiffParser(const Buffer& inputData) : RawParser(inputData) {}
+FiffParser::FiffParser(Buffer inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
   ByteStream bs(DataBuffer(mInput, Endianness::big));
@@ -75,15 +75,15 @@ void FiffParser::parseData() {
         ThrowFPE("Fiff is corrupted: second IFD is not after the first IFD");
 
       uint32_t rawOffset = second_ifd - first_ifd;
-      subIFD->add(std::make_unique<TiffEntry>(
+      subIFD->add(std::make_unique<TiffEntryWithData>(
           subIFD.get(), TiffTag::FUJI_STRIPOFFSETS, TiffDataType::OFFSET, 1,
-          ByteStream::createCopy(reinterpret_cast<const std::byte*>(&rawOffset),
-                                 4)));
+          Buffer(reinterpret_cast<const uint8_t*>(&rawOffset),
+                 sizeof(rawOffset))));
       uint32_t max_size = mInput.getSize() - second_ifd;
-      subIFD->add(std::make_unique<TiffEntry>(
+      subIFD->add(std::make_unique<TiffEntryWithData>(
           subIFD.get(), TiffTag::FUJI_STRIPBYTECOUNTS, TiffDataType::LONG, 1,
-          ByteStream::createCopy(reinterpret_cast<const std::byte*>(&max_size),
-                                 4)));
+          Buffer(reinterpret_cast<const uint8_t*>(&max_size),
+                 sizeof(rawOffset))));
     }
   }
 

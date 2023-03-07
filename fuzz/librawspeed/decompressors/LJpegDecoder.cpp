@@ -18,34 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawImage.h"                         // for RawImage, RawIm...
-#include "common/RawspeedException.h"                // for RawspeedException
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "fuzz/Common.h"                             // for CreateRawImage
-#include "io/Buffer.h"                               // for Buffer, DataBuffer
-#include "io/ByteStream.h"                           // for ByteStream
-#include "io/Endianness.h"                           // for Endianness, End...
-#include <cassert>                                   // for assert
-#include <cstdint>                                   // for uint8_t
-#include <cstdio>                                    // for size_t
+#include "decompressors/LJpegDecoder.h" // for LJpegDecoder
+#include "common/RawImage.h"            // for RawImage, RawImageData
+#include "common/RawspeedException.h"   // for RawspeedException
+#include "fuzz/Common.h"                // for CreateRawImage
+#include "io/Buffer.h"                  // for Buffer, DataBuffer
+#include "io/ByteStream.h"              // for ByteStream
+#include "io/Endianness.h"              // for Endianness, Endianness::little
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint8_t
+#include <cstdio>                       // for size_t
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
-
-namespace {
-
-class DummyLJpegDecompressor final
-    : public rawspeed::AbstractLJpegDecompressor {
-  void decodeScan() override {}
-
-public:
-  DummyLJpegDecompressor(const rawspeed::ByteStream& bs,
-                         const rawspeed::RawImage& img)
-      : AbstractLJpegDecompressor(bs, img) {}
-
-  void decode() { AbstractLJpegDecompressor::decode(); }
-};
-
-} // namespace
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
@@ -57,11 +41,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    DummyLJpegDecompressor d(bs, mRaw);
-    d.decode();
-    mRaw->createData();
+    const auto offsetX = bs.getU32();
+    const auto offsetY = bs.getU32();
+    const auto width = bs.getU32();
+    const auto height = bs.getU32();
+    const auto fixDng16Bug = bs.getU32();
 
-    // no image data was actually be decoded, so don't check for initialization
+    rawspeed::LJpegDecoder j(bs, mRaw);
+    mRaw->createData();
+    j.decode(offsetX, offsetY, width, height, fixDng16Bug);
+
+    // we can not check that all the image was initialized, because normally
+    // LJpegDecoder decodes just some one tile/slice.
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }

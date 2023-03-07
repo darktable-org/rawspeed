@@ -2,6 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,34 +21,56 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include <cstdint>                                   // for uint32_t
+#include "common/RawImage.h"
+#include "decompressors/HuffmanTable.h"
+#include "io/ByteStream.h"
+#include <cstdint> // for int
 
 namespace rawspeed {
 
-class ByteStream;
-class RawImage;
-
 // Decompresses Lossless JPEGs, with 2-4 components
 
-class LJpegDecompressor final : public AbstractLJpegDecompressor
-{
-  void decodeScan() override;
+class LJpegDecompressor final {
+public:
+  struct Frame {
+    const int cps;
+    const iPoint2D dim;
+  };
+  struct PerComponentRecipe {
+    const HuffmanTable<>& ht;
+    const uint16_t initPred;
+  };
+
+private:
+  RawImage mRaw;
+  ByteStream input;
+
+  const iRectangle2D imgFrame;
+
+  const Frame frame;
+  const std::vector<PerComponentRecipe> rec;
+
+  int fullBlocks = 0;
+  int trailingPixels = 0;
+
+  template <int N_COMP, size_t... I>
+  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
+      getHuffmanTablesImpl(std::index_sequence<I...> /*unused*/) const;
+
+  template <int N_COMP>
+  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
+  getHuffmanTables() const;
+
+  template <int N_COMP>
+  [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
+
   template <int N_COMP, bool WeirdWidth = false> void decodeN();
 
-  uint32_t offX = 0;
-  uint32_t offY = 0;
-  uint32_t w = 0;
-  uint32_t h = 0;
-
-  uint32_t fullBlocks = 0;
-  uint32_t trailingPixels = 0;
-
 public:
-  LJpegDecompressor(const ByteStream& bs, const RawImage& img);
+  LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, Frame frame,
+                    std::vector<PerComponentRecipe> rec, ByteStream bs);
 
-  void decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
-              uint32_t height, bool fixDng16Bug_);
+  void decode();
 };
 
 } // namespace rawspeed

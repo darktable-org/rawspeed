@@ -31,14 +31,12 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-class KdcDecoder final : public AbstractTiffDecoder
-{
+class KdcDecoder final : public AbstractTiffDecoder {
   [[nodiscard]] Buffer getInputBuffer() const;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  KdcDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  KdcDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

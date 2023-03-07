@@ -19,11 +19,11 @@
 */
 
 #include "rawspeedconfig.h"        // for HAVE_ZLIB
+#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
 #include "common/Common.h"         // for bit_cast
 #include <array>                   // for array
 #include <climits>                 // for CHAR_BIT
-#include <utility>                 // for move
 
 #ifdef HAVE_ZLIB
 
@@ -39,9 +39,9 @@
 
 namespace rawspeed {
 
-DeflateDecompressor::DeflateDecompressor(ByteStream bs, const RawImage& img,
+DeflateDecompressor::DeflateDecompressor(Buffer bs, const RawImage& img,
                                          int predictor, int bps_)
-    : input(std::move(bs)), mRaw(img), bps(bps_) {
+    : input(bs), mRaw(img), bps(bps_) {
   switch (predictor) {
   case 3:
     predFactor = 1;
@@ -85,14 +85,14 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
 };
 
 template <typename T>
-static inline void
-decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
-                 const CroppedArray2DRef<float>& out, int row) {
+static inline void decodeFPDeltaRow(const unsigned char* src,
+                                    size_t realTileWidth,
+                                    CroppedArray1DRef<float> out) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
 
-  for (int col = 0; col < out.croppedWidth; ++col) {
+  for (int col = 0; col < out.size(); ++col) {
     std::array<unsigned char, storage_bytes> bytes;
     for (int c = 0; c != bytesps; ++c)
       bytes[c] = src[col + c * realTileWidth];
@@ -111,7 +111,7 @@ decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
       break;
     }
 
-    out(row, col) = bit_cast<float>(tmp_expanded);
+    out(col) = bit_cast<float>(tmp_expanded);
   }
 }
 
@@ -127,10 +127,8 @@ void DeflateDecompressor::decode(
     *uBuffer =
         std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]); // NOLINT
 
-  const auto cSize = input.getRemainSize();
-  const unsigned char* cBuffer = input.getData(cSize);
-
-  if (int err = uncompress(uBuffer->get(), &dstLen, cBuffer, cSize);
+  if (int err =
+          uncompress(uBuffer->get(), &dstLen, input.begin(), input.getSize());
       err != Z_OK) {
     ThrowRDE("failed to uncompress tile: %d (%s)", err, zError(err));
   }
@@ -146,13 +144,13 @@ void DeflateDecompressor::decode(
 
     switch (bytesps) {
     case 2:
-      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out, row);
+      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out[row]);
       break;
     case 3:
-      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out, row);
+      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out[row]);
       break;
     case 4:
-      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out, row);
+      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out[row]);
       break;
     }
   }

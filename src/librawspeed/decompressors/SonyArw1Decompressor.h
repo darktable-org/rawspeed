@@ -36,7 +36,7 @@ class SonyArw1Decompressor final : public AbstractDecompressor {
 
 public:
   explicit SonyArw1Decompressor(const RawImage& img);
-  void decompress(const ByteStream& input) const;
+  void decompress(ByteStream input) const;
 };
 
 } // namespace rawspeed

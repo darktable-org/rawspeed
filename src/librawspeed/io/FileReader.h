@@ -20,20 +20,30 @@
 
 #pragma once
 
-#include <memory> // for unique_ptr
+#include "adt/AlignedAllocator.h"
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "io/Buffer.h"                       // for Buffer
+#include <cstdint>                           // for uint8_t
+#include <memory>                            // for unique_ptr
+#include <utility>                           // for pair
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
 class Buffer;
+template <class T, int alignment> class AlignedAllocator;
 
-class FileReader
-{
+class FileReader {
   const char* fileName;
 
 public:
   explicit FileReader(const char* fileName_) : fileName(fileName_) {}
 
-  std::unique_ptr<const Buffer> readFile();
+  std::pair<std::unique_ptr<std::vector<
+                uint8_t, DefaultInitAllocatorAdaptor<
+                             uint8_t, AlignedAllocator<uint8_t, 16>>>>,
+            Buffer>
+  readFile();
 };
 
 } // namespace rawspeed

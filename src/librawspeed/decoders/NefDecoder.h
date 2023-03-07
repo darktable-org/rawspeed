@@ -23,6 +23,7 @@
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
 #include "decoders/RawDecoder.h"          // for RawDecoder::RawSlice
+#include "io/Buffer.h"                    // for Buffer
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <array>                          // for array
 #include <cstdint>                        // for uint8_t, uint16_t, uint32_t
@@ -37,12 +38,10 @@ class ByteStream;
 class CameraMetaData;
 class iPoint2D;
 
-class NefDecoder final : public AbstractTiffDecoder
-{
+class NefDecoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  NefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  NefDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -61,7 +60,7 @@ private:
   void DecodeSNefUncompressed() const;
   void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch) const;
-  void DecodeNikonSNef(const ByteStream& input) const;
+  void DecodeNikonSNef(ByteStream input) const;
   [[nodiscard]] int getBitPerSample() const;
   [[nodiscard]] std::string getMode() const;
   [[nodiscard]] std::string getExtendedMode(const std::string& mode) const;

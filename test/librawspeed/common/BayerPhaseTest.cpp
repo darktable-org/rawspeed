@@ -18,19 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/BayerPhase.h"
-#include <algorithm>     // for fill, min, copy, equal, fill_n, max
-#include <array>         // for array
-#include <cassert>       // for assert
-#include <cstddef>       // for size_t
-#include <cstdint>       // for uint8_t, uint16_t
-#include <gtest/gtest.h> // for ParamIteratorInterface, ParamGeneratorInt...
-#include <limits>        // for numeric_limits
-#include <memory>        // for allocator, make_unique, unique_ptr
-#include <string>        // for basic_string, string, operator==
-#include <tuple>         // for make_tuple, get, tuple
-#include <type_traits>   // for __strip_reference_wrapper<>::__type
-#include <vector>        // for vector, vector<>::iterator, vector<>::val...
+#include "common/BayerPhase.h"         // for BayerPhase, BayerPhase::BGGR
+#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
+#include <array>                       // for array
+#include <cassert>                     // for assert
+#include <gtest/gtest.h>               // for UnitTest, EXPECT_EQ, TestWith...
+#include <map>                         // for allocator, map, operator!=
+#include <optional>                    // for optional
+#include <ostream>                     // for operator<<, ostream
+#include <tuple>                       // for get, tuple, apply
+#include <utility>                     // for forward, pair
 
 using rawspeed::BayerPhase;
 using rawspeed::CFAColor;

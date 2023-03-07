@@ -26,8 +26,7 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h"                      // for Endianness, Endianne...
+#include "io/Buffer.h"                          // for Buffer
 #include <cstdint>                              // for uint32_t
 #include <utility>                              // for move
 
@@ -36,14 +35,11 @@ namespace rawspeed {
 class JpegDecompressor final : public AbstractDecompressor {
   struct JpegDecompressStruct;
 
-  ByteStream input;
+  Buffer input;
   RawImage mRaw;
 
 public:
-  JpegDecompressor(ByteStream bs, const RawImage& img)
-      : input(std::move(bs)), mRaw(img) {
-    input.setByteOrder(Endianness::big);
-  }
+  JpegDecompressor(Buffer bs, const RawImage& img) : input(bs), mRaw(img) {}
 
   void decode(uint32_t offsetX, uint32_t offsetY);
 };

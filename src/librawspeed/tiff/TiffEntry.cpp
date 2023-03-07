@@ -22,18 +22,17 @@
 
 #include "tiff/TiffEntry.h"
 #include "common/Common.h"               // for isIn
+#include "io/Buffer.h"                   // for Buffer, DataBuffer
+#include "io/Endianness.h"               // for Endianness, Endianness::little
 #include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::DNGPRIVAT...
 #include <cassert>                       // for assert
-#include <cstdint>                       // for uint32_t, int16_t, uint16_t
+#include <cstdint>                       // for uint32_t, uint8_t, int32_t
 #include <cstring>                       // for strnlen
 #include <string>                        // for string
-#include <utility>                       // for move
 
 namespace rawspeed {
-
-class DataBuffer;
 
 // order see TiffDataType
 const std::array<uint32_t, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,
@@ -44,7 +43,8 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
     : parent(parent_), tag(static_cast<TiffTag>(bs.getU16())) {
   const uint16_t numType = bs.getU16();
   if (numType > static_cast<uint16_t>(TiffDataType::OFFSET))
-    ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.", numType);
+    ThrowTPE("Error reading TIFF structure. Unknown Type 0x%x encountered.",
+             numType);
   type = static_cast<TiffDataType>(numType);
   count = bs.getU32();
 
@@ -85,9 +85,8 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
 }
 
 TiffEntry::TiffEntry(TiffIFD* parent_, TiffTag tag_, TiffDataType type_,
-                     uint32_t count_, ByteStream&& data_)
-    : parent(parent_), data(std::move(data_)), tag(tag_), type(type_),
-      count(count_) {
+                     uint32_t count_, ByteStream data_)
+    : parent(parent_), data(data_), tag(tag_), type(type_), count(count_) {
   // check for count << datashift overflow
   if (count > UINT32_MAX >> datashifts[static_cast<uint32_t>(type)])
     ThrowTPE("integer overflow in size calculation.");
@@ -96,6 +95,18 @@ TiffEntry::TiffEntry(TiffIFD* parent_, TiffTag tag_, TiffDataType type_,
 
   if (data.getSize() != bytesize)
     ThrowTPE("data set larger than entry size given");
+}
+
+void TiffEntry::setData(ByteStream data_) { data = data_; }
+
+TiffEntryWithData::TiffEntryWithData(TiffIFD* parent_, TiffTag tag_,
+                                     TiffDataType type_, uint32_t count_,
+                                     Buffer mirror)
+    : TiffEntry(parent_, tag_, type_, /*count=*/0, ByteStream()),
+      data(mirror.begin(), mirror.end()) {
+  setData(ByteStream(
+      DataBuffer(Buffer(data.data(), data.size()), Endianness::little)));
+  count = count_;
 }
 
 bool __attribute__((pure)) TiffEntry::isInt() const {
@@ -272,7 +283,7 @@ std::string TiffEntry::getString() const {
   return {s, strnlen(s, bufSize)};
 }
 
-const DataBuffer &TiffEntry::getRootIfdData() const {
+DataBuffer TiffEntry::getRootIfdData() const {
   const TiffIFD* p = parent;
   const TiffRootIFD* r = nullptr;
   while (p) {

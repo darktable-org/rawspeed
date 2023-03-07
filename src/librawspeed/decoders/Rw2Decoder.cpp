@@ -49,7 +49,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -64,7 +64,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
   bool isOldPanasonic =
       !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
 
-  if (! isOldPanasonic)
+  if (!isOldPanasonic)
     raw = mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET);
   else
     raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
@@ -89,18 +89,22 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32_t size = mFile.getSize() - offset;
 
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-        mRaw);
-
-    if (size >= width*height*2) {
+    if (size >= width * height * 2) {
       // It's completely unpacked little-endian
+      UncompressedDecompressor u(
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+          mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 16 * width / 8,
+          16, BitOrder::LSB);
       mRaw->createData();
-      u.decodeRawUnpacked<12, Endianness::little>(width, height);
-    } else if (size >= width*height*3/2) {
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
+    } else if (size >= width * height * 3 / 2) {
       // It's a packed format
+      UncompressedDecompressor u(
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+          mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
+          (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::LSB);
       mRaw->createData();
-      u.decode12BitRaw<Endianness::little, false, true>(width, height);
+      u.decode12BitRawWithControl<Endianness::little>();
     } else {
       uint32_t section_split_offset = 0;
       PanasonicV4Decompressor p(
@@ -144,10 +148,11 @@ RawImage Rw2Decoder::decodeRawInternal() {
       return mRaw;
     }
     case 6: {
-      if (bitsPerSample != 14)
+      if (bitsPerSample != 14 && bitsPerSample != 12)
         ThrowRDE("Version %i: unexpected bits per sample: %i", version,
                  bitsPerSample);
-      PanasonicV6Decompressor v6(mRaw, bs);
+
+      PanasonicV6Decompressor v6(mRaw, bs, bitsPerSample);
       mRaw->createData();
       v6.decompress();
       return mRaw;
@@ -259,8 +264,8 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
     const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
 
-    for(int i = 0; i < 2; i++) {
-      for(int j = 0; j < 2; j++) {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
         const int k = i + 2 * j;
         const CFAColor c = mRaw->cfa.getColorAt(i, j);
         switch (c) {
@@ -315,19 +320,19 @@ std::string Rw2Decoder::guessMode() const {
   float t = fabs(ratio - 3.0F / 2.0F);
   if (t < min_diff) {
     closest_match = "3:2";
-    min_diff  = t;
+    min_diff = t;
   }
 
   t = fabs(ratio - 4.0F / 3.0F);
   if (t < min_diff) {
-    closest_match =  "4:3";
-    min_diff  = t;
+    closest_match = "4:3";
+    min_diff = t;
   }
 
   t = fabs(ratio - 1.0F);
   if (t < min_diff) {
     closest_match = "1:1";
-    min_diff  = t;
+    min_diff = t;
   }
   writeLog(DEBUG_PRIO::EXTRA, "Mode guess: '%s'", closest_match.c_str());
   return closest_match;

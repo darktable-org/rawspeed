@@ -26,7 +26,7 @@
 #include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
 #include <array>            // for array
 #include <cstdint>          // for uint8_t, uint32_t
-#include <gtest/gtest.h>    // for Test, Message, TestInfo (ptr only), ASSE...
+#include <gtest/gtest.h>    // for Test, TestInfo (ptr only), ASSERT_EQ, TEST
 #include <initializer_list> // for initializer_list
 #include <memory>           // for allocator
 

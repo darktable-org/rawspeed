@@ -20,24 +20,24 @@
 
 #pragma once
 
-#include <memory> // for unique_ptr
+#include "io/Buffer.h" // for Buffer
+#include <memory>      // for unique_ptr
 
 namespace rawspeed {
 
-class Buffer;
 class CameraMetaData;
 class RawDecoder;
 
 class RawParser {
 public:
-  explicit RawParser(const Buffer& inputData) : mInput(inputData) {}
+  explicit RawParser(Buffer inputData) : mInput(inputData) {}
   virtual ~RawParser() = default;
 
   virtual std::unique_ptr<RawDecoder>
   getDecoder(const CameraMetaData* meta = nullptr);
 
 protected:
-  const Buffer& mInput;
+  Buffer mInput;
 };
 
 } // namespace rawspeed

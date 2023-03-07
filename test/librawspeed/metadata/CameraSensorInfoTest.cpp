@@ -23,7 +23,7 @@
 #include <algorithm>                   // for copy, generate, fill_n, max
 #include <cstdlib>                     // for rand, srand
 #include <gmock/gmock.h>               // for InitGoogleMock
-#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
+#include <gtest/gtest.h>               // for ASSERT_NO_THROW, ASSERT_EQ
 #include <iostream>                    // for operator<<, basic_ostream::op...
 #include <limits>                      // for numeric_limits
 #include <memory>                      // for unique_ptr, allocator

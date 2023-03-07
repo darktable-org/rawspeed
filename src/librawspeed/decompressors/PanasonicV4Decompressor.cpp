@@ -36,13 +36,12 @@
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
 #include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
 #include <vector>                         // for vector, vector<>::iterator
 
 namespace rawspeed {
 
 PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
-                                                 const ByteStream& input_,
+                                                 ByteStream input_,
                                                  bool zero_is_not_bad,
                                                  uint32_t section_split_offset_)
     : mRaw(img), zero_is_bad(!zero_is_not_bad),
@@ -92,24 +91,23 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
   blocks.reserve(blocksTotal);
 
   unsigned currPixel = 0;
-  std::generate_n(std::back_inserter(blocks), blocksTotal,
-                  [&, pixelToCoordinate]() {
-                    assert(input.getRemainSize() != 0);
-                    const auto blockSize =
-                        std::min(input.getRemainSize(), BlockSize);
-                    assert(blockSize > 0);
-                    assert(blockSize % BytesPerPacket == 0);
-                    const auto packets = blockSize / BytesPerPacket;
-                    assert(packets > 0);
-                    const auto pixels = packets * PixelsPerPacket;
-                    assert(pixels > 0);
+  std::generate_n(
+      std::back_inserter(blocks), blocksTotal, [&, pixelToCoordinate]() {
+        assert(input.getRemainSize() != 0);
+        const auto blockSize = std::min(input.getRemainSize(), BlockSize);
+        assert(blockSize > 0);
+        assert(blockSize % BytesPerPacket == 0);
+        const auto packets = blockSize / BytesPerPacket;
+        assert(packets > 0);
+        const auto pixels = packets * PixelsPerPacket;
+        assert(pixels > 0);
 
-                    ByteStream bs = input.getStream(blockSize);
-                    iPoint2D beginCoord = pixelToCoordinate(currPixel);
-                    currPixel += pixels;
-                    iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return Block(std::move(bs), beginCoord, endCoord);
-                  });
+        ByteStream bs = input.getStream(blockSize);
+        iPoint2D beginCoord = pixelToCoordinate(currPixel);
+        currPixel += pixels;
+        iPoint2D endCoord = pixelToCoordinate(currPixel);
+        return Block(bs, beginCoord, endCoord);
+      });
   assert(blocks.size() == blocksTotal);
   assert(currPixel >= mRaw->dim.area());
   assert(input.getRemainSize() == 0);
@@ -152,7 +150,7 @@ class PanasonicV4Decompressor::ProxyStream {
 
 public:
   ProxyStream(ByteStream block_, int section_split_offset_)
-      : block(std::move(block_)), section_split_offset(section_split_offset_) {
+      : block(block_), section_split_offset(section_split_offset_) {
     parseBlock();
   }
 

@@ -80,8 +80,8 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
     iPoint2D endCoord;
 
     Block() = default;
-    Block(ByteStream&& bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
-        : bs(std::move(bs_)), beginCoord(beginCoord_), endCoord(endCoord_) {}
+    Block(ByteStream bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : bs(bs_), beginCoord(beginCoord_), endCoord(endCoord_) {}
   };
 
   // If really wanted, this vector could be avoided,
@@ -98,7 +98,7 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
   template <const PacketDsc& dsc> void decompressInternal() const noexcept;
 
 public:
-  PanasonicV5Decompressor(const RawImage& img, const ByteStream& input_,
+  PanasonicV5Decompressor(const RawImage& img, ByteStream input_,
                           uint32_t bps_);
 
   void decompress() const noexcept;

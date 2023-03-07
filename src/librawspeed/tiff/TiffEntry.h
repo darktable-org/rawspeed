@@ -1,4 +1,4 @@
-/*
+﻿/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -22,19 +22,20 @@
 
 #pragma once
 
-#include "adt/NotARational.h"    // for NotARational
-#include "io/ByteStream.h"       // for ByteStream
-#include "tiff/TiffTag.h"        // for TiffTag
-#include <algorithm>             // for fill_n
-#include <array>                 // for array
-#include <cstdint>               // for uint32_t, uint16_t, int16_t, int32_t
-#include <string>                // for string
-#include <vector>                // for vector
+#include "adt/NotARational.h" // for NotARational
+#include "io/ByteStream.h"    // for ByteStream
+#include "tiff/TiffTag.h"     // for TiffTag
+#include <algorithm>          // for fill_n
+#include <array>              // for array
+#include <cstdint>            // for uint32_t, uint16_t, uint8_t, int32_t
+#include <string>             // for string
+#include <vector>             // for vector
 
 namespace rawspeed {
 
 class DataBuffer;
 class TiffIFD;
+class Buffer;
 
 /*
  * Tag data type information.
@@ -58,21 +59,22 @@ enum class TiffDataType {
   OFFSET = 13,    /* 32-bit unsigned offset used for IFD and other offsets */
 };
 
-class TiffEntry
-{
+class TiffEntry {
   TiffIFD* parent;
   ByteStream data;
 
   friend class TiffIFD;
 
   template <typename T, T (TiffEntry::*getter)(uint32_t index) const>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::vector<T>
-  getArray(uint32_t count_) const {
+  [[nodiscard]] std::vector<T> getArray(uint32_t count_) const {
     std::vector<T> res(count_);
     for (uint32_t i = 0; i < count_; ++i)
       res[i] = (this->*getter)(i);
     return res;
   }
+
+protected:
+  void setData(ByteStream data_);
 
 public:
   TiffTag tag;
@@ -80,8 +82,10 @@ public:
   uint32_t count;
 
   TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32_t count,
-            ByteStream&& data);
+            ByteStream data);
   TiffEntry(TiffIFD* parent, ByteStream& bs);
+
+  virtual ~TiffEntry() = default;
 
   [[nodiscard]] bool __attribute__((pure)) isFloat() const;
   [[nodiscard]] bool __attribute__((pure)) isRational() const;
@@ -124,10 +128,18 @@ public:
 
   [[nodiscard]] ByteStream getData() const { return data; }
 
-  [[nodiscard]] const DataBuffer& getRootIfdData() const;
+  [[nodiscard]] DataBuffer getRootIfdData() const;
 
 protected:
   static const std::array<uint32_t, 14> datashifts;
+};
+
+class TiffEntryWithData : public TiffEntry {
+  const std::vector<uint8_t> data;
+
+public:
+  TiffEntryWithData(TiffIFD* parent, TiffTag tag, TiffDataType type,
+                    uint32_t count, Buffer mirror);
 };
 
 } // namespace rawspeed

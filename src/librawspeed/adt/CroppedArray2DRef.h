@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "adt/Array2DRef.h" // for Array2DRef
-#include <cassert>          // for assert
-#include <type_traits>      // for enable_if_t, remove_const_t, remove_cv_t
+#include "adt/Array2DRef.h"        // for Array2DRef
+#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
+#include <cassert>                 // for assert
+#include <type_traits> // for enable_if_t, remove_const_t, remove_cv_t
 
 namespace rawspeed {
 
@@ -31,8 +32,6 @@ template <class T> class CroppedArray2DRef {
 
   // We need to be able to convert to const version.
   friend CroppedArray2DRef<const T>;
-
-  T& operator[](int row) const;
 
 public:
   using value_type = T;
@@ -45,6 +44,11 @@ public:
 
   CroppedArray2DRef() = default;
 
+  // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
+  CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
+      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width),
+        croppedHeight(base.height) {}
+
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);
 
@@ -55,6 +59,8 @@ public:
       CroppedArray2DRef<T2> RHS)
       : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
         croppedWidth(RHS.croppedWidth), croppedHeight(RHS.croppedHeight) {}
+
+  CroppedArray1DRef<T> operator[](int row) const;
 
   T& operator()(int row, int col) const;
 };
@@ -81,17 +87,19 @@ CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
 }
 
 template <class T>
-inline T& CroppedArray2DRef<T>::operator[](const int row) const {
+inline CroppedArray1DRef<T>
+CroppedArray2DRef<T>::operator[](const int row) const {
   assert(row >= 0);
   assert(row < croppedHeight);
-  return base.operator()(offsetRows + row, /*col=*/0);
+  const Array1DRef<T> fullLine = base.operator[](offsetRows + row);
+  return fullLine.getCrop(offsetCols, croppedWidth);
 }
 
 template <class T>
 inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
   assert(col >= 0);
   assert(col < croppedWidth);
-  return (&(operator[](row)))[offsetCols + col];
+  return (operator[](row))(col);
 }
 
 } // namespace rawspeed

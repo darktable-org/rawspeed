@@ -3912,9 +3912,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="400" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9200 -3522 -992</ColorMatrixRow>
@@ -3951,9 +3948,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="100" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9200 -3522 -992</ColorMatrixRow>
@@ -3990,9 +3984,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9028 -3423 -1035</ColorMatrixRow>
@@ -4029,9 +4020,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="252" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9028 -3423 -1035</ColorMatrixRow>
@@ -4104,9 +4092,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4143,9 +4128,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="251" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4182,9 +4164,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4221,9 +4200,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="251" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9943 -3269 -839</ColorMatrixRow>
@@ -4260,9 +4236,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -4299,9 +4272,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="252" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -4338,9 +4308,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="1008" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13705 -6004 -1400</ColorMatrixRow>
@@ -4377,9 +4344,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="251" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13705 -6004 -1400</ColorMatrixRow>
@@ -4770,9 +4734,6 @@
 		</CFA>
 		<Crop x="2" y="2" width="-2" height="-2"/>
 		<Sensor black="400" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8813 -3210 -1036</ColorMatrixRow>
@@ -4809,9 +4770,6 @@
 		</CFA>
 		<Crop x="2" y="2" width="-2" height="-2"/>
 		<Sensor black="100" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8813 -3210 -1036</ColorMatrixRow>
@@ -5796,9 +5754,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="150" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9369 -3195 -791</ColorMatrixRow>
@@ -5835,9 +5790,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="600" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9369 -3195 -791</ColorMatrixRow>
@@ -5892,9 +5844,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="100" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -5931,9 +5880,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="400" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10405 -3755 -1270</ColorMatrixRow>
@@ -5982,9 +5928,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="192" white="3880"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8598 -2848 -857</ColorMatrixRow>
@@ -6003,9 +5946,6 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="768" white="15520"/>
-		<Hints>
-			<Hint name="msb_override" value=""/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8598 -2848 -857</ColorMatrixRow>
@@ -6401,6 +6341,7 @@
 		<Hints>
 			<Hint name="force_uncompressed" value=""/>
 			<Hint name="real_bpp" value="16"/>
+			<Hint name="msb_override" value="false"/>
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -6438,6 +6379,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="200" white="3800"/>
+		<Hints>
+			<Hint name="msb_override" value="false"/>
+		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10321 -3920 -931</ColorMatrixRow>
@@ -6586,6 +6530,7 @@
 		<Hints>
 			<Hint name="force_uncompressed" value=""/>
 			<Hint name="real_bpp" value="16"/>
+			<Hint name="msb_override" value="false"/>
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -6608,6 +6553,7 @@
 		<Hints>
 			<Hint name="force_uncompressed" value=""/>
 			<Hint name="real_bpp" value="16"/>
+			<Hint name="msb_override" value="false"/>
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -11283,6 +11229,30 @@
 				<ColorMatrixRow plane="0">6929 -2355 -708</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4192 12534 1828</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-1097 1989 5195</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5M2">
+		<ID make="Panasonic" model="DC-GH5M2">Panasonic DC-GH5M2</ID>
+		<Crop x="0" y="0" width="-56" height="0"/>
+		<Sensor black="129" white="4088"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9300 -3659 -755</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2981 10988 2287</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-190 1077 5016</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-GH5M2" mode="4:3">
+		<ID make="Panasonic" model="DC-GH5M2">Panasonic DC-GH5M2</ID>
+		<Crop x="0" y="0" width="-56" height="0"/>
+		<Sensor black="129" white="4088"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9300 -3659 -755</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2981 10988 2287</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-190 1077 5016</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -16532,6 +16502,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Phase One A/S" model="P45">
+		<ID make="Phase One" model="P45">Phase One P45</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="46" y="28" width="-24" height="-32"/>
+		<Sensor black="0" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">5053 -24 -117</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5685 14077 1703</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-2619 4491 5850</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Phase One A/S" model="P65+">
 		<ID make="Phase One" model="P65+">Phase One P65+</ID>
 		<CFA width="2" height="2">
@@ -16565,6 +16553,24 @@
 				<ColorMatrixRow plane="0">8035 435 -962</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-6001 13872 2320</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-1159 3065 5434</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Phase One A/S" model="IQ180">
+		<ID make="Phase One" model="IQ180">Phase One IQ180</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="42" y="16" width="-20" height="-50"/>
+		<Sensor black="257" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">6294 686 -712</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5435 13417 2211</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1006 2435 5042</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -17191,6 +17197,15 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX10 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX10 IS">Canon PowerShot SX10 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX20 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX20 IS">Canon PowerShot SX20 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX30 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX30 IS">Canon PowerShot SX30 IS</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX40 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX40 HS">Canon PowerShot SX40 HS</ID>
 	</Camera>
@@ -17200,11 +17215,29 @@
 	<Camera make="Canon" model="Canon PowerShot SX130 IS" mode="dng">
 		<ID make="Canon" model="PowerShot SX130 IS">Canon PowerShot SX130 IS</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX160 IS" mode="dng">
+		<ID make="Canon" model="PowerShot SX160 IS">Canon PowerShot SX160 IS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX220 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX220 HS">Canon PowerShot SX220 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX230 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX230 HS">Canon PowerShot SX230 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX240 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX240 HS">Canon PowerShot SX240 HS</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX260 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX260 HS">Canon PowerShot SX260 HS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot SX510 HS" mode="dng">
 		<ID make="Canon" model="PowerShot SX510 HS">Canon PowerShot SX510 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX530 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX530 HS">Canon PowerShot SX530 HS</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX710 HS" mode="dng">
+		<ID make="Canon" model="PowerShot SX710 HS">Canon PowerShot SX710 HS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A3200 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A3200 IS">Canon PowerShot A3200 IS</ID>

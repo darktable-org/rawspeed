@@ -23,6 +23,7 @@
 
 #include "common/RawImage.h"              // for RawImage
 #include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
+#include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
 #include <cstdint>                        // for uint32_t
@@ -33,12 +34,10 @@ namespace rawspeed {
 class Buffer;
 class CameraMetaData;
 
-class ArwDecoder final : public AbstractTiffDecoder
-{
+class ArwDecoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  ArwDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  ArwDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -49,8 +48,7 @@ private:
 
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
   RawImage decodeSRF(const TiffIFD* raw);
-  void DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
-                  uint32_t bpp);
+  void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
   void DecodeUncompressed(const TiffIFD* raw) const;
   static void SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
                           uint32_t key);

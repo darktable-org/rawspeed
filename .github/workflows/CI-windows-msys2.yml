@@ -24,9 +24,12 @@ on:
         type: string
       ECO:
         type: string
+    secrets:
+      CODECOV_TOKEN:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+  COVERAGE_REPORT_PREFIX: rawspeed-coverage # relative to the workspace!
 
 jobs:
   windows-msys2:
@@ -82,7 +85,7 @@ jobs:
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
-      - name: Test
+      - name: Test (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -91,25 +94,19 @@ jobs:
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
-      - name: Install
-        env:
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
-          TARGET: install
-        run: |
-          set -xe
-          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data
+        name: Collect source coverage data (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v3
@@ -119,9 +116,19 @@ jobs:
           CXX: ${{ inputs.compiler-family }}
           JOB_NAME: ${{ inputs.os }}.${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: unittests
-          name: ${JOB_NAME}.Unittests
+          flags: windows,unittests
+          name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}\rawspeed-build\gcov-reports-unittest
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/unittests
           fail_ci_if_error: true
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh

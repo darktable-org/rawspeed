@@ -40,7 +40,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool DcrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -112,6 +112,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   }();
 
   KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
+  mRaw->createData();
   k.decompress();
 
   return mRaw;

@@ -24,9 +24,12 @@ on:
         type: string
       ECO:
         type: string
+    secrets:
+      CODECOV_TOKEN:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+  COVERAGE_REPORT_PREFIX: rawspeed-coverage # relative to the workspace!
 
 jobs:
   macOS:
@@ -78,7 +81,7 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - name: Test
+      - name: Test (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -87,25 +90,19 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - name: Install
-        env:
-          SRC_DIR: ${{ github.workspace }}/rawspeed
-          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
-          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
-          TARGET: install
-        run: |
-          set -xe
-          "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data
+        name: Collect source coverage data (unit tests)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           TARGET: coverage
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
       - if: inputs.flavor == 'Coverage'
         name: Upload coverage to Codecov (unit tests)
         uses: codecov/codecov-action@v3
@@ -115,9 +112,57 @@ jobs:
           CXX: AppleXcode
           JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,ARCH,CXX
-          flags: unittests
-          name: ${JOB_NAME}.Unittests
+          flags: macOS,unittests
+          name: ${{ env.JOB_NAME }}.Unittests
           root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/rawspeed-build/gcov-reports-unittest
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/unittests
           fail_ci_if_error: true
+      - name: Test (benchmarks)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: test_benchmarks
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+      - if: inputs.flavor == 'Coverage'
+        name: Collect source coverage data (benchmarks)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: coverage_benchmarks
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
+      - if: inputs.flavor == 'Coverage'
+        name: Upload coverage to Codecov (benchmarks)
+        uses: codecov/codecov-action@v3
+        env:
+          OS: macOS
+          ARCH: x86_64
+          CXX: AppleXcode
+          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,ARCH,CXX
+          flags: macOS,benchmarks
+          name: ${{ env.JOB_NAME }}.Benchmarks
+          root_dir: ${{ github.workspace }}/rawspeed
+          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/benchmarks
+          fail_ci_if_error: true
+      - name: Install
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          TARGET: install
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/ci-script.sh"

@@ -2,7 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2017 Axel Waggershauser
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2017-2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
+#include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for copy_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
@@ -34,8 +35,12 @@ using std::copy_n;
 
 namespace rawspeed {
 
-LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
-    : AbstractLJpegDecompressor(bs, img) {
+LJpegDecompressor::LJpegDecompressor(const RawImage& img,
+                                     iRectangle2D imgFrame_, Frame frame_,
+                                     std::vector<PerComponentRecipe> rec_,
+                                     ByteStream bs)
+    : mRaw(img), input(bs), imgFrame(imgFrame_), frame(std::move(frame_)),
+      rec(std::move(rec_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -55,70 +60,166 @@ LJpegDecompressor::LJpegDecompressor(const ByteStream& bs, const RawImage& img)
              mRaw->dim.y);
   }
 #endif
-}
 
-void LJpegDecompressor::decode(uint32_t offsetX, uint32_t offsetY,
-                               uint32_t width, uint32_t height,
-                               bool fixDng16Bug_) {
-  if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
+  if (imgFrame.pos.x >= mRaw->dim.x)
     ThrowRDE("X offset outside of image");
-  if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
+  if (imgFrame.pos.y >= mRaw->dim.y)
     ThrowRDE("Y offset outside of image");
 
-  if (width > static_cast<unsigned>(mRaw->dim.x))
+  if (imgFrame.dim.x > mRaw->dim.x)
     ThrowRDE("Tile wider than image");
-  if (height > static_cast<unsigned>(mRaw->dim.y))
+  if (imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile taller than image");
 
-  if (offsetX + width > static_cast<unsigned>(mRaw->dim.x))
+  if (imgFrame.pos.x + imgFrame.dim.x > mRaw->dim.x)
     ThrowRDE("Tile overflows image horizontally");
-  if (offsetY + height > static_cast<unsigned>(mRaw->dim.y))
+  if (imgFrame.pos.y + imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile overflows image vertically");
 
-  if (width == 0 || height == 0)
-    return; // We do not need anything from this tile.
+  if (frame.cps < 1 || frame.cps > 4)
+    ThrowRDE("Unsupported number of components: %u", frame.cps);
 
-  offX = offsetX;
-  offY = offsetY;
-  w = width;
-  h = height;
+  if (rec.size() != (unsigned)frame.cps)
+    ThrowRDE("Must have exactly one recepie per component");
 
-  fixDng16Bug = fixDng16Bug_;
+  for (const auto& recip : rec) {
+    if (!recip.ht.isFullDecode())
+      ThrowRDE("Huffman table is not of a full decoding variety");
+  }
 
-  AbstractLJpegDecompressor::decode();
-}
+  if ((unsigned)frame.cps < mRaw->getCpp())
+    ThrowRDE("Unexpected number of components");
 
-void LJpegDecompressor::decodeScan()
-{
-  assert(frame.cps > 0);
-
-  if (predictorMode != 1)
-    ThrowRDE("Unsupported predictor mode: %u", predictorMode);
-
-  for (uint32_t i = 0; i < frame.cps; i++)
-    if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
-      ThrowRDE("Unsupported subsampling");
-
-  assert(static_cast<unsigned>(mRaw->dim.x) > offX);
-  if ((mRaw->getCpp() * (mRaw->dim.x - offX)) < frame.cps)
+  assert(mRaw->dim.x > imgFrame.pos.x);
+  if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const auto tileRequiredWidth = mRaw->getCpp() * w;
+  const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
 
   // How many full pixel blocks do we need to consume for that?
-  if (const auto blocksToConsume =
-          roundUpDivision(tileRequiredWidth, frame.cps);
-      frame.w < blocksToConsume || frame.h < h) {
+  if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
+      frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
+      frame.cps * frame.dim.x < (int)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.w, frame.h, tileRequiredWidth, h);
+             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
+             imgFrame.dim.y);
   }
 
   // How many full pixel blocks will we produce?
   fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!
   // Do we need to also produce part of a block?
   trailingPixels = tileRequiredWidth % frame.cps;
+}
 
+template <int N_COMP, size_t... I>
+std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
+LJpegDecompressor::getHuffmanTablesImpl(
+    std::index_sequence<I...> /*unused*/) const {
+  return std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>{
+      std::cref(rec[I].ht)...};
+}
+
+template <int N_COMP>
+std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
+LJpegDecompressor::getHuffmanTables() const {
+  return getHuffmanTablesImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
+}
+
+template <int N_COMP>
+std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
+  std::array<uint16_t, N_COMP> preds;
+  std::transform(
+      rec.begin(), rec.end(), preds.begin(),
+      [](const PerComponentRecipe& compRec) { return compRec.initPred; });
+  return preds;
+}
+
+// N_COMP == number of components (2, 3 or 4)
+
+template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
+  assert(mRaw->getCpp() > 0);
+  assert(N_COMP > 0);
+  assert(N_COMP >= mRaw->getCpp());
+  assert((N_COMP / mRaw->getCpp()) > 0);
+
+  assert(mRaw->dim.x >= N_COMP);
+  assert((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
+
+  const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
+                              mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
+                              mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y);
+
+  const auto ht = getHuffmanTables<N_COMP>();
+  auto pred = getInitialPreds<N_COMP>();
+  uint16_t* predNext = pred.data();
+
+  BitPumpJPEG bitStream(input);
+
+  // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
+  // The tiles at the bottom and the right may extend beyond the dimension of
+  // the raw image buffer. The excessive content has to be ignored.
+
+  assert(frame.dim.y >= imgFrame.dim.y);
+  assert(frame.cps * frame.dim.x >= (int)mRaw->getCpp() * imgFrame.dim.x);
+
+  assert(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
+  assert(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
+
+  // For y, we can simply stop decoding when we reached the border.
+  for (int row = 0; row < imgFrame.dim.y; ++row) {
+    int col = 0;
+
+    copy_n(predNext, N_COMP, pred.data());
+    // the predictor for the next line is the start of this line
+    predNext = &img(row, col);
+
+    // FIXME: predictor may have value outside of the uint16_t.
+    // https://github.com/darktable-org/rawspeed/issues/175
+
+    // For x, we first process all full pixel blocks within the image buffer ...
+    for (; col < N_COMP * fullBlocks; col += N_COMP) {
+      for (int i = 0; i != N_COMP; ++i) {
+        pred[i] = uint16_t(
+            pred[i] +
+            ((const HuffmanTable<>&)(ht[i])).decodeDifference(bitStream));
+        img(row, col + i) = pred[i];
+      }
+    }
+
+    // Sometimes we also need to consume one more block, and produce part of it.
+    if /*constexpr*/ (WeirdWidth) {
+      // FIXME: evaluate i-cache implications due to this being compile-time.
+      static_assert(N_COMP > 1 || !WeirdWidth,
+                    "can't want part of 1-pixel-wide block");
+      // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
+      // We may end up needing just part of last N_COMP pixels.
+      assert(trailingPixels > 0);
+      assert(trailingPixels < N_COMP);
+      int c = 0;
+      for (; c < trailingPixels; ++c) {
+        pred[c] = uint16_t(
+            pred[c] +
+            ((const HuffmanTable<>&)(ht[c])).decodeDifference(bitStream));
+        img(row, col + c) = pred[c];
+      }
+      // Discard the rest of the block.
+      assert(c < N_COMP);
+      for (; c < N_COMP; ++c) {
+        ((const HuffmanTable<>&)(ht[c])).decodeDifference(bitStream);
+      }
+      col += N_COMP; // We did just process one more block.
+    }
+
+    // ... and discard the rest.
+    for (; col < N_COMP * frame.dim.x; col += N_COMP) {
+      for (int i = 0; i != N_COMP; ++i)
+        ((const HuffmanTable<>&)(ht[i])).decodeDifference(bitStream);
+    }
+  }
+}
+
+void LJpegDecompressor::decode() {
   if (trailingPixels == 0) {
     switch (frame.cps) {
     case 1:
@@ -134,7 +235,7 @@ void LJpegDecompressor::decodeScan()
       decodeN<4>();
       break;
     default:
-      ThrowRDE("Unsupported number of components: %u", frame.cps);
+      __builtin_unreachable();
     }
   } else /* trailingPixels != 0 */ {
     // FIXME: using different function just for one tile likely causes
@@ -152,86 +253,7 @@ void LJpegDecompressor::decodeScan()
       decodeN<4, /*WeirdWidth=*/true>();
       break;
     default:
-      ThrowRDE("Unsupported number of components: %u", frame.cps);
-    }
-  }
-}
-
-// N_COMP == number of components (2, 3 or 4)
-
-template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
-  assert(mRaw->getCpp() > 0);
-  assert(N_COMP > 0);
-  assert(N_COMP >= mRaw->getCpp());
-  assert((N_COMP / mRaw->getCpp()) > 0);
-
-  assert(mRaw->dim.x >= N_COMP);
-  assert((mRaw->getCpp() * (mRaw->dim.x - offX)) >= N_COMP);
-
-  const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
-                              mRaw->getCpp() * offX, offY, mRaw->getCpp() * w,
-                              h);
-
-  const auto ht = to_array<N_COMP>(getHuffmanTables(N_COMP));
-  auto pred = to_array<N_COMP>(getInitialPredictors(N_COMP));
-  uint16_t* predNext = pred.data();
-
-  BitPumpJPEG bitStream(input);
-
-  // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
-  // The tiles at the bottom and the right may extend beyond the dimension of
-  // the raw image buffer. The excessive content has to be ignored.
-
-  assert(frame.h >= h);
-  assert(frame.cps * frame.w >= mRaw->getCpp() * w);
-
-  assert(offY + h <= static_cast<unsigned>(mRaw->dim.y));
-  assert(offX + w <= static_cast<unsigned>(mRaw->dim.x));
-
-  // For y, we can simply stop decoding when we reached the border.
-  for (unsigned row = 0; row < h; ++row) {
-    unsigned col = 0;
-
-    copy_n(predNext, N_COMP, pred.data());
-    // the predictor for the next line is the start of this line
-    predNext = &img(row, col);
-
-    // FIXME: predictor may have value outside of the uint16_t.
-    // https://github.com/darktable-org/rawspeed/issues/175
-
-    // For x, we first process all full pixel blocks within the image buffer ...
-    for (; col < N_COMP * fullBlocks; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i) {
-        pred[i] = uint16_t(pred[i] + ht[i]->decodeDifference(bitStream));
-        img(row, col + i) = pred[i];
-      }
-    }
-
-    // Sometimes we also need to consume one more block, and produce part of it.
-    if /*constexpr*/ (WeirdWidth) {
-      // FIXME: evaluate i-cache implications due to this being compile-time.
-      static_assert(N_COMP > 1 || !WeirdWidth,
-                    "can't want part of 1-pixel-wide block");
-      // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
-      // We may end up needing just part of last N_COMP pixels.
-      assert(trailingPixels > 0);
-      assert(trailingPixels < N_COMP);
-      unsigned c = 0;
-      for (; c < trailingPixels; ++c) {
-        pred[c] = uint16_t(pred[c] + ht[c]->decodeDifference(bitStream));
-        img(row, col + c) = pred[c];
-      }
-      // Discard the rest of the block.
-      assert(c < N_COMP);
-      for (; c < N_COMP; ++c) {
-        ht[c]->decodeDifference(bitStream);
-      }
-      col += N_COMP; // We did just process one more block.
-    }
-
-    // ... and discard the rest.
-    for (; col < N_COMP * frame.w; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i) ht[i]->decodeDifference(bitStream);
+      __builtin_unreachable();
     }
   }
 }

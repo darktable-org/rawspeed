@@ -28,6 +28,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include <algorithm>                      // for fill_n
 #include <array>                          // for array
 #include <cassert>                        // for assert
 #include <memory>                         // for allocator_traits<>::value_...
@@ -41,7 +42,7 @@ struct SamsungV1Decompressor::encTableItem {
 };
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
-                                             const ByteStream& bs_, int bit)
+                                             ByteStream bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -72,7 +73,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
     return 0;
   int32_t diff = pump.getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
-  diff = HuffmanTable::extend(diff, len);
+  diff = HuffmanTable<>::extend(diff, len);
   return diff;
 }
 

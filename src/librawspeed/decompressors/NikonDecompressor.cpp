@@ -119,7 +119,7 @@ class NikonLASDecompressor {
         huffsize[p] = static_cast<char>(l);
         ++p;
         if (p > 256)
-          ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too "
+          ThrowRDE("LJpegDecoder::createHuffmanTable: Code length too "
                    "long. Corrupt data.");
       }
     }
@@ -275,7 +275,7 @@ class NikonLASDecompressor {
   }
 
 public:
-  uint32_t setNCodesPerLength(const Buffer& data) {
+  uint32_t setNCodesPerLength(Buffer data) {
     uint32_t acc = 0;
     for (uint32_t i = 0; i < 16; i++) {
       dctbl1.bits[i + 1] = data[i];
@@ -285,9 +285,9 @@ public:
     return acc;
   }
 
-  void setCodeValues(const Buffer& data) {
-    for (uint32_t i = 0; i < data.getSize(); i++)
-      dctbl1.huffval[i] = data[i];
+  void setCodeValues(Array1DRef<const uint8_t> data) {
+    for (int i = 0; i < data.size(); i++)
+      dctbl1.huffval[i] = data(i);
   }
 
   void setup([[maybe_unused]] bool fullDecode_,
@@ -437,7 +437,8 @@ Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
   Huffman ht;
   uint32_t count =
       ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
-  ht.setCodeValues(Buffer(nikon_tree[huffSelect][1].data(), count));
+  ht.setCodeValues(
+      Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
   ht.setup(true, false);
   return ht;
 }
@@ -511,8 +512,7 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   }
 }
 
-void NikonDecompressor::decompress(const ByteStream& data,
-                                   bool uncorrectedRawValues) {
+void NikonDecompressor::decompress(ByteStream data, bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
   BitPumpMSB bits(data);
@@ -522,9 +522,9 @@ void NikonDecompressor::decompress(const ByteStream& data,
   assert(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
 
   if (!split) {
-    decompress<HuffmanTable>(bits, 0, mRaw->dim.y);
+    decompress<HuffmanTable<>>(bits, 0, mRaw->dim.y);
   } else {
-    decompress<HuffmanTable>(bits, 0, split);
+    decompress<HuffmanTable<>>(bits, 0, split);
     huffSelect += 1;
     decompress<NikonLASDecompressor>(bits, split, mRaw->dim.y);
   }

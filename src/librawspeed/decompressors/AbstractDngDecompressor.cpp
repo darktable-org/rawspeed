@@ -27,7 +27,7 @@
 #include "decoders/RawDecoderException.h"           // for RawDecoderException
 #include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
 #include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
-#include "decompressors/LJpegDecompressor.h"        // for LJpegDecompressor
+#include "decompressors/LJpegDecoder.h"             // for LJpegDecoder
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "decompressors/VC5Decompressor.h"          // for VC5Decompressor
 #include "io/ByteStream.h"                          // for ByteStream
@@ -46,7 +46,6 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    UncompressedDecompressor decompressor(e->bs, mRaw);
 
     iPoint2D tileSize(e->width, e->height);
     iPoint2D pos(e->offX, e->offY);
@@ -85,9 +84,10 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
       if (inputPitch == 0)
         ThrowRDE("Data input pitch is too short. Can not decode!");
 
-      decompressor.readUncompressedRaw(tileSize, pos, inputPitch, mBps,
-                                       big_endian ? BitOrder::MSB
-                                                  : BitOrder::LSB);
+      UncompressedDecompressor decompressor(
+          e->bs, mRaw, iRectangle2D(pos, tileSize), inputPitch, mBps,
+          big_endian ? BitOrder::MSB : BitOrder::LSB);
+      decompressor.readUncompressedRaw();
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -102,7 +102,7 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
     try {
-      LJpegDecompressor d(e->bs, mRaw);
+      LJpegDecoder d(e->bs, mRaw);
       d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
@@ -120,7 +120,8 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    DeflateDecompressor z(e->bs, mRaw, mPredictor, mBps);
+    DeflateDecompressor z(e->bs.peekBuffer(e->bs.getRemainSize()), mRaw,
+                          mPredictor, mBps);
     try {
       z.decode(&uBuffer, iPoint2D(mRaw->getCpp() * e->dsc.tileW, e->dsc.tileH),
                iPoint2D(mRaw->getCpp() * e->width, e->height),
@@ -157,7 +158,7 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    JpegDecompressor j(e->bs, mRaw);
+    JpegDecompressor j(e->bs.peekBuffer(e->bs.getRemainSize()), mRaw);
     try {
       j.decode(e->offX, e->offY);
     } catch (const RawDecoderException& err) {

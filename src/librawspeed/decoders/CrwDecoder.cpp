@@ -48,7 +48,7 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-bool CrwDecoder::isCRW(const Buffer& input) {
+bool CrwDecoder::isCRW(Buffer input) {
   static const std::array<char, 8> magic = {
       {'H', 'E', 'A', 'P', 'C', 'C', 'D', 'R'}};
   static const size_t magic_offset = 6;
@@ -56,8 +56,7 @@ bool CrwDecoder::isCRW(const Buffer& input) {
   return 0 == memcmp(data, magic.data(), magic.size());
 }
 
-CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
-                       const Buffer& file)
+CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file)
     : RawDecoder(file), mRootIFD(std::move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {
@@ -84,7 +83,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   assert(decTable != nullptr);
   uint32_t dec_table = decTable->getU32();
 
-  bool lowbits = ! hints.has("no_decompressed_lowbits");
+  bool lowbits = !hints.has("no_decompressed_lowbits");
 
   CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
   mRaw->createData();
@@ -117,8 +116,7 @@ float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
     frac = 32.0F / 3;
-  }
-  else if (frac == 0x14) {
+  } else if (frac == 0x14) {
     frac = 64.0F / 3;
   }
   return copysignf((val + frac) / 32.0F, in);
@@ -150,7 +148,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 
   // Fetch the white balance
-  try{
+  try {
     if (mRootIFD->hasEntryRecursive(static_cast<CiffTag>(0x0032))) {
       const CiffEntry* wb =
           mRootIFD->getEntryRecursive(static_cast<CiffTag>(0x0032));
@@ -175,7 +173,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         int offset = hints.get("wb_offset", 120);
 
         std::array<uint16_t, 2> key = {{0x410, 0x45f3}};
-        if (! hints.has("wb_mangle"))
+        if (!hints.has("wb_mangle"))
           key[0] = key[1] = 0;
 
         offset /= 2;
@@ -215,7 +213,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       if (wb_index > 9)
         ThrowRDE("Invalid white balance index");
-      int wb_offset = 1 + ("0134567028"[wb_index]-'0') * 4;
+      int wb_offset = 1 + ("0134567028"[wb_index] - '0') * 4;
       mRaw->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
       mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
       mRaw->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);

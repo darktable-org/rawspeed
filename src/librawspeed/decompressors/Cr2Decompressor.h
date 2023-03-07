@@ -27,22 +27,22 @@
 #include "common/RawspeedException.h"        // for ThrowException
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
-#include "decompressors/HuffmanTable.h" // for HuffmanTable, HuffmanTableLUT
-#include "io/ByteStream.h"              // for ByteStream
-#include <array>                        // for array
-#include <cassert>                      // for assert
-#include <cstddef>                      // for size_t
-#include <cstdint>                      // for uint16_t
-#include <functional>                   // for reference_wrapper
-#include <tuple>                        // for array, tuple
-#include <utility>                      // for index_sequence
-#include <vector>                       // for vector
+#include "decompressors/HuffmanTable.h"      // for HuffmanTable, HuffmanTa...
+#include "io/ByteStream.h"                   // for ByteStream
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <cstddef>                           // for size_t, ptrdiff_t
+#include <cstdint>                           // for uint16_t
+#include <functional>                        // for reference_wrapper
+#include <iterator>                          // for input_iterator_tag
+#include <tuple>                             // for tuple
+#include <utility>                           // for index_sequence
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
 class ByteStream;
 class RawImage;
-
 struct Cr2SliceWidthIterator;
 struct Cr2SliceIterator;
 struct Cr2OutputTileIterator;
@@ -173,6 +173,6 @@ public:
   void decompress();
 };
 
-extern template class Cr2Decompressor<HuffmanTable>;
+extern template class Cr2Decompressor<HuffmanTable<>>;
 
 } // namespace rawspeed

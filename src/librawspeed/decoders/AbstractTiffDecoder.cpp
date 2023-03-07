@@ -27,8 +27,8 @@
 
 namespace rawspeed {
 
-const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
-{
+const TiffIFD*
+AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const {
   std::vector<const TiffIFD*> ifds = mRootIFD->getIFDsWithTag(filter);
 
   if (ifds.empty())

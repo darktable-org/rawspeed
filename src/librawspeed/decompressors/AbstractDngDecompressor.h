@@ -100,8 +100,8 @@ struct DngSliceElement final {
   DngSliceElement& operator=(DngSliceElement&&) noexcept = delete;
 
   DngSliceElement(const DngTilingDescription& dsc_, unsigned n_, ByteStream bs_)
-      : dsc(dsc_), n(n_), bs(std::move(bs_)), column(n % dsc.tilesX),
-        row(n / dsc.tilesX), lastColumn((column + 1) == dsc.tilesX),
+      : dsc(dsc_), n(n_), bs(bs_), column(n % dsc.tilesX), row(n / dsc.tilesX),
+        lastColumn((column + 1) == dsc.tilesX),
         lastRow((row + 1) == dsc.tilesY), offX(dsc.tileW * column),
         offY(dsc.tileH * row),
         width(!lastColumn ? dsc.tileW : dsc.dim.x - offX),

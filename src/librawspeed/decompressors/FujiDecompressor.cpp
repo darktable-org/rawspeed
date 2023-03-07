@@ -25,21 +25,24 @@
 #include "decompressors/FujiDecompressor.h"
 #include "MemorySanitizer.h"              // for MSan
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
+#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
-#include "common/BayerPhase.h"            // for BayerPhase
+#include "common/BayerPhase.h"            // for getAsCFAColors, BayerPhase
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/XTransPhase.h"           // for XTransPhase
+#include "common/XTransPhase.h"           // for XTransPhase, getAsCFAColors
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Endianness.h"                // for Endianness, Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
-#include <algorithm>                      // for fill, min
+#include <algorithm>                      // for max, fill, min, minmax
 #include <cmath>                          // for abs
 #include <cstdint>                        // for uint16_t, uint32_t, int8_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
-#include <optional>
-#include <string> // for string
+#include <initializer_list>               // for initializer_list
+#include <optional>                       // for optional, operator!=
+#include <string>                         // for string
 
 namespace rawspeed {
 
@@ -57,7 +60,7 @@ template <> constexpr iPoint2D MCU<XTransTag> = {6, 6};
 } // namespace
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
-    : mRaw(img), input(std::move(input_)) {
+    : mRaw(img), input(input_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -104,7 +107,6 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
       (d.header.block_size & 1 && d.header.raw_type == 0)) {
     ThrowRDE("fuji_block_checks");
   }
-
 
   if (d.header.raw_type == 16) {
     line_width = (d.header.block_size * 2) / 3;
@@ -173,11 +175,9 @@ void FujiDecompressor::fuji_compressed_block::reset(
   const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
 
   linealloc.resize(ltotal * (params.line_width + 2), 0);
-
-  MSan::Allocated(reinterpret_cast<const std::byte*>(&linealloc[0]),
-                  ltotal * line_size);
-
   lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
+
+  MSan::Allocated(CroppedArray2DRef(lines));
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
   // including first and last helper columns of the second row.
@@ -186,11 +186,8 @@ void FujiDecompressor::fuji_compressed_block::reset(
     memset(&lines(color, 0), 0, 2 * line_size);
 
     // On the first row, we don't need to zero-init helper columns.
-    MSan::Allocated(reinterpret_cast<const std::byte*>(&lines(color, 0)),
-                    sizeof(uint16_t));
-    MSan::Allocated(
-        reinterpret_cast<const std::byte*>(&lines(color, lines.width - 1)),
-        sizeof(uint16_t));
+    MSan::Allocated(lines(color, 0));
+    MSan::Allocated(lines(color, lines.width - 1));
   }
 
   // And the first (real, uninitialized) line of each color gets the content
@@ -236,29 +233,29 @@ void FujiDecompressor::copy_line(const fuji_compressed_block& info,
                             MCU<Tag>.x, MCU<Tag>.y);
       for (int MCURow = 0; MCURow != MCU<Tag>.y; ++MCURow) {
         for (int MCUCol = 0; MCUCol != MCU<Tag>.x; ++MCUCol) {
-          int row_count = MCU<Tag>.y * MCUIdx.y + MCURow;
-          int pixel_count = MCU<Tag>.x * MCUIdx.x + MCUCol;
+          int imgRow = MCU<Tag>.y * MCUIdx.y + MCURow;
+          int imgCol = MCU<Tag>.x * MCUIdx.x + MCUCol;
 
           int row;
 
           switch (CFA(MCURow, MCUCol)) {
           case CFAColor::RED: // red
-            row = R2 + (row_count >> 1);
+            row = R2 + (imgRow >> 1);
             break;
 
           case CFAColor::GREEN: // green
-            row = G2 + row_count;
+            row = G2 + imgRow;
             break;
 
           case CFAColor::BLUE: // blue
-            row = B2 + (row_count >> 1);
+            row = B2 + (imgRow >> 1);
             break;
 
           default:
             __builtin_unreachable();
           }
 
-          out(MCURow, MCUCol) = info.lines(row, 1 + idx(pixel_count));
+          out(MCURow, MCUCol) = info.lines(row, 1 + idx(imgCol));
         }
       }
     }
@@ -268,9 +265,9 @@ void FujiDecompressor::copy_line(const fuji_compressed_block& info,
 void FujiDecompressor::copy_line_to_xtrans(const fuji_compressed_block& info,
                                            const FujiStrip& strip,
                                            int cur_line) const {
-  auto index = [](int pixel_count) {
-    return (((pixel_count * 2 / 3) & 0x7FFFFFFE) | ((pixel_count % 3) & 1)) +
-           ((pixel_count % 3) >> 1);
+  auto index = [](int imgCol) {
+    return (((imgCol * 2 / 3) & 0x7FFFFFFE) | ((imgCol % 3) & 1)) +
+           ((imgCol % 3) >> 1);
   };
 
   copy_line<XTransTag>(info, strip, cur_line, index);
@@ -279,7 +276,7 @@ void FujiDecompressor::copy_line_to_xtrans(const fuji_compressed_block& info,
 void FujiDecompressor::copy_line_to_bayer(const fuji_compressed_block& info,
                                           const FujiStrip& strip,
                                           int cur_line) const {
-  auto index = [](int pixel_count) { return pixel_count >> 1; };
+  auto index = [](int imgCol) { return imgCol >> 1; };
 
   copy_line<BayerTag>(info, strip, cur_line, index);
 }
@@ -289,10 +286,12 @@ inline int FujiDecompressor::fuji_zerobits(BitPumpMSB& pump) {
 
   // Count-and-skip all the leading `0`s.
   while (true) {
-    uint32_t batch = (pump.peekBits(31) << 1) | 0b1;
-    int numZerosInThisBatch = __builtin_clz(batch);
+    constexpr int batchSize = 32;
+    pump.fill(batchSize);
+    uint32_t batch = pump.peekBitsNoFill(batchSize);
+    int numZerosInThisBatch = countl_zero(batch);
     count += numZerosInThisBatch;
-    bool allZeroes = numZerosInThisBatch == 31;
+    bool allZeroes = numZerosInThisBatch == batchSize;
     int numBitsToSkip = numZerosInThisBatch;
     if (!allZeroes)
       numBitsToSkip += 1; // Also skip the first `1`.
@@ -304,43 +303,44 @@ inline int FujiDecompressor::fuji_zerobits(BitPumpMSB& pump) {
   return count;
 }
 
+// Given two non-negative numbers, how many times must the second number
+// be multiplied by 2, for it to become not smaller than the first number?
+// We are operating on arithmetical numbers here, without overflows.
 int __attribute__((const)) FujiDecompressor::bitDiff(int value1, int value2) {
-  int decBits = 0;
+  assert(value1 >= 0);
+  assert(value2 > 0);
 
-  if (value2 >= value1)
-    return decBits;
-
-  while (decBits <= 14) {
+  int lz1 = countl_zero((unsigned)value1);
+  int lz2 = countl_zero((unsigned)value2);
+  int decBits = std::max(lz2 - lz1, 0);
+  if ((value2 << decBits) < value1)
     ++decBits;
-
-    if ((value2 << decBits) >= value1)
-      return decBits;
-  }
-
-  return decBits;
+  return std::min(decBits, 15);
 }
 
 __attribute__((always_inline)) int
 FujiDecompressor::fuji_decode_sample(fuji_compressed_block& info, int grad,
                                      int interp_val,
                                      std::array<int_pair, 41>& grads) const {
-  int sample = 0;
-  int code = 0;
-
   int gradient = std::abs(grad);
 
-  sample = fuji_zerobits(info.pump);
+  int sampleBits = fuji_zerobits(info.pump);
 
-  if (sample < common_info.max_bits - common_info.raw_bits - 1) {
-    int decBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
-    code = 0;
-    if (decBits)
-      code = info.pump.getBits(decBits);
-    code += sample << decBits;
+  int codeBits;
+  int codeDelta;
+  if (sampleBits < common_info.max_bits - common_info.raw_bits - 1) {
+    codeBits = bitDiff(grads[gradient].value1, grads[gradient].value2);
+    codeDelta = sampleBits << codeBits;
   } else {
-    code = info.pump.getBits(common_info.raw_bits);
-    code++;
+    codeBits = common_info.raw_bits;
+    codeDelta = 1;
   }
+
+  int code = 0;
+  info.pump.fill(32);
+  if (codeBits)
+    code = info.pump.getBitsNoFill(codeBits);
+  code += codeDelta;
 
   if (code < 0 || code >= common_info.total_values) {
     ThrowRDE("fuji_decode_sample");
@@ -651,10 +651,12 @@ void FujiDecompressor::fuji_decode_strip(fuji_compressed_block& info_block,
     }
 
     for (auto i : colors) {
+      const auto out = CroppedArray2DRef(
+          info_block.lines, /*offsetCols=*/0, /*offsetRows=*/i.a + 2,
+          /*croppedWidth=*/info_block.lines.width, /*croppedHeight=*/i.b - 2);
+
       // All other lines of each color become uninitialized.
-      MSan::Allocated(
-          reinterpret_cast<const std::byte*>(&info_block.lines(i.a + 2, 0)),
-          (i.b - 2) * line_size);
+      MSan::Allocated(out);
 
       // And the first (real, uninitialized) line of each color gets the content
       // of the last helper column from the last decoded sample of previous

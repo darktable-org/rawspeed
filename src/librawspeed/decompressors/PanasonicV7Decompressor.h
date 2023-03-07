@@ -23,9 +23,12 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
+#include <climits>                              // for CHAR_BIT
+#include <cstdint>                              // for uint16_t
 #include <functional>
 
 namespace rawspeed {
+template <class T> class CroppedArray1DRef;
 
 class PanasonicV7Decompressor final : public AbstractDecompressor {
   RawImage mRaw;
@@ -37,15 +40,15 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
   static constexpr int PixelsPerBlock =
       (CHAR_BIT * BytesPerBlock) / BitsPerSample;
 
-  inline void __attribute__((always_inline))
+  static inline void __attribute__((always_inline))
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-  decompressBlock(const ByteStream& block, int row, int col) const noexcept;
+  decompressBlock(ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept;
 
   // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   void decompressRow(int row) const noexcept;
 
 public:
-  PanasonicV7Decompressor(const RawImage& img, const ByteStream& input_);
+  PanasonicV7Decompressor(const RawImage& img, ByteStream input_);
 
   void decompress() const;
 };

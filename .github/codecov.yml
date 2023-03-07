@@ -1,0 +1,10 @@
+codecov:
+  max_report_age: off
+  notify:
+    after_n_builds: 6
+coverage:
+  status:
+    project:
+      default:
+        target: 0%
+        informational: true

@@ -63,8 +63,8 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
     iPoint2D endCoord;
 
     Block() = default;
-    Block(ByteStream&& bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
-        : bs(std::move(bs_)), beginCoord(beginCoord_), endCoord(endCoord_) {}
+    Block(ByteStream bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : bs(bs_), beginCoord(beginCoord_), endCoord(endCoord_) {}
   };
 
   // If really wanted, this vector could be avoided,
@@ -77,13 +77,13 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
   processPixelPacket(ProxyStream& bits, int row, int col,
                      std::vector<uint32_t>* zero_pos) const noexcept;
 
-  void processBlock(const Block& block, std::vector<uint32_t>* zero_pos) const
-      noexcept;
+  void processBlock(const Block& block,
+                    std::vector<uint32_t>* zero_pos) const noexcept;
 
   void decompressThread() const noexcept;
 
 public:
-  PanasonicV4Decompressor(const RawImage& img, const ByteStream& input_,
+  PanasonicV4Decompressor(const RawImage& img, ByteStream input_,
                           bool zero_is_not_bad, uint32_t section_split_offset_);
 
   void decompress() const noexcept;

@@ -97,8 +97,8 @@ TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {
   recursivelyIncrementSubIFDCount();
 }
 
-TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-                 const DataBuffer& data, uint32_t offset)
+TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds, DataBuffer data,
+                 uint32_t offset)
     : TiffIFD(parent_) {
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
   // TiffRootIFD in a tiff file
@@ -146,11 +146,12 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
 
   ByteStream bs = t->getData();
 
-  // helper function for easy setup of ByteStream buffer for the different maker note types
-  // 'rebase' means position 0 of new stream equals current position
+  // helper function for easy setup of ByteStream buffer for the different maker
+  // note types 'rebase' means position 0 of new stream equals current position
   // 'newPosition' is the position where the IFD starts
-  // 'byteOrderOffset' is the position where the 2 magic bytes (II/MM) may be found
-  // 'context' is a string providing error information in case the byte order parsing should fail
+  // 'byteOrderOffset' is the position where the 2 magic bytes (II/MM) may be
+  // found 'context' is a string providing error information in case the byte
+  // order parsing should fail
   auto setup = [&bs](bool rebase, uint32_t newPosition,
                      uint32_t byteOrderOffset = 0,
                      const char* context = nullptr) {
@@ -176,24 +177,28 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
     setup(true, 8, 0, "Nikon makernote");
   } else if (bs.hasPrefix("OLYMPUS", 7)) { // new Olympus
     setup(true, 12);
-  } else if (bs.hasPrefix("OLYMP", 5)) {   // old Olympus
+  } else if (bs.hasPrefix("OLYMP", 5)) { // old Olympus
     setup(true, 8);
   } else if (bs.hasPrefix("OM SYSTEM", 9)) { // ex Olympus
     setup(true, 16);
   } else if (bs.hasPrefix("EPSON", 5)) {
     setup(false, 8);
   } else if (bs.hasPatternAt("Exif", 4, 6)) {
-    // TODO: for none of the rawsamples.ch files from Panasonic is this true, instead their MakerNote start with "Panasonic"
-    // Panasonic has the word Exif at byte 6, a complete Tiff header starts at byte 12
-    // This TIFF is 0 offset based
+    // TODO: for none of the rawsamples.ch files from Panasonic is this true,
+    // instead their MakerNote start with "Panasonic" Panasonic has the word
+    // Exif at byte 6, a complete Tiff header starts at byte 12 This TIFF is 0
+    // offset based
     setup(false, 20, 12, "Panosonic makernote");
   } else if (make == "SAMSUNG") {
-    // Samsung has no identification in its MakerNote but starts with the IFD right away
+    // Samsung has no identification in its MakerNote but starts with the IFD
+    // right away
     setup(true, 0);
   } else {
-    // cerr << "default MakerNote from " << make << endl; // Canon, Nikon (type 2), Sony, Minolta, Ricoh, Leica, Hasselblad, etc.
+    // cerr << "default MakerNote from " << make << endl; // Canon, Nikon (type
+    // 2), Sony, Minolta, Ricoh, Leica, Hasselblad, etc.
 
-    // At least one MAKE has not been handled explicitly and starts its MakerNote with an endian prefix: Kodak
+    // At least one MAKE has not been handled explicitly and starts its
+    // MakerNote with an endian prefix: Kodak
     if (bs.skipPrefix("II", 2)) {
       bs.setByteOrder(Endianness::little);
     } else if (bs.skipPrefix("MM", 2)) {
@@ -230,7 +235,7 @@ TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
     return i->second.get();
   }
   for (const auto& j : subIFDs) {
-    TiffEntry *entry = j->getEntryRecursive(tag);
+    TiffEntry* entry = j->getEntryRecursive(tag);
     if (entry)
       return entry;
   }
@@ -299,8 +304,7 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   return i->second.get();
 }
 
-TiffID TiffRootIFD::getID() const
-{
+TiffID TiffRootIFD::getID() const {
   TiffID id;
   const auto* makeE = getEntryRecursive(TiffTag::MAKE);
   const auto* modelE = getEntryRecursive(TiffTag::MODEL);

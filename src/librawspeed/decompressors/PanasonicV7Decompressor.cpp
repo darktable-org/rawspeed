@@ -21,21 +21,21 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicV7Decompressor.h"
+#include "adt/Array1DRef.h"               // for Array1DRef
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpLSB.h"
-#include <array>                          // for array
+#include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t
-#include <functional>
 
 namespace rawspeed {
 
 PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
-                                                 const ByteStream& input_)
+                                                 ByteStream input_)
     : mRaw(img) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -61,25 +61,28 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
 
 inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
-PanasonicV7Decompressor::decompressBlock(const ByteStream& block, int row,
-                                         int col) const noexcept {
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+PanasonicV7Decompressor::decompressBlock(
+    ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept {
+  assert(out.size() == PixelsPerBlock);
   BitPumpLSB pump(block);
-  for (int pix = 0; pix < PixelsPerBlock; pix++, col++)
-    out(row, col) = pump.getBits(BitsPerSample);
+  for (int pix = 0; pix < PixelsPerBlock; pix++)
+    out(pix) = pump.getBits(BitsPerSample);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
-  assert(mRaw->dim.x % PixelsPerBlock == 0);
-  const int blocksperrow = mRaw->dim.x / PixelsPerBlock;
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  Array1DRef<uint16_t> outRow = out[row];
+
+  assert(outRow.size() % PixelsPerBlock == 0);
+  const int blocksperrow = outRow.size() / PixelsPerBlock;
   const int bytesPerRow = BytesPerBlock * blocksperrow;
 
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
-  for (int rblock = 0, col = 0; rblock < blocksperrow;
-       rblock++, col += PixelsPerBlock) {
+  for (int rblock = 0; rblock < blocksperrow; rblock++) {
     ByteStream block = rowInput.getStream(BytesPerBlock);
-    decompressBlock(block, row, col);
+    decompressBlock(block,
+                    outRow.getCrop(PixelsPerBlock * rblock, PixelsPerBlock));
   }
 }
 

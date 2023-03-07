@@ -19,6 +19,7 @@
 */
 
 #include "decompressors/VC5Decompressor.h" // for VC5Decompressor
+#include "MemorySanitizer.h"               // for MSan
 #include "common/RawImage.h"               // for RawImage, RawImageData
 #include "common/RawspeedException.h"      // for RawspeedException
 #include "fuzz/Common.h"                   // for CreateCFA, CreateRawImage
@@ -55,7 +56,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     // VC5Decompressor is special
     // It is expected to be the only DNG tile, and to fill the entire image.
-    mRaw->checkMemIsInitialized();
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
   } catch (const rawspeed::RawspeedException&) {
     // Exceptions are good, crashes are bad.
   }

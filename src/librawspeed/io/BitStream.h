@@ -45,8 +45,7 @@ template <typename BIT_STREAM> struct BitStreamTraits final {
 //  * L<-R: new bits are pushed in on the right and pulled out on the left
 // Each BitStream specialization uses one of the two.
 
-struct BitStreamCacheBase
-{
+struct BitStreamCacheBase {
   uint64_t cache = 0;         // the actual bits stored in the cache
   unsigned int fillLevel = 0; // bits left in cache
 
@@ -56,8 +55,7 @@ struct BitStreamCacheBase
   static constexpr unsigned MaxGetBits = bitwidth<uint32_t>();
 };
 
-struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
-{
+struct BitStreamCacheLeftInRightOut : BitStreamCacheBase {
   inline void push(uint64_t bits, uint32_t count) noexcept {
     assert(count + fillLevel <= bitwidth(cache));
     cache |= bits << fillLevel;
@@ -74,8 +72,7 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase
   }
 };
 
-struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
-{
+struct BitStreamCacheRightInLeftOut : BitStreamCacheBase {
   inline void push(uint64_t bits, uint32_t count) noexcept {
     assert(count + fillLevel <= Size);
     assert(count != 0);
@@ -91,7 +88,8 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase
   }
 
   [[nodiscard]] inline uint32_t peek(uint32_t count) const noexcept {
-    return extractHighBits(cache, count, /*effectiveBitwidth=*/BitStreamCacheBase::Size);
+    return extractHighBits(cache, count,
+                           /*effectiveBitwidth=*/BitStreamCacheBase::Size);
   }
 
   inline void skip(uint32_t count) noexcept {
@@ -109,7 +107,7 @@ template <typename Tag> struct BitStreamReplenisherBase {
 
   BitStreamReplenisherBase() = default;
 
-  explicit BitStreamReplenisherBase(const Buffer& input)
+  explicit BitStreamReplenisherBase(Buffer input)
       : data(input.getData(0, input.getSize())), size(input.getSize()) {
     if (size < BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
@@ -192,9 +190,9 @@ public:
 
   BitStream() = default;
 
-  explicit BitStream(const Buffer& buf) : replenisher(buf) {}
+  explicit BitStream(Buffer buf) : replenisher(buf) {}
 
-  explicit BitStream(const ByteStream& s)
+  explicit BitStream(ByteStream s)
       : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
 
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
@@ -226,7 +224,7 @@ public:
 
   inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);
-    assert(nbits < Cache::MaxGetBits);
+    assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);
     return cache.peek(nbits);
   }

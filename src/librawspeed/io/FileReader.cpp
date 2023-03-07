@@ -20,13 +20,17 @@
 */
 
 #include "io/FileReader.h"
-#include "io/Buffer.h"          // for Buffer, Buffer::size_type
-#include "io/FileIOException.h" // for ThrowException, ThrowFIE
-#include <cstdio>               // for fclose, fseek, feof, ferror, fopen
-#include <fcntl.h>              // for SEEK_END, SEEK_SET
-#include <limits>               // for numeric_limits
-#include <memory>               // for unique_ptr, make_unique, operator==
-#include <utility>              // for move
+#include "adt/AlignedAllocator.h"            // for AlignedAllocator
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
+#include "io/Buffer.h"                       // for Buffer, Buffer::size_type
+#include "io/FileIOException.h"              // for ThrowException, ThrowFIE
+#include <cstdint>                           // for uint8_t
+#include <cstdio>                            // for fclose, fseek, feof
+#include <fcntl.h>                           // for SEEK_END, SEEK_SET
+#include <limits>                            // for numeric_limits
+#include <memory>                            // for unique_ptr, make_unique
+#include <type_traits>                       // for remove_reference<>::type
+#include <utility>                           // for move, pair
 
 #if !(defined(__unix__) || defined(__APPLE__))
 #ifndef NOMINMAX
@@ -41,7 +45,11 @@
 
 namespace rawspeed {
 
-std::unique_ptr<const Buffer> FileReader::readFile() {
+std::pair<std::unique_ptr<std::vector<
+              uint8_t, DefaultInitAllocatorAdaptor<
+                           uint8_t, AlignedAllocator<uint8_t, 16>>>>,
+          Buffer>
+FileReader::readFile() {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)
@@ -64,9 +72,12 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
   fseek(file.get(), 0, SEEK_SET);
 
-  auto dest = Buffer::Create(fileSize);
+  auto dest = std::make_unique<std::vector<
+      uint8_t,
+      DefaultInitAllocatorAdaptor<uint8_t, AlignedAllocator<uint8_t, 16>>>>(
+      fileSize);
 
-  if (auto bytes_read = fread(dest.get(), 1, fileSize, file.get());
+  if (auto bytes_read = fread(dest->data(), 1, fileSize, file.get());
       fileSize != bytes_read) {
     ThrowFIE("Could not read file, %s.",
              feof(file.get()) ? "reached end-of-file"
@@ -101,10 +112,13 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
   if (size.LowPart <= 0)
     ThrowFIE("File is 0 bytes.");
 
-  auto dest = Buffer::Create(size.LowPart);
+  auto dest = std::make_unique<std::vector<
+      uint8_t,
+      DefaultInitAllocatorAdaptor<uint8_t, AlignedAllocator<uint8_t, 16>>>>(
+      size.LowPart);
 
   DWORD bytes_read;
-  if (!ReadFile(file.get(), dest.get(), size.LowPart, &bytes_read, nullptr))
+  if (!ReadFile(file.get(), dest->data(), size.LowPart, &bytes_read, nullptr))
     ThrowFIE("Could not read file.");
 
   if (size.LowPart != bytes_read)
@@ -114,7 +128,7 @@ std::unique_ptr<const Buffer> FileReader::readFile() {
 
 #endif // __unix__
 
-  return std::make_unique<Buffer>(std::move(dest), fileSize);
+  return {std::move(dest), Buffer(dest->data(), fileSize)};
 }
 
 } // namespace rawspeed

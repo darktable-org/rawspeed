@@ -43,7 +43,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -125,46 +125,100 @@ RawImage OrfDecoder::decodeRawInternal() {
 
   OlympusDecompressor o(mRaw);
   mRaw->createData();
-  o.decompress(std::move(input));
+  o.decompress(input);
 
   return mRaw;
 }
 
-bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
+void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
+                                               uint32_t h,
+                                               uint32_t size) const {
+  int inputPitchBits = 12 * w;
+  assert(inputPitchBits % 8 == 0);
+
+  int inputPitchBytes = inputPitchBits / 8;
+
+  const int numEvenLines = roundUpDivision(h, 2);
+  ByteStream evenLinesInput = s.getStream(numEvenLines, inputPitchBytes);
+
+  const uint32_t oddLinesInputBegin =
+      roundUp(evenLinesInput.getSize(), 1U << 11U);
+  assert(oddLinesInputBegin >= evenLinesInput.getSize());
+  int padding = oddLinesInputBegin - evenLinesInput.getSize();
+  assert(padding >= 0);
+  s.skipBytes(padding);
+
+  const int numOddLines = h - numEvenLines;
+  ByteStream oddLinesInput = s.getStream(numOddLines, inputPitchBytes);
+
+  // By now we know we have enough input to produce the image.
+  mRaw->createData();
+
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  {
+    BitPumpMSB bs(evenLinesInput);
+    for (int i = 0; i != numEvenLines; ++i) {
+      for (unsigned col = 0; col != w; ++col) {
+        int row = 2 * i;
+        out(row, col) = bs.getBits(12);
+      }
+    }
+  }
+  {
+    BitPumpMSB bs(oddLinesInput);
+    for (int i = 0; i != numOddLines; ++i) {
+      for (unsigned col = 0; col != w; ++col) {
+        int row = 1 + 2 * i;
+        out(row, col) = bs.getBits(12);
+      }
+    }
+  }
+}
+
+bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
-  UncompressedDecompressor u(s, mRaw);
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
 
   if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
     // 12-bit  packed 'with control' raw
+    UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
+                               (12 * w / 8) + ((w + 2) / 10), 12,
+                               BitOrder::LSB);
     mRaw->createData();
-    u.decode12BitRaw<Endianness::little, false, true>(w, h);
+    u.decode12BitRawWithControl<Endianness::little>();
     return true;
   }
 
+  iPoint2D dimensions(w, h);
+  iPoint2D pos(0, 0);
   if (size == w * h * 12 / 8) { // We're in a 12-bit packed raw
-    iPoint2D dimensions(w, h);
-    iPoint2D pos(0, 0);
+    UncompressedDecompressor u(s, mRaw, iRectangle2D(pos, dimensions),
+                               w * 12 / 8, 12, BitOrder::MSB32);
     mRaw->createData();
-    u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder::MSB32);
+    u.readUncompressedRaw();
     return true;
   }
 
   if (size == w * h * 2) { // We're in an unpacked raw
-    mRaw->createData();
     // FIXME: seems fishy
-    if (s.getByteOrder() == getHostEndianness())
-      u.decodeRawUnpacked<12, Endianness::little>(w, h);
-    else
-      u.decode12BitRawUnpackedLeftAligned<Endianness::big>(w, h);
+    if (s.getByteOrder() == getHostEndianness()) {
+      UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
+                                 16 * w / 8, 16, BitOrder::LSB);
+      mRaw->createData();
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
+    } else {
+      UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
+                                 16 * w / 8, 16, BitOrder::MSB);
+      mRaw->createData();
+      u.decode12BitRawUnpackedLeftAligned<Endianness::big>();
+    }
     return true;
   }
 
-  if (size >
-      w * h * 3 / 2) { // We're in one of those weird interlaced packed raws
-    mRaw->createData();
-    u.decode12BitRaw<Endianness::big, true>(w, h);
+  if (size > w * h * 3 / 2) {
+    // We're in one of those weird interlaced packed raws
+    decodeUncompressedInterleaved(s, w, h, size);
     return true;
   }
 
