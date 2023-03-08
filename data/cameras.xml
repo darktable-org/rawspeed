@@ -14227,6 +14227,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F550EXR">
+		<ID make="Fujifilm" model="FinePix F550EXR">Fujifilm FinePix F550EXR</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="40" y="0" width="-36" height="0"/>
+		<Sensor black="256" white="3900"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">13690 -5358 -1474</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3369 11600 1998</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-132 1554 4395</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix F600EXR">
 		<ID make="Fujifilm" model="FinePix F600EXR">Fujifilm FinePix F600EXR</ID>
 		<CFA width="2" height="2">
