@@ -100,7 +100,8 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   // How many full pixel blocks do we need to consume for that?
   if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
-      frame.cps * frame.dim.x < (int)mRaw->getCpp() * imgFrame.dim.x) {
+      (int64_t)frame.cps * frame.dim.x <
+          (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
              imgFrame.dim.y);
@@ -161,7 +162,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // the raw image buffer. The excessive content has to be ignored.
 
   assert(frame.dim.y >= imgFrame.dim.y);
-  assert(frame.cps * frame.dim.x >= (int)mRaw->getCpp() * imgFrame.dim.x);
+  assert((int64_t)frame.cps * frame.dim.x >=
+         (int64_t)mRaw->getCpp() * imgFrame.dim.x);
 
   assert(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   assert(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
