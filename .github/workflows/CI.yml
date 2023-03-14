@@ -40,12 +40,9 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { distro: "debian:unstable-slim", family: GNU,  version: 11, CC: gcc-11,   CXX: g++-11 }
-          - { distro: "debian:bullseye-slim", family: GNU,  version: 10, CC: gcc-10,   CXX: g++-10 }
           - { distro: "debian:unstable-slim", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
           - { distro: "debian:unstable-slim", family: LLVM, version: 13, CC: clang-13, CXX: clang++-13 }
           - { distro: "ubuntu:jammy",         family: LLVM, version: 12, CC: clang-12, CXX: clang++-12 }
-          - { distro: "debian:bullseye-slim", family: LLVM, version: 11, CC: clang-11, CXX: clang++-11 }
         flavor: [ RelWithDebInfo, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -184,7 +181,8 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - { os: macos-12, family: XCode, version: 14.1, deployment_target: 14.1, CC: cc, CXX: c++ } # LLVM14
+          - { os: macos-12, family: XCode, version: 14.2,   deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM14
+          - { os: macos-11, family: XCode, version: 13.2.1, deployment_target: 11.3, CC: cc, CXX: c++ } # LLVM12
         flavor: [ RelWithDebInfo, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
@@ -200,11 +198,9 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - { os: macos-12, family: XCode, version: 14.1,   deployment_target: 10.7,   CC: cc, CXX: c++ } # LLVM14
-          - { os: macos-12, family: XCode, version: 13.4.1, deployment_target: 13.4.1, CC: cc, CXX: c++ } # LLVM13
-          - { os: macos-12, family: XCode, version: 13.2.1, deployment_target: 13.2.1, CC: cc, CXX: c++ } # LLVM12
-          - { os: macos-11, family: XCode, version: 12.5.1, deployment_target: 12.5.1, CC: cc, CXX: c++ } # LLVM11
-          - { os: macos-11, family: XCode, version: 12.4,   deployment_target: 12.4,   CC: cc, CXX: c++ } # LLVM10
+          - { os: macos-12, family: XCode, version: 14.2,   deployment_target: 11.3, CC: cc, CXX: c++ } # LLVM14
+          - { os: macos-12, family: XCode, version: 13.4.1, deployment_target: 12.0, CC: cc, CXX: c++ } # LLVM13
+          - { os: macos-12, family: XCode, version: 13.4.1, deployment_target: 11.3, CC: cc, CXX: c++ } # LLVM13
         flavor: [ RelWithDebInfo, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
@@ -220,7 +216,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - compiler: { os: macos-12, family: XCode, version: 14.1, deployment_target: 14.1, CC: cc, CXX: c++ } # LLVM14
+          - compiler: { os: macos-12, family: XCode, version: 14.2, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM14
             flavor: Coverage
     uses: ./.github/workflows/CI-macOS.yml
     with:
