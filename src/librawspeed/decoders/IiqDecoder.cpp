@@ -143,6 +143,8 @@ std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
 }
 } // namespace
 
+enum class IiqDecoder::IiqCorr { LUMA, CHROMA };
+
 RawImage IiqDecoder::decodeRawInternal() {
   const Buffer buf(mFile.getSubView(8));
   const DataBuffer db(buf, Endianness::little);
@@ -292,6 +294,12 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
       correctSensorDefects(meta_data.getSubStream(offset, len));
       SensorDefectsSeen = true;
       break;
+    case 0x40b: // Chroma calibration
+      PhaseOneFlatField(meta_data.getSubStream(offset, len), IiqCorr::CHROMA);
+      break;
+    case 0x410: // Luma calibration
+      PhaseOneFlatField(meta_data.getSubStream(offset, len), IiqCorr::LUMA);
+      break;
     case 0x431:
       if (QuadrantMultipliersSeen)
         ThrowRDE("Second quadrant multipliers entry seen. Unexpected.");
@@ -380,6 +388,90 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           pixel = curve[pixel - diff] + diff;
         }
       }
+    }
+  }
+}
+
+// Luma and chroma calibration to eliminate remaining paneling artefacts,
+// needed in addition to CorrectQuadrantMultipliersCombined().
+// -- Based on phase_one_flat_field() in dcraw.c by Dave Coffin
+void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
+  std::array<uint16_t, 8> head;
+  unsigned wide;
+  unsigned high;
+  unsigned y;
+  unsigned x;
+  unsigned c;
+  unsigned nc;
+  unsigned rend;
+  unsigned cend;
+  unsigned row;
+  unsigned col;
+  unsigned val;
+  int i;
+  float num;
+  std::array<float, 4> mult;
+  std::vector<float> mrow_storage;
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  switch (corr) {
+  case IiqCorr::LUMA:
+    nc = 2;
+    break;
+  case IiqCorr::CHROMA:
+    nc = 4;
+    break;
+  default:
+    ThrowRDE("Unsupported IIQ correction");
+  }
+  for (i = 0; i < 8; i++)
+    head[i] = data.getU16();
+  if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
+    return;
+  wide = head[2] / head[4] + (head[2] % head[4] != 0);
+  high = head[3] / head[5] + (head[3] % head[5] != 0);
+  const Array2DRef<float> mrow =
+      Array2DRef<float>::create(mrow_storage, wide, nc);
+
+  for (y = 0; y < high; y++) {
+    for (x = 0; x < wide; x++) {
+      for (c = 0; c < nc; c += 2) {
+        num = data.getU16() / 32768.0;
+        if (y == 0)
+          mrow(c, x) = num;
+        else
+          mrow(c + 1, x) = (num - mrow(c, x)) / head[5];
+      }
+    }
+    if (y == 0)
+      continue;
+    rend = head[1] + y * head[5];
+    for (row = rend - head[5]; row < (unsigned)mRaw->dim.y && row < rend &&
+                               row < (unsigned)(head[1] + head[3] - head[5]);
+         row++) {
+      for (x = 1; x < wide; x++) {
+        for (c = 0; c < nc; c += 2) {
+          mult[c] = mrow(c, x - 1);
+          mult[c + 1] = (mrow(c, x) - mult[c]) / head[4];
+        }
+        cend = head[0] + x * head[4];
+        for (col = cend - head[4];
+             col < (unsigned)mRaw->dim.x && col < cend &&
+             col < (unsigned)(head[0] + head[2] - head[4]);
+             col++) {
+          c = nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
+                     : 0;
+          if (!(c & 1)) {
+            val = img(row, col) * mult[c];
+            img(row, col) = std::min(val, 0xFFFFU);
+          }
+          for (c = 0; c < nc; c += 2)
+            mult[c] += mult[c + 1];
+        }
+      }
+      for (x = 0; x < wide; x++)
+        for (c = 0; c < nc; c += 2)
+          mrow(c, x) += mrow(c + 1, x);
     }
   }
 }
