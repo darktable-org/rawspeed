@@ -66,8 +66,6 @@ public:
 private:
   FujiHeader header;
 
-  void fuji_compressed_load_raw();
-
   ByteStream input;
 
   std::vector<ByteStream> strips;

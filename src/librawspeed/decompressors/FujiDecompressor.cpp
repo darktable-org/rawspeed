@@ -862,10 +862,6 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
   } else
     ThrowRDE("Unexpected CFA size");
 
-  fuji_compressed_load_raw();
-}
-
-void FujiDecompressor::fuji_compressed_load_raw() {
   // read block sizes
   std::vector<uint32_t> block_sizes;
   block_sizes.resize(header.blocks_in_row);
