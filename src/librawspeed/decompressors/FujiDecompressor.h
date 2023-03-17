@@ -76,63 +76,6 @@ public:
 private:
   FujiHeader header;
 
-  struct FujiStrip {
-    // part of which 'image' this block is
-    const FujiHeader& h;
-
-    // which strip is this, 0 .. h.blocks_in_row-1
-    const int n;
-
-    // the compressed data of this strip
-    const ByteStream bs;
-
-    FujiStrip() = delete;
-    FujiStrip(const FujiStrip&) = default;
-    FujiStrip(FujiStrip&&) noexcept = default;
-    FujiStrip& operator=(const FujiStrip&) noexcept = delete;
-    FujiStrip& operator=(FujiStrip&&) noexcept = delete;
-
-    FujiStrip(const FujiHeader& h_, int block, ByteStream bs_)
-        : h(h_), n(block), bs(bs_) {
-      assert(n >= 0 && n < h.blocks_in_row);
-    }
-
-    // each strip's line corresponds to 6 output lines.
-    static int lineHeight() { return 6; }
-
-    // how many vertical lines does this block encode?
-    [[nodiscard]] int height() const { return h.total_lines; }
-
-    // how many horizontal pixels does this block encode?
-    [[nodiscard]] int width() const {
-      // if this is not the last block, we are good.
-      if ((n + 1) != h.blocks_in_row)
-        return h.block_size;
-
-      // ok, this is the last block...
-
-      assert(h.block_size * h.blocks_in_row >= h.raw_width);
-      return h.raw_width - offsetX();
-    }
-
-    // how many horizontal pixels does this block encode?
-    [[nodiscard]] iPoint2D numMCUs(iPoint2D MCU) const {
-      assert(width() % MCU.x == 0);
-      assert(lineHeight() % MCU.y == 0);
-      return {width() / MCU.x, lineHeight() / MCU.y};
-    }
-
-    // where vertically does this block start?
-    [[nodiscard]] int offsetY(int line = 0) const {
-      (void)height(); // A note for NDEBUG builds that *this is used.
-      assert(line >= 0 && line < height());
-      return lineHeight() * line;
-    }
-
-    // where horizontally does this block start?
-    [[nodiscard]] int offsetX() const { return h.block_size * n; }
-  };
-
   void fuji_compressed_load_raw();
 
   struct fuji_compressed_params {

@@ -84,6 +84,63 @@ enum xt_lines {
   ltotal
 };
 
+struct FujiStrip {
+  // part of which 'image' this block is
+  const FujiDecompressor::FujiHeader& h;
+
+  // which strip is this, 0 .. h.blocks_in_row-1
+  const int n;
+
+  // the compressed data of this strip
+  const ByteStream bs;
+
+  FujiStrip() = delete;
+  FujiStrip(const FujiStrip&) = delete;
+  FujiStrip(FujiStrip&&) noexcept = delete;
+  FujiStrip& operator=(const FujiStrip&) noexcept = delete;
+  FujiStrip& operator=(FujiStrip&&) noexcept = delete;
+
+  FujiStrip(const FujiDecompressor::FujiHeader& h_, int block, ByteStream bs_)
+      : h(h_), n(block), bs(bs_) {
+    assert(n >= 0 && n < h.blocks_in_row);
+  }
+
+  // each strip's line corresponds to 6 output lines.
+  static int lineHeight() { return 6; }
+
+  // how many vertical lines does this block encode?
+  [[nodiscard]] int height() const { return h.total_lines; }
+
+  // how many horizontal pixels does this block encode?
+  [[nodiscard]] int width() const {
+    // if this is not the last block, we are good.
+    if ((n + 1) != h.blocks_in_row)
+      return h.block_size;
+
+    // ok, this is the last block...
+
+    assert(h.block_size * h.blocks_in_row >= h.raw_width);
+    return h.raw_width - offsetX();
+  }
+
+  // how many horizontal pixels does this block encode?
+  [[nodiscard]] iPoint2D numMCUs(iPoint2D MCU) const {
+    assert(width() % MCU.x == 0);
+    assert(lineHeight() % MCU.y == 0);
+    return {width() / MCU.x, lineHeight() / MCU.y};
+  }
+
+  // where vertically does this block start?
+  [[nodiscard]] int offsetY(int line = 0) const {
+    (void)height(); // A note for NDEBUG builds that *this is used.
+    assert(line >= 0 && line < height());
+    return lineHeight() * line;
+  }
+
+  // where horizontally does this block start?
+  [[nodiscard]] int offsetX() const { return h.block_size * n; }
+};
+
 } // namespace
 
 FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
@@ -219,16 +276,13 @@ struct fuji_compressed_block {
   std::vector<uint16_t> linealloc;
   Array2DRef<uint16_t> lines;
 
-  void fuji_decode_strip(const FujiDecompressor::FujiStrip& strip);
+  void fuji_decode_strip(const FujiStrip& strip);
 
   template <typename Tag, typename T>
-  void copy_line(const FujiDecompressor::FujiStrip& strip, int cur_line,
-                 T&& idx) const;
+  void copy_line(const FujiStrip& strip, int cur_line, T&& idx) const;
 
-  void copy_line_to_xtrans(const FujiDecompressor::FujiStrip& strip,
-                           int cur_line) const;
-  void copy_line_to_bayer(const FujiDecompressor::FujiStrip& strip,
-                          int cur_line) const;
+  void copy_line_to_xtrans(const FujiStrip& strip, int cur_line) const;
+  void copy_line_to_bayer(const FujiStrip& strip, int cur_line) const;
 
   static inline int fuji_zerobits(BitPumpMSB& pump);
   static int bitDiff(int value1, int value2);
@@ -301,8 +355,8 @@ void fuji_compressed_block::reset(
 }
 
 template <typename Tag, typename T>
-void fuji_compressed_block::copy_line(const FujiDecompressor::FujiStrip& strip,
-                                      int cur_line, T&& idx) const {
+void fuji_compressed_block::copy_line(const FujiStrip& strip, int cur_line,
+                                      T&& idx) const {
   std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData;
   if constexpr (std::is_same_v<XTransTag, Tag>)
     CFAData = getAsCFAColors(XTransPhase(0, 0));
@@ -352,8 +406,8 @@ void fuji_compressed_block::copy_line(const FujiDecompressor::FujiStrip& strip,
   }
 }
 
-void fuji_compressed_block::copy_line_to_xtrans(
-    const FujiDecompressor::FujiStrip& strip, int cur_line) const {
+void fuji_compressed_block::copy_line_to_xtrans(const FujiStrip& strip,
+                                                int cur_line) const {
   auto index = [](int imgCol) {
     return (((imgCol * 2 / 3) & 0x7FFFFFFE) | ((imgCol % 3) & 1)) +
            ((imgCol % 3) >> 1);
@@ -362,8 +416,8 @@ void fuji_compressed_block::copy_line_to_xtrans(
   copy_line<XTransTag>(strip, cur_line, index);
 }
 
-void fuji_compressed_block::copy_line_to_bayer(
-    const FujiDecompressor::FujiStrip& strip, int cur_line) const {
+void fuji_compressed_block::copy_line_to_bayer(const FujiStrip& strip,
+                                               int cur_line) const {
   auto index = [](int imgCol) { return imgCol >> 1; };
 
   copy_line<BayerTag>(strip, cur_line, index);
@@ -697,8 +751,7 @@ void fuji_compressed_block::fuji_bayer_decode_block(int cur_line) {
       cur_line);
 }
 
-void fuji_compressed_block::fuji_decode_strip(
-    const FujiDecompressor::FujiStrip& strip) {
+void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
   const unsigned line_size = sizeof(uint16_t) * (common_info.line_width + 2);
 
   struct i_pair {
