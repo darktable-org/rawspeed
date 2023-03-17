@@ -36,18 +36,8 @@
 
 namespace rawspeed {
 
-namespace {
-
-struct fuji_compressed_block;
-
-}
-
 class FujiDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
-
-  void decompressThread() const noexcept;
-
-  friend fuji_compressed_block;
 
 public:
   FujiDecompressor(const RawImage& img, ByteStream input);
@@ -77,23 +67,6 @@ private:
   FujiHeader header;
 
   void fuji_compressed_load_raw();
-
-  struct fuji_compressed_params {
-    fuji_compressed_params() = default;
-
-    explicit fuji_compressed_params(const FujiDecompressor& d);
-
-    std::vector<int8_t> q_table; /* quantization table */
-    std::array<int, 5> q_point;  /* quantization points */
-    int max_bits;
-    int min_value;
-    int raw_bits;
-    int total_values;
-    int maxDiff;
-    uint16_t line_width;
-  };
-
-  fuji_compressed_params common_info;
 
   ByteStream input;
 

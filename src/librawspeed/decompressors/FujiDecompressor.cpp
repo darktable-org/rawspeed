@@ -84,6 +84,19 @@ enum xt_lines {
   ltotal
 };
 
+struct fuji_compressed_params {
+  explicit fuji_compressed_params(const FujiDecompressor::FujiHeader& h);
+
+  std::vector<int8_t> q_table; /* quantization table */
+  std::array<int, 5> q_point;  /* quantization points */
+  int max_bits;
+  int min_value;
+  int raw_bits;
+  int total_values;
+  int maxDiff;
+  uint16_t line_width;
+};
+
 struct FujiStrip {
   // part of which 'image' this block is
   const FujiDecompressor::FujiHeader& h;
@@ -183,30 +196,30 @@ FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
   fuji_compressed_load_raw();
 }
 
-FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
-    const FujiDecompressor& d) {
+fuji_compressed_params::fuji_compressed_params(
+    const FujiDecompressor::FujiHeader& h) {
   int cur_val;
 
-  if ((d.header.block_size % 3 && d.header.raw_type == 16) ||
-      (d.header.block_size & 1 && d.header.raw_type == 0)) {
+  if ((h.block_size % 3 && h.raw_type == 16) ||
+      (h.block_size & 1 && h.raw_type == 0)) {
     ThrowRDE("fuji_block_checks");
   }
 
-  if (d.header.raw_type == 16) {
-    line_width = (d.header.block_size * 2) / 3;
+  if (h.raw_type == 16) {
+    line_width = (h.block_size * 2) / 3;
   } else {
-    line_width = d.header.block_size >> 1;
+    line_width = h.block_size >> 1;
   }
 
   q_point[0] = 0;
   q_point[1] = 0x12;
   q_point[2] = 0x43;
   q_point[3] = 0x114;
-  q_point[4] = (1 << d.header.raw_bits) - 1;
+  q_point[4] = (1 << h.raw_bits) - 1;
   min_value = 0x40;
 
   cur_val = -q_point[4];
-  q_table.resize(2 * (1 << d.header.raw_bits));
+  q_table.resize(2 * (1 << h.raw_bits));
 
   for (int8_t* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
     if (cur_val <= -q_point[3]) {
@@ -231,11 +244,11 @@ FujiDecompressor::fuji_compressed_params::fuji_compressed_params(
   }
 
   // populting gradients
-  if (q_point[4] == 0xFFFF) { // (1 << d.header.raw_bits) - 1
-    total_values = 0x10000;   // 1 << d.header.raw_bits
-    raw_bits = 16;            // d.header.raw_bits
-    max_bits = 64;            // d.header.raw_bits * (64 / d.header.raw_bits)
-    maxDiff = 1024;           // 1 << (d.header.raw_bits - 6)
+  if (q_point[4] == 0xFFFF) { // (1 << h.raw_bits) - 1
+    total_values = 0x10000;   // 1 << h.raw_bits
+    raw_bits = 16;            // h.raw_bits
+    max_bits = 64;            // h.raw_bits * (64 / h.raw_bits)
+    maxDiff = 1024;           // 1 << (h.raw_bits - 6)
   } else if (q_point[4] == 0x3FFF) {
     total_values = 0x4000;
     raw_bits = 14;
@@ -259,13 +272,13 @@ namespace {
 struct fuji_compressed_block {
   const Array2DRef<uint16_t> img;
   const FujiDecompressor::FujiHeader& header;
-  const FujiDecompressor::fuji_compressed_params& common_info;
+  const fuji_compressed_params& common_info;
 
-  fuji_compressed_block(
-      Array2DRef<uint16_t> img, const FujiDecompressor::FujiHeader& header,
-      const FujiDecompressor::fuji_compressed_params& common_info);
+  fuji_compressed_block(Array2DRef<uint16_t> img,
+                        const FujiDecompressor::FujiHeader& header,
+                        const fuji_compressed_params& common_info);
 
-  void reset(const FujiDecompressor::fuji_compressed_params& params);
+  void reset(const fuji_compressed_params& params);
 
   BitPumpMSB pump;
 
@@ -314,11 +327,10 @@ struct fuji_compressed_block {
 
 fuji_compressed_block::fuji_compressed_block(
     Array2DRef<uint16_t> img_, const FujiDecompressor::FujiHeader& header_,
-    const FujiDecompressor::fuji_compressed_params& common_info_)
+    const fuji_compressed_params& common_info_)
     : img(img_), header(header_), common_info(common_info_) {}
 
-void fuji_compressed_block::reset(
-    const FujiDecompressor::fuji_compressed_params& params) {
+void fuji_compressed_block::reset(const fuji_compressed_params& params) {
   const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
 
   linealloc.resize(ltotal * (params.line_width + 2), 0);
@@ -798,11 +810,66 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
   }
 }
 
+class FujiDecompressorImpl {
+  RawImage mRaw;
+  const Array1DRef<const ByteStream> strips;
+
+  const FujiDecompressor::FujiHeader& header;
+
+  const fuji_compressed_params common_info;
+
+  void decompressThread() const noexcept;
+
+public:
+  FujiDecompressorImpl(const RawImage& mRaw,
+                       Array1DRef<const ByteStream> strips,
+                       const FujiDecompressor::FujiHeader& h);
+
+  void decompress();
+};
+
+FujiDecompressorImpl::FujiDecompressorImpl(
+    const RawImage& mRaw_, Array1DRef<const ByteStream> strips_,
+    const FujiDecompressor::FujiHeader& h_)
+    : mRaw(mRaw_), strips(strips_), header(h_), common_info(header) {}
+
+void FujiDecompressorImpl::decompressThread() const noexcept {
+  fuji_compressed_block block_info(mRaw->getU16DataAsUncroppedArray2DRef(),
+                                   header, common_info);
+
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (int block = 0; block < header.blocks_in_row; ++block) {
+    FujiStrip strip(header, block, strips(block));
+    block_info.reset(common_info);
+    try {
+      block_info.pump = BitPumpMSB(strip.bs);
+      block_info.fuji_decode_strip(strip);
+    } catch (const RawspeedException& err) {
+      // Propagate the exception out of OpenMP magic.
+      mRaw->setError(err.what());
+    }
+  }
+}
+
+void FujiDecompressorImpl::decompress() {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(none)                                             \
+    num_threads(rawspeed_get_number_of_processor_cores())
+#endif
+  decompressThread();
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
+  }
+}
+
 } // namespace
 
 void FujiDecompressor::fuji_compressed_load_raw() {
-  common_info = fuji_compressed_params(*this);
-
   // read block sizes
   std::vector<uint32_t> block_sizes;
   block_sizes.resize(header.blocks_in_row);
@@ -823,38 +890,10 @@ void FujiDecompressor::fuji_compressed_load_raw() {
     strips.emplace_back(input.getStream(block_size));
 }
 
-void FujiDecompressor::decompressThread() const noexcept {
-  fuji_compressed_block block_info(mRaw->getU16DataAsUncroppedArray2DRef(),
-                                   header, common_info);
-
-#ifdef HAVE_OPENMP
-#pragma omp for schedule(static)
-#endif
-  for (int block = 0; block < header.blocks_in_row; ++block) {
-    FujiStrip strip(header, block, strips[block]);
-    block_info.reset(common_info);
-    try {
-      block_info.pump = BitPumpMSB(strip.bs);
-      block_info.fuji_decode_strip(strip);
-    } catch (const RawspeedException& err) {
-      // Propagate the exception out of OpenMP magic.
-      mRaw->setError(err.what());
-    }
-  }
-}
-
 void FujiDecompressor::decompress() const {
-#ifdef HAVE_OPENMP
-#pragma omp parallel default(none)                                             \
-    num_threads(rawspeed_get_number_of_processor_cores())
-#endif
-  decompressThread();
-
-  std::string firstErr;
-  if (mRaw->isTooManyErrors(1, &firstErr)) {
-    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
-             firstErr.c_str());
-  }
+  FujiDecompressorImpl impl(
+      mRaw, Array1DRef<const ByteStream>(strips.data(), strips.size()), header);
+  impl.decompress();
 }
 
 FujiDecompressor::FujiHeader::FujiHeader(ByteStream& bs)
