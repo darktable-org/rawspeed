@@ -154,48 +154,6 @@ struct FujiStrip {
   [[nodiscard]] int offsetX() const { return h.block_size * n; }
 };
 
-} // namespace
-
-FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
-    : mRaw(img), input(input_) {
-  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
-      mRaw->getBpp() != sizeof(uint16_t))
-    ThrowRDE("Unexpected component count / data type");
-
-  input.setByteOrder(Endianness::big);
-
-  header = FujiHeader(input);
-  if (!header)
-    ThrowRDE("compressed RAF header check");
-
-  if (mRaw->dim != iPoint2D(header.raw_width, header.raw_height))
-    ThrowRDE("RAF header specifies different dimensions!");
-
-  if (12 == header.raw_bits) {
-    ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
-             "samples on <https://raw.pixls.us/>, thanks!");
-  }
-
-  if (mRaw->cfa.getSize() == iPoint2D(6, 6)) {
-    std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
-    if (!p)
-      ThrowRDE("Invalid X-Trans CFA");
-    if (p != iPoint2D(0, 0))
-      ThrowRDE("Unexpected X-Trans phase: {%i,%i}. Please file a bug!", p->x,
-               p->y);
-  } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
-    std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
-    if (!p)
-      ThrowRDE("Invalid Bayer CFA");
-    if (p != BayerPhase::RGGB)
-      ThrowRDE("Unexpected Bayer phase: %i. Please file a bug!",
-               static_cast<int>(*p));
-  } else
-    ThrowRDE("Unexpected CFA size");
-
-  fuji_compressed_load_raw();
-}
-
 fuji_compressed_params::fuji_compressed_params(
     const FujiDecompressor::FujiHeader& h) {
   int cur_val;
@@ -266,8 +224,6 @@ fuji_compressed_params::fuji_compressed_params(
     ThrowRDE("FUJI q_point");
   }
 }
-
-namespace {
 
 struct fuji_compressed_block {
   const Array2DRef<uint16_t> img;
@@ -868,6 +824,46 @@ void FujiDecompressorImpl::decompress() {
 }
 
 } // namespace
+
+FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
+    : mRaw(img), input(input_) {
+  if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
+      mRaw->getBpp() != sizeof(uint16_t))
+    ThrowRDE("Unexpected component count / data type");
+
+  input.setByteOrder(Endianness::big);
+
+  header = FujiHeader(input);
+  if (!header)
+    ThrowRDE("compressed RAF header check");
+
+  if (mRaw->dim != iPoint2D(header.raw_width, header.raw_height))
+    ThrowRDE("RAF header specifies different dimensions!");
+
+  if (12 == header.raw_bits) {
+    ThrowRDE("Aha, finally, a 12-bit compressed RAF! Please consider providing "
+             "samples on <https://raw.pixls.us/>, thanks!");
+  }
+
+  if (mRaw->cfa.getSize() == iPoint2D(6, 6)) {
+    std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
+    if (!p)
+      ThrowRDE("Invalid X-Trans CFA");
+    if (p != iPoint2D(0, 0))
+      ThrowRDE("Unexpected X-Trans phase: {%i,%i}. Please file a bug!", p->x,
+               p->y);
+  } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
+    std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+    if (!p)
+      ThrowRDE("Invalid Bayer CFA");
+    if (p != BayerPhase::RGGB)
+      ThrowRDE("Unexpected Bayer phase: %i. Please file a bug!",
+               static_cast<int>(*p));
+  } else
+    ThrowRDE("Unexpected CFA size");
+
+  fuji_compressed_load_raw();
+}
 
 void FujiDecompressor::fuji_compressed_load_raw() {
   // read block sizes
