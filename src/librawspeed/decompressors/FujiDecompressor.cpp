@@ -263,6 +263,8 @@ struct fuji_compressed_block {
   [[nodiscard]] inline int
   fuji_decode_sample_odd(xt_lines c, int col, std::array<int_pair, 41>& grads);
 
+  [[nodiscard]] inline int fuji_quant_gradient(int v1, int v2) const;
+
   [[nodiscard]] inline std::pair<int, int>
   fuji_decode_interpolation_even_inner(xt_lines c, int col) const;
   [[nodiscard]] inline std::pair<int, int>
@@ -489,14 +491,15 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
   return std::min(interp_val, common_info.q_point[4]);
 }
 
-#define fuji_quant_gradient(v1, v2)                                            \
-  (9 * ci.q_table[ci.q_point[4] + (v1)] + ci.q_table[ci.q_point[4] + (v2)])
+__attribute__((always_inline)) int
+fuji_compressed_block::fuji_quant_gradient(int v1, int v2) const {
+  const auto& ci = common_info;
+  return 9 * ci.q_table[ci.q_point[4] + v1] + ci.q_table[ci.q_point[4] + v2];
+}
 
 __attribute__((always_inline)) std::pair<int, int>
 fuji_compressed_block::fuji_decode_interpolation_even_inner(xt_lines c,
                                                             int col) const {
-  const auto& ci = common_info;
-
   int Rb = lines(c - 1, 1 + 2 * (col + 0) + 0);
   int Rc = lines(c - 1, 1 + 2 * (col - 1) + 1);
   int Rd = lines(c - 1, 1 + 2 * (col + 0) + 1);
@@ -531,8 +534,6 @@ fuji_compressed_block::fuji_decode_interpolation_even_inner(xt_lines c,
 __attribute__((always_inline)) std::pair<int, int>
 fuji_compressed_block::fuji_decode_interpolation_odd_inner(xt_lines c,
                                                            int col) const {
-  const auto& ci = common_info;
-
   int Ra = lines(c + 0, 1 + 2 * (col + 0) + 0);
   int Rb = lines(c - 1, 1 + 2 * (col + 0) + 1);
   int Rc = lines(c - 1, 1 + 2 * (col + 0) + 0);
@@ -549,8 +550,6 @@ fuji_compressed_block::fuji_decode_interpolation_odd_inner(xt_lines c,
   int grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
   return {grad, interp_val};
 }
-
-#undef fuji_quant_gradient
 
 __attribute__((always_inline)) int
 fuji_compressed_block::fuji_decode_sample_even(
