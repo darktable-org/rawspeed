@@ -87,7 +87,7 @@ enum xt_lines {
 struct fuji_compressed_params {
   explicit fuji_compressed_params(const FujiDecompressor::FujiHeader& h);
 
-  int8_t qTableLookup(int cur_val) const;
+  [[nodiscard]] int8_t qTableLookup(int cur_val) const;
 
   std::vector<int8_t> q_table; /* quantization table */
   std::array<int, 5> q_point;  /* quantization points */
