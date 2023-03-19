@@ -28,10 +28,10 @@
 #include "parsers/RawParserException.h"       // for RawParserException (pt...
 #include "parsers/TiffParserException.h"      // for TiffParserException (p...
 #include <exception>                          // for exception
-#include <gmock/gmock.h>                      // for HasSubstr, ASSERT_THAT
-#include <gtest/gtest.h>                      // for Message, TestPartResult
 #include <memory>                             // for unique_ptr
 #include <stdexcept>                          // for runtime_error
+#include <gmock/gmock.h>                      // for HasSubstr, ASSERT_THAT
+#include <gtest/gtest.h>                      // for Message, TestPartResult
 
 using rawspeed::CameraMetadataException;
 using rawspeed::CiffParserException;

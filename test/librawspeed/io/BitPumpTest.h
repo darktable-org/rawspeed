@@ -26,8 +26,8 @@
 #include <array>            // for array
 #include <assert.h>         // for assert
 #include <cstdint>          // for uint8_t, uint32_t
-#include <gtest/gtest.h>    // for Message, TypedTestSuitePState, ASSERT_EQ
 #include <initializer_list> // for initializer_list
+#include <gtest/gtest.h>    // for Message, TypedTestSuitePState, ASSERT_EQ
 
 using rawspeed::Buffer;
 using rawspeed::ByteStream;
