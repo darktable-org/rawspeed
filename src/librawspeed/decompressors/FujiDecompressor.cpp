@@ -87,6 +87,8 @@ enum xt_lines {
 struct fuji_compressed_params {
   explicit fuji_compressed_params(const FujiDecompressor::FujiHeader& h);
 
+  int8_t qTableLookup(int cur_val) const;
+
   std::vector<int8_t> q_table; /* quantization table */
   std::array<int, 5> q_point;  /* quantization points */
   int max_bits;
@@ -154,10 +156,26 @@ struct FujiStrip {
   [[nodiscard]] int offsetX() const { return h.block_size * n; }
 };
 
+int8_t GetGradient(const fuji_compressed_params& p, int cur_val) {
+  cur_val -= p.q_point[4];
+
+  int abs_cur_val = std::abs(cur_val);
+
+  int grad = 0;
+  if (abs_cur_val > 0)
+    grad = 1;
+  if (abs_cur_val >= p.q_point[1])
+    grad = 2;
+  if (abs_cur_val >= p.q_point[2])
+    grad = 3;
+  if (abs_cur_val >= p.q_point[3])
+    grad = 4;
+
+  return cur_val >= 0 ? grad : -grad;
+}
+
 fuji_compressed_params::fuji_compressed_params(
     const FujiDecompressor::FujiHeader& h) {
-  int cur_val;
-
   if ((h.block_size % 3 && h.raw_type == 16) ||
       (h.block_size & 1 && h.raw_type == 0)) {
     ThrowRDE("fuji_block_checks");
@@ -176,32 +194,13 @@ fuji_compressed_params::fuji_compressed_params(
   q_point[4] = (1 << h.raw_bits) - 1;
   min_value = 0x40;
 
-  cur_val = -q_point[4];
-  q_table.resize(2 * (1 << h.raw_bits));
-
-  for (int8_t* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
-    if (cur_val <= -q_point[3]) {
-      *qt = -4;
-    } else if (cur_val <= -q_point[2]) {
-      *qt = -3;
-    } else if (cur_val <= -q_point[1]) {
-      *qt = -2;
-    } else if (cur_val < 0) {
-      *qt = -1;
-    } else if (cur_val == 0) {
-      *qt = 0;
-    } else if (cur_val < q_point[1]) {
-      *qt = 1;
-    } else if (cur_val < q_point[2]) {
-      *qt = 2;
-    } else if (cur_val < q_point[3]) {
-      *qt = 3;
-    } else {
-      *qt = 4;
-    }
+  // populting gradients
+  const int NumGradientTableEntries = 2 * (1 << h.raw_bits);
+  q_table.resize(NumGradientTableEntries);
+  for (int i = 0; i != NumGradientTableEntries; ++i) {
+    q_table[i] = GetGradient(*this, i);
   }
 
-  // populting gradients
   if (q_point[4] == 0xFFFF) { // (1 << h.raw_bits) - 1
     total_values = 0x10000;   // 1 << h.raw_bits
     raw_bits = 16;            // h.raw_bits
@@ -223,6 +222,10 @@ fuji_compressed_params::fuji_compressed_params(
   } else {
     ThrowRDE("FUJI q_point");
   }
+}
+
+int8_t fuji_compressed_params::qTableLookup(int cur_val) const {
+  return q_table[cur_val];
 }
 
 struct fuji_compressed_block {
@@ -262,6 +265,8 @@ struct fuji_compressed_block {
   fuji_decode_sample_even(xt_lines c, int col, std::array<int_pair, 41>& grads);
   [[nodiscard]] inline int
   fuji_decode_sample_odd(xt_lines c, int col, std::array<int_pair, 41>& grads);
+
+  [[nodiscard]] inline int fuji_quant_gradient(int v1, int v2) const;
 
   [[nodiscard]] inline std::pair<int, int>
   fuji_decode_interpolation_even_inner(xt_lines c, int col) const;
@@ -489,14 +494,16 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
   return std::min(interp_val, common_info.q_point[4]);
 }
 
-#define fuji_quant_gradient(v1, v2)                                            \
-  (9 * ci.q_table[ci.q_point[4] + (v1)] + ci.q_table[ci.q_point[4] + (v2)])
+__attribute__((always_inline)) int
+fuji_compressed_block::fuji_quant_gradient(int v1, int v2) const {
+  const auto& ci = common_info;
+  return 9 * ci.qTableLookup(ci.q_point[4] + v1) +
+         ci.qTableLookup(ci.q_point[4] + v2);
+}
 
 __attribute__((always_inline)) std::pair<int, int>
 fuji_compressed_block::fuji_decode_interpolation_even_inner(xt_lines c,
                                                             int col) const {
-  const auto& ci = common_info;
-
   int Rb = lines(c - 1, 1 + 2 * (col + 0) + 0);
   int Rc = lines(c - 1, 1 + 2 * (col - 1) + 1);
   int Rd = lines(c - 1, 1 + 2 * (col + 0) + 1);
@@ -531,8 +538,6 @@ fuji_compressed_block::fuji_decode_interpolation_even_inner(xt_lines c,
 __attribute__((always_inline)) std::pair<int, int>
 fuji_compressed_block::fuji_decode_interpolation_odd_inner(xt_lines c,
                                                            int col) const {
-  const auto& ci = common_info;
-
   int Ra = lines(c + 0, 1 + 2 * (col + 0) + 0);
   int Rb = lines(c - 1, 1 + 2 * (col + 0) + 1);
   int Rc = lines(c - 1, 1 + 2 * (col + 0) + 0);
@@ -549,8 +554,6 @@ fuji_compressed_block::fuji_decode_interpolation_odd_inner(xt_lines c,
   int grad = fuji_quant_gradient(Rb - Rc, Rc - Ra);
   return {grad, interp_val};
 }
-
-#undef fuji_quant_gradient
 
 __attribute__((always_inline)) int
 fuji_compressed_block::fuji_decode_sample_even(
