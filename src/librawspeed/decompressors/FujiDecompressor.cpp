@@ -157,23 +157,19 @@ struct FujiStrip {
 int8_t GetGradient(const fuji_compressed_params& p, int cur_val) {
   cur_val -= p.q_point[4];
 
-  if (cur_val <= -p.q_point[3])
-    return -4;
-  if (cur_val <= -p.q_point[2])
-    return -3;
-  if (cur_val <= -p.q_point[1])
-    return -2;
-  if (cur_val < 0)
-    return -1;
-  if (cur_val == 0)
-    return 0;
-  if (cur_val < p.q_point[1])
-    return 1;
-  if (cur_val < p.q_point[2])
-    return 2;
-  if (cur_val < p.q_point[3])
-    return 3;
-  return 4;
+  int abs_cur_val = std::abs(cur_val);
+
+  int grad = 0;
+  if (abs_cur_val > 0)
+    grad = 1;
+  if (abs_cur_val >= p.q_point[1])
+    grad = 2;
+  if (abs_cur_val >= p.q_point[2])
+    grad = 3;
+  if (abs_cur_val >= p.q_point[3])
+    grad = 4;
+
+  return cur_val >= 0 ? grad : -grad;
 }
 
 fuji_compressed_params::fuji_compressed_params(
