@@ -154,10 +154,30 @@ struct FujiStrip {
   [[nodiscard]] int offsetX() const { return h.block_size * n; }
 };
 
+int8_t GetGradient(const fuji_compressed_params& p, int cur_val) {
+  cur_val -= p.q_point[4];
+
+  if (cur_val <= -p.q_point[3])
+    return -4;
+  if (cur_val <= -p.q_point[2])
+    return -3;
+  if (cur_val <= -p.q_point[1])
+    return -2;
+  if (cur_val < 0)
+    return -1;
+  if (cur_val == 0)
+    return 0;
+  if (cur_val < p.q_point[1])
+    return 1;
+  if (cur_val < p.q_point[2])
+    return 2;
+  if (cur_val < p.q_point[3])
+    return 3;
+  return 4;
+}
+
 fuji_compressed_params::fuji_compressed_params(
     const FujiDecompressor::FujiHeader& h) {
-  int cur_val;
-
   if ((h.block_size % 3 && h.raw_type == 16) ||
       (h.block_size & 1 && h.raw_type == 0)) {
     ThrowRDE("fuji_block_checks");
@@ -176,32 +196,13 @@ fuji_compressed_params::fuji_compressed_params(
   q_point[4] = (1 << h.raw_bits) - 1;
   min_value = 0x40;
 
-  cur_val = -q_point[4];
-  q_table.resize(2 * (1 << h.raw_bits));
-
-  for (int8_t* qt = &q_table[0]; cur_val <= q_point[4]; ++qt, ++cur_val) {
-    if (cur_val <= -q_point[3]) {
-      *qt = -4;
-    } else if (cur_val <= -q_point[2]) {
-      *qt = -3;
-    } else if (cur_val <= -q_point[1]) {
-      *qt = -2;
-    } else if (cur_val < 0) {
-      *qt = -1;
-    } else if (cur_val == 0) {
-      *qt = 0;
-    } else if (cur_val < q_point[1]) {
-      *qt = 1;
-    } else if (cur_val < q_point[2]) {
-      *qt = 2;
-    } else if (cur_val < q_point[3]) {
-      *qt = 3;
-    } else {
-      *qt = 4;
-    }
+  // populting gradients
+  const int NumGradientTableEntries = 2 * (1 << h.raw_bits);
+  q_table.resize(NumGradientTableEntries);
+  for (int i = 0; i != NumGradientTableEntries; ++i) {
+    q_table[i] = GetGradient(*this, i);
   }
 
-  // populting gradients
   if (q_point[4] == 0xFFFF) { // (1 << h.raw_bits) - 1
     total_values = 0x10000;   // 1 << h.raw_bits
     raw_bits = 16;            // h.raw_bits
