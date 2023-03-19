@@ -87,6 +87,8 @@ enum xt_lines {
 struct fuji_compressed_params {
   explicit fuji_compressed_params(const FujiDecompressor::FujiHeader& h);
 
+  int8_t qTableLookup(int cur_val) const;
+
   std::vector<int8_t> q_table; /* quantization table */
   std::array<int, 5> q_point;  /* quantization points */
   int max_bits;
@@ -220,6 +222,10 @@ fuji_compressed_params::fuji_compressed_params(
   } else {
     ThrowRDE("FUJI q_point");
   }
+}
+
+int8_t fuji_compressed_params::qTableLookup(int cur_val) const {
+  return q_table[cur_val];
 }
 
 struct fuji_compressed_block {
@@ -491,7 +497,8 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
 __attribute__((always_inline)) int
 fuji_compressed_block::fuji_quant_gradient(int v1, int v2) const {
   const auto& ci = common_info;
-  return 9 * ci.q_table[ci.q_point[4] + v1] + ci.q_table[ci.q_point[4] + v2];
+  return 9 * ci.qTableLookup(ci.q_point[4] + v1) +
+         ci.qTableLookup(ci.q_point[4] + v2);
 }
 
 __attribute__((always_inline)) std::pair<int, int>
