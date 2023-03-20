@@ -21,9 +21,10 @@
 #pragma once
 
 #include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "adt/Invariant.h"  // for invariant
 #include <algorithm>        // for max, clamp
 #include <array>            // for array
-#include <cassert>          // for assert
+#include <cassert>          // for invariant
 #include <climits>          // for CHAR_BIT
 #include <cstdint>          // for uintptr_t, uint8_t, uint16_t
 #include <cstring>          // for size_t, memcpy
@@ -76,7 +77,8 @@ template <typename T> constexpr bool RAWSPEED_READNONE isPowerOfTwo(T val) {
   return (val & (~val + 1)) == val;
 }
 
-template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
+template <class T>
+constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
   return CHAR_BIT * sizeof(T);
 }
 
@@ -145,10 +147,10 @@ constexpr uint16_t RAWSPEED_READNONE clampBits(
     T value, unsigned int nBits,
     typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
   // We expect to produce uint16_t.
-  assert(nBits <= 16);
+  invariant(nBits <= 16);
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
-  assert(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
+  invariant(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
   const T maxVal = (T(1) << nBits) - T(1);
   return std::clamp(value, T(0), maxVal);
 }
@@ -157,7 +159,7 @@ template <typename T>
 constexpr bool RAWSPEED_READNONE isIntN(
     T value, unsigned int nBits,
     typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
-  assert(nBits < bitwidth<T>() && "Check must not be tautological.");
+  invariant(nBits < bitwidth<T>() && "Check must not be tautological.");
   using UnsignedT = std::make_unsigned_t<T>;
   const auto highBits = static_cast<UnsignedT>(value) >> nBits;
   return highBits == 0;
@@ -174,10 +176,10 @@ template <class T>
 constexpr RAWSPEED_READNONE T extractHighBits(
     T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>(),
     typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
-  assert(effectiveBitwidth <= bitwidth<T>());
-  assert(nBits <= effectiveBitwidth);
+  invariant(effectiveBitwidth <= bitwidth<T>());
+  invariant(nBits <= effectiveBitwidth);
   auto numLowBitsToSkip = effectiveBitwidth - nBits;
-  assert(numLowBitsToSkip < bitwidth<T>());
+  invariant(numLowBitsToSkip < bitwidth<T>());
   return value >> numLowBitsToSkip;
 }
 
@@ -185,7 +187,7 @@ template <typename T>
 constexpr typename std::make_signed_t<T> RAWSPEED_READNONE signExtend(
     T value, unsigned int nBits,
     typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
-  assert(nBits != 0 && "Only valid for non-zero bit count.");
+  invariant(nBits != 0 && "Only valid for non-zero bit count.");
   const T SpareSignBits = bitwidth<T>() - nBits;
   using SignedT = std::make_signed_t<T>;
   return static_cast<SignedT>(value << SpareSignBits) >> SpareSignBits;
