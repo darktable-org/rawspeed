@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "AddressSanitizer.h"
+#include "adt/Invariant.h" // for invariant
 #include "common/Common.h"
 #include "common/RawspeedException.h"
 #include <cstddef> // for size_t
@@ -36,8 +37,8 @@ namespace impl {
                                           alloc_size(1), alloc_align(2)))
 alignedMalloc(size_t size, size_t alignment) {
   assert(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
-  assert(isAligned(alignment, sizeof(void*))); // for posix_memalign
-  assert(isAligned(size, alignment));          // for aligned_alloc
+  invariant(isAligned(alignment, sizeof(void*))); // for posix_memalign
+  invariant(isAligned(size, alignment));          // for aligned_alloc
 
   void* ptr = nullptr;
 
@@ -61,7 +62,7 @@ alignedMalloc(size_t size, size_t alignment) {
 #error "No aligned malloc() implementation available!"
 #endif
 
-  assert(isAligned(ptr, alignment));
+  invariant(isAligned(ptr, alignment));
 
   return ptr;
 }
@@ -89,15 +90,16 @@ public:
 
   [[nodiscard]] T* allocate(std::size_t numElts) const {
     static_assert(alignment >= alignof(T), "insufficient alignment");
-    assert(numElts > 0 && "Should not be trying to allocate no elements");
+    invariant(numElts > 0 && "Should not be trying to allocate no elements");
     assert(numElts <= allocator_traits::max_size(*this) &&
            "Can allocate this many elements.");
-    assert(numElts <= SIZE_MAX / sizeof(T) &&
-           "Byte count calculation will not overflow");
+    invariant(numElts <= SIZE_MAX / sizeof(T) &&
+              "Byte count calculation will not overflow");
 
     std::size_t numBytes = sizeof(T) * numElts;
     std::size_t numPaddedBytes = roundUp(numBytes, alignment);
-    assert(numPaddedBytes >= numBytes && "Alignment did not cause wraparound.");
+    invariant(numPaddedBytes >= numBytes &&
+              "Alignment did not cause wraparound.");
 
     auto* r = static_cast<T*>(impl::alignedMalloc(numPaddedBytes, alignment));
     if (!r)
@@ -108,8 +110,8 @@ public:
   }
 
   void deallocate(T* p, std::size_t n) const noexcept {
-    assert(p);
-    assert(n > 0);
+    invariant(p);
+    invariant(n > 0);
     impl::alignedFree(p);
   }
 

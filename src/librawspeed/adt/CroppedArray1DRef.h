@@ -21,6 +21,7 @@
 #pragma once
 
 #include "adt/Array1DRef.h" // for Array1DRef
+#include "adt/Invariant.h"  // for invariant
 #include <cassert>          // for assert
 #include <type_traits>      // for negation, is_const, remove_const_t, is_same
 #include <vector>           // for vector
@@ -94,8 +95,8 @@ template <class T>
 CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
                                         const int numElts_)
     : base(base_), offset(offset_), numElts(numElts_) {
-  assert(offset >= 0);
-  assert(numElts >= 0);
+  invariant(offset >= 0);
+  invariant(numElts >= 0);
   assert(offset + numElts <= std::size(base));
 }
 
@@ -109,8 +110,8 @@ template <class T> inline int CroppedArray1DRef<T>::size() const {
 
 template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
-  assert(eltIdx >= 0);
-  assert(eltIdx < numElts);
+  invariant(eltIdx >= 0);
+  invariant(eltIdx < numElts);
   return base(offset + eltIdx);
 }
 

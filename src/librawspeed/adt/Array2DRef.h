@@ -22,7 +22,7 @@
 #pragma once
 
 #include "adt/Array1DRef.h" // for Array1DRef
-#include <cassert>          // for assert
+#include "adt/Invariant.h"  // for invariant
 #include <cstddef>          // for byte
 #include <type_traits>      // for negation, is_const, remove_const_t, is_same
 #include <vector>           // for vector
@@ -117,23 +117,23 @@ template <class T>
 Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
                           const int dataPitch /* = 0 */)
     : _data(data), width(dataWidth), height(dataHeight) {
-  assert(width >= 0);
-  assert(height >= 0);
+  invariant(width >= 0);
+  invariant(height >= 0);
   _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
 }
 
 template <class T>
 inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
-  assert(_data);
-  assert(row >= 0);
-  assert(row < height);
+  invariant(_data);
+  invariant(row >= 0);
+  invariant(row < height);
   return Array1DRef<T>(&_data[row * _pitch], width);
 }
 
 template <class T>
 inline T& Array2DRef<T>::operator()(const int row, const int col) const {
-  assert(col >= 0);
-  assert(col < width);
+  invariant(col >= 0);
+  invariant(col < width);
   return (operator[](row))(col);
 }
 
