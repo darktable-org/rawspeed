@@ -20,9 +20,9 @@
 
 #include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
 #include "bench/Common.h"                    // for benchmarkDryRun
-#include <benchmark/benchmark.h>             // for State, Benchmark
 #include <map>                               // for map<>::mapped_type
 #include <vector>                            // for allocator, vector
+#include <benchmark/benchmark.h>             // for State, Benchmark
 
 using Type = std::byte;
 

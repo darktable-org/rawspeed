@@ -20,8 +20,8 @@
 
 #include "rawspeedconfig.h"          // for HAVE_PUGIXML, RAWSPEED_SOURCE_DIR
 #include "metadata/CameraMetaData.h" // for CameraMetaData
-#include <benchmark/benchmark.h>     // for DoNotOptimize, State, State::St...
 #include <pugixml.hpp>               // for xml_document, xml_parse_result
+#include <benchmark/benchmark.h>     // for DoNotOptimize, State, State::St...
 
 #ifndef HAVE_PUGIXML
 #error This benchmark requires to be built with pugixml being present.

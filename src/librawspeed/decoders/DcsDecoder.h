@@ -36,8 +36,8 @@ class DcsDecoder final : public SimpleTiffDecoder {
   void checkImageDimensions() override;
 
 public:
-  static bool __attribute__((pure))
-  isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  static bool RAWSPEED_READONLY isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                                     Buffer file);
   DcsDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 

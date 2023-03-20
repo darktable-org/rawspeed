@@ -32,8 +32,8 @@ rawspeed_get_number_of_processor_cores() {
   return omp_get_max_threads();
 }
 #else
-extern "C" int __attribute__((const, visibility("default")))
-rawspeed_get_number_of_processor_cores() {
+extern "C" int __attribute__((visibility("default")))
+rawspeed_get_number_of_processor_cores() RAWSPEED_READNONE {
   return 1;
 }
 #endif

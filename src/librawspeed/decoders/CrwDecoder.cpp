@@ -107,7 +107,7 @@ void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 // based on exiftool's Image::ExifTool::Canon::CanonEv
-float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
+float RAWSPEED_READNONE CrwDecoder::canonEv(const int64_t in) {
   // remove sign
   int64_t val = abs(in);
   // remove fraction

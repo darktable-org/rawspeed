@@ -186,12 +186,11 @@ protected:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
-  [[nodiscard]] inline size_t __attribute__((pure)) maxCodeLength() const {
+  [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodeLength() const {
     return nCodesPerLength.size() - 1;
   }
 
-  [[nodiscard]] inline size_t __attribute__((pure))
-  maxCodePlusDiffLength() const {
+  [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodePlusDiffLength() const {
     return maxCodeLength() +
            *(std::max_element(codeValues.cbegin(), codeValues.cend()));
   }
@@ -202,8 +201,7 @@ protected:
   // (there are always 0 codes of length 0)
   std::vector<unsigned int> nCodesPerLength; // index is length of code
 
-  [[nodiscard]] inline unsigned int __attribute__((pure))
-  maxCodesCount() const {
+  [[nodiscard]] inline unsigned int RAWSPEED_READONLY maxCodesCount() const {
     return std::accumulate(nCodesPerLength.begin(), nCodesPerLength.end(), 0U);
   }
 
@@ -386,7 +384,7 @@ public:
 
   // Figure F.12 – Extending the sign bit of a decoded value in V
   // WARNING: this is *not* your normal 2's complement sign extension!
-  inline static int __attribute__((const)) extend(uint32_t diff, uint32_t len) {
+  inline static int RAWSPEED_READNONE extend(uint32_t diff, uint32_t len) {
     assert(len > 0);
     auto ret = static_cast<int32_t>(diff);
     if ((diff & (1 << (len - 1))) == 0)

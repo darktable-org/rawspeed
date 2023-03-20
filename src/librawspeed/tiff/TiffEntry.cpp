@@ -109,16 +109,16 @@ TiffEntryWithData::TiffEntryWithData(TiffIFD* parent_, TiffTag tag_,
   count = count_;
 }
 
-bool __attribute__((pure)) TiffEntry::isInt() const {
+bool RAWSPEED_READONLY TiffEntry::isInt() const {
   return type == TiffDataType::LONG || type == TiffDataType::SHORT ||
          type == TiffDataType::BYTE;
 }
 
-bool __attribute__((pure)) TiffEntry::isString() const {
+bool RAWSPEED_READONLY TiffEntry::isString() const {
   return type == TiffDataType::ASCII;
 }
 
-bool __attribute__((pure)) TiffEntry::isFloat() const {
+bool RAWSPEED_READONLY TiffEntry::isFloat() const {
   switch (type) {
   case TiffDataType::FLOAT:
   case TiffDataType::DOUBLE:
@@ -134,7 +134,7 @@ bool __attribute__((pure)) TiffEntry::isFloat() const {
   }
 }
 
-bool __attribute__((pure)) TiffEntry::isRational() const {
+bool RAWSPEED_READONLY TiffEntry::isRational() const {
   switch (type) {
   case TiffDataType::SHORT:
   case TiffDataType::LONG:
@@ -145,7 +145,7 @@ bool __attribute__((pure)) TiffEntry::isRational() const {
   }
 }
 
-bool __attribute__((pure)) TiffEntry::isSRational() const {
+bool RAWSPEED_READONLY TiffEntry::isSRational() const {
   switch (type) {
   case TiffDataType::SSHORT:
   case TiffDataType::SLONG:

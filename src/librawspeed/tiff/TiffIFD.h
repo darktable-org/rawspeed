@@ -112,9 +112,9 @@ public:
   [[nodiscard]] const TiffIFD* getIFDWithTag(TiffTag tag,
                                              uint32_t index = 0) const;
   [[nodiscard]] TiffEntry* getEntry(TiffTag tag) const;
-  [[nodiscard]] TiffEntry* __attribute__((pure))
+  [[nodiscard]] TiffEntry* RAWSPEED_READONLY
   getEntryRecursive(TiffTag tag) const;
-  [[nodiscard]] bool __attribute__((pure)) hasEntry(TiffTag tag) const {
+  [[nodiscard]] bool RAWSPEED_READONLY hasEntry(TiffTag tag) const {
     return entries.find(tag) != entries.end();
   }
   [[nodiscard]] bool hasEntryRecursive(TiffTag tag) const {

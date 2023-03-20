@@ -5,6 +5,7 @@ FILE(GLOB SOURCES
   "CroppedArray1DRef.h"
   "CroppedArray2DRef.h"
   "DefaultInitAllocatorAdaptor.h"
+  "Invariant.h"
   "Mutex.h"
   "NORangesSet.h"
   "NotARational.h"

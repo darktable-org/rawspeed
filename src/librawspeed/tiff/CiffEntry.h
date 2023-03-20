@@ -67,16 +67,16 @@ public:
   [[nodiscard]] std::string_view getString() const;
   [[nodiscard]] std::vector<std::string> getStrings() const;
 
-  [[nodiscard]] uint32_t __attribute__((pure)) getElementSize() const;
-  [[nodiscard]] uint32_t __attribute__((pure)) getElementShift() const;
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getElementSize() const;
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getElementShift() const;
 
   // variables:
   CiffTag tag;
   CiffDataType type;
   uint32_t count;
 
-  [[nodiscard]] bool __attribute__((pure)) isInt() const;
-  [[nodiscard]] bool __attribute__((pure)) isString() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isInt() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isString() const;
 };
 
 } // namespace rawspeed

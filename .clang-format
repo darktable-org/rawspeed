@@ -6,13 +6,14 @@ Standard:     c++17
 DerivePointerAlignment: false
 PointerAlignment: Left
 IncludeCategories:
-  - Regex:           '^(<|"rawspeedconfig\.h"|>)$'
-    Priority:        -2
-  - Regex:           '^(<|"RawSpeed-API\.h"|>)$'
-    Priority:        -1
-  - Regex:           '^(<|"(gtest|gmock)/)'
-    Priority:        2
+  - Regex:           '^[<"]rawspeedconfig\.h[">]$'
+    Priority:        -20
+  - Regex:           '^[<"]RawSpeed-API\.h[">]$'
+    Priority:        -10
+  - Regex:           '^[<"](gtest|gmock|benchmark)/'
+    Priority:        20
   - Regex:           '.*'
-    Priority:        1
+    Priority:        10
+IncludeBlocks: Merge
 IncludeIsMainRegex: ''
 ...

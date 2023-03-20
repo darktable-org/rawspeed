@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2016-2017 Roman Lebedev
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,10 +18,35 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for rawspeed_get_number_of_processor_cores
+#pragma once
 
-// define this function, it is only declared in rawspeed:
-// for fuzzing, do not want any threading.
-extern "C" int RAWSPEED_READNONE rawspeed_get_number_of_processor_cores() {
-  return 1;
+#ifndef NDEBUG
+
+#include <cassert> // for assert
+
+#define invariant(expr) assert(expr)
+
+#else // NDEBUG
+
+#ifndef __has_builtin      // Optional of course.
+#define __has_builtin(x) 0 // Compatibility with non-clang compilers.
+#endif
+
+#if __has_builtin(__builtin_assume)
+
+#define invariant(expr) __builtin_assume(expr)
+
+#else // __has_builtin(__builtin_assume)
+
+namespace rawspeed {
+
+__attribute__((always_inline)) constexpr inline void invariant(bool precond) {
+  if (!precond)
+    __builtin_unreachable();
 }
+
+} // namespace rawspeed
+
+#endif // __has_builtin(__builtin_assume)
+
+#endif // NDEBUG

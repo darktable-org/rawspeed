@@ -41,7 +41,7 @@ namespace {
 // in a horrible code. So let's just provide our own signbit(). It compiles to
 // the exact same code as the std::signbit(int).
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-constexpr __attribute__((const)) bool SignBit(T x) {
+constexpr RAWSPEED_READNONE bool SignBit(T x) {
   return x < 0;
 }
 

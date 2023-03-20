@@ -22,7 +22,7 @@
 
 #include "adt/Array2DRef.h"        // for Array2DRef
 #include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
-#include <cassert>                 // for assert
+#include "adt/Invariant.h"         // for invariant
 #include <type_traits> // for enable_if_t, remove_const_t, remove_cv_t
 
 namespace rawspeed {
@@ -78,27 +78,27 @@ CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
                                         int croppedHeight_)
     : base(base_), offsetCols(offsetCols_), offsetRows(offsetRows_),
       croppedWidth(croppedWidth_), croppedHeight(croppedHeight_) {
-  assert(offsetCols_ >= 0);
-  assert(offsetRows_ >= 0);
-  assert(croppedWidth_ >= 0);
-  assert(croppedHeight_ >= 0);
-  assert(offsetCols_ + croppedWidth_ <= base.width);
-  assert(offsetRows_ + croppedHeight_ <= base.height);
+  invariant(offsetCols_ >= 0);
+  invariant(offsetRows_ >= 0);
+  invariant(croppedWidth_ >= 0);
+  invariant(croppedHeight_ >= 0);
+  invariant(offsetCols_ + croppedWidth_ <= base.width);
+  invariant(offsetRows_ + croppedHeight_ <= base.height);
 }
 
 template <class T>
 inline CroppedArray1DRef<T>
 CroppedArray2DRef<T>::operator[](const int row) const {
-  assert(row >= 0);
-  assert(row < croppedHeight);
+  invariant(row >= 0);
+  invariant(row < croppedHeight);
   const Array1DRef<T> fullLine = base.operator[](offsetRows + row);
   return fullLine.getCrop(offsetCols, croppedWidth);
 }
 
 template <class T>
 inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
-  assert(col >= 0);
-  assert(col < croppedWidth);
+  invariant(col >= 0);
+  invariant(col < croppedWidth);
   return (operator[](row))(col);
 }
 

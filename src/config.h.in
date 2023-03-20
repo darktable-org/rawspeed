@@ -92,3 +92,5 @@ static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE,
 
 #define RAWSPEED_UNLIKELY_FUNCTION __attribute__((cold))
 #define RAWSPEED_NOINLINE __attribute__((noinline))
+#define RAWSPEED_READONLY __attribute__((pure))
+#define RAWSPEED_READNONE __attribute__((const))

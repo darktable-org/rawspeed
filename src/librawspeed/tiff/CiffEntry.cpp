@@ -70,7 +70,7 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
   count = bytesize >> getElementShift();
 }
 
-uint32_t __attribute__((pure)) CiffEntry::getElementShift() const {
+uint32_t RAWSPEED_READONLY CiffEntry::getElementShift() const {
   switch (type) {
   case CiffDataType::SHORT:
     return 1;
@@ -85,7 +85,7 @@ uint32_t __attribute__((pure)) CiffEntry::getElementShift() const {
   }
 }
 
-uint32_t __attribute__((pure)) CiffEntry::getElementSize() const {
+uint32_t RAWSPEED_READONLY CiffEntry::getElementSize() const {
   switch (type) {
   case CiffDataType::BYTE:
   case CiffDataType::ASCII:
@@ -102,7 +102,7 @@ uint32_t __attribute__((pure)) CiffEntry::getElementSize() const {
   }
 }
 
-bool __attribute__((pure)) CiffEntry::isInt() const {
+bool RAWSPEED_READONLY CiffEntry::isInt() const {
   return (type == CiffDataType::LONG || type == CiffDataType::SHORT ||
           type == CiffDataType::BYTE);
 }
@@ -171,7 +171,7 @@ vector<std::string> CiffEntry::getStrings() const {
   return strs;
 }
 
-bool __attribute__((pure)) CiffEntry::isString() const {
+bool RAWSPEED_READONLY CiffEntry::isString() const {
   return (type == CiffDataType::ASCII);
 }
 

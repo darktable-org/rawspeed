@@ -224,13 +224,13 @@ CiffIFD::getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const {
   });
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) const {
+bool RAWSPEED_READONLY CiffIFD::hasEntry(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
   return mEntry.count(tag) > 0;
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
+bool RAWSPEED_READONLY CiffIFD::hasEntryRecursive(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
   if (mEntry.count(tag) > 0)

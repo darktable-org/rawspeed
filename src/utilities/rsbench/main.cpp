@@ -23,7 +23,6 @@
 #include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
 #include "common/ChecksumFile.h"             // for ChecksumFileEntry, Read...
 #include <algorithm>                         // for max
-#include <benchmark/benchmark.h>             // for Counter, Counter::Flags
 #include <chrono>                            // for duration, high_resoluti...
 #include <cstdint>                           // for uint8_t
 #include <ctime>                             // for clock, clock_t, CLOCKS_...
@@ -35,6 +34,7 @@
 #include <type_traits>                       // for __type_identity_t
 #include <utility>                           // for move
 #include <vector>                            // for vector
+#include <benchmark/benchmark.h>             // for Counter, Counter::Flags
 
 #ifdef HAVE_OPENMP
 #include <omp.h> // for omp_get_max_threads
@@ -118,7 +118,7 @@ struct Entry {
 
 static int currThreadCount;
 
-extern "C" int __attribute__((pure)) rawspeed_get_number_of_processor_cores() {
+extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
   return currThreadCount;
 }
 

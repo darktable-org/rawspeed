@@ -27,6 +27,7 @@
  *   Software.
  */
 
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
 #include "md5.h"
 #include <cstdint> // for uint32_t, uint8_t
 #include <cstdio>  // for size_t, snprintf
@@ -50,9 +51,8 @@ static void md5_compress(md5_state* state, const uint8_t* block) {
     LOADSCHEDULE(i);
 
   // Assumes that x is uint32_t and 0 < n < 32
-  auto ROTL32 = [](uint32_t x, int n) __attribute__((pure)) {
-    return (x << n) | (x >> (32 - n));
-  };
+  auto ROTL32 = [](uint32_t x, int n)
+                    RAWSPEED_READONLY { return (x << n) | (x >> (32 - n)); };
 
   auto ROUND_TAIL = [ROTL32, &schedule](uint32_t& a, uint32_t b, uint32_t expr,
                                         uint32_t k, uint32_t s, uint32_t t) {

@@ -421,8 +421,7 @@ inline int fuji_compressed_block::fuji_zerobits(BitPumpMSB& pump) {
 // Given two non-negative numbers, how many times must the second number
 // be multiplied by 2, for it to become not smaller than the first number?
 // We are operating on arithmetical numbers here, without overflows.
-int __attribute__((const))
-fuji_compressed_block::bitDiff(int value1, int value2) {
+int RAWSPEED_READNONE fuji_compressed_block::bitDiff(int value1, int value2) {
   assert(value1 >= 0);
   assert(value2 > 0);
 

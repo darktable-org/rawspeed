@@ -67,10 +67,9 @@ public:
   [[nodiscard]] bool hasCamera(const std::string& make,
                                const std::string& model,
                                const std::string& mode) const;
-  [[nodiscard]] const Camera* __attribute__((pure))
+  [[nodiscard]] const Camera* RAWSPEED_READONLY
   getChdkCamera(uint32_t filesize) const;
-  [[nodiscard]] bool __attribute__((pure))
-  hasChdkCamera(uint32_t filesize) const;
+  [[nodiscard]] bool RAWSPEED_READONLY hasChdkCamera(uint32_t filesize) const;
   void disableMake(std::string_view make) const;
   void disableCamera(std::string_view make, std::string_view model) const;
 

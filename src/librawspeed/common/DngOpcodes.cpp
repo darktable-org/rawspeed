@@ -202,7 +202,7 @@ protected:
     assert(roi.isThisInside(subImage));
   }
 
-  [[nodiscard]] const iRectangle2D& __attribute__((pure)) getRoi() const {
+  [[nodiscard]] const iRectangle2D& RAWSPEED_READONLY getRoi() const {
     return roi;
   }
 };
@@ -331,7 +331,7 @@ protected:
       ThrowRDE("Invalid pitch");
   }
 
-  [[nodiscard]] iPoint2D __attribute__((pure)) getPitch() const {
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getPitch() const {
     return {static_cast<int>(colPitch), static_cast<int>(rowPitch)};
   }
 

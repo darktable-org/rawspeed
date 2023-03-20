@@ -22,10 +22,10 @@
 #include "io/Endianness.h" // for getHostEndianness, Endianness, getByteSwa...
 #include <algorithm>       // for copy
 #include <cstring>         // for memcpy, memcmp
-#include <gtest/gtest.h>   // for UnitTest, Test, TestInfo (ptr only), ASSE...
 #include <iomanip>         // for operator<<, setfill, setw, _Setw, _Setfill
 #include <iostream>        // for hex, endl, ostream
 #include <memory>          // for allocator
+#include <gtest/gtest.h>   // for UnitTest, Test, TestInfo (ptr only), ASSE...
 
 using rawspeed::Endianness;
 using rawspeed::getBE;

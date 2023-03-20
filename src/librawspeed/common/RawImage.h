@@ -132,8 +132,8 @@ public:
 
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area);
-  [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
-  [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getUncroppedDim() const;
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
   virtual void setWithLookUp(uint16_t value, uint8_t* dst,

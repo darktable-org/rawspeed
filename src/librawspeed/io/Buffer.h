@@ -22,10 +22,11 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan
+#include "adt/Invariant.h"    // for invariant
 #include "common/Common.h"    // for roundUp
 #include "io/Endianness.h"    // for Endianness, getHostEndianness, Endiannes...
 #include "io/IOException.h"   // for ThrowException, ThrowIOE
-#include <cassert>            // for assert
+#include <cassert>            // for invariant
 #include <cstdint>            // for uint8_t, uint64_t, uint32_t
 #include <memory>             // for unique_ptr
 #include <utility>            // for move, operator<, pair, swap
@@ -81,7 +82,7 @@ public:
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    assert(data);
+    invariant(data);
 
     return data + offset;
   }
@@ -91,11 +92,11 @@ public:
 
   // std begin/end iterators to allow for range loop
   [[nodiscard]] const uint8_t* begin() const {
-    assert(data);
+    invariant(data);
     return data;
   }
   [[nodiscard]] const uint8_t* end() const {
-    assert(data);
+    invariant(data);
     return data + size;
   }
 
@@ -110,7 +111,9 @@ public:
         !inNativeByteOrder);
   }
 
-  [[nodiscard]] inline size_type getSize() const { return size; }
+  [[nodiscard]] inline size_type RAWSPEED_READONLY getSize() const {
+    return size;
+  }
 
   [[nodiscard]] inline bool isValid(size_type offset,
                                     size_type count = 1) const {
