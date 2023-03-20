@@ -22,10 +22,11 @@
 #pragma once
 
 #include "AddressSanitizer.h" // for ASan
+#include "adt/Invariant.h"    // for invariant
 #include "common/Common.h"    // for roundUp
 #include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
 #include "io/IOException.h"   // for ThrowException, ThrowIOE
-#include <cassert>            // for assert
+#include <cassert>            // for invariant
 #include <cstdint>            // for uint8_t, uint16_t, int32_t, uint32_t
 #include <cstring>            // for memchr, memcmp, memcpy
 #include <limits>             // for numeric_limits
@@ -66,7 +67,7 @@ public:
   }
 
   [[nodiscard]] inline size_type getPosition() const {
-    assert(getSize() >= pos);
+    invariant(getSize() >= pos);
     (void)check(0);
     return pos;
   }
@@ -75,7 +76,7 @@ public:
     (void)check(0);
   }
   [[nodiscard]] inline size_type getRemainSize() const {
-    assert(getSize() >= pos);
+    invariant(getSize() >= pos);
     (void)check(0);
     return getSize() - pos;
   }
@@ -116,7 +117,7 @@ public:
   }
 
   [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
-    assert(data);
+    invariant(data);
     (void)check(i + 1);
     return data[pos + i];
   }
@@ -128,7 +129,7 @@ public:
 
   inline bool hasPatternAt(const char* pattern, size_type size_,
                            size_type relPos) const {
-    assert(data);
+    invariant(data);
     if (!isValid(pos + relPos, size_))
       return false;
     return memcmp(&data[pos + relPos], pattern, size_) == 0;
@@ -146,7 +147,7 @@ public:
   }
 
   inline uint8_t getByte() {
-    assert(data);
+    invariant(data);
     (void)check(1);
     return data[pos++];
   }

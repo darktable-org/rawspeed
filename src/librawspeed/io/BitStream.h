@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "adt/Invariant.h" // for invariant
 #include "common/Common.h"  // for bitwidth, extractHighBits
 #include "io/Buffer.h"      // for Buffer
 #include "io/ByteStream.h"  // for ByteStream
@@ -29,7 +30,6 @@
 #include "io/IOException.h" // for ThrowIOE
 #include <algorithm>        // for fill_n, min
 #include <array>            // for array
-#include <cassert>          // for assert
 #include <cstdint>          // for uint32_t, uint8_t, uint64_t
 #include <cstring>          // for memcpy
 
@@ -57,7 +57,7 @@ struct BitStreamCacheBase {
 
 struct BitStreamCacheLeftInRightOut : BitStreamCacheBase {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= bitwidth(cache));
+    invariant(count + fillLevel <= bitwidth(cache));
     cache |= bits << fillLevel;
     fillLevel += count;
   }
@@ -74,8 +74,8 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase {
 
 struct BitStreamCacheRightInLeftOut : BitStreamCacheBase {
   inline void push(uint64_t bits, uint32_t count) noexcept {
-    assert(count + fillLevel <= Size);
-    assert(count != 0);
+    invariant(count + fillLevel <= Size);
+    invariant(count != 0);
     // If the maximal size of the cache is BitStreamCacheBase::Size, and we
     // have fillLevel [high] bits set, how many empty [low] bits do we have?
     const uint32_t vacantBits = BitStreamCacheBase::Size - fillLevel;
@@ -196,7 +196,7 @@ public:
       : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
 
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
-    assert(nbits <= Cache::MaxGetBits);
+    invariant(nbits <= Cache::MaxGetBits);
 
     if (cache.fillLevel >= nbits)
       return;
@@ -223,15 +223,15 @@ public:
   }
 
   inline uint32_t RAWSPEED_READONLY peekBitsNoFill(uint32_t nbits) {
-    assert(nbits != 0);
-    assert(nbits <= Cache::MaxGetBits);
-    assert(nbits <= cache.fillLevel);
+    invariant(nbits != 0);
+    invariant(nbits <= Cache::MaxGetBits);
+    invariant(nbits <= cache.fillLevel);
     return cache.peek(nbits);
   }
 
   inline void skipBitsNoFill(uint32_t nbits) {
-    assert(nbits <= Cache::MaxGetBits);
-    assert(nbits <= cache.fillLevel);
+    invariant(nbits <= Cache::MaxGetBits);
+    invariant(nbits <= cache.fillLevel);
     cache.skip(nbits);
   }
 
