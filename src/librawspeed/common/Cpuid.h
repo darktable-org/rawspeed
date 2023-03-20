@@ -20,11 +20,13 @@
 
 #pragma once
 
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+
 namespace rawspeed {
 
 class Cpuid final {
 public:
-  static bool __attribute__((const)) SSE2();
+  static bool RAWSPEED_READNONE SSE2();
 };
 
 } // namespace rawspeed

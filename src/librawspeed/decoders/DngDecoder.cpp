@@ -53,9 +53,8 @@ using std::vector;
 
 namespace rawspeed {
 
-bool __attribute__((pure))
-DngDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                 [[maybe_unused]] Buffer file) {
+bool RAWSPEED_READONLY DngDecoder::isAppropriateDecoder(
+    const TiffRootIFD* rootIFD, [[maybe_unused]] Buffer file) {
   return rootIFD->hasEntryRecursive(TiffTag::DNGVERSION);
 }
 

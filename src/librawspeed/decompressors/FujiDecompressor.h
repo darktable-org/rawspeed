@@ -48,7 +48,7 @@ public:
     FujiHeader() = default;
 
     explicit FujiHeader(ByteStream& input_);
-    explicit __attribute__((pure)) operator bool() const; // validity check
+    explicit RAWSPEED_READONLY operator bool() const; // validity check
 
     uint16_t signature;
     uint8_t version;

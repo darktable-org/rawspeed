@@ -109,14 +109,13 @@ bool CameraMetaData::hasCamera(const std::string& make,
   return getCamera(make, model, mode);
 }
 
-const Camera* __attribute__((pure))
+const Camera* RAWSPEED_READONLY
 CameraMetaData::getChdkCamera(uint32_t filesize) const {
   auto camera = chdkCameras.find(filesize);
   return camera == chdkCameras.end() ? nullptr : camera->second;
 }
 
-bool __attribute__((pure))
-CameraMetaData::hasChdkCamera(uint32_t filesize) const {
+bool RAWSPEED_READONLY CameraMetaData::hasChdkCamera(uint32_t filesize) const {
   return chdkCameras.end() != chdkCameras.find(filesize);
 }
 

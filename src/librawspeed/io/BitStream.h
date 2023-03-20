@@ -222,7 +222,7 @@ public:
     return cache.fillLevel;
   }
 
-  inline uint32_t __attribute__((pure)) peekBitsNoFill(uint32_t nbits) {
+  inline uint32_t RAWSPEED_READONLY peekBitsNoFill(uint32_t nbits) {
     assert(nbits != 0);
     assert(nbits <= Cache::MaxGetBits);
     assert(nbits <= cache.fillLevel);

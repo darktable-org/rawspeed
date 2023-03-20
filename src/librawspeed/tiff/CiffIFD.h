@@ -80,34 +80,33 @@ class CiffIFD final {
                      ByteStream& dirEntries);
 
   template <typename Lambda>
-  std::vector<const CiffIFD*> __attribute__((pure))
-  getIFDsWithTagIf(CiffTag tag, const Lambda& f) const;
+  std::vector<const CiffIFD*>
+      RAWSPEED_READONLY getIFDsWithTagIf(CiffTag tag, const Lambda& f) const;
 
   template <typename Lambda>
-  const CiffEntry* __attribute__((pure))
-  getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
+  const CiffEntry* RAWSPEED_READONLY getEntryRecursiveIf(CiffTag tag,
+                                                         const Lambda& f) const;
 
 public:
   explicit CiffIFD(CiffIFD* parent);
   CiffIFD(CiffIFD* parent, ByteStream directory);
 
-  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
-  getIFDsWithTag(CiffTag tag) const;
-  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*>
+      RAWSPEED_READONLY getIFDsWithTag(CiffTag tag) const;
+  [[nodiscard]] std::vector<const CiffIFD*> RAWSPEED_READONLY
   getIFDsWithTagWhere(CiffTag tag, uint32_t isValue) const;
-  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*> RAWSPEED_READONLY
   getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const;
 
-  [[nodiscard]] bool __attribute__((pure)) hasEntry(CiffTag tag) const;
-  [[nodiscard]] bool __attribute__((pure)) hasEntryRecursive(CiffTag tag) const;
+  [[nodiscard]] bool RAWSPEED_READONLY hasEntry(CiffTag tag) const;
+  [[nodiscard]] bool RAWSPEED_READONLY hasEntryRecursive(CiffTag tag) const;
 
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
-  getEntry(CiffTag tag) const;
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY getEntry(CiffTag tag) const;
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY
   getEntryRecursive(CiffTag tag) const;
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY
   getEntryRecursiveWhere(CiffTag tag, uint32_t isValue) const;
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY
   getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const;
 };
 

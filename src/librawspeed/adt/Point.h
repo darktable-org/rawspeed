@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include <algorithm>   // for max, min
-#include <cmath>       // for abs
-#include <cstdint>     // for int32_t, uint64_t
-#include <cstdlib>     // for abs
-#include <tuple>       // for tie, operator==, tuple
-#include <type_traits> // for make_signed_t
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include <algorithm>        // for max, min
+#include <cmath>            // for abs
+#include <cstdint>          // for int32_t, uint64_t
+#include <cstdlib>          // for abs
+#include <tuple>            // for tie, operator==, tuple
+#include <type_traits>      // for make_signed_t
 
 namespace rawspeed {
 
@@ -77,7 +78,7 @@ public:
 
   [[nodiscard]] bool hasPositiveArea() const { return operator>({0, 0}); }
 
-  [[nodiscard]] area_type __attribute__((pure)) area() const {
+  [[nodiscard]] area_type RAWSPEED_READONLY area() const {
     using signed_area = std::make_signed_t<area_type>;
 
     area_type x_abs = std::abs(static_cast<signed_area>(x));

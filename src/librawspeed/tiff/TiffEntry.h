@@ -87,11 +87,11 @@ public:
 
   virtual ~TiffEntry() = default;
 
-  [[nodiscard]] bool __attribute__((pure)) isFloat() const;
-  [[nodiscard]] bool __attribute__((pure)) isRational() const;
-  [[nodiscard]] bool __attribute__((pure)) isSRational() const;
-  [[nodiscard]] bool __attribute__((pure)) isInt() const;
-  [[nodiscard]] bool __attribute__((pure)) isString() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isFloat() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isRational() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isSRational() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isInt() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isString() const;
   [[nodiscard]] uint8_t getByte(uint32_t index = 0) const;
   [[nodiscard]] uint32_t getU32(uint32_t index = 0) const;
   [[nodiscard]] int32_t getI32(uint32_t index = 0) const;

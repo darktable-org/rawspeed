@@ -29,12 +29,13 @@ using rawspeed::iPoint2D;
 using rawspeed::roundUp;
 using std::sqrt;
 
-bool __attribute__((const, visibility("default"))) benchmarkDryRun() {
+bool RAWSPEED_READNONE __attribute__((visibility("default")))
+benchmarkDryRun() {
   // NOLINTNEXTLINE(concurrency-mt-unsafe)
   return std::getenv("RAWSPEED_BENCHMARK_DRYRUN") != nullptr;
 }
 
-iPoint2D __attribute__((const, visibility("default")))
+iPoint2D RAWSPEED_READNONE __attribute__((visibility("default")))
 areaToRectangle(size_t area, iPoint2D aspect) {
   double sqSide = sqrt(area);
   double sqARatio =

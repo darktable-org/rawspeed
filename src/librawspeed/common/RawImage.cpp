@@ -159,11 +159,11 @@ void RawImageData::setCpp(uint32_t val) {
   bpp *= val;
 }
 
-iPoint2D __attribute__((pure)) rawspeed::RawImageData::getUncroppedDim() const {
+iPoint2D RAWSPEED_READONLY rawspeed::RawImageData::getUncroppedDim() const {
   return uncropped_dim;
 }
 
-iPoint2D __attribute__((pure)) RawImageData::getCropOffset() const {
+iPoint2D RAWSPEED_READONLY RawImageData::getCropOffset() const {
   return mOffset;
 }
 

@@ -118,7 +118,7 @@ struct Entry {
 
 static int currThreadCount;
 
-extern "C" int __attribute__((pure)) rawspeed_get_number_of_processor_cores() {
+extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
   return currThreadCount;
 }
 

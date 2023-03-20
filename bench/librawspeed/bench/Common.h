@@ -23,7 +23,7 @@
 #include "adt/Point.h" // for iPoint2D
 #include <cstddef>     // for size_t
 
-bool __attribute__((const)) benchmarkDryRun();
+bool RAWSPEED_READNONE benchmarkDryRun();
 
-rawspeed::iPoint2D __attribute__((const))
+rawspeed::iPoint2D RAWSPEED_READNONE
 areaToRectangle(size_t area, rawspeed::iPoint2D aspect = {2, 2});
