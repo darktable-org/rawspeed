@@ -36,7 +36,7 @@ namespace impl {
 [[nodiscard]] inline void* __attribute__((malloc, warn_unused_result,
                                           alloc_size(1), alloc_align(2)))
 alignedMalloc(size_t size, size_t alignment) {
-  assert(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
+  invariant(isPowerOfTwo(alignment)); // for posix_memalign, _aligned_malloc
   invariant(isAligned(alignment, sizeof(void*))); // for posix_memalign
   invariant(isAligned(size, alignment));          // for aligned_alloc
 

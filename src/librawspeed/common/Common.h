@@ -72,7 +72,7 @@ inline T_TO bit_cast(const T_FROM& from) noexcept {
 }
 
 // only works for positive values and zero
-template <typename T> constexpr bool isPowerOfTwo(T val) {
+template <typename T> constexpr bool RAWSPEED_READNONE isPowerOfTwo(T val) {
   return (val & (~val + 1)) == val;
 }
 
