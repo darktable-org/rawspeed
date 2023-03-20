@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "adt/Invariant.h" // for invariant
-#include <type_traits> // for negation, is_const, remove_const_t, is_same
-#include <vector>      // for vector
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
+#include "adt/Invariant.h"  // for invariant
+#include <type_traits>      // for negation, is_const, remove_const_t, is_same
+#include <vector>           // for vector
 
 namespace rawspeed {
 
@@ -75,7 +76,7 @@ public:
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
 
-  [[nodiscard]] int size() const;
+  [[nodiscard]] int RAWSPEED_READONLY size() const;
 
   [[nodiscard]] T& operator()(int eltIdx) const;
 

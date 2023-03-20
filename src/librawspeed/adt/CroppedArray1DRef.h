@@ -20,9 +20,9 @@
 
 #pragma once
 
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
 #include "adt/Array1DRef.h" // for Array1DRef
 #include "adt/Invariant.h"  // for invariant
-#include <cassert>          // for assert
 #include <type_traits>      // for negation, is_const, remove_const_t, is_same
 #include <vector>           // for vector
 
@@ -81,7 +81,7 @@ public:
 
   [[nodiscard]] const T* begin() const;
 
-  [[nodiscard]] int size() const;
+  [[nodiscard]] int RAWSPEED_READONLY size() const;
 
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
@@ -97,7 +97,7 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
     : base(base_), offset(offset_), numElts(numElts_) {
   invariant(offset >= 0);
   invariant(numElts >= 0);
-  assert(offset + numElts <= std::size(base));
+  invariant(offset + numElts <= base.size());
 }
 
 template <class T> inline const T* CroppedArray1DRef<T>::begin() const {
