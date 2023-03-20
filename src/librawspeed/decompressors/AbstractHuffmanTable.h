@@ -22,11 +22,12 @@
 #pragma once
 
 #include "adt/Array1DRef.h"               // for Array1DRef
+#include "adt/Invariant.h"                // for invariant
 #include "common/Common.h"                // for extractHighBits
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer
 #include <algorithm>                      // for copy, equal, fill, max
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstddef>                        // for size_t
 #include <cstdint>                        // for uint8_t, uint32_t, uint16_t
 #include <functional>                     // for less, less_equal
@@ -151,14 +152,14 @@ public:
 
     CodeSymbol(typename Traits::CodeTy code_, uint8_t code_len_)
         : code(code_), code_len(code_len_) {
-      assert(code_len > 0);
-      assert(code_len <= Traits::MaxCodeLenghtBits);
-      assert(code <= ((1U << code_len) - 1U));
+      invariant(code_len > 0);
+      invariant(code_len <= Traits::MaxCodeLenghtBits);
+      invariant(code <= ((1U << code_len) - 1U));
     }
 
     static bool HaveCommonPrefix(const CodeSymbol& symbol,
                                  const CodeSymbol& partial) {
-      assert(partial.code_len <= symbol.code_len);
+      invariant(partial.code_len <= symbol.code_len);
 
       const auto s0 = extractHighBits(symbol.code, partial.code_len,
                                       /*effectiveBitwidth=*/symbol.code_len);
@@ -213,7 +214,7 @@ protected:
       codeValues; // index is just sequential number
 
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    assert(!fullDecode_ || Traits::SupportsFullDecode);
+    invariant(!fullDecode_ || Traits::SupportsFullDecode);
 
     this->fullDecode = fullDecode_;
     this->fixDNGBug16 = fixDNGBug16_;
@@ -289,7 +290,7 @@ public:
   }
 
   uint32_t setNCodesPerLength(Buffer data) {
-    assert(data.getSize() == Traits::MaxCodeLenghtBits);
+    invariant(data.getSize() == Traits::MaxCodeLenghtBits);
 
     nCodesPerLength.resize((1 + Traits::MaxCodeLenghtBits), 0);
     std::copy(data.begin(), data.end(), &nCodesPerLength[1]);
@@ -305,7 +306,7 @@ public:
     assert(nCodesPerLength.back() > 0);
 
     const auto count = maxCodesCount();
-    assert(count > 0);
+    invariant(count > 0);
 
     if (count > Traits::MaxNumCodeValues)
       ThrowRDE("Too big code-values table");
@@ -341,8 +342,8 @@ public:
   }
 
   void setCodeValues(Array1DRef<const typename Traits::CodeValueTy> data) {
-    assert(data.size() <= Traits::MaxNumCodeValues);
-    assert((unsigned)data.size() == maxCodesCount());
+    invariant(data.size() <= Traits::MaxNumCodeValues);
+    invariant((unsigned)data.size() == maxCodesCount());
 
     codeValues.clear();
     codeValues.reserve(maxCodesCount());
@@ -360,8 +361,8 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int processSymbol(BIT_STREAM& bs, CodeSymbol symbol,
                            typename Traits::CodeValueTy codeValue) const {
-    assert(symbol.code_len >= 0 &&
-           symbol.code_len <= Traits::MaxCodeLenghtBits);
+    invariant(symbol.code_len >= 0 &&
+              symbol.code_len <= Traits::MaxCodeLenghtBits);
 
     // If we were only looking for symbol's code value, then just return it.
     if (!FULL_DECODE)
@@ -370,7 +371,7 @@ public:
     // Else, treat it as the length of following difference
     // that we need to read and extend.
     int diff_l = codeValue;
-    assert(diff_l >= 0 && diff_l <= 16);
+    invariant(diff_l >= 0 && diff_l <= 16);
 
     if (diff_l == 16) {
       if (fixDNGBug16)
@@ -378,14 +379,14 @@ public:
       return -32768;
     }
 
-    assert(symbol.code_len + diff_l <= 32);
+    invariant(symbol.code_len + diff_l <= 32);
     return diff_l ? extend(bs.getBitsNoFill(diff_l), diff_l) : 0;
   }
 
   // Figure F.12 – Extending the sign bit of a decoded value in V
   // WARNING: this is *not* your normal 2's complement sign extension!
   inline static int RAWSPEED_READNONE extend(uint32_t diff, uint32_t len) {
-    assert(len > 0);
+    invariant(len > 0);
     auto ret = static_cast<int32_t>(diff);
     if ((diff & (1 << (len - 1))) == 0)
       ret -= (1 << len) - 1;

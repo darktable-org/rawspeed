@@ -26,7 +26,7 @@
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "decompressors/HuffmanTableLookup.h"   // for HuffmanTableLookup
 #include "io/BitStream.h"                       // for BitStreamTraits
-#include <cassert>                              // for assert
+#include <cassert>                              // for invariant
 #include <cstddef>                              // for size_t
 #include <cstdint>                              // for int32_t, uint16_t
 #include <memory>                               // for allocator_traits<>::...
@@ -126,7 +126,7 @@ public:
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
           // -> store only the length and do a normal sign extension later
-          assert(!Base::fullDecode || diff_l > 0);
+          invariant(!Base::fullDecode || diff_l > 0);
           decodeLookup[c] = diff_l << PayloadShift | code_l;
 
           if (!Base::fullDecode)
@@ -160,7 +160,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!Base::fullDecode);
+    invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -170,7 +170,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(Base::fullDecode);
+    invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -183,7 +183,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
 
     typename Base::CodeSymbol partial;
@@ -209,11 +209,11 @@ public:
       // the payload is the code value for this symbol.
       partial.code_len = len;
       codeValue = payload;
-      assert(!FULL_DECODE || codeValue /*aka diff_l*/ > 0);
+      invariant(!FULL_DECODE || codeValue /*aka diff_l*/ > 0);
     } else {
       // No match in the lookup table, because either the code is longer
       // than LookupDepth or the input is corrupt. Need to read more bits...
-      assert(len == 0);
+      invariant(len == 0);
       bs.skipBitsNoFill(partial.code_len);
       std::tie(partial, codeValue) =
           Base::finishReadingPartialSymbol(bs, partial);

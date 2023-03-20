@@ -30,7 +30,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min, fill_n
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 
 namespace rawspeed {
@@ -58,9 +58,9 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
 
 KodakDecompressor::segment
 KodakDecompressor::decodeSegment(const uint32_t bsize) {
-  assert(bsize > 0);
-  assert(bsize % 4 == 0);
-  assert(bsize <= segment_size);
+  invariant(bsize > 0);
+  invariant(bsize % 4 == 0);
+  invariant(bsize <= segment_size);
 
   segment out;
   static_assert(out.size() == segment_size, "Wrong segment size");
@@ -87,7 +87,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
   }
   for (uint32_t i = 0; i < bsize; i++) {
     uint32_t len = blen[i];
-    assert(len < 16);
+    invariant(len < 16);
 
     if (bits < len) {
       for (uint32_t j = 0; j < 32; j += 8) {

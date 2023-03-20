@@ -117,38 +117,38 @@ struct FujiStrip {
 
   FujiStrip(const FujiDecompressor::FujiHeader& h_, int block, ByteStream bs_)
       : h(h_), n(block), bs(bs_) {
-    assert(n >= 0 && n < h.blocks_in_row);
+    invariant(n >= 0 && n < h.blocks_in_row);
   }
 
   // each strip's line corresponds to 6 output lines.
-  static int lineHeight() { return 6; }
+  static int RAWSPEED_READONLY lineHeight() { return 6; }
 
   // how many vertical lines does this block encode?
-  [[nodiscard]] int height() const { return h.total_lines; }
+  [[nodiscard]] int RAWSPEED_READONLY height() const { return h.total_lines; }
 
   // how many horizontal pixels does this block encode?
-  [[nodiscard]] int width() const {
+  [[nodiscard]] int RAWSPEED_READONLY width() const {
     // if this is not the last block, we are good.
     if ((n + 1) != h.blocks_in_row)
       return h.block_size;
 
     // ok, this is the last block...
 
-    assert(h.block_size * h.blocks_in_row >= h.raw_width);
+    invariant(h.block_size * h.blocks_in_row >= h.raw_width);
     return h.raw_width - offsetX();
   }
 
   // how many horizontal pixels does this block encode?
   [[nodiscard]] iPoint2D numMCUs(iPoint2D MCU) const {
-    assert(width() % MCU.x == 0);
-    assert(lineHeight() % MCU.y == 0);
+    invariant(width() % MCU.x == 0);
+    invariant(lineHeight() % MCU.y == 0);
     return {width() / MCU.x, lineHeight() / MCU.y};
   }
 
   // where vertically does this block start?
   [[nodiscard]] int offsetY(int line = 0) const {
     (void)height(); // A note for NDEBUG builds that *this is used.
-    assert(line >= 0 && line < height());
+    invariant(line >= 0 && line < height());
     return lineHeight() * line;
   }
 
@@ -422,8 +422,8 @@ inline int fuji_compressed_block::fuji_zerobits(BitPumpMSB& pump) {
 // be multiplied by 2, for it to become not smaller than the first number?
 // We are operating on arithmetical numbers here, without overflows.
 int RAWSPEED_READNONE fuji_compressed_block::bitDiff(int value1, int value2) {
-  assert(value1 >= 0);
-  assert(value2 > 0);
+  invariant(value1 >= 0);
+  invariant(value2 > 0);
 
   int lz1 = countl_zero((unsigned)value1);
   int lz2 = countl_zero((unsigned)value2);
@@ -598,7 +598,7 @@ template <typename T>
 __attribute__((always_inline)) void
 fuji_compressed_block::fuji_decode_block(T&& func_even,
                                          [[maybe_unused]] int cur_line) {
-  assert(common_info.line_width % 2 == 0);
+  invariant(common_info.line_width % 2 == 0);
   const int line_width = common_info.line_width / 2;
 
   auto pass = [this, &line_width, func_even](std::array<xt_lines, 2> c,
@@ -702,10 +702,10 @@ void fuji_compressed_block::xtrans_decode_block(int cur_line) {
             (comp == 1 && (row == 1 || row == 2 || (row == 3 && i % 2 != 0) ||
                            (row == 5 && i % 2 == 0))))
           return fuji_decode_interpolation_even(c, col);
-        assert((comp == 0 && (row == 1 || (row == 2 && i % 2 != 0) ||
-                              row == 3 || (row == 4 && i % 2 == 0))) ||
-               (comp == 1 && (row == 0 || (row == 3 && i % 2 == 0) ||
-                              row == 4 || (row == 5 && i % 2 != 0))));
+        invariant((comp == 0 && (row == 1 || (row == 2 && i % 2 != 0) ||
+                                 row == 3 || (row == 4 && i % 2 == 0))) ||
+                  (comp == 1 && (row == 0 || (row == 3 && i % 2 == 0) ||
+                                 row == 4 || (row == 5 && i % 2 != 0))));
         return fuji_decode_sample_even(c, col, grads);
       },
       cur_line);

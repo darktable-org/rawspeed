@@ -30,7 +30,7 @@
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include <algorithm>                      // for sort, fill_n
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for int32_t, uint16_t
 #include <memory>                         // for allocator_traits<>::value_...
 #include <string>                         // for string
@@ -84,8 +84,8 @@ void PhaseOneDecompressor::prepareStrips() {
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(out.width > 0);
-  assert(out.width % 2 == 0);
+  invariant(out.width > 0);
+  invariant(out.width % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
@@ -115,7 +115,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
           }
         }
 
-        assert((col == 0 && j > 0) || col != 0);
+        invariant((col == 0 && j > 0) || col != 0);
         if (j > 0)
           i = length[2 * (j - 1) + pump.getBitsNoFill(1)];
       }

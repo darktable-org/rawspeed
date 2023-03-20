@@ -29,7 +29,7 @@
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 
 namespace rawspeed {
 
@@ -54,9 +54,9 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
 
 void SonyArw1Decompressor::decompress(ByteStream input) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.height > 0);
-  assert(out.height % 2 == 0);
+  invariant(out.width > 0);
+  invariant(out.height > 0);
+  invariant(out.height % 2 == 0);
 
   BitPumpMSB bits(input);
   int pred = 0;

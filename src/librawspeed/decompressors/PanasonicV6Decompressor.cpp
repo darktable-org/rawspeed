@@ -28,7 +28,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint16_t
 
 namespace rawspeed {
@@ -51,8 +51,8 @@ struct PanasonicV6Decompressor::BlockDsc {
         PixelbaseCompare(is14Bit ? 0x2000 : 0x800),
         SpixCompare(is14Bit ? 0xffff : 0x3fff),
         PixelMask(is14Bit ? 0x3fff : 0xfff) {
-    assert((BitsPerSample == 14 || BitsPerSample == 12) &&
-           "invalid bits per sample), only use 12/14 bits.");
+    invariant((BitsPerSample == 14 || BitsPerSample == 12) &&
+              "invalid bits per sample), only use 12/14 bits.");
   }
 };
 
@@ -218,7 +218,7 @@ PanasonicV6Decompressor::decompressBlock(ByteStream& rowInput, int row,
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 template <const PanasonicV6Decompressor::BlockDsc& dsc>
 void PanasonicV6Decompressor::decompressRow(int row) const noexcept {
-  assert(mRaw->dim.x % dsc.PixelsPerBlock == 0);
+  invariant(mRaw->dim.x % dsc.PixelsPerBlock == 0);
   const int blocksperrow = mRaw->dim.x / dsc.PixelsPerBlock;
   const int bytesPerRow = dsc.BytesPerBlock * blocksperrow;
 

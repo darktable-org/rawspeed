@@ -25,7 +25,7 @@
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <algorithm>                            // for max, fill_n
-#include <cassert>                              // for assert
+#include <cassert>                              // for invariant
 #include <cstdint>                              // for uint64_t
 #include <tuple>                                // for tie
 #include <utility>                              // for pair
@@ -57,7 +57,7 @@ private:
 
     // Read bits until either find the code or detect the incorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
-      assert(partial.code_len <= Traits::MaxCodeLenghtBits);
+      invariant(partial.code_len <= Traits::MaxCodeLenghtBits);
 
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
@@ -118,7 +118,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!Base::fullDecode);
+    invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -127,7 +127,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(Base::fullDecode);
+    invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -140,7 +140,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::fullDecode);
 
     bs.fill(32);
 

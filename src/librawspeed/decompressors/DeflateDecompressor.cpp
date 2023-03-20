@@ -32,7 +32,7 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/DeflateDecompressor.h"
 #include "io/Endianness.h" // for getBE
-#include <cassert>         // for assert
+#include <cassert>         // for invariant
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
 #include <zlib.h>          // for uncompress, zError, Z_OK
@@ -119,7 +119,7 @@ void DeflateDecompressor::decode(
     std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
     iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
   int bytesps = bps / 8;
-  assert(bytesps >= 2 && bytesps <= 4);
+  invariant(bytesps >= 2 && bytesps <= 4);
 
   uLongf dstLen = bytesps * maxDim.area();
 

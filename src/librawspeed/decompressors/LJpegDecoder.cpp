@@ -28,7 +28,7 @@
 #include "io/ByteStream.h"                   // for ByteStream
 #include <algorithm>                         // for copy_n
 #include <array>                             // for array
-#include <cassert>                           // for assert
+#include <cassert>                           // for invariant
 
 using std::copy_n;
 
@@ -88,7 +88,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 }
 
 void LJpegDecoder::decodeScan() {
-  assert(frame.cps > 0);
+  invariant(frame.cps > 0);
 
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
