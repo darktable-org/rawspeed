@@ -5,6 +5,7 @@ FILE(GLOB SOURCES
   "AbstractHuffmanTable.h"
   "AbstractLJpegDecoder.cpp"
   "AbstractLJpegDecoder.h"
+  "AbstractPrefixCode.h"
   "AbstractSamsungDecompressor.h"
   "BinaryHuffmanTree.h"
   "Cr2Decompressor.cpp"

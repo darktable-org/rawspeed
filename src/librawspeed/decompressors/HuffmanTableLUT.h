@@ -68,11 +68,11 @@
 
 namespace rawspeed {
 
-template <typename HuffmanTableTag>
-class HuffmanTableLUT final : public HuffmanTableLookup<HuffmanTableTag> {
+template <typename CodeTag>
+class HuffmanTableLUT final : public HuffmanTableLookup<CodeTag> {
 public:
-  using Base = HuffmanTableLookup<HuffmanTableTag>;
-  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  using Base = HuffmanTableLookup<CodeTag>;
+  using Traits = typename Base::Traits;
 
 private:
   // The code can be compiled with two different decode lookup table layouts.
@@ -103,7 +103,7 @@ private:
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
     const std::vector<typename Base::CodeSymbol> symbols =
-        HuffmanTableLookup<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
+        HuffmanTableLookup<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above
