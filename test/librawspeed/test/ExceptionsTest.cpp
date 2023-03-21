@@ -30,8 +30,6 @@
 #include <exception>                          // for exception
 #include <memory>                             // for unique_ptr
 #include <stdexcept>                          // for runtime_error
-#include <gmock/gmock.h>                      // for HasSubstr, ASSERT_THAT
-#include <gtest/gtest.h>                      // for Message, TestPartResult
 
 using rawspeed::CameraMetadataException;
 using rawspeed::CiffParserException;

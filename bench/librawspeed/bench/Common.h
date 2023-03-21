@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include "adt/Point.h" // for iPoint2D
-#include <cstddef>     // for size_t
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "adt/Point.h"      // for iPoint2D
+#include <cstddef>          // for size_t
 
 bool RAWSPEED_READNONE benchmarkDryRun();
 

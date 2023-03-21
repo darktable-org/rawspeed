@@ -31,7 +31,8 @@
 #include <cassert>                       // for assert
 #include <map>                           // for map, operator!=, _Rb_tree_c...
 #include <memory>                        // for unique_ptr, make_unique
-#include <string>                        // for operator==, string
+#include <string>                        // for string, basic_string<>::__s...
+#include <string_view>                   // for operator==
 #include <utility>                       // for move, pair
 #include <vector>                        // for vector, vector<>::const_ite...
 

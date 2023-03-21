@@ -22,14 +22,14 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicV6Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <array>                          // for array
-#include <cassert>                        // for invariant
-#include <cstdint>                        // for uint16_t
+#include <cstdint>                        // for uint16_t, uint32_t
 
 namespace rawspeed {
 

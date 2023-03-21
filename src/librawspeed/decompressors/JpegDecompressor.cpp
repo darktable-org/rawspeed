@@ -21,6 +21,7 @@
 
 #include "rawspeedconfig.h"       // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
 #include "adt/AlignedAllocator.h" // for AlignedAllocator
+#include <jmorecfg.h>             // for METHODDEF, boolean
 
 #ifdef HAVE_JPEG
 
@@ -28,12 +29,11 @@
 #include "adt/Point.h"                    // for iPoint2D
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/JpegDecompressor.h"
-#include "io/ByteStream.h" // for ByteStream
-#include <algorithm>       // for min, fill_n, max
-#include <array>           // for array
-#include <jpeglib.h>       // for jpeg_destroy_decompress
-#include <memory>          // for unique_ptr
-#include <vector>          // for vector
+#include <algorithm> // for min, fill_n, max
+#include <array>     // for array
+#include <jpeglib.h> // for jpeg_destroy_decompress
+#include <memory>    // for unique_ptr
+#include <vector>    // for vector
 
 #ifndef HAVE_JPEG_MEM_SRC
 #include "io/IOException.h" // for ThrowIOE

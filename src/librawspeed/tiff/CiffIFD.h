@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"  // for RAWSPEED_READONLY
 #include "adt/NORangesSet.h" // for set
 #include "tiff/CiffEntry.h"  // for CiffEntry (ptr only)
 #include "tiff/CiffTag.h"    // for CiffTag

@@ -28,7 +28,8 @@
 #include <type_traits>   // for __strip_reference_wrapper<>::__type
 #include <utility>       // for make_pair, pair, move
 #include <variant>       // for tuple
-#include <gtest/gtest.h> // for ASSERT_EQ, ASSERT_NO_THROW, Test, UnitTest
+#include <gtest/gtest.h> // for Message, TestPartResult, ParamIteratorInter...
+
 // IWYU pragma: no_include <pstl/glue_algorithm_defs.h>
 
 using rawspeed::iPoint2D;

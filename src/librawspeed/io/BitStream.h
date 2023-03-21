@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
 #include "adt/Invariant.h"  // for invariant
 #include "common/Common.h"  // for bitwidth, extractHighBits
 #include "io/Buffer.h"      // for Buffer

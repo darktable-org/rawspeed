@@ -23,7 +23,7 @@
 #include <memory>                            // for unique_ptr, allocator
 #include <string>                            // for string
 #include <vector>                            // for vector
-#include <gtest/gtest.h>                     // for Test, ASSERT_EQ, ASSERT...
+#include <gtest/gtest.h>                     // for AssertionResult, Message
 
 using rawspeed::BinaryHuffmanTree;
 

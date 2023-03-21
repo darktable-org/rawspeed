@@ -21,7 +21,6 @@
 #include "adt/Range.h"     // for Range
 #include "adt/RangeTest.h" // for RangeDoesntContain, RangeContains
 #include <set>             // for allocator, operator!=, set, set<>::const_i...
-#include <gtest/gtest.h>   // for Message, TestPartResult, ASSERT_PRED_FORMAT2
 
 using rawspeed::Range;
 

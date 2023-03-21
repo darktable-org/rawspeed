@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Invariant.h"                   // for invariant
 #include "adt/Point.h"                       // for iPoint2D
 #include "adt/iterator_range.h"              // for iterator_range
 #include "common/RawImage.h"                 // for RawImage

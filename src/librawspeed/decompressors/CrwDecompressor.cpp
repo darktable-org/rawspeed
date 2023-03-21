@@ -21,7 +21,9 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
+#include "adt/Array1DRef.h"               // for Array1DRef
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -30,9 +32,9 @@
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for fill, copy, fill_n, max
 #include <array>                          // for array
-#include <cassert>                        // for invariant
-#include <cstdint>                        // for uint16_t, uint8_t, int16_t
+#include <cstdint>                        // for uint8_t, uint16_t, int16_t
 #include <tuple>                          // for array
 #include <vector>                         // for vector
 

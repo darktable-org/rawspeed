@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV0Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for signExtend
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -30,7 +31,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for max
 #include <array>                          // for array
-#include <cassert>                        // for invariant
+#include <cassert>                        // for assert
 #include <cstdint>                        // for uint32_t, uint16_t, int32_t
 #include <iterator>                       // for advance, begin, end, next
 #include <utility>                        // for swap

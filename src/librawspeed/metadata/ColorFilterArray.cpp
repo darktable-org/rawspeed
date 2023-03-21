@@ -25,7 +25,6 @@
 #include <algorithm>                      // for copy, fill_n, fill, max
 #include <cassert>                        // for assert
 #include <cinttypes>                      // for PRId64
-#include <cmath>                          // for abs
 #include <cstdarg>                        // for va_arg, va_end, va_list
 #include <cstdlib>                        // for size_t, abs
 #include <map>                            // for map

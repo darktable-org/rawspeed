@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PhaseOneDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImageData, RawImage
@@ -30,7 +31,6 @@
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
 #include <algorithm>                      // for sort, fill_n
 #include <array>                          // for array
-#include <cassert>                        // for invariant
 #include <cstdint>                        // for int32_t, uint16_t
 #include <memory>                         // for allocator_traits<>::value_...
 #include <string>                         // for string

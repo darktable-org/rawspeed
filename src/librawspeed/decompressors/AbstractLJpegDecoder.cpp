@@ -21,15 +21,17 @@
 */
 
 #include "decompressors/AbstractLJpegDecoder.h"
+#include "adt/Array1DRef.h"                     // for Array1DRef
+#include "adt/Invariant.h"                      // for invariant
 #include "adt/Point.h"                          // for iPoint2D
 #include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable, Huffma...
+#include "io/Buffer.h"                          // for Buffer
 #include "io/ByteStream.h"                      // for ByteStream
 #include "io/Endianness.h"                      // for Endianness, Endianne...
 #include <array>                                // for array
-#include <cassert>                              // for assert
 #include <memory>                               // for unique_ptr, make_unique
 #include <optional>                             // for optional
 #include <utility>                              // for move

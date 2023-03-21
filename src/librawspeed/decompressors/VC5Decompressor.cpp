@@ -30,6 +30,7 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP, RAWSPEED_CACH...
 #include "decompressors/VC5Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for roundUpDivision, rawspeed_...
 #include "common/ErrorLog.h"              // for ErrorLog

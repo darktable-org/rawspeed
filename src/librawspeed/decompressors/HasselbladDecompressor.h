@@ -27,8 +27,9 @@
 #include "common/RawImage.h"              // for RawImage
 #include "common/RawspeedException.h"     // for ThrowException
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable, HuffmanTa...
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB32.h"              // for BitPumpMSB32
+#include "io/Buffer.h"                    // for Buffer::size_type
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
 #include <cassert>                        // for assert

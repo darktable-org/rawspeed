@@ -23,7 +23,7 @@
 #include <set>           // for allocator, set
 #include <tuple>         // for make_tuple, tuple, get
 #include <utility>       // for __tuple_element_t
-#include <gtest/gtest.h> // for TestWithParam, UnitTest
+#include <gtest/gtest.h> // for ParamIteratorInterface, AssertionFailure
 
 using rawspeed::Range;
 

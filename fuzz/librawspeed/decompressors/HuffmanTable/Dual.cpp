@@ -30,16 +30,15 @@
 #include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
 #include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableTree.h"    // for HuffmanTableTree
-#include "decompressors/HuffmanTableVector.h"  // for HuffmanTableVector
+#include "decompressors/HuffmanTableVector.h"  //  IWYU pragma: keep
 #include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
-#include "io/BitPumpMSB.h"                     // IWYU pragma: keep
-#include "io/BitPumpMSB32.h"                   // IWYU pragma: keep
-#include "io/BitStream.h"                      // for BitStream
+#include "io/BitPumpMSB.h"                     // for BitStream<>::fillCache
+#include "io/BitPumpMSB32.h"                   // for BitStream<>::fillCache
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
 #include "io/Endianness.h"                     // for Endianness, Endiannes...
 #include "io/IOException.h"                    // for RawspeedException
+#include <algorithm>                           // for generate_n, max
 #include <cassert>                             // for assert
 #include <cstdint>                             // for uint8_t
 #include <cstdio>                              // for size_t
@@ -48,6 +47,8 @@
 
 namespace rawspeed {
 struct BaselineHuffmanTableTag;
+struct VC5HuffmanTableTag;
+template <typename HuffmanTableTag> class HuffmanTableTree;
 } // namespace rawspeed
 
 template <typename Pump, bool IsFullDecode, typename HT0, typename HT1>

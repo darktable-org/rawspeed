@@ -29,7 +29,7 @@
 #include <tuple>           // for make_tuple, get, tuple
 #include <type_traits>     // for __strip_reference_wrapper<>::__type
 #include <vector>          // for vector, vector<>::iterator, vector<>::val...
-#include <gtest/gtest.h>   // for Test, UnitTest, ASSERT_EQ, TestWithParam
+#include <gtest/gtest.h>   // for ParamIteratorInterface, ParamGeneratorInt...
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;

@@ -21,10 +21,11 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D
+#include "adt/Point.h"                              // for iPoint2D, iRecta...
+#include "common/Common.h"                          // for BitOrder, BitOrd...
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for DataBuffer, Buffer
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "metadata/Camera.h"                        // for Hints

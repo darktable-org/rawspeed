@@ -21,15 +21,18 @@
 
 #include "decompressors/LJpegDecompressor.h"
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for to_array, roundUpDivision
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D, iRectangle2D
+#include "common/Common.h"                // for roundUpDivision
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for copy_n
+#include <algorithm>                      // for transform
 #include <array>                          // for array
-#include <cassert>                        // for invariant
+#include <memory>                         // for allocator_traits<>::value_...
+#include <pstl/glue_algorithm_defs.h>     // for copy_n
+#include <utility>                        // for move
 
 using std::copy_n;
 

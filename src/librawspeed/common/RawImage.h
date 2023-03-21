@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"                  // for WITH_SSE2
+#include "rawspeedconfig.h"                  // for RAWSPEED_READONLY, WITH...
 #include "ThreadSafetyAnalysis.h"            // for GUARDED_BY, REQUIRES
 #include "adt/AlignedAllocator.h"            // for AlignedAllocator
 #include "adt/Array2DRef.h"                  // for Array2DRef

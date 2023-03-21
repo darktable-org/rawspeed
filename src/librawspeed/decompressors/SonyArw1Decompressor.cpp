@@ -22,6 +22,7 @@
 
 #include "decompressors/SonyArw1Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -29,7 +30,6 @@
 #include "decompressors/HuffmanTable.h"   // for HuffmanTable
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
-#include <cassert>                        // for invariant
 
 namespace rawspeed {
 

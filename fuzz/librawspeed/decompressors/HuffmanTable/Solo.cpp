@@ -22,21 +22,20 @@
 #error IMPL must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "common/RawspeedException.h"          // for RawspeedException
+#include "common/RawspeedException.h"          // for ThrowException, ThrowRSE
 #include "decompressors/BinaryHuffmanTree.h"   // for BinaryHuffmanTree<>::...
 #include "decompressors/HuffmanTable.h"        // IWYU pragma: keep
 #include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
 #include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableTree.h"    // for HuffmanTableTree
-#include "decompressors/HuffmanTableVector.h"  // for HuffmanTableVector
+#include "decompressors/HuffmanTableVector.h"  //  IWYU pragma: keep
 #include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
-#include "io/BitPumpMSB.h"                     // IWYU pragma: keep
-#include "io/BitPumpMSB32.h"                   // IWYU pragma: keep
-#include "io/BitStream.h"                      // for BitStream
+#include "io/BitPumpMSB.h"                     // for BitStream<>::fillCache
+#include "io/BitPumpMSB32.h"                   // for BitStream<>::fillCache
 #include "io/Buffer.h"                         // for Buffer, DataBuffer
 #include "io/ByteStream.h"                     // for ByteStream
 #include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include <algorithm>                           // for generate_n
 #include <cassert>                             // for assert
 #include <cstdint>                             // for uint8_t
 #include <cstdio>                              // for size_t

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"             // for RAWSPEED_READONLY
 #include "common/RawImage.h"            // for RawImage
 #include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
 #include "io/Buffer.h"                  // for Buffer

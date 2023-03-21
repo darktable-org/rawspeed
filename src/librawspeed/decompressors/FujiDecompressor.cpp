@@ -21,28 +21,33 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
 #include "decompressors/FujiDecompressor.h"
 #include "MemorySanitizer.h"              // for MSan
+#include "adt/Array1DRef.h"               // for Array1DRef
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/BayerPhase.h"            // for getAsCFAColors, BayerPhase
-#include "common/Common.h"                // for rawspeed_get_number_of_pro...
+#include "common/Common.h"                // for countl_zero, rawspeed_get_...
 #include "common/RawImage.h"              // for RawImageData, RawImage
 #include "common/XTransPhase.h"           // for XTransPhase, getAsCFAColors
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/Endianness.h"                // for Endianness, Endianness::big
 #include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
-#include <algorithm>                      // for max, fill, min, minmax
-#include <cmath>                          // for abs
-#include <cstdint>                        // for uint16_t, uint32_t, int8_t
+#include <algorithm>                      // for max, min, fill, minmax
+#include <array>                          // for array, array<>::value_type
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t, int8_t, uint32_t
 #include <cstdlib>                        // for abs
 #include <cstring>                        // for memcpy, memset
 #include <initializer_list>               // for initializer_list
 #include <optional>                       // for optional, operator!=
 #include <string>                         // for string
+#include <utility>                        // for pair
 
 namespace rawspeed {
 

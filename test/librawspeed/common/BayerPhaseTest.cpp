@@ -27,7 +27,7 @@
 #include <ostream>                     // for operator<<, ostream
 #include <tuple>                       // for get, tuple, apply
 #include <utility>                     // for forward, pair
-#include <gtest/gtest.h>               // for UnitTest, EXPECT_EQ, TestWith...
+#include <gtest/gtest.h>               // for ParamIteratorInterface, Param...
 
 using rawspeed::BayerPhase;
 using rawspeed::CFAColor;

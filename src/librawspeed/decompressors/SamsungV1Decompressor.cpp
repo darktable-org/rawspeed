@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV1Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -30,7 +31,6 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include <algorithm>                      // for fill_n
 #include <array>                          // for array
-#include <cassert>                        // for invariant
 #include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 

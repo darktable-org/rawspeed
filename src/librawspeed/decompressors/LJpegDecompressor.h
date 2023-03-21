@@ -21,10 +21,16 @@
 
 #pragma once
 
-#include "common/RawImage.h"
-#include "decompressors/HuffmanTable.h"
-#include "io/ByteStream.h"
-#include <cstdint> // for int
+#include "adt/Point.h"                  // for iPoint2D, iRectangle2D
+#include "common/RawImage.h"            // for RawImage
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "io/ByteStream.h"              // for ByteStream
+#include <array>                        // for array
+#include <cstdint>                      // for uint16_t
+#include <functional>                   // for reference_wrapper
+#include <stddef.h>                     // for size_t
+#include <tuple>                        // for array
+#include <vector>                       // for vector
 
 namespace rawspeed {
 

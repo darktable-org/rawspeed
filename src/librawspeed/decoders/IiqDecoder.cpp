@@ -40,15 +40,15 @@
 #include <array>                                // for array, array<>::valu...
 #include <cassert>                              // for assert
 #include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for abs, lround
+#include <cmath>                                // for lround
 #include <cstdlib>                              // for abs
 #include <functional>                           // for greater_equal
 #include <iterator>                             // for advance, next, begin
 #include <memory>                               // for unique_ptr
-#include <optional>
-#include <string>  // for operator==, string
-#include <utility> // for move
-#include <vector>  // for vector, allocator
+#include <optional>                             // for optional, nullopt
+#include <string>                               // for operator==, string
+#include <utility>                              // for move
+#include <vector>                               // for vector, allocator
 
 namespace rawspeed {
 

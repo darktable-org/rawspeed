@@ -19,8 +19,9 @@
 */
 
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
+#include "adt/Array1DRef.h"                     // for Array1DRef
 #include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for copy, fill_n, max, min
+#include <algorithm>                            // for max, min
 #include <bitset>                               // for bitset
 #include <cassert>                              // for assert
 #include <cstdint>                              // for uint8_t, uint32_t
@@ -31,7 +32,7 @@
 #include <type_traits>                          // for __decay_and_strip
 #include <utility>                              // for move
 #include <vector>                               // for vector
-#include <gtest/gtest.h>                        // for Test, CmpHelperNE
+#include <gtest/gtest.h>                        // for ParamIteratorInterface
 
 namespace rawspeed {
 struct BaselineHuffmanTableTag;

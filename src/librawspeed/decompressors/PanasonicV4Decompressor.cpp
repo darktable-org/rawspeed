@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicV4Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Mutex.h"                    // for MutexLocker
 #include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
 #include "common/Common.h"                // for extractHighBits, rawspeed_...
@@ -31,7 +32,7 @@
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
 #include <algorithm>                      // for copy, max, fill_n, generate_n
 #include <array>                          // for array
-#include <cassert>                        // for invariant
+#include <cassert>                        // for assert
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits

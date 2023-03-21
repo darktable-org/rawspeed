@@ -20,12 +20,10 @@
 
 #include "decompressors/DeflateDecompressor.h" // for DeflateDecompressor
 #include "adt/Point.h"                         // for iPoint2D
-#include "bench/Common.h"                      // for areaToRectangle
+#include "bench/Common.h"                      // for areaToRectangle, benc...
 #include "common/Common.h"                     // for isAligned
 #include "common/RawImage.h"                   // for RawImage, RawImageData
-#include "io/Buffer.h"                         // for Buffer, DataBuffer
-#include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include "io/Buffer.h"                         // for Buffer
 #include <algorithm>                           // for fill_n
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t

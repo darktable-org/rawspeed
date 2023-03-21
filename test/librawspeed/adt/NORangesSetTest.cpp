@@ -23,8 +23,8 @@
 #include "adt/RangeTest.h"   // for AllOverlapped, TwoRangesTest, twoRanges...
 #include <string>            // for string, allocator
 #include <tuple>             // for get, tuple
-#include <utility>           // for __tuple_element_t
-#include <gtest/gtest.h>     // for ASSERT_TRUE, ASSERT_FALSE, UnitTest
+#include <gtest/gtest.h>     // for ParamIteratorInterface, AssertionResult
+
 // IWYU pragma: no_forward_declare rawspeed::Range
 
 using rawspeed::NORangesSet;

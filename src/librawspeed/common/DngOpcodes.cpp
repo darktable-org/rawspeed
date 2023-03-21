@@ -20,6 +20,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
 #include "common/DngOpcodes.h"
 #include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
@@ -32,7 +33,7 @@
 #include "io/Endianness.h"                // for Endianness, Endianness::big
 #include <algorithm>                      // for generate_n, clamp, fill_n
 #include <cassert>                        // for assert
-#include <cmath>                          // for abs, isfinite, pow
+#include <cmath>                          // for isfinite, pow
 #include <cstdlib>                        // for abs
 #include <initializer_list>               // for initializer_list
 #include <iterator>                       // for back_insert_iterator, back...

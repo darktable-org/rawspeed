@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"  // for HAVE_PUGIXML
+#include "rawspeedconfig.h"  // for RAWSPEED_READONLY, HAVE_PUGIXML
 #include "metadata/Camera.h" // for Camera (ptr only)
 #include <cstdint>           // for uint32_t
 #include <map>               // for map

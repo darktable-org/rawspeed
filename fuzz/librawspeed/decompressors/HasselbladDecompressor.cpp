@@ -22,17 +22,17 @@
 #include "HuffmanTable/Common.h"        // for createHuffmanTable
 #include "MemorySanitizer.h"            // for MSan
 #include "common/RawImage.h"            // for RawImage, RawImageData
-#include "common/RawspeedException.h"   // for ThrowException, Rawsp...
+#include "common/RawspeedException.h"   // for RawspeedException
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "fuzz/Common.h"                // for CreateRawImage
 #include "io/Buffer.h"                  // for Buffer, DataBuffer
 #include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for Endianness, Endiannes...
-#include <algorithm>                    // for generate_n, copy
+#include "io/Endianness.h"              // for Endianness, Endianness::little
+#include <algorithm>                    // for fill, copy, fill_n, generate_n
 #include <cassert>                      // for assert
+#include <cstddef>                      // for size_t
 #include <cstdint>                      // for uint16_t, uint8_t
-#include <initializer_list>             // for initializer_list
-#include <iterator>                     // for back_insert_iterator
+#include <vector>                       // for vector
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

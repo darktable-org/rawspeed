@@ -18,8 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitStream.h" // for BitStream
-#include "bench/Common.h"
+#include "io/BitStream.h"        // for BitStream
+#include "bench/Common.h"        // for benchmarkDryRun
 #include "io/BitPumpJPEG.h"      // for BitPumpJPEG, BitStream<>::fillCache
 #include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache
 #include "io/BitPumpMSB.h"       // for BitPumpMSB, BitStream<>::fillCache
@@ -27,13 +27,12 @@
 #include "io/BitPumpMSB32.h"     // for BitPumpMSB32, BitStream<>::fillCache
 #include "io/Buffer.h"           // for Buffer, DataBuffer
 #include "io/ByteStream.h"       // for ByteStream
-#include "io/Endianness.h"       // for Endianness, Endianness::big, Endian...
+#include "io/Endianness.h"       // for Endianness, Endianness::unknown
 #include <algorithm>             // for fill_n
 #include <cassert>               // for assert
 #include <cstddef>               // for size_t
 #include <cstdint>               // for uint8_t
 #include <string>                // for string, to_string, allocator
-#include <type_traits>           // for integral_constant
 #include <vector>                // for vector
 #include <benchmark/benchmark.h> // for State, Benchmark, Initialize, RunSp...
 

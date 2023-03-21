@@ -21,6 +21,7 @@
 #include "rawspeedconfig.h"        // for HAVE_ZLIB
 #include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
+#include "adt/Invariant.h"         // for invariant
 #include "common/Common.h"         // for bit_cast
 #include <array>                   // for array
 #include <climits>                 // for CHAR_BIT
@@ -32,7 +33,6 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/DeflateDecompressor.h"
 #include "io/Endianness.h" // for getBE
-#include <cassert>         // for invariant
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
 #include <zlib.h>          // for uncompress, zError, Z_OK

@@ -22,7 +22,8 @@
 
 #include "decompressors/UncompressedDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D, iRectangle2D
 #include "common/Common.h"                // for BitOrder, copyPixels, BitO...
 #include "common/FloatingPoint.h"         // for Binary16, Binary24, Binary...
 #include "decoders/RawDecoderException.h" // for ThrowRDE
@@ -34,7 +35,6 @@
 #include "io/Endianness.h"                // for Endianness, Endianness::li...
 #include "io/IOException.h"               // for ThrowException, ThrowIOE
 #include <algorithm>                      // for min
-#include <cassert>                        // for invariant
 #include <cinttypes>                      // for PRIu64
 
 using std::min;

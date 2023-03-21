@@ -28,7 +28,7 @@
 #include <cstdint>          // for uint8_t, uint32_t
 #include <initializer_list> // for initializer_list
 #include <memory>           // for allocator
-#include <gtest/gtest.h>    // for Test, TestInfo (ptr only), ASSERT_EQ, TEST
+#include <gtest/gtest.h>    // for Message, TestPartResult, INSTANTIATE_TYP...
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::Buffer;

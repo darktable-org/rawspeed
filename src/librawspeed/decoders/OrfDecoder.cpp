@@ -21,13 +21,15 @@
 */
 
 #include "decoders/OrfDecoder.h"
+#include "adt/Array2DRef.h"                         // for Array2DRef
 #include "adt/NORangesSet.h"                        // for NORangesSet
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for BitOrder, BitOrd...
+#include "adt/Point.h"                              // for iPoint2D, iRecta...
+#include "common/Common.h"                          // for BitOrder, roundUp
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/OlympusDecompressor.h"      // for OlympusDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
+#include "io/BitPumpMSB.h"                          // for BitPumpMSB
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, getH...
 #include "metadata/ColorFilterArray.h"              // for CFAColor, ColorF...
@@ -35,6 +37,7 @@
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
+#include <cassert>                                  // for assert
 #include <memory>                                   // for unique_ptr, allo...
 #include <string>                                   // for operator==, string
 

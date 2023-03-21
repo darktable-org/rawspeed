@@ -19,6 +19,7 @@
 */
 
 #include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
+#include "adt/Array1DRef.h"             // for Array1DRef
 #include "io/BitPumpMSB.h"              // for BitStream<>::fillCache, BitP...
 #include "io/BitStream.h"               // for BitStream
 #include "io/Buffer.h"                  // for Buffer, DataBuffer
@@ -30,7 +31,7 @@
 #include <initializer_list>             // for initializer_list
 #include <utility>                      // for move
 #include <vector>                       // for vector, allocator
-#include <gtest/gtest.h>                // for Test, TestInfo (ptr only)
+#include <gtest/gtest.h>                // for Message, TestPartResult
 
 namespace rawspeed {
 class RawDecoderException;

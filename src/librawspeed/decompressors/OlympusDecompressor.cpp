@@ -20,16 +20,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
 #include "decompressors/OlympusDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
-#include <cassert>                        // for invariant
-#include <cmath>                          // for abs
 #include <cstdlib>                        // for abs
 #include <type_traits>                    // for enable_if_t
 

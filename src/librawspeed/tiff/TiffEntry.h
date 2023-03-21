@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"   // for RAWSPEED_READONLY
 #include "adt/NotARational.h" // for NotARational
 #include "io/ByteStream.h"    // for ByteStream
 #include "tiff/TiffTag.h"     // for TiffTag

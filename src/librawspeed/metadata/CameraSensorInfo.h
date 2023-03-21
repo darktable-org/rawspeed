@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
 #include <algorithm>        // for copy
 #include <vector>           // for vector
 

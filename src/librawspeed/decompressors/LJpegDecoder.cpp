@@ -20,15 +20,18 @@
 */
 
 #include "decompressors/LJpegDecoder.h"
-#include "adt/Point.h"                       // for iPoint2D
-#include "common/Common.h"                   // for to_array, roundUpDivision
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"                 // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor
+#include "decompressors/HuffmanTable.h"      // for HuffmanTable
+#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor::PerC...
 #include "io/ByteStream.h"                   // for ByteStream
-#include <algorithm>                         // for copy_n
+#include <algorithm>                         // for generate_n
 #include <array>                             // for array
-#include <cassert>                           // for invariant
+#include <iterator>                          // for back_insert_iterator
+#include <pstl/glue_algorithm_defs.h>        // for copy_n
+#include <vector>                            // for vector
 
 using std::copy_n;
 

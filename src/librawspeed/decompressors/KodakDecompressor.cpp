@@ -22,6 +22,7 @@
 
 #include "decompressors/KodakDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for extractHighBits, isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -30,7 +31,6 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for min, fill_n
 #include <array>                          // for array
-#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 
 namespace rawspeed {

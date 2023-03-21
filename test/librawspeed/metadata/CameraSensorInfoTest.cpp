@@ -28,8 +28,8 @@
 #include <string>                      // for basic_string, string
 #include <tuple>                       // for get, tuple
 #include <vector>                      // for vector
-#include <gmock/gmock.h>               // for InitGoogleMock
-#include <gtest/gtest.h>               // for ASSERT_NO_THROW, ASSERT_EQ
+#include <gmock/gmock.h>               // for testing::InitGoogleMock
+#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
 
 using rawspeed::CameraSensorInfo;
 using std::unique_ptr;

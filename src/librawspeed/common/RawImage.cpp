@@ -18,8 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
 #include "common/RawImage.h"
+#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
