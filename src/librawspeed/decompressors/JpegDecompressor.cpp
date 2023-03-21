@@ -21,7 +21,6 @@
 
 #include "rawspeedconfig.h"       // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
 #include "adt/AlignedAllocator.h" // for AlignedAllocator
-#include <jmorecfg.h>             // for METHODDEF, boolean
 
 #ifdef HAVE_JPEG
 

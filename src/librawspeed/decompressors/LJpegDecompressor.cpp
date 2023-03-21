@@ -31,7 +31,6 @@
 #include <algorithm>                      // for transform
 #include <array>                          // for array
 #include <memory>                         // for allocator_traits<>::value_...
-#include <pstl/glue_algorithm_defs.h>     // for copy_n
 #include <utility>                        // for move
 
 using std::copy_n;

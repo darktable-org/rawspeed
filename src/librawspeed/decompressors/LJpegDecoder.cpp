@@ -30,7 +30,6 @@
 #include <algorithm>                         // for generate_n
 #include <array>                             // for array
 #include <iterator>                          // for back_insert_iterator
-#include <pstl/glue_algorithm_defs.h>        // for copy_n
 #include <vector>                            // for vector
 
 using std::copy_n;
