@@ -108,12 +108,6 @@ static void checkPump(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
 }
 
 template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
-  if (std::is_same_v<rawspeed::IMPL0<Tag>, rawspeed::HuffmanTableTree<
-                                               rawspeed::VC5HuffmanTableTag>> ||
-      std::is_same_v<rawspeed::IMPL1<Tag>,
-                     rawspeed::HuffmanTableTree<rawspeed::VC5HuffmanTableTag>>)
-    ThrowRSE("FIXME: impl+flavor combination not supported.");
-
   rawspeed::ByteStream bs0 = bs;
   rawspeed::ByteStream bs1 = bs;
 
