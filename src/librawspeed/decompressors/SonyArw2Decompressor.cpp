@@ -28,7 +28,7 @@
 #include "common/RawImage.h"              // for RawImageData, RawImage
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint16_t, uint32_t, uint8_t
 #include <string>                         // for string, allocator
 
@@ -52,8 +52,8 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
 
 void SonyArw2Decompressor::decompressRow(int row) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.width % 32 == 0);
+  invariant(out.width > 0);
+  invariant(out.width % 32 == 0);
 
   // Allow compiler to devirtualize the calls below.
   auto& rawdata = reinterpret_cast<RawImageDataU16&>(*mRaw);
@@ -106,9 +106,9 @@ void SonyArw2Decompressor::decompressRow(int row) const {
 }
 
 void SonyArw2Decompressor::decompressThread() const noexcept {
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 32 == 0);
-  assert(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.x % 32 == 0);
+  invariant(mRaw->dim.y > 0);
 
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)

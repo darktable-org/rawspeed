@@ -422,7 +422,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
   outputBits = 0;
   for (int wp = img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
-  assert(outputBits <= 16);
+  invariant(outputBits <= 16);
 
   parseVC5();
 }
@@ -454,8 +454,8 @@ void VC5Decompressor::initVC5LogTable() {
 void VC5Decompressor::parseVC5() {
   mBs.setByteOrder(Endianness::big);
 
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.y > 0);
 
   // All VC-5 data must start with "VC-%" (0x56432d35)
   if (mBs.getU32() != 0x56432d35)
@@ -651,7 +651,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     unsigned int numPixelsLeft = 0;
 
     void decodeNextPixelGroup() {
-      assert(numPixelsLeft == 0);
+      invariant(numPixelsLeft == 0);
       std::tie(pixelValue, numPixelsLeft) = getRLV(bits);
     }
 

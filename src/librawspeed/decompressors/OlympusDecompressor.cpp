@@ -28,7 +28,7 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cmath>                          // for abs
 #include <cstdlib>                        // for abs
 #include <type_traits>                    // for enable_if_t
@@ -134,9 +134,9 @@ inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
 }
 
 void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
-  assert(mRaw->dim.y > 0);
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 2 == 0);
+  invariant(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.x % 2 == 0);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -155,9 +155,9 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
 }
 
 void OlympusDecompressor::decompress(ByteStream input) const {
-  assert(mRaw->dim.y > 0);
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 2 == 0);
+  invariant(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.x % 2 == 0);
 
   input.skipBytes(7);
   BitPumpMSB bits(input);

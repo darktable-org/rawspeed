@@ -30,7 +30,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for max
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint32_t, uint16_t, int32_t
 #include <iterator>                       // for advance, begin, end, next
 #include <utility>                        // for swap
@@ -75,7 +75,7 @@ void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
       ThrowRDE("Line offsets are out of sequence or slice is empty.");
 
     const auto size = *next_offset_iterator - *offset_iterator;
-    assert(size > 0);
+    invariant(size > 0);
 
     stripes.emplace_back(bsr.getStream(size));
 
@@ -106,7 +106,7 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
 
 void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
+  invariant(out.width > 0);
 
   BitPumpMSB32 bits(bs);
 

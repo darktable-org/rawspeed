@@ -110,8 +110,8 @@ class RawImageData : public ErrorLog {
 
 public:
   virtual ~RawImageData();
-  [[nodiscard]] uint32_t getCpp() const { return cpp; }
-  [[nodiscard]] uint32_t getBpp() const { return bpp; }
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getCpp() const { return cpp; }
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getBpp() const { return bpp; }
   void setCpp(uint32_t val);
   void createData();
   void poisonPadding();
@@ -238,8 +238,8 @@ public:
   static RawImage create(const iPoint2D& dim,
                          RawImageType type = RawImageType::UINT16,
                          uint32_t componentsPerPixel = 1);
-  RawImageData* operator->() const { return p_; }
-  RawImageData& operator*() const { return *p_; }
+  RawImageData* RAWSPEED_READONLY operator->() const { return p_; }
+  RawImageData& RAWSPEED_READONLY operator*() const { return *p_; }
   explicit RawImage(RawImageData* p); // p must not be NULL
   ~RawImage();
   RawImage(const RawImage& p);

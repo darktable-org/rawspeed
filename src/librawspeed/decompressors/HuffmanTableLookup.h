@@ -24,7 +24,7 @@
 #include "decoders/RawDecoderException.h"       // for ThrowRDE
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "io/BitStream.h"                       // for BitStreamTraits
-#include <cassert>                              // for assert
+#include <cassert>                              // for invariant
 #include <cstdint>                              // for uint32_t, uint16_t
 #include <memory>                               // for allocator_traits<>::...
 #include <tuple>                                // for tie
@@ -114,7 +114,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!Base::fullDecode);
+    invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -123,7 +123,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(Base::fullDecode);
+    invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -178,7 +178,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
 
     typename Base::CodeSymbol symbol;

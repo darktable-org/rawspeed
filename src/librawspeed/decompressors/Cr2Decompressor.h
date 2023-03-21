@@ -30,7 +30,7 @@
 #include "decompressors/HuffmanTable.h"      // for HuffmanTable, HuffmanTa...
 #include "io/ByteStream.h"                   // for ByteStream
 #include <array>                             // for array
-#include <cassert>                           // for assert
+#include <cassert>                           // for invariant
 #include <cstddef>                           // for size_t, ptrdiff_t
 #include <cstdint>                           // for uint16_t
 #include <functional>                        // for reference_wrapper
@@ -74,7 +74,7 @@ public:
   }
 
   [[nodiscard]] int widthOfSlice(int sliceId) const {
-    assert(sliceId >= 0 && sliceId < numSlices);
+    invariant(sliceId >= 0 && sliceId < numSlices);
     if ((sliceId + 1) == numSlices)
       return lastSliceWidth;
     return sliceWidth;
@@ -97,11 +97,13 @@ struct Cr2SliceWidthIterator final {
 
   Cr2SliceWidthIterator(const Cr2SliceWidths& slicing_, int sliceId_)
       : slicing(slicing_), sliceId(sliceId_) {
-    assert(sliceId >= 0 && sliceId <= slicing.numSlices && "Iterator overflow");
+    invariant(sliceId >= 0 && sliceId <= slicing.numSlices &&
+              "Iterator overflow");
   }
 
   value_type operator*() const {
-    assert(sliceId >= 0 && sliceId < slicing.numSlices && "Iterator overflow");
+    invariant(sliceId >= 0 && sliceId < slicing.numSlices &&
+              "Iterator overflow");
     return slicing.widthOfSlice(sliceId);
   }
   Cr2SliceWidthIterator& operator++() {
@@ -110,7 +112,7 @@ struct Cr2SliceWidthIterator final {
   }
   friend bool operator==(const Cr2SliceWidthIterator& a,
                          const Cr2SliceWidthIterator& b) {
-    assert(&a.slicing == &b.slicing && "Comparing unrelated iterators.");
+    invariant(&a.slicing == &b.slicing && "Comparing unrelated iterators.");
     return a.sliceId == b.sliceId;
   }
   friend bool operator!=(const Cr2SliceWidthIterator& a,

@@ -26,7 +26,7 @@
 #include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree<>:...
 #include "io/BitStream.h"                       // for BitStreamTraits
 #include <algorithm>                            // for max, for_each, copy
-#include <cassert>                              // for assert
+#include <cassert>                              // for invariant
 #include <initializer_list>                     // for initializer_list
 #include <iterator>                             // for advance, next
 #include <memory>                               // for unique_ptr, make_unique
@@ -58,7 +58,7 @@ private:
 
     // Read bits until either find the code or detect the incorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
-      assert(partial.code_len <= Traits::MaxCodeLenghtBits);
+      invariant(partial.code_len <= Traits::MaxCodeLenghtBits);
 
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
@@ -94,11 +94,11 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    assert((!std::is_same_v<
-            HuffmanTableTag,
-            VC5HuffmanTableTag>)&&"FIXME: this implementation allocates too "
-                                  "much memory when used with that flavour "
-                                  "during fuzzing");
+    invariant((!std::is_same_v<
+               HuffmanTableTag,
+               VC5HuffmanTableTag>)&&"FIXME: this implementation allocates too "
+                                     "much memory when used with that flavour "
+                                     "during fuzzing");
 
     AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
 
@@ -134,7 +134,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(!Base::fullDecode);
+    invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -143,7 +143,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(Base::fullDecode);
+    invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -156,7 +156,7 @@ public:
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::fullDecode);
 
     bs.fill(32);
 

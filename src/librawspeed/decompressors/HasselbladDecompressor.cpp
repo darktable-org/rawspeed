@@ -32,7 +32,7 @@
 #include "io/ByteStream.h"                   // for ByteStream
 #include <algorithm>                         // for min, transform
 #include <array>                             // for array
-#include <cassert>                           // for assert
+#include <cassert>                           // for invariant
 #include <cstddef>                           // for size_t
 #include <cstdint>                           // for uint16_t
 #include <functional>                        // for cref, reference_wrapper
@@ -82,9 +82,9 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
 ByteStream::size_type HasselbladDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(out.height > 0);
-  assert(out.width > 0);
-  assert(out.width % 2 == 0);
+  invariant(out.height > 0);
+  invariant(out.width > 0);
+  invariant(out.width % 2 == 0);
 
   const auto ht = rec.ht;
   ht.verifyCodeValuesAsDiffLengths();

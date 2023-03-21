@@ -30,7 +30,7 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include <algorithm>                      // for fill_n
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <memory>                         // for allocator_traits<>::value_...
 #include <vector>                         // for vector
 
@@ -117,8 +117,8 @@ void SamsungV1Decompressor::decompress() const {
   }
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
-  assert(out.height % 2 == 0 && "Should have even row count.");
+  invariant(out.width % 32 == 0 && "Should have even count of pixels per row.");
+  invariant(out.height % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(bs);
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};

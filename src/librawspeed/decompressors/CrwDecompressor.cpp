@@ -31,7 +31,7 @@
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint16_t, uint8_t, int16_t
 #include <tuple>                          // for array
 #include <vector>                         // for vector
@@ -58,7 +58,7 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
     // If there are low bits, the first part (size is calculable) is low bits
     // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
     const unsigned lBlocks = 1 * height * width / 4;
-    assert(lBlocks > 0);
+    invariant(lBlocks > 0);
     lowbitInput = rawData.getStream(lBlocks);
   }
 
@@ -73,7 +73,7 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
 
 HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
                                             const uint8_t* values) {
-  assert(ncpl);
+  invariant(ncpl);
 
   HuffmanTable<> ht;
   auto count = ht.setNCodesPerLength(Buffer(ncpl, 16));
@@ -166,7 +166,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
 inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
                                          const crw_hts& mHuff,
                                          BitPumpJPEG& bs) {
-  assert(diffBuf);
+  invariant(diffBuf);
 
   // decode the block
   for (int i = 0; i < 64;) {
@@ -175,7 +175,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
     const int len = codeValue & 0b1111;
     const int index = codeValue >> 4;
-    assert(len >= 0 && index >= 0);
+    invariant(len >= 0 && index >= 0);
 
     if (len == 0 && index == 0 && i)
       break;
@@ -207,16 +207,16 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
 // FIXME: this function is horrible.
 void CrwDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.width % 4 == 0);
-  assert(out.height > 0);
+  invariant(out.width > 0);
+  invariant(out.width % 4 == 0);
+  invariant(out.height > 0);
 
   {
     // Each block encodes 64 pixels
 
-    assert((out.height * out.width) % 64 == 0);
+    invariant((out.height * out.width) % 64 == 0);
     const unsigned hBlocks = out.height * out.width / 64;
-    assert(hBlocks > 0);
+    invariant(hBlocks > 0);
 
     BitPumpJPEG bs(rawInput);
 
@@ -252,8 +252,8 @@ void CrwDecompressor::decompress() {
         ++col;
       }
     }
-    assert(row == (out.height - 1));
-    assert(col == out.width);
+    invariant(row == (out.height - 1));
+    invariant(col == out.width);
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits

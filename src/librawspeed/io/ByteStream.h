@@ -75,7 +75,7 @@ public:
     pos = newPos;
     (void)check(0);
   }
-  [[nodiscard]] inline size_type getRemainSize() const {
+  [[nodiscard]] inline size_type RAWSPEED_READONLY getRemainSize() const {
     invariant(getSize() >= pos);
     (void)check(0);
     return getSize() - pos;

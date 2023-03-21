@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <cassert>          // for assert
+#include "adt/Invariant.h"  // for invariant
+#include <cassert>          // for invariant
 #include <initializer_list> // IWYU pragma: keep
 #include <memory>           // for unique_ptr, make_unique
 #include <vector>           // for vector
@@ -114,7 +115,7 @@ bool BinaryHuffmanTree<T>::Branch::forEachNode(Lambda l) {
 
 template <typename T> bool BinaryHuffmanTree<T>::Branch::hasLeafs() const {
   return forEachNode([](const std::unique_ptr<Node>* n) {
-    assert(n);
+    invariant(n);
     if (!(*n)) // If the node is empty, then it certainly does not have leafs
       return false;
     return Node::Type::Leaf == static_cast<typename Node::Type>(**n);
@@ -129,7 +130,7 @@ bool BinaryHuffmanTree<T>::Branch::pruneLeaflessBranches(
 
   bool foundLeafs = false; // Any leafs in this branch?
   (*top)->getAsBranch().forEachNode([&foundLeafs](std::unique_ptr<Node>* n) {
-    assert(n);
+    invariant(n);
     if (!(*n))
       return false; // Nothing to do here, node is empty already, keep going.
     switch (static_cast<typename Node::Type>(**n)) {
@@ -156,7 +157,7 @@ bool BinaryHuffmanTree<T>::Branch::pruneLeaflessBranches(
 template <typename T>
 std::vector<typename BinaryHuffmanTree<T>::Branch*>
 BinaryHuffmanTree<T>::getAllBranchesOfDepth(int depth) {
-  assert(depth >= 0);
+  invariant(depth >= 0);
 
   if (0 == depth) {
     // The root (depth == 0) is is special, and is *always* a Branch.
@@ -177,10 +178,10 @@ BinaryHuffmanTree<T>::getAllBranchesOfDepth(int depth) {
   branches.reserve(2U * prevBranches.size());
 
   for (const auto& prevBranch : prevBranches) {
-    assert(prevBranch);
+    invariant(prevBranch);
 
     prevBranch->forEachNode([&branches](std::unique_ptr<Node>* n) {
-      assert(n);
+      invariant(n);
       // If the Node is vacant, make it a branch.
       // The user was supposed to create all the required Leafs before.
       // We shall prune Leaf-less branches at the end
@@ -200,7 +201,7 @@ BinaryHuffmanTree<T>::getAllBranchesOfDepth(int depth) {
 template <typename T>
 std::vector<std::unique_ptr<typename BinaryHuffmanTree<T>::Node>*>
 BinaryHuffmanTree<T>::getAllVacantNodesAtDepth(int depth) {
-  assert(depth > 0);
+  invariant(depth > 0);
 
   // Get all branches of previous depth
   auto prevBranches = getAllBranchesOfDepth(depth - 1);
@@ -214,12 +215,12 @@ BinaryHuffmanTree<T>::getAllVacantNodesAtDepth(int depth) {
   nodes.reserve(2U * prevBranches.size());
 
   for (const auto& prevBranch : prevBranches) {
-    assert(prevBranch);
+    invariant(prevBranch);
 
     auto& b = prevBranch->getAsBranch();
 
     b.forEachNode([&nodes](std::unique_ptr<Node>* n) {
-      assert(n);
+      invariant(n);
       if (!(*n)) // If there is no node already, then record it.
         nodes.emplace_back(n);
       return false; // keep going;

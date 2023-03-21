@@ -174,7 +174,7 @@ void AbstractLJpegDecoder::parseSOF(ByteStream sofInput, SOFInfo* sof) {
 }
 
 void AbstractLJpegDecoder::parseSOS(ByteStream sos) {
-  assert(frame.initialized);
+  invariant(frame.initialized);
 
   if (sos.getRemainSize() != 1 + 2 * frame.cps + 3)
     ThrowRDE("Invalid SOS header length.");

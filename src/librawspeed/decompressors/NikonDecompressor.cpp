@@ -29,7 +29,7 @@
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for max
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cstdint>                        // for uint16_t, uint32_t, int16_t
 #include <cstdio>                         // for size_t
 #include <vector>                         // for vector
@@ -497,8 +497,8 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   // allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
-  assert(out.width % 2 == 0);
-  assert(out.width >= 2);
+  invariant(out.width % 2 == 0);
+  invariant(out.width >= 2);
   for (int row = start_y; row < end_y; row++) {
     std::array<int, 2> pred = pUp[row & 1];
     for (int col = 0; col < out.width; col++) {
@@ -519,7 +519,7 @@ void NikonDecompressor::decompress(ByteStream data, bool uncorrectedRawValues) {
 
   random = bits.peekBits(24);
 
-  assert(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
+  invariant(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
 
   if (!split) {
     decompress<HuffmanTable<>>(bits, 0, mRaw->dim.y);

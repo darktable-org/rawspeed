@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "adt/Invariant.h" // for invariant
+#include "adt/Invariant.h"  // for invariant
 #include "common/Common.h"  // for bitwidth, extractHighBits
 #include "io/Buffer.h"      // for Buffer
 #include "io/ByteStream.h"  // for ByteStream
@@ -205,7 +205,7 @@ public:
   }
 
   // these methods might be specialized by implementations that support it
-  [[nodiscard]] inline size_type getInputPosition() const {
+  [[nodiscard]] inline size_type RAWSPEED_READONLY getInputPosition() const {
     return replenisher.getPos();
   }
 
@@ -218,7 +218,7 @@ public:
     return replenisher.getRemainingSize();
   }
 
-  [[nodiscard]] inline size_type getFillLevel() const {
+  [[nodiscard]] inline size_type RAWSPEED_READONLY getFillLevel() const {
     return cache.fillLevel;
   }
 

@@ -34,7 +34,7 @@
 #include "io/Endianness.h"                // for Endianness, Endianness::li...
 #include "io/IOException.h"               // for ThrowException, ThrowIOE
 #include <algorithm>                      // for min
-#include <cassert>                        // for assert
+#include <cassert>                        // for invariant
 #include <cinttypes>                      // for PRIu64
 
 using std::min;
@@ -43,10 +43,10 @@ namespace rawspeed {
 
 void UncompressedDecompressor::sanityCheck(const uint32_t* h,
                                            int bytesPerLine) const {
-  assert(h != nullptr);
-  assert(*h > 0);
-  assert(bytesPerLine > 0);
-  assert(input.getSize() > 0);
+  invariant(h != nullptr);
+  invariant(*h > 0);
+  invariant(bytesPerLine > 0);
+  invariant(input.getSize() > 0);
 
   // How many multiples of bpl are there in the input buffer?
   // The remainder is ignored/discarded.
@@ -67,18 +67,18 @@ void UncompressedDecompressor::sanityCheck(const uint32_t* h,
 
 void UncompressedDecompressor::sanityCheck(uint32_t w, const uint32_t* h,
                                            int bpp) const {
-  assert(w > 0);
-  assert(bpp > 0);
+  invariant(w > 0);
+  invariant(bpp > 0);
 
   // bytes per line
   const auto bpl = bpp * w;
-  assert(bpl > 0);
+  invariant(bpl > 0);
 
   sanityCheck(h, bpl);
 }
 
 int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
-  assert(w > 0);
+  invariant(w > 0);
 
   if ((12 * w) % 8 != 0)
     ThrowIOE("Bad image width");
@@ -121,7 +121,7 @@ UncompressedDecompressor::UncompressedDecompressor(
     ThrowRDE("Unsupported bit depth");
 
   const auto outPixelBits = (uint64_t)w * cpp * bitPerPixel;
-  assert(outPixelBits > 0);
+  invariant(outPixelBits > 0);
 
   if (outPixelBits % 8 != 0) {
     ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
@@ -139,7 +139,7 @@ UncompressedDecompressor::UncompressedDecompressor(
   // Check the specified pitch, not the minimally-required pitch.
   sanityCheck(&h, inputPitchBytes);
 
-  assert((unsigned)inputPitchBytes >= outPixelBytes);
+  invariant((unsigned)inputPitchBytes >= outPixelBytes);
   skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
 
   if (oy > static_cast<uint64_t>(mRaw->dim.y))
