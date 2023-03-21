@@ -50,10 +50,6 @@ getCodeValues(rawspeed::ByteStream& bs, unsigned numCodeValues) {
 template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   T ht;
 
-  if (std::is_same_v<T,
-                     rawspeed::HuffmanTableTree<rawspeed::VC5HuffmanTableTag>>)
-    ThrowRSE("FIXME: impl+flavor combination not supported.");
-
   // first bytes are consumed as n-codes-per-length
   const auto count =
       ht.setNCodesPerLength(bs.getBuffer(getHuffmanTableMaxLength<T>()));

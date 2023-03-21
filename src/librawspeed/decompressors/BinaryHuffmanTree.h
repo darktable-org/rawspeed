@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2018 Roman Lebedev
+    Copyright (C) 2018-2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,22 @@
 
 #pragma once
 
-#include "adt/Invariant.h"  // for invariant
-#include <cassert>          // for invariant
+#include "adt/Invariant.h" // for invariant
+#include "decompressors/AbstractHuffmanTable.h"
+#include <cassert>          // for assert
+#include <functional>       // for reference_wrapper
 #include <initializer_list> // IWYU pragma: keep
 #include <memory>           // for unique_ptr, make_unique
-#include <vector>           // for vector
 
 namespace rawspeed {
 
-template <typename T>
+template <typename HuffmanTableTag>
 class BinaryHuffmanTree final /* : public BinarySearchTree */ {
 public:
+  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  using CodeSymbol = typename AbstractHuffmanTable<HuffmanTableTag>::CodeSymbol;
+  using CodeTy = typename Traits::CodeTy;
+
   struct Branch;
   struct Leaf;
 
@@ -57,15 +62,7 @@ public:
       return Node::Type::Branch;
     }
 
-    std::unique_ptr<Node> zero;
-    std::unique_ptr<Node> one;
-
-    template <typename Lambda> [[nodiscard]] bool forEachNode(Lambda l) const;
-    template <typename Lambda> bool forEachNode(Lambda l);
-
-    [[nodiscard]] bool hasLeafs() const;
-
-    static bool pruneLeaflessBranches(std::unique_ptr<Node>* n);
+    std::array<std::unique_ptr<Node>, 2> buds;
   };
 
   struct Leaf final : public Node {
@@ -73,166 +70,53 @@ public:
       return Node::Type::Leaf;
     }
 
-    T value;
+    CodeTy value;
 
     Leaf() = default;
 
-    explicit Leaf(T value_) : value(value_) {}
+    explicit Leaf(CodeTy value_) : value(value_) {}
   };
 
-  std::unique_ptr<Node> root;
+  void add(CodeSymbol symbol, CodeTy value);
 
-  std::vector<Branch*> getAllBranchesOfDepth(int depth);
-  std::vector<std::unique_ptr<Node>*> getAllVacantNodesAtDepth(int depth);
-  void pruneLeaflessBranches();
+  std::unique_ptr<Node> root;
 };
 
-template <typename T>
-template <typename Lambda>
-bool BinaryHuffmanTree<T>::Branch::forEachNode(Lambda l) const {
-  bool done = false;
-  // NOTE: The order *IS* important! Left to right, zero to one!
-  for (const auto* node : {&zero, &one}) {
-    done = l(node);
-    if (done)
-      return done;
+template <typename HuffmanTableTag>
+void BinaryHuffmanTree<HuffmanTableTag>::add(const CodeSymbol symbol,
+                                             CodeTy value) {
+  invariant(symbol.code_len > 0);
+  invariant(symbol.code_len <= Traits::MaxCodeLenghtBits);
+
+  auto getSymbolsNthMSB = [&symbol](int msbBitIdx) {
+    invariant(msbBitIdx >= 0 && msbBitIdx < symbol.code_len);
+    unsigned MSBs = extractHighBits(symbol.code, 1 + msbBitIdx,
+                                    /*effectiveBitwidth=*/symbol.code_len);
+    return MSBs & 0b1;
+  };
+
+  CodeSymbol partial;
+  partial.code = 0;
+  partial.code_len = 0;
+
+  std::reference_wrapper<std::unique_ptr<Node>> newBud = root;
+  for (int depth = 0; depth < symbol.code_len; ++depth) {
+    unsigned bit = getSymbolsNthMSB(depth);
+    ++partial.code_len;
+    partial.code = (partial.code << 1) | bit;
+    std::unique_ptr<Node>& bud = newBud;
+    if (!bud)
+      bud = std::make_unique<Branch>();
+    // NOTE: if this bud is already a Leaf, this is not a prefix code.
+    newBud = bud->getAsBranch().buds[bit];
   }
-  return done;
-}
+  invariant(partial == symbol && "Failed to interpret symbol as bit sequence.");
 
-template <typename T>
-template <typename Lambda>
-bool BinaryHuffmanTree<T>::Branch::forEachNode(Lambda l) {
-  bool done = false;
-  // NOTE: The order *IS* important! Left to right, zero to one!
-  for (auto* node : {&zero, &one}) {
-    done = l(node);
-    if (done)
-      return done;
-  }
-  return done;
-}
+  std::unique_ptr<Node>& bud = newBud;
+  assert(!bud && "This Node should be vacant!");
 
-template <typename T> bool BinaryHuffmanTree<T>::Branch::hasLeafs() const {
-  return forEachNode([](const std::unique_ptr<Node>* n) {
-    invariant(n);
-    if (!(*n)) // If the node is empty, then it certainly does not have leafs
-      return false;
-    return Node::Type::Leaf == static_cast<typename Node::Type>(**n);
-  });
-}
-
-template <typename T>
-bool BinaryHuffmanTree<T>::Branch::pruneLeaflessBranches(
-    std::unique_ptr<Node>* top) {
-  if (!top)
-    return false;
-
-  bool foundLeafs = false; // Any leafs in this branch?
-  (*top)->getAsBranch().forEachNode([&foundLeafs](std::unique_ptr<Node>* n) {
-    invariant(n);
-    if (!(*n))
-      return false; // Nothing to do here, node is empty already, keep going.
-    switch (static_cast<typename Node::Type>(**n)) {
-    case Node::Type::Branch:
-      // Recurse. Any leafs in this branch?
-      if (Branch::pruneLeaflessBranches(n))
-        foundLeafs = true;
-      else
-        n->reset(); // Aha, dead branch, prune it!
-      break;
-    case Node::Type::Leaf:
-      foundLeafs = true; // Ok, this is a Leaf, great.
-      break;
-    }
-    return false; // keep going.
-  });
-
-  if (!foundLeafs)
-    top->reset();
-
-  return foundLeafs;
-}
-
-template <typename T>
-std::vector<typename BinaryHuffmanTree<T>::Branch*>
-BinaryHuffmanTree<T>::getAllBranchesOfDepth(int depth) {
-  invariant(depth >= 0);
-
-  if (0 == depth) {
-    // The root (depth == 0) is is special, and is *always* a Branch.
-    if (!root)
-      root = std::make_unique<Branch>();
-    return {&root->getAsBranch()};
-  }
-
-  // Recursively get all branches of previous depth
-  auto prevBranches = getAllBranchesOfDepth(depth - 1);
-
-  // Early return in case of no branches on previous depth
-  if (prevBranches.empty())
-    return {};
-
-  // We will have at most twice as much branches as at the previous depth.
-  decltype(prevBranches) branches;
-  branches.reserve(2U * prevBranches.size());
-
-  for (const auto& prevBranch : prevBranches) {
-    invariant(prevBranch);
-
-    prevBranch->forEachNode([&branches](std::unique_ptr<Node>* n) {
-      invariant(n);
-      // If the Node is vacant, make it a branch.
-      // The user was supposed to create all the required Leafs before.
-      // We shall prune Leaf-less branches at the end
-      if (!(*n))
-        *n = std::make_unique<Branch>();
-      // If this is a branch, add it to the list.
-      if (Node::Type::Branch == static_cast<typename Node::Type>(**n))
-        branches.emplace_back(&((*n)->getAsBranch()));
-      return false; // keep going;
-    });
-  }
-  assert(branches.size() <= 2U * prevBranches.size());
-
-  return branches;
-}
-
-template <typename T>
-std::vector<std::unique_ptr<typename BinaryHuffmanTree<T>::Node>*>
-BinaryHuffmanTree<T>::getAllVacantNodesAtDepth(int depth) {
-  invariant(depth > 0);
-
-  // Get all branches of previous depth
-  auto prevBranches = getAllBranchesOfDepth(depth - 1);
-
-  // Early return in case of no branches on previous depth
-  if (prevBranches.empty())
-    return {};
-
-  // We will have at most two nodes per each branch on the previous depth.
-  std::vector<std::unique_ptr<BinaryHuffmanTree<T>::Node>*> nodes;
-  nodes.reserve(2U * prevBranches.size());
-
-  for (const auto& prevBranch : prevBranches) {
-    invariant(prevBranch);
-
-    auto& b = prevBranch->getAsBranch();
-
-    b.forEachNode([&nodes](std::unique_ptr<Node>* n) {
-      invariant(n);
-      if (!(*n)) // If there is no node already, then record it.
-        nodes.emplace_back(n);
-      return false; // keep going;
-    });
-  }
-  assert(nodes.size() <= 2U * prevBranches.size());
-
-  return nodes;
-}
-
-template <typename T> void BinaryHuffmanTree<T>::pruneLeaflessBranches() {
-  Branch::pruneLeaflessBranches(&root);
+  // And add this node/leaf to tree in the given position
+  bud = std::make_unique<Leaf>(value);
 }
 
 } // namespace rawspeed

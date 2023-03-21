@@ -43,7 +43,7 @@ public:
   using Traits = HuffmanTableTraits<HuffmanTableTag>;
 
 private:
-  BinaryHuffmanTree<typename Traits::CodeValueTy> tree;
+  BinaryHuffmanTree<HuffmanTableTag> tree;
 
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol,
@@ -70,7 +70,7 @@ private:
       // What is the last bit, which we have just read?
 
       // NOTE: The order *IS* important! Left to right, zero to one!
-      const auto& newNode = !bit ? top->zero : top->one;
+      const auto& newNode = top->buds[bit];
 
       if (!newNode) {
         // Got nothing in this direction.
@@ -94,39 +94,16 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    invariant((!std::is_same_v<
-               HuffmanTableTag,
-               VC5HuffmanTableTag>)&&"FIXME: this implementation allocates too "
-                                     "much memory when used with that flavour "
-                                     "during fuzzing");
-
     AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
 
-    auto currValue = Base::codeValues.cbegin();
-    for (auto codeLen = 1UL; codeLen < Base::nCodesPerLength.size();
-         codeLen++) {
-      const auto nCodesForCurrLen = Base::nCodesPerLength[codeLen];
+    // Figure C.1: make table of Huffman code length for each symbol
+    // Figure C.2: generate the codes themselves
+    std::vector<typename Base::CodeSymbol> symbols =
+        Base::generateCodeSymbols();
+    assert(symbols.size() == Base::maxCodesCount());
 
-      auto nodes = tree.getAllVacantNodesAtDepth(codeLen);
-      if (nodes.size() < nCodesForCurrLen) {
-        ThrowRDE("Got too many (%u) codes for len %lu, can only have %zu codes",
-                 nCodesForCurrLen, codeLen, nodes.size());
-      }
-
-      // Make first nCodesForCurrLen nodes Leafs
-      std::for_each(nodes.cbegin(), std::next(nodes.cbegin(), nCodesForCurrLen),
-                    [&currValue](auto* node) {
-                      *node = std::make_unique<typename decltype(tree)::Leaf>(
-                          *currValue);
-                      std::advance(currValue, 1);
-                    });
-    }
-
-    assert(Base::codeValues.cend() == currValue);
-
-    // And get rid of all the branches that do not lead to Leafs.
-    // It is crucial to detect degenerate codes at the earliest.
-    tree.pruneLeaflessBranches();
+    for (unsigned codeIndex = 0; codeIndex != symbols.size(); ++codeIndex)
+      tree.add(symbols[codeIndex], Base::codeValues[codeIndex]);
   }
 
   template <typename BIT_STREAM>
