@@ -20,20 +20,20 @@
 
 #pragma once
 
-#include "adt/Invariant.h" // for invariant
-#include "decompressors/AbstractHuffmanTable.h"
-#include <cassert>          // for assert
-#include <functional>       // for reference_wrapper
-#include <initializer_list> // IWYU pragma: keep
-#include <memory>           // for unique_ptr, make_unique
+#include "adt/Invariant.h"                    // for invariant
+#include "decompressors/AbstractPrefixCode.h" // for AbstractPrefixCode
+#include <cassert>                            // for assert
+#include <functional>                         // for reference_wrapper
+#include <initializer_list>                   // IWYU pragma: keep
+#include <memory>                             // for unique_ptr, make_unique
 
 namespace rawspeed {
 
-template <typename HuffmanTableTag>
+template <typename CodeTag>
 class BinaryHuffmanTree final /* : public BinarySearchTree */ {
 public:
-  using Traits = HuffmanTableTraits<HuffmanTableTag>;
-  using CodeSymbol = typename AbstractHuffmanTable<HuffmanTableTag>::CodeSymbol;
+  using Traits = typename AbstractPrefixCode<CodeTag>::Traits;
+  using CodeSymbol = typename AbstractPrefixCode<CodeTag>::CodeSymbol;
   using CodeTy = typename Traits::CodeTy;
 
   struct Branch;
@@ -82,9 +82,8 @@ public:
   std::unique_ptr<Node> root;
 };
 
-template <typename HuffmanTableTag>
-void BinaryHuffmanTree<HuffmanTableTag>::add(const CodeSymbol symbol,
-                                             CodeTy value) {
+template <typename CodeTag>
+void BinaryHuffmanTree<CodeTag>::add(const CodeSymbol symbol, CodeTy value) {
   invariant(symbol.code_len > 0);
   invariant(symbol.code_len <= Traits::MaxCodeLenghtBits);
 

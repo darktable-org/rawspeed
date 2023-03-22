@@ -43,8 +43,8 @@
 #include <vector>                              // for vector
 
 namespace rawspeed {
-struct BaselineHuffmanTableTag;
-struct VC5HuffmanTableTag;
+struct BaselineCodeTag;
+struct VC5CodeTag;
 } // namespace rawspeed
 
 template <typename Pump, bool IsFullDecode, typename HT>
@@ -99,10 +99,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     // Which flavor?
     switch (bs.getByte()) {
     case 0:
-      checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
+      checkFlavour<rawspeed::BaselineCodeTag>(bs);
       break;
     case 1:
-      checkFlavour<rawspeed::VC5HuffmanTableTag>(bs);
+      checkFlavour<rawspeed::VC5CodeTag>(bs);
       break;
     default:
       ThrowRSE("Unknown flavor");

@@ -32,10 +32,9 @@
 namespace rawspeed {
 class Buffer;
 
-template <typename HuffmanTableTag = BaselineHuffmanTableTag>
-class DummyHuffmanTable final {
+template <typename CodeTag = BaselineCodeTag> class DummyHuffmanTable final {
 public:
-  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  using Traits = CodeTraits<BaselineCodeTag>;
 
 private:
   bool fullDecode = true;

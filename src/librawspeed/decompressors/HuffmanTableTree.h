@@ -36,14 +36,14 @@
 
 namespace rawspeed {
 
-template <typename HuffmanTableTag>
-class HuffmanTableTree final : public AbstractHuffmanTable<HuffmanTableTag> {
+template <typename CodeTag>
+class HuffmanTableTree final : public AbstractHuffmanTable<CodeTag> {
 public:
-  using Base = AbstractHuffmanTable<HuffmanTableTag>;
-  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  using Base = AbstractHuffmanTable<CodeTag>;
+  using Traits = typename Base::Traits;
 
 private:
-  BinaryHuffmanTree<HuffmanTableTag> tree;
+  BinaryHuffmanTree<CodeTag> tree;
 
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol,
@@ -94,7 +94,7 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
+    AbstractHuffmanTable<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
     // Figure C.1: make table of Huffman code length for each symbol
     // Figure C.2: generate the codes themselves

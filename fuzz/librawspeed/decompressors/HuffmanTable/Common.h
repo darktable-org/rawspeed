@@ -27,7 +27,7 @@
 #include <type_traits>     // for is_same
 
 namespace rawspeed {
-template <typename HuffmanTableTag> class DummyHuffmanTable;
+template <typename CodeTag> class DummyHuffmanTable;
 } // namespace rawspeed
 
 template <typename T> static constexpr int getHuffmanTableMaxLength() {
