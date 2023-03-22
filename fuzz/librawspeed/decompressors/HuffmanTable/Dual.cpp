@@ -30,7 +30,8 @@
 #include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
 #include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableVector.h"  //  IWYU pragma: keep
+#include "decompressors/HuffmanTableTree.h"    // IWYU pragma: keep
+#include "decompressors/HuffmanTableVector.h"  // IWYU pragma: keep
 #include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
 #include "io/BitPumpMSB.h"                     // for BitStream<>::fillCache
 #include "io/BitPumpMSB32.h"                   // for BitStream<>::fillCache
@@ -43,6 +44,7 @@
 #include <cstdint>                             // for uint8_t
 #include <cstdio>                              // for size_t
 #include <initializer_list>                    // for initializer_list
+#include <optional>                            // for optional
 #include <vector>                              // for vector
 
 namespace rawspeed {
@@ -106,23 +108,23 @@ static void checkPump(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
     workloop<Pump, /*IsFullDecode=*/false>(bs0, bs1, ht0, ht1);
 }
 
-template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
+template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
   rawspeed::ByteStream bs0 = bs;
   rawspeed::ByteStream bs1 = bs;
 
   bool failure0 = false;
   bool failure1 = false;
 
-  rawspeed::IMPL0<Tag> ht0;
-  rawspeed::IMPL1<Tag> ht1;
+  std::optional<rawspeed::IMPL0<CodeTag>> ht0;
+  std::optional<rawspeed::IMPL1<CodeTag>> ht1;
 
   try {
-    ht0 = createHuffmanTable<decltype(ht0)>(bs0);
+    ht0 = createHuffmanTable<rawspeed::IMPL0<CodeTag>>(bs0);
   } catch (const rawspeed::RawspeedException&) {
     failure0 = true;
   }
   try {
-    ht1 = createHuffmanTable<decltype(ht1)>(bs1);
+    ht1 = createHuffmanTable<rawspeed::IMPL1<CodeTag>>(bs1);
   } catch (const rawspeed::RawspeedException&) {
     failure1 = true;
   }
@@ -143,13 +145,13 @@ template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
   bs1.skipBytes(1);
   switch (bs0.getByte()) {
   case 0:
-    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, *ht0, *ht1);
     break;
   case 1:
-    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, *ht0, *ht1);
     break;
   case 2:
-    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, *ht0, *ht1);
     break;
   default:
     ThrowRSE("Unknown bit pump");

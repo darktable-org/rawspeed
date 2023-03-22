@@ -234,6 +234,9 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
     if (huff[htIndex] != nullptr)
       ThrowRDE("Duplicate table definition");
 
+    // Temporary table, used during parsing LJpeg.
+    AbstractHuffmanTable<BaselineCodeTag> ht_;
+
     // copy 16 bytes from input stream to number of codes per length table
     uint32_t nCodes = ht_.setNCodesPerLength(dht.getBuffer(16));
 
@@ -247,13 +250,17 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
         Array1DRef<const uint8_t>(codesBuf.begin(), codesBuf.getSize()));
 
     // see if we already have a HuffmanTable with the same codes
-    for (const auto& i : huffmanTableStore)
-      if (*i == ht_)
-        huff[htIndex] = i.get();
+    assert(huffmanTableStore.size() == huffmanCodeStore.size());
+    for (unsigned index = 0; index != huffmanTableStore.size(); ++index) {
+      if (*huffmanCodeStore[index] == ht_)
+        huff[htIndex] = huffmanTableStore[index].get();
+    }
 
     if (!huff[htIndex]) {
+      huffmanCodeStore.emplace_back(std::make_unique<decltype(ht_)>(ht_));
       // setup new ht_ and put it into the store
-      auto dHT = std::make_unique<HuffmanTable<>>(ht_);
+      auto code = ht_.operator PrefixCode<BaselineCodeTag>();
+      auto dHT = std::make_unique<HuffmanTable<>>(std::move(code));
       dHT->setup(fullDecodeHT, fixDng16Bug);
       huff[htIndex] = dHT.get();
       huffmanTableStore.emplace_back(std::move(dHT));

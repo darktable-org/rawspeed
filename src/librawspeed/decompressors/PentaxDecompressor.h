@@ -42,8 +42,9 @@ public:
   void decompress(ByteStream data) const;
 
 private:
-  static HuffmanTable<> SetupHuffmanTable_Legacy();
-  static HuffmanTable<> SetupHuffmanTable_Modern(ByteStream stream);
+  static PrefixCode<BaselineCodeTag> SetupHuffmanTable_Legacy();
+  static PrefixCode<BaselineCodeTag>
+  SetupHuffmanTable_Modern(ByteStream stream);
   static HuffmanTable<> SetupHuffmanTable(std::optional<ByteStream> metaData);
 
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>

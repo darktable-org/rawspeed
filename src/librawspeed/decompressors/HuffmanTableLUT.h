@@ -21,17 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for extractHighBits
-#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "decompressors/HuffmanTableLookup.h"   // for HuffmanTableLookup
-#include "io/BitStream.h"                       // for BitStreamTraits
-#include <cassert>                              // for invariant
-#include <cstddef>                              // for size_t
-#include <cstdint>                              // for int32_t, uint16_t
-#include <memory>                               // for allocator_traits<>::...
-#include <tuple>                                // for tie
-#include <vector>                               // for vector
+#include "common/Common.h"                    // for extractHighBits
+#include "decoders/RawDecoderException.h"     // for ThrowException, Thro...
+#include "decompressors/HuffmanTableLookup.h" // for HuffmanTableLookup
+#include "io/BitStream.h"                     // for BitStreamTraits
+#include <cassert>                            // for invariant
+#include <cstddef>                            // for size_t
+#include <cstdint>                            // for int32_t, uint16_t
+#include <memory>                             // for allocator_traits<>::...
+#include <tuple>                              // for tie
+#include <vector>                             // for vector
 // IWYU pragma: no_include <algorithm>
 
 /*
@@ -71,8 +70,11 @@ namespace rawspeed {
 template <typename CodeTag>
 class HuffmanTableLUT final : public HuffmanTableLookup<CodeTag> {
 public:
+  using Tag = CodeTag;
   using Base = HuffmanTableLookup<CodeTag>;
   using Traits = typename Base::Traits;
+
+  using Base::Base;
 
 private:
   // The code can be compiled with two different decode lookup table layouts.
@@ -102,21 +104,20 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    const std::vector<typename Base::CodeSymbol> symbols =
-        HuffmanTableLookup<CodeTag>::setup(fullDecode_, fixDNGBug16_);
+    HuffmanTableLookup<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above
     decodeLookup.resize(1 << LookupDepth);
-    for (size_t i = 0; i < symbols.size(); i++) {
-      uint8_t code_l = symbols[i].code_len;
+    for (size_t i = 0; i < Base::code.symbols.size(); i++) {
+      uint8_t code_l = Base::code.symbols[i].code_len;
       if (code_l > static_cast<int>(LookupDepth))
         break;
 
-      uint16_t ll = symbols[i].code << (LookupDepth - code_l);
+      uint16_t ll = Base::code.symbols[i].code << (LookupDepth - code_l);
       uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
       static_assert(Traits::MaxCodeValueLenghtBits <= 16);
-      uint16_t diff_l = Base::codeValues[i];
+      uint16_t diff_l = Base::code.codeValues[i];
       for (uint16_t c = ll; c <= ul; c++) {
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
