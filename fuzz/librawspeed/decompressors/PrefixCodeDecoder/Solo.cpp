@@ -23,7 +23,7 @@
 #endif
 
 #include "common/RawspeedException.h"        // for ThrowException, ThrowRSE
-#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree<>::...
+#include "decompressors/BinaryPrefixTree.h"  // for BinaryPrefixTree<>::...
 #include "decompressors/PrefixCodeDecoder.h" // IWYU pragma: keep
 #include "decompressors/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
 #include "decompressors/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep

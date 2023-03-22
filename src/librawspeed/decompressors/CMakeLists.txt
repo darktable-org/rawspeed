@@ -7,7 +7,7 @@ FILE(GLOB SOURCES
   "AbstractPrefixCode.h"
   "AbstractPrefixCodeDecoder.h"
   "AbstractSamsungDecompressor.h"
-  "BinaryHuffmanTree.h"
+  "BinaryPrefixTree.h"
   "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
   "Cr2LJpegDecoder.cpp"

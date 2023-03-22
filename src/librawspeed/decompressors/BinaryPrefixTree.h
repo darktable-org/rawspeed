@@ -30,7 +30,7 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class BinaryHuffmanTree final /* : public BinarySearchTree */ {
+class BinaryPrefixTree final /* : public BinarySearchTree */ {
 public:
   using Traits = typename AbstractPrefixCode<CodeTag>::Traits;
   using CodeSymbol = typename AbstractPrefixCode<CodeTag>::CodeSymbol;
@@ -83,7 +83,7 @@ public:
 };
 
 template <typename CodeTag>
-void BinaryHuffmanTree<CodeTag>::add(const CodeSymbol symbol, CodeTy value) {
+void BinaryPrefixTree<CodeTag>::add(const CodeSymbol symbol, CodeTy value) {
   invariant(symbol.code_len > 0);
   invariant(symbol.code_len <= Traits::MaxCodeLenghtBits);
 

@@ -23,16 +23,16 @@
 
 #include "decoders/RawDecoderException.h" // for ThrowException, Thro...
 #include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
-#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree<>:...
-#include "io/BitStream.h"                    // for BitStreamTraits
-#include <algorithm>                         // for max, for_each, copy
-#include <cassert>                           // for invariant
-#include <initializer_list>                  // for initializer_list
-#include <iterator>                          // for advance, next
-#include <memory>                            // for unique_ptr, make_unique
-#include <tuple>                             // for tie
-#include <utility>                           // for pair
-#include <vector>                            // for vector, vector<>::co...
+#include "decompressors/BinaryPrefixTree.h" // for BinaryPrefixTree<>:...
+#include "io/BitStream.h"                   // for BitStreamTraits
+#include <algorithm>                        // for max, for_each, copy
+#include <cassert>                          // for invariant
+#include <initializer_list>                 // for initializer_list
+#include <iterator>                         // for advance, next
+#include <memory>                           // for unique_ptr, make_unique
+#include <tuple>                            // for tie
+#include <utility>                          // for pair
+#include <vector>                           // for vector, vector<>::co...
 
 namespace rawspeed {
 
@@ -46,7 +46,7 @@ public:
   using Base::Base;
 
 private:
-  BinaryHuffmanTree<CodeTag> tree;
+  BinaryPrefixTree<CodeTag> tree;
 
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol,

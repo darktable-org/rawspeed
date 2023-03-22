@@ -25,7 +25,7 @@
 #error IMPL1 must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree<>::...
+#include "decompressors/BinaryPrefixTree.h"  // for BinaryPrefixTree<>::...
 #include "decompressors/PrefixCodeDecoder.h" // IWYU pragma: keep
 #include "decompressors/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
 #include "decompressors/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep
