@@ -20,7 +20,7 @@
 
 #include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
 #include "adt/Array1DRef.h"             // for Array1DRef
-#include "decompressors/AbstractHuffmanTable.h"
+#include "decompressors/HuffmanCode.h"
 #include "io/BitPumpMSB.h"  // for BitStream<>::fillCache, BitP...
 #include "io/BitStream.h"   // for BitStream
 #include "io/Buffer.h"      // for Buffer, DataBuffer
@@ -50,18 +50,18 @@ namespace rawspeed_test {
 auto genHTFull =
     [](std::initializer_list<uint8_t>&& nCodesPerLength,
        std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable<> {
-  rawspeed::AbstractHuffmanTable<rawspeed::BaselineCodeTag> ht_;
+  rawspeed::HuffmanCode<rawspeed::BaselineCodeTag> hc;
 
   std::vector<uint8_t> lv(nCodesPerLength.begin(), nCodesPerLength.end());
   lv.resize(16);
   Buffer lb(lv.data(), lv.size());
-  ht_.setNCodesPerLength(lb);
+  hc.setNCodesPerLength(lb);
 
   std::vector<uint8_t> cv(codeValues.begin(), codeValues.end());
   rawspeed::Array1DRef<uint8_t> cb(cv.data(), cv.size());
-  ht_.setCodeValues(cb);
+  hc.setCodeValues(cb);
 
-  auto code = ht_.operator rawspeed::PrefixCode<rawspeed::BaselineCodeTag>();
+  auto code = hc.operator rawspeed::PrefixCode<rawspeed::BaselineCodeTag>();
   HuffmanTable<> ht(std::move(code));
   return ht;
 };

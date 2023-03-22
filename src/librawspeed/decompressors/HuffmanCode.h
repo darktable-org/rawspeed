@@ -40,13 +40,13 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class AbstractHuffmanTable : public AbstractPrefixCode<CodeTag> {
+class HuffmanCode final : public AbstractPrefixCode<CodeTag> {
 public:
   using Parent = AbstractPrefixCode<CodeTag>;
   using CodeSymbol = typename AbstractPrefixCode<CodeTag>::CodeSymbol;
   using Traits = typename AbstractPrefixCode<CodeTag>::Traits;
 
-  AbstractHuffmanTable() = default;
+  HuffmanCode() = default;
 
 protected:
   [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodeLength() const {
@@ -63,6 +63,7 @@ protected:
     return std::accumulate(nCodesPerLength.begin(), nCodesPerLength.end(), 0U);
   }
 
+public:
   [[nodiscard]] std::vector<CodeSymbol> generateCodeSymbols() const {
     std::vector<CodeSymbol> symbols;
 
@@ -91,8 +92,7 @@ protected:
     return symbols;
   }
 
-public:
-  bool operator==(const AbstractHuffmanTable& other) const {
+  bool operator==(const HuffmanCode& other) const {
     return nCodesPerLength == other.nCodesPerLength &&
            this->codeValues == other.codeValues;
   }

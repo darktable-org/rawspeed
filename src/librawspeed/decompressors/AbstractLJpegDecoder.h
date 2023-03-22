@@ -25,7 +25,7 @@
 #include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
+#include "decompressors/HuffmanCode.h"          // for HuffmanCode
 #include "decompressors/HuffmanTable.h"         // for HuffmanTable
 #include "io/ByteStream.h"                      // for ByteStream
 #include <algorithm>                            // for fill_n, fill
@@ -151,7 +151,7 @@ public:
 
 class AbstractLJpegDecoder : public AbstractDecompressor {
   // std::vector of unique HTs, to not recreate HT, but cache them
-  std::vector<std::unique_ptr<const AbstractHuffmanTable<BaselineCodeTag>>>
+  std::vector<std::unique_ptr<const HuffmanCode<BaselineCodeTag>>>
       huffmanCodeStore;
   std::vector<std::unique_ptr<const HuffmanTable<>>> huffmanTableStore;
 

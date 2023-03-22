@@ -1,5 +1,5 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
-  "AbstractHuffmanTableTest.cpp"
+  "HuffmanCodeTest.cpp"
   "HuffmanTableTest.cpp"
 )
 

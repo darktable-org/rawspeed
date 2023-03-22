@@ -26,7 +26,7 @@
 #include "common/Common.h"                // for extractHighBits, clampBits
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h"
+#include "decompressors/HuffmanCode.h"
 #include "decompressors/HuffmanTable.h" // for HuffmanTable
 #include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::f...
 #include "io/Buffer.h"                  // for Buffer
@@ -449,13 +449,13 @@ Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
 template <>
 HuffmanTable<>
 NikonDecompressor::createHuffmanTable<HuffmanTable<>>(uint32_t huffSelect) {
-  AbstractHuffmanTable<BaselineCodeTag> ht_;
+  HuffmanCode<BaselineCodeTag> hc;
   uint32_t count =
-      ht_.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
-  ht_.setCodeValues(
+      hc.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
+  hc.setCodeValues(
       Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
 
-  auto code = ht_.operator PrefixCode<BaselineCodeTag>();
+  auto code = hc.operator PrefixCode<BaselineCodeTag>();
   HuffmanTable<> ht(std::move(code));
   ht.setup(true, false);
   return ht;

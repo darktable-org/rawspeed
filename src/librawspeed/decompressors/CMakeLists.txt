@@ -2,7 +2,7 @@ FILE(GLOB SOURCES
   "AbstractDecompressor.h"
   "AbstractDngDecompressor.cpp"
   "AbstractDngDecompressor.h"
-  "AbstractHuffmanTable.h"
+  "HuffmanCode.h"
   "AbstractLJpegDecoder.cpp"
   "AbstractLJpegDecoder.h"
   "AbstractPrefixCode.h"

@@ -21,23 +21,23 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "adt/Array1DRef.h"                     // for Array1DRef
-#include "adt/Array2DRef.h"                     // for Array2DRef
-#include "adt/Invariant.h"                      // for invariant
-#include "adt/Point.h"                          // for iPoint2D
-#include "common/Common.h"                      // for isIntN
-#include "common/RawImage.h"                    // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"       // for ThrowException, ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable, HuffmanT...
-#include "io/BitPumpJPEG.h"                     // for BitPumpJPEG, BitStrea...
-#include "io/Buffer.h"                          // for Buffer
-#include "io/ByteStream.h"                      // for ByteStream
-#include <algorithm>                            // for fill, copy, fill_n, max
-#include <array>                                // for array
-#include <cstdint>                              // for uint8_t, uint16_t, int...
-#include <tuple>                                // for array
-#include <vector>                               // for vector
+#include "adt/Array1DRef.h"               // for Array1DRef
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D
+#include "common/Common.h"                // for isIntN
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "decompressors/HuffmanCode.h"    // for HuffmanCode
+#include "decompressors/HuffmanTable.h"   // for HuffmanTable, HuffmanT...
+#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStrea...
+#include "io/Buffer.h"                    // for Buffer
+#include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for fill, copy, fill_n, max
+#include <array>                          // for array
+#include <cstdint>                        // for uint8_t, uint16_t, int...
+#include <tuple>                          // for array
+#include <vector>                         // for vector
 
 using std::array;
 
@@ -76,11 +76,11 @@ HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
                                             const uint8_t* values) {
   invariant(ncpl);
 
-  AbstractHuffmanTable<BaselineCodeTag> ht_;
-  auto count = ht_.setNCodesPerLength(Buffer(ncpl, 16));
-  ht_.setCodeValues(Array1DRef<const uint8_t>(values, count));
+  HuffmanCode<BaselineCodeTag> hc;
+  auto count = hc.setNCodesPerLength(Buffer(ncpl, 16));
+  hc.setCodeValues(Array1DRef<const uint8_t>(values, count));
 
-  auto code = ht_.operator PrefixCode<BaselineCodeTag>();
+  auto code = hc.operator PrefixCode<BaselineCodeTag>();
   HuffmanTable<> ht(std::move(code));
   ht.setup(/*fullDecode_=*/false, false);
   return ht;

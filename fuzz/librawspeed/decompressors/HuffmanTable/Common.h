@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "decompressors/AbstractHuffmanTable.h"
+#include "decompressors/HuffmanCode.h"
 #include "io/ByteStream.h" // for ByteStream
 #include <type_traits>     // for is_same
 
@@ -37,16 +37,16 @@ getCodeValues(rawspeed::ByteStream& bs, unsigned numCodeValues) {
 
 template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   using CodeTag = typename T::Tag;
-  rawspeed::AbstractHuffmanTable<CodeTag> ht_;
+  rawspeed::HuffmanCode<CodeTag> hc;
 
   // first bytes are consumed as n-codes-per-length
   const auto count =
-      ht_.setNCodesPerLength(bs.getBuffer(T::Traits::MaxCodeLenghtBits));
+      hc.setNCodesPerLength(bs.getBuffer(T::Traits::MaxCodeLenghtBits));
 
   if (count) {
     // and then count more bytes consumed as code values
     const auto codesBuf = getCodeValues<T>(bs, count);
-    ht_.setCodeValues(
+    hc.setCodeValues(
         rawspeed::Array1DRef<const typename T::Traits::CodeValueTy>(
             codesBuf.data(), codesBuf.size()));
   }
@@ -58,7 +58,7 @@ template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
   if (T::Traits::SupportsFullDecode)
     fullDecode = bs.getByte() != 0;
 
-  auto code = ht_.operator rawspeed::PrefixCode<CodeTag>();
+  auto code = hc.operator rawspeed::PrefixCode<CodeTag>();
   T ht(std::move(code));
   ht.setup(fullDecode, fixDNGBug16);
 
