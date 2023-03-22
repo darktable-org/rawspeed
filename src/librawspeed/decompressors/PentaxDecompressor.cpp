@@ -26,14 +26,15 @@
 #include "common/Common.h"                // for extractHighBits, isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for max, fill, fill_n, copy
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
-#include <vector>                         // for vector
+#include "decompressors/AbstractHuffmanTable.h"
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::f...
+#include "io/Buffer.h"                  // for Buffer
+#include "io/ByteStream.h"              // for ByteStream
+#include <algorithm>                    // for max, fill, fill_n, copy
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint8_t, uint32_t, uint16_t
+#include <vector>                       // for vector
 
 namespace rawspeed {
 
@@ -59,19 +60,23 @@ PentaxDecompressor::PentaxDecompressor(const RawImage& img,
   }
 }
 
-HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Legacy() {
-  HuffmanTable<> ht;
+PrefixCode<BaselineCodeTag> PentaxDecompressor::SetupHuffmanTable_Legacy() {
+  // Temporary table, used during parsing LJpeg.
+  AbstractHuffmanTable<BaselineCodeTag> ht_;
 
   /* Initialize with legacy data */
-  auto nCodes = ht.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
+  auto nCodes = ht_.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
   invariant(nCodes == 13); // see pentax_tree definition
-  ht.setCodeValues(Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
+  ht_.setCodeValues(
+      Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
 
-  return ht;
+  return ht_.operator PrefixCode<BaselineCodeTag>();
 }
 
-HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
-  HuffmanTable<> ht;
+PrefixCode<BaselineCodeTag>
+PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
+  // Temporary table, used during parsing LJpeg.
+  AbstractHuffmanTable<BaselineCodeTag> ht_;
 
   const uint32_t depth = stream.getU16() + 12;
   if (depth > 15)
@@ -102,7 +107,7 @@ HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
 
   assert(nCodesPerLength.size() == 17);
   assert(nCodesPerLength[0] == 0);
-  auto nCodes = ht.setNCodesPerLength(Buffer(&nCodesPerLength[1], 16));
+  auto nCodes = ht_.setNCodesPerLength(Buffer(&nCodesPerLength[1], 16));
   invariant(nCodes == depth);
 
   std::vector<uint8_t> codeValues;
@@ -124,20 +129,21 @@ HuffmanTable<> PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   }
 
   assert(codeValues.size() == nCodes);
-  ht.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
+  ht_.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
 
-  return ht;
+  return ht_.operator PrefixCode<BaselineCodeTag>();
 }
 
 HuffmanTable<>
 PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
-  HuffmanTable<> ht;
+  std::optional<PrefixCode<BaselineCodeTag>> code;
 
   if (metaData)
-    ht = SetupHuffmanTable_Modern(*metaData);
+    code = SetupHuffmanTable_Modern(*metaData);
   else
-    ht = SetupHuffmanTable_Legacy();
+    code = SetupHuffmanTable_Legacy();
 
+  HuffmanTable<> ht(std::move(*code));
   ht.setup(true, false);
 
   return ht;

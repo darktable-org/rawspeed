@@ -21,22 +21,23 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable, HuffmanTableLUT
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for fill, copy, fill_n, max
-#include <array>                          // for array
-#include <cstdint>                        // for uint8_t, uint16_t, int16_t
-#include <tuple>                          // for array
-#include <vector>                         // for vector
+#include "adt/Array1DRef.h"                     // for Array1DRef
+#include "adt/Array2DRef.h"                     // for Array2DRef
+#include "adt/Invariant.h"                      // for invariant
+#include "adt/Point.h"                          // for iPoint2D
+#include "common/Common.h"                      // for isIntN
+#include "common/RawImage.h"                    // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"       // for ThrowException, ThrowRDE
+#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
+#include "decompressors/HuffmanTable.h"         // for HuffmanTable, HuffmanT...
+#include "io/BitPumpJPEG.h"                     // for BitPumpJPEG, BitStrea...
+#include "io/Buffer.h"                          // for Buffer
+#include "io/ByteStream.h"                      // for ByteStream
+#include <algorithm>                            // for fill, copy, fill_n, max
+#include <array>                                // for array
+#include <cstdint>                              // for uint8_t, uint16_t, int...
+#include <tuple>                                // for array
+#include <vector>                               // for vector
 
 using std::array;
 
@@ -44,7 +45,7 @@ namespace rawspeed {
 
 CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
-    : mRaw(img), lowbits(lowbits_) {
+    : mRaw(img), mHuff(initHuffTables(dec_table)), lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -69,19 +70,19 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
 
   // Rest is the high bits.
   rawInput = rawData.getStream(rawData.getRemainSize());
-
-  mHuff = initHuffTables(dec_table);
 }
 
 HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
                                             const uint8_t* values) {
   invariant(ncpl);
 
-  HuffmanTable<> ht;
-  auto count = ht.setNCodesPerLength(Buffer(ncpl, 16));
-  ht.setCodeValues(Array1DRef<const uint8_t>(values, count));
-  ht.setup(/*fullDecode_=*/false, false);
+  AbstractHuffmanTable<BaselineCodeTag> ht_;
+  auto count = ht_.setNCodesPerLength(Buffer(ncpl, 16));
+  ht_.setCodeValues(Array1DRef<const uint8_t>(values, count));
 
+  auto code = ht_.operator PrefixCode<BaselineCodeTag>();
+  HuffmanTable<> ht(std::move(code));
+  ht.setup(/*fullDecode_=*/false, false);
   return ht;
 }
 

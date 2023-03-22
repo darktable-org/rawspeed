@@ -20,19 +20,20 @@
 
 #include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
 #include "adt/Array1DRef.h"                     // for Array1DRef
-#include "io/Buffer.h"                          // for Buffer
-#include <algorithm>                            // for max, min
-#include <bitset>                               // for bitset
-#include <cassert>                              // for assert
-#include <cstdint>                              // for uint8_t, uint32_t
-#include <initializer_list>                     // for initializer_list
-#include <ostream>                              // for operator<<, ostream
-#include <string>                               // for allocator, basic_string
-#include <tuple>                                // for make_tuple, get, tuple
-#include <type_traits>                          // for __decay_and_strip
-#include <utility>                              // for move
-#include <vector>                               // for vector
-#include <gtest/gtest.h>                        // for ParamIteratorInterface
+#include "decompressors/AbstractPrefixCodeDecoder.h"
+#include "io/Buffer.h"      // for Buffer
+#include <algorithm>        // for max, min
+#include <bitset>           // for bitset
+#include <cassert>          // for assert
+#include <cstdint>          // for uint8_t, uint32_t
+#include <initializer_list> // for initializer_list
+#include <ostream>          // for operator<<, ostream
+#include <string>           // for allocator, basic_string
+#include <tuple>            // for make_tuple, get, tuple
+#include <type_traits>      // for __decay_and_strip
+#include <utility>          // for move
+#include <vector>           // for vector
+#include <gtest/gtest.h>    // for ParamIteratorInterface
 
 namespace rawspeed {
 struct BaselineCodeTag;
@@ -547,7 +548,9 @@ static const SignExtendDataType signExtendData[]{
 INSTANTIATE_TEST_CASE_P(SignExtendTest, SignExtendTest,
                         ::testing::ValuesIn(signExtendData));
 TEST_P(SignExtendTest, SignExtendTest) {
-  ASSERT_EQ(AbstractHuffmanTable<BaselineCodeTag>::extend(diff, len), value);
+  ASSERT_EQ(
+      rawspeed::AbstractPrefixCodeDecoder<BaselineCodeTag>::extend(diff, len),
+      value);
 }
 
 using generateCodeSymbolsDataType =
@@ -615,69 +618,5 @@ TEST_P(generateCodeSymbolsTest, generateCodeSymbolsTest) {
 
   ASSERT_EQ(generateCodeSymbols(), expectedSymbols);
 }
-
-class DummyHuffmanTableTest : public AbstractHuffmanTable<BaselineCodeTag>,
-                              public ::testing::Test {};
-using DummyHuffmanTableDeathTest = DummyHuffmanTableTest;
-
-#ifndef NDEBUG
-TEST_F(DummyHuffmanTableDeathTest, VerifyCodeSymbolsTest) {
-  {
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b0, 1}};
-    ASSERT_EXIT(
-        {
-          VerifyCodeSymbols(s);
-
-          exit(0);
-        },
-        ::testing::ExitedWithCode(0), "");
-  }
-  {
-    // Duplicates are not ok.
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b0, 1},
-                                                                     {0b0, 1}};
-    ASSERT_DEATH({ VerifyCodeSymbols(s); },
-                 "all code symbols are globally ordered");
-  }
-  {
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b0, 1},
-                                                                     {0b1, 1}};
-    ASSERT_EXIT(
-        {
-          VerifyCodeSymbols(s);
-
-          exit(0);
-        },
-        ::testing::ExitedWithCode(0), "");
-  }
-  {
-    // Code Symbols are strictly increasing
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b1, 1},
-                                                                     {0b0, 1}};
-    ASSERT_DEATH({ VerifyCodeSymbols(s); },
-                 "all code symbols are globally ordered");
-  }
-  {
-    // Code Lengths are not decreasing
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b0, 2},
-                                                                     {0b1, 1}};
-    ASSERT_DEATH({ VerifyCodeSymbols(s); },
-                 "all code symbols are globally ordered");
-  }
-  {
-    // Reverse order
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b10, 2},
-                                                                     {0b0, 1}};
-    ASSERT_DEATH({ VerifyCodeSymbols(s); },
-                 "all code symbols are globally ordered");
-  }
-  {
-    // Can not have common prefixes
-    std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> s{{0b0, 1},
-                                                                     {0b01, 2}};
-    ASSERT_DEATH({ VerifyCodeSymbols(s); }, "!CodeSymbol::HaveCommonPrefix");
-  }
-}
-#endif
 
 } // namespace rawspeed_test

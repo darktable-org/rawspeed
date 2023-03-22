@@ -28,7 +28,8 @@
 #include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
 #include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
 #include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableVector.h"  //  IWYU pragma: keep
+#include "decompressors/HuffmanTableTree.h"    // IWYU pragma: keep
+#include "decompressors/HuffmanTableVector.h"  // IWYU pragma: keep
 #include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
 #include "io/BitPumpMSB.h"                     // for BitStream<>::fillCache
 #include "io/BitPumpMSB32.h"                   // for BitStream<>::fillCache
@@ -63,8 +64,8 @@ static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
     workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
 }
 
-template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
-  const auto ht = createHuffmanTable<rawspeed::IMPL<Tag>>(bs);
+template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
+  const auto ht = createHuffmanTable<rawspeed::IMPL<CodeTag>>(bs);
 
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans

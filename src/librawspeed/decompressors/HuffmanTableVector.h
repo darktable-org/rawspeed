@@ -21,27 +21,28 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "io/BitStream.h"                       // for BitStreamTraits
-#include <algorithm>                            // for max, fill_n
-#include <cassert>                              // for invariant
-#include <cstdint>                              // for uint64_t
-#include <tuple>                                // for tie
-#include <utility>                              // for pair
-#include <vector>                               // for vector
+#include "decoders/RawDecoderException.h"            // for ThrowRDE
+#include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
+#include "io/BitStream.h"                            // for BitStreamTraits
+#include <algorithm>                                 // for max, fill_n
+#include <cassert>                                   // for invariant
+#include <cstdint>                                   // for uint64_t
+#include <tuple>                                     // for tie
+#include <utility>                                   // for pair
+#include <vector>                                    // for vector
 
 namespace rawspeed {
 
 template <typename CodeTag>
-class HuffmanTableVector final : public AbstractHuffmanTable<CodeTag> {
+class HuffmanTableVector final : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
-  using Base = AbstractHuffmanTable<CodeTag>;
+  using Tag = CodeTag;
+  using Base = AbstractPrefixCodeDecoder<CodeTag>;
   using Traits = typename Base::Traits;
 
-private:
-  std::vector<typename Base::CodeSymbol> symbols;
+  using Base::Base;
 
+private:
   // Given this code len, which code id is the minimal?
   std::vector<unsigned int> extrCodeIdForLen; // index is length of code
 
@@ -68,15 +69,15 @@ private:
       // Given global ordering and the code length, we know the code id range.
       for (codeId = extrCodeIdForLen[partial.code_len];
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
-        const typename Base::CodeSymbol& symbol = symbols[codeId];
+        const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
         if (symbol == partial) // yay, found?
-          return {symbol, Base::codeValues[codeId]};
+          return {symbol, Base::code.codeValues[codeId]};
       }
 
       // Ok, but does any symbol have this same prefix?
       bool haveCommonPrefix = false;
-      for (; codeId < symbols.size(); codeId++) {
-        const typename Base::CodeSymbol& symbol = symbols[codeId];
+      for (; codeId < Base::code.symbols.size(); codeId++) {
+        const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
         haveCommonPrefix |= Base::CodeSymbol::HaveCommonPrefix(symbol, partial);
         if (haveCommonPrefix)
           break;
@@ -95,22 +96,17 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    AbstractHuffmanTable<CodeTag>::setup(fullDecode_, fixDNGBug16_);
+    AbstractPrefixCodeDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
-    // Figure C.1: make table of Huffman code length for each symbol
-    // Figure C.2: generate the codes themselves
-    symbols = Base::generateCodeSymbols();
-    assert(symbols.size() == Base::maxCodesCount());
-
-    extrCodeIdForLen.reserve(1U + Base::nCodesPerLength.size());
+    extrCodeIdForLen.reserve(1U + Base::code.nCodesPerLength.size());
     extrCodeIdForLen.resize(2); // for len 0 and 1, the min code id is always 0
-    for (auto codeLen = 1UL; codeLen < Base::nCodesPerLength.size();
+    for (auto codeLen = 1UL; codeLen < Base::code.nCodesPerLength.size();
          codeLen++) {
       auto minCodeId = extrCodeIdForLen.back();
-      minCodeId += Base::nCodesPerLength[codeLen];
+      minCodeId += Base::code.nCodesPerLength[codeLen];
       extrCodeIdForLen.emplace_back(minCodeId);
     }
-    assert(extrCodeIdForLen.size() == 1U + Base::nCodesPerLength.size());
+    assert(extrCodeIdForLen.size() == 1U + Base::code.nCodesPerLength.size());
   }
 
   template <typename BIT_STREAM>

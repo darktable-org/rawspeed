@@ -21,26 +21,29 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree<>:...
-#include "io/BitStream.h"                       // for BitStreamTraits
-#include <algorithm>                            // for max, for_each, copy
-#include <cassert>                              // for invariant
-#include <initializer_list>                     // for initializer_list
-#include <iterator>                             // for advance, next
-#include <memory>                               // for unique_ptr, make_unique
-#include <tuple>                                // for tie
-#include <utility>                              // for pair
-#include <vector>                               // for vector, vector<>::co...
+#include "decoders/RawDecoderException.h" // for ThrowException, Thro...
+#include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
+#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree<>:...
+#include "io/BitStream.h"                    // for BitStreamTraits
+#include <algorithm>                         // for max, for_each, copy
+#include <cassert>                           // for invariant
+#include <initializer_list>                  // for initializer_list
+#include <iterator>                          // for advance, next
+#include <memory>                            // for unique_ptr, make_unique
+#include <tuple>                             // for tie
+#include <utility>                           // for pair
+#include <vector>                            // for vector, vector<>::co...
 
 namespace rawspeed {
 
 template <typename CodeTag>
-class HuffmanTableTree final : public AbstractHuffmanTable<CodeTag> {
+class HuffmanTableTree final : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
-  using Base = AbstractHuffmanTable<CodeTag>;
+  using Tag = CodeTag;
+  using Base = AbstractPrefixCodeDecoder<CodeTag>;
   using Traits = typename Base::Traits;
+
+  using Base::Base;
 
 private:
   BinaryHuffmanTree<CodeTag> tree;
@@ -94,16 +97,11 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    AbstractHuffmanTable<CodeTag>::setup(fullDecode_, fixDNGBug16_);
+    AbstractPrefixCodeDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
-    // Figure C.1: make table of Huffman code length for each symbol
-    // Figure C.2: generate the codes themselves
-    std::vector<typename Base::CodeSymbol> symbols =
-        Base::generateCodeSymbols();
-    assert(symbols.size() == Base::maxCodesCount());
-
-    for (unsigned codeIndex = 0; codeIndex != symbols.size(); ++codeIndex)
-      tree.add(symbols[codeIndex], Base::codeValues[codeIndex]);
+    for (unsigned codeIndex = 0; codeIndex != Base::code.symbols.size();
+         ++codeIndex)
+      tree.add(Base::code.symbols[codeIndex], Base::code.codeValues[codeIndex]);
   }
 
   template <typename BIT_STREAM>

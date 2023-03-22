@@ -133,6 +133,7 @@ template <typename CodeTag> struct CodeTraitsValidator final {
 template <typename CodeTag> class AbstractPrefixCode {
 public:
   using Traits = CodeTraits<CodeTag>;
+  using CodeValueTy = typename Traits::CodeValueTy;
   static_assert(CodeTraitsValidator<CodeTag>::validate());
 
   struct CodeSymbol final {
@@ -164,8 +165,17 @@ public:
     }
   };
 
+  AbstractPrefixCode() = default;
+
+  explicit AbstractPrefixCode(std::vector<CodeValueTy> codeValues_)
+      : codeValues(std::move(codeValues_)) {
+    assert(
+        all_of(codeValues.begin(), codeValues.end(),
+               [](const CodeValueTy& v) { return v <= Traits::MaxCodeValue; }));
+  }
+
   // The target alphabet, the values to which the (prefix) codes map, in order.
-  std::vector<typename Traits::CodeValueTy> codeValues;
+  std::vector<CodeValueTy> codeValues;
 };
 
 } // namespace rawspeed

@@ -26,15 +26,16 @@
 #include "common/Common.h"                // for extractHighBits, clampBits
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for fill_n, fill, max, copy
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t, int16_t
-#include <cstdio>                         // for size_t
-#include <vector>                         // for vector
+#include "decompressors/AbstractHuffmanTable.h"
+#include "decompressors/HuffmanTable.h" // for HuffmanTable
+#include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::f...
+#include "io/Buffer.h"                  // for Buffer
+#include "io/ByteStream.h"              // for ByteStream
+#include <algorithm>                    // for fill_n, fill, max, copy
+#include <cassert>                      // for assert
+#include <cstdint>                      // for uint16_t, uint32_t, int16_t
+#include <cstdio>                       // for size_t
+#include <vector>                       // for vector
 
 namespace rawspeed {
 
@@ -441,6 +442,21 @@ Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
       ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
   ht.setCodeValues(
       Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
+  ht.setup(true, false);
+  return ht;
+}
+
+template <>
+HuffmanTable<>
+NikonDecompressor::createHuffmanTable<HuffmanTable<>>(uint32_t huffSelect) {
+  AbstractHuffmanTable<BaselineCodeTag> ht_;
+  uint32_t count =
+      ht_.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
+  ht_.setCodeValues(
+      Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
+
+  auto code = ht_.operator PrefixCode<BaselineCodeTag>();
+  HuffmanTable<> ht(std::move(code));
   ht.setup(true, false);
   return ht;
 }

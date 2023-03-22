@@ -20,38 +20,30 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "io/BitStream.h"                       // for BitStreamTraits
-#include <cassert>                              // for invariant
-#include <cstdint>                              // for uint32_t
-#include <tuple>                                // for tie
-#include <utility>                              // for pair
-#include <vector>                               // for vector
+#include "decompressors/AbstractPrefixCode.h" // for CodeTraits
+#include "decompressors/PrefixCode.h"         // for PrefixCode...
+#include "io/BitStream.h"                     // for BitStreamTraits
+#include <cassert>                            // for invariant
+#include <cstdint>                            // for uint32_t
+#include <tuple>                              // for tie
+#include <utility>                            // for pair
+#include <vector>                             // for vector
 
 namespace rawspeed {
 class Buffer;
 
 template <typename CodeTag = BaselineCodeTag> class DummyHuffmanTable final {
 public:
-  using Traits = CodeTraits<BaselineCodeTag>;
+  using Tag = CodeTag;
+  using Traits = CodeTraits<CodeTag>;
+
+  explicit DummyHuffmanTable(PrefixCode<CodeTag> code) {}
 
 private:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
 public:
-  static uint32_t setNCodesPerLength(Buffer data) {
-    (void)data;
-    // No-op.
-    return 0;
-  }
-
-  static void setCodeValues(Array1DRef<const uint8_t> data) {
-    (void)data;
-    // No-op.
-  }
-
   void setup(bool fullDecode_, bool fixDNGBug16_) {
     fullDecode = fullDecode_;
     fixDNGBug16 = fixDNGBug16_;
