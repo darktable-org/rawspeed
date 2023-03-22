@@ -4,7 +4,7 @@ add_dependencies(fuzzers PrefixCodeDecoderFuzzers)
 function(add_ht_solo_fuzzer impl)
   set(fuzzer "PrefixCodeDecoder${impl}Fuzzer")
 
-  rawspeed_add_executable(${fuzzer} Solo.cpp)
+  rawspeed_add_executable(${fuzzer} Solo.cpp Common.h)
   target_compile_definitions(${fuzzer}
     PRIVATE
       -DIMPL=PrefixCode${impl}Decoder
@@ -18,7 +18,7 @@ endfunction()
 function(add_ht_dual_fuzzer impl0 impl1)
   set(fuzzer "PrefixCodeDecoderFuzzer-${impl0}Vs${impl1}")
 
-  rawspeed_add_executable(${fuzzer} Dual.cpp)
+  rawspeed_add_executable(${fuzzer} Dual.cpp Common.h)
   target_compile_definitions(${fuzzer}
     PRIVATE
     -DIMPL0=PrefixCode${impl0}Decoder

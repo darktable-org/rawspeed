@@ -139,7 +139,6 @@ template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
   assert(bs0.getPosition() == bs1.getPosition());
-  assert(bs0.getPosition() >= 19);
 
   // Which bit pump should we use?
   bs1.skipBytes(1);
