@@ -2,7 +2,7 @@ add_custom_target(PrefixCodeDecoderFuzzers ALL)
 add_dependencies(fuzzers PrefixCodeDecoderFuzzers)
 
 function(add_ht_solo_fuzzer impl)
-  set(fuzzer "PrefixCodeDecoder${impl}Fuzzer")
+  set(fuzzer "PrefixCode${impl}DecoderFuzzer")
 
   rawspeed_add_executable(${fuzzer} Solo.cpp Common.h)
   target_compile_definitions(${fuzzer}
