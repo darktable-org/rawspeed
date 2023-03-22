@@ -37,7 +37,7 @@ struct JPEGBitPumpTag;
 using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
 
 template <> struct BitStreamTraits<JPEGBitPumpTag> final {
-  static constexpr bool canUseWithHuffmanTable = true;
+  static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
   // Normally, we want to read 4 bytes, but at worst each one of those can be

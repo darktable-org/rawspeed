@@ -21,14 +21,14 @@
 
 #pragma once
 
-#include "adt/Invariant.h"                   // for invariant
-#include "adt/Point.h"                       // for iPoint2D
-#include "adt/iterator_range.h"              // for iterator_range
-#include "common/RawImage.h"                 // for RawImage
-#include "common/RawspeedException.h"        // for ThrowException
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
-#include "decompressors/HuffmanTable.h"      // for HuffmanTable, HuffmanTa...
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D
+#include "adt/iterator_range.h"           // for iterator_range
+#include "common/RawImage.h"              // for RawImage
+#include "common/RawspeedException.h"     // for ThrowException
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "decompressors/DummyPrefixCodeDecoder.h" // for DummyPrefixCodeDecoder
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder, HuffmanTa...
 #include "io/ByteStream.h"                   // for ByteStream
 #include <array>                             // for array
 #include <cassert>                           // for invariant
@@ -57,7 +57,7 @@ class Cr2SliceWidths {
   friend class Cr2LJpegDecoder;
   friend struct Cr2SliceWidthIterator;
 
-  template <typename HuffmanTable> friend class Cr2Decompressor;
+  template <typename PrefixCodeDecoder> friend class Cr2Decompressor;
 
 public:
   Cr2SliceWidths() = default;
@@ -129,10 +129,10 @@ inline Cr2SliceWidthIterator Cr2SliceWidths::end() const {
   return {*this, numSlices};
 }
 
-template <typename HuffmanTable> class Cr2Decompressor final {
+template <typename PrefixCodeDecoder> class Cr2Decompressor final {
 public:
   struct PerComponentRecipe {
-    const HuffmanTable& ht;
+    const PrefixCodeDecoder& ht;
     const uint16_t initPred;
   };
 
@@ -148,12 +148,14 @@ private:
   const ByteStream input;
 
   template <int N_COMP, size_t... I>
-  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
-      getHuffmanTablesImpl(std::index_sequence<I...> /*unused*/) const;
+  [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder>,
+                           N_COMP>
+      getPrefixCodeDecodersImpl(std::index_sequence<I...> /*unused*/) const;
 
   template <int N_COMP>
-  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
-  getHuffmanTables() const;
+  [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder>,
+                           N_COMP>
+  getPrefixCodeDecoders() const;
 
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
@@ -176,6 +178,6 @@ public:
   void decompress();
 };
 
-extern template class Cr2Decompressor<HuffmanTable<>>;
+extern template class Cr2Decompressor<PrefixCodeDecoder<>>;
 
 } // namespace rawspeed

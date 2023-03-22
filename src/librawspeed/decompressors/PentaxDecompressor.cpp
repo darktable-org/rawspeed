@@ -26,15 +26,15 @@
 #include "common/Common.h"                // for extractHighBits, isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h"
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "io/BitPumpMSB.h"              // for BitPumpMSB, BitStream<>::f...
-#include "io/Buffer.h"                  // for Buffer
-#include "io/ByteStream.h"              // for ByteStream
-#include <algorithm>                    // for max, fill, fill_n, copy
-#include <cassert>                      // for assert
-#include <cstdint>                      // for uint8_t, uint32_t, uint16_t
-#include <vector>                       // for vector
+#include "decompressors/HuffmanCode.h"
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/BitPumpMSB.h" // for BitPumpMSB, BitStream<>::f...
+#include "io/Buffer.h"     // for Buffer
+#include "io/ByteStream.h" // for ByteStream
+#include <algorithm>       // for max, fill, fill_n, copy
+#include <cassert>         // for assert
+#include <cstdint>         // for uint8_t, uint32_t, uint16_t
+#include <vector>          // for vector
 
 namespace rawspeed {
 
@@ -48,7 +48,7 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
 
 PentaxDecompressor::PentaxDecompressor(const RawImage& img,
                                        std::optional<ByteStream> metaData)
-    : mRaw(img), ht(SetupHuffmanTable(metaData)) {
+    : mRaw(img), ht(SetupPrefixCodeDecoder(metaData)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -60,23 +60,23 @@ PentaxDecompressor::PentaxDecompressor(const RawImage& img,
   }
 }
 
-PrefixCode<BaselineCodeTag> PentaxDecompressor::SetupHuffmanTable_Legacy() {
+PrefixCode<BaselineCodeTag>
+PentaxDecompressor::SetupPrefixCodeDecoder_Legacy() {
   // Temporary table, used during parsing LJpeg.
-  AbstractHuffmanTable<BaselineCodeTag> ht_;
+  HuffmanCode<BaselineCodeTag> hc;
 
   /* Initialize with legacy data */
-  auto nCodes = ht_.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
+  auto nCodes = hc.setNCodesPerLength(Buffer(pentax_tree[0][0].data(), 16));
   invariant(nCodes == 13); // see pentax_tree definition
-  ht_.setCodeValues(
-      Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
+  hc.setCodeValues(Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
 
-  return ht_.operator PrefixCode<BaselineCodeTag>();
+  return hc.operator PrefixCode<BaselineCodeTag>();
 }
 
 PrefixCode<BaselineCodeTag>
-PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
+PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
   // Temporary table, used during parsing LJpeg.
-  AbstractHuffmanTable<BaselineCodeTag> ht_;
+  HuffmanCode<BaselineCodeTag> hc;
 
   const uint32_t depth = stream.getU16() + 12;
   if (depth > 15)
@@ -107,7 +107,7 @@ PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
 
   assert(nCodesPerLength.size() == 17);
   assert(nCodesPerLength[0] == 0);
-  auto nCodes = ht_.setNCodesPerLength(Buffer(&nCodesPerLength[1], 16));
+  auto nCodes = hc.setNCodesPerLength(Buffer(&nCodesPerLength[1], 16));
   invariant(nCodes == depth);
 
   std::vector<uint8_t> codeValues;
@@ -129,21 +129,21 @@ PentaxDecompressor::SetupHuffmanTable_Modern(ByteStream stream) {
   }
 
   assert(codeValues.size() == nCodes);
-  ht_.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
+  hc.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
 
-  return ht_.operator PrefixCode<BaselineCodeTag>();
+  return hc.operator PrefixCode<BaselineCodeTag>();
 }
 
-HuffmanTable<>
-PentaxDecompressor::SetupHuffmanTable(std::optional<ByteStream> metaData) {
+PrefixCodeDecoder<>
+PentaxDecompressor::SetupPrefixCodeDecoder(std::optional<ByteStream> metaData) {
   std::optional<PrefixCode<BaselineCodeTag>> code;
 
   if (metaData)
-    code = SetupHuffmanTable_Modern(*metaData);
+    code = SetupPrefixCodeDecoder_Modern(*metaData);
   else
-    code = SetupHuffmanTable_Legacy();
+    code = SetupPrefixCodeDecoder_Legacy();
 
-  HuffmanTable<> ht(std::move(*code));
+  PrefixCodeDecoder<> ht(std::move(*code));
   ht.setup(true, false);
 
   return ht;

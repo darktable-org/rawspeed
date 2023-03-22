@@ -22,31 +22,31 @@
 
 #pragma once
 
-#include "adt/Point.h"                    // for iPoint2D
-#include "adt/iterator_range.h"           // for iterator_range
-#include "common/RawImage.h"              // for RawImage
-#include "common/RawspeedException.h"     // for ThrowException
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/Buffer.h"                    // for Buffer::size_type
-#include "io/ByteStream.h"                // for ByteStream
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstddef>                        // for size_t, ptrdiff_t
-#include <cstdint>                        // for uint16_t
-#include <functional>                     // for reference_wrapper
-#include <iterator>                       // for input_iterator_tag
-#include <tuple>                          // for tuple
-#include <utility>                        // for index_sequence
-#include <vector>                         // for vector
+#include "adt/Point.h"                       // for iPoint2D
+#include "adt/iterator_range.h"              // for iterator_range
+#include "common/RawImage.h"                 // for RawImage
+#include "common/RawspeedException.h"        // for ThrowException
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/BitPumpMSB32.h"                 // for BitPumpMSB32
+#include "io/Buffer.h"                       // for Buffer::size_type
+#include "io/ByteStream.h"                   // for ByteStream
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <cstddef>                           // for size_t, ptrdiff_t
+#include <cstdint>                           // for uint16_t
+#include <functional>                        // for reference_wrapper
+#include <iterator>                          // for input_iterator_tag
+#include <tuple>                             // for tuple
+#include <utility>                           // for index_sequence
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
 class HasselbladDecompressor final {
 public:
   struct PerComponentRecipe {
-    const HuffmanTable<>& ht;
+    const PrefixCodeDecoder<>& ht;
     const uint16_t initPred;
   };
 

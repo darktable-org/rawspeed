@@ -21,23 +21,23 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "adt/Array1DRef.h"                     // for Array1DRef
-#include "adt/Array2DRef.h"                     // for Array2DRef
-#include "adt/Invariant.h"                      // for invariant
-#include "adt/Point.h"                          // for iPoint2D
-#include "common/Common.h"                      // for isIntN
-#include "common/RawImage.h"                    // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"       // for ThrowException, ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable, HuffmanT...
-#include "io/BitPumpJPEG.h"                     // for BitPumpJPEG, BitStrea...
-#include "io/Buffer.h"                          // for Buffer
-#include "io/ByteStream.h"                      // for ByteStream
-#include <algorithm>                            // for fill, copy, fill_n, max
-#include <array>                                // for array
-#include <cstdint>                              // for uint8_t, uint16_t, int...
-#include <tuple>                                // for array
-#include <vector>                               // for vector
+#include "adt/Array1DRef.h"                  // for Array1DRef
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/Common.h"                   // for isIntN
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/HuffmanCode.h"       // for HuffmanCode
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder, HuffmanT...
+#include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStrea...
+#include "io/Buffer.h"                       // for Buffer
+#include "io/ByteStream.h"                   // for ByteStream
+#include <algorithm>                         // for fill, copy, fill_n, max
+#include <array>                             // for array
+#include <cstdint>                           // for uint8_t, uint16_t, int...
+#include <tuple>                             // for array
+#include <vector>                            // for vector
 
 using std::array;
 
@@ -72,16 +72,16 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
   rawInput = rawData.getStream(rawData.getRemainSize());
 }
 
-HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
-                                            const uint8_t* values) {
+PrefixCodeDecoder<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
+                                                 const uint8_t* values) {
   invariant(ncpl);
 
-  AbstractHuffmanTable<BaselineCodeTag> ht_;
-  auto count = ht_.setNCodesPerLength(Buffer(ncpl, 16));
-  ht_.setCodeValues(Array1DRef<const uint8_t>(values, count));
+  HuffmanCode<BaselineCodeTag> hc;
+  auto count = hc.setNCodesPerLength(Buffer(ncpl, 16));
+  hc.setCodeValues(Array1DRef<const uint8_t>(values, count));
 
-  auto code = ht_.operator PrefixCode<BaselineCodeTag>();
-  HuffmanTable<> ht(std::move(code));
+  auto code = hc.operator PrefixCode<BaselineCodeTag>();
+  PrefixCodeDecoder<> ht(std::move(code));
   ht.setup(/*fullDecode_=*/false, false);
   return ht;
 }
@@ -157,7 +157,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
          0xf2, 0xb1, 0xe4, 0xd1, 0x83, 0x63, 0xea, 0xc3, 0xe2, 0x82, 0xf1, 0xa3,
          0xc2, 0xa1, 0xc1, 0xe3, 0xa2, 0xe1, 0xff, 0xff}}};
 
-  std::array<HuffmanTable<>, 2> mHuff = {
+  std::array<PrefixCodeDecoder<>, 2> mHuff = {
       {makeDecoder(first_tree_ncpl[table].data(),
                    first_tree_codevalues[table].data()),
        makeDecoder(second_tree_ncpl[table].data(),
@@ -200,7 +200,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (i >= 64)
       break;
 
-    diff = HuffmanTable<>::extend(diff, len);
+    diff = PrefixCodeDecoder<>::extend(diff, len);
 
     (*diffBuf)[i] = diff;
     ++i;

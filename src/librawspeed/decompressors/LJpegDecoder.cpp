@@ -24,8 +24,8 @@
 #include "adt/Point.h"                       // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"                 // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"      // for HuffmanTable
 #include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor::PerC...
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
 #include "io/ByteStream.h"                   // for ByteStream
 #include <algorithm>                         // for generate_n
 #include <array>                             // for array
@@ -104,7 +104,7 @@ void LJpegDecoder::decodeScan() {
   std::vector<LJpegDecompressor::PerComponentRecipe> rec;
   rec.reserve(N_COMP);
   std::generate_n(std::back_inserter(rec), N_COMP,
-                  [&rec, hts = getHuffmanTables(N_COMP),
+                  [&rec, hts = getPrefixCodeDecoders(N_COMP),
                    initPred = getInitialPredictors(
                        N_COMP)]() -> LJpegDecompressor::PerComponentRecipe {
                     const int i = rec.size();

@@ -59,7 +59,7 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
   if (!len)
     return 0;
   int diff = bs.getBits(len);
-  diff = HuffmanTable<>::extend(diff, len);
+  diff = PrefixCodeDecoder<>::extend(diff, len);
   if (diff == 65535)
     return -32768;
   return diff;

@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include "adt/Point.h"                  // for iPoint2D, iRectangle2D
-#include "common/RawImage.h"            // for RawImage
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "io/ByteStream.h"              // for ByteStream
-#include <array>                        // for array
-#include <cstdint>                      // for uint16_t
-#include <functional>                   // for reference_wrapper
-#include <stddef.h>                     // for size_t
-#include <tuple>                        // for array
-#include <vector>                       // for vector
+#include "adt/Point.h"                       // for iPoint2D, iRectangle2D
+#include "common/RawImage.h"                 // for RawImage
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/ByteStream.h"                   // for ByteStream
+#include <array>                             // for array
+#include <cstdint>                           // for uint16_t
+#include <functional>                        // for reference_wrapper
+#include <stddef.h>                          // for size_t
+#include <tuple>                             // for array
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
@@ -43,7 +43,7 @@ public:
     const iPoint2D dim;
   };
   struct PerComponentRecipe {
-    const HuffmanTable<>& ht;
+    const PrefixCodeDecoder<>& ht;
     const uint16_t initPred;
   };
 
@@ -60,12 +60,14 @@ private:
   int trailingPixels = 0;
 
   template <int N_COMP, size_t... I>
-  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
-      getHuffmanTablesImpl(std::index_sequence<I...> /*unused*/) const;
+  [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder<>>,
+                           N_COMP>
+      getPrefixCodeDecodersImpl(std::index_sequence<I...> /*unused*/) const;
 
   template <int N_COMP>
-  [[nodiscard]] std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
-  getHuffmanTables() const;
+  [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder<>>,
+                           N_COMP>
+  getPrefixCodeDecoders() const;
 
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;

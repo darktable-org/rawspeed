@@ -18,8 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "adt/Array1DRef.h"                     // for Array1DRef
+#include "decompressors/HuffmanCode.h" // for HuffmanCode...
+#include "adt/Array1DRef.h"            // for Array1DRef
 #include "decompressors/AbstractPrefixCodeDecoder.h"
 #include "io/Buffer.h"      // for Buffer
 #include <algorithm>        // for max, min
@@ -39,31 +39,30 @@ namespace rawspeed {
 struct BaselineCodeTag;
 } // namespace rawspeed
 
-using rawspeed::AbstractHuffmanTable;
 using rawspeed::BaselineCodeTag;
 using rawspeed::Buffer;
+using rawspeed::HuffmanCode;
 using std::make_tuple;
 
 namespace rawspeed {
 
 class RawDecoderException;
 
-bool operator!=(const AbstractHuffmanTable<BaselineCodeTag>& lhs,
-                const AbstractHuffmanTable<BaselineCodeTag>& rhs) {
+bool operator!=(const HuffmanCode<BaselineCodeTag>& lhs,
+                const HuffmanCode<BaselineCodeTag>& rhs) {
   return !(lhs == rhs);
 }
 
-::std::ostream&
-operator<<(::std::ostream& os,
-           const AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol s) {
+::std::ostream& operator<<(::std::ostream& os,
+                           const HuffmanCode<BaselineCodeTag>::CodeSymbol s) {
   auto str = std::bitset<32>(s.code).to_string();
 
   str = str.substr(str.size() - s.code_len);
   return os << "0b" << str;
 }
 
-bool operator!=(const AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol& lhs,
-                const AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol& rhs) {
+bool operator!=(const HuffmanCode<BaselineCodeTag>::CodeSymbol& lhs,
+                const HuffmanCode<BaselineCodeTag>::CodeSymbol& rhs) {
   return !(lhs == rhs);
 }
 
@@ -71,8 +70,8 @@ bool operator!=(const AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol& lhs,
 
 namespace rawspeed_test {
 
-TEST(AbstractHuffmanTableCodeSymbolTest, Equality) {
-#define s AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol
+TEST(HuffmanCodeCodeSymbolTest, Equality) {
+#define s HuffmanCode<BaselineCodeTag>::CodeSymbol
   ASSERT_EQ(s(0, 1), s(0, 1));
   ASSERT_EQ(s(1, 1), s(1, 1));
 
@@ -83,13 +82,13 @@ TEST(AbstractHuffmanTableCodeSymbolTest, Equality) {
 
 #ifndef NDEBUG
 TEST(CodeSymbolDeathTest, CodeSymbolLength) {
-  ASSERT_DEATH({ AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(0, 0); },
+  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(0, 0); },
                "code_len > 0");
-  ASSERT_DEATH({ AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(1, 0); },
+  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(1, 0); },
                "code_len > 0");
-  ASSERT_DEATH({ AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(0, 17); },
+  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(0, 17); },
                "code_len <= Traits::MaxCodeLenghtBits");
-  ASSERT_DEATH({ AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(1, 17); },
+  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(1, 17); },
                "code_len <= Traits::MaxCodeLenghtBits");
 }
 
@@ -125,13 +124,12 @@ INSTANTIATE_TEST_CASE_P(CodeSymbolDeathTest, CodeSymbolDeathTest,
                         ::testing::ValuesIn(CodeSymbolData));
 TEST_P(CodeSymbolDeathTest, CodeSymbolDeathTest) {
   if (die) {
-    ASSERT_DEATH(
-        { AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(val, len); },
-        "code <= \\(\\(1U << code_len\\) - 1U\\)");
+    ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len); },
+                 "code <= \\(\\(1U << code_len\\) - 1U\\)");
   } else {
     ASSERT_EXIT(
         {
-          AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(val, len);
+          HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len);
           exit(0);
         },
         ::testing::ExitedWithCode(0), "");
@@ -170,13 +168,13 @@ INSTANTIATE_TEST_CASE_P(CodeSymbolPrintTest, CodeSymbolPrintTest,
                         ::testing::ValuesIn(CodeSymbolPrintData));
 TEST_P(CodeSymbolPrintTest, CodeSymbolPrintTest) {
   ASSERT_EQ(::testing::PrintToString(
-                AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol(val, len)),
+                HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len)),
             str);
 }
 
 using CodeSymbolHaveCommonPrefixDataType =
-    std::tuple<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol,
-               AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>;
+    std::tuple<HuffmanCode<BaselineCodeTag>::CodeSymbol,
+               HuffmanCode<BaselineCodeTag>::CodeSymbol>;
 class CodeSymbolHaveCommonPrefixTest
     : public ::testing::TestWithParam<CodeSymbolHaveCommonPrefixDataType> {
 protected:
@@ -188,16 +186,16 @@ protected:
     partial = std::get<1>(p);
   }
 
-  AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol symbol;
-  AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol partial;
+  HuffmanCode<BaselineCodeTag>::CodeSymbol symbol;
+  HuffmanCode<BaselineCodeTag>::CodeSymbol partial;
 };
-std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>
+std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>
 GenerateAllPossibleCodeSymbols() {
   // change those two together
   static constexpr auto maxLen = 2U;
   static constexpr auto expectedCnt = 2U + 4U;
 
-  std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol> allVariants;
+  std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol> allVariants;
   allVariants.reserve(expectedCnt);
   for (unsigned l = 1; l <= maxLen; l++) {
     for (unsigned c = 0; c <= ((1U << l) - 1U); c++)
@@ -221,8 +219,8 @@ TEST_P(CodeSymbolHaveCommonPrefixTest, CodeSymbolHaveCommonPrefixTest) {
   // Trim them to the same length (cut end chars)
   symbol_str.resize(len);
   partial_str.resize(len);
-  ASSERT_EQ(AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-                symbol, partial),
+  ASSERT_EQ(HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(symbol,
+                                                                       partial),
             symbol_str == partial_str)
       << "Where symbol_str = " << symbol_str
       << ", partial_str = " << partial_str;
@@ -230,74 +228,69 @@ TEST_P(CodeSymbolHaveCommonPrefixTest, CodeSymbolHaveCommonPrefixTest) {
 TEST(CodeSymbolHaveCommonPrefixTest, BasicTest) {
   {
     // Self-check for common prefix equals true
-    const AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol s(0b0, 1);
+    const HuffmanCode<BaselineCodeTag>::CodeSymbol s(0b0, 1);
     ASSERT_TRUE(
-        AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(s,
-                                                                            s));
+        HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(s, s));
   }
-  ASSERT_TRUE(
-      AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-          {0b0, 1}, {0b0, 1}));
-  ASSERT_TRUE(
-      AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-          {0b10, 2}, {0b1, 1}));
-  ASSERT_FALSE(
-      AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-          {0b10, 2}, {0b0, 1}));
-  ASSERT_FALSE(
-      AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-          {0b10, 2}, {0b01, 2}));
+  ASSERT_TRUE(HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
+      {0b0, 1}, {0b0, 1}));
+  ASSERT_TRUE(HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
+      {0b10, 2}, {0b1, 1}));
+  ASSERT_FALSE(HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
+      {0b10, 2}, {0b0, 1}));
+  ASSERT_FALSE(HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
+      {0b10, 2}, {0b01, 2}));
 }
 
 #ifndef NDEBUG
 TEST(CodeSymbolHaveCommonPrefixDeathTest, AsymmetricalDeathTest) {
   ASSERT_DEATH(
       {
-        AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-            {0b0, 1}, {0b0, 2});
+        HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix({0b0, 1},
+                                                                   {0b0, 2});
       },
       "partial.code_len <= symbol.code_len");
   ASSERT_DEATH(
       {
-        AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix(
-            {0b01, 2}, {0b010, 3});
+        HuffmanCode<BaselineCodeTag>::CodeSymbol::HaveCommonPrefix({0b01, 2},
+                                                                   {0b010, 3});
       },
       "partial.code_len <= symbol.code_len");
 }
 #endif
 
 auto genHT = [](std::initializer_list<uint8_t>&& nCodesPerLength)
-    -> AbstractHuffmanTable<BaselineCodeTag> {
-  AbstractHuffmanTable<BaselineCodeTag> ht;
+    -> HuffmanCode<BaselineCodeTag> {
+  HuffmanCode<BaselineCodeTag> hc;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
   Buffer b(v.data(), v.size());
-  ht.setNCodesPerLength(b);
+  hc.setNCodesPerLength(b);
 
-  return ht;
+  return hc;
 };
 
 auto genHTCount =
     [](std::initializer_list<uint8_t>&& nCodesPerLength) -> uint32_t {
-  AbstractHuffmanTable<BaselineCodeTag> ht;
+  HuffmanCode<BaselineCodeTag> hc;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
   Buffer b(v.data(), v.size());
-  return ht.setNCodesPerLength(b);
+  return hc.setNCodesPerLength(b);
 };
 
 auto genHTFull = [](std::initializer_list<uint8_t>&& nCodesPerLength,
                     std::initializer_list<uint8_t>&& codeValues)
-    -> AbstractHuffmanTable<BaselineCodeTag> {
-  auto ht = genHT(std::move(nCodesPerLength));
+    -> HuffmanCode<BaselineCodeTag> {
+  auto hc = genHT(std::move(nCodesPerLength));
   std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
   rawspeed::Array1DRef<const uint8_t> b(v.data(), v.size());
-  ht.setCodeValues(b);
-  return ht;
+  hc.setCodeValues(b);
+  return hc;
 };
 
 #ifndef NDEBUG
-TEST(AbstractHuffmanTableDeathTest, setNCodesPerLengthRequires16Lengths) {
+TEST(HuffmanCodeDeathTest, setNCodesPerLengthRequires16Lengths) {
   for (int i = 0; i < 32; i++) {
     std::vector<uint8_t> v(i, 1);
     ASSERT_EQ(v.size(), i);
@@ -305,15 +298,15 @@ TEST(AbstractHuffmanTableDeathTest, setNCodesPerLengthRequires16Lengths) {
     Buffer b(v.data(), v.size());
     ASSERT_EQ(b.getSize(), v.size());
 
-    AbstractHuffmanTable<BaselineCodeTag> ht;
+    HuffmanCode<BaselineCodeTag> hc;
 
     if (b.getSize() != 16) {
-      ASSERT_DEATH({ ht.setNCodesPerLength(b); },
+      ASSERT_DEATH({ hc.setNCodesPerLength(b); },
                    "data.getSize\\(\\) == Traits::MaxCodeLenghtBits");
     } else {
       ASSERT_EXIT(
           {
-            ht.setNCodesPerLength(b);
+            hc.setNCodesPerLength(b);
 
             exit(0);
           },
@@ -323,10 +316,10 @@ TEST(AbstractHuffmanTableDeathTest, setNCodesPerLengthRequires16Lengths) {
 }
 #endif
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthEqualCompareAndTrimming) {
+TEST(HuffmanCodeTest, setNCodesPerLengthEqualCompareAndTrimming) {
   {
-    AbstractHuffmanTable<BaselineCodeTag> a;
-    AbstractHuffmanTable<BaselineCodeTag> b;
+    HuffmanCode<BaselineCodeTag> a;
+    HuffmanCode<BaselineCodeTag> b;
 
     ASSERT_EQ(a, b);
   }
@@ -345,21 +338,21 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthEqualCompareAndTrimming) {
   ASSERT_NE(genHT({1}), genHT({1, 1}));
 }
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthEmptyIsBad) {
+TEST(HuffmanCodeTest, setNCodesPerLengthEmptyIsBad) {
   ASSERT_THROW(genHT({}), rawspeed::RawDecoderException);
   ASSERT_THROW(genHT({0}), rawspeed::RawDecoderException);
   ASSERT_THROW(genHT({0, 0}), rawspeed::RawDecoderException);
 }
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesTotal) {
+TEST(HuffmanCodeTest, setNCodesPerLengthTooManyCodesTotal) {
   ASSERT_NO_THROW(genHT({0, 0, 0, 0, 0, 0, 0, 162}));
   ASSERT_THROW(genHT({0, 0, 0, 0, 0, 0, 0, 163}),
                rawspeed::RawDecoderException);
 }
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLength) {
+TEST(HuffmanCodeTest, setNCodesPerLengthTooManyCodesForLength) {
   for (int len = 1; len < 8; len++) {
-    AbstractHuffmanTable<BaselineCodeTag> ht;
+    HuffmanCode<BaselineCodeTag> ht;
     std::vector<uint8_t> v(16, 0);
     Buffer b(v.data(), v.size());
     for (auto i = 1U; i <= (1U << len); i++) {
@@ -371,7 +364,7 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthTooManyCodesForLength) {
   }
 }
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthCodeSymbolOverflow) {
+TEST(HuffmanCodeTest, setNCodesPerLengthCodeSymbolOverflow) {
   ASSERT_NO_THROW(genHT({1}));
   ASSERT_NO_THROW(genHT({2}));
   ASSERT_THROW(genHT({3}), rawspeed::RawDecoderException);
@@ -382,7 +375,7 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthCodeSymbolOverflow) {
   ASSERT_THROW(genHT({0, 5}), rawspeed::RawDecoderException);
 }
 
-TEST(AbstractHuffmanTableTest, setNCodesPerLengthCounts) {
+TEST(HuffmanCodeTest, setNCodesPerLengthCounts) {
   ASSERT_EQ(genHTCount({1}), 1);
   ASSERT_EQ(genHTCount({1, 0}), 1);
   ASSERT_EQ(genHTCount({0, 1}), 1);
@@ -393,9 +386,9 @@ TEST(AbstractHuffmanTableTest, setNCodesPerLengthCounts) {
 }
 
 #ifndef NDEBUG
-TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresCount) {
+TEST(HuffmanCodeDeathTest, setCodeValuesRequiresCount) {
   for (int len = 1; len < 8; len++) {
-    AbstractHuffmanTable<BaselineCodeTag> ht;
+    HuffmanCode<BaselineCodeTag> ht;
     std::vector<uint8_t> l(16, 0);
     Buffer bl(l.data(), l.size());
     l[len - 1] = (1U << len) - 1U;
@@ -420,7 +413,7 @@ TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresCount) {
   }
 }
 
-TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresLessThan162) {
+TEST(HuffmanCodeDeathTest, setCodeValuesRequiresLessThan162) {
   auto ht = genHT({0, 0, 0, 0, 0, 0, 0, 162});
   std::vector<uint8_t> v(163, 0);
   rawspeed::Array1DRef<const uint8_t> bv(v.data(), v.size());
@@ -429,7 +422,7 @@ TEST(AbstractHuffmanTableDeathTest, setCodeValuesRequiresLessThan162) {
 }
 #endif
 
-TEST(AbstractHuffmanTableTest, setCodeValuesValueLessThan16) {
+TEST(HuffmanCodeTest, setCodeValuesValueLessThan16) {
   auto ht = genHT({1});
   std::vector<uint8_t> v(1);
 
@@ -440,7 +433,7 @@ TEST(AbstractHuffmanTableTest, setCodeValuesValueLessThan16) {
   }
 }
 
-TEST(AbstractHuffmanTableTest, EqualCompareAndTrimming) {
+TEST(HuffmanCodeTest, EqualCompareAndTrimming) {
   ASSERT_EQ(genHTFull({1}, {0}), genHTFull({1}, {0}));
   ASSERT_EQ(genHTFull({1}, {1}), genHTFull({1}, {1}));
 
@@ -555,10 +548,9 @@ TEST_P(SignExtendTest, SignExtendTest) {
 
 using generateCodeSymbolsDataType =
     std::tuple<std::vector<uint8_t>,
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>>;
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>>;
 class generateCodeSymbolsTest
-    : protected AbstractHuffmanTable<BaselineCodeTag>,
-      public ::testing::TestWithParam<generateCodeSymbolsDataType> {
+    : public ::testing::TestWithParam<generateCodeSymbolsDataType> {
 protected:
   generateCodeSymbolsTest() = default;
   virtual void SetUp() {
@@ -570,37 +562,35 @@ protected:
   }
 
   std::vector<uint8_t> ncpl;
-  std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>
-      expectedSymbols;
+  std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol> expectedSymbols;
 };
 static const generateCodeSymbolsDataType generateCodeSymbolsData[]{
     make_tuple(std::vector<uint8_t>{1},
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>{
-                   {0b0, 1}}),
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>{{0b0, 1}}),
 
     make_tuple(std::vector<uint8_t>{0, 1},
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>{
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>{
                    {0b00, 2},
                }),
     make_tuple(std::vector<uint8_t>{0, 2},
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>{
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>{
                    {0b00, 2},
                    {0b01, 2},
                }),
     make_tuple(std::vector<uint8_t>{0, 3},
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>{
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>{
                    {0b00, 2},
                    {0b01, 2},
                    {0b10, 2},
                }),
 
     make_tuple(std::vector<uint8_t>{1, 1},
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>{
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>{
                    {0b0, 1},
                    {0b10, 2},
                }),
     make_tuple(std::vector<uint8_t>{1, 2},
-               std::vector<AbstractHuffmanTable<BaselineCodeTag>::CodeSymbol>{
+               std::vector<HuffmanCode<BaselineCodeTag>::CodeSymbol>{
                    {0b0, 1},
                    {0b10, 2},
                    {0b11, 2},
@@ -610,13 +600,14 @@ static const generateCodeSymbolsDataType generateCodeSymbolsData[]{
 INSTANTIATE_TEST_CASE_P(generateCodeSymbolsTest, generateCodeSymbolsTest,
                         ::testing::ValuesIn(generateCodeSymbolsData));
 TEST_P(generateCodeSymbolsTest, generateCodeSymbolsTest) {
+  HuffmanCode<BaselineCodeTag> hc;
   Buffer bl(ncpl.data(), ncpl.size());
-  const auto cnt = setNCodesPerLength(bl);
+  const auto cnt = hc.setNCodesPerLength(bl);
   std::vector<uint8_t> cv(cnt, 0);
   rawspeed::Array1DRef<const uint8_t> bv(cv.data(), cv.size());
-  setCodeValues(bv);
+  hc.setCodeValues(bv);
 
-  ASSERT_EQ(generateCodeSymbols(), expectedSymbols);
+  ASSERT_EQ(hc.generateCodeSymbols(), expectedSymbols);
 }
 
 } // namespace rawspeed_test

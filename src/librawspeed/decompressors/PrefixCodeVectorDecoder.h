@@ -21,23 +21,21 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h" // for ThrowException, Thro...
+#include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
-#include "decompressors/BinaryHuffmanTree.h" // for BinaryHuffmanTree<>:...
-#include "io/BitStream.h"                    // for BitStreamTraits
-#include <algorithm>                         // for max, for_each, copy
-#include <cassert>                           // for invariant
-#include <initializer_list>                  // for initializer_list
-#include <iterator>                          // for advance, next
-#include <memory>                            // for unique_ptr, make_unique
-#include <tuple>                             // for tie
-#include <utility>                           // for pair
-#include <vector>                            // for vector, vector<>::co...
+#include "io/BitStream.h"                            // for BitStreamTraits
+#include <algorithm>                                 // for max, fill_n
+#include <cassert>                                   // for invariant
+#include <cstdint>                                   // for uint64_t
+#include <tuple>                                     // for tie
+#include <utility>                                   // for pair
+#include <vector>                                    // for vector
 
 namespace rawspeed {
 
 template <typename CodeTag>
-class HuffmanTableTree final : public AbstractPrefixCodeDecoder<CodeTag> {
+class PrefixCodeVectorDecoder final
+    : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
   using Tag = CodeTag;
   using Base = AbstractPrefixCodeDecoder<CodeTag>;
@@ -46,18 +44,18 @@ public:
   using Base::Base;
 
 private:
-  BinaryHuffmanTree<CodeTag> tree;
+  // Given this code len, which code id is the minimal?
+  std::vector<unsigned int> extrCodeIdForLen; // index is length of code
 
   template <typename BIT_STREAM>
-  inline std::pair<typename Base::CodeSymbol,
-                   typename Traits::CodeValueTy /*codeValue*/>
+  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    typename Base::CodeSymbol partial;
 
-    const auto* top = &(tree.root->getAsBranch());
+    typename Base::CodeSymbol partial;
+    uint64_t codeId;
 
     // Read bits until either find the code or detect the incorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
@@ -66,29 +64,31 @@ private:
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
 
-      // codechecker_false_positive [core.uninitialized.Assign]
       partial.code <<= 1;
       partial.code |= bit;
 
-      // What is the last bit, which we have just read?
+      // Given global ordering and the code length, we know the code id range.
+      for (codeId = extrCodeIdForLen[partial.code_len];
+           codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
+        const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
+        if (symbol == partial) // yay, found?
+          return {symbol, Base::code.codeValues[codeId]};
+      }
 
-      // NOTE: The order *IS* important! Left to right, zero to one!
-      const auto& newNode = top->buds[bit];
+      // Ok, but does any symbol have this same prefix?
+      bool haveCommonPrefix = false;
+      for (; codeId < Base::code.symbols.size(); codeId++) {
+        const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
+        haveCommonPrefix |= Base::CodeSymbol::HaveCommonPrefix(symbol, partial);
+        if (haveCommonPrefix)
+          break;
+      }
 
-      if (!newNode) {
-        // Got nothing in this direction.
+      // If no symbols have this prefix, then the code is invalid.
+      if (!haveCommonPrefix) {
         ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
                  partial.code_len);
       }
-
-      if (static_cast<typename decltype(tree)::Node::Type>(*newNode) ==
-          decltype(tree)::Node::Type::Leaf) {
-        // Ok, great, hit a Leaf. This is it.
-        return {partial, newNode->getAsLeaf().value};
-      }
-
-      // Else, this is a branch, continue looking.
-      top = &(newNode->getAsBranch());
     }
 
     // We have either returned the found symbol, or thrown on incorrect symbol.
@@ -99,15 +99,21 @@ public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
     AbstractPrefixCodeDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
-    for (unsigned codeIndex = 0; codeIndex != Base::code.symbols.size();
-         ++codeIndex)
-      tree.add(Base::code.symbols[codeIndex], Base::code.codeValues[codeIndex]);
+    extrCodeIdForLen.reserve(1U + Base::code.nCodesPerLength.size());
+    extrCodeIdForLen.resize(2); // for len 0 and 1, the min code id is always 0
+    for (auto codeLen = 1UL; codeLen < Base::code.nCodesPerLength.size();
+         codeLen++) {
+      auto minCodeId = extrCodeIdForLen.back();
+      minCodeId += Base::code.nCodesPerLength[codeLen];
+      extrCodeIdForLen.emplace_back(minCodeId);
+    }
+    assert(extrCodeIdForLen.size() == 1U + Base::code.nCodesPerLength.size());
   }
 
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
@@ -116,7 +122,7 @@ public:
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
@@ -129,7 +135,7 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
 

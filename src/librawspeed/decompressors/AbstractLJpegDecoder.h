@@ -25,8 +25,8 @@
 #include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable
+#include "decompressors/HuffmanCode.h"          // for HuffmanCode
+#include "decompressors/PrefixCodeDecoder.h"    // for PrefixCodeDecoder
 #include "io/ByteStream.h"                      // for ByteStream
 #include <algorithm>                            // for fill_n, fill
 #include <array>                                // for array
@@ -36,7 +36,7 @@
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library
- * Comments added by tm. See also Copyright in HuffmanTable.h.
+ * Comments added by tm. See also Copyright in PrefixCodeDecoder.h.
  */
 
 namespace rawspeed {
@@ -151,12 +151,14 @@ public:
 
 class AbstractLJpegDecoder : public AbstractDecompressor {
   // std::vector of unique HTs, to not recreate HT, but cache them
-  std::vector<std::unique_ptr<const AbstractHuffmanTable<BaselineCodeTag>>>
+  std::vector<std::unique_ptr<const HuffmanCode<BaselineCodeTag>>>
       huffmanCodeStore;
-  std::vector<std::unique_ptr<const HuffmanTable<>>> huffmanTableStore;
+  std::vector<std::unique_ptr<const PrefixCodeDecoder<>>>
+      PrefixCodeDecoderStore;
 
   uint32_t Pt = 0;
-  std::array<const HuffmanTable<>*, 4> huff{{}}; // 4 pointers into the store
+  std::array<const PrefixCodeDecoder<>*, 4> huff{
+      {}}; // 4 pointers into the store
 
 public:
   AbstractLJpegDecoder(ByteStream bs, const RawImage& img);
@@ -174,9 +176,9 @@ protected:
   static void parseDRI(ByteStream dri);
   JpegMarker getNextMarker(bool allowskip);
 
-  [[nodiscard]] std::vector<const HuffmanTable<>*>
-  getHuffmanTables(int N_COMP) const {
-    std::vector<const HuffmanTable<>*> ht(N_COMP);
+  [[nodiscard]] std::vector<const PrefixCodeDecoder<>*>
+  getPrefixCodeDecoders(int N_COMP) const {
+    std::vector<const PrefixCodeDecoder<>*> ht(N_COMP);
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
       if (const unsigned dcTbls = huff.size(); dcTblNo >= dcTbls) {

@@ -22,26 +22,26 @@
 #error IMPL must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "common/RawspeedException.h"          // for ThrowException, ThrowRSE
-#include "decompressors/BinaryHuffmanTree.h"   // for BinaryHuffmanTree<>::...
-#include "decompressors/HuffmanTable.h"        // IWYU pragma: keep
-#include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
-#include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
-#include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableTree.h"    // IWYU pragma: keep
-#include "decompressors/HuffmanTableVector.h"  // IWYU pragma: keep
-#include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
-#include "io/BitPumpMSB.h"                     // for BitStream<>::fillCache
-#include "io/BitPumpMSB32.h"                   // for BitStream<>::fillCache
-#include "io/Buffer.h"                         // for Buffer, DataBuffer
-#include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
-#include <algorithm>                           // for generate_n
-#include <cassert>                             // for assert
-#include <cstdint>                             // for uint8_t
-#include <cstdio>                              // for size_t
-#include <initializer_list>                    // for initializer_list
-#include <vector>                              // for vector
+#include "common/RawspeedException.h"        // for ThrowException, ThrowRSE
+#include "decompressors/BinaryPrefixTree.h"  // for BinaryPrefixTree<>::...
+#include "decompressors/PrefixCodeDecoder.h" // IWYU pragma: keep
+#include "decompressors/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "decompressors/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep
+#include "decompressors/PrefixCodeLookupDecoder.h" // IWYU pragma: keep
+#include "decompressors/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
+#include "decompressors/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
+#include "io/BitPumpJPEG.h"                        // for BitStream<>::fillCache
+#include "io/BitPumpMSB.h"                         // for BitStream<>::fillCache
+#include "io/BitPumpMSB32.h"                       // for BitStream<>::fillCache
+#include "io/Buffer.h"                             // for Buffer, DataBuffer
+#include "io/ByteStream.h"                         // for ByteStream
+#include "io/Endianness.h"  // for Endianness, Endiannes...
+#include <algorithm>        // for generate_n
+#include <cassert>          // for assert
+#include <cstdint>          // for uint8_t
+#include <cstdio>           // for size_t
+#include <initializer_list> // for initializer_list
+#include <vector>           // for vector
 
 namespace rawspeed {
 struct BaselineCodeTag;
@@ -65,7 +65,7 @@ static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
 }
 
 template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
-  const auto ht = createHuffmanTable<rawspeed::IMPL<CodeTag>>(bs);
+  const auto ht = createPrefixCodeDecoder<rawspeed::IMPL<CodeTag>>(bs);
 
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans

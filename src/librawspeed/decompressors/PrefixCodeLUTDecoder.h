@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"                    // for extractHighBits
-#include "decoders/RawDecoderException.h"     // for ThrowException, Thro...
-#include "decompressors/HuffmanTableLookup.h" // for HuffmanTableLookup
-#include "io/BitStream.h"                     // for BitStreamTraits
-#include <cassert>                            // for invariant
-#include <cstddef>                            // for size_t
-#include <cstdint>                            // for int32_t, uint16_t
-#include <memory>                             // for allocator_traits<>::...
-#include <tuple>                              // for tie
-#include <vector>                             // for vector
+#include "common/Common.h"                // for extractHighBits
+#include "decoders/RawDecoderException.h" // for ThrowException, Thro...
+#include "decompressors/PrefixCodeLookupDecoder.h" // for PrefixCodeLookupDecoder
+#include "io/BitStream.h"                          // for BitStreamTraits
+#include <cassert>                                 // for invariant
+#include <cstddef>                                 // for size_t
+#include <cstdint>                                 // for int32_t, uint16_t
+#include <memory> // for allocator_traits<>::...
+#include <tuple>  // for tie
+#include <vector> // for vector
 // IWYU pragma: no_include <algorithm>
 
 /*
@@ -68,10 +68,10 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class HuffmanTableLUT final : public HuffmanTableLookup<CodeTag> {
+class PrefixCodeLUTDecoder final : public PrefixCodeLookupDecoder<CodeTag> {
 public:
   using Tag = CodeTag;
-  using Base = HuffmanTableLookup<CodeTag>;
+  using Base = PrefixCodeLookupDecoder<CodeTag>;
   using Traits = typename Base::Traits;
 
   using Base::Base;
@@ -104,7 +104,7 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    HuffmanTableLookup<CodeTag>::setup(fullDecode_, fixDNGBug16_);
+    PrefixCodeLookupDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above
@@ -159,7 +159,7 @@ public:
   inline __attribute__((always_inline)) int
   decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
@@ -169,7 +169,7 @@ public:
   inline __attribute__((always_inline)) int
   decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
@@ -182,7 +182,7 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
