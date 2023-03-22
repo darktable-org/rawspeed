@@ -64,9 +64,9 @@ public:
       assert(s.code_len > 0 && s.code_len <= Traits::MaxCodeLenghtBits);
       ++nCodesPerLength[s.code_len];
     }
-    while (nCodesPerLength.size() > 1 && nCodesPerLength.back() == 0)
+    while (nCodesPerLength.back() == 0)
       nCodesPerLength.pop_back();
-    assert(!nCodesPerLength.empty() && nCodesPerLength[0] == 0);
+    assert(nCodesPerLength.size() > 1);
 
     verifyCodeSymbols();
   }
