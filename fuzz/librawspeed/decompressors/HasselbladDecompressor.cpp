@@ -19,20 +19,20 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "HuffmanTable/Common.h"        // for createHuffmanTable
-#include "MemorySanitizer.h"            // for MSan
-#include "common/RawImage.h"            // for RawImage, RawImageData
-#include "common/RawspeedException.h"   // for RawspeedException
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "fuzz/Common.h"                // for CreateRawImage
-#include "io/Buffer.h"                  // for Buffer, DataBuffer
-#include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for Endianness, Endianness::little
-#include <algorithm>                    // for fill, copy, fill_n, generate_n
-#include <cassert>                      // for assert
-#include <cstddef>                      // for size_t
-#include <cstdint>                      // for uint16_t, uint8_t
-#include <vector>                       // for vector
+#include "MemorySanitizer.h"                 // for MSan
+#include "PrefixCodeDecoder/Common.h"        // for createPrefixCodeDecoder
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "common/RawspeedException.h"        // for RawspeedException
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "fuzz/Common.h"                     // for CreateRawImage
+#include "io/Buffer.h"                       // for Buffer, DataBuffer
+#include "io/ByteStream.h"                   // for ByteStream
+#include "io/Endianness.h" // for Endianness, Endianness::little
+#include <algorithm>       // for fill, copy, fill_n, generate_n
+#include <cassert>         // for assert
+#include <cstddef>         // for size_t
+#include <cstdint>         // for uint16_t, uint8_t
+#include <vector>          // for vector
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -46,7 +46,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const auto ht = createHuffmanTable<rawspeed::HuffmanTable<>>(bs);
+    const auto ht = createPrefixCodeDecoder<rawspeed::PrefixCodeDecoder<>>(bs);
     const auto initPred = bs.get<uint16_t>();
 
     rawspeed::HasselbladDecompressor::PerComponentRecipe rec = {ht, initPred};

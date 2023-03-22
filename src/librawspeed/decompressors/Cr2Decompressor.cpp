@@ -20,10 +20,10 @@
 
 #include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor
 #include "decompressors/Cr2DecompressorImpl.h" // IWYU pragma: keep
-#include "decompressors/HuffmanTable.h"        // for HuffmanTable
+#include "decompressors/PrefixCodeDecoder.h"   // for PrefixCodeDecoder
 
 namespace rawspeed {
 
-template class Cr2Decompressor<HuffmanTable<>>;
+template class Cr2Decompressor<PrefixCodeDecoder<>>;
 
 } // namespace rawspeed

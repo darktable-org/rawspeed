@@ -1,6 +1,6 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "HuffmanCodeTest.cpp"
-  "HuffmanTableTest.cpp"
+  "PrefixCodeDecoderTest.cpp"
 )
 
 foreach(SRC ${RAWSPEED_TEST_SOURCES})

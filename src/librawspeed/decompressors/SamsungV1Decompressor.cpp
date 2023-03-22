@@ -21,18 +21,18 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include <algorithm>                      // for fill_n
-#include <array>                          // for array
-#include <memory>                         // for allocator_traits<>::value_...
-#include <vector>                         // for vector
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/Common.h"                   // for isIntN
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/BitPumpMSB.h"                   // for BitPumpMSB
+#include <algorithm>                         // for fill_n
+#include <array>                             // for array
+#include <memory> // for allocator_traits<>::value_...
+#include <vector> // for vector
 
 namespace rawspeed {
 
@@ -73,7 +73,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
     return 0;
   int32_t diff = pump.getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
-  diff = HuffmanTable<>::extend(diff, len);
+  diff = PrefixCodeDecoder<>::extend(diff, len);
   return diff;
 }
 

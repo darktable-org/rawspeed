@@ -37,7 +37,7 @@
 namespace rawspeed {
 
 template <typename BIT_STREAM> struct BitStreamTraits final {
-  static constexpr bool canUseWithHuffmanTable = false;
+  static constexpr bool canUseWithPrefixCodeDecoder = false;
 };
 
 // simple 64-bit wide cache implementation that acts like a FiFo.

@@ -116,17 +116,17 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
 }
 
 template <int N_COMP, size_t... I>
-std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
-LJpegDecompressor::getHuffmanTablesImpl(
+std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP>
+LJpegDecompressor::getPrefixCodeDecodersImpl(
     std::index_sequence<I...> /*unused*/) const {
-  return std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>{
+  return std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP>{
       std::cref(rec[I].ht)...};
 }
 
 template <int N_COMP>
-std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
-LJpegDecompressor::getHuffmanTables() const {
-  return getHuffmanTablesImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
+std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP>
+LJpegDecompressor::getPrefixCodeDecoders() const {
+  return getPrefixCodeDecodersImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
 }
 
 template <int N_COMP>
@@ -153,7 +153,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
                               mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
                               mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y);
 
-  const auto ht = getHuffmanTables<N_COMP>();
+  const auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
   uint16_t* predNext = pred.data();
 
@@ -186,7 +186,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(
             pred[i] +
-            ((const HuffmanTable<>&)(ht[i])).decodeDifference(bitStream));
+            ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
         img(row, col + i) = pred[i];
       }
     }
@@ -204,13 +204,13 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       for (; c < trailingPixels; ++c) {
         pred[c] = uint16_t(
             pred[c] +
-            ((const HuffmanTable<>&)(ht[c])).decodeDifference(bitStream));
+            ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream));
         img(row, col + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
       for (; c < N_COMP; ++c) {
-        ((const HuffmanTable<>&)(ht[c])).decodeDifference(bitStream);
+        ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
       }
       col += N_COMP; // We did just process one more block.
     }
@@ -218,7 +218,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // ... and discard the rest.
     for (; col < N_COMP * frame.dim.x; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i)
-        ((const HuffmanTable<>&)(ht[i])).decodeDifference(bitStream);
+        ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
     }
   }
 }

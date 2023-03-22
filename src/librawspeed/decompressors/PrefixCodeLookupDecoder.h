@@ -67,7 +67,7 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class HuffmanTableLookup : public AbstractPrefixCodeDecoder<CodeTag> {
+class PrefixCodeLookupDecoder : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
   using Tag = CodeTag;
   using Base = AbstractPrefixCodeDecoder<CodeTag>;
@@ -107,7 +107,7 @@ public:
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
@@ -116,7 +116,7 @@ public:
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
@@ -135,7 +135,7 @@ protected:
       partial.code_len++;
     }
 
-    // NOTE: when we are called from HuffmanTableLUT, the partial.code_len
+    // NOTE: when we are called from PrefixCodeLUTDecoder, the partial.code_len
     // *could* be larger than the largest code lenght for this huffman table,
     // which is a symptom of a corrupt code.
     if (partial.code_len > Base::maxCodeLength() ||
@@ -171,7 +171,7 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);

@@ -35,7 +35,8 @@ getCodeValues(rawspeed::ByteStream& bs, unsigned numCodeValues) {
   return values;
 }
 
-template <typename T> static T createHuffmanTable(rawspeed::ByteStream& bs) {
+template <typename T>
+static T createPrefixCodeDecoder(rawspeed::ByteStream& bs) {
   using CodeTag = typename T::Tag;
   rawspeed::HuffmanCode<CodeTag> hc;
 

@@ -21,21 +21,21 @@
 */
 
 #include "decompressors/AbstractLJpegDecoder.h"
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/RawspeedException.h"     // for ThrowException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "decompressors/HuffmanCode.h"    // for HuffmanCode
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable, Huffma...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianne...
-#include <array>                          // for array
-#include <memory>                         // for unique_ptr, make_unique
-#include <optional>                       // for optional
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include "adt/Array1DRef.h"                  // for Array1DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/RawspeedException.h"        // for ThrowException
+#include "decoders/RawDecoderException.h"    // for ThrowRDE
+#include "decompressors/HuffmanCode.h"       // for HuffmanCode
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder, Huffma...
+#include "io/Buffer.h"                       // for Buffer
+#include "io/ByteStream.h"                   // for ByteStream
+#include "io/Endianness.h"                   // for Endianness, Endianne...
+#include <array>                             // for array
+#include <memory>                            // for unique_ptr, make_unique
+#include <optional>                          // for optional
+#include <utility>                           // for move
+#include <vector>                            // for vector
 
 namespace rawspeed {
 
@@ -249,21 +249,21 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
     hc.setCodeValues(
         Array1DRef<const uint8_t>(codesBuf.begin(), codesBuf.getSize()));
 
-    // see if we already have a HuffmanTable with the same codes
-    assert(huffmanTableStore.size() == huffmanCodeStore.size());
-    for (unsigned index = 0; index != huffmanTableStore.size(); ++index) {
+    // see if we already have a PrefixCodeDecoder with the same codes
+    assert(PrefixCodeDecoderStore.size() == huffmanCodeStore.size());
+    for (unsigned index = 0; index != PrefixCodeDecoderStore.size(); ++index) {
       if (*huffmanCodeStore[index] == hc)
-        huff[htIndex] = huffmanTableStore[index].get();
+        huff[htIndex] = PrefixCodeDecoderStore[index].get();
     }
 
     if (!huff[htIndex]) {
       huffmanCodeStore.emplace_back(std::make_unique<decltype(hc)>(hc));
       // setup new hc and put it into the store
       auto code = hc.operator PrefixCode<BaselineCodeTag>();
-      auto dHT = std::make_unique<HuffmanTable<>>(std::move(code));
+      auto dHT = std::make_unique<PrefixCodeDecoder<>>(std::move(code));
       dHT->setup(fullDecodeHT, fixDng16Bug);
       huff[htIndex] = dHT.get();
-      huffmanTableStore.emplace_back(std::move(dHT));
+      PrefixCodeDecoderStore.emplace_back(std::move(dHT));
     }
   }
 }

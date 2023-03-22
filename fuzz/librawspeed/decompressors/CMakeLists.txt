@@ -7,7 +7,7 @@ macro(add_simple_fuzzer name)
   add_dependencies(fuzzers ${TheFuzzer})
 endmacro()
 
-add_subdirectory(HuffmanTable)
+add_subdirectory(PrefixCodeDecoder)
 
 set(DECOMPRESSORS
   "Cr2LJpegDecoder"
@@ -41,20 +41,20 @@ foreach(decompressor ${DECOMPRESSORS})
 endforeach()
 
 
-function(add_specialized_fuzzer Name HuffmanTableImpl)
-  set(fuzzer "${Name}Fuzzer-${HuffmanTableImpl}")
+function(add_specialized_fuzzer Name PrefixCodeDecoderImpl)
+  set(fuzzer "${Name}Fuzzer-${PrefixCodeDecoderImpl}")
 
   rawspeed_add_executable(${fuzzer} ${Name}.cpp)
   target_compile_definitions(${fuzzer}
     PRIVATE
-    -DHuffmanTableImpl=${HuffmanTableImpl}
-    -DWITH_${HuffmanTableImpl}
+    -DPrefixCodeDecoderImpl=${PrefixCodeDecoderImpl}
+    -DWITH_${PrefixCodeDecoderImpl}
   )
 
   add_fuzz_target(${fuzzer})
 
-  add_dependencies(HuffmanTableFuzzers ${fuzzer})
+  add_dependencies(PrefixCodeDecoderFuzzers ${fuzzer})
 endfunction()
 
-add_specialized_fuzzer("Cr2Decompressor" HuffmanTable)
-add_specialized_fuzzer("Cr2Decompressor" DummyHuffmanTable)
+add_specialized_fuzzer("Cr2Decompressor" PrefixCodeDecoder)
+add_specialized_fuzzer("Cr2Decompressor" DummyPrefixCodeDecoder)
