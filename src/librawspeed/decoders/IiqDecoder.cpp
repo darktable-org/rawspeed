@@ -399,7 +399,6 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   std::array<uint16_t, 8> head;
   int high;
   unsigned val;
-  float num;
   std::array<float, 4> mult;
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -429,7 +428,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   for (int y = 0; y < high; y++) {
     for (int x = 0; x < wide; x++) {
       for (int c = 0; c < nc; c += 2) {
-        num = data.getU16() / 32768.0;
+        float num = data.getU16() / 32768.0;
         if (y == 0)
           mrow(x, c) = num;
         else
