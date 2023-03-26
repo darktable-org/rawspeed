@@ -399,8 +399,6 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   std::array<uint16_t, 8> head;
   unsigned high;
   unsigned y;
-  unsigned rend;
-  unsigned row;
   unsigned val;
   int i;
   float num;
@@ -442,9 +440,8 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
     }
     if (y == 0)
       continue;
-    rend = head[1] + y * head[5];
-    for (row = rend - head[5]; row < (unsigned)mRaw->dim.y && row < rend &&
-                               row < (unsigned)(head[1] + head[3] - head[5]);
+    for (int rend = head[1] + y * head[5], row = rend - head[5];
+         row < mRaw->dim.y && row < rend && row < (head[1] + head[3] - head[5]);
          row++) {
       for (int x = 1; x < wide; x++) {
         for (int c = 0; c < nc; c += 2) {
