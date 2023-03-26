@@ -397,8 +397,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 // -- Based on phase_one_flat_field() in dcraw.c by Dave Coffin
 void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   std::array<uint16_t, 8> head;
-  unsigned high;
-  unsigned y;
+  int high;
   unsigned val;
   int i;
   float num;
@@ -428,7 +427,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
       mrow_storage, /*width=*/wide * nc, /*height=*/1);
   mrow = Array2DRef<float>(mrow_storage.data(), /*width=*/nc, /*height=*/wide);
 
-  for (y = 0; y < high; y++) {
+  for (int y = 0; y < high; y++) {
     for (int x = 0; x < wide; x++) {
       for (int c = 0; c < nc; c += 2) {
         num = data.getU16() / 32768.0;
