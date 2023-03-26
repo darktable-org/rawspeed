@@ -399,7 +399,6 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   std::array<uint16_t, 8> head;
   int high;
   unsigned val;
-  int i;
   float num;
   std::array<float, 4> mult;
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -415,7 +414,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   default:
     ThrowRDE("Unsupported IIQ correction");
   }
-  for (i = 0; i < 8; i++)
+  for (int i = 0; i < 8; i++)
     head[i] = data.getU16();
   if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
     return;
