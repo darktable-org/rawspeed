@@ -400,9 +400,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   unsigned high;
   unsigned y;
   unsigned rend;
-  unsigned cend;
   unsigned row;
-  unsigned col;
   unsigned val;
   int i;
   float num;
@@ -453,10 +451,9 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
           mult[c] = mrow(x - 1, c);
           mult[c + 1] = (mrow(x, c) - mult[c]) / head[4];
         }
-        cend = head[0] + x * head[4];
-        for (col = cend - head[4];
-             col < (unsigned)mRaw->dim.x && col < cend &&
-             col < (unsigned)(head[0] + head[2] - head[4]);
+        for (int cend = head[0] + x * head[4], col = cend - head[4];
+             col < mRaw->dim.x && col < cend &&
+             col < head[0] + head[2] - head[4];
              col++) {
           if (int c =
                   nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
