@@ -401,8 +401,6 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   unsigned high;
   unsigned y;
   unsigned x;
-  unsigned c;
-  unsigned nc;
   unsigned rend;
   unsigned cend;
   unsigned row;
@@ -413,6 +411,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   std::array<float, 4> mult;
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
+  int nc;
   switch (corr) {
   case IiqCorr::LUMA:
     nc = 2;
@@ -437,7 +436,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
 
   for (y = 0; y < high; y++) {
     for (x = 0; x < wide; x++) {
-      for (c = 0; c < nc; c += 2) {
+      for (int c = 0; c < nc; c += 2) {
         num = data.getU16() / 32768.0;
         if (y == 0)
           mrow(x, c) = num;
@@ -452,7 +451,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
                                row < (unsigned)(head[1] + head[3] - head[5]);
          row++) {
       for (x = 1; x < wide; x++) {
-        for (c = 0; c < nc; c += 2) {
+        for (int c = 0; c < nc; c += 2) {
           mult[c] = mrow(x - 1, c);
           mult[c + 1] = (mrow(x, c) - mult[c]) / head[4];
         }
@@ -461,18 +460,19 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
              col < (unsigned)mRaw->dim.x && col < cend &&
              col < (unsigned)(head[0] + head[2] - head[4]);
              col++) {
-          c = nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
-                     : 0;
-          if (!(c & 1)) {
+          if (int c =
+                  nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
+                         : 0;
+              !(c & 1)) {
             val = img(row, col) * mult[c];
             img(row, col) = std::min(val, 0xFFFFU);
           }
-          for (c = 0; c < nc; c += 2)
+          for (int c = 0; c < nc; c += 2)
             mult[c] += mult[c + 1];
         }
       }
       for (x = 0; x < wide; x++)
-        for (c = 0; c < nc; c += 2)
+        for (int c = 0; c < nc; c += 2)
           mrow(x, c) += mrow(x, c + 1);
     }
   }
