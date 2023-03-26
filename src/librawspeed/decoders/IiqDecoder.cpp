@@ -397,10 +397,8 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 // -- Based on phase_one_flat_field() in dcraw.c by Dave Coffin
 void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   std::array<uint16_t, 8> head;
-  unsigned wide;
   unsigned high;
   unsigned y;
-  unsigned x;
   unsigned rend;
   unsigned cend;
   unsigned row;
@@ -426,7 +424,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
     head[i] = data.getU16();
   if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
     return;
-  wide = head[2] / head[4] + (head[2] % head[4] != 0);
+  int wide = head[2] / head[4] + (head[2] % head[4] != 0);
   high = head[3] / head[5] + (head[3] % head[5] != 0);
 
   std::vector<float> mrow_storage;
@@ -435,7 +433,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   mrow = Array2DRef<float>(mrow_storage.data(), /*width=*/nc, /*height=*/wide);
 
   for (y = 0; y < high; y++) {
-    for (x = 0; x < wide; x++) {
+    for (int x = 0; x < wide; x++) {
       for (int c = 0; c < nc; c += 2) {
         num = data.getU16() / 32768.0;
         if (y == 0)
@@ -450,7 +448,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
     for (row = rend - head[5]; row < (unsigned)mRaw->dim.y && row < rend &&
                                row < (unsigned)(head[1] + head[3] - head[5]);
          row++) {
-      for (x = 1; x < wide; x++) {
+      for (int x = 1; x < wide; x++) {
         for (int c = 0; c < nc; c += 2) {
           mult[c] = mrow(x - 1, c);
           mult[c + 1] = (mrow(x, c) - mult[c]) / head[4];
@@ -471,7 +469,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
             mult[c] += mult[c + 1];
         }
       }
-      for (x = 0; x < wide; x++)
+      for (int x = 0; x < wide; x++)
         for (int c = 0; c < nc; c += 2)
           mrow(x, c) += mrow(x, c + 1);
     }
