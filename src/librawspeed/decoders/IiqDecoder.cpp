@@ -212,6 +212,7 @@ RawImage IiqDecoder::decodeRawInternal() {
       block_offsets = bs.getSubStream(data, len);
       break;
     case 0x21d:
+      // 16-bit black level adapted to 14-bit raw data (IIQFormat::IIQ_L)
       black_level = data >> 2;
       break;
     case 0x222:
