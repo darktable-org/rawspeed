@@ -92,6 +92,9 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if ((unsigned)frame.cps < mRaw->getCpp())
     ThrowRDE("Unexpected number of components");
 
+  if ((int64_t)frame.cps * frame.dim.x > std::numeric_limits<int>::max())
+    ThrowRDE("LJpeg frame is too big");
+
   invariant(mRaw->dim.x > imgFrame.pos.x);
   if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
