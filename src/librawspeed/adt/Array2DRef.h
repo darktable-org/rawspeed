@@ -48,7 +48,7 @@ public:
 
   Array2DRef() = default;
 
-  Array2DRef(T* data, int dataWidth, int dataHeight, int dataPitch = 0);
+  Array2DRef(T* data, int width, int height, int pitch = 0);
 
   // Can not cast away constness.
   template <
@@ -114,12 +114,12 @@ public:
 };
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data, const int dataWidth, const int dataHeight,
-                          const int dataPitch /* = 0 */)
-    : _data(data), width(dataWidth), height(dataHeight) {
+Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
+                          const int pitch_ /* = 0 */)
+    : _data(data), width(width_), height(height_) {
   invariant(width >= 0);
   invariant(height >= 0);
-  _pitch = (dataPitch == 0 ? dataWidth : dataPitch);
+  _pitch = (pitch_ == 0 ? width_ : pitch_);
 }
 
 template <class T>
