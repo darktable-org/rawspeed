@@ -13636,7 +13636,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="-10" height="0"/>
+		<Crop x="0" y="0" width="-8" height="0"/>
 		<Sensor black="512" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -13804,7 +13804,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="-28" height="0"/>
+		<Crop x="0" y="0" width="-24" height="0"/>
 		<Sensor black="512" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
