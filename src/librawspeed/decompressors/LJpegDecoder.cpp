@@ -20,15 +20,17 @@
 */
 
 #include "decompressors/LJpegDecoder.h"
-#include "adt/Point.h"                       // for iPoint2D
-#include "common/Common.h"                   // for to_array, roundUpDivision
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D, iRectangle2D
 #include "common/RawImage.h"                 // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor
+#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor::PerC...
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
 #include "io/ByteStream.h"                   // for ByteStream
-#include <algorithm>                         // for copy_n
+#include <algorithm>                         // for generate_n
 #include <array>                             // for array
-#include <cassert>                           // for assert
+#include <iterator>                          // for back_insert_iterator
+#include <vector>                            // for vector
 
 using std::copy_n;
 
@@ -88,7 +90,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 }
 
 void LJpegDecoder::decodeScan() {
-  assert(frame.cps > 0);
+  invariant(frame.cps > 0);
 
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
@@ -102,7 +104,7 @@ void LJpegDecoder::decodeScan() {
   std::vector<LJpegDecompressor::PerComponentRecipe> rec;
   rec.reserve(N_COMP);
   std::generate_n(std::back_inserter(rec), N_COMP,
-                  [&rec, hts = getHuffmanTables(N_COMP),
+                  [&rec, hts = getPrefixCodeDecoders(N_COMP),
                    initPred = getInitialPredictors(
                        N_COMP)]() -> LJpegDecompressor::PerComponentRecipe {
                     const int i = rec.size();

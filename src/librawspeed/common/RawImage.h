@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"                  // for WITH_SSE2
+#include "rawspeedconfig.h"                  // for RAWSPEED_READONLY, WITH...
 #include "ThreadSafetyAnalysis.h"            // for GUARDED_BY, REQUIRES
 #include "adt/AlignedAllocator.h"            // for AlignedAllocator
 #include "adt/Array2DRef.h"                  // for Array2DRef
@@ -110,8 +110,8 @@ class RawImageData : public ErrorLog {
 
 public:
   virtual ~RawImageData();
-  [[nodiscard]] uint32_t getCpp() const { return cpp; }
-  [[nodiscard]] uint32_t getBpp() const { return bpp; }
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getCpp() const { return cpp; }
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getBpp() const { return bpp; }
   void setCpp(uint32_t val);
   void createData();
   void poisonPadding();
@@ -132,8 +132,8 @@ public:
 
   void subFrame(iRectangle2D cropped);
   void clearArea(iRectangle2D area);
-  [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
-  [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getUncroppedDim() const;
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
   virtual void setWithLookUp(uint16_t value, uint8_t* dst,
@@ -238,8 +238,8 @@ public:
   static RawImage create(const iPoint2D& dim,
                          RawImageType type = RawImageType::UINT16,
                          uint32_t componentsPerPixel = 1);
-  RawImageData* operator->() const { return p_; }
-  RawImageData& operator*() const { return *p_; }
+  RawImageData* RAWSPEED_READONLY operator->() const { return p_; }
+  RawImageData& RAWSPEED_READONLY operator*() const { return *p_; }
   explicit RawImage(RawImageData* p); // p must not be NULL
   ~RawImage();
   RawImage(const RawImage& p);

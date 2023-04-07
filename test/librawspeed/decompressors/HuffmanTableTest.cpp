@@ -18,19 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
-#include "io/BitPumpMSB.h"              // for BitStream<>::fillCache, BitP...
-#include "io/BitStream.h"               // for BitStream
-#include "io/Buffer.h"                  // for Buffer, DataBuffer
-#include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for Endianness, Endianness::little
-#include <algorithm>                    // for copy, fill_n, max
-#include <array>                        // for array
-#include <cstdint>                      // for uint8_t
-#include <gtest/gtest.h>                // for Test, TestInfo (ptr only)
-#include <initializer_list>             // for initializer_list
-#include <utility>                      // for move
-#include <vector>                       // for vector, allocator
+#include "adt/Array1DRef.h" // for Array1DRef
+#include "decompressors/HuffmanCode.h"
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeLUTDecoder, PrefixCodeDecoder
+#include "io/BitPumpMSB.h"  // for BitStream<>::fillCache, BitP...
+#include "io/BitStream.h"   // for BitStream
+#include "io/Buffer.h"      // for Buffer, DataBuffer
+#include "io/ByteStream.h"  // for ByteStream
+#include "io/Endianness.h"  // for Endianness, Endianness::little
+#include <algorithm>        // for copy, fill_n, max
+#include <array>            // for array
+#include <cstdint>          // for uint8_t
+#include <initializer_list> // for initializer_list
+#include <utility>          // for move
+#include <vector>           // for vector, allocator
+#include <gtest/gtest.h>    // for Message, TestPartResult
 
 namespace rawspeed {
 class RawDecoderException;
@@ -41,32 +43,30 @@ using rawspeed::Buffer;
 using rawspeed::ByteStream;
 using rawspeed::DataBuffer;
 using rawspeed::Endianness;
-using rawspeed::HuffmanTable;
+using rawspeed::PrefixCodeDecoder;
 
 namespace rawspeed_test {
 
-auto genHT =
-    [](std::initializer_list<uint8_t>&& nCodesPerLength) -> HuffmanTable<> {
-  HuffmanTable<> ht;
-  std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
-  v.resize(16);
-  Buffer b(v.data(), v.size());
-  ht.setNCodesPerLength(b);
-
-  return ht;
-};
-
 auto genHTFull =
     [](std::initializer_list<uint8_t>&& nCodesPerLength,
-       std::initializer_list<uint8_t>&& codeValues) -> HuffmanTable<> {
-  auto ht = genHT(std::move(nCodesPerLength));
-  std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
-  rawspeed::Array1DRef<uint8_t> b(v.data(), v.size());
-  ht.setCodeValues(b);
+       std::initializer_list<uint8_t>&& codeValues) -> PrefixCodeDecoder<> {
+  rawspeed::HuffmanCode<rawspeed::BaselineCodeTag> hc;
+
+  std::vector<uint8_t> lv(nCodesPerLength.begin(), nCodesPerLength.end());
+  lv.resize(16);
+  Buffer lb(lv.data(), lv.size());
+  hc.setNCodesPerLength(lb);
+
+  std::vector<uint8_t> cv(codeValues.begin(), codeValues.end());
+  rawspeed::Array1DRef<uint8_t> cb(cv.data(), cv.size());
+  hc.setCodeValues(cb);
+
+  auto code = hc.operator rawspeed::PrefixCode<rawspeed::BaselineCodeTag>();
+  PrefixCodeDecoder<> ht(std::move(code));
   return ht;
 };
 
-TEST(HuffmanTableTest, decodeCodeValueIdentityTest) {
+TEST(PrefixCodeDecoderTest, decodeCodeValueIdentityTest) {
   static const std::array<uint8_t, 4> data{
       {0b01010101, 0b01010101, 0b01010101, 0b01010101}};
   const Buffer b(data.data(), data.size());
@@ -84,7 +84,7 @@ TEST(HuffmanTableTest, decodeCodeValueIdentityTest) {
   }
 }
 
-TEST(HuffmanTableTest, decodeDifferenceIdentityTest) {
+TEST(PrefixCodeDecoderTest, decodeDifferenceIdentityTest) {
   static const std::array<uint8_t, 4> data{
       {0b00000000, 0b11010101, 0b01010101, 0b01111111}};
   const Buffer b(data.data(), data.size());
@@ -101,7 +101,7 @@ TEST(HuffmanTableTest, decodeDifferenceIdentityTest) {
   ASSERT_EQ(ht.decodeDifference(p), 127);
 }
 
-TEST(HuffmanTableTest, decodeCodeValueBadCodeTest) {
+TEST(PrefixCodeDecoderTest, decodeCodeValueBadCodeTest) {
   static const std::array<uint8_t, 4> data{{0b01000000}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);
@@ -116,7 +116,7 @@ TEST(HuffmanTableTest, decodeCodeValueBadCodeTest) {
   ASSERT_THROW(ht.decodeCodeValue(p), rawspeed::RawDecoderException);
 }
 
-TEST(HuffmanTableTest, decodeDifferenceBadCodeTest) {
+TEST(PrefixCodeDecoderTest, decodeDifferenceBadCodeTest) {
   static const std::array<uint8_t, 4> data{{0b00100000}};
   const Buffer b(data.data(), data.size());
   const DataBuffer db(b, Endianness::little);

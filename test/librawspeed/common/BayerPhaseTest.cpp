@@ -22,12 +22,12 @@
 #include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
 #include <array>                       // for array
 #include <cassert>                     // for assert
-#include <gtest/gtest.h>               // for UnitTest, EXPECT_EQ, TestWith...
 #include <map>                         // for allocator, map, operator!=
 #include <optional>                    // for optional
 #include <ostream>                     // for operator<<, ostream
 #include <tuple>                       // for get, tuple, apply
 #include <utility>                     // for forward, pair
+#include <gtest/gtest.h>               // for ParamIteratorInterface, Param...
 
 using rawspeed::BayerPhase;
 using rawspeed::CFAColor;

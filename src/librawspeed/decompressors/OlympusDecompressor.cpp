@@ -20,16 +20,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
 #include "decompressors/OlympusDecompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cmath>                          // for abs
 #include <cstdlib>                        // for abs
 #include <type_traits>                    // for enable_if_t
 
@@ -41,7 +41,7 @@ namespace {
 // in a horrible code. So let's just provide our own signbit(). It compiles to
 // the exact same code as the std::signbit(int).
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-constexpr __attribute__((const)) bool SignBit(T x) {
+constexpr RAWSPEED_READNONE bool SignBit(T x) {
   return x < 0;
 }
 
@@ -134,9 +134,9 @@ inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
 }
 
 void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
-  assert(mRaw->dim.y > 0);
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 2 == 0);
+  invariant(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.x % 2 == 0);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -155,9 +155,9 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
 }
 
 void OlympusDecompressor::decompress(ByteStream input) const {
-  assert(mRaw->dim.y > 0);
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 2 == 0);
+  invariant(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.x % 2 == 0);
 
   input.skipBytes(7);
   BitPumpMSB bits(input);

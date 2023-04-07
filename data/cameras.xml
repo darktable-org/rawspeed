@@ -13636,7 +13636,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="-10" height="0"/>
+		<Crop x="0" y="0" width="-8" height="0"/>
 		<Sensor black="512" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -13804,7 +13804,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="-28" height="0"/>
+		<Crop x="0" y="0" width="-24" height="0"/>
 		<Sensor black="512" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -14224,6 +14224,24 @@
 				<ColorMatrixRow plane="0">11401 -4498 -1312</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-5088 12751 2613</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-838 1568 5941</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F550EXR">
+		<ID make="Fujifilm" model="FinePix F550EXR">Fujifilm FinePix F550EXR</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="40" y="0" width="-36" height="0"/>
+		<Sensor black="256" white="3900"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">13690 -5358 -1474</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3369 11600 1998</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-132 1554 4395</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -16547,7 +16565,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="42" y="8" width="-20" height="-54"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8035 435 -962</ColorMatrixRow>
@@ -16565,7 +16583,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="42" y="16" width="-20" height="-50"/>
-		<Sensor black="257" white="16383"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6294 686 -712</ColorMatrixRow>
@@ -16583,7 +16601,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="92" y="108" width="0" height="0"/>
-		<Sensor black="1024" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">3984 0 0</ColorMatrixRow>
@@ -17146,6 +17164,9 @@
 	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M10" mode="dng">
 		<ID make="Leica" model="M10">LEICA M10</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M10 MONOCHROM" mode="dng">
+		<ID make="Leica" model="M10 Monochrom">LEICA M10 MONOCHROM</ID>
 	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M (Typ 240)" mode="dng">
 		<ID make="Leica" model="M (Typ 240)">LEICA M (Typ 240)</ID>

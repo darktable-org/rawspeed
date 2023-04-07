@@ -35,7 +35,7 @@ struct MSBBitPumpTag;
 using BitPumpMSB = BitStream<MSBBitPumpTag, BitStreamCacheRightInLeftOut>;
 
 template <> struct BitStreamTraits<MSBBitPumpTag> final {
-  static constexpr bool canUseWithHuffmanTable = true;
+  static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;

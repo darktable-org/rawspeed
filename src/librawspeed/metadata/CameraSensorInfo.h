@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include <algorithm> // for copy
-#include <vector>    // for vector
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
+#include <algorithm>        // for copy
+#include <vector>           // for vector
 
 namespace rawspeed {
 
@@ -29,8 +30,8 @@ class CameraSensorInfo final {
 public:
   CameraSensorInfo(int black_level, int white_level, int min_iso, int max_iso,
                    std::vector<int> black_separate);
-  [[nodiscard]] bool __attribute__((pure)) isIsoWithin(int iso) const;
-  [[nodiscard]] bool __attribute__((pure)) isDefault() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isIsoWithin(int iso) const;
+  [[nodiscard]] bool RAWSPEED_READONLY isDefault() const;
   int mBlackLevel;
   int mWhiteLevel;
   int mMinIso;

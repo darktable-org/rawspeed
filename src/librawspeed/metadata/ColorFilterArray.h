@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include "adt/Point.h" // for iPoint2D
-#include <algorithm>   // for copy
-#include <cstdint>     // for uint32_t, uint8_t
-#include <map>         // for map
-#include <string>      // for string
-#include <vector>      // for vector
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "adt/Point.h"      // for iPoint2D
+#include <algorithm>        // for copy
+#include <cstdint>          // for uint32_t, uint8_t
+#include <map>              // for map
+#include <string>           // for string
+#include <vector>           // for vector
 
 namespace rawspeed {
 
@@ -67,8 +68,8 @@ public:
   [[nodiscard]] iPoint2D getSize() const { return size; }
 
   static std::string colorToString(CFAColor c);
-  static uint32_t __attribute__((const))
-  shiftDcrawFilter(uint32_t filter, int x, int y);
+  static uint32_t RAWSPEED_READNONE shiftDcrawFilter(uint32_t filter, int x,
+                                                     int y);
 };
 
 // FC macro from dcraw outputs, given the filters definition, the dcraw color

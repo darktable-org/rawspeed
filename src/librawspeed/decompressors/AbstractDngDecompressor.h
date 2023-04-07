@@ -21,12 +21,12 @@
 
 #pragma once
 
+#include "adt/Invariant.h"                      // for invariant
 #include "adt/Point.h"                          // for iPoint2D
 #include "common/Common.h"                      // for roundUpDivision
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
 #include "io/ByteStream.h"                      // for ByteStream
-#include <cassert>                              // for assert
 #include <cstdint>                              // for uint32_t
 #include <utility>                              // for move
 #include <vector>                               // for vector
@@ -56,16 +56,16 @@ struct DngTilingDescription final {
       : dim(dim_), tileW(tileW_), tileH(tileH_),
         tilesX(roundUpDivision(dim.x, tileW)),
         tilesY(roundUpDivision(dim.y, tileH)), numTiles(tilesX * tilesY) {
-    assert(dim.area() > 0);
-    assert(tileW > 0);
-    assert(tileH > 0);
-    assert(tilesX > 0);
-    assert(tilesY > 0);
-    assert(tileW * tilesX >= static_cast<unsigned>(dim.x));
-    assert(tileH * tilesY >= static_cast<unsigned>(dim.y));
-    assert(tileW * (tilesX - 1) < static_cast<unsigned>(dim.x));
-    assert(tileH * (tilesY - 1) < static_cast<unsigned>(dim.y));
-    assert(numTiles > 0);
+    invariant(dim.area() > 0);
+    invariant(tileW > 0);
+    invariant(tileH > 0);
+    invariant(tilesX > 0);
+    invariant(tilesY > 0);
+    invariant(tileW * tilesX >= static_cast<unsigned>(dim.x));
+    invariant(tileH * tilesY >= static_cast<unsigned>(dim.y));
+    invariant(tileW * (tilesX - 1) < static_cast<unsigned>(dim.x));
+    invariant(tileH * (tilesY - 1) < static_cast<unsigned>(dim.y));
+    invariant(numTiles > 0);
   }
 };
 
@@ -106,18 +106,19 @@ struct DngSliceElement final {
         offY(dsc.tileH * row),
         width(!lastColumn ? dsc.tileW : dsc.dim.x - offX),
         height(!lastRow ? dsc.tileH : dsc.dim.y - offY) {
-    assert(n < dsc.numTiles);
-    assert(bs.getRemainSize() > 0);
-    assert(column < dsc.tilesX);
-    assert(row < dsc.tilesY);
-    assert(offX < static_cast<unsigned>(dsc.dim.x));
-    assert(offY < static_cast<unsigned>(dsc.dim.y));
-    assert(width > 0);
-    assert(height > 0);
-    assert(offX + width <= static_cast<unsigned>(dsc.dim.x));
-    assert(offY + height <= static_cast<unsigned>(dsc.dim.y));
-    assert(!lastColumn || (offX + width == static_cast<unsigned>(dsc.dim.x)));
-    assert(!lastRow || (offY + height == static_cast<unsigned>(dsc.dim.y)));
+    invariant(n < dsc.numTiles);
+    invariant(bs.getRemainSize() > 0);
+    invariant(column < dsc.tilesX);
+    invariant(row < dsc.tilesY);
+    invariant(offX < static_cast<unsigned>(dsc.dim.x));
+    invariant(offY < static_cast<unsigned>(dsc.dim.y));
+    invariant(width > 0);
+    invariant(height > 0);
+    invariant(offX + width <= static_cast<unsigned>(dsc.dim.x));
+    invariant(offY + height <= static_cast<unsigned>(dsc.dim.y));
+    invariant(!lastColumn ||
+              (offX + width == static_cast<unsigned>(dsc.dim.x)));
+    invariant(!lastRow || (offY + height == static_cast<unsigned>(dsc.dim.y)));
   }
 };
 

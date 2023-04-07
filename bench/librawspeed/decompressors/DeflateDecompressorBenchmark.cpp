@@ -20,14 +20,11 @@
 
 #include "decompressors/DeflateDecompressor.h" // for DeflateDecompressor
 #include "adt/Point.h"                         // for iPoint2D
-#include "bench/Common.h"                      // for areaToRectangle
+#include "bench/Common.h"                      // for areaToRectangle, benc...
 #include "common/Common.h"                     // for isAligned
 #include "common/RawImage.h"                   // for RawImage, RawImageData
-#include "io/Buffer.h"                         // for Buffer, DataBuffer
-#include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
+#include "io/Buffer.h"                         // for Buffer
 #include <algorithm>                           // for fill_n
-#include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
 #include <cstdint>                             // for uint8_t
@@ -35,6 +32,7 @@
 #include <type_traits>                         // for integral_constant
 #include <vector>                              // for vector
 #include <zlib.h>                              // for compress, compressBound
+#include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
 
 #ifndef NDEBUG
 #include <limits> // for numeric_limits

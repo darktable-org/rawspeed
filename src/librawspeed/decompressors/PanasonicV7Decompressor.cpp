@@ -24,12 +24,12 @@
 #include "adt/Array1DRef.h"               // for Array1DRef
 #include "adt/Array2DRef.h"               // for Array2DRef
 #include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
-#include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t
 
 namespace rawspeed {
@@ -63,7 +63,7 @@ inline void __attribute__((always_inline))
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 PanasonicV7Decompressor::decompressBlock(
     ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept {
-  assert(out.size() == PixelsPerBlock);
+  invariant(out.size() == PixelsPerBlock);
   BitPumpLSB pump(block);
   for (int pix = 0; pix < PixelsPerBlock; pix++)
     out(pix) = pump.getBits(BitsPerSample);
@@ -74,7 +74,7 @@ void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   Array1DRef<uint16_t> outRow = out[row];
 
-  assert(outRow.size() % PixelsPerBlock == 0);
+  invariant(outRow.size() % PixelsPerBlock == 0);
   const int blocksperrow = outRow.size() / PixelsPerBlock;
   const int bytesPerRow = BytesPerBlock * blocksperrow;
 

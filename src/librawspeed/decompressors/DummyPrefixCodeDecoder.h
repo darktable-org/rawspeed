@@ -20,39 +20,31 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"       // for ThrowRDE
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "io/BitStream.h"                       // for BitStreamTraits
-#include <cassert>                              // for assert
-#include <cstdint>                              // for uint32_t
-#include <tuple>                                // for tie
-#include <utility>                              // for pair
-#include <vector>                               // for vector
+#include "decompressors/AbstractPrefixCode.h" // for CodeTraits
+#include "decompressors/PrefixCode.h"         // for PrefixCode...
+#include "io/BitStream.h"                     // for BitStreamTraits
+#include <cassert>                            // for invariant
+#include <cstdint>                            // for uint32_t
+#include <tuple>                              // for tie
+#include <utility>                            // for pair
+#include <vector>                             // for vector
 
 namespace rawspeed {
 class Buffer;
 
-template <typename HuffmanTableTag = BaselineHuffmanTableTag>
-class DummyHuffmanTable final {
+template <typename CodeTag = BaselineCodeTag>
+class DummyPrefixCodeDecoder final {
 public:
-  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  using Tag = CodeTag;
+  using Traits = CodeTraits<CodeTag>;
+
+  explicit DummyPrefixCodeDecoder(PrefixCode<CodeTag> code) {}
 
 private:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
 public:
-  static uint32_t setNCodesPerLength(Buffer data) {
-    (void)data;
-    // No-op.
-    return 0;
-  }
-
-  static void setCodeValues(Array1DRef<const uint8_t> data) {
-    (void)data;
-    // No-op.
-  }
-
   void setup(bool fullDecode_, bool fixDNGBug16_) {
     fullDecode = fullDecode_;
     fixDNGBug16 = fixDNGBug16_;
@@ -63,18 +55,18 @@ public:
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    assert(!fullDecode);
+    invariant(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    assert(fullDecode);
+    invariant(fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -85,9 +77,9 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == fullDecode);
+    invariant(FULL_DECODE == fullDecode);
 
     (void)bs;
 

@@ -23,10 +23,10 @@
 #include "adt/Point.h"                 // for iPoint2D
 #include <algorithm>                   // for copy
 #include <cstdint>                     // for uint32_t
-#include <gtest/gtest.h>               // for Test, ASSERT_EQ, ASSERT_NO_THROW
 #include <iosfwd>                      // for ostream
 #include <string>                      // for allocator, basic_string, oper...
 #include <tuple>                       // for get, make_tuple, tuple
+#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
 
 using rawspeed::CFAColor;
 using rawspeed::ColorFilterArray;

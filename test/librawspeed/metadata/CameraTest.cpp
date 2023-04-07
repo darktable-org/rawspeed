@@ -19,9 +19,9 @@
 */
 
 #include "metadata/Camera.h" // for Hints
-#include <gtest/gtest.h>     // for Test, TestInfo (ptr only), ASSERT_TRUE
 #include <string>            // for string, allocator, basic_string, to_string
 #include <tuple>             // for get, tuple
+#include <gtest/gtest.h>     // for AssertionResult, Message, TestPartResult
 
 using rawspeed::Hints;
 using std::string;

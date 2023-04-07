@@ -21,17 +21,17 @@
 */
 
 #include "decompressors/KodakDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for extractHighBits, isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min, fill_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/Common.h"                   // for extractHighBits, isIntN
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/ByteStream.h"                   // for ByteStream
+#include <algorithm>                         // for min, fill_n
+#include <array>                             // for array
+#include <cstdint>                           // for uint32_t, uint8_t, uint16_t
 
 namespace rawspeed {
 
@@ -58,9 +58,9 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
 
 KodakDecompressor::segment
 KodakDecompressor::decodeSegment(const uint32_t bsize) {
-  assert(bsize > 0);
-  assert(bsize % 4 == 0);
-  assert(bsize <= segment_size);
+  invariant(bsize > 0);
+  invariant(bsize % 4 == 0);
+  invariant(bsize <= segment_size);
 
   segment out;
   static_assert(out.size() == segment_size, "Wrong segment size");
@@ -87,7 +87,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
   }
   for (uint32_t i = 0; i < bsize; i++) {
     uint32_t len = blen[i];
-    assert(len < 16);
+    invariant(len < 16);
 
     if (bits < len) {
       for (uint32_t j = 0; j < 32; j += 8) {
@@ -102,7 +102,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = len != 0 ? HuffmanTable<>::extend(diff, len) : int(diff);
+    out[i] = len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff);
   }
 
   return out;

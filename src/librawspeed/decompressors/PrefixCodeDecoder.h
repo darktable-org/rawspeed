@@ -22,25 +22,26 @@
 
 // IWYU pragma: begin_exports
 
-#include "decompressors/HuffmanTableLUT.h" // for HuffmanTableLUT
-// #include "decompressors/HuffmanTableLookup.h" // for HuffmanTableLookup
-// #include "decompressors/HuffmanTableTree.h" // for HuffmanTableTree
-// #include "decompressors/HuffmanTableVector.h" // for HuffmanTableVector
+#include "decompressors/PrefixCodeLUTDecoder.h" // for PrefixCodeLUTDecoder
+// #include "decompressors/PrefixCodeLookupDecoder.h" // for
+// PrefixCodeLookupDecoder #include "decompressors/PrefixCodeTreeDecoder.h" //
+// for PrefixCodeTreeDecoder #include "decompressors/PrefixCodeVectorDecoder.h"
+// // for PrefixCodeVectorDecoder
 
 // IWYU pragma: end_exports
 
 namespace rawspeed {
 
-template <typename HuffmanTableTag = BaselineHuffmanTableTag>
-using HuffmanTable = HuffmanTableLUT<HuffmanTableTag>;
+template <typename CodeTag = BaselineCodeTag>
+using PrefixCodeDecoder = PrefixCodeLUTDecoder<CodeTag>;
 
-// template <typename HuffmanTableTag>
-// using HuffmanTable = HuffmanTableLookup<HuffmanTableTag>;
+// template <typename CodeTag>
+// using PrefixCodeDecoder = PrefixCodeLookupDecoder<CodeTag>;
 
-// template <typename HuffmanTableTag>
-// using HuffmanTable = HuffmanTableTree<HuffmanTableTag>;
+// template <typename CodeTag>
+// using PrefixCodeDecoder = PrefixCodeTreeDecoder<CodeTag>;
 
-// template <typename HuffmanTableTag>
-// using HuffmanTable = HuffmanTableVector<HuffmanTableTag>;
+// template <typename CodeTag>
+// using PrefixCodeDecoder = PrefixCodeVectorDecoder<CodeTag>;
 
 } // namespace rawspeed

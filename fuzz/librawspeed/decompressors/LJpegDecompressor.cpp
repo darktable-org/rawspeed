@@ -19,20 +19,19 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "HuffmanTable/Common.h"        // for createHuffmanTable
-#include "MemorySanitizer.h"            // for MSan
-#include "common/RawImage.h"            // for RawImage, RawImageData
-#include "common/RawspeedException.h"   // for ThrowException, Rawsp...
-#include "decompressors/HuffmanTable.h" // for HuffmanTable
-#include "fuzz/Common.h"                // for CreateRawImage
-#include "io/Buffer.h"                  // for Buffer, DataBuffer
-#include "io/ByteStream.h"              // for ByteStream
-#include "io/Endianness.h"              // for Endianness, Endiannes...
-#include <algorithm>                    // for generate_n, copy
-#include <cassert>                      // for assert
-#include <cstdint>                      // for uint16_t, uint8_t
-#include <initializer_list>             // for initializer_list
-#include <iterator>                     // for back_insert_iterator
+#include "MemorySanitizer.h"          // for MSan
+#include "PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "common/RawImage.h"          // for RawImage, RawImageData
+#include "common/RawspeedException.h" // for ThrowException, RawspeedExce...
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "fuzz/Common.h"                     // for CreateRawImage
+#include "io/Buffer.h"                       // for Buffer, DataBuffer
+#include "io/ByteStream.h"                   // for ByteStream
+#include "io/Endianness.h" // for Endianness, Endianness::little
+#include <algorithm>       // for generate_n, copy, fill, fill_n
+#include <cassert>         // for assert
+#include <cstdint>         // for uint16_t, uint8_t
+#include <iterator>        // for back_insert_iterator, back_i...
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -55,12 +54,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const unsigned num_recips = bs.getU32();
 
     const unsigned num_unique_hts = bs.getU32();
-    std::vector<rawspeed::HuffmanTable<>> uniqueHts;
+    std::vector<rawspeed::PrefixCodeDecoder<>> uniqueHts;
     std::generate_n(std::back_inserter(uniqueHts), num_unique_hts, [&bs]() {
-      return createHuffmanTable<rawspeed::HuffmanTable<>>(bs);
+      return createPrefixCodeDecoder<rawspeed::PrefixCodeDecoder<>>(bs);
     });
 
-    std::vector<const rawspeed::HuffmanTable<>*> hts;
+    std::vector<const rawspeed::PrefixCodeDecoder<>*> hts;
     std::generate_n(std::back_inserter(hts), num_recips, [&bs, &uniqueHts]() {
       if (unsigned uniq_ht_idx = bs.getU32(); uniq_ht_idx < uniqueHts.size())
         return &uniqueHts[uniq_ht_idx];

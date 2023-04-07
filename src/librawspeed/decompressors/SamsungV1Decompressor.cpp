@@ -21,18 +21,18 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include <algorithm>                      // for fill_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <memory>                         // for allocator_traits<>::value_...
-#include <vector>                         // for vector
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/Common.h"                   // for isIntN
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/BitPumpMSB.h"                   // for BitPumpMSB
+#include <algorithm>                         // for fill_n
+#include <array>                             // for array
+#include <memory> // for allocator_traits<>::value_...
+#include <vector> // for vector
 
 namespace rawspeed {
 
@@ -73,7 +73,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
     return 0;
   int32_t diff = pump.getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
-  diff = HuffmanTable<>::extend(diff, len);
+  diff = PrefixCodeDecoder<>::extend(diff, len);
   return diff;
 }
 
@@ -117,8 +117,8 @@ void SamsungV1Decompressor::decompress() const {
   }
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
-  assert(out.height % 2 == 0 && "Should have even row count.");
+  invariant(out.width % 32 == 0 && "Should have even count of pixels per row.");
+  invariant(out.height % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(bs);
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};

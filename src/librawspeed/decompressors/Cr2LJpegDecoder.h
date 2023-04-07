@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDe...
+#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDecoder
 #include "decompressors/Cr2Decompressor.h"      // for Cr2SliceWidths
 #include <cassert>                              // for assert
 #include <cstdint>                              // for uint16_t

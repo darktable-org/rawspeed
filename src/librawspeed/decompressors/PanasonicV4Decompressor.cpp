@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicV4Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Mutex.h"                    // for MutexLocker
 #include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
 #include "common/Common.h"                // for extractHighBits, rawspeed_...
@@ -60,9 +61,9 @@ PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
              section_split_offset, BlockSize);
 
   // Naive count of bytes that given pixel count requires.
-  assert(mRaw->dim.area() % PixelsPerPacket == 0);
+  invariant(mRaw->dim.area() % PixelsPerPacket == 0);
   const auto bytesTotal = (mRaw->dim.area() / PixelsPerPacket) * BytesPerPacket;
-  assert(bytesTotal > 0);
+  invariant(bytesTotal > 0);
 
   // If section_split_offset is zero, then that we need to read the normal
   // amount of bytes. But if it is not, then we need to round up to multiple of
@@ -86,21 +87,21 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
 
   // If section_split_offset == 0, last block may not be full.
   const auto blocksTotal = roundUpDivision(input.getRemainSize(), BlockSize);
-  assert(blocksTotal > 0);
-  assert(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
+  invariant(blocksTotal > 0);
+  invariant(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
   blocks.reserve(blocksTotal);
 
   unsigned currPixel = 0;
   std::generate_n(
       std::back_inserter(blocks), blocksTotal, [&, pixelToCoordinate]() {
-        assert(input.getRemainSize() != 0);
+        invariant(input.getRemainSize() != 0);
         const auto blockSize = std::min(input.getRemainSize(), BlockSize);
-        assert(blockSize > 0);
-        assert(blockSize % BytesPerPacket == 0);
+        invariant(blockSize > 0);
+        invariant(blockSize % BytesPerPacket == 0);
         const auto packets = blockSize / BytesPerPacket;
-        assert(packets > 0);
+        invariant(packets > 0);
         const auto pixels = packets * PixelsPerPacket;
-        assert(pixels > 0);
+        invariant(pixels > 0);
 
         ByteStream bs = input.getStream(blockSize);
         iPoint2D beginCoord = pixelToCoordinate(currPixel);
@@ -126,8 +127,8 @@ class PanasonicV4Decompressor::ProxyStream {
 
   void parseBlock() {
     assert(buf.empty());
-    assert(block.getRemainSize() <= BlockSize);
-    assert(section_split_offset <= BlockSize);
+    invariant(block.getRemainSize() <= BlockSize);
+    invariant(section_split_offset <= BlockSize);
 
     Buffer FirstSection = block.getBuffer(section_split_offset);
     Buffer SecondSection = block.getBuffer(block.getRemainSize());
@@ -141,7 +142,7 @@ class PanasonicV4Decompressor::ProxyStream {
     // Now append the original 1'st section right after the new 1'st section.
     buf.insert(buf.end(), FirstSection.begin(), FirstSection.end());
 
-    assert(block.getRemainSize() == 0);
+    invariant(block.getRemainSize() == 0);
 
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
@@ -223,8 +224,8 @@ void PanasonicV4Decompressor::processBlock(
     if (block.endCoord.y == row)
       endCol = block.endCoord.x;
 
-    assert(col % PixelsPerPacket == 0);
-    assert(endCol % PixelsPerPacket == 0);
+    invariant(col % PixelsPerPacket == 0);
+    invariant(endCol % PixelsPerPacket == 0);
 
     for (; col < endCol; col += PixelsPerPacket)
       processPixelPacket(bits, row, col, zero_pos);

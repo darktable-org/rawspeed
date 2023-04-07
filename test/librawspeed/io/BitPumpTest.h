@@ -24,10 +24,10 @@
 #include "io/ByteStream.h"  // for ByteStream
 #include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
 #include <array>            // for array
-#include <assert.h>         // for assert
+#include <cassert>          // for assert
 #include <cstdint>          // for uint8_t, uint32_t
-#include <gtest/gtest.h>    // for Message, TypedTestSuitePState, ASSERT_EQ
 #include <initializer_list> // for initializer_list
+#include <gtest/gtest.h>    // for ParamIteratorInterface, Message
 
 using rawspeed::Buffer;
 using rawspeed::ByteStream;

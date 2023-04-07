@@ -24,7 +24,7 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable
+#include "decompressors/PrefixCodeDecoder.h"    // for PrefixCodeDecoder
 #include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
 #include "io/ByteStream.h"                      // for ByteStream
 #include <array>                                // for array
@@ -33,7 +33,7 @@
 namespace rawspeed {
 
 class CrwDecompressor final : public AbstractDecompressor {
-  using crw_hts = std::array<HuffmanTable<>, 2>;
+  using crw_hts = std::array<PrefixCodeDecoder<>, 2>;
 
   RawImage mRaw;
   crw_hts mHuff;
@@ -49,7 +49,8 @@ public:
   void decompress();
 
 private:
-  static HuffmanTable<> makeDecoder(const uint8_t* ncpl, const uint8_t* values);
+  static PrefixCodeDecoder<> makeDecoder(const uint8_t* ncpl,
+                                         const uint8_t* values);
   static crw_hts initHuffTables(uint32_t table);
 
   inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,

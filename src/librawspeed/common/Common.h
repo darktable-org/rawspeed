@@ -20,9 +20,11 @@
 
 #pragma once
 
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "adt/Invariant.h"  // for invariant
 #include <algorithm>        // for max, clamp
 #include <array>            // for array
-#include <cassert>          // for assert
+#include <cassert>          // for invariant
 #include <climits>          // for CHAR_BIT
 #include <cstdint>          // for uintptr_t, uint8_t, uint16_t
 #include <cstring>          // for size_t, memcpy
@@ -71,16 +73,17 @@ inline T_TO bit_cast(const T_FROM& from) noexcept {
 }
 
 // only works for positive values and zero
-template <typename T> constexpr bool isPowerOfTwo(T val) {
+template <typename T> constexpr bool RAWSPEED_READNONE isPowerOfTwo(T val) {
   return (val & (~val + 1)) == val;
 }
 
-template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
+template <class T>
+constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
   return CHAR_BIT * sizeof(T);
 }
 
 template <typename T>
-constexpr size_t __attribute__((const)) getMisalignmentOffset(
+constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
     T value, size_t multiple,
     typename std::enable_if<std::is_pointer_v<T>>::type* /*unused*/ = nullptr) {
   if (multiple == 0)
@@ -91,7 +94,7 @@ constexpr size_t __attribute__((const)) getMisalignmentOffset(
 }
 
 template <typename T>
-constexpr size_t __attribute__((const)) getMisalignmentOffset(
+constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
     T value, size_t multiple,
     typename std::enable_if<std::is_integral_v<T>>::type* /*unused*/ =
         nullptr) {
@@ -101,8 +104,8 @@ constexpr size_t __attribute__((const)) getMisalignmentOffset(
 }
 
 template <typename T>
-constexpr T __attribute__((const))
-roundToMultiple(T value, size_t multiple, bool roundDown) {
+constexpr T RAWSPEED_READNONE roundToMultiple(T value, size_t multiple,
+                                              bool roundDown) {
   size_t offset = getMisalignmentOffset(value, multiple);
   if (offset == 0)
     return value;
@@ -114,51 +117,49 @@ roundToMultiple(T value, size_t multiple, bool roundDown) {
   return roundedDown + multiple;
 }
 
-constexpr size_t __attribute__((const))
-roundDown(size_t value, size_t multiple) {
+constexpr size_t RAWSPEED_READNONE roundDown(size_t value, size_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/true);
 }
 
-constexpr size_t __attribute__((const)) roundUp(size_t value, size_t multiple) {
+constexpr size_t RAWSPEED_READNONE roundUp(size_t value, size_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/false);
 }
 
-constexpr size_t __attribute__((const))
-roundUpDivision(size_t value, size_t div) {
+constexpr size_t RAWSPEED_READNONE roundUpDivision(size_t value, size_t div) {
   return (value != 0) ? (1 + ((value - 1) / div)) : 0;
 }
 
 template <class T>
-constexpr __attribute__((const)) bool isAligned(T value, size_t multiple) {
+constexpr RAWSPEED_READNONE bool isAligned(T value, size_t multiple) {
   return (multiple == 0) || (getMisalignmentOffset(value, multiple) == 0);
 }
 
 template <typename T, typename T2>
-bool __attribute__((pure))
-isIn(const T value, const std::initializer_list<T2>& list) {
+bool RAWSPEED_READONLY isIn(const T value,
+                            const std::initializer_list<T2>& list) {
   return std::any_of(list.begin(), list.end(),
                      [value](const T2& t) { return t == value; });
 }
 
 // Clamps the given value to the range 0 .. 2^n-1, with n <= 16
 template <typename T>
-constexpr uint16_t __attribute__((const)) clampBits(
+constexpr uint16_t RAWSPEED_READNONE clampBits(
     T value, unsigned int nBits,
     typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
   // We expect to produce uint16_t.
-  assert(nBits <= 16);
+  invariant(nBits <= 16);
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
-  assert(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
+  invariant(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
   const T maxVal = (T(1) << nBits) - T(1);
   return std::clamp(value, T(0), maxVal);
 }
 
 template <typename T>
-constexpr bool __attribute__((const)) isIntN(
+constexpr bool RAWSPEED_READNONE isIntN(
     T value, unsigned int nBits,
     typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
-  assert(nBits < bitwidth<T>() && "Check must not be tautological.");
+  invariant(nBits < bitwidth<T>() && "Check must not be tautological.");
   using UnsignedT = std::make_unsigned_t<T>;
   const auto highBits = static_cast<UnsignedT>(value) >> nBits;
   return highBits == 0;
@@ -172,21 +173,21 @@ constexpr int countl_zero(T x) noexcept {
 }
 
 template <class T>
-constexpr __attribute__((const)) T extractHighBits(
+constexpr RAWSPEED_READNONE T extractHighBits(
     T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>(),
     typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
-  assert(effectiveBitwidth <= bitwidth<T>());
-  assert(nBits <= effectiveBitwidth);
+  invariant(effectiveBitwidth <= bitwidth<T>());
+  invariant(nBits <= effectiveBitwidth);
   auto numLowBitsToSkip = effectiveBitwidth - nBits;
-  assert(numLowBitsToSkip < bitwidth<T>());
+  invariant(numLowBitsToSkip < bitwidth<T>());
   return value >> numLowBitsToSkip;
 }
 
 template <typename T>
-constexpr typename std::make_signed_t<T> __attribute__((const)) signExtend(
+constexpr typename std::make_signed_t<T> RAWSPEED_READNONE signExtend(
     T value, unsigned int nBits,
     typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
-  assert(nBits != 0 && "Only valid for non-zero bit count.");
+  invariant(nBits != 0 && "Only valid for non-zero bit count.");
   const T SpareSignBits = bitwidth<T>() - nBits;
   using SignedT = std::make_signed_t<T>;
   return static_cast<SignedT>(value << SpareSignBits) >> SpareSignBits;

@@ -21,20 +21,23 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable, HuffmanTableLUT
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint8_t, int16_t
-#include <tuple>                          // for array
-#include <vector>                         // for vector
+#include "adt/Array1DRef.h"                  // for Array1DRef
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/Common.h"                   // for isIntN
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/HuffmanCode.h"       // for HuffmanCode
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder, HuffmanT...
+#include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStrea...
+#include "io/Buffer.h"                       // for Buffer
+#include "io/ByteStream.h"                   // for ByteStream
+#include <algorithm>                         // for fill, copy, fill_n, max
+#include <array>                             // for array
+#include <cstdint>                           // for uint8_t, uint16_t, int...
+#include <tuple>                             // for array
+#include <vector>                            // for vector
 
 using std::array;
 
@@ -42,7 +45,7 @@ namespace rawspeed {
 
 CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
-    : mRaw(img), lowbits(lowbits_) {
+    : mRaw(img), mHuff(initHuffTables(dec_table)), lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -58,7 +61,7 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
     // If there are low bits, the first part (size is calculable) is low bits
     // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
     const unsigned lBlocks = 1 * height * width / 4;
-    assert(lBlocks > 0);
+    invariant(lBlocks > 0);
     lowbitInput = rawData.getStream(lBlocks);
   }
 
@@ -67,19 +70,19 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
 
   // Rest is the high bits.
   rawInput = rawData.getStream(rawData.getRemainSize());
-
-  mHuff = initHuffTables(dec_table);
 }
 
-HuffmanTable<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
-                                            const uint8_t* values) {
-  assert(ncpl);
+PrefixCodeDecoder<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
+                                                 const uint8_t* values) {
+  invariant(ncpl);
 
-  HuffmanTable<> ht;
-  auto count = ht.setNCodesPerLength(Buffer(ncpl, 16));
-  ht.setCodeValues(Array1DRef<const uint8_t>(values, count));
+  HuffmanCode<BaselineCodeTag> hc;
+  auto count = hc.setNCodesPerLength(Buffer(ncpl, 16));
+  hc.setCodeValues(Array1DRef<const uint8_t>(values, count));
+
+  auto code = hc.operator PrefixCode<BaselineCodeTag>();
+  PrefixCodeDecoder<> ht(std::move(code));
   ht.setup(/*fullDecode_=*/false, false);
-
   return ht;
 }
 
@@ -154,7 +157,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
          0xf2, 0xb1, 0xe4, 0xd1, 0x83, 0x63, 0xea, 0xc3, 0xe2, 0x82, 0xf1, 0xa3,
          0xc2, 0xa1, 0xc1, 0xe3, 0xa2, 0xe1, 0xff, 0xff}}};
 
-  std::array<HuffmanTable<>, 2> mHuff = {
+  std::array<PrefixCodeDecoder<>, 2> mHuff = {
       {makeDecoder(first_tree_ncpl[table].data(),
                    first_tree_codevalues[table].data()),
        makeDecoder(second_tree_ncpl[table].data(),
@@ -166,7 +169,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
 inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
                                          const crw_hts& mHuff,
                                          BitPumpJPEG& bs) {
-  assert(diffBuf);
+  invariant(diffBuf);
 
   // decode the block
   for (int i = 0; i < 64;) {
@@ -175,7 +178,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
     const int len = codeValue & 0b1111;
     const int index = codeValue >> 4;
-    assert(len >= 0 && index >= 0);
+    invariant(len >= 0 && index >= 0);
 
     if (len == 0 && index == 0 && i)
       break;
@@ -197,7 +200,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (i >= 64)
       break;
 
-    diff = HuffmanTable<>::extend(diff, len);
+    diff = PrefixCodeDecoder<>::extend(diff, len);
 
     (*diffBuf)[i] = diff;
     ++i;
@@ -207,16 +210,16 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
 // FIXME: this function is horrible.
 void CrwDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.width % 4 == 0);
-  assert(out.height > 0);
+  invariant(out.width > 0);
+  invariant(out.width % 4 == 0);
+  invariant(out.height > 0);
 
   {
     // Each block encodes 64 pixels
 
-    assert((out.height * out.width) % 64 == 0);
+    invariant((out.height * out.width) % 64 == 0);
     const unsigned hBlocks = out.height * out.width / 64;
-    assert(hBlocks > 0);
+    invariant(hBlocks > 0);
 
     BitPumpJPEG bs(rawInput);
 
@@ -252,8 +255,8 @@ void CrwDecompressor::decompress() {
         ++col;
       }
     }
-    assert(row == (out.height - 1));
-    assert(col == out.width);
+    invariant(row == (out.height - 1));
+    invariant(col == out.width);
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits

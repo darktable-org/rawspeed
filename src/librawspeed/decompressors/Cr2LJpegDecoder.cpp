@@ -21,19 +21,19 @@
 */
 
 #include "decompressors/Cr2LJpegDecoder.h"
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for generate_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t
-#include <initializer_list>               // for initializer_list
-#include <iterator>                       // for back_insert_iterator, back...
-#include <tuple>                          // for tuple, get
-#include <vector>                         // for vector
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/ByteStream.h"                   // for ByteStream
+#include <algorithm>                         // for generate_n
+#include <array>                             // for array
+#include <cassert>                           // for assert
+#include <cstdint>                           // for uint16_t, uint32_t
+#include <initializer_list>                  // for initializer_list
+#include <iterator> // for back_insert_iterator, back...
+#include <tuple>    // for tuple, get
+#include <vector>   // for vector
 
 namespace rawspeed {
 
@@ -129,18 +129,19 @@ void Cr2LJpegDecoder::decodeScan() {
 
   int N_COMP = std::get<0>(format);
 
-  std::vector<Cr2Decompressor<HuffmanTable<>>::PerComponentRecipe> rec;
+  std::vector<Cr2Decompressor<PrefixCodeDecoder<>>::PerComponentRecipe> rec;
   rec.reserve(N_COMP);
-  std::generate_n(std::back_inserter(rec), N_COMP,
-                  [&rec, hts = getHuffmanTables(N_COMP),
-                   initPred = getInitialPredictors(N_COMP)]()
-                      -> Cr2Decompressor<HuffmanTable<>>::PerComponentRecipe {
-                    const int i = rec.size();
-                    return {*hts[i], initPred[i]};
-                  });
+  std::generate_n(
+      std::back_inserter(rec), N_COMP,
+      [&rec, hts = getPrefixCodeDecoders(N_COMP),
+       initPred = getInitialPredictors(N_COMP)]()
+          -> Cr2Decompressor<PrefixCodeDecoder<>>::PerComponentRecipe {
+        const int i = rec.size();
+        return {*hts[i], initPred[i]};
+      });
 
-  Cr2Decompressor<HuffmanTable<>> d(mRaw, format, iPoint2D(frame.w, frame.h),
-                                    slicing, rec, input);
+  Cr2Decompressor<PrefixCodeDecoder<>> d(
+      mRaw, format, iPoint2D(frame.w, frame.h), slicing, rec, input);
   d.decompress();
 }
 

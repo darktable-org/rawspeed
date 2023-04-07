@@ -22,30 +22,30 @@
 #error IMPL must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "common/RawspeedException.h"          // for RawspeedException
-#include "decompressors/BinaryHuffmanTree.h"   // for BinaryHuffmanTree<>::...
-#include "decompressors/HuffmanTable.h"        // IWYU pragma: keep
-#include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
-#include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
-#include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableTree.h"    // for HuffmanTableTree
-#include "decompressors/HuffmanTableVector.h"  // for HuffmanTableVector
-#include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
-#include "io/BitPumpMSB.h"                     // IWYU pragma: keep
-#include "io/BitPumpMSB32.h"                   // IWYU pragma: keep
-#include "io/BitStream.h"                      // for BitStream
-#include "io/Buffer.h"                         // for Buffer, DataBuffer
-#include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
-#include <cassert>                             // for assert
-#include <cstdint>                             // for uint8_t
-#include <cstdio>                              // for size_t
-#include <initializer_list>                    // for initializer_list
-#include <vector>                              // for vector
+#include "common/RawspeedException.h"        // for ThrowException, ThrowRSE
+#include "decompressors/BinaryPrefixTree.h"  // for BinaryPrefixTree<>::...
+#include "decompressors/PrefixCodeDecoder.h" // IWYU pragma: keep
+#include "decompressors/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "decompressors/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep
+#include "decompressors/PrefixCodeLookupDecoder.h" // IWYU pragma: keep
+#include "decompressors/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
+#include "decompressors/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
+#include "io/BitPumpJPEG.h"                        // for BitStream<>::fillCache
+#include "io/BitPumpMSB.h"                         // for BitStream<>::fillCache
+#include "io/BitPumpMSB32.h"                       // for BitStream<>::fillCache
+#include "io/Buffer.h"                             // for Buffer, DataBuffer
+#include "io/ByteStream.h"                         // for ByteStream
+#include "io/Endianness.h"  // for Endianness, Endiannes...
+#include <algorithm>        // for generate_n
+#include <cassert>          // for assert
+#include <cstdint>          // for uint8_t
+#include <cstdio>           // for size_t
+#include <initializer_list> // for initializer_list
+#include <vector>           // for vector
 
 namespace rawspeed {
-struct BaselineHuffmanTableTag;
-struct VC5HuffmanTableTag;
+struct BaselineCodeTag;
+struct VC5CodeTag;
 } // namespace rawspeed
 
 template <typename Pump, bool IsFullDecode, typename HT>
@@ -64,8 +64,8 @@ static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
     workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
 }
 
-template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
-  const auto ht = createHuffmanTable<rawspeed::IMPL<Tag>>(bs);
+template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
+  const auto ht = createPrefixCodeDecoder<rawspeed::IMPL<CodeTag>>(bs);
 
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
@@ -100,10 +100,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     // Which flavor?
     switch (bs.getByte()) {
     case 0:
-      checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
+      checkFlavour<rawspeed::BaselineCodeTag>(bs);
       break;
     case 1:
-      checkFlavour<rawspeed::VC5HuffmanTableTag>(bs);
+      checkFlavour<rawspeed::VC5CodeTag>(bs);
       break;
     default:
       ThrowRSE("Unknown flavor");

@@ -22,9 +22,9 @@
 #include "rawspeedconfig.h"          // for HAVE_PUGIXML, RAWSPEED_SOURCE_DIR
 #include "metadata/Camera.h"         // for Camera
 #include "metadata/CameraMetaData.h" // for CameraMetaData
-#include <gtest/gtest.h>             // for Test, ASSERT_EQ, CmpHelperNE
 #include <memory>                    // for allocator, unique_ptr
 #include <string>                    // for string, basic_string
+#include <gtest/gtest.h>             // for Message, TestPartResult
 
 using rawspeed::CameraMetaData;
 using std::unique_ptr;

@@ -22,11 +22,13 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"  // for RAWSPEED_READONLY
 #include "adt/NORangesSet.h" // for set
 #include "io/ByteStream.h"   // for ByteStream
 #include "tiff/CiffTag.h"    // for CiffTag
 #include <cstdint>           // for uint32_t, uint16_t, uint8_t
 #include <string>            // for string
+#include <string_view>       // for string_view
 #include <vector>            // for vector
 
 namespace rawspeed {
@@ -67,16 +69,16 @@ public:
   [[nodiscard]] std::string_view getString() const;
   [[nodiscard]] std::vector<std::string> getStrings() const;
 
-  [[nodiscard]] uint32_t __attribute__((pure)) getElementSize() const;
-  [[nodiscard]] uint32_t __attribute__((pure)) getElementShift() const;
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getElementSize() const;
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getElementShift() const;
 
   // variables:
   CiffTag tag;
   CiffDataType type;
   uint32_t count;
 
-  [[nodiscard]] bool __attribute__((pure)) isInt() const;
-  [[nodiscard]] bool __attribute__((pure)) isString() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isInt() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isString() const;
 };
 
 } // namespace rawspeed

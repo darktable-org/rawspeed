@@ -20,11 +20,12 @@
 
 #pragma once
 
-#include <algorithm>   // for minmax
-#include <cassert>     // for assert
-#include <iterator>    // for begin, end
-#include <type_traits> // for enable_if_t, make_unsigned_t
-#include <utility>     // for pair
+#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include <algorithm>        // for minmax
+#include <cassert>          // for assert
+#include <iterator>         // for begin, end
+#include <type_traits>      // for enable_if_t, make_unsigned_t
+#include <utility>          // for pair
 
 namespace rawspeed {
 
@@ -38,9 +39,9 @@ public:
   template <typename T2, typename = std::enable_if_t<std::is_unsigned_v<T2>>>
   constexpr Range(T base_, T2 size_) : base(base_), size(size_) {}
 
-  constexpr T __attribute__((const)) begin() const { return base; }
+  constexpr T RAWSPEED_READNONE begin() const { return base; }
 
-  constexpr T __attribute__((const)) end() const { return base + T(size); }
+  constexpr T RAWSPEED_READNONE end() const { return base + T(size); }
 };
 
 template <typename T> bool operator<(const Range<T>& lhs, const Range<T>& rhs) {
@@ -48,7 +49,7 @@ template <typename T> bool operator<(const Range<T>& lhs, const Range<T>& rhs) {
 }
 
 template <typename Tr, typename Tv>
-constexpr bool __attribute__((const)) RangeContains(const Tr& r, Tv pos) {
+constexpr bool RAWSPEED_READNONE RangeContains(const Tr& r, Tv pos) {
   if (pos < std::begin(r))
     return false;
 
@@ -57,8 +58,7 @@ constexpr bool __attribute__((const)) RangeContains(const Tr& r, Tv pos) {
 }
 
 template <typename T>
-constexpr bool __attribute__((const))
-RangesOverlap(const T& lhs, const T& rhs) {
+constexpr bool RAWSPEED_READNONE RangesOverlap(const T& lhs, const T& rhs) {
   if (&lhs == &rhs)
     return true;
 

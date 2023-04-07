@@ -21,15 +21,17 @@
 
 #include "decompressors/LJpegDecompressor.h"
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for to_array, roundUpDivision
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D, iRectangle2D
+#include "common/Common.h"                // for roundUpDivision
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for copy_n
+#include <algorithm>                      // for transform
 #include <array>                          // for array
-#include <cassert>                        // for assert
+#include <memory>                         // for allocator_traits<>::value_...
+#include <utility>                        // for move
 
 using std::copy_n;
 
@@ -90,7 +92,10 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if ((unsigned)frame.cps < mRaw->getCpp())
     ThrowRDE("Unexpected number of components");
 
-  assert(mRaw->dim.x > imgFrame.pos.x);
+  if ((int64_t)frame.cps * frame.dim.x > std::numeric_limits<int>::max())
+    ThrowRDE("LJpeg frame is too big");
+
+  invariant(mRaw->dim.x > imgFrame.pos.x);
   if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
@@ -100,7 +105,8 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   // How many full pixel blocks do we need to consume for that?
   if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
-      frame.cps * frame.dim.x < (int)mRaw->getCpp() * imgFrame.dim.x) {
+      (int64_t)frame.cps * frame.dim.x <
+          (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
              imgFrame.dim.y);
@@ -113,17 +119,17 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
 }
 
 template <int N_COMP, size_t... I>
-std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
-LJpegDecompressor::getHuffmanTablesImpl(
+std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP>
+LJpegDecompressor::getPrefixCodeDecodersImpl(
     std::index_sequence<I...> /*unused*/) const {
-  return std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>{
+  return std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP>{
       std::cref(rec[I].ht)...};
 }
 
 template <int N_COMP>
-std::array<std::reference_wrapper<const HuffmanTable<>>, N_COMP>
-LJpegDecompressor::getHuffmanTables() const {
-  return getHuffmanTablesImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
+std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP>
+LJpegDecompressor::getPrefixCodeDecoders() const {
+  return getPrefixCodeDecodersImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
 }
 
 template <int N_COMP>
@@ -138,19 +144,19 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 // N_COMP == number of components (2, 3 or 4)
 
 template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
-  assert(mRaw->getCpp() > 0);
-  assert(N_COMP > 0);
-  assert(N_COMP >= mRaw->getCpp());
-  assert((N_COMP / mRaw->getCpp()) > 0);
+  invariant(mRaw->getCpp() > 0);
+  invariant(N_COMP > 0);
+  invariant(N_COMP >= mRaw->getCpp());
+  invariant((N_COMP / mRaw->getCpp()) > 0);
 
-  assert(mRaw->dim.x >= N_COMP);
-  assert((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
+  invariant(mRaw->dim.x >= N_COMP);
+  invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
 
   const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
                               mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
                               mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y);
 
-  const auto ht = getHuffmanTables<N_COMP>();
+  const auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
   uint16_t* predNext = pred.data();
 
@@ -160,11 +166,12 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  assert(frame.dim.y >= imgFrame.dim.y);
-  assert(frame.cps * frame.dim.x >= (int)mRaw->getCpp() * imgFrame.dim.x);
+  invariant(frame.dim.y >= imgFrame.dim.y);
+  invariant((int64_t)frame.cps * frame.dim.x >=
+            (int64_t)mRaw->getCpp() * imgFrame.dim.x);
 
-  assert(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
-  assert(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
+  invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
+  invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
   // For y, we can simply stop decoding when we reached the border.
   for (int row = 0; row < imgFrame.dim.y; ++row) {
@@ -182,7 +189,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(
             pred[i] +
-            ((const HuffmanTable<>&)(ht[i])).decodeDifference(bitStream));
+            ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
         img(row, col + i) = pred[i];
       }
     }
@@ -194,19 +201,19 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
                     "can't want part of 1-pixel-wide block");
       // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
       // We may end up needing just part of last N_COMP pixels.
-      assert(trailingPixels > 0);
-      assert(trailingPixels < N_COMP);
+      invariant(trailingPixels > 0);
+      invariant(trailingPixels < N_COMP);
       int c = 0;
       for (; c < trailingPixels; ++c) {
         pred[c] = uint16_t(
             pred[c] +
-            ((const HuffmanTable<>&)(ht[c])).decodeDifference(bitStream));
+            ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream));
         img(row, col + c) = pred[c];
       }
       // Discard the rest of the block.
-      assert(c < N_COMP);
+      invariant(c < N_COMP);
       for (; c < N_COMP; ++c) {
-        ((const HuffmanTable<>&)(ht[c])).decodeDifference(bitStream);
+        ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
       }
       col += N_COMP; // We did just process one more block.
     }
@@ -214,7 +221,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // ... and discard the rest.
     for (; col < N_COMP * frame.dim.x; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i)
-        ((const HuffmanTable<>&)(ht[i])).decodeDifference(bitStream);
+        ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
     }
   }
 }

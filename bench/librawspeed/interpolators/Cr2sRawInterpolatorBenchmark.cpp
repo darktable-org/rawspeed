@@ -25,10 +25,10 @@
 #include "common/Common.h"                     // for roundUp
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include <array>                               // for array
-#include <benchmark/benchmark.h>               // for State, Benchmark, Cou...
 #include <cstdint>                             // for uint16_t
 #include <tuple>                               // for array
 #include <type_traits>                         // for integral_constant
+#include <benchmark/benchmark.h>               // for State, Benchmark, Cou...
 
 using rawspeed::Cr2sRawInterpolator;
 using rawspeed::iPoint2D;

@@ -23,7 +23,7 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable
+#include "decompressors/PrefixCodeDecoder.h"    // for PrefixCodeDecoder
 #include <array>                                // for array
 #include <cstdint>                              // for uint8_t
 #include <optional>                             // for optional
@@ -34,7 +34,7 @@ class ByteStream;
 
 class PentaxDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
-  const HuffmanTable<> ht;
+  const PrefixCodeDecoder<> ht;
 
 public:
   PentaxDecompressor(const RawImage& img, std::optional<ByteStream> metaData);
@@ -42,9 +42,11 @@ public:
   void decompress(ByteStream data) const;
 
 private:
-  static HuffmanTable<> SetupHuffmanTable_Legacy();
-  static HuffmanTable<> SetupHuffmanTable_Modern(ByteStream stream);
-  static HuffmanTable<> SetupHuffmanTable(std::optional<ByteStream> metaData);
+  static PrefixCode<BaselineCodeTag> SetupPrefixCodeDecoder_Legacy();
+  static PrefixCode<BaselineCodeTag>
+  SetupPrefixCodeDecoder_Modern(ByteStream stream);
+  static PrefixCodeDecoder<>
+  SetupPrefixCodeDecoder(std::optional<ByteStream> metaData);
 
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
       pentax_tree;

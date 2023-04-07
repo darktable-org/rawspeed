@@ -25,29 +25,31 @@
 #error IMPL1 must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "decompressors/BinaryHuffmanTree.h"   // for BinaryHuffmanTree<>::...
-#include "decompressors/HuffmanTable.h"        // IWYU pragma: keep
-#include "decompressors/HuffmanTable/Common.h" // for createHuffmanTable
-#include "decompressors/HuffmanTableLUT.h"     // IWYU pragma: keep
-#include "decompressors/HuffmanTableLookup.h"  // IWYU pragma: keep
-#include "decompressors/HuffmanTableTree.h"    // for HuffmanTableTree
-#include "decompressors/HuffmanTableVector.h"  // for HuffmanTableVector
-#include "io/BitPumpJPEG.h"                    // for BitStream<>::fillCache
-#include "io/BitPumpMSB.h"                     // IWYU pragma: keep
-#include "io/BitPumpMSB32.h"                   // IWYU pragma: keep
-#include "io/BitStream.h"                      // for BitStream
-#include "io/Buffer.h"                         // for Buffer, DataBuffer
-#include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
-#include "io/IOException.h"                    // for RawspeedException
-#include <cassert>                             // for assert
-#include <cstdint>                             // for uint8_t
-#include <cstdio>                              // for size_t
-#include <initializer_list>                    // for initializer_list
-#include <vector>                              // for vector
+#include "decompressors/BinaryPrefixTree.h"  // for BinaryPrefixTree<>::...
+#include "decompressors/PrefixCodeDecoder.h" // IWYU pragma: keep
+#include "decompressors/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "decompressors/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep
+#include "decompressors/PrefixCodeLookupDecoder.h" // IWYU pragma: keep
+#include "decompressors/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
+#include "decompressors/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
+#include "io/BitPumpJPEG.h"                        // for BitStream<>::fillCache
+#include "io/BitPumpMSB.h"                         // for BitStream<>::fillCache
+#include "io/BitPumpMSB32.h"                       // for BitStream<>::fillCache
+#include "io/Buffer.h"                             // for Buffer, DataBuffer
+#include "io/ByteStream.h"                         // for ByteStream
+#include "io/Endianness.h"  // for Endianness, Endiannes...
+#include "io/IOException.h" // for RawspeedException
+#include <algorithm>        // for generate_n, max
+#include <cassert>          // for assert
+#include <cstdint>          // for uint8_t
+#include <cstdio>           // for size_t
+#include <initializer_list> // for initializer_list
+#include <optional>         // for optional
+#include <vector>           // for vector
 
 namespace rawspeed {
-struct BaselineHuffmanTableTag;
+struct BaselineCodeTag;
+struct VC5CodeTag;
 } // namespace rawspeed
 
 template <typename Pump, bool IsFullDecode, typename HT0, typename HT1>
@@ -106,29 +108,23 @@ static void checkPump(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
     workloop<Pump, /*IsFullDecode=*/false>(bs0, bs1, ht0, ht1);
 }
 
-template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
-  if (std::is_same_v<rawspeed::IMPL0<Tag>, rawspeed::HuffmanTableTree<
-                                               rawspeed::VC5HuffmanTableTag>> ||
-      std::is_same_v<rawspeed::IMPL1<Tag>,
-                     rawspeed::HuffmanTableTree<rawspeed::VC5HuffmanTableTag>>)
-    ThrowRSE("FIXME: impl+flavor combination not supported.");
-
+template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
   rawspeed::ByteStream bs0 = bs;
   rawspeed::ByteStream bs1 = bs;
 
   bool failure0 = false;
   bool failure1 = false;
 
-  rawspeed::IMPL0<Tag> ht0;
-  rawspeed::IMPL1<Tag> ht1;
+  std::optional<rawspeed::IMPL0<CodeTag>> ht0;
+  std::optional<rawspeed::IMPL1<CodeTag>> ht1;
 
   try {
-    ht0 = createHuffmanTable<decltype(ht0)>(bs0);
+    ht0 = createPrefixCodeDecoder<rawspeed::IMPL0<CodeTag>>(bs0);
   } catch (const rawspeed::RawspeedException&) {
     failure0 = true;
   }
   try {
-    ht1 = createHuffmanTable<decltype(ht1)>(bs1);
+    ht1 = createPrefixCodeDecoder<rawspeed::IMPL1<CodeTag>>(bs1);
   } catch (const rawspeed::RawspeedException&) {
     failure1 = true;
   }
@@ -149,13 +145,13 @@ template <typename Tag> static void checkFlavour(rawspeed::ByteStream bs) {
   bs1.skipBytes(1);
   switch (bs0.getByte()) {
   case 0:
-    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, *ht0, *ht1);
     break;
   case 1:
-    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, *ht0, *ht1);
     break;
   case 2:
-    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, *ht0, *ht1);
     break;
   default:
     ThrowRSE("Unknown bit pump");
@@ -175,10 +171,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     // Which flavor?
     switch (bs.getByte()) {
     case 0:
-      checkFlavour<rawspeed::BaselineHuffmanTableTag>(bs);
+      checkFlavour<rawspeed::BaselineCodeTag>(bs);
       break;
     case 1:
-      checkFlavour<rawspeed::VC5HuffmanTableTag>(bs);
+      checkFlavour<rawspeed::VC5CodeTag>(bs);
       break;
     default:
       ThrowRSE("Unknown flavor");

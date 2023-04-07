@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV0Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for signExtend
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -75,7 +76,7 @@ void SamsungV0Decompressor::computeStripes(ByteStream bso, ByteStream bsr) {
       ThrowRDE("Line offsets are out of sequence or slice is empty.");
 
     const auto size = *next_offset_iterator - *offset_iterator;
-    assert(size > 0);
+    invariant(size > 0);
 
     stripes.emplace_back(bsr.getStream(size));
 
@@ -106,7 +107,7 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
 
 void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
+  invariant(out.width > 0);
 
   BitPumpMSB32 bits(bs);
 

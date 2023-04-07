@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV2Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for clampBits, signExtend
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -75,7 +76,7 @@ inline __attribute__((always_inline)) int16_t
 SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
   if (len == 0)
     return 0;
-  assert(len <= 15 && "Difference occupies at most 15 bits.");
+  invariant(len <= 15 && "Difference occupies at most 15 bits.");
   return signExtend(pump.getBits(len), len);
 }
 
@@ -126,7 +127,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(2); // reserved
   initVal = startpump.getBits(14);
 
-  assert(startpump.getInputPosition() == headerSize);
+  invariant(startpump.getInputPosition() == headerSize);
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
@@ -338,8 +339,8 @@ void SamsungV2Decompressor::decompressRow(int row) {
   for (auto& i : diffBitsMode)
     i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
-  assert(width >= 16);
-  assert(width % 16 == 0);
+  invariant(width >= 16);
+  invariant(width % 16 == 0);
   for (int col = 0; col < width; col += 16)
     processBlock(pump, row, col);
 

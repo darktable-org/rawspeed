@@ -22,29 +22,15 @@
 
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompressor, HasselbladSliceWidths
 #include "adt/Array2DRef.h"                       // for Array2DRef
-#include "adt/Point.h"                       // for iPoint2D, iPoint2D::area_...
-#include "adt/iterator_range.h"              // for iterator_range
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
-#include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
-#include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStream<>:...
-#include "io/ByteStream.h"                   // for ByteStream
-#include <algorithm>                         // for min, transform
-#include <array>                             // for array
-#include <cassert>                           // for assert
-#include <cstddef>                           // for size_t
-#include <cstdint>                           // for uint16_t
-#include <functional>                        // for cref, reference_wrapper
-#include <initializer_list>                  // for initializer_list
-#include <optional>                          // for optional
-#include <tuple>                             // for make_tuple, operator==, get
-#include <utility>                           // for move, index_sequence, mak...
-#include <vector>                            // for vector
+#include "adt/Invariant.h"                        // for invariant
+#include "adt/Point.h"                            // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "common/RawspeedException.h"     // for ThrowException
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include <cstdint>                        // for uint16_t
 
 namespace rawspeed {
-
-class ByteStream;
 
 HasselbladDecompressor::HasselbladDecompressor(const RawImage& mRaw_,
                                                const PerComponentRecipe& rec_,
@@ -73,7 +59,7 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
   if (!len)
     return 0;
   int diff = bs.getBits(len);
-  diff = HuffmanTable<>::extend(diff, len);
+  diff = PrefixCodeDecoder<>::extend(diff, len);
   if (diff == 65535)
     return -32768;
   return diff;
@@ -82,9 +68,9 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
 ByteStream::size_type HasselbladDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(out.height > 0);
-  assert(out.width > 0);
-  assert(out.width % 2 == 0);
+  invariant(out.height > 0);
+  invariant(out.width > 0);
+  invariant(out.width % 2 == 0);
 
   const auto ht = rec.ht;
   ht.verifyCodeValuesAsDiffLengths();

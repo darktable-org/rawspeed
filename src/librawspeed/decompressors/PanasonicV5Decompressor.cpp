@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h" // for HAVE_OPENMP
 #include "decompressors/PanasonicV5Decompressor.h"
 #include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
 #include "common/Common.h"                // for rawspeed_get_number_of_pro...
 #include "common/RawImage.h"              // for RawImage, RawImageData
@@ -84,13 +85,13 @@ PanasonicV5Decompressor::PanasonicV5Decompressor(const RawImage& img,
   }
 
   // How many pixel packets does the specified pixel count require?
-  assert(mRaw->dim.area() % dsc->pixelsPerPacket == 0);
+  invariant(mRaw->dim.area() % dsc->pixelsPerPacket == 0);
   const auto numPackets = mRaw->dim.area() / dsc->pixelsPerPacket;
-  assert(numPackets > 0);
+  invariant(numPackets > 0);
 
   // And how many blocks that would be? Last block may not be full, pad it.
   numBlocks = roundUpDivision(numPackets, PacketsPerBlock);
-  assert(numBlocks > 0);
+  invariant(numBlocks > 0);
 
   // Does the input contain enough blocks?
   // How many full blocks does the input contain? This is truncating division.
@@ -109,12 +110,12 @@ void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
     return iPoint2D(pixel % width, pixel / width);
   };
 
-  assert(numBlocks * BlockSize == input.getRemainSize());
+  invariant(numBlocks * BlockSize == input.getRemainSize());
   blocks.reserve(numBlocks);
 
   const auto pixelsPerBlock = dsc.pixelsPerPacket * PacketsPerBlock;
-  assert((numBlocks - 1U) * pixelsPerBlock < mRaw->dim.area());
-  assert(numBlocks * pixelsPerBlock >= mRaw->dim.area());
+  invariant((numBlocks - 1U) * pixelsPerBlock < mRaw->dim.area());
+  invariant(numBlocks * pixelsPerBlock >= mRaw->dim.area());
 
   unsigned currPixel = 0;
   std::generate_n(std::back_inserter(blocks), numBlocks,
@@ -126,8 +127,8 @@ void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
                     return Block(bs, beginCoord, endCoord);
                   });
   assert(blocks.size() == numBlocks);
-  assert(currPixel >= mRaw->dim.area());
-  assert(input.getRemainSize() == 0);
+  invariant(currPixel >= mRaw->dim.area());
+  invariant(input.getRemainSize() == 0);
 
   // Clamp the end coordinate for the last block.
   blocks.back().endCoord = mRaw->dim;
@@ -141,13 +142,13 @@ class PanasonicV5Decompressor::ProxyStream {
 
   void parseBlock() {
     assert(buf.empty());
-    assert(block.getRemainSize() == BlockSize);
+    invariant(block.getRemainSize() == BlockSize);
 
     static_assert(BlockSize > sectionSplitOffset);
 
     Buffer FirstSection = block.getBuffer(sectionSplitOffset);
     Buffer SecondSection = block.getBuffer(block.getRemainSize());
-    assert(FirstSection.getSize() < SecondSection.getSize());
+    invariant(FirstSection.getSize() < SecondSection.getSize());
 
     buf.reserve(BlockSize);
 
@@ -157,7 +158,7 @@ class PanasonicV5Decompressor::ProxyStream {
     buf.insert(buf.end(), FirstSection.begin(), FirstSection.end());
 
     assert(buf.size() == BlockSize);
-    assert(block.getRemainSize() == 0);
+    invariant(block.getRemainSize() == 0);
 
     // And reset the clock.
     input = ByteStream(
@@ -182,7 +183,7 @@ inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(bs.getFillLevel() == 0);
+  invariant(bs.getFillLevel() == 0);
 
   for (int p = 0; p < dsc.pixelsPerPacket;) {
     bs.fill();
@@ -211,8 +212,8 @@ void PanasonicV5Decompressor::processBlock(const Block& block) const {
     if (block.endCoord.y == row)
       endx = block.endCoord.x;
 
-    assert(col % dsc.pixelsPerPacket == 0);
-    assert(endx % dsc.pixelsPerPacket == 0);
+    invariant(col % dsc.pixelsPerPacket == 0);
+    invariant(endx % dsc.pixelsPerPacket == 0);
 
     for (; col < endx; col += dsc.pixelsPerPacket)
       processPixelPacket<dsc>(bs, row, col);

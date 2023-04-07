@@ -21,15 +21,15 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/ByteStream.h"                // for ByteStream
-#include <cassert>                        // for assert
+#include "adt/Array2DRef.h"                  // for Array2DRef
+#include "adt/Invariant.h"                   // for invariant
+#include "adt/Point.h"                       // for iPoint2D
+#include "common/Common.h"                   // for isIntN
+#include "common/RawImage.h"                 // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
+#include "io/BitPumpMSB.h"                   // for BitPumpMSB
+#include "io/ByteStream.h"                   // for ByteStream
 
 namespace rawspeed {
 
@@ -49,14 +49,14 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
   if (len == 0)
     return 0;
   int diff = bs.getBitsNoFill(len);
-  return HuffmanTable<>::extend(diff, len);
+  return PrefixCodeDecoder<>::extend(diff, len);
 }
 
 void SonyArw1Decompressor::decompress(ByteStream input) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.height > 0);
-  assert(out.height % 2 == 0);
+  invariant(out.width > 0);
+  invariant(out.height > 0);
+  invariant(out.height % 2 == 0);
 
   BitPumpMSB bits(input);
   int pred = 0;

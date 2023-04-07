@@ -21,36 +21,39 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
-#include "decompressors/AbstractHuffmanTable.h" // for AbstractHuffmanTable...
-#include "decompressors/BinaryHuffmanTree.h"    // for BinaryHuffmanTree<>:...
-#include "io/BitStream.h"                       // for BitStreamTraits
-#include <algorithm>                            // for max, for_each, copy
-#include <cassert>                              // for assert
-#include <initializer_list>                     // for initializer_list
-#include <iterator>                             // for advance, next
-#include <memory>                               // for unique_ptr, make_unique
-#include <tuple>                                // for tie
-#include <utility>                              // for pair
-#include <vector>                               // for vector, vector<>::co...
+#include "decoders/RawDecoderException.h" // for ThrowException, Thro...
+#include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
+#include "decompressors/BinaryPrefixTree.h" // for BinaryPrefixTree<>:...
+#include "io/BitStream.h"                   // for BitStreamTraits
+#include <algorithm>                        // for max, for_each, copy
+#include <cassert>                          // for invariant
+#include <initializer_list>                 // for initializer_list
+#include <iterator>                         // for advance, next
+#include <memory>                           // for unique_ptr, make_unique
+#include <tuple>                            // for tie
+#include <utility>                          // for pair
+#include <vector>                           // for vector, vector<>::co...
 
 namespace rawspeed {
 
-template <typename HuffmanTableTag>
-class HuffmanTableTree final : public AbstractHuffmanTable<HuffmanTableTag> {
+template <typename CodeTag>
+class PrefixCodeTreeDecoder final : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
-  using Base = AbstractHuffmanTable<HuffmanTableTag>;
-  using Traits = HuffmanTableTraits<HuffmanTableTag>;
+  using Tag = CodeTag;
+  using Base = AbstractPrefixCodeDecoder<CodeTag>;
+  using Traits = typename Base::Traits;
+
+  using Base::Base;
 
 private:
-  BinaryHuffmanTree<typename Traits::CodeValueTy> tree;
+  BinaryPrefixTree<CodeTag> tree;
 
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol,
                    typename Traits::CodeValueTy /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
     typename Base::CodeSymbol partial;
 
@@ -58,7 +61,7 @@ private:
 
     // Read bits until either find the code or detect the incorrect code
     for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
-      assert(partial.code_len <= Traits::MaxCodeLenghtBits);
+      invariant(partial.code_len <= Traits::MaxCodeLenghtBits);
 
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
@@ -70,7 +73,7 @@ private:
       // What is the last bit, which we have just read?
 
       // NOTE: The order *IS* important! Left to right, zero to one!
-      const auto& newNode = !bit ? top->zero : top->one;
+      const auto& newNode = top->buds[bit];
 
       if (!newNode) {
         // Got nothing in this direction.
@@ -94,56 +97,28 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    assert((!std::is_same_v<
-            HuffmanTableTag,
-            VC5HuffmanTableTag>)&&"FIXME: this implementation allocates too "
-                                  "much memory when used with that flavour "
-                                  "during fuzzing");
+    AbstractPrefixCodeDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
-    AbstractHuffmanTable<HuffmanTableTag>::setup(fullDecode_, fixDNGBug16_);
-
-    auto currValue = Base::codeValues.cbegin();
-    for (auto codeLen = 1UL; codeLen < Base::nCodesPerLength.size();
-         codeLen++) {
-      const auto nCodesForCurrLen = Base::nCodesPerLength[codeLen];
-
-      auto nodes = tree.getAllVacantNodesAtDepth(codeLen);
-      if (nodes.size() < nCodesForCurrLen) {
-        ThrowRDE("Got too many (%u) codes for len %lu, can only have %zu codes",
-                 nCodesForCurrLen, codeLen, nodes.size());
-      }
-
-      // Make first nCodesForCurrLen nodes Leafs
-      std::for_each(nodes.cbegin(), std::next(nodes.cbegin(), nCodesForCurrLen),
-                    [&currValue](auto* node) {
-                      *node = std::make_unique<typename decltype(tree)::Leaf>(
-                          *currValue);
-                      std::advance(currValue, 1);
-                    });
-    }
-
-    assert(Base::codeValues.cend() == currValue);
-
-    // And get rid of all the branches that do not lead to Leafs.
-    // It is crucial to detect degenerate codes at the earliest.
-    tree.pruneLeaflessBranches();
+    for (unsigned codeIndex = 0; codeIndex != Base::code.symbols.size();
+         ++codeIndex)
+      tree.add(Base::code.symbols[codeIndex], Base::code.codeValues[codeIndex]);
   }
 
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    assert(!Base::fullDecode);
+    invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
 
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    assert(Base::fullDecode);
+    invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -154,9 +129,9 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithHuffmanTable,
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
-    assert(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::fullDecode);
 
     bs.fill(32);
 

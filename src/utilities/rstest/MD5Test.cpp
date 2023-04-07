@@ -31,10 +31,10 @@
 #include <array>         // for array
 #include <cstdint>       // for UINT32_C, uint8_t
 #include <cstring>       // for strlen
-#include <gtest/gtest.h> // for ParamIteratorInterface, ParamGeneratorInter...
 #include <string>        // for allocator, basic_string
 #include <tuple>         // for tie, tuple
 #include <utility>       // for pair
+#include <gtest/gtest.h> // for ParamIteratorInterface, ParamGeneratorInter...
 
 using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {

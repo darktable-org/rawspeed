@@ -21,6 +21,7 @@
 
 #include "rawspeedconfig.h" // for HAVE_OPENMP, HAV...
 #include "decompressors/AbstractDngDecompressor.h"
+#include "adt/Invariant.h"                          // for invariant
 #include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for rawspeed_get_num...
 #include "common/RawImage.h"                        // for RawImageData
@@ -33,7 +34,6 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "io/IOException.h"                         // for IOException, Thr...
-#include <cassert>                                  // for assert
 #include <limits>                                   // for numeric_limits
 #include <memory>                                   // for unique_ptr
 #include <string>                                   // for string
@@ -72,7 +72,7 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
         ThrowIOE("Integer overflow when calculating input pitch");
 
       const int inputPitchBits = inputPixelBits * e->dsc.tileW;
-      assert(inputPitchBits > 0);
+      invariant(inputPitchBits > 0);
 
       if (inputPitchBits % 8 != 0) {
         ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
@@ -171,10 +171,10 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
 #endif
 
 void AbstractDngDecompressor::decompressThread() const noexcept {
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.y > 0);
-  assert(mRaw->getCpp() > 0 && mRaw->getCpp() <= 4);
-  assert(mBps > 0 && mBps <= 32);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.y > 0);
+  invariant(mRaw->getCpp() > 0 && mRaw->getCpp() <= 4);
+  invariant(mBps > 0 && mBps <= 32);
 
   if (compression == 1) {
     /* Uncompressed */

@@ -22,10 +22,11 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include <array>                                // for array
-#include <cstdint>                              // for uint32_t, uint16_t
-#include <vector>                               // for vector
+#include "decompressors/PrefixCodeDecoder.h"
+#include "io/BitPumpMSB.h" // for BitPumpMSB
+#include <array>           // for array
+#include <cstdint>         // for uint32_t, uint16_t
+#include <vector>          // for vector
 
 namespace rawspeed {
 class ByteStream;
@@ -61,7 +62,12 @@ private:
   void decompress(BitPumpMSB& bits, int start_y, int end_y);
 
   template <typename Huffman>
-  static Huffman createHuffmanTable(uint32_t huffSelect);
+  static Huffman createPrefixCodeDecoder(uint32_t huffSelect);
 };
+
+template <>
+PrefixCodeDecoder<>
+NikonDecompressor::createPrefixCodeDecoder<PrefixCodeDecoder<>>(
+    uint32_t huffSelect);
 
 } // namespace rawspeed

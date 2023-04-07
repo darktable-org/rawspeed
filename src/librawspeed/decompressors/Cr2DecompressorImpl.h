@@ -26,21 +26,21 @@
 #include "common/RawImage.h"               // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor, Cr2SliceWidths
-#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
-#include "decompressors/HuffmanTableLUT.h"   // for HuffmanTableLUT
-#include "io/BitPumpJPEG.h"                  // for BitPumpJPEG, BitStream<>:...
-#include "io/ByteStream.h"                   // for ByteStream
-#include <algorithm>                         // for min, transform
-#include <array>                             // for array
-#include <cassert>                           // for assert
-#include <cstddef>                           // for size_t
-#include <cstdint>                           // for uint16_t
-#include <functional>                        // for cref, reference_wrapper
-#include <initializer_list>                  // for initializer_list
-#include <optional>                          // for optional
-#include <tuple>                             // for make_tuple, operator==, get
-#include <utility>                           // for move, index_sequence, mak...
-#include <vector>                            // for vector
+#include "decompressors/DummyPrefixCodeDecoder.h" // for DummyPrefixCodeDecoder
+#include "decompressors/PrefixCodeLUTDecoder.h"   // for PrefixCodeLUTDecoder
+#include "io/BitPumpJPEG.h" // for BitPumpJPEG, BitStream<>:...
+#include "io/ByteStream.h"  // for ByteStream
+#include <algorithm>        // for min, transform
+#include <array>            // for array
+#include <cassert>          // for invariant
+#include <cstddef>          // for size_t
+#include <cstdint>          // for uint16_t
+#include <functional>       // for cref, reference_wrapper
+#include <initializer_list> // for initializer_list
+#include <optional>         // for optional
+#include <tuple>            // for make_tuple, operator==, get
+#include <utility>          // for move, index_sequence, mak...
+#include <vector>           // for vector
 
 namespace rawspeed {
 
@@ -80,13 +80,15 @@ struct Cr2SliceIterator final {
   Cr2SliceIterator(Cr2SliceWidthIterator sliceWidthIter_, const iPoint2D& frame)
       : frameHeight(frame.y), widthIter(sliceWidthIter_) {}
 
-  value_type operator*() const { return {*widthIter, frameHeight}; }
+  value_type RAWSPEED_READONLY operator*() const {
+    return {*widthIter, frameHeight};
+  }
   Cr2SliceIterator& operator++() {
     ++widthIter;
     return *this;
   }
   friend bool operator==(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
-    assert(a.frameHeight == b.frameHeight && "Unrelated iterators.");
+    invariant(a.frameHeight == b.frameHeight && "Unrelated iterators.");
     return a.widthIter == b.widthIter;
   }
   friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
@@ -115,9 +117,9 @@ struct Cr2OutputTileIterator final {
     iRectangle2D tile = {outPos, *sliceIter};
     // Clamping
     int outRowsRemaining = imgDim.y - tile.getTop();
-    assert(outRowsRemaining >= 0);
+    invariant(outRowsRemaining >= 0);
     int tileRowsRemaining = tile.getHeight() - sliceRow;
-    assert(tileRowsRemaining >= 0);
+    invariant(tileRowsRemaining >= 0);
     const int tileHeight = std::min(outRowsRemaining, tileRowsRemaining);
     tile.dim.y = tileHeight;
     return tile;
@@ -126,7 +128,7 @@ struct Cr2OutputTileIterator final {
     const iRectangle2D currTile = operator*();
     sliceRow += currTile.getHeight();
     outPos = currTile.getBottomLeft();
-    assert(sliceRow >= 0 && sliceRow <= (*sliceIter).y && "Overflow");
+    invariant(sliceRow >= 0 && sliceRow <= (*sliceIter).y && "Overflow");
     if (sliceRow == (*sliceIter).y) {
       ++sliceIter;
       sliceRow = 0;
@@ -137,14 +139,14 @@ struct Cr2OutputTileIterator final {
     }
     return *this;
   }
-  friend bool operator==(const Cr2OutputTileIterator& a,
-                         const Cr2OutputTileIterator& b) {
-    assert(&a.imgDim == &b.imgDim && "Unrelated iterators.");
+  friend bool RAWSPEED_READONLY operator==(const Cr2OutputTileIterator& a,
+                                           const Cr2OutputTileIterator& b) {
+    invariant(&a.imgDim == &b.imgDim && "Unrelated iterators.");
     // NOTE: outPos is correctly omitted here.
     return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
   }
-  friend bool operator!=(const Cr2OutputTileIterator& a,
-                         const Cr2OutputTileIterator& b) {
+  friend bool RAWSPEED_READONLY operator!=(const Cr2OutputTileIterator& a,
+                                           const Cr2OutputTileIterator& b) {
     return !(a == b);
   }
 };
@@ -155,7 +157,7 @@ class Cr2VerticalOutputStripIterator final {
 
   [[nodiscard]] std::pair<iRectangle2D, int> coalesce() const {
     Cr2OutputTileIterator tmpIter = outputTileIterator;
-    assert(tmpIter != outputTileIterator_end && "Iterator overflow.");
+    invariant(tmpIter != outputTileIterator_end && "Iterator overflow.");
 
     iRectangle2D rect = *tmpIter;
     int num = 1;
@@ -163,10 +165,10 @@ class Cr2VerticalOutputStripIterator final {
     for (++tmpIter; tmpIter != outputTileIterator_end; ++tmpIter) {
       iRectangle2D nextRect = *tmpIter;
       const TileSequenceStatus s = evaluateConsecutiveTiles(rect, nextRect);
-      assert(s != TileSequenceStatus::Invalid && "Bad tiling.");
+      invariant(s != TileSequenceStatus::Invalid && "Bad tiling.");
       if (s == TileSequenceStatus::BeginsNewColumn)
         break;
-      assert(s == TileSequenceStatus::ContinuesColumn);
+      invariant(s == TileSequenceStatus::ContinuesColumn);
       rect.dim.y += nextRect.dim.y;
       ++num;
     }
@@ -194,8 +196,8 @@ public:
   }
   friend bool operator==(const Cr2VerticalOutputStripIterator& a,
                          const Cr2VerticalOutputStripIterator& b) {
-    assert(a.outputTileIterator_end == b.outputTileIterator_end &&
-           "Comparing unrelated iterators.");
+    invariant(a.outputTileIterator_end == b.outputTileIterator_end &&
+              "Comparing unrelated iterators.");
     return a.outputTileIterator == b.outputTileIterator;
   }
   friend bool operator!=(const Cr2VerticalOutputStripIterator& a,
@@ -204,27 +206,28 @@ public:
   }
 };
 
-template <typename HuffmanTable>
-iterator_range<Cr2SliceIterator> Cr2Decompressor<HuffmanTable>::getSlices() {
+template <typename PrefixCodeDecoder>
+iterator_range<Cr2SliceIterator>
+Cr2Decompressor<PrefixCodeDecoder>::getSlices() {
   return {Cr2SliceIterator(slicing.begin(), frame),
           Cr2SliceIterator(slicing.end(), frame)};
 }
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<HuffmanTable>::getAllOutputTiles() {
+Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() {
   auto slices = getSlices();
   return {Cr2OutputTileIterator(std::begin(slices), dim),
           Cr2OutputTileIterator(std::end(slices), dim)};
 }
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<HuffmanTable>::getOutputTiles() {
+Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() {
   auto allOutputTiles = getAllOutputTiles();
   auto first = allOutputTiles.begin();
   auto end = allOutputTiles.end();
-  assert(first != end && "No tiles?");
+  invariant(first != end && "No tiles?");
   auto last = first;
   while (std::next(last) != end && (*last).getBottomRight() != dim)
     ++last;
@@ -232,9 +235,9 @@ Cr2Decompressor<HuffmanTable>::getOutputTiles() {
   return {first, ++last};
 }
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 [[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
-Cr2Decompressor<HuffmanTable>::getVerticalOutputStrips() {
+Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() {
   auto outputTiles = getOutputTiles();
   return {Cr2VerticalOutputStripIterator(std::begin(outputTiles),
                                          std::end(outputTiles)),
@@ -274,8 +277,8 @@ struct Dsc {
 
 } // namespace
 
-template <typename HuffmanTable>
-Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
+template <typename PrefixCodeDecoder>
+Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
     const RawImage& mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
     iPoint2D frame_, Cr2SliceWidths slicing_,
@@ -360,26 +363,26 @@ Cr2Decompressor<HuffmanTable>::Cr2Decompressor(
     ThrowRDE("Tiles do not cover the entire image area.");
 }
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 template <int N_COMP, size_t... I>
-std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
-Cr2Decompressor<HuffmanTable>::getHuffmanTablesImpl(
+std::array<std::reference_wrapper<const PrefixCodeDecoder>, N_COMP>
+Cr2Decompressor<PrefixCodeDecoder>::getPrefixCodeDecodersImpl(
     std::index_sequence<I...> /*unused*/) const {
-  return std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>{
+  return std::array<std::reference_wrapper<const PrefixCodeDecoder>, N_COMP>{
       std::cref(rec[I].ht)...};
 }
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 template <int N_COMP>
-std::array<std::reference_wrapper<const HuffmanTable>, N_COMP>
-Cr2Decompressor<HuffmanTable>::getHuffmanTables() const {
-  return getHuffmanTablesImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
+std::array<std::reference_wrapper<const PrefixCodeDecoder>, N_COMP>
+Cr2Decompressor<PrefixCodeDecoder>::getPrefixCodeDecoders() const {
+  return getPrefixCodeDecodersImpl<N_COMP>(std::make_index_sequence<N_COMP>{});
 }
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 template <int N_COMP>
 std::array<uint16_t, N_COMP>
-Cr2Decompressor<HuffmanTable>::getInitialPreds() const {
+Cr2Decompressor<PrefixCodeDecoder>::getInitialPreds() const {
   std::array<uint16_t, N_COMP> preds;
   std::transform(
       rec.begin(), rec.end(), preds.begin(),
@@ -391,9 +394,9 @@ Cr2Decompressor<HuffmanTable>::getInitialPreds() const {
 // X_S_F  == x/horizontal sampling factor (1 or 2)
 // Y_S_F  == y/vertical   sampling factor (1 or 2)
 
-template <typename HuffmanTable>
+template <typename PrefixCodeDecoder>
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
+void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -407,7 +410,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   //  * for <3,2,2>: 12 = 3*2*2
   // and advances x by N_COMP*X_S_F and y by Y_S_F
 
-  auto ht = getHuffmanTables<N_COMP>();
+  auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
   const auto* predNext = &out(0, 0);
 
@@ -419,7 +422,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
 
   auto frameColsRemaining = [&]() {
     int r = frame.x - globalFrameCol;
-    assert(r >= 0);
+    invariant(r >= 0);
     return r;
   };
 
@@ -439,7 +442,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
           predNext = &out(row, dsc.groupSize * col);
           ++globalFrameRow;
           globalFrameCol = 0;
-          assert(globalFrameRow < frame.y && "Run out of frame");
+          invariant(globalFrameRow < frame.y && "Run out of frame");
         }
 
         // How many pixel can we decode until we finish the row of either
@@ -449,7 +452,7 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
             out(row, dsc.groupSize * col + p) = pred[c] +=
-                ((const HuffmanTable&)(ht[c])).decodeDifference(bs);
+                ((const PrefixCodeDecoder&)(ht[c])).decodeDifference(bs);
           }
         }
       }
@@ -457,8 +460,8 @@ void Cr2Decompressor<HuffmanTable>::decompressN_X_Y() {
   }
 }
 
-template <typename HuffmanTable>
-void Cr2Decompressor<HuffmanTable>::decompress() {
+template <typename PrefixCodeDecoder>
+void Cr2Decompressor<PrefixCodeDecoder>::decompress() {
   if (std::make_tuple(3, 2, 2) == format) {
     decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     return;

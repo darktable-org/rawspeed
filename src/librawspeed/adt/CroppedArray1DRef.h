@@ -20,8 +20,9 @@
 
 #pragma once
 
+#include "rawspeedconfig.h" // for RAWSPEED_READONLY
 #include "adt/Array1DRef.h" // for Array1DRef
-#include <cassert>          // for assert
+#include "adt/Invariant.h"  // for invariant
 #include <type_traits>      // for negation, is_const, remove_const_t, is_same
 #include <vector>           // for vector
 
@@ -80,7 +81,7 @@ public:
 
   [[nodiscard]] const T* begin() const;
 
-  [[nodiscard]] int size() const;
+  [[nodiscard]] int RAWSPEED_READONLY size() const;
 
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
@@ -94,9 +95,9 @@ template <class T>
 CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
                                         const int numElts_)
     : base(base_), offset(offset_), numElts(numElts_) {
-  assert(offset >= 0);
-  assert(numElts >= 0);
-  assert(offset + numElts <= std::size(base));
+  invariant(offset >= 0);
+  invariant(numElts >= 0);
+  invariant(offset + numElts <= base.size());
 }
 
 template <class T> inline const T* CroppedArray1DRef<T>::begin() const {
@@ -109,8 +110,8 @@ template <class T> inline int CroppedArray1DRef<T>::size() const {
 
 template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
-  assert(eltIdx >= 0);
-  assert(eltIdx < numElts);
+  invariant(eltIdx >= 0);
+  invariant(eltIdx < numElts);
   return base(offset + eltIdx);
 }
 

@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "adt/Point.h"                          // for iPoint2D, iRectangle...
 #include "common/Common.h"                      // for BitOrder
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor

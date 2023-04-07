@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,33 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#ifndef NDEBUG
+
+#include <cassert> // for assert
+
+#define invariant(expr) assert(expr)
+
+#else // NDEBUG
+
+#ifndef __has_builtin      // Optional of course.
+#define __has_builtin(x) 0 // Compatibility with non-clang compilers.
+#endif
+
+#if __has_builtin(__builtin_assume)
+
+#define invariant(expr) __builtin_assume(expr)
+
+#else // __has_builtin(__builtin_assume)
 
 namespace rawspeed {
 
-class Cpuid final {
-public:
-  static bool RAWSPEED_READNONE SSE2();
-};
+__attribute__((always_inline)) constexpr inline void invariant(bool precond) {
+  if (!precond)
+    __builtin_unreachable();
+}
 
 } // namespace rawspeed
+
+#endif // __has_builtin(__builtin_assume)
+
+#endif // NDEBUG

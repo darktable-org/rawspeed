@@ -21,7 +21,8 @@
 
 #include "decoders/KdcDecoder.h"
 #include "adt/NORangesSet.h"                        // for NORangesSet
-#include "adt/Point.h"                              // for iPoint2D
+#include "adt/Point.h"                              // for iPoint2D, iRecta...
+#include "common/Common.h"                          // for BitOrder, BitOrd...
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer

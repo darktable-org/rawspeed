@@ -21,6 +21,7 @@
 #include "rawspeedconfig.h"        // for HAVE_ZLIB
 #include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
+#include "adt/Invariant.h"         // for invariant
 #include "common/Common.h"         // for bit_cast
 #include <array>                   // for array
 #include <climits>                 // for CHAR_BIT
@@ -32,7 +33,6 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "decompressors/DeflateDecompressor.h"
 #include "io/Endianness.h" // for getBE
-#include <cassert>         // for assert
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
 #include <zlib.h>          // for uncompress, zError, Z_OK
@@ -119,7 +119,7 @@ void DeflateDecompressor::decode(
     std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
     iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
   int bytesps = bps / 8;
-  assert(bytesps >= 2 && bytesps <= 4);
+  invariant(bytesps >= 2 && bytesps <= 4);
 
   uLongf dstLen = bytesps * maxDim.area();
 

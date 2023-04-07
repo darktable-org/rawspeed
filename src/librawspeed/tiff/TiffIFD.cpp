@@ -230,7 +230,7 @@ const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
   return ifds[index];
 }
 
-TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
+TiffEntry* RAWSPEED_READONLY TiffIFD::getEntryRecursive(TiffTag tag) const {
   if (auto i = entries.find(tag); i != entries.end()) {
     return i->second.get();
   }

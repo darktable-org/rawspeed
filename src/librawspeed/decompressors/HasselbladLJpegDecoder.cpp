@@ -20,18 +20,13 @@
 */
 
 #include "decompressors/HasselbladLJpegDecoder.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for to_array
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompressor
-#include "decompressors/HuffmanTable.h" // for HuffmanTableLUT, HuffmanTable
-#include "io/BitPumpMSB32.h"            // for BitPumpMSB32, BitStream<>:...
-#include "io/ByteStream.h"              // for ByteStream
-#include <array>                        // for array
-#include <cassert>                      // for assert
-#include <cstdint>                      // for uint16_t
+#include "adt/Point.h"                            // for iPoint2D
+#include "common/RawImage.h"                      // for RawImage, RawImage...
+#include "decoders/RawDecoderException.h"         // for ThrowException
+#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
+#include "io/ByteStream.h"                        // for ByteStream
+#include <cstdint>                                // for uint16_t
+#include <vector>                                 // for vector
 
 namespace rawspeed {
 
@@ -58,7 +53,7 @@ void HasselbladLJpegDecoder::decodeScan() {
   }
 
   const HasselbladDecompressor::PerComponentRecipe rec = {
-      *getHuffmanTables(1)[0], getInitialPredictors(1)[0]};
+      *getPrefixCodeDecoders(1)[0], getInitialPredictors(1)[0]};
 
   HasselbladDecompressor d(mRaw, rec, input);
   input.skipBytes(d.decompress());

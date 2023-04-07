@@ -18,11 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocator...
+#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
 #include "bench/Common.h"                    // for benchmarkDryRun
-#include <benchmark/benchmark.h>             // for State, Benchmark
+#include <cstddef>                           // for byte
 #include <map>                               // for map<>::mapped_type
 #include <vector>                            // for allocator, vector
+#include <benchmark/benchmark.h>             // for State, Benchmark, BENCH...
 
 using Type = std::byte;
 
