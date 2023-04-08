@@ -75,8 +75,6 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     t[i * 2] = table[nfilled - 1];
     t[i * 2 + 1] = 0;
   }
-  t[0] = t[1];
-  t[TABLE_SIZE - 1] = t[TABLE_SIZE - 2];
 }
 
 uint16_t* TableLookUp::getTable(int n) {
