@@ -62,10 +62,13 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     int center = table[i];
     int lower = i > 0 ? table[i - 1] : center;
     int upper = i < (nfilled - 1) ? table[i + 1] : center;
+    // Non-monotonic LUT handling: don't interpolate across the cross-over.
+    lower = std::min(lower, center);
+    upper = std::max(upper, center);
     int delta = upper - lower;
+    invariant(delta >= 0);
     t[i * 2] = clampBits(center - ((upper - lower + 2) / 4), 16);
-    t[i * 2 + 1] = uint16_t(delta);
-    // FIXME: this is completely broken when the curve is non-monotonic.
+    t[i * 2 + 1] = delta;
   }
 
   for (int i = nfilled; i < TABLE_MAX_ELTS; i++) {
