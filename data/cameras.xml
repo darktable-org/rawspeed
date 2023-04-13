@@ -17168,6 +17168,12 @@
 	<Camera make="Leica Camera AG" model="LEICA M10 MONOCHROM" mode="dng">
 		<ID make="Leica" model="M10 Monochrom">LEICA M10 MONOCHROM</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M11" mode="dng">
+		<ID make="Leica" model="M11">LEICA M11</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M11 Monochrom" mode="dng">
+		<ID make="Leica" model="M11 Monochrom">LEICA M11 Monochrom</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M (Typ 240)" mode="dng">
 		<ID make="Leica" model="M (Typ 240)">LEICA M (Typ 240)</ID>
 	</Camera>
