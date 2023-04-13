@@ -66,20 +66,21 @@ static void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
     bool failure1 = false;
 
     try {
-      decoded0 = ht0.template decode<decltype(bits0), IsFullDecode>(bits0);
-    } catch (const rawspeed::IOException&) {
-      // For now, let's ignore stream depleteon issues.
-      throw;
-    } catch (const rawspeed::RawspeedException&) {
-      failure0 = true;
-    }
-    try {
       decoded1 = ht1.template decode<decltype(bits1), IsFullDecode>(bits1);
     } catch (const rawspeed::IOException&) {
       // For now, let's ignore stream depleteon issues.
       throw;
     } catch (const rawspeed::RawspeedException&) {
       failure1 = true;
+    }
+
+    try {
+      decoded0 = ht0.template decode<decltype(bits0), IsFullDecode>(bits0);
+    } catch (const rawspeed::IOException&) {
+      // For now, let's ignore stream depleteon issues.
+      throw;
+    } catch (const rawspeed::RawspeedException&) {
+      failure0 = true;
     }
 
     // They both should either fail or succeed, else there is a bug.

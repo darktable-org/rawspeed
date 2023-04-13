@@ -80,8 +80,7 @@ PrefixCodeDecoder<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
   auto count = hc.setNCodesPerLength(Buffer(ncpl, 16));
   hc.setCodeValues(Array1DRef<const uint8_t>(values, count));
 
-  auto code = hc.operator PrefixCode<BaselineCodeTag>();
-  PrefixCodeDecoder<> ht(std::move(code));
+  PrefixCodeDecoder<> ht(std::move(hc));
   ht.setup(/*fullDecode_=*/false, false);
   return ht;
 }

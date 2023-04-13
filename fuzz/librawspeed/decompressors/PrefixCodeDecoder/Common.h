@@ -65,8 +65,8 @@ auto getCodeSymbols(rawspeed::ByteStream& bs, unsigned numSymbols) {
 }
 
 template <typename CodeTag>
-static rawspeed::PrefixCode<CodeTag>
-createHuffmanPrefixCode(rawspeed::ByteStream& bs) {
+inline rawspeed::HuffmanCode<CodeTag>
+createHuffmanCode(rawspeed::ByteStream& bs) {
   using Traits = rawspeed::CodeTraits<CodeTag>;
 
   rawspeed::HuffmanCode<CodeTag> hc;
@@ -84,12 +84,12 @@ createHuffmanPrefixCode(rawspeed::ByteStream& bs) {
         codesBuf.data(), codesBuf.size()));
   }
 
-  return hc.operator rawspeed::PrefixCode<CodeTag>();
+  return hc;
 }
 
 template <typename CodeTag>
-static rawspeed::PrefixCode<CodeTag>
-createSimplePrefixCode(rawspeed::ByteStream& bs) {
+inline rawspeed::PrefixCode<CodeTag>
+createPrefixCode(rawspeed::ByteStream& bs) {
   using Traits = rawspeed::CodeTraits<CodeTag>;
 
   unsigned numCodeValues = bs.getU32();
@@ -106,15 +106,52 @@ createSimplePrefixCode(rawspeed::ByteStream& bs) {
   return {symbols, codeValues};
 }
 
+template <typename T, typename CodeTag,
+          typename std::enable_if_t<std::is_constructible_v<
+              T, rawspeed::HuffmanCode<CodeTag>>>* /*unused*/
+          = nullptr>
+inline T createHuffmanPrefixCodeDecoderImpl(rawspeed::ByteStream& bs) {
+  auto hc = createHuffmanCode<CodeTag>(bs);
+  return T(std::move(hc));
+}
+
+template <typename T, typename CodeTag,
+          typename std::enable_if_t<!std::is_constructible_v<
+              T, rawspeed::HuffmanCode<CodeTag>>>* /*unused*/
+          = nullptr>
+inline T createHuffmanPrefixCodeDecoderImpl(rawspeed::ByteStream& bs) {
+  auto hc = createHuffmanCode<CodeTag>(bs);
+  auto code = hc.operator rawspeed::PrefixCode<CodeTag>();
+  return T(std::move(code));
+}
+
+template <typename T, typename CodeTag,
+          typename std::enable_if_t<!std::is_constructible_v<
+              T, rawspeed::PrefixCode<CodeTag>>>* /*unused*/
+          = nullptr>
+inline T createSimplePrefixCodeDecoderImpl(rawspeed::ByteStream& bs) {
+  ThrowRSE(
+      "This Prefix code decoder implementation only support Huffman codes");
+}
+
+template <typename T, typename CodeTag,
+          typename std::enable_if_t<std::is_constructible_v<
+              T, rawspeed::PrefixCode<CodeTag>>>* /*unused*/
+          = nullptr>
+inline T createSimplePrefixCodeDecoderImpl(rawspeed::ByteStream& bs) {
+  auto pc = createPrefixCode<CodeTag>(bs);
+  return T(std::move(pc));
+}
+
 template <typename T>
 static T createPrefixCodeDecoder(rawspeed::ByteStream& bs) {
   using CodeTag = typename T::Tag;
 
-  std::optional<rawspeed::PrefixCode<CodeTag>> code;
+  std::optional<T> ht;
   if (bool huffmanCode = bs.getByte() != 0; huffmanCode)
-    code = createHuffmanPrefixCode<CodeTag>(bs);
+    ht = createHuffmanPrefixCodeDecoderImpl<T, CodeTag>(bs);
   else
-    code = createSimplePrefixCode<CodeTag>(bs);
+    ht = createSimplePrefixCodeDecoderImpl<T, CodeTag>(bs);
 
   // and one more byte as 'fixDNGBug16' boolean
   const bool fixDNGBug16 = bs.getByte() != 0;
@@ -123,8 +160,7 @@ static T createPrefixCodeDecoder(rawspeed::ByteStream& bs) {
   if (T::Traits::SupportsFullDecode)
     fullDecode = bs.getByte() != 0;
 
-  T ht(std::move(*code));
-  ht.setup(fullDecode, fixDNGBug16);
+  ht->setup(fullDecode, fixDNGBug16);
 
-  return ht;
+  return std::move(*ht);
 }

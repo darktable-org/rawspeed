@@ -23,6 +23,7 @@
 
 #include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCod...
+#include "decompressors/HuffmanCode.h"               // for HuffmanCode...
 #include "io/BitStream.h"                            // for BitStreamTraits
 #include <cassert>                                   // for invariant
 #include <cstdint>                                   // for uint32_t, uint16_t
@@ -73,7 +74,13 @@ public:
   using Base = AbstractPrefixCodeDecoder<CodeTag>;
   using Traits = typename Base::Traits;
 
-  using Base::Base;
+  // We only support true Huffman codes, not generic prefix codes.
+  explicit PrefixCodeLookupDecoder(HuffmanCode<CodeTag>&& hc)
+      : Base(hc.operator rawspeed::PrefixCode<CodeTag>()) {}
+
+  PrefixCodeLookupDecoder(PrefixCode<CodeTag>) = delete;
+  PrefixCodeLookupDecoder(const PrefixCode<CodeTag>&) = delete;
+  PrefixCodeLookupDecoder(PrefixCode<CodeTag>&&) = delete;
 
 protected:
   // private fields calculated from codesPerBits and codeValues
