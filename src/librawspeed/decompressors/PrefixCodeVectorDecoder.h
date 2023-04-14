@@ -65,8 +65,7 @@ protected:
       partial.code_len++;
 
       // Given global ordering and the code length, we know the code id range.
-      uint64_t codeId;
-      for (codeId = extrCodeIdForLen[partial.code_len];
+      for (uint64_t codeId = extrCodeIdForLen[partial.code_len];
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
         invariant(partial.code_len == symbol.code_len);
