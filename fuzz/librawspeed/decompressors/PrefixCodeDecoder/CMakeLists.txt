@@ -2,13 +2,25 @@ add_custom_target(PrefixCodeDecoderFuzzers ALL)
 add_dependencies(fuzzers PrefixCodeDecoderFuzzers)
 
 function(add_ht_solo_fuzzer impl)
-  set(fuzzer "PrefixCode${impl}DecoderFuzzer")
+  string(REPLACE ":" ";" impl "${impl}")
+  list(GET impl 0 frontend)
+  list(GET impl -1 backend)
+
+  string(REPLACE ";" "With" implName "${impl}")
+  set(fuzzer "PrefixCode${implName}DecoderFuzzer")
 
   rawspeed_add_executable(${fuzzer} Solo.cpp Common.h)
   target_compile_definitions(${fuzzer}
     PRIVATE
-      -DIMPL=PrefixCode${impl}Decoder
+      -DIMPL=PrefixCode${frontend}Decoder
   )
+
+  if(NOT "${frontend}" STREQUAL "${backend}")
+    target_compile_definitions(${fuzzer}
+      PRIVATE
+        -DBACKIMPL=PrefixCode${backend}Decoder
+    )
+  endif()
 
   add_fuzz_target(${fuzzer})
 
@@ -16,21 +28,56 @@ function(add_ht_solo_fuzzer impl)
 endfunction()
 
 function(add_ht_dual_fuzzer impl0 impl1)
-  set(fuzzer "PrefixCodeDecoderFuzzer-${impl0}Vs${impl1}")
+  string(REPLACE ":" ";" impl0 "${impl0}")
+  string(REPLACE ":" ";" impl1 "${impl1}")
+
+  list(GET impl0 0 frontend0)
+  list(GET impl1 0 frontend1)
+  list(GET impl0 -1 backend0)
+  list(GET impl1 -1 backend1)
+
+  string(REPLACE ";" "With" impl0Name "${impl0}")
+  string(REPLACE ";" "With" impl1Name "${impl1}")
+
+  set(fuzzer "PrefixCodeDecoderFuzzer-${impl0Name}Vs${impl1Name}")
 
   rawspeed_add_executable(${fuzzer} Dual.cpp Common.h)
   target_compile_definitions(${fuzzer}
     PRIVATE
-    -DIMPL0=PrefixCode${impl0}Decoder
-    -DIMPL1=PrefixCode${impl1}Decoder
+    -DIMPL0=PrefixCode${frontend0}Decoder
+    -DIMPL1=PrefixCode${frontend1}Decoder
   )
+
+  if(NOT "${frontend0}" STREQUAL "${backend0}")
+    target_compile_definitions(${fuzzer}
+      PRIVATE
+      -DBACKIMPL0=PrefixCode${backend0}Decoder
+    )
+  endif()
+
+  if(NOT "${frontend1}" STREQUAL "${backend1}")
+    target_compile_definitions(${fuzzer}
+      PRIVATE
+      -DBACKIMPL1=PrefixCode${backend1}Decoder
+    )
+  endif()
 
   add_fuzz_target(${fuzzer})
 
   add_dependencies(PrefixCodeDecoderFuzzers ${fuzzer})
 endfunction()
 
-set(IMPL "LUT" "Lookup" "Tree" "Vector")
+set(IMPL     "Tree")
+set(FRONTEND "LUT")
+set(BACKEND  "Lookup" "Vector")
+
+foreach(backend ${BACKEND})
+  list(APPEND IMPL "${backend}")
+  foreach(frontend ${FRONTEND})
+    list(APPEND IMPL "${frontend}:${backend}")
+  endforeach()
+endforeach()
+
 
 foreach(impl ${IMPL})
   add_ht_solo_fuzzer(${impl})

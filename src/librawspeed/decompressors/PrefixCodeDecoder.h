@@ -33,7 +33,8 @@
 namespace rawspeed {
 
 template <typename CodeTag = BaselineCodeTag>
-using PrefixCodeDecoder = PrefixCodeLUTDecoder<CodeTag>;
+using PrefixCodeDecoder =
+    PrefixCodeLUTDecoder<CodeTag, PrefixCodeLookupDecoder<CodeTag>>;
 
 // template <typename CodeTag>
 // using PrefixCodeDecoder = PrefixCodeLookupDecoder<CodeTag>;

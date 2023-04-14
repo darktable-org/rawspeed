@@ -67,11 +67,11 @@
 
 namespace rawspeed {
 
-template <typename CodeTag>
-class PrefixCodeLUTDecoder final : public PrefixCodeLookupDecoder<CodeTag> {
+template <typename CodeTag, typename BackendPrefixCodeDecoder>
+class PrefixCodeLUTDecoder final : public BackendPrefixCodeDecoder {
 public:
   using Tag = CodeTag;
-  using Base = PrefixCodeLookupDecoder<CodeTag>;
+  using Base = BackendPrefixCodeDecoder;
   using Traits = typename Base::Traits;
 
   using Base::Base;
@@ -104,7 +104,7 @@ private:
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    PrefixCodeLookupDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
+    Base::setup(fullDecode_, fixDNGBug16_);
 
     // Generate lookup table for fast decoding lookup.
     // See definition of decodeLookup above

@@ -113,8 +113,19 @@ template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
   rawspeed::ByteStream bs0 = bs;
   rawspeed::ByteStream bs1 = bs;
 
-  auto ht0 = createPrefixCodeDecoder<rawspeed::IMPL0<CodeTag>>(bs0);
-  auto ht1 = createPrefixCodeDecoder<rawspeed::IMPL1<CodeTag>>(bs1);
+#ifndef BACKIMPL0
+  const auto ht0 = createPrefixCodeDecoder<rawspeed::IMPL0<CodeTag>>(bs0);
+#else
+  const auto ht0 = createPrefixCodeDecoder<
+      rawspeed::IMPL0<CodeTag, rawspeed::BACKIMPL0<CodeTag>>>(bs0);
+#endif
+
+#ifndef BACKIMPL1
+  const auto ht1 = createPrefixCodeDecoder<rawspeed::IMPL1<CodeTag>>(bs1);
+#else
+  const auto ht1 = createPrefixCodeDecoder<
+      rawspeed::IMPL1<CodeTag, rawspeed::BACKIMPL1<CodeTag>>>(bs1);
+#endif
 
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
