@@ -8789,6 +8789,66 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-GF8">
+		<ID make="Panasonic" model="DMC-GF8">Panasonic DMC-GF8</ID>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7610 -2780 -576</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4614 12195 2733</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1375 2393 6490</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-GF8" mode="4:3">
+		<ID make="Panasonic" model="DMC-GF8">Panasonic DMC-GF8</ID>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7610 -2780 -576</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4614 12195 2733</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1375 2393 6490</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-GF8" mode="1:1">
+		<ID make="Panasonic" model="DMC-GF8">Panasonic DMC-GF8</ID>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7610 -2780 -576</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4614 12195 2733</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1375 2393 6490</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-GF8" mode="3:2">
+		<ID make="Panasonic" model="DMC-GF8">Panasonic DMC-GF8</ID>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7610 -2780 -576</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4614 12195 2733</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1375 2393 6490</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-GF8" mode="16:9">
+		<ID make="Panasonic" model="DMC-GF8">Panasonic DMC-GF8</ID>
+		<Crop x="0" y="0" width="-208" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7610 -2780 -576</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4614 12195 2733</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1375 2393 6490</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-GH2">
 		<ID make="Panasonic" model="DMC-GH2">Panasonic DMC-GH2</ID>
 		<Crop x="0" y="0" width="-216" height="0"/>
