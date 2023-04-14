@@ -67,8 +67,8 @@
 
 namespace rawspeed {
 
-template <typename CodeTag>
-class PrefixCodeLUTDecoder final : public PrefixCodeLookupDecoder<CodeTag> {
+template <typename CodeTag, typename BackendPrefixCodeDecoder>
+class PrefixCodeLUTDecoder final : public BackendPrefixCodeDecoder {
 public:
   using Tag = CodeTag;
   using Base = PrefixCodeLookupDecoder<CodeTag>;
