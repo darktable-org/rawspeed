@@ -83,14 +83,11 @@ protected:
       }
 
       // If no symbols have this prefix, then the code is invalid.
-      if (!haveCommonPrefix) {
-        ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
-                 partial.code_len);
-      }
+      if (!haveCommonPrefix)
+        break;
     }
 
-    // We have either returned the found symbol, or thrown on incorrect symbol.
-    __builtin_unreachable();
+    ThrowRDE("bad Huffman code: %u (len: %u)", partial.code, partial.code_len);
   }
 
   template <typename BIT_STREAM>
