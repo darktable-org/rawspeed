@@ -73,19 +73,6 @@ protected:
         if (symbol == partial) // yay, found?
           return {symbol, Base::code.codeValues[codeId]};
       }
-
-      // Ok, but does any symbol have this same prefix?
-      bool haveCommonPrefix = false;
-      for (; codeId < Base::code.symbols.size(); codeId++) {
-        const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
-        haveCommonPrefix |= Base::CodeSymbol::HaveCommonPrefix(symbol, partial);
-        if (haveCommonPrefix)
-          break;
-      }
-
-      // If no symbols have this prefix, then the code is invalid.
-      if (!haveCommonPrefix)
-        break;
     }
 
     ThrowRDE("bad Huffman code: %u (len: %u)", partial.code, partial.code_len);
