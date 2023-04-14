@@ -67,9 +67,9 @@ function(add_ht_dual_fuzzer impl0 impl1)
   add_dependencies(PrefixCodeDecoderFuzzers ${fuzzer})
 endfunction()
 
-set(IMPL     "Tree" "Vector")
+set(IMPL     "Tree")
 set(FRONTEND "LUT")
-set(BACKEND  "Lookup")
+set(BACKEND  "Lookup" "Vector")
 
 foreach(backend ${BACKEND})
   list(APPEND IMPL "${backend}")
