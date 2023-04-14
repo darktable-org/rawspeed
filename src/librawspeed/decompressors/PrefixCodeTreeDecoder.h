@@ -99,6 +99,7 @@ public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {
     AbstractPrefixCodeDecoder<CodeTag>::setup(fullDecode_, fixDNGBug16_);
 
+    assert(Base::code.symbols.size() == Base::code.codeValues.size());
     for (unsigned codeIndex = 0; codeIndex != Base::code.symbols.size();
          ++codeIndex)
       tree.add(Base::code.symbols[codeIndex], Base::code.codeValues[codeIndex]);

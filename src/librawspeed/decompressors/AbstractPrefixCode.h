@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for bitwidth
-#include <cstdint>         // for uint16_t
-#include <type_traits>     // for is_integral
+#include "common/Common.h"                // for bitwidth
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include <cstdint>                        // for uint16_t
+#include <type_traits>                    // for is_integral
 
 namespace rawspeed {
 
@@ -169,6 +170,8 @@ public:
 
   explicit AbstractPrefixCode(std::vector<CodeValueTy> codeValues_)
       : codeValues(std::move(codeValues_)) {
+    if (codeValues.empty())
+      ThrowRDE("Empty code alphabet?");
     assert(
         all_of(codeValues.begin(), codeValues.end(),
                [](const CodeValueTy& v) { return v <= Traits::MaxCodeValue; }));

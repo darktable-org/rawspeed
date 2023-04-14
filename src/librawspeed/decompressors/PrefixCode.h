@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "decoders/RawDecoderException.h"     // for ThrowException, ThrowRDE
 #include "decompressors/AbstractPrefixCode.h" // for AbstractPrefixCode
 #include <algorithm>                          // for copy, equal, fill, max
 #include <cassert>                            // for invariant
@@ -54,13 +55,18 @@ public:
   PrefixCode(std::vector<CodeSymbol> symbols_,
              std::vector<CodeValueTy> codeValues_)
       : Base(std::move(codeValues_)), symbols(std::move(symbols_)) {
+    if (symbols.empty() || Base::codeValues.empty() ||
+        symbols.size() != Base::codeValues.size())
+      ThrowRDE("Malformed code");
+
     nCodesPerLength.resize(1 + Traits::MaxCodeLenghtBits);
     for (const CodeSymbol& s : symbols) {
       assert(s.code_len > 0 && s.code_len <= Traits::MaxCodeLenghtBits);
       ++nCodesPerLength[s.code_len];
     }
-    while (!nCodesPerLength.empty() && nCodesPerLength.back() == 0)
+    while (nCodesPerLength.back() == 0)
       nCodesPerLength.pop_back();
+    assert(nCodesPerLength.size() > 1);
 
     verifyCodeSymbols();
   }
@@ -69,20 +75,19 @@ private:
   void verifyCodeSymbols() {
     // We are at the Root node, len is 1, there are two possible child Nodes
     unsigned maxCodes = 2;
-    (void)maxCodes;
     for (auto codeLen = 1UL; codeLen < nCodesPerLength.size(); codeLen++) {
       // we have codeLen bits. make sure that that code count can actually fit
       // E.g. for len 1 we could have two codes: 0b0 and 0b1
       // (but in that case there can be no other codes (with higher lengths))
       const unsigned nCodes = nCodesPerLength[codeLen];
-      assert(nCodes <= maxCodes && "Too many codes.");
+      if (nCodes > maxCodes)
+        ThrowRDE("Too many codes of of length %lu.", codeLen);
       // There are nCodes leafs on this level, and those can not be branches
       maxCodes -= nCodes;
       // On the next level, rest can be branches, and can have two child Nodes
       maxCodes *= 2;
     }
 
-#ifndef NDEBUG
     // The code symbols are ordered so that all the code values are strictly
     // increasing and code lengths are not decreasing.
     // FIXME: this is somewhat more strict than nessesary.
@@ -91,19 +96,20 @@ private:
       return std::less<>()(lhs.code, rhs.code) &&
              std::less_equal<>()(lhs.code_len, rhs.code_len);
     };
-#endif
-    assert(std::adjacent_find(symbols.cbegin(), symbols.cend(),
-                              [&symbolSort](const CodeSymbol& lhs,
-                                            const CodeSymbol& rhs) -> bool {
-                                return !symbolSort(lhs, rhs);
-                              }) == symbols.cend() &&
-           "all code symbols are globally ordered");
 
-    // No two symbols should have the same prefix (high bytes)
+    if (std::adjacent_find(symbols.cbegin(), symbols.cend(),
+                           [&symbolSort](const CodeSymbol& lhs,
+                                         const CodeSymbol& rhs) -> bool {
+                             return !symbolSort(lhs, rhs);
+                           }) != symbols.cend())
+      ThrowRDE("Code symbols are not globally ordered");
+
+    // No two symbols should have the same prefix (high bits)
     // Only analyze the lower triangular matrix, excluding diagonal
     for (auto sId = 0UL; sId < symbols.size(); sId++) {
       for (auto pId = 0UL; pId < sId; pId++)
-        assert(!CodeSymbol::HaveCommonPrefix(symbols[sId], symbols[pId]));
+        if (CodeSymbol::HaveCommonPrefix(symbols[sId], symbols[pId]))
+          ThrowRDE("Not prefix codes!");
     }
   }
 };

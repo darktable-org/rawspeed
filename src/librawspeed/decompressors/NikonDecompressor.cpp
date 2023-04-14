@@ -459,8 +459,7 @@ NikonDecompressor::createPrefixCodeDecoder<PrefixCodeDecoder<>>(
   hc.setCodeValues(
       Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
 
-  auto code = hc.operator PrefixCode<BaselineCodeTag>();
-  PrefixCodeDecoder<> ht(std::move(code));
+  PrefixCodeDecoder<> ht(std::move(hc));
   ht.setup(true, false);
   return ht;
 }
