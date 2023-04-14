@@ -69,6 +69,7 @@ protected:
       for (codeId = extrCodeIdForLen[partial.code_len];
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
+        invariant(partial.code_len == symbol.code_len);
         if (symbol == partial) // yay, found?
           return {symbol, Base::code.codeValues[codeId]};
       }
