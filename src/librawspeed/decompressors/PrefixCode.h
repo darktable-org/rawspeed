@@ -88,20 +88,13 @@ private:
       maxCodes *= 2;
     }
 
-    // The code symbols are ordered so that all the code values are strictly
-    // increasing and code lengths are not decreasing.
-    // FIXME: this is somewhat more strict than nessesary.
-    // The symbols *of the same length* don't need to be sorted.
-    const auto symbolSort = [](const CodeSymbol& lhs, const CodeSymbol& rhs) {
-      return std::less<>()(lhs.code, rhs.code) &&
-             std::less_equal<>()(lhs.code_len, rhs.code_len);
-    };
-
-    if (std::adjacent_find(symbols.cbegin(), symbols.cend(),
-                           [&symbolSort](const CodeSymbol& lhs,
-                                         const CodeSymbol& rhs) -> bool {
-                             return !symbolSort(lhs, rhs);
-                           }) != symbols.cend())
+    // The code symbols are ordered so that the code lengths are not decreasing.
+    // NOTE: codes of same lenght are not nessesairly sorted!
+    if (std::adjacent_find(
+            symbols.cbegin(), symbols.cend(),
+            [](const CodeSymbol& lhs, const CodeSymbol& rhs) -> bool {
+              return !std::less_equal<>()(lhs.code_len, rhs.code_len);
+            }) != symbols.cend())
       ThrowRDE("Code symbols are not globally ordered");
 
     // No two symbols should have the same prefix (high bits)
