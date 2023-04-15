@@ -87,7 +87,7 @@ private:
   // The len field contains the number of bits, this lookup consumed.
   // A lookup value of 0 means the code was too big to fit into the table.
   // The optimal LookupDepth is also likely to depend on the CPU architecture.
-  static constexpr unsigned PayloadShift = 16;
+  static constexpr unsigned PayloadShift = 9;
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
   static constexpr unsigned LookupDepth = 11;
