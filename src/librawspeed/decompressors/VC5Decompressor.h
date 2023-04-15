@@ -27,15 +27,17 @@
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include "io/ByteStream.h"                      // for ByteStream
-#include <array>                                // for array
-#include <cstdint>                              // for int16_t, uint16_t
-#include <memory>                               // for unique_ptr
-#include <optional>                             // for optional
-#include <type_traits>                          // for underlying_type_t
-#include <utility>                              // for move, pair
-#include <vector>                               // for vector
+#include "decompressors/PrefixCodeLUTDecoder.h" // for PrefixCodeLUTDecoder
+#include "decompressors/PrefixCodeVectorDecoder.h" // for PrefixCodeVectorDe...
+#include "io/BitPumpMSB.h"                         // for BitPumpMSB
+#include "io/ByteStream.h"                         // for ByteStream
+#include <array>                                   // for array
+#include <cstdint>                                 // for int16_t, uint16_t
+#include <memory>                                  // for unique_ptr
+#include <optional>                                // for optional
+#include <type_traits>                             // for underlying_type_t
+#include <utility>                                 // for move, pair
+#include <vector>                                  // for vector
 
 namespace rawspeed {
 class ErrorLog;
@@ -97,6 +99,13 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr auto VC5_LOG_TABLE_BITWIDTH = 12;
   int outputBits;
   SimpleLUT<unsigned, VC5_LOG_TABLE_BITWIDTH> mVC5LogTable;
+
+  using PrefixCodeDecoder =
+      PrefixCodeLUTDecoder<VC5CodeTag, PrefixCodeVectorDecoder<VC5CodeTag>>;
+
+  std::optional<PrefixCodeDecoder> codeDecoder;
+
+  void initPrefixCodeDecoder();
 
   void initVC5LogTable();
 
@@ -171,9 +180,12 @@ class VC5Decompressor final : public AbstractDecompressor {
       [[nodiscard]] BandData decode() const noexcept override;
     };
     struct HighPassBand final : AbstractDecodeableBand {
+      const PrefixCodeDecoder& decoder;
       int16_t quant;
-      HighPassBand(Wavelet& wavelet_, ByteStream bs_, int16_t quant_)
-          : AbstractDecodeableBand(wavelet_, bs_), quant(quant_) {}
+      HighPassBand(Wavelet& wavelet_, ByteStream bs_,
+                   const PrefixCodeDecoder& decoder_, int16_t quant_)
+          : AbstractDecodeableBand(wavelet_, bs_), decoder(decoder_),
+            quant(quant_) {}
       [[nodiscard]] BandData decode() const override;
     };
 
@@ -208,7 +220,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   std::array<Channel, numChannels> channels;
 
   static inline std::pair<int16_t /*value*/, unsigned int /*count*/>
-  getRLV(BitPumpMSB& bits);
+  getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits);
 
   void parseLargeCodeblock(ByteStream bs);
 
