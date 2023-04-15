@@ -91,7 +91,9 @@ private:
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
   static constexpr unsigned LookupDepth = 11;
-  std::vector<int32_t> decodeLookup;
+  using LUTEntryTy = int32_t;
+  using LUTUnsignedEntryTy = std::make_unsigned_t<LUTEntryTy>;
+  std::vector<LUTEntryTy> decodeLookup;
 #else
   // lookup table containing 2 fields: payload:4|len:4
   // the payload is the length of the diff, len is the length of the code
@@ -139,15 +141,15 @@ public:
             decodeLookup[c] += diff_l;
 
           if (diff_l) {
-            uint32_t diff;
+            LUTUnsignedEntryTy diff;
             if (diff_l != 16) {
               diff = extractHighBits(c, code_l + diff_l,
                                      /*effectiveBitwidth=*/LookupDepth);
               diff &= ((1 << diff_l) - 1);
             } else
-              diff = uint32_t(-32768);
-            decodeLookup[c] |= static_cast<int32_t>(
-                static_cast<uint32_t>(Base::extend(diff, diff_l))
+              diff = LUTUnsignedEntryTy(-32768);
+            decodeLookup[c] |= static_cast<LUTEntryTy>(
+                static_cast<LUTUnsignedEntryTy>(Base::extend(diff, diff_l))
                 << PayloadShift);
           }
         }
