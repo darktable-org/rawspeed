@@ -87,11 +87,13 @@ private:
   // The len field contains the number of bits, this lookup consumed.
   // A lookup value of 0 means the code was too big to fit into the table.
   // The optimal LookupDepth is also likely to depend on the CPU architecture.
-  static constexpr unsigned PayloadShift = 16;
+  static constexpr unsigned PayloadShift = 9;
   static constexpr unsigned FlagMask = 0x100;
   static constexpr unsigned LenMask = 0xff;
   static constexpr unsigned LookupDepth = 11;
-  std::vector<int32_t> decodeLookup;
+  using LUTEntryTy = int32_t;
+  using LUTUnsignedEntryTy = std::make_unsigned_t<LUTEntryTy>;
+  std::vector<LUTEntryTy> decodeLookup;
 #else
   // lookup table containing 2 fields: payload:4|len:4
   // the payload is the length of the diff, len is the length of the code
@@ -116,8 +118,9 @@ public:
 
       uint16_t ll = Base::code.symbols[i].code << (LookupDepth - code_l);
       uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
-      static_assert(Traits::MaxCodeValueLenghtBits <= 16);
-      uint16_t diff_l = Base::code.codeValues[i];
+      static_assert(Traits::MaxCodeValueLenghtBits <=
+                    bitwidth<LUTEntryTy>() - PayloadShift);
+      LUTUnsignedEntryTy diff_l = Base::code.codeValues[i];
       for (uint16_t c = ll; c <= ul; c++) {
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
@@ -139,15 +142,15 @@ public:
             decodeLookup[c] += diff_l;
 
           if (diff_l) {
-            uint32_t diff;
+            LUTUnsignedEntryTy diff;
             if (diff_l != 16) {
               diff = extractHighBits(c, code_l + diff_l,
                                      /*effectiveBitwidth=*/LookupDepth);
               diff &= ((1 << diff_l) - 1);
             } else
-              diff = uint32_t(-32768);
-            decodeLookup[c] |= static_cast<int32_t>(
-                static_cast<uint32_t>(Base::extend(diff, diff_l))
+              diff = LUTUnsignedEntryTy(-32768);
+            decodeLookup[c] |= static_cast<LUTEntryTy>(
+                static_cast<LUTUnsignedEntryTy>(Base::extend(diff, diff_l))
                 << PayloadShift);
           }
         }
