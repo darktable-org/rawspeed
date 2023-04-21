@@ -42,8 +42,8 @@ public:
   void decompress(ByteStream data) const;
 
 private:
-  static PrefixCode<BaselineCodeTag> SetupPrefixCodeDecoder_Legacy();
-  static PrefixCode<BaselineCodeTag>
+  static HuffmanCode<BaselineCodeTag> SetupPrefixCodeDecoder_Legacy();
+  static HuffmanCode<BaselineCodeTag>
   SetupPrefixCodeDecoder_Modern(ByteStream stream);
   static PrefixCodeDecoder<>
   SetupPrefixCodeDecoder(std::optional<ByteStream> metaData);

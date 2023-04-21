@@ -259,8 +259,7 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
     if (!huff[htIndex]) {
       huffmanCodeStore.emplace_back(std::make_unique<decltype(hc)>(hc));
       // setup new hc and put it into the store
-      auto code = hc.operator PrefixCode<BaselineCodeTag>();
-      auto dHT = std::make_unique<PrefixCodeDecoder<>>(std::move(code));
+      auto dHT = std::make_unique<PrefixCodeDecoder<>>(std::move(hc));
       dHT->setup(fullDecodeHT, fixDng16Bug);
       huff[htIndex] = dHT.get();
       PrefixCodeDecoderStore.emplace_back(std::move(dHT));

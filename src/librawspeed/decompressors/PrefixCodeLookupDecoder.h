@@ -23,6 +23,7 @@
 
 #include "decoders/RawDecoderException.h"            // for ThrowRDE
 #include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCod...
+#include "decompressors/HuffmanCode.h"               // for HuffmanCode...
 #include "io/BitStream.h"                            // for BitStreamTraits
 #include <cassert>                                   // for invariant
 #include <cstdint>                                   // for uint32_t, uint16_t
@@ -73,7 +74,13 @@ public:
   using Base = AbstractPrefixCodeDecoder<CodeTag>;
   using Traits = typename Base::Traits;
 
-  using Base::Base;
+  // We only support true Huffman codes, not generic prefix codes.
+  explicit PrefixCodeLookupDecoder(HuffmanCode<CodeTag>&& hc)
+      : Base(hc.operator rawspeed::PrefixCode<CodeTag>()) {}
+
+  PrefixCodeLookupDecoder(PrefixCode<CodeTag>) = delete;
+  PrefixCodeLookupDecoder(const PrefixCode<CodeTag>&) = delete;
+  PrefixCodeLookupDecoder(PrefixCode<CodeTag>&&) = delete;
 
 protected:
   // private fields calculated from codesPerBits and codeValues
@@ -127,6 +134,9 @@ protected:
   inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   finishReadingPartialSymbol(BIT_STREAM& bs,
                              typename Base::CodeSymbol partial) const {
+    static_assert(
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        "This BitStream specialization is not marked as usable here");
     while (partial.code_len < Base::maxCodeLength() &&
            (MaxCodeValue == maxCodeOL[partial.code_len] ||
             partial.code > maxCodeOL[partial.code_len])) {
@@ -170,9 +180,6 @@ public:
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
-    static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
 

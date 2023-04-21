@@ -66,20 +66,21 @@ static void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
     bool failure1 = false;
 
     try {
-      decoded0 = ht0.template decode<decltype(bits0), IsFullDecode>(bits0);
-    } catch (const rawspeed::IOException&) {
-      // For now, let's ignore stream depleteon issues.
-      throw;
-    } catch (const rawspeed::RawspeedException&) {
-      failure0 = true;
-    }
-    try {
       decoded1 = ht1.template decode<decltype(bits1), IsFullDecode>(bits1);
     } catch (const rawspeed::IOException&) {
       // For now, let's ignore stream depleteon issues.
       throw;
     } catch (const rawspeed::RawspeedException&) {
       failure1 = true;
+    }
+
+    try {
+      decoded0 = ht0.template decode<decltype(bits0), IsFullDecode>(bits0);
+    } catch (const rawspeed::IOException&) {
+      // For now, let's ignore stream depleteon issues.
+      throw;
+    } catch (const rawspeed::RawspeedException&) {
+      failure0 = true;
     }
 
     // They both should either fail or succeed, else there is a bug.
@@ -112,46 +113,35 @@ template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
   rawspeed::ByteStream bs0 = bs;
   rawspeed::ByteStream bs1 = bs;
 
-  bool failure0 = false;
-  bool failure1 = false;
+#ifndef BACKIMPL0
+  const auto ht0 = createPrefixCodeDecoder<rawspeed::IMPL0<CodeTag>>(bs0);
+#else
+  const auto ht0 = createPrefixCodeDecoder<
+      rawspeed::IMPL0<CodeTag, rawspeed::BACKIMPL0<CodeTag>>>(bs0);
+#endif
 
-  std::optional<rawspeed::IMPL0<CodeTag>> ht0;
-  std::optional<rawspeed::IMPL1<CodeTag>> ht1;
-
-  try {
-    ht0 = createPrefixCodeDecoder<rawspeed::IMPL0<CodeTag>>(bs0);
-  } catch (const rawspeed::RawspeedException&) {
-    failure0 = true;
-  }
-  try {
-    ht1 = createPrefixCodeDecoder<rawspeed::IMPL1<CodeTag>>(bs1);
-  } catch (const rawspeed::RawspeedException&) {
-    failure1 = true;
-  }
-
-  // They both should either fail or succeed, else there is a bug.
-  assert(failure0 == failure1);
-
-  // If any failed, we can't continue.
-  if (failure0 || failure1)
-    ThrowRSE("Failure detected");
+#ifndef BACKIMPL1
+  const auto ht1 = createPrefixCodeDecoder<rawspeed::IMPL1<CodeTag>>(bs1);
+#else
+  const auto ht1 = createPrefixCodeDecoder<
+      rawspeed::IMPL1<CodeTag, rawspeed::BACKIMPL1<CodeTag>>>(bs1);
+#endif
 
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
   assert(bs0.getPosition() == bs1.getPosition());
-  assert(bs0.getPosition() >= 19);
 
   // Which bit pump should we use?
   bs1.skipBytes(1);
   switch (bs0.getByte()) {
   case 0:
-    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, *ht0, *ht1);
+    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, ht0, ht1);
     break;
   case 1:
-    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, *ht0, *ht1);
+    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, ht0, ht1);
     break;
   case 2:
-    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, *ht0, *ht1);
+    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, ht0, ht1);
     break;
   default:
     ThrowRSE("Unknown bit pump");

@@ -21,6 +21,7 @@
 #pragma once
 
 #include "decompressors/AbstractPrefixCode.h" // for CodeTraits
+#include "decompressors/HuffmanCode.h"        // for HuffmanCode...
 #include "decompressors/PrefixCode.h"         // for PrefixCode...
 #include "io/BitStream.h"                     // for BitStreamTraits
 #include <cassert>                            // for invariant
@@ -38,6 +39,7 @@ public:
   using Tag = CodeTag;
   using Traits = CodeTraits<CodeTag>;
 
+  explicit DummyPrefixCodeDecoder(HuffmanCode<CodeTag> code) {}
   explicit DummyPrefixCodeDecoder(PrefixCode<CodeTag> code) {}
 
 private:

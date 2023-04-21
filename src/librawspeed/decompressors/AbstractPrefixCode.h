@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for bitwidth
-#include <cstdint>         // for uint16_t
-#include <type_traits>     // for is_integral
+#include "common/Common.h"                // for bitwidth
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include <cstdint>                        // for uint16_t
+#include <type_traits>                    // for is_integral
 
 namespace rawspeed {
 
@@ -65,9 +66,9 @@ template <> struct CodeTraits<VC5CodeTag> final {
   static constexpr int MaxCodeLenghtBits = 26;
   static constexpr int MaxNumCodeValues = 264;
 
-  using CodeValueTy = uint16_t;
-  static constexpr int MaxCodeValueLenghtBits = 9;
-  static constexpr CodeValueTy MaxCodeValue = MaxNumCodeValues;
+  using CodeValueTy = uint32_t;
+  static constexpr int MaxCodeValueLenghtBits = 19;
+  static constexpr CodeValueTy MaxCodeValue = 524287;
 
   static constexpr int MaxDiffLengthBits = -1;     // unused
   static constexpr CodeValueTy MaxDiffLength = -1; // unused
@@ -98,18 +99,18 @@ template <typename CodeTag> struct CodeTraitsValidator final {
   static_assert(std::is_integral<typename Traits::CodeValueTy>::value);
   static_assert(std::is_unsigned<typename Traits::CodeValueTy>::value);
   static_assert(std::is_same<typename Traits::CodeValueTy, uint8_t>::value ||
-                std::is_same<typename Traits::CodeValueTy, uint16_t>::value);
+                std::is_same<typename Traits::CodeValueTy, uint32_t>::value);
 
   static_assert(Traits::MaxCodeValueLenghtBits > 0 &&
                 Traits::MaxCodeValueLenghtBits <=
                     bitwidth<typename Traits::CodeValueTy>());
   static_assert(Traits::MaxCodeValueLenghtBits == 8 ||
-                Traits::MaxCodeValueLenghtBits == 9);
+                Traits::MaxCodeValueLenghtBits == 19);
 
   static_assert(Traits::MaxCodeValue > 0 &&
                 Traits::MaxCodeValue <=
                     ((1ULL << Traits::MaxCodeValueLenghtBits) - 1ULL));
-  static_assert(Traits::MaxCodeValue == 255 || Traits::MaxCodeValue == 264);
+  static_assert(Traits::MaxCodeValue == 255 || Traits::MaxCodeValue == 524287);
 
   static_assert(
       std::is_same<decltype(Traits::SupportsFullDecode), const bool>::value);
@@ -169,6 +170,8 @@ public:
 
   explicit AbstractPrefixCode(std::vector<CodeValueTy> codeValues_)
       : codeValues(std::move(codeValues_)) {
+    if (codeValues.empty())
+      ThrowRDE("Empty code alphabet?");
     assert(
         all_of(codeValues.begin(), codeValues.end(),
                [](const CodeValueTy& v) { return v <= Traits::MaxCodeValue; }));

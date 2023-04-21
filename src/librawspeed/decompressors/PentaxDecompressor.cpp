@@ -60,7 +60,7 @@ PentaxDecompressor::PentaxDecompressor(const RawImage& img,
   }
 }
 
-PrefixCode<BaselineCodeTag>
+HuffmanCode<BaselineCodeTag>
 PentaxDecompressor::SetupPrefixCodeDecoder_Legacy() {
   // Temporary table, used during parsing LJpeg.
   HuffmanCode<BaselineCodeTag> hc;
@@ -70,10 +70,10 @@ PentaxDecompressor::SetupPrefixCodeDecoder_Legacy() {
   invariant(nCodes == 13); // see pentax_tree definition
   hc.setCodeValues(Array1DRef<const uint8_t>(pentax_tree[0][1].data(), nCodes));
 
-  return hc.operator PrefixCode<BaselineCodeTag>();
+  return hc;
 }
 
-PrefixCode<BaselineCodeTag>
+HuffmanCode<BaselineCodeTag>
 PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
   // Temporary table, used during parsing LJpeg.
   HuffmanCode<BaselineCodeTag> hc;
@@ -131,19 +131,19 @@ PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
   assert(codeValues.size() == nCodes);
   hc.setCodeValues(Array1DRef<const uint8_t>(codeValues.data(), nCodes));
 
-  return hc.operator PrefixCode<BaselineCodeTag>();
+  return hc;
 }
 
 PrefixCodeDecoder<>
 PentaxDecompressor::SetupPrefixCodeDecoder(std::optional<ByteStream> metaData) {
-  std::optional<PrefixCode<BaselineCodeTag>> code;
+  std::optional<HuffmanCode<BaselineCodeTag>> hc;
 
   if (metaData)
-    code = SetupPrefixCodeDecoder_Modern(*metaData);
+    hc = SetupPrefixCodeDecoder_Modern(*metaData);
   else
-    code = SetupPrefixCodeDecoder_Legacy();
+    hc = SetupPrefixCodeDecoder_Legacy();
 
-  PrefixCodeDecoder<> ht(std::move(*code));
+  PrefixCodeDecoder<> ht(std::move(*hc));
   ht.setup(true, false);
 
   return ht;

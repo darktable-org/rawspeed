@@ -34,8 +34,7 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class PrefixCodeVectorDecoder final
-    : public AbstractPrefixCodeDecoder<CodeTag> {
+class PrefixCodeVectorDecoder : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
   using Tag = CodeTag;
   using Base = AbstractPrefixCodeDecoder<CodeTag>;
@@ -47,52 +46,46 @@ private:
   // Given this code len, which code id is the minimal?
   std::vector<unsigned int> extrCodeIdForLen; // index is length of code
 
+protected:
   template <typename BIT_STREAM>
   inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
-  readSymbol(BIT_STREAM& bs) const {
+  finishReadingPartialSymbol(BIT_STREAM& bs,
+                             typename Base::CodeSymbol partial) const {
     static_assert(
         BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
         "This BitStream specialization is not marked as usable here");
 
-    typename Base::CodeSymbol partial;
-    uint64_t codeId;
-
     // Read bits until either find the code or detect the incorrect code
-    for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
-      invariant(partial.code_len <= Traits::MaxCodeLenghtBits);
-
+    while (partial.code_len < Base::maxCodeLength()) {
       // Read one more bit
       const bool bit = bs.getBitsNoFill(1);
 
       partial.code <<= 1;
       partial.code |= bit;
+      partial.code_len++;
 
       // Given global ordering and the code length, we know the code id range.
-      for (codeId = extrCodeIdForLen[partial.code_len];
+      for (uint64_t codeId = extrCodeIdForLen[partial.code_len];
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
+        invariant(partial.code_len == symbol.code_len);
         if (symbol == partial) // yay, found?
           return {symbol, Base::code.codeValues[codeId]};
       }
-
-      // Ok, but does any symbol have this same prefix?
-      bool haveCommonPrefix = false;
-      for (; codeId < Base::code.symbols.size(); codeId++) {
-        const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
-        haveCommonPrefix |= Base::CodeSymbol::HaveCommonPrefix(symbol, partial);
-        if (haveCommonPrefix)
-          break;
-      }
-
-      // If no symbols have this prefix, then the code is invalid.
-      if (!haveCommonPrefix) {
-        ThrowRDE("bad Huffman code: %u (len: %u)", partial.code,
-                 partial.code_len);
-      }
     }
 
-    // We have either returned the found symbol, or thrown on incorrect symbol.
-    __builtin_unreachable();
+    ThrowRDE("bad Huffman code: %u (len: %u)", partial.code, partial.code_len);
+  }
+
+  template <typename BIT_STREAM>
+  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
+    // Start from completely unknown symbol.
+    typename Base::CodeSymbol partial;
+    partial.code_len = 0;
+    partial.code = 0;
+
+    return finishReadingPartialSymbol(bs, partial);
   }
 
 public:

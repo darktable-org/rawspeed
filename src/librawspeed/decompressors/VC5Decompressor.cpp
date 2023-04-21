@@ -88,15 +88,6 @@ constexpr int16_t decompand(int16_t val) {
 }();
 #endif
 
-const std::array<RLV, table17.length> decompandedTable17 = []() {
-  std::array<RLV, table17.length> d;
-  for (auto i = 0U; i < table17.length; i++) {
-    d[i] = table17.entries[i];
-    d[i].value = decompand(table17.entries[i].value);
-  }
-  return d;
-}();
-
 inline bool readValue(const bool& storage) {
   bool value;
 
@@ -428,6 +419,36 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
   parseVC5();
 }
 
+static constexpr int DecompandedCodeValueBitWidth = 10;
+static constexpr int RLVRunLengthBitWidth = 9;
+
+void VC5Decompressor::initPrefixCodeDecoder() {
+  using CodeSymbol = AbstractPrefixCode<VC5CodeTag>::CodeSymbol;
+  using CodeValueTy = CodeTraits<VC5CodeTag>::CodeValueTy;
+
+  std::vector<CodeSymbol> symbols;
+  std::vector<CodeValueTy> codeValues;
+
+  symbols.reserve(table17.length);
+  for (const RLV& e : table17.entries)
+    symbols.emplace_back(e.bits, e.size);
+
+  codeValues.reserve(table17.length);
+  for (const RLV& e : table17.entries) {
+    CodeValueTy value = decompand(e.value);
+    assert(rawspeed::isIntN(value, DecompandedCodeValueBitWidth));
+    (void)DecompandedCodeValueBitWidth;
+    assert(rawspeed::isIntN(e.count, RLVRunLengthBitWidth));
+    value <<= RLVRunLengthBitWidth;
+    value |= e.count;
+    codeValues.emplace_back(value);
+  }
+
+  PrefixCode<VC5CodeTag> code(std::move(symbols), std::move(codeValues));
+  codeDecoder.emplace(std::move(code));
+  codeDecoder->setup(/*fullDecode_=*/false, /*fixDNGBug16_=*/false);
+}
+
 void VC5Decompressor::initVC5LogTable() {
   mVC5LogTable = decltype(mVC5LogTable)(
       [outputBits_ = outputBits](unsigned i, unsigned tableSize) {
@@ -645,6 +666,7 @@ VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
 VC5Decompressor::BandData
 VC5Decompressor::Wavelet::HighPassBand::decode() const {
   class DeRLVer final {
+    const PrefixCodeDecoder& decoder;
     BitPumpMSB bits;
     const int16_t quant;
 
@@ -653,11 +675,12 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
 
     void decodeNextPixelGroup() {
       invariant(numPixelsLeft == 0);
-      std::tie(pixelValue, numPixelsLeft) = getRLV(bits);
+      std::tie(pixelValue, numPixelsLeft) = getRLV(decoder, bits);
     }
 
   public:
-    DeRLVer(ByteStream bs, int16_t quant_) : bits(bs), quant(quant_) {}
+    DeRLVer(const PrefixCodeDecoder& decoder_, ByteStream bs, int16_t quant_)
+        : decoder(decoder_), bits(bs), quant(quant_) {}
 
     void verifyIsAtEnd() {
       if (numPixelsLeft != 0)
@@ -690,7 +713,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   };
 
   // decode highpass band
-  DeRLVer d(bs, quant);
+  DeRLVer d(decoder, bs, quant);
   BandData highpass;
   auto& band = highpass.description;
   band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
@@ -756,7 +779,7 @@ void VC5Decompressor::parseLargeCodeblock(ByteStream bs) {
   } else {
     if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs,
+    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs, *codeDecoder,
                                                       *mVC5.quantization);
     mVC5.quantization.reset();
   }
@@ -809,6 +832,7 @@ void VC5Decompressor::decode(unsigned int offsetX, unsigned int offsetY,
   if (offsetX || offsetY || mRaw->dim != iPoint2D(width, height))
     ThrowRDE("VC5Decompressor expects to fill the whole image, not some tile.");
 
+  initPrefixCodeDecoder();
   initVC5LogTable();
 
   alignas(RAWSPEED_CACHELINESIZE) bool exceptionThrown = false;
@@ -902,25 +926,12 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
 }
 
 inline std::pair<int16_t /*value*/, unsigned int /*count*/>
-VC5Decompressor::getRLV(BitPumpMSB& bits) {
-  unsigned int iTab;
+VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits) {
+  unsigned bitfield = decoder.decodeCodeValue(bits);
 
-  static constexpr auto maxBits = 1 + table17.entries[table17.length - 1].size;
+  unsigned int count = bitfield & ((1U << RLVRunLengthBitWidth) - 1U);
+  int16_t value = bitfield >> RLVRunLengthBitWidth;
 
-  // Ensure the maximum number of bits are cached to make peekBits() as fast as
-  // possible.
-  bits.fill(maxBits);
-  for (iTab = 0; iTab < table17.length; ++iTab) {
-    if (decompandedTable17[iTab].bits ==
-        bits.peekBitsNoFill(decompandedTable17[iTab].size))
-      break;
-  }
-  if (iTab >= table17.length)
-    ThrowRDE("Code not found in codebook");
-
-  bits.skipBitsNoFill(decompandedTable17[iTab].size);
-  int16_t value = decompandedTable17[iTab].value;
-  unsigned int count = decompandedTable17[iTab].count;
   if (value != 0 && bits.getBitsNoFill(1))
     value = -value;
 

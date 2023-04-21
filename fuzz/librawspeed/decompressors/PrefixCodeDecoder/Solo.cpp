@@ -65,11 +65,12 @@ static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
 }
 
 template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
+#ifndef BACKIMPL
   const auto ht = createPrefixCodeDecoder<rawspeed::IMPL<CodeTag>>(bs);
-
-  // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
-  // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
-  assert(bs.getPosition() >= 19);
+#else
+  const auto ht = createPrefixCodeDecoder<
+      rawspeed::IMPL<CodeTag, rawspeed::BACKIMPL<CodeTag>>>(bs);
+#endif
 
   // Which bit pump should we use?
   switch (bs.getByte()) {
