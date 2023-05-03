@@ -63,6 +63,9 @@ RawImage ThreefrDecoder::decodeRawInternal() {
     return mRaw;
   }
 
+  if (compression != 7) // LJpeg
+    ThrowRDE("Unexpected compression type.");
+
   uint32_t off = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
   // STRIPBYTECOUNTS is strange/invalid for the existing (compressed?) 3FR
   // samples...
