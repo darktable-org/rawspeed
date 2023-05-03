@@ -43,6 +43,7 @@ public:
 
 private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  void DecodeUncompressed(const TiffIFD* raw) const;
 };
 
 } // namespace rawspeed
