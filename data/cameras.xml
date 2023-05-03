@@ -17177,6 +17177,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Hasselblad" model="X2D 100C">
+		<ID make="Hasselblad" model="X2D 100C">Hasselblad 100-20-Coated6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="136" y="106" width="-118" height="0"/>
+		<Sensor black="4267" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">6468 -1899 -545</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4526 12267 2542</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-388 1276 6096</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX 645Z" mode="dng">
 		<ID make="Pentax" model="645Z">PENTAX 645Z</ID>
 		<ColorMatrices>
