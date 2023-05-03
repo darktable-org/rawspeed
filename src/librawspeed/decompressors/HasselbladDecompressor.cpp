@@ -44,7 +44,7 @@ HasselbladDecompressor::HasselbladDecompressor(const RawImage& mRaw_,
 
   // FIXME: could be wrong. max "active pixels" - "100 MP"
   if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
-      mRaw->dim.x > 12000 || mRaw->dim.y > 8816) {
+      mRaw->dim.x > 12000 || mRaw->dim.y > 8842) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
