@@ -17188,6 +17188,9 @@
 		</CFA>
 		<Crop x="136" y="106" width="-118" height="0"/>
 		<Sensor black="4267" white="65535"/>
+		<Aliases>
+			<Alias id="X2D 100C">Hasselblad X2D 100C</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6468 -1899 -545</ColorMatrixRow>
