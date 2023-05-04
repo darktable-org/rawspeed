@@ -9154,6 +9154,42 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ100" mode="1:1">
+		<ID make="Panasonic" model="DMC-FZ100">Panasonic DMC-FZ100</ID>
+		<Crop x="0" y="0" width="-168" height="0"/>
+		<Sensor black="120" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">16197 -6146 -1761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2393 10765 1869</ColorMatrixRow>
+				<ColorMatrixRow plane="2">366 2238 5248</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ100" mode="3:2">
+		<ID make="Panasonic" model="DMC-FZ100">Panasonic DMC-FZ100</ID>
+		<Crop x="0" y="0" width="-200" height="0"/>
+		<Sensor black="120" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">16197 -6146 -1761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2393 10765 1869</ColorMatrixRow>
+				<ColorMatrixRow plane="2">366 2238 5248</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ100" mode="16:9">
+		<ID make="Panasonic" model="DMC-FZ100">Panasonic DMC-FZ100</ID>
+		<Crop x="0" y="0" width="-200" height="0"/>
+		<Sensor black="120" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">16197 -6146 -1761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2393 10765 1869</ColorMatrixRow>
+				<ColorMatrixRow plane="2">366 2238 5248</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ1000">
 		<ID make="Panasonic" model="DMC-FZ1000">Panasonic DMC-FZ1000</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
