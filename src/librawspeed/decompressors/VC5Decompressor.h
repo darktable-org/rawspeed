@@ -23,21 +23,21 @@
 
 #include "adt/Array2DRef.h"                     // for Array2DRef
 #include "adt/DefaultInitAllocatorAdaptor.h"    // for DefaultInitAllocator...
+#include "codes/PrefixCodeLUTDecoder.h"         // for PrefixCodeLUTDecoder
+#include "codes/PrefixCodeVectorDecoder.h"      // for PrefixCodeVectorDe...
 #include "common/BayerPhase.h"                  // for BayerPhase
 #include "common/RawImage.h"                    // for RawImage
 #include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/PrefixCodeLUTDecoder.h" // for PrefixCodeLUTDecoder
-#include "decompressors/PrefixCodeVectorDecoder.h" // for PrefixCodeVectorDe...
-#include "io/BitPumpMSB.h"                         // for BitPumpMSB
-#include "io/ByteStream.h"                         // for ByteStream
-#include <array>                                   // for array
-#include <cstdint>                                 // for int16_t, uint16_t
-#include <memory>                                  // for unique_ptr
-#include <optional>                                // for optional
-#include <type_traits>                             // for underlying_type_t
-#include <utility>                                 // for move, pair
-#include <vector>                                  // for vector
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include "io/ByteStream.h"                      // for ByteStream
+#include <array>                                // for array
+#include <cstdint>                              // for int16_t, uint16_t
+#include <memory>                               // for unique_ptr
+#include <optional>                             // for optional
+#include <type_traits>                          // for underlying_type_t
+#include <utility>                              // for move, pair
+#include <vector>                               // for vector
 
 namespace rawspeed {
 class ErrorLog;

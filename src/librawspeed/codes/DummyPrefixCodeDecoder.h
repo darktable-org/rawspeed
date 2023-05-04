@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include "decompressors/AbstractPrefixCode.h" // for CodeTraits
-#include "decompressors/HuffmanCode.h"        // for HuffmanCode...
-#include "decompressors/PrefixCode.h"         // for PrefixCode...
-#include "io/BitStream.h"                     // for BitStreamTraits
-#include <cassert>                            // for invariant
-#include <cstdint>                            // for uint32_t
-#include <tuple>                              // for tie
-#include <utility>                            // for pair
-#include <vector>                             // for vector
+#include "codes/AbstractPrefixCode.h" // for CodeTraits
+#include "codes/HuffmanCode.h"        // for HuffmanCode...
+#include "codes/PrefixCode.h"         // for PrefixCode...
+#include "io/BitStream.h"             // for BitStreamTraits
+#include <cassert>                    // for invariant
+#include <cstdint>                    // for uint32_t
+#include <tuple>                      // for tie
+#include <utility>                    // for pair
+#include <vector>                     // for vector
 
 namespace rawspeed {
 class Buffer;

@@ -21,15 +21,15 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "adt/Array2DRef.h"                  // for Array2DRef
-#include "adt/Invariant.h"                   // for invariant
-#include "adt/Point.h"                       // for iPoint2D
-#include "common/Common.h"                   // for isIntN
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
-#include "io/BitPumpMSB.h"                   // for BitPumpMSB
-#include "io/ByteStream.h"                   // for ByteStream
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D
+#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
+#include "common/Common.h"                // for isIntN
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include "io/ByteStream.h"                // for ByteStream
 
 namespace rawspeed {
 

@@ -19,14 +19,14 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
-#include "MemorySanitizer.h"                 // for MSan
-#include "PrefixCodeDecoder/Common.h"        // for createPrefixCodeDecoder
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for RawspeedException
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
+#include "MemorySanitizer.h"                // for MSan
+#include "codes/PrefixCodeDecoder.h"        // for PrefixCodeDecoder
+#include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "common/RawImage.h"                // for RawImage, RawImageData
+#include "common/RawspeedException.h"       // for RawspeedException
+#include "fuzz/Common.h"                    // for CreateRawImage
+#include "io/Buffer.h"                      // for Buffer, DataBuffer
+#include "io/ByteStream.h"                  // for ByteStream
 #include "io/Endianness.h" // for Endianness, Endianness::little
 #include <algorithm>       // for fill, copy, fill_n, generate_n
 #include <cassert>         // for assert

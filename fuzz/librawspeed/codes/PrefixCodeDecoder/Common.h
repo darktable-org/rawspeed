@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include "codes/HuffmanCode.h"
 #include "common/RawspeedException.h"
-#include "decompressors/HuffmanCode.h"
 #include "io/ByteStream.h" // for ByteStream
 #include <optional>        // for optional
 #include <type_traits>     // for is_same

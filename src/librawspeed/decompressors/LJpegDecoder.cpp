@@ -22,10 +22,10 @@
 #include "decompressors/LJpegDecoder.h"
 #include "adt/Invariant.h"                   // for invariant
 #include "adt/Point.h"                       // for iPoint2D, iRectangle2D
+#include "codes/PrefixCodeDecoder.h"         // for PrefixCodeDecoder
 #include "common/RawImage.h"                 // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
 #include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor::PerC...
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
 #include "io/ByteStream.h"                   // for ByteStream
 #include <algorithm>                         // for generate_n
 #include <array>                             // for array

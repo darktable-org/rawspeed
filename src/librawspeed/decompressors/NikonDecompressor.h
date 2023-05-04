@@ -20,13 +20,13 @@
 
 #pragma once
 
+#include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/PrefixCodeDecoder.h"
-#include "io/BitPumpMSB.h" // for BitPumpMSB
-#include <array>           // for array
-#include <cstdint>         // for uint32_t, uint16_t
-#include <vector>          // for vector
+#include "io/BitPumpMSB.h"                      // for BitPumpMSB
+#include <array>                                // for array
+#include <cstdint>                              // for uint32_t, uint16_t
+#include <vector>                               // for vector
 
 namespace rawspeed {
 class ByteStream;

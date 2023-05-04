@@ -19,20 +19,20 @@
 */
 
 #include "adt/Array1DRef.h" // for Array1DRef
-#include "decompressors/HuffmanCode.h"
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeLUTDecoder, PrefixCodeDecoder
-#include "io/BitPumpMSB.h"  // for BitStream<>::fillCache, BitP...
-#include "io/BitStream.h"   // for BitStream
-#include "io/Buffer.h"      // for Buffer, DataBuffer
-#include "io/ByteStream.h"  // for ByteStream
-#include "io/Endianness.h"  // for Endianness, Endianness::little
-#include <algorithm>        // for copy, fill_n, max
-#include <array>            // for array
-#include <cstdint>          // for uint8_t
-#include <initializer_list> // for initializer_list
-#include <utility>          // for move
-#include <vector>           // for vector, allocator
-#include <gtest/gtest.h>    // for Message, TestPartResult
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h" // for PrefixCodeLUTDecoder, PrefixCodeDecoder
+#include "io/BitPumpMSB.h"           // for BitStream<>::fillCache, BitP...
+#include "io/BitStream.h"            // for BitStream
+#include "io/Buffer.h"               // for Buffer, DataBuffer
+#include "io/ByteStream.h"           // for ByteStream
+#include "io/Endianness.h"           // for Endianness, Endianness::little
+#include <algorithm>                 // for copy, fill_n, max
+#include <array>                     // for array
+#include <cstdint>                   // for uint8_t
+#include <initializer_list>          // for initializer_list
+#include <utility>                   // for move
+#include <vector>                    // for vector, allocator
+#include <gtest/gtest.h>             // for Message, TestPartResult
 
 namespace rawspeed {
 class RawDecoderException;

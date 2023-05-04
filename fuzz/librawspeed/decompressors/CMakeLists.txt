@@ -7,8 +7,6 @@ macro(add_simple_fuzzer name)
   add_dependencies(fuzzers ${TheFuzzer})
 endmacro()
 
-add_subdirectory(PrefixCodeDecoder)
-
 set(DECOMPRESSORS
   "Cr2LJpegDecoder"
   "CrwDecompressor"

@@ -19,8 +19,8 @@
 */
 
 #include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor
+#include "codes/PrefixCodeDecoder.h"           // for PrefixCodeDecoder
 #include "decompressors/Cr2DecompressorImpl.h" // IWYU pragma: keep
-#include "decompressors/PrefixCodeDecoder.h"   // for PrefixCodeDecoder
 
 namespace rawspeed {
 

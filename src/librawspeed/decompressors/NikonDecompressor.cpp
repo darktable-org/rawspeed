@@ -19,23 +19,23 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
+#include "adt/Array1DRef.h" // for Array1DRef
+#include "adt/Array2DRef.h" // for Array2DRef
+#include "adt/Invariant.h"  // for invariant
+#include "adt/Point.h"      // for iPoint2D
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
 #include "common/Common.h"                // for extractHighBits, clampBits
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanCode.h"
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
-#include "io/BitPumpMSB.h" // for BitPumpMSB, BitStream<>::f...
-#include "io/Buffer.h"     // for Buffer
-#include "io/ByteStream.h" // for ByteStream
-#include <algorithm>       // for fill_n, fill, max, copy
-#include <cassert>         // for assert
-#include <cstdint>         // for uint16_t, uint32_t, int16_t
-#include <cstdio>          // for size_t
-#include <vector>          // for vector
+#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
+#include "io/Buffer.h"                    // for Buffer
+#include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for fill_n, fill, max, copy
+#include <cassert>                        // for assert
+#include <cstdint>                        // for uint16_t, uint32_t, int16_t
+#include <cstdio>                         // for size_t
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

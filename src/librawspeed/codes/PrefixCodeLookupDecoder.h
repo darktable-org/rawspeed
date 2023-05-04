@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include "decoders/RawDecoderException.h"            // for ThrowRDE
-#include "decompressors/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCod...
-#include "decompressors/HuffmanCode.h"               // for HuffmanCode...
-#include "io/BitStream.h"                            // for BitStreamTraits
-#include <cassert>                                   // for invariant
-#include <cstdint>                                   // for uint32_t, uint16_t
-#include <memory>                                    // for allocator_traits...
-#include <tuple>                                     // for tie
-#include <utility>                                   // for pair
-#include <vector>                                    // for vector
+#include "codes/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCod...
+#include "codes/HuffmanCode.h"               // for HuffmanCode...
+#include "decoders/RawDecoderException.h"    // for ThrowRDE
+#include "io/BitStream.h"                    // for BitStreamTraits
+#include <cassert>                           // for invariant
+#include <cstdint>                           // for uint32_t, uint16_t
+#include <memory>                            // for allocator_traits...
+#include <tuple>                             // for tie
+#include <utility>                           // for pair
+#include <vector>                            // for vector
 // IWYU pragma: no_include <algorithm>
 
 /*
