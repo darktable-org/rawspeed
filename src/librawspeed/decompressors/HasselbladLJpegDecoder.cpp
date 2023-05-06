@@ -38,7 +38,7 @@ HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
     ThrowRDE("Unexpected component count / data type");
 
   // FIXME: could be wrong. max "active pixels" - "100 MP"
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
       mRaw->dim.x > 12000 || mRaw->dim.y > 8842) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);

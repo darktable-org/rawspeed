@@ -43,7 +43,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 4 != 0 ||
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 4 != 0 ||
       mRaw->dim.x > 4516 || mRaw->dim.y > 3012)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);

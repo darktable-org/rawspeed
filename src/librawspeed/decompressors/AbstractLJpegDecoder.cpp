@@ -43,7 +43,7 @@ AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, const RawImage& img)
     : input(bs), mRaw(img) {
   input.setByteOrder(Endianness::big);
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
+  if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Image has zero size");
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION

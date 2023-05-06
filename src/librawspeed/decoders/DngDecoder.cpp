@@ -762,7 +762,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     blackdim = iPoint2D(bleveldim->getU32(0), bleveldim->getU32(1));
   }
 
-  if (blackdim.x == 0 || blackdim.y == 0)
+  if (!blackdim.hasPositiveArea())
     return false;
 
   if (!raw->hasEntry(TiffTag::BLACKLEVEL))
