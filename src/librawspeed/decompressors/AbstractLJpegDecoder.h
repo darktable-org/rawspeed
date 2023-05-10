@@ -21,12 +21,12 @@
 
 #pragma once
 
+#include "codes/HuffmanCode.h"                  // for HuffmanCode
+#include "codes/PrefixCodeDecoder.h"            // for PrefixCodeDecoder
 #include "common/RawImage.h"                    // for RawImage
 #include "common/RawspeedException.h"           // for ThrowException
 #include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/HuffmanCode.h"          // for HuffmanCode
-#include "decompressors/PrefixCodeDecoder.h"    // for PrefixCodeDecoder
 #include "io/ByteStream.h"                      // for ByteStream
 #include <algorithm>                            // for fill_n, fill
 #include <array>                                // for array

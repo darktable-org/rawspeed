@@ -21,21 +21,21 @@
 */
 
 #include "decompressors/AbstractLJpegDecoder.h"
-#include "adt/Array1DRef.h"                  // for Array1DRef
-#include "adt/Invariant.h"                   // for invariant
-#include "adt/Point.h"                       // for iPoint2D
-#include "common/RawspeedException.h"        // for ThrowException
-#include "decoders/RawDecoderException.h"    // for ThrowRDE
-#include "decompressors/HuffmanCode.h"       // for HuffmanCode
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder, Huffma...
-#include "io/Buffer.h"                       // for Buffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h"                   // for Endianness, Endianne...
-#include <array>                             // for array
-#include <memory>                            // for unique_ptr, make_unique
-#include <optional>                          // for optional
-#include <utility>                           // for move
-#include <vector>                            // for vector
+#include "adt/Array1DRef.h"               // for Array1DRef
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D
+#include "codes/HuffmanCode.h"            // for HuffmanCode
+#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder, Huffma...
+#include "common/RawspeedException.h"     // for ThrowException
+#include "decoders/RawDecoderException.h" // for ThrowRDE
+#include "io/Buffer.h"                    // for Buffer
+#include "io/ByteStream.h"                // for ByteStream
+#include "io/Endianness.h"                // for Endianness, Endianne...
+#include <array>                          // for array
+#include <memory>                         // for unique_ptr, make_unique
+#include <optional>                       // for optional
+#include <utility>                        // for move
+#include <vector>                         // for vector
 
 namespace rawspeed {
 
@@ -43,7 +43,7 @@ AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, const RawImage& img)
     : input(bs), mRaw(img) {
   input.setByteOrder(Endianness::big);
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0)
+  if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Image has zero size");
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION

@@ -22,10 +22,10 @@
 
 // IWYU pragma: begin_exports
 
-#include "decompressors/PrefixCodeLUTDecoder.h" // for PrefixCodeLUTDecoder
-// #include "decompressors/PrefixCodeLookupDecoder.h" // for
-// PrefixCodeLookupDecoder #include "decompressors/PrefixCodeTreeDecoder.h" //
-// for PrefixCodeTreeDecoder #include "decompressors/PrefixCodeVectorDecoder.h"
+#include "codes/PrefixCodeLUTDecoder.h" // for PrefixCodeLUTDecoder
+// #include "codes/PrefixCodeLookupDecoder.h" // for
+// PrefixCodeLookupDecoder #include "codes/PrefixCodeTreeDecoder.h" //
+// for PrefixCodeTreeDecoder #include "codes/PrefixCodeVectorDecoder.h"
 // // for PrefixCodeVectorDecoder
 
 // IWYU pragma: end_exports

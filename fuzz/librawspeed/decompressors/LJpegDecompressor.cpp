@@ -19,19 +19,19 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "MemorySanitizer.h"          // for MSan
-#include "PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
-#include "common/RawImage.h"          // for RawImage, RawImageData
+#include "MemorySanitizer.h"                // for MSan
+#include "codes/PrefixCodeDecoder.h"        // for PrefixCodeDecoder
+#include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "common/RawImage.h"                // for RawImage, RawImageData
 #include "common/RawspeedException.h" // for ThrowException, RawspeedExce...
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h" // for Endianness, Endianness::little
-#include <algorithm>       // for generate_n, copy, fill, fill_n
-#include <cassert>         // for assert
-#include <cstdint>         // for uint16_t, uint8_t
-#include <iterator>        // for back_insert_iterator, back_i...
+#include "fuzz/Common.h"              // for CreateRawImage
+#include "io/Buffer.h"                // for Buffer, DataBuffer
+#include "io/ByteStream.h"            // for ByteStream
+#include "io/Endianness.h"            // for Endianness, Endianness::little
+#include <algorithm>                  // for generate_n, copy, fill, fill_n
+#include <cassert>                    // for assert
+#include <cstdint>                    // for uint16_t, uint8_t
+#include <iterator>                   // for back_insert_iterator, back_i...
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

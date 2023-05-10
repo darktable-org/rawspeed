@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"                // for extractHighBits
-#include "decoders/RawDecoderException.h" // for ThrowException, Thro...
-#include "decompressors/PrefixCodeLookupDecoder.h" // for PrefixCodeLookupDecoder
-#include "io/BitStream.h"                          // for BitStreamTraits
-#include <cassert>                                 // for invariant
-#include <cstddef>                                 // for size_t
-#include <cstdint>                                 // for int32_t, uint16_t
-#include <memory> // for allocator_traits<>::...
-#include <tuple>  // for tie
-#include <vector> // for vector
+#include "codes/PrefixCodeLookupDecoder.h" // for PrefixCodeLookupDecoder
+#include "common/Common.h"                 // for extractHighBits
+#include "decoders/RawDecoderException.h"  // for ThrowException, Thro...
+#include "io/BitStream.h"                  // for BitStreamTraits
+#include <cassert>                         // for invariant
+#include <cstddef>                         // for size_t
+#include <cstdint>                         // for int32_t, uint16_t
+#include <memory>                          // for allocator_traits<>::...
+#include <tuple>                           // for tie
+#include <vector>                          // for vector
 // IWYU pragma: no_include <algorithm>
 
 /*

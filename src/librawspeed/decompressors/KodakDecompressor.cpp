@@ -21,17 +21,17 @@
 */
 
 #include "decompressors/KodakDecompressor.h"
-#include "adt/Array2DRef.h"                  // for Array2DRef
-#include "adt/Invariant.h"                   // for invariant
-#include "adt/Point.h"                       // for iPoint2D
-#include "common/Common.h"                   // for extractHighBits, isIntN
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder
-#include "io/ByteStream.h"                   // for ByteStream
-#include <algorithm>                         // for min, fill_n
-#include <array>                             // for array
-#include <cstdint>                           // for uint32_t, uint8_t, uint16_t
+#include "adt/Array2DRef.h"               // for Array2DRef
+#include "adt/Invariant.h"                // for invariant
+#include "adt/Point.h"                    // for iPoint2D
+#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
+#include "common/Common.h"                // for extractHighBits, isIntN
+#include "common/RawImage.h"              // for RawImage, RawImageData
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "io/ByteStream.h"                // for ByteStream
+#include <algorithm>                      // for min, fill_n
+#include <array>                          // for array
+#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 
 namespace rawspeed {
 
@@ -43,7 +43,7 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 4 != 0 ||
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 4 != 0 ||
       mRaw->dim.x > 4516 || mRaw->dim.y > 3012)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);

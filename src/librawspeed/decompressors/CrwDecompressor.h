@@ -22,9 +22,9 @@
 
 #pragma once
 
+#include "codes/PrefixCodeDecoder.h"            // for PrefixCodeDecoder
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/PrefixCodeDecoder.h"    // for PrefixCodeDecoder
 #include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
 #include "io/ByteStream.h"                      // for ByteStream
 #include <array>                                // for array

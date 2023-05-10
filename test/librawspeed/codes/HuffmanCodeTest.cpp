@@ -18,9 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HuffmanCode.h" // for HuffmanCode...
-#include "adt/Array1DRef.h"            // for Array1DRef
-#include "decompressors/AbstractPrefixCodeDecoder.h"
+#include "codes/HuffmanCode.h" // for HuffmanCode...
+#include "adt/Array1DRef.h"    // for Array1DRef
+#include "codes/AbstractPrefixCodeDecoder.h"
 #include "io/Buffer.h"      // for Buffer
 #include <algorithm>        // for max, min
 #include <bitset>           // for bitset

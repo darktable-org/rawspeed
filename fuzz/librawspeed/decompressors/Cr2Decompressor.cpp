@@ -23,21 +23,21 @@
 #endif
 
 #include "decompressors/Cr2Decompressor.h"
-#include "MemorySanitizer.h"          // for MSan
-#include "PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
-#include "common/RawImage.h"          // for RawImage, RawImageData
-#include "common/RawspeedException.h" // for ThrowException, Rawsp...
-#include "decompressors/DummyPrefixCodeDecoder.h" // for DummyPrefixCodeDecoder
-#include "decompressors/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
-#include "fuzz/Common.h"                          // for CreateRawImage
-#include "io/Buffer.h"                            // for Buffer, DataBuffer
-#include "io/ByteStream.h"                        // for ByteStream
-#include "io/Endianness.h"  // for Endianness, Endiannes...
-#include <algorithm>        // for generate_n, copy
-#include <cassert>          // for assert
-#include <cstdint>          // for uint16_t, uint8_t
-#include <initializer_list> // for initializer_list
-#include <iterator>         // for back_insert_iterator
+#include "MemorySanitizer.h"                // for MSan
+#include "codes/DummyPrefixCodeDecoder.h"   // for DummyPrefixCodeDecoder
+#include "codes/PrefixCodeDecoder.h"        // for PrefixCodeDecoder
+#include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
+#include "common/RawImage.h"                // for RawImage, RawImageData
+#include "common/RawspeedException.h"       // for ThrowException, Rawsp...
+#include "fuzz/Common.h"                    // for CreateRawImage
+#include "io/Buffer.h"                      // for Buffer, DataBuffer
+#include "io/ByteStream.h"                  // for ByteStream
+#include "io/Endianness.h"                  // for Endianness, Endiannes...
+#include <algorithm>                        // for generate_n, copy
+#include <cassert>                          // for assert
+#include <cstdint>                          // for uint16_t, uint8_t
+#include <initializer_list>                 // for initializer_list
+#include <iterator>                         // for back_insert_iterator
 
 #ifdef WITH_DummyPrefixCodeDecoder
 #include "decompressors/Cr2DecompressorImpl.h" // for Cr2Decompressor::Cr2D...

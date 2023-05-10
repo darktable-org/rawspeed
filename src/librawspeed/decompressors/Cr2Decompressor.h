@@ -24,21 +24,21 @@
 #include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
 #include "adt/iterator_range.h"           // for iterator_range
+#include "codes/DummyPrefixCodeDecoder.h" // for DummyPrefixCodeDecoder
+#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder, HuffmanTa...
 #include "common/RawImage.h"              // for RawImage
 #include "common/RawspeedException.h"     // for ThrowException
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/DummyPrefixCodeDecoder.h" // for DummyPrefixCodeDecoder
-#include "decompressors/PrefixCodeDecoder.h" // for PrefixCodeDecoder, HuffmanTa...
-#include "io/ByteStream.h"                   // for ByteStream
-#include <array>                             // for array
-#include <cassert>                           // for invariant
-#include <cstddef>                           // for size_t, ptrdiff_t
-#include <cstdint>                           // for uint16_t
-#include <functional>                        // for reference_wrapper
-#include <iterator>                          // for input_iterator_tag
-#include <tuple>                             // for tuple
-#include <utility>                           // for index_sequence
-#include <vector>                            // for vector
+#include "io/ByteStream.h"                // for ByteStream
+#include <array>                          // for array
+#include <cassert>                        // for invariant
+#include <cstddef>                        // for size_t, ptrdiff_t
+#include <cstdint>                        // for uint16_t
+#include <functional>                     // for reference_wrapper
+#include <iterator>                       // for input_iterator_tag
+#include <tuple>                          // for tuple
+#include <utility>                        // for index_sequence
+#include <vector>                         // for vector
 
 namespace rawspeed {
 

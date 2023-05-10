@@ -9154,6 +9154,42 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ100" mode="1:1">
+		<ID make="Panasonic" model="DMC-FZ100">Panasonic DMC-FZ100</ID>
+		<Crop x="0" y="0" width="-168" height="0"/>
+		<Sensor black="120" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">16197 -6146 -1761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2393 10765 1869</ColorMatrixRow>
+				<ColorMatrixRow plane="2">366 2238 5248</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ100" mode="3:2">
+		<ID make="Panasonic" model="DMC-FZ100">Panasonic DMC-FZ100</ID>
+		<Crop x="0" y="0" width="-200" height="0"/>
+		<Sensor black="120" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">16197 -6146 -1761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2393 10765 1869</ColorMatrixRow>
+				<ColorMatrixRow plane="2">366 2238 5248</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ100" mode="16:9">
+		<ID make="Panasonic" model="DMC-FZ100">Panasonic DMC-FZ100</ID>
+		<Crop x="0" y="0" width="-200" height="0"/>
+		<Sensor black="120" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">16197 -6146 -1761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2393 10765 1869</ColorMatrixRow>
+				<ColorMatrixRow plane="2">366 2238 5248</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ1000">
 		<ID make="Panasonic" model="DMC-FZ1000">Panasonic DMC-FZ1000</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
@@ -17138,24 +17174,64 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Hasselblad" model="Hasselblad X1DM2-50c">
-		<ID make="Hasselblad" model="X1DM2-50c">Hasselblad 50-15-Coated5</ID>
+	<Camera make="Hasselblad" model="Hasselblad X1D">
+		<ID make="Hasselblad" model="X1D">Hasselblad 50-15-Coated5</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">RED</Color>
 			<Color x="1" y="0">GREEN</Color>
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="48" y="104" width="-60" height="0"/>
+		<Crop x="56" y="104" width="-60" height="0"/>
+		<Sensor black="1028" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">5002 -878 111</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4856 11929 3338</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1183 2041 7022</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Hasselblad" model="X1D II 50C">
+		<ID make="Hasselblad" model="X1D II 50C">Hasselblad 50-15-Coated5</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="56" y="104" width="-60" height="0"/>
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="X1D II 50C">Hasselblad X1D II 50C</Alias>
+			<Alias id="X1DM2-50c">Hasselblad X1DM2-50c</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5002 -878 111</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4856 11929 3338</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-1183 2041 7022</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Hasselblad" model="X2D 100C">
+		<ID make="Hasselblad" model="X2D 100C">Hasselblad 100-20-Coated6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="136" y="106" width="-118" height="0"/>
+		<Sensor black="4267" white="65535"/>
+		<Aliases>
+			<Alias id="X2D 100C">Hasselblad X2D 100C</Alias>
+		</Aliases>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">6468 -1899 -545</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4526 12267 2542</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-388 1276 6096</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>

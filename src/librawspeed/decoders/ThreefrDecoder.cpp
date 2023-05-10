@@ -20,20 +20,21 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
-#include "adt/Point.h"                            // for iPoint2D
-#include "decoders/RawDecoderException.h"         // for ThrowException
-#include "decompressors/HasselbladLJpegDecoder.h" // for HasselbladLJpegDec...
-#include "io/Buffer.h"                            // for Buffer, DataBuffer
-#include "io/ByteStream.h"                        // for ByteStream
-#include "io/Endianness.h"                        // for Endianness, Endian...
-#include "metadata/ColorFilterArray.h"            // for CFAColor, CFAColor...
-#include "tiff/TiffEntry.h"                       // for TiffEntry
-#include "tiff/TiffIFD.h"                         // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                         // for TiffTag, TiffTag::...
-#include <array>                                  // for array
-#include <cstdint>                                // for uint32_t
-#include <memory>                                 // for unique_ptr, allocator
-#include <string>                                 // for operator==, string
+#include "adt/Point.h"                              // for iPoint2D
+#include "decoders/RawDecoderException.h"           // for ThrowException
+#include "decompressors/HasselbladLJpegDecoder.h"   // for HasselbladLJpegDec...
+#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
+#include "io/Buffer.h"                              // for Buffer, DataBuffer
+#include "io/ByteStream.h"                          // for ByteStream
+#include "io/Endianness.h"                          // for Endianness, Endian...
+#include "metadata/ColorFilterArray.h"              // for CFAColor, CFAColor...
+#include "tiff/TiffEntry.h"                         // for TiffEntry
+#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffIFD
+#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag::...
+#include <array>                                    // for array
+#include <cstdint>                                  // for uint32_t
+#include <memory>                                   // for unique_ptr, allocator
+#include <string>                                   // for operator==, string
 
 namespace rawspeed {
 
@@ -53,12 +54,23 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   const auto* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS, 1);
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
-  uint32_t off = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
-  // STRIPBYTECOUNTS is strange/invalid for the existing 3FR samples...
-
-  const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
+  uint32_t compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
 
   mRaw->dim = iPoint2D(width, height);
+
+  if (1 == compression) {
+    DecodeUncompressed(raw);
+    return mRaw;
+  }
+
+  if (compression != 7) // LJpeg
+    ThrowRDE("Unexpected compression type.");
+
+  uint32_t off = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+  // STRIPBYTECOUNTS is strange/invalid for the existing (compressed?) 3FR
+  // samples...
+
+  const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
 
   HasselbladLJpegDecoder l(bs, mRaw);
   mRaw->createData();
@@ -66,6 +78,33 @@ RawImage ThreefrDecoder::decodeRawInternal() {
   l.decode();
 
   return mRaw;
+}
+
+void ThreefrDecoder::DecodeUncompressed(const TiffIFD* raw) const {
+  if (mRaw->getDataType() != RawImageType::UINT16)
+    ThrowRDE("Unexpected data type");
+
+  if (mRaw->getCpp() != 1 || mRaw->getBpp() != sizeof(uint16_t))
+    ThrowRDE("Unexpected cpp: %u", mRaw->getCpp());
+
+  // FIXME: could be wrong. max "active pixels" - "100 MP"
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
+      mRaw->dim.x > 12000 || mRaw->dim.y > 8842) {
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+  }
+
+  uint32_t off = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
+  // STRIPBYTECOUNTS looks valid for the existing uncompressed 3FR samples
+  uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
+
+  const ByteStream bs(
+      DataBuffer(mFile.getSubView(off, count), Endianness::little));
+
+  UncompressedDecompressor u(bs, mRaw, iRectangle2D({0, 0}, mRaw->dim),
+                             2 * mRaw->dim.x, 16, BitOrder::LSB);
+  mRaw->createData();
+  u.readUncompressedRaw();
 }
 
 void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

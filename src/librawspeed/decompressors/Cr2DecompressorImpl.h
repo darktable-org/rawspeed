@@ -23,24 +23,24 @@
 #include "adt/Array2DRef.h"                // for Array2DRef
 #include "adt/Point.h"                     // for iPoint2D, iPoint2D::area_...
 #include "adt/iterator_range.h"            // for iterator_range
+#include "codes/DummyPrefixCodeDecoder.h"  // for DummyPrefixCodeDecoder
+#include "codes/PrefixCodeLUTDecoder.h"    // for PrefixCodeLUTDecoder
 #include "common/RawImage.h"               // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
 #include "decompressors/Cr2Decompressor.h" // for Cr2Decompressor, Cr2SliceWidths
-#include "decompressors/DummyPrefixCodeDecoder.h" // for DummyPrefixCodeDecoder
-#include "decompressors/PrefixCodeLUTDecoder.h"   // for PrefixCodeLUTDecoder
-#include "io/BitPumpJPEG.h" // for BitPumpJPEG, BitStream<>:...
-#include "io/ByteStream.h"  // for ByteStream
-#include <algorithm>        // for min, transform
-#include <array>            // for array
-#include <cassert>          // for invariant
-#include <cstddef>          // for size_t
-#include <cstdint>          // for uint16_t
-#include <functional>       // for cref, reference_wrapper
-#include <initializer_list> // for initializer_list
-#include <optional>         // for optional
-#include <tuple>            // for make_tuple, operator==, get
-#include <utility>          // for move, index_sequence, mak...
-#include <vector>           // for vector
+#include "io/BitPumpJPEG.h"                // for BitPumpJPEG, BitStream<>:...
+#include "io/ByteStream.h"                 // for ByteStream
+#include <algorithm>                       // for min, transform
+#include <array>                           // for array
+#include <cassert>                         // for invariant
+#include <cstddef>                         // for size_t
+#include <cstdint>                         // for uint16_t
+#include <functional>                      // for cref, reference_wrapper
+#include <initializer_list>                // for initializer_list
+#include <optional>                        // for optional
+#include <tuple>                           // for make_tuple, operator==, get
+#include <utility>                         // for move, index_sequence, mak...
+#include <vector>                          // for vector
 
 namespace rawspeed {
 

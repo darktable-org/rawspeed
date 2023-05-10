@@ -21,9 +21,9 @@
 
 #pragma once
 
+#include "codes/PrefixCodeDecoder.h"            // for PrefixCodeDecoder
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/PrefixCodeDecoder.h"    // for PrefixCodeDecoder
 #include <array>                                // for array
 #include <cstdint>                              // for uint8_t
 #include <optional>                             // for optional

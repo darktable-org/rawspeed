@@ -1,4 +1,5 @@
 add_subdirectory(adt)
+add_subdirectory(codes)
 add_subdirectory(common)
 add_subdirectory(metadata)
 add_subdirectory(io)
