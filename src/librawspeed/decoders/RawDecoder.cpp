@@ -39,13 +39,15 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffIFD
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for copy, max
+#include <algorithm>                                // for min, max
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <string>                                   // for string, allocator
 #include <vector>                                   // for vector
 
 using std::vector;
+
+using std::min;
 
 namespace rawspeed {
 
@@ -74,7 +76,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
              counts->count, offsets->count);
   }
 
-  if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
+  if (yPerSlice == 0 ||
       roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
@@ -105,7 +107,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
     else
       slice.h = yPerSlice;
 
-    offY += yPerSlice;
+    offY = min(height, offY + yPerSlice);
 
     if (!mFile.isValid(slice.offset, slice.count))
       ThrowRDE("Slice offset/count invalid");
@@ -116,7 +118,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   if (slices.empty())
     ThrowRDE("No valid slices found. File probably truncated.");
 
-  assert(height <= offY);
+  assert(height == offY);
   assert(slices.size() == counts->count);
 
   mRaw->createData();

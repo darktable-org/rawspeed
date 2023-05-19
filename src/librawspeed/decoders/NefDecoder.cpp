@@ -222,7 +222,7 @@ void NefDecoder::DecodeUncompressed() const {
              counts->count, offsets->count);
   }
 
-  if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
+  if (yPerSlice == 0 ||
       roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
