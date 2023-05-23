@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "adt/BitIterator.h"              // for BitMSBIterator
+#include "adt/iterator_range.h"           // for iterator_range
 #include "common/Common.h"                // for bitwidth
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include <cstdint>                        // for uint16_t
@@ -148,6 +150,11 @@ public:
       assert(code_len > 0);
       assert(code_len <= Traits::MaxCodeLenghtBits);
       assert(code <= ((1U << code_len) - 1U));
+    }
+
+    [[nodiscard]] iterator_range<BitMSBIterator<typename Traits::CodeTy>>
+    getBitsMSB() const {
+      return {{code, code_len - 1}, {code, -1}};
     }
 
     static bool HaveCommonPrefix(const CodeSymbol& symbol,

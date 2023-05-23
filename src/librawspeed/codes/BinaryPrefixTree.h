@@ -87,20 +87,12 @@ void BinaryPrefixTree<CodeTag>::add(const CodeSymbol symbol, CodeTy value) {
   invariant(symbol.code_len > 0);
   invariant(symbol.code_len <= Traits::MaxCodeLenghtBits);
 
-  auto getSymbolsNthMSB = [&symbol](int msbBitIdx) {
-    invariant(msbBitIdx >= 0 && msbBitIdx < symbol.code_len);
-    unsigned MSBs = extractHighBits(symbol.code, 1 + msbBitIdx,
-                                    /*effectiveBitwidth=*/symbol.code_len);
-    return MSBs & 0b1;
-  };
-
   CodeSymbol partial;
   partial.code = 0;
   partial.code_len = 0;
 
   std::reference_wrapper<std::unique_ptr<Node>> newBud = root;
-  for (int depth = 0; depth < symbol.code_len; ++depth) {
-    unsigned bit = getSymbolsNthMSB(depth);
+  for (unsigned bit : symbol.getBitsMSB()) {
     ++partial.code_len;
     partial.code = (partial.code << 1) | bit;
     std::unique_ptr<Node>& bud = newBud;
