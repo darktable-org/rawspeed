@@ -30,6 +30,7 @@
 #include <initializer_list>                  // for initializer_list
 #include <iterator>                          // for advance, next
 #include <memory>                            // for unique_ptr, make_unique
+#include <optional>                          // for optional
 #include <tuple>                             // for tie
 #include <utility>                           // for pair
 #include <vector>                            // for vector, vector<>::co...
@@ -37,7 +38,7 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class PrefixCodeTreeDecoder final : public AbstractPrefixCodeDecoder<CodeTag> {
+class PrefixCodeTreeDecoder : public AbstractPrefixCodeDecoder<CodeTag> {
 public:
   using Tag = CodeTag;
   using Base = AbstractPrefixCodeDecoder<CodeTag>;
@@ -48,29 +49,23 @@ public:
 private:
   BinaryPrefixTree<CodeTag> tree;
 
+protected:
   template <typename BIT_STREAM>
-  inline std::pair<typename Base::CodeSymbol,
-                   typename Traits::CodeValueTy /*codeValue*/>
-  readSymbol(BIT_STREAM& bs) const {
-    static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
+  finishReadingPartialSymbol(BIT_STREAM& bs,
+                             typename Base::CodeSymbol initialPartial) const {
     typename Base::CodeSymbol partial;
+    partial.code = 0;
+    partial.code_len = 0;
 
     const auto* top = &(tree.root->getAsBranch());
 
-    // Read bits until either find the code or detect the incorrect code
-    for (partial.code = 0, partial.code_len = 1;; ++partial.code_len) {
-      invariant(partial.code_len <= Traits::MaxCodeLenghtBits);
-
-      // Read one more bit
-      const bool bit = bs.getBitsNoFill(1);
-
-      // codechecker_false_positive [core.uninitialized.Assign]
+    auto walkBinaryTree = [&partial, &top](bool bit)
+        -> std::optional<
+            std::pair<typename Base::CodeSymbol, int /*codeValue*/>> {
       partial.code <<= 1;
       partial.code |= bit;
-
-      // What is the last bit, which we have just read?
+      partial.code_len++;
 
       // NOTE: The order *IS* important! Left to right, zero to one!
       const auto& newNode = top->buds[bit];
@@ -84,15 +79,48 @@ private:
       if (static_cast<typename decltype(tree)::Node::Type>(*newNode) ==
           decltype(tree)::Node::Type::Leaf) {
         // Ok, great, hit a Leaf. This is it.
-        return {partial, newNode->getAsLeaf().value};
+        return {{partial, newNode->getAsLeaf().value}};
       }
 
       // Else, this is a branch, continue looking.
       top = &(newNode->getAsBranch());
+      return std::nullopt;
+    };
+
+    // First, translate pre-existing code bits.
+    for (unsigned bit : initialPartial.getBitsMSB()) {
+      if (auto sym = walkBinaryTree(bit))
+        return *sym;
+    }
+
+    // Read bits until either find the code or detect the incorrect code
+    while (true) {
+      invariant(partial.code_len <= Traits::MaxCodeLenghtBits);
+
+      // Read one more bit
+      const bool bit = bs.getBitsNoFill(1);
+
+      if (auto sym = walkBinaryTree(bit))
+        return *sym;
     }
 
     // We have either returned the found symbol, or thrown on incorrect symbol.
     __builtin_unreachable();
+  }
+
+  template <typename BIT_STREAM>
+  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
+  readSymbol(BIT_STREAM& bs) const {
+    static_assert(
+        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        "This BitStream specialization is not marked as usable here");
+
+    // Start from completely unknown symbol.
+    typename Base::CodeSymbol partial;
+    partial.code_len = 0;
+    partial.code = 0;
+
+    return finishReadingPartialSymbol(bs, partial);
   }
 
 public:
