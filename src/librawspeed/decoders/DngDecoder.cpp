@@ -499,8 +499,17 @@ RawImage DngDecoder::decodeRawInternal() {
 
 void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Crop
-  if (const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw))
-    mRaw->subFrame(*aa);
+  if (const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw)) {
+    try {
+      if (!aa->hasPositiveArea())
+        ThrowRDE("No positive active area");
+      mRaw->subFrame(*aa);
+    } catch (const RawDecoderException& e) {
+      // We push back errors from the active area parser, since the image may
+      // still be usable
+      mRaw->setError(e.what());
+    }
+  }
 
   if (raw->hasEntry(TiffTag::DEFAULTCROPORIGIN) &&
       raw->hasEntry(TiffTag::DEFAULTCROPSIZE)) {
@@ -509,13 +518,19 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     const TiffEntry* size_entry = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
 
     const auto tl_r = origin_entry->getRationalArray(2);
-    std::array<unsigned, 2> tl;
-    std::transform(tl_r.begin(), tl_r.end(), tl.begin(),
-                   [](const NotARational<unsigned>& r) {
-                     if (r.den == 0 || r.num % r.den != 0)
-                       ThrowRDE("Error decoding default crop origin");
-                     return r.num / r.den;
-                   });
+    std::array<unsigned, 2> tl = {0, 0};
+    try {
+      std::transform(tl_r.begin(), tl_r.end(), tl.begin(),
+                     [](const NotARational<unsigned>& r) {
+                       if (r.den == 0 || r.num % r.den != 0)
+                         ThrowRDE("Error decoding default crop origin");
+                       return r.num / r.den;
+                     });
+    } catch (const RawDecoderException& e) {
+      // We push back errors from the crop parser, since the image may still
+      // be usable
+      mRaw->setError(e.what());
+    }
 
     if (iPoint2D cropOrigin(tl[0], tl[1]);
         cropped.isPointInsideInclusive(cropOrigin))
@@ -524,13 +539,20 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     cropped.dim = mRaw->dim - cropped.pos;
 
     const auto sz_r = size_entry->getRationalArray(2);
-    std::array<unsigned, 2> sz;
-    std::transform(sz_r.begin(), sz_r.end(), sz.begin(),
-                   [](const NotARational<unsigned>& r) {
-                     if (r.den == 0 || r.num % r.den != 0)
-                       ThrowRDE("Error decoding default crop size");
-                     return r.num / r.den;
-                   });
+    std::array<unsigned, 2> sz = {static_cast<unsigned>(mRaw->dim.x),
+                                  static_cast<unsigned>(mRaw->dim.y)};
+    try {
+      std::transform(sz_r.begin(), sz_r.end(), sz.begin(),
+                     [](const NotARational<unsigned>& r) {
+                       if (r.den == 0 || r.num % r.den != 0)
+                         ThrowRDE("Error decoding default crop size");
+                       return r.num / r.den;
+                     });
+    } catch (const RawDecoderException& e) {
+      // We push back errors from the crop parser, since the image may still
+      // be usable
+      mRaw->setError(e.what());
+    }
 
     if (iPoint2D size(sz[0], sz[1]);
         size.isThisInside(mRaw->dim) &&
