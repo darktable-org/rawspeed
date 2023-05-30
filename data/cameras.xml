@@ -17350,6 +17350,9 @@
 	<Camera make="LEICA CAMERA AG" model="LEICA Q2" mode="dng">
 		<ID make="Leica" model="Q2">LEICA Q2</ID>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA Q3" mode="dng">
+		<ID make="Leica" model="Q3">LEICA Q3</ID>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA SL (Typ 601)" mode="dng">
 		<ID make="Leica" model="SL (Typ 601)">LEICA SL (Typ 601)</ID>
 	</Camera>
