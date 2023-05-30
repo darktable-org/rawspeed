@@ -14829,6 +14829,27 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-A7">
+		<ID make="Fujifilm" model="X-A7">Fujifilm X-A7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1024" white="16383"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">15055 -7391 -1274</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4062 12071 2238</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-610 1217 6147</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-S1">
 		<ID make="Fujifilm" model="X-S1">Fujifilm X-S1</ID>
 		<CFA width="2" height="2">
