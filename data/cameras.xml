@@ -4352,6 +4352,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z 8" mode="14bit-compressed">
+		<ID make="Nikon" model="Z 8">NIKON Z 8</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15892"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11423 -4564 -1123</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4816 12895 2119</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-210 1061 7282</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Z 9" mode="14bit-compressed">
 		<ID make="Nikon" model="Z 9">Nikon Z 9</ID>
 		<CFA width="2" height="2">
@@ -7009,7 +7027,7 @@
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkII">
 		<ID make="Olympus" model="E-M1MarkII">Olympus E-M1 Mark II</ID>
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-32" height="0"/>
 		<Sensor black="254" white="4000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -7021,7 +7039,7 @@
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkIII">
 		<ID make="Olympus" model="E-M1MarkIII">Olympus E-M1 Mark III</ID>
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-32" height="0"/>
 		<Sensor black="256" white="4000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -14829,6 +14847,27 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="X-A7">
+		<ID make="Fujifilm" model="X-A7">Fujifilm X-A7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1024" white="16383"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">15055 -7391 -1274</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4062 12071 2238</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-610 1217 6147</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="FUJIFILM" model="X-S1">
 		<ID make="Fujifilm" model="X-S1">Fujifilm X-S1</ID>
 		<CFA width="2" height="2">
@@ -17349,6 +17388,9 @@
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA Q2" mode="dng">
 		<ID make="Leica" model="Q2">LEICA Q2</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA Q3" mode="dng">
+		<ID make="Leica" model="Q3">LEICA Q3</ID>
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA SL (Typ 601)" mode="dng">
 		<ID make="Leica" model="SL (Typ 601)">LEICA SL (Typ 601)</ID>
