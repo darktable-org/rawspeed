@@ -7039,7 +7039,7 @@
 	</Camera>
 	<Camera make="OLYMPUS CORPORATION" model="E-M1MarkIII">
 		<ID make="Olympus" model="E-M1MarkIII">Olympus E-M1 Mark III</ID>
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-32" height="0"/>
 		<Sensor black="256" white="4000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
