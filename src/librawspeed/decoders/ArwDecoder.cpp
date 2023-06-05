@@ -344,7 +344,9 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
     }
 
   const TiffEntry* origin_entry = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
-  const TiffEntry* size_entry = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
+  const TiffEntry* size_entry = raw->hasEntry(TiffTag::SONYRAWIMAGESIZE)
+                                    ? raw->getEntry(TiffTag::SONYRAWIMAGESIZE)
+                                    : raw->getEntry(TiffTag::DEFAULTCROPSIZE);
   iRectangle2D crop(origin_entry->getU32(0), origin_entry->getU32(1),
                     size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
