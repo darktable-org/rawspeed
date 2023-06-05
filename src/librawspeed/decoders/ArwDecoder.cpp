@@ -204,7 +204,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
 
   std::vector<uint16_t> curve(0x4001);
-  const TiffEntry* c = raw->getEntry(TiffTag::SONY_CURVE);
+  const TiffEntry* c = raw->getEntry(TiffTag::SONYCURVE);
   std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32_t i = 0; i < 4; i++)
@@ -509,11 +509,11 @@ void ArwDecoder::GetWB() const {
                              priv->getU32());
 
     const TiffEntry* sony_offset =
-        makerNoteIFD.getEntryRecursive(TiffTag::SONY_OFFSET);
+        makerNoteIFD.getEntryRecursive(TiffTag::SONYOFFSET);
     const TiffEntry* sony_length =
-        makerNoteIFD.getEntryRecursive(TiffTag::SONY_LENGTH);
+        makerNoteIFD.getEntryRecursive(TiffTag::SONYLENGTH);
     const TiffEntry* sony_key =
-        makerNoteIFD.getEntryRecursive(TiffTag::SONY_KEY);
+        makerNoteIFD.getEntryRecursive(TiffTag::SONYKEY);
     if (!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("couldn't find the correct metadata for WB decoding");
 
