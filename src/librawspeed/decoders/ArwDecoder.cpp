@@ -149,6 +149,8 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   if (7 == compression) {
     DecodeLJpeg(raw);
+    // cropping of lossless compressed L files already done in Ljpeg decoder
+    applyCrop = false;
     return mRaw;
   }
 
@@ -343,11 +345,10 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
       decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
     }
 
-  const TiffEntry* origin_entry = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
   const TiffEntry* size_entry = raw->hasEntry(TiffTag::SONYRAWIMAGESIZE)
                                     ? raw->getEntry(TiffTag::SONYRAWIMAGESIZE)
                                     : raw->getEntry(TiffTag::DEFAULTCROPSIZE);
-  iRectangle2D crop(origin_entry->getU32(0), origin_entry->getU32(1),
+  iRectangle2D crop(0, 0,
                     size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
 }
