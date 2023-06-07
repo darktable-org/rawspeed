@@ -75,7 +75,7 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, bool WeirdWidth = false> void decodeN();
+  template <const iPoint2D& MCUSize> void decodeN();
 
 public:
   LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, Frame frame,

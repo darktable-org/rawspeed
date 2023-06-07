@@ -150,7 +150,19 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 
 // N_COMP == number of components (2, 3 or 4)
 
-template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
+namespace {
+
+template <int MCUWidth, int MCUHeight>
+constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
+
+} // namespace
+
+template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
+  invariant(MCUSize == this->MCUSize);
+
+  invariant(MCUSize.hasPositiveArea());
+  // FIXME: workarounding lack of constexpr std::abs() :(
+  constexpr int N_COMP = MCUSize.x * MCUSize.y;
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
   invariant(N_COMP >= mRaw->getCpp());
@@ -243,22 +255,40 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 }
 
 void LJpegDecompressor::decode() {
-  switch (frame.cps) {
+  invariant(MCUSize.area() == static_cast<iPoint2D::area_type>(frame.cps));
+  switch (MCUSize.area()) {
   case 1:
-    decodeN<1>();
+    if (MCUSize == MCU<1, 1>) {
+      decodeN<MCU<1, 1>>();
+      return;
+    }
     break;
   case 2:
-    decodeN<2>();
+    if (MCUSize == MCU<2, 1>) {
+      decodeN<MCU<2, 1>>();
+      return;
+    }
     break;
   case 3:
-    decodeN<3>();
+    if (MCUSize == MCU<3, 1>) {
+      decodeN<MCU<3, 1>>();
+      return;
+    }
     break;
   case 4:
-    decodeN<4>();
+    if (MCUSize == MCU<4, 1>) {
+      decodeN<MCU<4, 1>>();
+      return;
+    }
+    if (MCUSize == MCU<2, 2>) {
+      decodeN<MCU<2, 2>>();
+      return;
+    }
     break;
   default:
     __builtin_unreachable();
   }
+  __builtin_unreachable();
 }
 
 } // namespace rawspeed
