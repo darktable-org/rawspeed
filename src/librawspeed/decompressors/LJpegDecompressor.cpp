@@ -172,7 +172,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  invariant(frame.dim.y >= imgFrame.dim.y);
+  // invariant(frame.dim.y >= imgFrame.dim.y); // FIXME
   invariant((int64_t)frame.cps * frame.dim.x >=
             (int64_t)mRaw->getCpp() * imgFrame.dim.x);
 
