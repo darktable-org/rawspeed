@@ -186,22 +186,22 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
   // For y, we can simply stop decoding when we reached the border.
   for (int frameRow = 0; frameRow < numFrameRows; ++frameRow) {
-    int col = 0;
+    int frameCol = 0;
 
     // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
 
     // For x, we first process all full pixel blocks within the image buffer ...
-    for (; col < N_COMP * fullBlocks; col += N_COMP) {
+    for (; frameCol < fullBlocks; ++frameCol) {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(
             pred[i] +
             ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
         if (interleaveRows) {
           img((frameRow * MCUSize.y) + (i / MCUSize.y),
-              (col / MCUSize.x) + (i % MCUSize.x)) = pred[i];
+              (N_COMP * frameCol / MCUSize.x) + (i % MCUSize.x)) = pred[i];
         } else {
-          img(frameRow, col + i) = pred[i];
+          img(frameRow, N_COMP * frameCol + i) = pred[i];
         }
       }
     }
@@ -220,18 +220,18 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
         pred[c] = uint16_t(
             pred[c] +
             ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream));
-        img(frameRow, col + c) = pred[c];
+        img(frameRow, N_COMP * frameCol + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
       for (; c < N_COMP; ++c) {
         ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
       }
-      col += N_COMP; // We did just process one more block.
+      ++frameCol; // We did just process one more block.
     }
 
     // ... and discard the rest.
-    for (; col < N_COMP * frame.dim.x; col += N_COMP) {
+    for (; N_COMP * frameCol < N_COMP * frame.dim.x; ++frameCol) {
       for (int i = 0; i != N_COMP; ++i)
         ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
     }
