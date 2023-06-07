@@ -58,6 +58,7 @@ private:
 
   int fullBlocks = 0;
   int trailingPixels = 0;
+  bool interleaveRows = false;
 
   template <int N_COMP, size_t... I>
   [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder<>>,
@@ -76,7 +77,7 @@ private:
 
 public:
   LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, Frame frame,
-                    std::vector<PerComponentRecipe> rec, ByteStream bs);
+                    std::vector<PerComponentRecipe> rec, ByteStream bs, bool interleaveRows = false);
 
   void decode();
 };
