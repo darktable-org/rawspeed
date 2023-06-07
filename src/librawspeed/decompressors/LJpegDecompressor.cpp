@@ -198,8 +198,9 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
           int c = MCUSize.x * MCURow + MCUСol;
           pred[c] = uint16_t(pred[c] + ((const PrefixCodeDecoder<>&)(ht[c]))
                                            .decodeDifference(bitStream));
-          img((frameRow * MCUSize.y) + MCURow,
-              (frameCol * MCUSize.x) + MCUСol) = pred[c];
+          int imgRow = (frameRow * MCUSize.y) + MCURow;
+          int imgCol = (frameCol * MCUSize.x) + MCUСol;
+          img(imgRow, imgCol) = pred[c];
         }
       }
     }
