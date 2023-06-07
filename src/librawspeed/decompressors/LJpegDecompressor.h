@@ -56,6 +56,8 @@ private:
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
 
+  const iPoint2D MCUSize;
+
   int fullCols = 0;
   int trailingPixels = 0;
   bool interleaveRows = false;

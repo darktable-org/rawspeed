@@ -42,7 +42,10 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
                                      std::vector<PerComponentRecipe> rec_,
                                      ByteStream bs, bool interleaveRows_)
     : mRaw(img), input(bs), imgFrame(imgFrame_), frame(std::move(frame_)),
-      rec(std::move(rec_)), interleaveRows{interleaveRows_} {
+      rec(std::move(rec_)),
+      MCUSize(!interleaveRows_ ? iPoint2D(frame.cps, 1)
+                               : iPoint2D(frame.cps / 2, frame.cps / 2)),
+      interleaveRows{interleaveRows_} {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -156,10 +159,6 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
-
-  invariant(!interleaveRows || N_COMP == 4);
-  const iPoint2D MCUSize =
-      !interleaveRows ? iPoint2D(N_COMP, 1) : iPoint2D(N_COMP / 2, N_COMP / 2);
 
   const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
                               mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
