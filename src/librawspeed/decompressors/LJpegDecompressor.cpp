@@ -214,17 +214,16 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       // We may end up needing just part of last N_COMP pixels.
       invariant(trailingPixels > 0);
       invariant(trailingPixels < N_COMP);
-      int c = 0;
-      for (; c < trailingPixels; ++c) {
-        pred[c] = uint16_t(
-            pred[c] +
-            ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream));
-        img(frameRow, N_COMP * frameCol + c) = pred[c];
-      }
-      // Discard the rest of the block.
-      invariant(c < N_COMP);
-      for (; c < N_COMP; ++c) {
-        ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
+      for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
+        for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
+          int c = MCUSize.x * MCURow + MCUСol;
+          pred[c] = uint16_t(pred[c] + ((const PrefixCodeDecoder<>&)(ht[c]))
+                                           .decodeDifference(bitStream));
+          int imgRow = (frameRow * MCUSize.y) + MCURow;
+          int imgCol = (frameCol * MCUSize.x) + MCUСol;
+          if (imgCol < img.croppedWidth)
+            img(imgRow, imgCol) = pred[c];
+        }
       }
       ++frameCol; // We did just process one more block.
     }
