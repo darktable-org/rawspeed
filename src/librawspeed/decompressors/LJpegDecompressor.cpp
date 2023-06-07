@@ -195,11 +195,11 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     for (; frameCol < fullCols; ++frameCol) {
       for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
         for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-          int i = MCUSize.x * MCURow + MCUСol;
-          pred[i] = uint16_t(pred[i] + ((const PrefixCodeDecoder<>&)(ht[i]))
+          int c = MCUSize.x * MCURow + MCUСol;
+          pred[c] = uint16_t(pred[c] + ((const PrefixCodeDecoder<>&)(ht[c]))
                                            .decodeDifference(bitStream));
           img((frameRow * MCUSize.y) + MCURow,
-              (frameCol * MCUSize.x) + MCUСol) = pred[i];
+              (frameCol * MCUSize.x) + MCUСol) = pred[c];
         }
       }
     }
@@ -230,8 +230,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // ... and discard the rest.
     for (; frameCol < frame.dim.x; ++frameCol) {
-      for (int i = 0; i != N_COMP; ++i)
-        ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
+      for (int c = 0; c != N_COMP; ++c)
+        ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
     }
 
     // The first sample of the next row is calculated based on the first sample
