@@ -117,7 +117,7 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   }
 
   // How many full pixel blocks will we produce?
-  fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!
+  fullCols = tileRequiredWidth / frame.cps; // Truncating division!
   // Do we need to also produce part of a block?
   trailingPixels = tileRequiredWidth % frame.cps;
 }
@@ -192,7 +192,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // https://github.com/darktable-org/rawspeed/issues/175
 
     // For x, we first process all full pixel blocks within the image buffer ...
-    for (; frameCol < fullBlocks; ++frameCol) {
+    for (; frameCol < fullCols; ++frameCol) {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] = uint16_t(
             pred[i] +

@@ -56,7 +56,7 @@ private:
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
 
-  int fullBlocks = 0;
+  int fullCols = 0;
   int trailingPixels = 0;
   bool interleaveRows = false;
 
