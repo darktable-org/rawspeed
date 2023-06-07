@@ -181,6 +181,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
+  invariant(imgFrame.dim.y % MCUSize.y == 0);
   const auto numRows = imgFrame.dim.y / MCUSize.y;
 
   // For y, we can simply stop decoding when we reached the border.
