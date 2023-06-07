@@ -334,23 +334,22 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
 #pragma omp parallel for schedule(static) default(none)                        \
     shared(offsets, counts) firstprivate(tilesX, tilew, tileh)
 #endif
-    for (int tile = 0U; tile < static_cast<int>(offsets->count); tile++) {
-      const uint32_t tileX = tile % tilesX;
-      const uint32_t tileY = tile / tilesX;
-      const uint32_t offset = offsets->getU32(tile);
-      const uint32_t length = counts->getU32(tile);
+  for (int tile = 0U; tile < static_cast<int>(offsets->count); tile++) {
+    const uint32_t tileX = tile % tilesX;
+    const uint32_t tileY = tile / tilesX;
+    const uint32_t offset = offsets->getU32(tile);
+    const uint32_t length = counts->getU32(tile);
 
-      LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
-                                                Endianness::little)),
-                          mRaw, true);
-      decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
-    }
+    LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
+                                               Endianness::little)),
+                         mRaw, true);
+    decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
+  }
 
   const TiffEntry* size_entry = raw->hasEntry(TiffTag::SONYRAWIMAGESIZE)
                                     ? raw->getEntry(TiffTag::SONYRAWIMAGESIZE)
                                     : raw->getEntry(TiffTag::DEFAULTCROPSIZE);
-  iRectangle2D crop(0, 0,
-                    size_entry->getU32(0), size_entry->getU32(1));
+  iRectangle2D crop(0, 0, size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
 }
 

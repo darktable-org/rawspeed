@@ -77,7 +77,8 @@ private:
 
 public:
   LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, Frame frame,
-                    std::vector<PerComponentRecipe> rec, ByteStream bs, bool interleaveRows = false);
+                    std::vector<PerComponentRecipe> rec, ByteStream bs,
+                    bool interleaveRows = false);
 
   void decode();
 };
