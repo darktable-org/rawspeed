@@ -193,15 +193,13 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // For x, we first process all full pixel blocks within the image buffer ...
     for (; frameCol < fullCols; ++frameCol) {
-      for (int i = 0; i != N_COMP; ++i) {
-        pred[i] = uint16_t(
-            pred[i] +
-            ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
-        if (interleaveRows) {
-          img((frameRow * MCUSize.y) + (i / MCUSize.y),
-              (N_COMP * frameCol / MCUSize.x) + (i % MCUSize.x)) = pred[i];
-        } else {
-          img(frameRow, N_COMP * frameCol + i) = pred[i];
+      for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
+        for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
+          int i = MCUSize.x * MCURow + MCUСol;
+          pred[i] = uint16_t(pred[i] + ((const PrefixCodeDecoder<>&)(ht[i]))
+                                           .decodeDifference(bitStream));
+          img((frameRow * MCUSize.y) + MCURow,
+              (frameCol * MCUSize.x) + MCUСol) = pred[i];
         }
       }
     }
