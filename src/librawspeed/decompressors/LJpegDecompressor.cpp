@@ -229,7 +229,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     }
 
     // ... and discard the rest.
-    for (; N_COMP * frameCol < N_COMP * frame.dim.x; ++frameCol) {
+    for (; frameCol < frame.dim.x; ++frameCol) {
       for (int i = 0; i != N_COMP; ++i)
         ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
     }
