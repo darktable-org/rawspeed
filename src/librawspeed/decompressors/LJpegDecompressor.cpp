@@ -182,10 +182,10 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
   invariant(imgFrame.dim.y % MCUSize.y == 0);
-  const auto numRows = imgFrame.dim.y / MCUSize.y;
+  const auto numFrameRows = imgFrame.dim.y / MCUSize.y;
 
   // For y, we can simply stop decoding when we reached the border.
-  for (int row = 0; row < numRows; ++row) {
+  for (int frameRow = 0; frameRow < numFrameRows; ++frameRow) {
     int col = 0;
 
     // FIXME: predictor may have value outside of the uint16_t.
@@ -198,10 +198,10 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
             pred[i] +
             ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
         if (interleaveRows) {
-          img((row * MCUSize.y) + (i / MCUSize.y),
+          img((frameRow * MCUSize.y) + (i / MCUSize.y),
               (col / MCUSize.x) + (i % MCUSize.x)) = pred[i];
         } else {
-          img(row, col + i) = pred[i];
+          img(frameRow, col + i) = pred[i];
         }
       }
     }
@@ -220,7 +220,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
         pred[c] = uint16_t(
             pred[c] +
             ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream));
-        img(row, col + c) = pred[c];
+        img(frameRow, col + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
@@ -241,7 +241,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
         pred[MCUSize.x * MCURow + MCUСol] =
-            img(row * MCUSize.y + MCURow, MCUСol);
+            img(frameRow * MCUSize.y + MCURow, MCUСol);
       }
     }
   }
