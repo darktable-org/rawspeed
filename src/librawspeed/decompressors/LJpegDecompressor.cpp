@@ -243,11 +243,11 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
     // The first sample of the next row is calculated based on the first sample
     // of this row, so copy it for the next iteration
-    if (interleaveRows) {
-      copy_n(&img(row * MCUSize.y, 0), MCUSize.x, pred.data());
-      copy_n(&img(row * MCUSize.y + 1, 0), MCUSize.x, pred.data() + MCUSize.x);
-    } else {
-      copy_n(&img(row, 0), N_COMP, pred.data());
+    for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
+      for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
+        pred[MCUSize.x * MCURow + MCUСol] =
+            img(row * MCUSize.y + MCURow, MCUСol);
+      }
     }
   }
 }
