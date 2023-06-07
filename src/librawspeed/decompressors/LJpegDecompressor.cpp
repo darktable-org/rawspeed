@@ -188,12 +188,6 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   for (int row = 0; row < numRows; ++row) {
     int col = 0;
 
-    /*
-    copy_n(predNext, N_COMP, pred.data());
-    // the predictor for the next line is the start of this line
-    predNext = &img(row, col);
-    */
-
     // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
 
