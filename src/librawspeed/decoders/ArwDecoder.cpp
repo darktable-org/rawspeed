@@ -334,7 +334,7 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
 #pragma omp parallel for schedule(static) default(none)                        \
     shared(offsets, counts) firstprivate(tilesX, tilew, tileh)
 #endif
-  for (uint32_t tile = 0U; tile < offsets->count; tile++) {
+  for (int tile = 0U; tile < static_cast<int>(offsets->count); tile++) {
     const uint32_t tileX = tile % tilesX;
     const uint32_t tileY = tile / tilesX;
     const uint32_t offset = offsets->getU32(tile);
