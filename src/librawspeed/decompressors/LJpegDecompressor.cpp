@@ -158,8 +158,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
 
   invariant(!interleaveRows || N_COMP == 4);
-  auto interleaveHeight = (interleaveRows ? 2 : 1);
-  auto interleaveWidth = N_COMP / interleaveHeight;
+  const iPoint2D MCUSize =
+      !interleaveRows ? iPoint2D(N_COMP, 1) : iPoint2D(N_COMP / 2, N_COMP / 2);
 
   const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
                               mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
@@ -181,7 +181,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  const auto numRows = imgFrame.dim.y / interleaveHeight;
+  const auto numRows = imgFrame.dim.y / MCUSize.y;
 
   // For y, we can simply stop decoding when we reached the border.
   for (int row = 0; row < numRows; ++row) {
@@ -203,8 +203,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
             pred[i] +
             ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
         if (interleaveRows) {
-          img((row * interleaveHeight) + (i / interleaveHeight),
-              (col / interleaveWidth) + (i % interleaveWidth)) = pred[i];
+          img((row * MCUSize.y) + (i / MCUSize.y),
+              (col / MCUSize.x) + (i % MCUSize.x)) = pred[i];
         } else {
           img(row, col + i) = pred[i];
         }
@@ -244,9 +244,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // The first sample of the next row is calculated based on the first sample
     // of this row, so copy it for the next iteration
     if (interleaveRows) {
-      copy_n(&img(row * interleaveHeight, 0), interleaveWidth, pred.data());
-      copy_n(&img(row * interleaveHeight + 1, 0), interleaveWidth,
-             pred.data() + interleaveWidth);
+      copy_n(&img(row * MCUSize.y, 0), MCUSize.x, pred.data());
+      copy_n(&img(row * MCUSize.y + 1, 0), MCUSize.x, pred.data() + MCUSize.x);
     } else {
       copy_n(&img(row, 0), N_COMP, pred.data());
     }
