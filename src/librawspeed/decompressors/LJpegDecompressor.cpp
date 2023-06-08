@@ -110,6 +110,7 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   const int tileRequiredWidth =
       (int)mRaw->getCpp() * imgFrame.dim.x * MCUSize.x;
   // How many of these rows do we need?
+  invariant(imgFrame.dim.y % MCUSize.y == 0);
   const auto numRows = imgFrame.dim.y / MCUSize.y;
 
   // How many full pixel blocks do we need to consume for that?
