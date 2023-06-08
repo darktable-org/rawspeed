@@ -40,9 +40,9 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(const RawImage& img,
                                      iRectangle2D imgFrame_, Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     ByteStream bs, bool interleaveRows_)
+                                     ByteStream bs)
     : mRaw(img), input(bs), imgFrame(imgFrame_), frame(std::move(frame_)),
-      rec(std::move(rec_)), interleaveRows{interleaveRows_} {
+      rec(std::move(rec_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -100,19 +100,16 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const auto interleaveFactor = interleaveRows ? 2 : 1;
-  const int tileRequiredWidth =
-      (int)mRaw->getCpp() * imgFrame.dim.x * interleaveFactor;
-  // How many of these rows do we need?
-  const auto numRows = imgFrame.dim.y / interleaveFactor;
+  const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
 
   // How many full pixel blocks do we need to consume for that?
   if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
-      frame.dim.x < blocksToConsume || frame.dim.y < numRows ||
+      frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
       (int64_t)frame.cps * frame.dim.x <
           (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth, numRows);
+             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
+             imgFrame.dim.y);
   }
 
   // How many full pixel blocks will we produce?
@@ -151,13 +148,9 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(N_COMP > 0);
   invariant(N_COMP >= mRaw->getCpp());
   invariant((N_COMP / mRaw->getCpp()) > 0);
-  invariant(((N_COMP & 1) == 0) | !interleaveRows);
 
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
-
-  auto interleaveHeight = (interleaveRows ? 2 : 1);
-  auto interleaveWidth = N_COMP / interleaveHeight;
 
   const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
                               mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
@@ -165,6 +158,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
 
   const auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
+  uint16_t* predNext = pred.data();
 
   BitPumpJPEG bitStream(input);
 
@@ -172,24 +166,20 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  // invariant(frame.dim.y >= imgFrame.dim.y); // FIXME
+  invariant(frame.dim.y >= imgFrame.dim.y);
   invariant((int64_t)frame.cps * frame.dim.x >=
             (int64_t)mRaw->getCpp() * imgFrame.dim.x);
 
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  const auto numRows = imgFrame.dim.y / interleaveHeight;
-
   // For y, we can simply stop decoding when we reached the border.
-  for (int row = 0; row < numRows; ++row) {
+  for (int row = 0; row < imgFrame.dim.y; ++row) {
     int col = 0;
 
-    /*
     copy_n(predNext, N_COMP, pred.data());
     // the predictor for the next line is the start of this line
     predNext = &img(row, col);
-    */
 
     // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
@@ -200,12 +190,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
         pred[i] = uint16_t(
             pred[i] +
             ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
-        if (interleaveRows) {
-          img((row * interleaveHeight) + (i / interleaveHeight),
-              (col / interleaveWidth) + (i % interleaveWidth)) = pred[i];
-        } else {
-          img(row, col + i) = pred[i];
-        }
+        img(row, col + i) = pred[i];
       }
     }
 
@@ -237,16 +222,6 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     for (; col < N_COMP * frame.dim.x; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i)
         ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
-    }
-
-    // The first sample of the next row is calculated based on the first sample
-    // of this row, so copy it for the next iteration
-    if (interleaveRows) {
-      copy_n(&img(row * interleaveHeight, 0), interleaveWidth, pred.data());
-      copy_n(&img(row * interleaveHeight + 1, 0), interleaveWidth,
-             pred.data() + interleaveWidth);
-    } else {
-      copy_n(&img(row, 0), N_COMP, pred.data());
     }
   }
 }
