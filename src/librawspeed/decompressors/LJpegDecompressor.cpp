@@ -33,8 +33,6 @@
 #include <memory>                         // for allocator_traits<>::value_...
 #include <utility>                        // for move
 
-using std::copy_n;
-
 namespace rawspeed {
 
 LJpegDecompressor::LJpegDecompressor(const RawImage& img,
