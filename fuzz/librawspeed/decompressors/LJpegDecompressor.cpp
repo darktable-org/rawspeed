@@ -45,11 +45,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const int N_COMP = bs.getI32();
     const int frame_w = bs.getI32();
     const int frame_h = bs.getI32();
-    const rawspeed::LJpegDecompressor::Frame frame{
-        N_COMP, rawspeed::iPoint2D(frame_w, frame_h)};
+    const int MCU_w = bs.getI32();
+    const int MCU_h = bs.getI32();
+
+    const rawspeed::iPoint2D frame = {frame_w, frame_h};
+    const rawspeed::iPoint2D MCU = {MCU_w, MCU_h};
 
     const unsigned num_recips = bs.getU32();
 
@@ -82,7 +84,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
                     });
 
     rawspeed::LJpegDecompressor d(
-        mRaw, rawspeed::iRectangle2D(mRaw->dim.x, mRaw->dim.y), frame, rec,
+        mRaw, rawspeed::iRectangle2D(mRaw->dim.x, mRaw->dim.y), frame, MCU, rec,
         bs.getSubStream(/*offset=*/0));
     mRaw->createData();
     d.decode();
