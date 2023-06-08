@@ -196,6 +196,7 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
   const auto numFrameRows = imgFrame.dim.y / MCUSize.y;
 
   // For y, we can simply stop decoding when we reached the border.
+  invariant(numFrameRows > 0);
   for (int frameRow = 0; frameRow < numFrameRows; ++frameRow) {
     int frameCol = 0;
 
@@ -203,6 +204,7 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
     // https://github.com/darktable-org/rawspeed/issues/175
 
     // For x, we first process all full pixel blocks within the image buffer ...
+    invariant(fullCols > 0);
     for (; frameCol < fullCols; ++frameCol) {
       for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
         for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
