@@ -30,6 +30,7 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for transform
 #include <array>                          // for array
+#include <cinttypes>                      // for PRId64
 #include <memory>                         // for allocator_traits<>::value_...
 #include <utility>                        // for move
 
@@ -79,7 +80,7 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
 
   auto cps = MCUSize.area();
   if (cps < 1 || cps > 4)
-    ThrowRDE("Unsupported number of components: %lu", cps);
+    ThrowRDE("Unsupported number of components: %" PRId64, cps);
 
   if (MCUSize != iPoint2D(cps, 1) && MCUSize != iPoint2D(2, 2))
     ThrowRDE("Unsupported LJpeg MCU: %i x %i", MCUSize.x, MCUSize.y);
