@@ -20,6 +20,7 @@
 */
 
 #include "decoders/ArwDecoder.h"
+#include "MemorySanitizer.h"                        // for MSan
 #include "adt/NORangesSet.h"                        // for NORangesSet
 #include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for roundDown
@@ -279,7 +280,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
   }
 }
 
-void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
+void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
@@ -297,13 +298,16 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
       width > 9728 || height > 6656)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  mRaw->dim = iPoint2D(width, height);
+  mRaw->dim = iPoint2D(2 * width, height / 2);
 
-  const uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
-  const uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
+  uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
+  uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
 
-  if (tilew <= 0 || tileh <= 0)
+  if (tilew <= 0 || tileh <= 0 || tileh % 2 != 0)
     ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
+
+  tileh /= 2;
+  tilew *= 2;
 
   assert(tilew > 0);
   const uint32_t tilesX = roundUpDivision(mRaw->dim.x, tilew);
@@ -342,15 +346,52 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) const {
 
     LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
                                                Endianness::little)),
-                         mRaw, true);
+                         mRaw);
     decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
   }
+
+  PostProcessLJpeg();
 
   const TiffEntry* size_entry = raw->hasEntry(TiffTag::SONYRAWIMAGESIZE)
                                     ? raw->getEntry(TiffTag::SONYRAWIMAGESIZE)
                                     : raw->getEntry(TiffTag::DEFAULTCROPSIZE);
   iRectangle2D crop(0, 0, size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
+}
+
+void ArwDecoder::PostProcessLJpeg() {
+  MSan::CheckMemIsInitialized(mRaw->getByteDataAsUncroppedArray2DRef());
+  RawImage nonInterleavedRaw = mRaw;
+
+  invariant(nonInterleavedRaw->dim.x % 4 == 0);
+  iPoint2D interleavedDims = {nonInterleavedRaw->dim.x / 2,
+                              2 * nonInterleavedRaw->dim.y};
+  mRaw = RawImage::create(interleavedDims, RawImageType::UINT16, 1);
+
+  const Array2DRef<const uint16_t> in =
+      nonInterleavedRaw->getU16DataAsUncroppedArray2DRef();
+  const Array2DRef<uint16_t> out = mRaw->getU16DataAsUncroppedArray2DRef();
+
+  constexpr iPoint2D inMCUSize = {4, 1};
+  constexpr iPoint2D outMCUSize = {2, 2};
+
+#ifdef HAVE_OPENMP
+#pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
+#endif
+  for (int inRow = 0; inRow < in.height; ++inRow) {
+    invariant(in.width % inMCUSize.x == 0);
+    for (int MCUIdx = 0, numMCUsPerRow = in.width / inMCUSize.x;
+         MCUIdx < numMCUsPerRow; ++MCUIdx) {
+      for (int outMCURow = 0; outMCURow != outMCUSize.y; ++outMCURow) {
+        for (int outMCUСol = 0; outMCUСol != outMCUSize.x; ++outMCUСol) {
+          out(outMCUSize.y * inRow + outMCURow,
+              outMCUSize.x * MCUIdx + outMCUСol) =
+              in(inRow,
+                 MCUIdx * inMCUSize.x + outMCUSize.x * outMCURow + outMCUСol);
+        }
+      }
+    }
+  }
 }
 
 void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
