@@ -107,12 +107,10 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  invariant(!interleaveRows || frame.cps == 4);
-  const auto interleaveFactor = interleaveRows ? 2 : 1;
   const int tileRequiredWidth =
-      (int)mRaw->getCpp() * imgFrame.dim.x * interleaveFactor;
+      (int)mRaw->getCpp() * imgFrame.dim.x * MCUSize.x;
   // How many of these rows do we need?
-  const auto numRows = imgFrame.dim.y / interleaveFactor;
+  const auto numRows = imgFrame.dim.y / MCUSize.y;
 
   // How many full pixel blocks do we need to consume for that?
   if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
