@@ -107,25 +107,25 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const int tileRequiredWidth =
-      (int)mRaw->getCpp() * imgFrame.dim.x * MCUSize.x;
+  const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
   // How many of these rows do we need?
   invariant(imgFrame.dim.y % MCUSize.y == 0);
   const auto numRows = imgFrame.dim.y / MCUSize.y;
 
   // How many full pixel blocks do we need to consume for that?
-  if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
+  if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, MCUSize.x);
       frame.dim.x < blocksToConsume || frame.dim.y < numRows ||
-      (int64_t)frame.cps * frame.dim.x <
+      (int64_t)MCUSize.x * frame.dim.x <
           (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth, numRows);
+             MCUSize.x * frame.dim.x, frame.dim.y, tileRequiredWidth, numRows);
   }
 
   // How many full pixel blocks will we produce?
-  fullCols = tileRequiredWidth / frame.cps; // Truncating division!
+  fullCols = tileRequiredWidth / MCUSize.x; // Truncating division!
+  invariant(fullCols > 0);
   // Do we need to also produce part of a block?
-  havePartialCol = tileRequiredWidth % frame.cps;
+  havePartialCol = tileRequiredWidth % MCUSize.x;
 }
 
 template <int N_COMP, size_t... I>
