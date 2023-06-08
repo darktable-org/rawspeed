@@ -125,7 +125,7 @@ template <typename PUMP> void registerPump(const char* pumpName) {
       name += ">>";
 
       const auto Fn = BM_BitStream<PUMP>;
-      auto* b = benchmark::RegisterBenchmark(name.c_str(), Fn, i, j);
+      auto* b = benchmark::RegisterBenchmark(name, Fn, i, j);
       b->Apply(CustomArguments);
     }
   }
