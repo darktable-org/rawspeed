@@ -185,8 +185,7 @@ static inline void BM_RawSpeed(benchmark::State& state, Entry* entry,
 static void addBench(Entry* entry, std::string tName, int threads) {
   tName += std::to_string(threads);
 
-  auto* b =
-      benchmark::RegisterBenchmark(tName.c_str(), &BM_RawSpeed, entry, threads);
+  auto* b = benchmark::RegisterBenchmark(tName, &BM_RawSpeed, entry, threads);
   b->Unit(benchmark::kMillisecond);
   b->UseRealTime();
   b->MeasureProcessCPUTime();
