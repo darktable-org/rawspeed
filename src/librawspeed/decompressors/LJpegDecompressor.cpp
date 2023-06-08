@@ -36,11 +36,11 @@
 namespace rawspeed {
 
 LJpegDecompressor::LJpegDecompressor(const RawImage& img,
-                                     iRectangle2D imgFrame_, Frame frame_,
+                                     iRectangle2D imgFrame_, iPoint2D frame_,
                                      iPoint2D MCUSize_,
                                      std::vector<PerComponentRecipe> rec_,
                                      ByteStream bs)
-    : mRaw(img), input(bs), imgFrame(imgFrame_), frame(std::move(frame_)),
+    : mRaw(img), input(bs), imgFrame(imgFrame_), frame(frame_),
       MCUSize(MCUSize_), rec(std::move(rec_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -77,16 +77,14 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if (imgFrame.pos.y + imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile overflows image vertically");
 
-  if (frame.cps < 1 || frame.cps > 4)
-    ThrowRDE("Unsupported number of components: %u", frame.cps);
+  auto cps = MCUSize.area();
+  if (cps < 1 || cps > 4)
+    ThrowRDE("Unsupported number of components: %lu", cps);
 
-  if (MCUSize.area() != static_cast<iPoint2D::area_type>(frame.cps))
-    ThrowRDE("LJpeg MCU size does not mactch number of components");
-
-  if (MCUSize != iPoint2D(frame.cps, 1) && MCUSize != iPoint2D(2, 2))
+  if (MCUSize != iPoint2D(cps, 1) && MCUSize != iPoint2D(2, 2))
     ThrowRDE("Unsupported LJpeg MCU: %i x %i", MCUSize.x, MCUSize.y);
 
-  if (rec.size() != (unsigned)frame.cps)
+  if (rec.size() != (unsigned)cps)
     ThrowRDE("Must have exactly one recepie per component");
 
   for (const auto& recip : rec) {
@@ -94,10 +92,10 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if ((unsigned)frame.cps < mRaw->getCpp())
+  if ((unsigned)cps < mRaw->getCpp())
     ThrowRDE("Unexpected number of components");
 
-  if ((int64_t)frame.cps * frame.dim.x > std::numeric_limits<int>::max())
+  if ((int64_t)cps * frame.x > std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
 
   if (!(imgFrame.dim >= MCUSize))
@@ -111,11 +109,10 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
 
   // How many full pixel blocks do we need to consume for that?
   if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, MCUSize.x);
-      frame.dim.x < blocksToConsume || frame.dim.y < numRows ||
-      (int64_t)MCUSize.x * frame.dim.x <
-          (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
+      frame.x < blocksToConsume || frame.y < numRows ||
+      (int64_t)MCUSize.x * frame.x < (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             MCUSize.x * frame.dim.x, frame.dim.y, tileRequiredWidth, numRows);
+             MCUSize.x * frame.x, frame.y, tileRequiredWidth, numRows);
   }
 
   // How many full pixel blocks will we produce?
@@ -184,8 +181,8 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  // invariant(frame.dim.y >= imgFrame.dim.y); // FIXME
-  invariant((int64_t)frame.cps * frame.dim.x >=
+  // invariant(frame.y >= imgFrame.dim.y); // FIXME
+  invariant((int64_t)N_COMP * frame.x >=
             (int64_t)mRaw->getCpp() * imgFrame.dim.x);
 
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
@@ -237,7 +234,7 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
     }
 
     // ... and discard the rest.
-    for (; frameCol < frame.dim.x; ++frameCol) {
+    for (; frameCol < frame.x; ++frameCol) {
       for (int c = 0; c != N_COMP; ++c)
         ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
     }
@@ -254,7 +251,6 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
 }
 
 void LJpegDecompressor::decode() {
-  invariant(MCUSize.area() == static_cast<iPoint2D::area_type>(frame.cps));
   switch (MCUSize.area()) {
   case 1:
     if (MCUSize == MCU<1, 1>) {

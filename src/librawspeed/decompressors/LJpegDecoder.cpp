@@ -116,10 +116,9 @@ void LJpegDecoder::decodeScan() {
                     return {*hts[i], initPred[i]};
                   });
 
-  LJpegDecompressor d(
-      mRaw, iRectangle2D({(int)offX, (int)offY}, {(int)w, (int)h}),
-      LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, MCUSize,
-      rec, input);
+  LJpegDecompressor d(mRaw,
+                      iRectangle2D({(int)offX, (int)offY}, {(int)w, (int)h}),
+                      {(int)frame.w, (int)frame.h}, MCUSize, rec, input);
   d.decode();
 }
 

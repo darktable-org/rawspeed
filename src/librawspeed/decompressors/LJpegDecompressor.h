@@ -38,10 +38,6 @@ namespace rawspeed {
 
 class LJpegDecompressor final {
 public:
-  struct Frame {
-    const int cps;
-    const iPoint2D dim;
-  };
   struct PerComponentRecipe {
     const PrefixCodeDecoder<>& ht;
     const uint16_t initPred;
@@ -53,7 +49,7 @@ private:
 
   const iRectangle2D imgFrame;
 
-  const Frame frame;
+  const iPoint2D frame;
   const iPoint2D MCUSize;
   const std::vector<PerComponentRecipe> rec;
 
@@ -76,7 +72,7 @@ private:
   template <const iPoint2D& MCUSize> void decodeN();
 
 public:
-  LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, Frame frame,
+  LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, iPoint2D frame,
                     iPoint2D MCUSize, std::vector<PerComponentRecipe> rec,
                     ByteStream bs);
 
