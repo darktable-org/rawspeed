@@ -255,7 +255,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   mRaw->dim = iPoint2D(width, height);
 
-  if (width == 0 || height == 0 || width > 9728 || height > 6656)
+  if (width == 0 || height == 0 || width > 9600 || height > 6376)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   if (c2 == 0)
