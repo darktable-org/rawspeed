@@ -102,9 +102,8 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if ((int64_t)frame.cps * frame.dim.x > std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
 
-  invariant(mRaw->dim.x > imgFrame.pos.x);
-  if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
-    ThrowRDE("Got less pixels than the components per sample");
+  if (!(imgFrame.dim >= MCUSize))
+    ThrowRDE("Image frame is smaller than a single LJpeg MCU.");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
   const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
