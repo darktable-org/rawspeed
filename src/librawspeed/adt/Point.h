@@ -55,14 +55,14 @@ public:
     return *this;
   }
 
-  constexpr bool operator==(const iPoint2D& rhs) const {
+  constexpr bool RAWSPEED_READONLY operator==(const iPoint2D& rhs) const {
     return x == rhs.x && y == rhs.y;
   }
   constexpr bool operator!=(const iPoint2D& rhs) const {
     return !operator==(rhs);
   }
 
-  constexpr bool operator>(const iPoint2D& rhs) const {
+  constexpr bool RAWSPEED_READONLY operator>(const iPoint2D& rhs) const {
     return x > rhs.x && y > rhs.y;
   }
   constexpr bool operator<(const iPoint2D& rhs) const {
@@ -76,7 +76,9 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  [[nodiscard]] bool hasPositiveArea() const { return operator>({0, 0}); }
+  [[nodiscard]] bool RAWSPEED_READONLY hasPositiveArea() const {
+    return operator>({0, 0});
+  }
 
   [[nodiscard]] area_type RAWSPEED_READONLY area() const {
     using signed_area = std::make_signed_t<area_type>;
