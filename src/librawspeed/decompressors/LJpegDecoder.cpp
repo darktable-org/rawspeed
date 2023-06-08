@@ -102,6 +102,10 @@ void LJpegDecoder::decodeScan() {
 
   int N_COMP = frame.cps;
 
+  const iPoint2D MCUSize = !interleaveRows
+                               ? iPoint2D(frame.cps, 1)
+                               : iPoint2D(frame.cps / 2, frame.cps / 2);
+
   std::vector<LJpegDecompressor::PerComponentRecipe> rec;
   rec.reserve(N_COMP);
   std::generate_n(std::back_inserter(rec), N_COMP,
@@ -114,8 +118,8 @@ void LJpegDecoder::decodeScan() {
 
   LJpegDecompressor d(
       mRaw, iRectangle2D({(int)offX, (int)offY}, {(int)w, (int)h}),
-      LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, rec, input,
-      interleaveRows);
+      LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, MCUSize,
+      rec, input);
   d.decode();
 }
 

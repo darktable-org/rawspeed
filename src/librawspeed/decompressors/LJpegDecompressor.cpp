@@ -37,13 +37,11 @@ namespace rawspeed {
 
 LJpegDecompressor::LJpegDecompressor(const RawImage& img,
                                      iRectangle2D imgFrame_, Frame frame_,
+                                     iPoint2D MCUSize_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     ByteStream bs, bool interleaveRows_)
+                                     ByteStream bs)
     : mRaw(img), input(bs), imgFrame(imgFrame_), frame(std::move(frame_)),
-      rec(std::move(rec_)),
-      MCUSize(!interleaveRows_ ? iPoint2D(frame.cps, 1)
-                               : iPoint2D(frame.cps / 2, frame.cps / 2)),
-      interleaveRows{interleaveRows_} {
+      MCUSize(MCUSize_), rec(std::move(rec_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -169,7 +167,6 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
   invariant(N_COMP > 0);
   invariant(N_COMP >= mRaw->getCpp());
   invariant((N_COMP / mRaw->getCpp()) > 0);
-  invariant(((N_COMP & 1) == 0) | !interleaveRows);
 
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
