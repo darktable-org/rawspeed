@@ -49,11 +49,12 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
   RawImage decodeSRF(const TiffIFD* raw);
   void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
+  void DecodeLJpeg(const TiffIFD* raw);
+  void PostProcessLJpeg();
   void DecodeUncompressed(const TiffIFD* raw) const;
   static void SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
                           uint32_t key);
   void GetWB() const;
-  ByteStream in;
   int mShiftDownScale = 0;
   int mShiftDownScaleForExif = 0;
 };
