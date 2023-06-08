@@ -155,12 +155,12 @@ constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
 
 } // namespace
 
-template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
-  invariant(MCUSize == this->MCUSize);
+template <const iPoint2D& MCU> void LJpegDecompressor::decodeN() {
+  invariant(MCU == this->MCUSize);
 
-  invariant(MCUSize.hasPositiveArea());
+  invariant(MCU.hasPositiveArea());
   // FIXME: workarounding lack of constexpr std::abs() :(
-  constexpr int N_COMP = MCUSize.x * MCUSize.y;
+  constexpr int N_COMP = MCU.x * MCU.y;
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
   invariant(N_COMP >= mRaw->getCpp());
@@ -189,8 +189,8 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  invariant(imgFrame.dim.y % MCUSize.y == 0);
-  const auto numFrameRows = imgFrame.dim.y / MCUSize.y;
+  invariant(imgFrame.dim.y % MCU.y == 0);
+  const auto numFrameRows = imgFrame.dim.y / MCU.y;
 
   // For y, we can simply stop decoding when we reached the border.
   invariant(numFrameRows > 0);
@@ -203,13 +203,13 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
     // For x, we first process all full pixel blocks within the image buffer ...
     invariant(fullCols > 0);
     for (; frameCol < fullCols; ++frameCol) {
-      for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
-        for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-          int c = MCUSize.x * MCURow + MCUСol;
+      for (int MCURow = 0; MCURow != MCU.y; ++MCURow) {
+        for (int MCUСol = 0; MCUСol != MCU.x; ++MCUСol) {
+          int c = MCU.x * MCURow + MCUСol;
           pred[c] = uint16_t(pred[c] + ((const PrefixCodeDecoder<>&)(ht[c]))
                                            .decodeDifference(bitStream));
-          int imgRow = (frameRow * MCUSize.y) + MCURow;
-          int imgCol = (frameCol * MCUSize.x) + MCUСol;
+          int imgRow = (frameRow * MCU.y) + MCURow;
+          int imgCol = (frameCol * MCU.x) + MCUСol;
           img(imgRow, imgCol) = pred[c];
         }
       }
@@ -220,13 +220,13 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
       invariant(N_COMP > 1 && "can't want part of 1-pixel-wide block");
       // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
       // We may end up needing just part of last N_COMP pixels.
-      for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
-        for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-          int c = MCUSize.x * MCURow + MCUСol;
+      for (int MCURow = 0; MCURow != MCU.y; ++MCURow) {
+        for (int MCUСol = 0; MCUСol != MCU.x; ++MCUСol) {
+          int c = MCU.x * MCURow + MCUСol;
           pred[c] = uint16_t(pred[c] + ((const PrefixCodeDecoder<>&)(ht[c]))
                                            .decodeDifference(bitStream));
-          int imgRow = (frameRow * MCUSize.y) + MCURow;
-          int imgCol = (frameCol * MCUSize.x) + MCUСol;
+          int imgRow = (frameRow * MCU.y) + MCURow;
+          int imgCol = (frameCol * MCU.x) + MCUСol;
           if (imgCol < img.croppedWidth)
             img(imgRow, imgCol) = pred[c];
         }
@@ -242,10 +242,9 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
 
     // The first sample of the next row is calculated based on the first sample
     // of this row, so copy it for the next iteration
-    for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
-      for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-        pred[MCUSize.x * MCURow + MCUСol] =
-            img(frameRow * MCUSize.y + MCURow, MCUСol);
+    for (int MCURow = 0; MCURow != MCU.y; ++MCURow) {
+      for (int MCUСol = 0; MCUСol != MCU.x; ++MCUСol) {
+        pred[MCU.x * MCURow + MCUСol] = img(frameRow * MCU.y + MCURow, MCUСol);
       }
     }
   }
