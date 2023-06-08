@@ -84,6 +84,12 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   if (frame.cps < 1 || frame.cps > 4)
     ThrowRDE("Unsupported number of components: %u", frame.cps);
 
+  if (MCUSize.area() != static_cast<iPoint2D::area_type>(frame.cps))
+    ThrowRDE("LJpeg MCU size does not mactch number of components");
+
+  if (MCUSize != iPoint2D(frame.cps, 1) && MCUSize != iPoint2D(2, 2))
+    ThrowRDE("Unsupported LJpeg MCU: %i x %i", MCUSize.x, MCUSize.y);
+
   if (rec.size() != (unsigned)frame.cps)
     ThrowRDE("Must have exactly one recepie per component");
 
