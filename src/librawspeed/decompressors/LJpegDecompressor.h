@@ -59,7 +59,7 @@ private:
   const iPoint2D MCUSize;
 
   int fullCols = 0;
-  int trailingPixels = 0;
+  bool havePartialCol = false;
   bool interleaveRows = false;
 
   template <int N_COMP, size_t... I>

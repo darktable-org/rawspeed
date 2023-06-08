@@ -126,7 +126,7 @@ LJpegDecompressor::LJpegDecompressor(const RawImage& img,
   // How many full pixel blocks will we produce?
   fullCols = tileRequiredWidth / frame.cps; // Truncating division!
   // Do we need to also produce part of a block?
-  trailingPixels = tileRequiredWidth % frame.cps;
+  havePartialCol = tileRequiredWidth % frame.cps;
 }
 
 template <int N_COMP, size_t... I>
@@ -223,12 +223,10 @@ template <const iPoint2D& MCUSize> void LJpegDecompressor::decodeN() {
     }
 
     // Sometimes we also need to consume one more block, and produce part of it.
-    if (trailingPixels) {
+    if (havePartialCol) {
       invariant(N_COMP > 1 && "can't want part of 1-pixel-wide block");
       // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
       // We may end up needing just part of last N_COMP pixels.
-      invariant(trailingPixels > 0);
-      invariant(trailingPixels < N_COMP);
       for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
         for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
           int c = MCUSize.x * MCURow + MCUСol;
