@@ -372,13 +372,13 @@ void ArwDecoder::PostProcessLJpeg() {
       nonInterleavedRaw->getU16DataAsUncroppedArray2DRef();
   const Array2DRef<uint16_t> out = mRaw->getU16DataAsUncroppedArray2DRef();
 
-  constexpr iPoint2D inMCUSize = {4, 1};
-  constexpr iPoint2D outMCUSize = {2, 2};
-
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
 #endif
   for (int inRow = 0; inRow < in.height; ++inRow) {
+    static constexpr iPoint2D inMCUSize = {4, 1};
+    static constexpr iPoint2D outMCUSize = {2, 2};
+
     invariant(in.width % inMCUSize.x == 0);
     for (int MCUIdx = 0, numMCUsPerRow = in.width / inMCUSize.x;
          MCUIdx < numMCUsPerRow; ++MCUIdx) {
