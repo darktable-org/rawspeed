@@ -284,6 +284,11 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+  uint32_t photometric =
+      raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU32();
+
+  if (photometric != 32803)
+    ThrowRDE("Unsupported photometric interpretation: %u", photometric);
 
   switch (bitPerPixel) {
   case 8:
@@ -352,9 +357,7 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
 
   PostProcessLJpeg();
 
-  const TiffEntry* size_entry = raw->hasEntry(TiffTag::SONYRAWIMAGESIZE)
-                                    ? raw->getEntry(TiffTag::SONYRAWIMAGESIZE)
-                                    : raw->getEntry(TiffTag::DEFAULTCROPSIZE);
+  const TiffEntry* size_entry = raw->getEntry(TiffTag::SONYRAWIMAGESIZE);
   iRectangle2D crop(0, 0, size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
 }
