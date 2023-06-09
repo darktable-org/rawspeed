@@ -284,6 +284,11 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+  uint32_t photometric =
+      raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU32();
+
+  if (photometric != 32803)
+    ThrowRDE("Unsupported photometric interpretation: %u", photometric);
 
   switch (bitPerPixel) {
   case 8:
