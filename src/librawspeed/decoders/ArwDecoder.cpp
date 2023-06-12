@@ -20,10 +20,13 @@
 */
 
 #include "decoders/ArwDecoder.h"
+#include "MemorySanitizer.h"                        // for MSan
 #include "adt/NORangesSet.h"                        // for NORangesSet
 #include "adt/Point.h"                              // for iPoint2D
 #include "common/Common.h"                          // for roundDown
-#include "decoders/RawDecoderException.h"           // for ThrowException
+#include "common/RawspeedException.h"               // for RawspeedException
+#include "decoders/RawDecoderException.h"           // for ThrowRDE
+#include "decompressors/LJpegDecoder.h"             // for LJpegDecoder
 #include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
 #include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -145,6 +148,13 @@ RawImage ArwDecoder::decodeRawInternal() {
     return mRaw;
   }
 
+  if (7 == compression) {
+    DecodeLJpeg(raw);
+    // cropping of lossless compressed L files already done in Ljpeg decoder
+    applyCrop = false;
+    return mRaw;
+  }
+
   if (32767 != compression)
     ThrowRDE("Unsupported compression %i", compression);
 
@@ -197,7 +207,7 @@ RawImage ArwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
 
   std::vector<uint16_t> curve(0x4001);
-  const TiffEntry* c = raw->getEntry(TiffTag::SONY_CURVE);
+  const TiffEntry* c = raw->getEntry(TiffTag::SONYCURVE);
   std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
 
   for (uint32_t i = 0; i < 4; i++)
@@ -267,6 +277,123 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
                                2 * width, 16, BitOrder::LSB);
     mRaw->createData();
     u.readUncompressedRaw();
+  }
+}
+
+void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+  uint32_t bitPerPixel = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
+  uint32_t photometric =
+      raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU32();
+
+  if (photometric != 32803)
+    ThrowRDE("Unsupported photometric interpretation: %u", photometric);
+
+  switch (bitPerPixel) {
+  case 8:
+  case 12:
+  case 14:
+    break;
+  default:
+    ThrowRDE("Unexpected bits per pixel: %u", bitPerPixel);
+  }
+
+  if (width == 0 || height == 0 || width % 2 != 0 || height % 2 != 0 ||
+      width > 9728 || height > 6656)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  mRaw->dim = iPoint2D(2 * width, height / 2);
+
+  uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
+  uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
+
+  if (tilew <= 0 || tileh <= 0 || tileh % 2 != 0)
+    ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
+
+  tileh /= 2;
+  tilew *= 2;
+
+  assert(tilew > 0);
+  const uint32_t tilesX = roundUpDivision(mRaw->dim.x, tilew);
+  if (!tilesX)
+    ThrowRDE("Zero tiles horizontally");
+
+  assert(tileh > 0);
+  const uint32_t tilesY = roundUpDivision(mRaw->dim.y, tileh);
+  if (!tilesY)
+    ThrowRDE("Zero tiles vertically");
+
+  const TiffEntry* offsets = raw->getEntry(TiffTag::TILEOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::TILEBYTECOUNTS);
+  if (offsets->count != counts->count) {
+    ThrowRDE("Tile count mismatch: offsets:%u count:%u", offsets->count,
+             counts->count);
+  }
+
+  // tilesX * tilesY may overflow, but division is fine, so let's do that.
+  if ((offsets->count / tilesX != tilesY || (offsets->count % tilesX != 0)) ||
+      (offsets->count / tilesY != tilesX || (offsets->count % tilesY != 0))) {
+    ThrowRDE("Tile X/Y count mismatch: total:%u X:%u, Y:%u", offsets->count,
+             tilesX, tilesY);
+  }
+
+  mRaw->createData();
+#ifdef HAVE_OPENMP
+#pragma omp parallel for schedule(static) default(none)                        \
+    shared(offsets, counts) firstprivate(tilesX, tilew, tileh)
+#endif
+  for (int tile = 0U; tile < static_cast<int>(offsets->count); tile++) {
+    const uint32_t tileX = tile % tilesX;
+    const uint32_t tileY = tile / tilesX;
+    const uint32_t offset = offsets->getU32(tile);
+    const uint32_t length = counts->getU32(tile);
+
+    LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
+                                               Endianness::little)),
+                         mRaw);
+    decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
+  }
+
+  PostProcessLJpeg();
+
+  const TiffEntry* size_entry = raw->getEntry(TiffTag::SONYRAWIMAGESIZE);
+  iRectangle2D crop(0, 0, size_entry->getU32(0), size_entry->getU32(1));
+  mRaw->subFrame(crop);
+}
+
+void ArwDecoder::PostProcessLJpeg() {
+  MSan::CheckMemIsInitialized(mRaw->getByteDataAsUncroppedArray2DRef());
+  RawImage nonInterleavedRaw = mRaw;
+
+  invariant(nonInterleavedRaw->dim.x % 4 == 0);
+  iPoint2D interleavedDims = {nonInterleavedRaw->dim.x / 2,
+                              2 * nonInterleavedRaw->dim.y};
+  mRaw = RawImage::create(interleavedDims, RawImageType::UINT16, 1);
+
+  const Array2DRef<const uint16_t> in =
+      nonInterleavedRaw->getU16DataAsUncroppedArray2DRef();
+  const Array2DRef<uint16_t> out = mRaw->getU16DataAsUncroppedArray2DRef();
+
+#ifdef HAVE_OPENMP
+#pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
+#endif
+  for (int inRow = 0; inRow < in.height; ++inRow) {
+    static constexpr iPoint2D inMCUSize = {4, 1};
+    static constexpr iPoint2D outMCUSize = {2, 2};
+
+    invariant(in.width % inMCUSize.x == 0);
+    for (int MCUIdx = 0, numMCUsPerRow = in.width / inMCUSize.x;
+         MCUIdx < numMCUsPerRow; ++MCUIdx) {
+      for (int outMCURow = 0; outMCURow != outMCUSize.y; ++outMCURow) {
+        for (int outMCUСol = 0; outMCUСol != outMCUSize.x; ++outMCUСol) {
+          out(outMCUSize.y * inRow + outMCURow,
+              outMCUSize.x * MCUIdx + outMCUСol) =
+              in(inRow,
+                 MCUIdx * inMCUSize.x + outMCUSize.x * outMCURow + outMCUСol);
+        }
+      }
+    }
   }
 }
 
@@ -427,11 +554,11 @@ void ArwDecoder::GetWB() const {
                              priv->getU32());
 
     const TiffEntry* sony_offset =
-        makerNoteIFD.getEntryRecursive(TiffTag::SONY_OFFSET);
+        makerNoteIFD.getEntryRecursive(TiffTag::SONYOFFSET);
     const TiffEntry* sony_length =
-        makerNoteIFD.getEntryRecursive(TiffTag::SONY_LENGTH);
+        makerNoteIFD.getEntryRecursive(TiffTag::SONYLENGTH);
     const TiffEntry* sony_key =
-        makerNoteIFD.getEntryRecursive(TiffTag::SONY_KEY);
+        makerNoteIFD.getEntryRecursive(TiffTag::SONYKEY);
     if (!sony_offset || !sony_length || !sony_key || sony_key->count != 4)
       ThrowRDE("couldn't find the correct metadata for WB decoding");
 
