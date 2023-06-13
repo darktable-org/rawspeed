@@ -14161,8 +14161,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SONY" model="ZV-1M2" supported="unknown-no-samples">
+	<Camera make="SONY" model="ZV-1M2">
 		<ID make="Sony" model="ZV-1M2">Sony ZV-1M2</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-8" height="0"/>
+		<Sensor black="800" white="16300"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8280 -2987 -703</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3531 11645 2133</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-550 1542 5312</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="SONY" model="ZV-E1">
 		<ID make="Sony" model="ZV-E1">Sony ZV-E1</ID>
