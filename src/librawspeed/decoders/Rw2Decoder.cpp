@@ -213,6 +213,12 @@ void Rw2Decoder::parseCFA() const {
   }
 }
 
+const TiffIFD* Rw2Decoder::getRaw() const {
+  return mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET)
+             ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
+             : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
+}
+
 void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   parseCFA();
 
@@ -230,10 +236,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     setMetaData(meta, id, "", iso);
   }
 
-  const TiffIFD* raw =
-      mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET)
-          ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
-          : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
+  const TiffIFD* raw = getRaw();
 
   // Read blacklevels
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
@@ -336,6 +339,32 @@ std::string Rw2Decoder::guessMode() const {
   }
   writeLog(DEBUG_PRIO::EXTRA, "Mode guess: '%s'", closest_match.c_str());
   return closest_match;
+}
+
+rawspeed::iRectangle2D Rw2Decoder::getDefaultCrop() {
+  const TiffIFD* raw = getRaw();
+  if (raw->hasEntry(TiffTag::PANASONIC_SENSORLEFTBORDER) &&
+      raw->hasEntry(TiffTag::PANASONIC_SENSORTOPBORDER) &&
+      raw->hasEntry(TiffTag::PANASONIC_SENSORRIGHTBORDER) &&
+      raw->hasEntry(TiffTag::PANASONIC_SENSORBOTTOMBORDER)) {
+    const uint16_t leftBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORLEFTBORDER)->getU16();
+    const uint16_t topBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORTOPBORDER)->getU16();
+    const uint16_t rightBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORRIGHTBORDER)->getU16();
+    const uint16_t bottomBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORBOTTOMBORDER)->getU16();
+    const uint16_t width = rightBorder - leftBorder;
+    const uint16_t height = bottomBorder - topBorder;
+    return {leftBorder, topBorder, width, height};
+  }
+  ThrowRDE("Cannot figure out vendor crop. Required entries were not found: "
+           "%X, %X, %X, %X",
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORLEFTBORDER),
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORTOPBORDER),
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORRIGHTBORDER),
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORBOTTOMBORDER));
 }
 
 } // namespace rawspeed

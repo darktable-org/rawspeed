@@ -235,16 +235,20 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   mRaw->metadata.mode = mode;
 
   if (applyCrop) {
-    iPoint2D new_size = cam->cropSize;
+    if (cam->cropAvailable) {
+      iPoint2D new_size = cam->cropSize;
 
-    // If crop size is negative, use relative cropping
-    if (new_size.x <= 0)
-      new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
+      // If crop size is negative, use relative cropping
+      if (new_size.x <= 0)
+        new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
 
-    if (new_size.y <= 0)
-      new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+      if (new_size.y <= 0)
+        new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
 
-    mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
+      mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
+    } else {
+      mRaw->subFrame(getDefaultCrop());
+    }
   }
 
   const CameraSensorInfo* sensor = cam->getSensorInfo(iso_speed);
@@ -281,6 +285,10 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       }
     }
   }
+}
+
+rawspeed::iRectangle2D RawDecoder::getDefaultCrop() {
+  return {mRaw->dim.x, mRaw->dim.y};
 }
 
 rawspeed::RawImage RawDecoder::decodeRaw() {

@@ -189,10 +189,18 @@ void Camera::parseCrop(const xml_node& cur) {
   if (name(cur) != "Crop")
     ThrowCME("Not an Crop node!");
 
-  cropSize.x = cur.attribute("width").as_int(0);
-  cropSize.y = cur.attribute("height").as_int(0);
-  cropPos.x = cur.attribute("x").as_int(0);
-  cropPos.y = cur.attribute("y").as_int(0);
+  const auto widthAttr = cur.attribute("width");
+  const auto heightAttr = cur.attribute("height");
+  const auto xAttr = cur.attribute("x");
+  const auto yAttr = cur.attribute("y");
+
+  cropSize.x = widthAttr.as_int(0);
+  cropSize.y = heightAttr.as_int(0);
+  cropPos.x = xAttr.as_int(0);
+  cropPos.y = yAttr.as_int(0);
+
+  cropAvailable = !(widthAttr.empty() && heightAttr.empty() && xAttr.empty() &&
+                    yAttr.empty());
 
   if (cropPos.x < 0)
     ThrowCME("Negative X axis crop specified in camera %s %s", make.c_str(),
