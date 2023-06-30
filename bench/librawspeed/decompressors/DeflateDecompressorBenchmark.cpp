@@ -41,12 +41,14 @@
 using rawspeed::Buffer;
 using rawspeed::DeflateDecompressor;
 
+namespace {
+
 template <size_t N> using BPS = std::integral_constant<size_t, N>;
 template <int N> using Pf = std::integral_constant<int, N>;
 
 template <typename BPS>
-static std::vector<uint8_t> compressChunk(const rawspeed::RawImage& mRaw,
-                                          uLong* bufSize) {
+std::vector<uint8_t> compressChunk(const rawspeed::RawImage& mRaw,
+                                   uLong* bufSize) {
   static_assert(BPS::value > 0, "bad bps");
   static_assert(rawspeed::isAligned(BPS::value, 8), "not byte count");
 
@@ -72,7 +74,7 @@ static std::vector<uint8_t> compressChunk(const rawspeed::RawImage& mRaw,
 }
 
 template <typename BPS, typename Pf>
-static inline void BM_DeflateDecompressor(benchmark::State& state) {
+inline void BM_DeflateDecompressor(benchmark::State& state) {
   static_assert(BPS::value > 0, "bad bps");
   static_assert(rawspeed::isAligned(BPS::value, 8), "not byte count");
 
@@ -115,7 +117,7 @@ static inline void BM_DeflateDecompressor(benchmark::State& state) {
   state.SetBytesProcessed(BPS::value * state.items_processed() / 8);
 }
 
-static inline void CustomArgs(benchmark::internal::Benchmark* b) {
+inline void CustomArgs(benchmark::internal::Benchmark* b) {
   if (benchmarkDryRun()) {
     static constexpr int L2dByteSize = 512U * (1U << 10U);
     b->Arg((L2dByteSize / (32 / 8)) / 4);
@@ -138,5 +140,7 @@ static inline void CustomArgs(benchmark::internal::Benchmark* b) {
 #define GEN_PSS() GEN_PFS(16) GEN_PFS(24) GEN_PFS(32)
 
 GEN_PSS()
+
+} // namespace
 
 BENCHMARK_MAIN();

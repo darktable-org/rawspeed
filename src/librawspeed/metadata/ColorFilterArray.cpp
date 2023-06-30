@@ -163,7 +163,9 @@ uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
   return filter;
 }
 
-static std::optional<std::string_view> getColorAsString(CFAColor c) {
+namespace {
+
+std::optional<std::string_view> getColorAsString(CFAColor c) {
   switch (c) {
   case CFAColor::RED:
     return "RED";
@@ -188,6 +190,8 @@ static std::optional<std::string_view> getColorAsString(CFAColor c) {
   }
 }
 
+} // namespace
+
 std::string ColorFilterArray::colorToString(CFAColor c) {
   auto s = getColorAsString(c);
   if (!s)
@@ -203,7 +207,8 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
   cfa[pos.x + static_cast<size_t>(pos.y) * size.x] = c;
 }
 
-static uint32_t toDcrawColor(CFAColor c) {
+namespace {
+uint32_t toDcrawColor(CFAColor c) {
   switch (c) {
   case CFAColor::FUJI_GREEN:
   case CFAColor::RED:
@@ -223,6 +228,8 @@ static uint32_t toDcrawColor(CFAColor c) {
   }
   __builtin_unreachable();
 }
+
+} // namespace
 
 uint32_t ColorFilterArray::getDcrawFilter() const {
   // dcraw magic

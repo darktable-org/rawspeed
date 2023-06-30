@@ -39,10 +39,12 @@ using rawspeed::BitOrder;
 using rawspeed::Buffer;
 using rawspeed::UncompressedDecompressor;
 
+namespace {
+
 template <size_t N> using BPS = std::integral_constant<size_t, N>;
 
 template <typename T, BitOrder BO, typename BPS>
-static inline void BM_UncompressedDecompressor(benchmark::State& state) {
+inline void BM_UncompressedDecompressor(benchmark::State& state) {
   static_assert(BPS::value > 0, "bad bps");
 
   auto dim = areaToRectangle(state.range(0));
@@ -77,7 +79,7 @@ static inline void BM_UncompressedDecompressor(benchmark::State& state) {
   state.SetBytesProcessed(BPS::value * state.items_processed() / 8);
 }
 
-static inline void CustomArgs(benchmark::internal::Benchmark* b) {
+inline void CustomArgs(benchmark::internal::Benchmark* b) {
   b->Unit(benchmark::kMicrosecond);
 
   if (benchmarkDryRun()) {
@@ -127,5 +129,7 @@ GEN_BO(BitOrder::LSB)
 GEN_BO(BitOrder::MSB)
 GEN_U(BitOrder::MSB16)
 GEN_U(BitOrder::MSB32)
+
+} // namespace
 
 BENCHMARK_MAIN();

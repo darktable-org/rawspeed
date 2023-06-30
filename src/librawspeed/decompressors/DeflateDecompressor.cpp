@@ -58,10 +58,12 @@ DeflateDecompressor::DeflateDecompressor(Buffer bs, const RawImage& img,
   predFactor *= mRaw->getCpp();
 }
 
+namespace {
+
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
 // <jcelaya@gmail.com>
-static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
-                                    unsigned int bytesps, int factor) {
+inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
+                             unsigned int bytesps, int factor) {
   for (size_t col = factor; col < realTileWidth * bytesps; ++col) {
     // Yes, this is correct, and is symmetrical with EncodeDeltaBytes in
     // hdrmerge, and they both combined are lossless.
@@ -69,6 +71,8 @@ static inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
     src[col] = static_cast<unsigned char>(src[col] + src[col - factor]);
   }
 }
+
+} // namespace
 
 template <typename T> struct StorageType {};
 template <> struct StorageType<ieee_754_2008::Binary16> {
@@ -84,10 +88,11 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
   static constexpr int padding_bytes = 0;
 };
 
+namespace {
+
 template <typename T>
-static inline void decodeFPDeltaRow(const unsigned char* src,
-                                    size_t realTileWidth,
-                                    CroppedArray1DRef<float> out) {
+inline void decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
+                             CroppedArray1DRef<float> out) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
@@ -114,6 +119,8 @@ static inline void decodeFPDeltaRow(const unsigned char* src,
     out(col) = bit_cast<float>(tmp_expanded);
   }
 }
+
+} // namespace
 
 void DeflateDecompressor::decode(
     std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT

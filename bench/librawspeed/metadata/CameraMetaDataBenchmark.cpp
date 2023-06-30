@@ -27,10 +27,12 @@
 #error This benchmark requires to be built with pugixml being present.
 #endif
 
-static constexpr const char* const CAMERASXML =
+namespace {
+
+constexpr const char* const CAMERASXML =
     RAWSPEED_SOURCE_DIR "/data/cameras.xml";
 
-static void BM_pugixml_load_cameras_xml(benchmark::State& state) {
+void BM_pugixml_load_cameras_xml(benchmark::State& state) {
   for (auto _ : state) {
     pugi::xml_document doc;
 
@@ -47,12 +49,14 @@ static void BM_pugixml_load_cameras_xml(benchmark::State& state) {
 }
 BENCHMARK(BM_pugixml_load_cameras_xml)->Unit(benchmark::kMicrosecond);
 
-static void BM_CameraMetaData(benchmark::State& state) {
+void BM_CameraMetaData(benchmark::State& state) {
   for (auto _ : state) {
     rawspeed::CameraMetaData metadata(CAMERASXML);
     benchmark::DoNotOptimize(metadata);
   }
 }
 BENCHMARK(BM_CameraMetaData)->Unit(benchmark::kMicrosecond);
+
+} // namespace
 
 BENCHMARK_MAIN();

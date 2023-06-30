@@ -70,8 +70,10 @@ CameraMetaData::CameraMetaData(const char* docname) {
 }
 #endif
 
-static inline CameraId getId(const std::string& make, const std::string& model,
-                             const std::string& mode) {
+namespace {
+
+inline CameraId getId(const std::string& make, const std::string& model,
+                      const std::string& mode) {
   CameraId id;
   id.make = trimSpaces(make);
   id.model = trimSpaces(model);
@@ -79,6 +81,8 @@ static inline CameraId getId(const std::string& make, const std::string& model,
 
   return id;
 }
+
+} // namespace
 
 const Camera* CameraMetaData::getCamera(const std::string& make,
                                         const std::string& model,

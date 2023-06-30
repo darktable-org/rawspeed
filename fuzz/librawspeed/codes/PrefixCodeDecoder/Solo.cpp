@@ -48,8 +48,10 @@ struct BaselineCodeTag;
 struct VC5CodeTag;
 } // namespace rawspeed
 
+namespace {
+
 template <typename Pump, bool IsFullDecode, typename HT>
-static void workloop(rawspeed::ByteStream bs, const HT& ht) {
+void workloop(rawspeed::ByteStream bs, const HT& ht) {
   Pump bits(bs);
   while (true)
     ht.template decode<Pump, IsFullDecode>(bits);
@@ -57,14 +59,14 @@ static void workloop(rawspeed::ByteStream bs, const HT& ht) {
 }
 
 template <typename Pump, typename HT>
-static void checkPump(rawspeed::ByteStream bs, const HT& ht) {
+void checkPump(rawspeed::ByteStream bs, const HT& ht) {
   if (ht.isFullDecode())
     workloop<Pump, /*IsFullDecode=*/true>(bs, ht);
   else
     workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
 }
 
-template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
+template <typename CodeTag> void checkFlavour(rawspeed::ByteStream bs) {
 #ifndef BACKIMPL
   const auto ht = createPrefixCodeDecoder<rawspeed::IMPL<CodeTag>>(bs);
 #else
@@ -87,6 +89,8 @@ template <typename CodeTag> static void checkFlavour(rawspeed::ByteStream bs) {
     ThrowRSE("Unknown bit pump");
   }
 }
+
+} // namespace
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

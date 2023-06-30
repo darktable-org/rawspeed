@@ -27,13 +27,15 @@
 
 using Type = std::byte;
 
-template <typename Allocator> static void construct(benchmark::State& state) {
+namespace {
+
+template <typename Allocator> void construct(benchmark::State& state) {
   std::vector<Type, Allocator> vec(state.range(0));
   benchmark::DoNotOptimize(vec);
 }
 
 template <typename Allocator>
-static void construct_with_zeroinit(benchmark::State& state) {
+void construct_with_zeroinit(benchmark::State& state) {
   std::vector<Type, Allocator> vec(state.range(0), Type(0));
   benchmark::DoNotOptimize(vec);
 }
@@ -54,7 +56,7 @@ void BM_std_vector(benchmark::State& state, Worker&& worker) {
   state.SetItemsProcessed(state.range(0) * state.iterations());
 }
 
-static void CustomArguments(benchmark::internal::Benchmark* b) {
+void CustomArguments(benchmark::internal::Benchmark* b) {
   if (benchmarkDryRun()) {
     b->Arg(512U * (1U << 10U)); // 512 KiB
     return;
@@ -84,5 +86,7 @@ BENCHMARK_CAPTURE_NAME(
     construct_with_zeroinit<
         rawspeed::DefaultInitAllocatorAdaptor<Type, std::allocator<Type>>>)
     ->Apply(CustomArguments);
+
+} // namespace
 
 BENCHMARK_MAIN();
