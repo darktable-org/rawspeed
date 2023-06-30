@@ -136,11 +136,11 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
   // we can not go all the way to the top first because this partial tree
   // is not yet added to the TiffRootIFD.
   const TiffIFD* p = this;
-  const TiffEntry* makeEntry;
-  do {
+  const TiffEntry* makeEntry = nullptr;
+  while (p && !makeEntry) {
     makeEntry = p->getEntryRecursive(TiffTag::MAKE);
     p = p->parent;
-  } while (!makeEntry && p);
+  }
   std::string make =
       makeEntry != nullptr ? trimSpaces(makeEntry->getString()) : "";
 
