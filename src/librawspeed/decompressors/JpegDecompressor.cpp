@@ -92,12 +92,17 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 
 #endif
 
+namespace {
+
+// NOLINTNEXTLINE(readability-static-definition-in-anonymous-namespace)
 [[noreturn]] METHODDEF(void) my_error_throw(j_common_ptr cinfo) {
   std::array<char, JMSG_LENGTH_MAX> buf;
   buf.fill(0);
   (*cinfo->err->format_message)(cinfo, buf.data());
   ThrowRDE("JPEG decoder error: %s", buf.data());
 }
+
+} // namespace
 
 struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
   struct jpeg_error_mgr jerr;

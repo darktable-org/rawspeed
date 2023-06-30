@@ -149,7 +149,9 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 #pragma GCC diagnostic ignored "-Wframe-larger-than="
 #pragma GCC diagnostic ignored "-Wstack-usage="
 
-static void __attribute__((format(printf, 2, 3)))
+namespace {
+
+void __attribute__((format(printf, 2, 3)))
 APPEND(ostringstream* oss, const char* format, ...) {
   std::array<char, 1024> line;
 
@@ -160,6 +162,8 @@ APPEND(ostringstream* oss, const char* format, ...) {
 
   *oss << line.data();
 }
+
+} // namespace
 
 std::string img_hash(const RawImage& r, bool noSamples) {
   ostringstream oss;
@@ -426,9 +430,10 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
 #pragma GCC diagnostic pop
 
-static int
-results(const map<std::string, std::string, std::less<>>& failedTests,
-        const options& o) {
+namespace {
+
+int results(const map<std::string, std::string, std::less<>>& failedTests,
+            const options& o) {
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
@@ -472,7 +477,7 @@ results(const map<std::string, std::string, std::less<>>& failedTests,
   return 1;
 }
 
-static int usage(const char* progname) {
+int usage(const char* progname) {
   cout << "usage: " << progname << R"(
   [-h] print this help
   [-c] for each file: decode, compute hash and store it.
@@ -497,6 +502,8 @@ static int usage(const char* progname) {
 )";
   return 0;
 }
+
+} // namespace
 
 } // namespace rawspeed::rstest
 

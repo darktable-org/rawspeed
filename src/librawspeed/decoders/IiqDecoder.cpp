@@ -141,6 +141,7 @@ std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
     return std::nullopt;
   }
 }
+
 } // namespace
 
 enum class IiqDecoder::IiqCorr { LUMA, CHROMA };

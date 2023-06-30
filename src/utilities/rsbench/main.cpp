@@ -94,8 +94,6 @@ template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
   }
 };
 
-} // namespace
-
 // Lazy cache for the referenced file's content - not actually read until
 // requested the first time.
 struct Entry {
@@ -116,14 +114,17 @@ struct Entry {
   }
 };
 
-static int currThreadCount;
+namespace {
+
+int currThreadCount;
+
+} // namespace
 
 extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
   return currThreadCount;
 }
 
-static inline void BM_RawSpeed(benchmark::State& state, Entry* entry,
-                               int threads) {
+inline void BM_RawSpeed(benchmark::State& state, Entry* entry, int threads) {
   currThreadCount = threads;
 
 #ifdef HAVE_PUGIXML
@@ -182,7 +183,7 @@ static inline void BM_RawSpeed(benchmark::State& state, Entry* entry,
   // but i'm not sure they are interesting.
 }
 
-static void addBench(Entry* entry, std::string tName, int threads) {
+void addBench(Entry* entry, std::string tName, int threads) {
   tName += std::to_string(threads);
 
   auto* b = benchmark::RegisterBenchmark(tName, &BM_RawSpeed, entry, threads);
@@ -190,6 +191,8 @@ static void addBench(Entry* entry, std::string tName, int threads) {
   b->UseRealTime();
   b->MeasureProcessCPUTime();
 }
+
+} // namespace
 
 int main(int argc, char** argv) {
   benchmark::Initialize(&argc, argv);

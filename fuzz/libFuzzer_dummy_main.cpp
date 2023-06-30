@@ -38,7 +38,9 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
-static int usage() {
+namespace {
+
+int usage() {
   std::cout << "This is just a placeholder.\nFor fuzzers to actually function, "
                "you need to build rawspeed with clang compiler, with FUZZ "
                "build type.\n";
@@ -46,7 +48,7 @@ static int usage() {
   return EXIT_SUCCESS;
 }
 
-static void process(const char* filename) noexcept {
+void process(const char* filename) noexcept {
   rawspeed::FileReader reader(filename);
   std::unique_ptr<std::vector<
       uint8_t, rawspeed::DefaultInitAllocatorAdaptor<
@@ -64,6 +66,8 @@ static void process(const char* filename) noexcept {
 
   LLVMFuzzerTestOneInput(buf.getData(0, buf.getSize()), buf.getSize());
 }
+
+} // namespace
 
 int main(int argc, char** argv) {
   if (1 == argc || (2 == argc && std::string("-help=1") == argv[1]))

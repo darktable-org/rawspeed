@@ -20,8 +20,8 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { distro: "debian:bookworm-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
-          - { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
+          - { distro: "debian:trixie-slim", family: GNU,  version: 13, CC: gcc-13,   CXX: g++-13 }
+          - { distro: "debian:trixie-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
         flavor: [ RelWithDebInfo, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -40,6 +40,8 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
+          - { distro: "debian:bookworm-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
+          - { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
           - { distro: "debian:bookworm-slim", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
           - { distro: "debian:bookworm-slim", family: LLVM, version: 13, CC: clang-13, CXX: clang++-13 }
           - { distro: "ubuntu:jammy",         family: LLVM, version: 12, CC: clang-12, CXX: clang++-12 }
@@ -61,13 +63,13 @@ jobs:
       matrix:
         include:
           - os: linux
-            compiler: { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15, CLANG_TIDY: clang-tidy-15 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16, CLANG_TIDY: clang-tidy-16 }
             flavor: ClangTidy
           - os: linux
-            compiler: { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
             flavor: ClangStaticAnalysis
           - os: linux
-            compiler: { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
             flavor: CodeQLAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -87,7 +89,7 @@ jobs:
       matrix:
         include:
           - os: linux
-            compiler: { distro: "debian:bookworm-slim", family: GNU, version: 12, CC: gcc-12, CXX: g++-12, GCOV: gcov-12 }
+            compiler: { distro: "debian:trixie-slim", family: GNU, version: 13, CC: gcc-13, CXX: g++-13, GCOV: gcov-13 }
             flavor: Coverage
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -109,7 +111,7 @@ jobs:
       matrix:
         include:
           - os: linux
-            compiler: { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
             flavor: SonarCloudStaticAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:

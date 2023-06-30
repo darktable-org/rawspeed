@@ -42,7 +42,9 @@ class CameraMetaData;
 NakedDecoder::NakedDecoder(Buffer file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
-static std::optional<BitOrder> getAsBitOrder(std::string_view s) {
+namespace {
+
+std::optional<BitOrder> getAsBitOrder(std::string_view s) {
   if (s == "plain")
     return BitOrder::LSB;
   if (s == "jpeg")
@@ -53,6 +55,8 @@ static std::optional<BitOrder> getAsBitOrder(std::string_view s) {
     return BitOrder::MSB32;
   return std::nullopt;
 }
+
+} // namespace
 
 void NakedDecoder::parseHints() {
   const auto& cHints = cam->hints;

@@ -38,10 +38,12 @@ using rawspeed::roundUp;
 using std::array;
 using std::integral_constant;
 
+namespace {
+
 template <int N> using v = integral_constant<int, N>;
 
 template <const iPoint2D& subSampling, typename version>
-static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
+inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
   static const array<int, 3> sraw_coeffs = {{999, 1000, 1001}};
   static const int hue = 1269;
 
@@ -80,7 +82,7 @@ static inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
                            benchmark::Counter::kIs1024)}});
 }
 
-static inline void CustomArguments(benchmark::internal::Benchmark* b) {
+inline void CustomArguments(benchmark::internal::Benchmark* b) {
   b->MeasureProcessCPUTime();
   b->UseRealTime();
 
@@ -99,13 +101,15 @@ static inline void CustomArguments(benchmark::internal::Benchmark* b) {
   b->Unit(benchmark::kMillisecond);
 }
 
-static constexpr const iPoint2D S422(2, 1);
+constexpr const iPoint2D S422(2, 1);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S422, v<0>)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S422, v<1>)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S422, v<2>)->Apply(CustomArguments);
 
-static constexpr const iPoint2D S420(2, 2);
+constexpr const iPoint2D S420(2, 2);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S420, v<1>)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM_Cr2sRawInterpolator, S420, v<2>)->Apply(CustomArguments);
+
+} // namespace
 
 BENCHMARK_MAIN();

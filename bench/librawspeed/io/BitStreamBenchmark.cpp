@@ -43,11 +43,13 @@ using rawspeed::BitPumpMSB16;
 using rawspeed::BitPumpMSB32;
 using rawspeed::Endianness;
 
-static constexpr const size_t STEP_MAX = 32;
+namespace {
+
+constexpr const size_t STEP_MAX = 32;
 
 template <typename Pump>
-static inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
-                                unsigned int Step) {
+inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
+                         unsigned int Step) {
   assert(state.range(0) > 0);
   assert((size_t)state.range(0) <=
          std::numeric_limits<rawspeed::Buffer::size_type>::max());
@@ -96,7 +98,7 @@ static inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   state.SetBytesProcessed(state.items_processed() / 8);
 }
 
-static inline void CustomArguments(benchmark::internal::Benchmark* b) {
+inline void CustomArguments(benchmark::internal::Benchmark* b) {
   if (benchmarkDryRun()) {
     b->Arg((512U * (1U << 10U)) / 10);
     return;
@@ -130,6 +132,8 @@ template <typename PUMP> void registerPump(const char* pumpName) {
     }
   }
 }
+
+} // namespace
 
 #define REGISTER_PUMP(PUMP) registerPump<PUMP>(#PUMP)
 

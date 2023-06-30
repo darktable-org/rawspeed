@@ -36,10 +36,10 @@
 
 namespace rawspeed::md5 {
 
-// hashes 64 bytes at once
-static void md5_compress(md5_state* state, const uint8_t* block);
+namespace {
 
-static void md5_compress(md5_state* state, const uint8_t* block) {
+// hashes 64 bytes at once
+void md5_compress(md5_state* state, const uint8_t* block) {
   std::array<uint32_t, 16> schedule = {{}};
 
   auto LOADSCHEDULE = [&block, &schedule](int i) {
@@ -155,6 +155,8 @@ static void md5_compress(md5_state* state, const uint8_t* block) {
   (*state)[2] = uint32_t(0UL + (*state)[2] + c);
   (*state)[3] = uint32_t(0UL + (*state)[3] + d);
 }
+
+} // namespace
 
 /* Full message hasher */
 
