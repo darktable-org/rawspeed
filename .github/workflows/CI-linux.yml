@@ -46,11 +46,19 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_SCANNER_VERSION: 4.6.2.2472
-    name: ${{ inputs.name }}
+    name: qqq
     container:
       image: ${{ inputs.distro }}
       options: --tmpfs /tmp:exec --tmpfs /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}:exec
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(job) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Configure APT
         run: |
           set -xe

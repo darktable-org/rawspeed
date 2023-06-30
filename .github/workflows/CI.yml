@@ -26,7 +26,7 @@ jobs:
     name: linux-fast.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       distro: ${{ matrix.compiler.distro }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -51,7 +51,7 @@ jobs:
     name: linux-legacy.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       distro: ${{ matrix.compiler.distro }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -78,7 +78,7 @@ jobs:
     name: linux-static-analysis.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       distro: ${{ matrix.compiler.distro }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -100,7 +100,7 @@ jobs:
     name: linux-coverage.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       distro: ${{ matrix.compiler.distro }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -124,7 +124,7 @@ jobs:
     name: linux-sonarcloud-static-analysis.${{ matrix.compiler.distro }}.${{ matrix.compiler.family }}${{ matrix.compiler.version }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-linux.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       distro: ${{ matrix.compiler.distro }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -147,7 +147,7 @@ jobs:
     name: linux-ossfuzz.${{ matrix.sanitizer }}
     uses: ./.github/workflows/CI-ossfuzz.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       sanitizer: ${{ matrix.sanitizer }}
   windows-msys2-fast:
     strategy:
@@ -164,7 +164,7 @@ jobs:
     name: windows-msys2-fast.${{ matrix.msys2.msystem }}.${{ matrix.msys2.family }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       msys2-msystem: ${{ matrix.msys2.msystem }}
       msys2-arch: ${{ matrix.msys2.arch }}
@@ -183,7 +183,7 @@ jobs:
     name: windows-msys2-coverage.${{ matrix.msys2.msystem }}.${{ matrix.msys2.family }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.os }}
       msys2-msystem: ${{ matrix.msys2.msystem }}
       msys2-arch: ${{ matrix.msys2.arch }}
@@ -205,7 +205,7 @@ jobs:
     name: macOS-fast.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-macOS.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.compiler.os }}
       os-deployment_target: ${{ matrix.compiler.deployment_target }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -225,7 +225,7 @@ jobs:
     name: macOS-legacy.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-macOS.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.compiler.os }}
       os-deployment_target: ${{ matrix.compiler.deployment_target }}
       compiler-family: ${{ matrix.compiler.family }}
@@ -243,7 +243,7 @@ jobs:
     name: macOS-coverage.${{ matrix.compiler.family }}.${{ matrix.compiler.version }}.targeting.OSX.${{ matrix.compiler.deployment_target }}.${{ matrix.flavor }}
     uses: ./.github/workflows/CI-macOS.yml
     with:
-      name: ${{ github.name }}
+      name: ${{ github.job }}
       os: ${{ matrix.compiler.os }}
       os-deployment_target: ${{ matrix.compiler.deployment_target }}
       compiler-family: ${{ matrix.compiler.family }}
