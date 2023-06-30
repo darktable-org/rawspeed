@@ -387,7 +387,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) schedule(static)                        \
     num_threads(rawspeed_get_number_of_processor_cores()) firstprivate(out)    \
-        lastprivate(row)
+    lastprivate(row)
 #endif
   for (row = 0; row < input.height - 1; ++row)
     interpolate_420_row<version>(row);

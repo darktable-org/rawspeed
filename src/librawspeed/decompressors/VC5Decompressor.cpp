@@ -194,8 +194,9 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
 // See https://bugs.llvm.org/show_bug.cgi?id=51666
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #ifdef HAVE_OPENMP
-#pragma omp taskloop default(none) firstprivate(dst, process) num_tasks(       \
-    roundUpDivision(rawspeed_get_number_of_processor_cores(), numChannels))
+#pragma omp taskloop default(none) firstprivate(dst, process)                  \
+    num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(),        \
+                                  numChannels))
 #endif
   for (int row = 0; row < dst.height / 2; ++row) {
 #pragma GCC diagnostic pop
@@ -253,10 +254,10 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
   // See https://bugs.llvm.org/show_bug.cgi?id=51666
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #ifdef HAVE_OPENMP
-#pragma omp taskloop if (finalWavelet) default(none) firstprivate(dst,         \
-                                                                  process)     \
+#pragma omp taskloop if (finalWavelet) default(none)                           \
+    firstprivate(dst, process)                                                 \
     num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(), 2))    \
-        mergeable
+    mergeable
 #endif
   for (int row = 0; row < dst.height; ++row) {
 #pragma GCC diagnostic pop
@@ -283,9 +284,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 #ifdef HAVE_OPENMP
 #pragma omp task default(none)                                                 \
     shared(exceptionThrown, highlow, lowlow, lowpass)                          \
-        depend(in                                                              \
-               : highlow, lowlow) depend(out                                   \
-                                         : lowpass)
+    depend(in : highlow, lowlow) depend(out : lowpass)
 #endif
   {
     // Proceed only if decoding did not fail.
@@ -309,9 +308,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 #ifdef HAVE_OPENMP
 #pragma omp task default(none)                                                 \
     shared(exceptionThrown, highhigh, lowhigh, highpass)                       \
-        depend(in                                                              \
-               : highhigh, lowhigh) depend(out                                 \
-                                           : highpass)
+    depend(in : highhigh, lowhigh) depend(out : highpass)
 #endif
   {
     // Proceed only if decoding did not fail.
@@ -339,9 +336,7 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 #ifdef HAVE_OPENMP
 #pragma omp task default(none)                                                 \
     shared(exceptionThrown, lowpass, highpass, reconstructedLowpass)           \
-        depend(in                                                              \
-               : lowpass, highpass) depend(out                                 \
-                                           : reconstructedLowpass)
+    depend(in : lowpass, highpass) depend(out : reconstructedLowpass)
 #endif
   {
     // Proceed only if decoding did not fail.
@@ -608,8 +603,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 
 #ifdef HAVE_OPENMP
 #pragma omp task default(none) shared(decodedData, errLog, exceptionThrown)    \
-    depend(out                                                                 \
-           : decodedData)
+    depend(out : decodedData)
 #endif
   {
     // Proceed only if decoding did not fail.
