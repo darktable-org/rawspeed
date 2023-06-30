@@ -1,6 +1,9 @@
 on:
   workflow_call:
     inputs:
+      name:
+        required: true
+        type: string
       os:
         required: true
         type: string
@@ -33,7 +36,7 @@ env:
 
 jobs:
   macOS:
-    name: ${{ inputs.compiler-family }}.${{ inputs.compiler-version }}.targeting.OSX.${{ inputs.os-deployment_target }}.${{ inputs.flavor }}
+    name: ${{ inputs.name }}
     runs-on: ${{ inputs.os }}
     steps:
       - uses: actions/checkout@v3

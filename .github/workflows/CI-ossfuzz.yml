@@ -1,12 +1,16 @@
 on:
   workflow_call:
     inputs:
+      name:
+        required: true
+        type: string
       sanitizer:
         required: true
         type: string
 
 jobs:
   linux:
+    name: ${{ inputs.name }}
     runs-on: ubuntu-latest
     steps:
       - name: (OSS-FUZZ) Building with ${{ inputs.sanitizer }} sanitizer
