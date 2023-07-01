@@ -395,7 +395,7 @@ jobs:
           set -xe
           . "$PWD//codechecker/venv/bin/activate"
           export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
-          CodeChecker check --ctu --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
+          CodeChecker check --ctu --ctu-reanalyze-on-failure --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
       - if: inputs.flavor == 'CodeQLAnalysis'
         name: Perform CodeQL static analysis
         uses: github/codeql-action/analyze@v2
