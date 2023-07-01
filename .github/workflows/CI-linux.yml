@@ -117,7 +117,8 @@ jobs:
             eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
           fi
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
-            eatmydata apt-get install curl \
+            eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
+                                      curl \
                                       libxml2-dev \
                                       libxslt1-dev \
                                       make \
@@ -384,7 +385,7 @@ jobs:
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'ClangStaticAnalysis'
-        name: Perform clang static analysis
+        name: Perform clang static analysis (plain mode)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -395,6 +396,18 @@ jobs:
           . "$PWD//codechecker/venv/bin/activate"
           export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
           CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
+      - if: inputs.flavor == 'ClangStaticAnalysis'
+        name: Perform clang static analysis (CTU mode)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          CC: ${{ inputs.compiler-CC }}
+          CXX: ${{ inputs.compiler-CXX }}
+        run: |
+          set -xe
+          . "$PWD//codechecker/venv/bin/activate"
+          export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
+          CodeChecker check --ctu --ctu-reanalyze-on-failure --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
       - if: inputs.flavor == 'CodeQLAnalysis'
         name: Perform CodeQL static analysis
         uses: github/codeql-action/analyze@v2

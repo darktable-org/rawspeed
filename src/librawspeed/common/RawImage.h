@@ -109,7 +109,7 @@ class RawImageData : public ErrorLog {
   friend class RawImageWorker;
 
 public:
-  virtual ~RawImageData();
+  virtual ~RawImageData() = default;
   [[nodiscard]] uint32_t RAWSPEED_READONLY getCpp() const { return cpp; }
   [[nodiscard]] uint32_t RAWSPEED_READONLY getBpp() const { return bpp; }
   void setCpp(uint32_t val);
@@ -173,9 +173,6 @@ public:
   Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
                         // than 1 thread is accessing vector
 
-private:
-  uint32_t dataRefCount GUARDED_BY(mymutex) = 0;
-
 protected:
   RawImageType dataType;
   RawImageData();
@@ -194,11 +191,13 @@ protected:
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   std::unique_ptr<TableLookUp> table;
-  Mutex mymutex;
 };
 
 class RawImageDataU16 final : public RawImageData {
 public:
+  RawImageDataU16();
+  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
+
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
@@ -212,13 +211,14 @@ private:
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   void doLookup(int start_y, int end_y) override;
 
-  RawImageDataU16();
-  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
 class RawImageDataFloat final : public RawImageData {
 public:
+  RawImageDataFloat();
+  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
+
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
   void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
@@ -227,8 +227,7 @@ private:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
-  RawImageDataFloat();
-  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
+
   friend class RawImage;
 };
 
@@ -238,26 +237,24 @@ public:
   static RawImage create(const iPoint2D& dim,
                          RawImageType type = RawImageType::UINT16,
                          uint32_t componentsPerPixel = 1);
-  RawImageData* RAWSPEED_READONLY operator->() const { return p_; }
+  RawImageData* RAWSPEED_READONLY operator->() const { return &*p_; }
   RawImageData& RAWSPEED_READONLY operator*() const { return *p_; }
-  explicit RawImage(RawImageData* p); // p must not be NULL
-  ~RawImage();
-  RawImage(const RawImage& p);
-  RawImage& operator=(const RawImage& p) noexcept;
-  RawImage& operator=(RawImage&& p) noexcept;
 
-  RawImageData* get() { return p_; }
+  explicit RawImage(RawImageData* p) = delete;
+  explicit RawImage(std::shared_ptr<RawImageData> p) : p_(std::move(p)) {}
+
+  RawImageData* get() { return &*p_; }
 
 private:
-  RawImageData* p_; // p_ is never NULL
+  std::shared_ptr<RawImageData> p_; // p_ is never NULL
 };
 
 inline RawImage RawImage::create(RawImageType type) {
   switch (type) {
   case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16());
+    return RawImage(std::make_shared<RawImageDataU16>());
   case RawImageType::F32:
-    return RawImage(new RawImageDataFloat());
+    return RawImage(std::make_shared<RawImageDataFloat>());
   default:
     writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
     __builtin_unreachable();
@@ -268,9 +265,10 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
                                  uint32_t componentsPerPixel) {
   switch (type) {
   case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16(dim, componentsPerPixel));
+    return RawImage(std::make_shared<RawImageDataU16>(dim, componentsPerPixel));
   case RawImageType::F32:
-    return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
+    return RawImage(
+        std::make_shared<RawImageDataFloat>(dim, componentsPerPixel));
   default:
     writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
     __builtin_unreachable();

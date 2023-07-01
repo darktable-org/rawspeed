@@ -31,12 +31,13 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <cstdint>                        // for uint16_t
+#include <utility>                        // for move
 
 namespace rawspeed {
 
-PanasonicV7Decompressor::PanasonicV7Decompressor(const RawImage& img,
+PanasonicV7Decompressor::PanasonicV7Decompressor(RawImage img,
                                                  ByteStream input_)
-    : mRaw(img) {
+    : mRaw(std::move(img)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

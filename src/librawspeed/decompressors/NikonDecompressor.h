@@ -48,7 +48,7 @@ class NikonDecompressor final : public AbstractDecompressor {
   uint32_t random;
 
 public:
-  NikonDecompressor(const RawImage& raw, ByteStream metadata, uint32_t bitsPS);
+  NikonDecompressor(RawImage raw, ByteStream metadata, uint32_t bitsPS);
 
   void decompress(ByteStream data, bool uncorrectedRawValues);
 

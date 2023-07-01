@@ -43,7 +43,7 @@ class CrwDecompressor final : public AbstractDecompressor {
   ByteStream rawInput;
 
 public:
-  CrwDecompressor(const RawImage& img, uint32_t dec_table_, bool lowbits_,
+  CrwDecompressor(RawImage img, uint32_t dec_table_, bool lowbits_,
                   ByteStream rawData);
 
   void decompress();

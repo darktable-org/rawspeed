@@ -31,12 +31,12 @@
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <cstdint>                        // for uint16_t, uint32_t, uint8_t
 #include <string>                         // for allocator, string
+#include <utility>                        // for move
 
 namespace rawspeed {
 
-SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
-                                           ByteStream input_)
-    : mRaw(img) {
+SonyArw2Decompressor::SonyArw2Decompressor(RawImage img, ByteStream input_)
+    : mRaw(std::move(img)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

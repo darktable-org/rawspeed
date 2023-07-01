@@ -170,7 +170,7 @@ private:
 
 public:
   Cr2Decompressor(
-      const RawImage& mRaw,
+      RawImage mRaw,
       std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format,
       iPoint2D frame, Cr2SliceWidths slicing,
       std::vector<PerComponentRecipe> rec, ByteStream input);

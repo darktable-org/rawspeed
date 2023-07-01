@@ -41,7 +41,7 @@ class FujiDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
 public:
-  FujiDecompressor(const RawImage& img, ByteStream input);
+  FujiDecompressor(RawImage img, ByteStream input);
 
   void decompress() const;
 

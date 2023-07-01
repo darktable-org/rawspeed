@@ -75,7 +75,7 @@ private:
   template <int N_COMP, bool WeirdWidth = false> void decodeN();
 
 public:
-  LJpegDecompressor(const RawImage& img, iRectangle2D imgFrame, Frame frame,
+  LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec, ByteStream bs);
 
   void decode();
