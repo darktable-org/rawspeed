@@ -76,7 +76,9 @@ public:
     return x <= rhs.x && y <= rhs.y;
   }
 
-  [[nodiscard]] bool hasPositiveArea() const { return operator>({0, 0}); }
+  [[nodiscard]] bool RAWSPEED_READONLY hasPositiveArea() const {
+    return operator>({0, 0});
+  }
 
   [[nodiscard]] area_type RAWSPEED_READONLY area() const {
     using signed_area = std::make_signed_t<area_type>;

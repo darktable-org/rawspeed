@@ -69,6 +69,7 @@ CFAColor ColorFilterArray::getColorAt(int x, int y) const {
     ThrowRDE("No CFA size set");
 
   // calculate the positive modulo [0 .. size-1]
+  invariant(size.hasPositiveArea());
   x = (x % size.x + size.x) % size.x;
   y = (y % size.y + size.y) % size.y;
 
