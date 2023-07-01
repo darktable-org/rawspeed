@@ -385,7 +385,19 @@ jobs:
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - if: inputs.flavor == 'ClangStaticAnalysis'
-        name: Perform clang static analysis
+        name: Perform clang static analysis (plain mode)
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          CC: ${{ inputs.compiler-CC }}
+          CXX: ${{ inputs.compiler-CXX }}
+        run: |
+          set -xe
+          . "$PWD//codechecker/venv/bin/activate"
+          export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
+          CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
+      - if: inputs.flavor == 'ClangStaticAnalysis'
+        name: Perform clang static analysis (CTU mode)
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
