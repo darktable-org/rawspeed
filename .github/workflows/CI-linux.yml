@@ -130,7 +130,8 @@ jobs:
                                       python3-venv \
                                       python3-virtualenv \
                                       python3-wheel \
-                                      python3-yaml
+                                      python3-yaml \
+                                      xz-utils
           fi
           eatmydata apt-get clean
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
@@ -393,9 +394,21 @@ jobs:
           CXX: ${{ inputs.compiler-CXX }}
         run: |
           set -xe
-          . "$PWD//codechecker/venv/bin/activate"
-          export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
-          CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
+          . "$PWD/codechecker/venv/bin/activate"
+          export PATH="$PWD/codechecker/build/CodeChecker/bin:$PATH"
+          set +e
+          CodeChecker check --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores -o "${BUILD_DIR}/codechecker_results"
+          bugs=$?
+          CodeChecker parse -e html "${BUILD_DIR}/codechecker_results" -o "${BUILD_DIR}/codechecker_report"
+          set -xe
+          tar -cvJ -f "$GITHUB_WORKSPACE/codechecker_report.tar.xz" -C "${BUILD_DIR}" "codechecker_report"
+          [ $bugs -eq 0 ] || exit 1
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        name: Upload results of clang static analysis (plain mode)
+        with:
+          name: codechecker_report.tar.xz
+          path: ${{ github.workspace }}/codechecker_report.tar.xz
       - if: inputs.flavor == 'ClangStaticAnalysis'
         name: Perform clang static analysis (CTU mode)
         env:
@@ -405,9 +418,21 @@ jobs:
           CXX: ${{ inputs.compiler-CXX }}
         run: |
           set -xe
-          . "$PWD//codechecker/venv/bin/activate"
-          export PATH="$PWD//codechecker/build/CodeChecker/bin:$PATH"
-          CodeChecker check --ctu --ctu-reanalyze-on-failure --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores
+          . "$PWD/codechecker/venv/bin/activate"
+          export PATH="$PWD/codechecker/build/CodeChecker/bin:$PATH"
+          set +e
+          CodeChecker check --ctu --ctu-reanalyze-on-failure --logfile "${BUILD_DIR}/compile_commands.json" --analyzers clangsa --jobs "$(nproc --all)" --file "${SRC_DIR}/*" --disable deadcode.DeadStores -o "${BUILD_DIR}/codechecker_ctu_results"
+          bugs=$?
+          CodeChecker parse -e html "${BUILD_DIR}/codechecker_ctu_results" -o "${BUILD_DIR}/codechecker_ctu_report"
+          set -xe
+          tar -cvJ -f "$GITHUB_WORKSPACE/codechecker_ctu_report.tar.xz" -C "${BUILD_DIR}" "codechecker_ctu_report"
+          [ $bugs -eq 0 ] || exit 1
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        name: Upload results of clang static analysis (CTU mode)
+        with:
+          name: codechecker_ctu_report.tar.xz
+          path: ${{ github.workspace }}/codechecker_ctu_report.tar.xz
       - if: inputs.flavor == 'CodeQLAnalysis'
         name: Perform CodeQL static analysis
         uses: github/codeql-action/analyze@v2
