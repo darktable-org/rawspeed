@@ -37,7 +37,7 @@ class PentaxDecompressor final : public AbstractDecompressor {
   const PrefixCodeDecoder<> ht;
 
 public:
-  PentaxDecompressor(const RawImage& img, std::optional<ByteStream> metaData);
+  PentaxDecompressor(RawImage img, std::optional<ByteStream> metaData);
 
   void decompress(ByteStream data) const;
 

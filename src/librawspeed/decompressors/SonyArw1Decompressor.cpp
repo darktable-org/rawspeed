@@ -30,10 +30,12 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
+#include <utility>                        // for move
 
 namespace rawspeed {
 
-SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
+SonyArw1Decompressor::SonyArw1Decompressor(RawImage img)
+    : mRaw(std::move(img)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

@@ -39,8 +39,8 @@
 
 namespace rawspeed {
 
-AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, const RawImage& img)
-    : input(bs), mRaw(img) {
+AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, RawImage img)
+    : input(bs), mRaw(std::move(img)) {
   input.setByteOrder(Endianness::big);
 
   if (!mRaw->dim.hasPositiveArea())

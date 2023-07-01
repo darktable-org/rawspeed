@@ -34,7 +34,7 @@ class SonyArw2Decompressor final : public AbstractDecompressor {
   ByteStream input;
 
 public:
-  SonyArw2Decompressor(const RawImage& img, ByteStream input);
+  SonyArw2Decompressor(RawImage img, ByteStream input);
   void decompress() const;
 };
 

@@ -36,6 +36,7 @@
 #include "io/IOException.h"               // for ThrowException, ThrowIOE
 #include <algorithm>                      // for min
 #include <cinttypes>                      // for PRIu64
+#include <utility>                        // for move
 
 using std::min;
 
@@ -96,11 +97,12 @@ int UncompressedDecompressor::bytesPerLine(int w, bool skips) {
 }
 
 UncompressedDecompressor::UncompressedDecompressor(
-    ByteStream input_, const RawImage& img_, const iRectangle2D& crop,
+    ByteStream input_, RawImage img_, const iRectangle2D& crop,
     int inputPitchBytes_, int bitPerPixel_, BitOrder order_)
-    : input(input_.getStream(crop.dim.y, inputPitchBytes_)), mRaw(img_),
-      size(crop.dim), offset(crop.pos), inputPitchBytes(inputPitchBytes_),
-      bitPerPixel(bitPerPixel_), order(order_) {
+    : input(input_.getStream(crop.dim.y, inputPitchBytes_)),
+      mRaw(std::move(img_)), size(crop.dim), offset(crop.pos),
+      inputPitchBytes(inputPitchBytes_), bitPerPixel(bitPerPixel_),
+      order(order_) {
   if (!size.hasPositiveArea())
     ThrowRDE("Empty tile.");
 

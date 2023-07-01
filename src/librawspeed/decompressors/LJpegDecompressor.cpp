@@ -37,12 +37,12 @@ using std::copy_n;
 
 namespace rawspeed {
 
-LJpegDecompressor::LJpegDecompressor(const RawImage& img,
-                                     iRectangle2D imgFrame_, Frame frame_,
+LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
+                                     Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
                                      ByteStream bs)
-    : mRaw(img), input(bs), imgFrame(imgFrame_), frame(std::move(frame_)),
-      rec(std::move(rec_)) {
+    : mRaw(std::move(img)), input(bs), imgFrame(imgFrame_),
+      frame(std::move(frame_)), rec(std::move(rec_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));

@@ -60,7 +60,7 @@ private:
   static int getBits(BitPumpMSB32& bs, int len);
 
 public:
-  HasselbladDecompressor(const RawImage& mRaw, const PerComponentRecipe& rec,
+  HasselbladDecompressor(RawImage mRaw, const PerComponentRecipe& rec,
                          ByteStream input);
 
   [[nodiscard]] ByteStream::size_type decompress();

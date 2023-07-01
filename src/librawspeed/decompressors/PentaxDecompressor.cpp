@@ -34,6 +34,7 @@
 #include <algorithm>                      // for max, fill, fill_n, copy
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint8_t, uint32_t, uint16_t
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -46,9 +47,9 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
           {3, 4, 2, 5, 1, 6, 0, 7, 8, 9, 10, 11, 12}}},
     }};
 
-PentaxDecompressor::PentaxDecompressor(const RawImage& img,
+PentaxDecompressor::PentaxDecompressor(RawImage img,
                                        std::optional<ByteStream> metaData)
-    : mRaw(img), ht(SetupPrefixCodeDecoder(metaData)) {
+    : mRaw(std::move(img)), ht(SetupPrefixCodeDecoder(metaData)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

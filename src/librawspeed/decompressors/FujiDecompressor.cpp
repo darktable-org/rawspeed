@@ -784,17 +784,17 @@ class FujiDecompressorImpl {
   void decompressThread() const noexcept;
 
 public:
-  FujiDecompressorImpl(const RawImage& mRaw,
-                       Array1DRef<const ByteStream> strips,
+  FujiDecompressorImpl(RawImage mRaw, Array1DRef<const ByteStream> strips,
                        const FujiDecompressor::FujiHeader& h);
 
   void decompress();
 };
 
 FujiDecompressorImpl::FujiDecompressorImpl(
-    const RawImage& mRaw_, Array1DRef<const ByteStream> strips_,
+    RawImage mRaw_, Array1DRef<const ByteStream> strips_,
     const FujiDecompressor::FujiHeader& h_)
-    : mRaw(mRaw_), strips(strips_), header(h_), common_info(header) {}
+    : mRaw(std::move(mRaw_)), strips(strips_), header(h_), common_info(header) {
+}
 
 void FujiDecompressorImpl::decompressThread() const noexcept {
   fuji_compressed_block block_info(mRaw->getU16DataAsUncroppedArray2DRef(),
@@ -832,8 +832,8 @@ void FujiDecompressorImpl::decompress() {
 
 } // namespace
 
-FujiDecompressor::FujiDecompressor(const RawImage& img, ByteStream input_)
-    : mRaw(img), input(input_) {
+FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
+    : mRaw(std::move(img)), input(input_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

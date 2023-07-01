@@ -37,15 +37,16 @@
 #include <iterator>                       // for back_insert_iterator, back...
 #include <limits>                         // for numeric_limits
 #include <memory>                         // for allocator_traits<>::value_...
+#include <utility>                        // for move
 #include <vector>                         // for vector, vector<>::iterator
 
 namespace rawspeed {
 
-PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
+PanasonicV4Decompressor::PanasonicV4Decompressor(RawImage img,
                                                  ByteStream input_,
                                                  bool zero_is_not_bad,
                                                  uint32_t section_split_offset_)
-    : mRaw(img), zero_is_bad(!zero_is_not_bad),
+    : mRaw(std::move(img)), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))

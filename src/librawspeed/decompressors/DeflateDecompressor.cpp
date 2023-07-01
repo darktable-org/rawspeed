@@ -35,13 +35,14 @@
 #include "io/Endianness.h" // for getBE
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
+#include <utility>         // for move
 #include <zlib.h>          // for uncompress, zError, Z_OK
 
 namespace rawspeed {
 
-DeflateDecompressor::DeflateDecompressor(Buffer bs, const RawImage& img,
-                                         int predictor, int bps_)
-    : input(bs), mRaw(img), bps(bps_) {
+DeflateDecompressor::DeflateDecompressor(Buffer bs, RawImage img, int predictor,
+                                         int bps_)
+    : input(bs), mRaw(std::move(img)), bps(bps_) {
   switch (predictor) {
   case 3:
     predFactor = 1;

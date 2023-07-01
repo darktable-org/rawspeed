@@ -48,7 +48,7 @@ class PanasonicV7Decompressor final : public AbstractDecompressor {
   void decompressRow(int row) const noexcept;
 
 public:
-  PanasonicV7Decompressor(const RawImage& img, ByteStream input_);
+  PanasonicV7Decompressor(RawImage img, ByteStream input_);
 
   void decompress() const;
 };

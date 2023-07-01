@@ -42,7 +42,7 @@ class KodakDecompressor final : public AbstractDecompressor {
   segment decodeSegment(uint32_t bsize);
 
 public:
-  KodakDecompressor(const RawImage& img, ByteStream bs, int bps,
+  KodakDecompressor(RawImage img, ByteStream bs, int bps,
                     bool uncorrectedRawValues_);
 
   void decompress();
