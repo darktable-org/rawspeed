@@ -25,12 +25,12 @@
 #include <benchmark/benchmark.h> // for State, Benchmark, State::StateIterator
 
 static inline void BM_MD5(benchmark::State& state) {
-  const size_t bufsize = state.range(0) * sizeof(char);
-  std::unique_ptr<char, decltype(&free)> buf((char*)malloc(bufsize), &free);
+  // Create a zero-initialized data. Content does not matter for our purpose.
+  std::vector<char> buf(state.range(0), char(0));
 
   for (auto _ : state) {
     rawspeed::md5::md5_state hash;
-    rawspeed::md5::md5_hash((uint8_t*)buf.get(), bufsize, &hash);
+    rawspeed::md5::md5_hash((uint8_t*)buf.data(), buf.size(), &hash);
   }
 
   state.SetComplexityN(state.range(0));
