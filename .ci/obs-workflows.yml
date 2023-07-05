@@ -1,0 +1,10 @@
+develop:
+  steps:
+    - trigger_services:
+        project: graphics:darktable:master
+        package: rawspeed
+  filters:
+    event: push
+    branches:
+      only:
+        - develop
