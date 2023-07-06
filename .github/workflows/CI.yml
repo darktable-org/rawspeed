@@ -82,7 +82,6 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
-      ECO: -DBUILD_BENCHMARKING=OFF
   linux-coverage:
     strategy:
       fail-fast: false
