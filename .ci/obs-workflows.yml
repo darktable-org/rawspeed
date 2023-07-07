@@ -8,3 +8,11 @@ develop:
     branches:
       only:
         - develop
+pull_request:
+  steps:
+    - branch_package:
+        source_project: graphics:darktable:master
+        source_package: rawspeed
+        target_project: home:LebedevRI
+  filters:
+    event: pull_request
