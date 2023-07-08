@@ -489,7 +489,7 @@ protected:
             S::select(getRoi().getWidth(), getRoi().getHeight()),
             S::select(getPitch().x, getPitch().y));
         expectedSize != deltaF_count) {
-      ThrowRDE("Got unexpected number of elements (%zu), expected %u.",
+      ThrowRDE("Got unexpected number of elements (%lu), expected %u.",
                expectedSize, deltaF_count);
     }
 
