@@ -78,10 +78,10 @@ protected:
   std::vector<int> mBlackLevelSeparate;
 };
 
-INSTANTIATE_TEST_CASE_P(MinMax, CameraSensorInfoTestDumb,
-                        testing::Combine(testing::ValuesIn(ISOList), // min iso
-                                         testing::ValuesIn(ISOList)  // max iso
-                                         ));
+INSTANTIATE_TEST_SUITE_P(MinMax, CameraSensorInfoTestDumb,
+                         testing::Combine(testing::ValuesIn(ISOList), // min iso
+                                          testing::ValuesIn(ISOList)  // max iso
+                                          ));
 
 TEST_P(CameraSensorInfoTestDumb, Constructor) {
   ASSERT_NO_THROW({
@@ -279,8 +279,8 @@ protected:
   std::vector<int> mBlackLevelSeparate;
 };
 
-INSTANTIATE_TEST_CASE_P(Expectations, CameraSensorInfoTest,
-                        testing::ValuesIn(CameraSensorIsoInfos));
+INSTANTIATE_TEST_SUITE_P(Expectations, CameraSensorInfoTest,
+                         testing::ValuesIn(CameraSensorIsoInfos));
 
 TEST_P(CameraSensorInfoTest, IsDefault) {
   CameraSensorInfo Info(mBlackLevel, mWhiteLevel, data.mMinIso, data.mMaxIso,

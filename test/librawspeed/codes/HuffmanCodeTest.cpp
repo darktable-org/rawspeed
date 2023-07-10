@@ -120,8 +120,8 @@ static const CodeSymbolType CodeSymbolData[]{
     make_tuple(0b11, 2, false),
     // clang-format on
 };
-INSTANTIATE_TEST_CASE_P(CodeSymbolDeathTest, CodeSymbolDeathTest,
-                        ::testing::ValuesIn(CodeSymbolData));
+INSTANTIATE_TEST_SUITE_P(CodeSymbolDeathTest, CodeSymbolDeathTest,
+                         ::testing::ValuesIn(CodeSymbolData));
 TEST_P(CodeSymbolDeathTest, CodeSymbolDeathTest) {
   if (die) {
     ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len); },
@@ -164,8 +164,8 @@ static const CodeSymbolPrintDataType CodeSymbolPrintData[]{
     make_tuple(0b11, 2, "0b11"),
     // clang-format on
 };
-INSTANTIATE_TEST_CASE_P(CodeSymbolPrintTest, CodeSymbolPrintTest,
-                        ::testing::ValuesIn(CodeSymbolPrintData));
+INSTANTIATE_TEST_SUITE_P(CodeSymbolPrintTest, CodeSymbolPrintTest,
+                         ::testing::ValuesIn(CodeSymbolPrintData));
 TEST_P(CodeSymbolPrintTest, CodeSymbolPrintTest) {
   ASSERT_EQ(::testing::PrintToString(
                 HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len)),
@@ -205,7 +205,7 @@ GenerateAllPossibleCodeSymbols() {
   return allVariants;
 }
 static const auto allPossibleCodeSymbols = GenerateAllPossibleCodeSymbols();
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     CodeSymbolHaveCommonPrefixTest, CodeSymbolHaveCommonPrefixTest,
     ::testing::Combine(::testing::ValuesIn(allPossibleCodeSymbols),
                        ::testing::ValuesIn(allPossibleCodeSymbols)));
@@ -538,8 +538,8 @@ static const SignExtendDataType signExtendData[]{
     make_tuple(0b11, 0b11, -0b100),
     // clang-format on
 };
-INSTANTIATE_TEST_CASE_P(SignExtendTest, SignExtendTest,
-                        ::testing::ValuesIn(signExtendData));
+INSTANTIATE_TEST_SUITE_P(SignExtendTest, SignExtendTest,
+                         ::testing::ValuesIn(signExtendData));
 TEST_P(SignExtendTest, SignExtendTest) {
   ASSERT_EQ(
       rawspeed::AbstractPrefixCodeDecoder<BaselineCodeTag>::extend(diff, len),
@@ -597,8 +597,8 @@ static const generateCodeSymbolsDataType generateCodeSymbolsData[]{
                }),
 
 };
-INSTANTIATE_TEST_CASE_P(generateCodeSymbolsTest, generateCodeSymbolsTest,
-                        ::testing::ValuesIn(generateCodeSymbolsData));
+INSTANTIATE_TEST_SUITE_P(generateCodeSymbolsTest, generateCodeSymbolsTest,
+                         ::testing::ValuesIn(generateCodeSymbolsData));
 TEST_P(generateCodeSymbolsTest, generateCodeSymbolsTest) {
   HuffmanCode<BaselineCodeTag> hc;
   Buffer bl(ncpl.data(), ncpl.size());

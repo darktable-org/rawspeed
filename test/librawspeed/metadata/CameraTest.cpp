@@ -142,8 +142,8 @@ protected:
   virtual void SetUp() override { notTrue = std::get<0>(GetParam()); }
   string notTrue;
 };
-INSTANTIATE_TEST_CASE_P(NotTrue, BoolHintTest,
-                        ::testing::Values("True", "false", "False", "", "_"));
+INSTANTIATE_TEST_SUITE_P(NotTrue, BoolHintTest,
+                         ::testing::Values("True", "false", "False", "", "_"));
 
 TEST_P(BoolHintTest, HintsBool) {
   Hints hints;

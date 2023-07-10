@@ -219,8 +219,8 @@ static const identityType identityValues[] = {
         std::vector<std::array<double, 4>>{{{65535.0, -1.0, 0.0, 0.0}}})};
 
 using IntegerIdentityTest = IdentityTest<uint16_t>;
-INSTANTIATE_TEST_CASE_P(IntegerIdentityTest, IntegerIdentityTest,
-                        ::testing::ValuesIn(identityValues));
+INSTANTIATE_TEST_SUITE_P(IntegerIdentityTest, IntegerIdentityTest,
+                         ::testing::ValuesIn(identityValues));
 TEST_P(IntegerIdentityTest, ValuesAreLinearlyInterpolated) {
   for (auto x = edges.front().y; x < edges.back().y; ++x)
     ASSERT_EQ(interpolated[x], x);
@@ -228,8 +228,8 @@ TEST_P(IntegerIdentityTest, ValuesAreLinearlyInterpolated) {
 TEST_P(IntegerIdentityTest, SegmentCoeffients) { CheckSegments(); }
 
 using DoubleIdentityTest = IdentityTest<double>;
-INSTANTIATE_TEST_CASE_P(DoubleIdentityTest, DoubleIdentityTest,
-                        ::testing::ValuesIn(identityValues));
+INSTANTIATE_TEST_SUITE_P(DoubleIdentityTest, DoubleIdentityTest,
+                         ::testing::ValuesIn(identityValues));
 TEST_P(DoubleIdentityTest, ValuesAreLinearlyInterpolated) {
   for (auto x = edges.front().y; x < edges.back().y; ++x) {
     ASSERT_DOUBLE_EQ(interpolated[x], x);
@@ -280,8 +280,8 @@ protected:
   int extraSteps;
   std::vector<int> got;
 };
-INSTANTIATE_TEST_CASE_P(CalculateStepsEdgesTest, CalculateStepsEdgesTest,
-                        ::testing::Range(0, 254));
+INSTANTIATE_TEST_SUITE_P(CalculateStepsEdgesTest, CalculateStepsEdgesTest,
+                         ::testing::Range(0, 254));
 TEST_P(CalculateStepsEdgesTest, Count) {
   ASSERT_EQ(got.size(), 2 + extraSteps);
 }
@@ -323,8 +323,8 @@ static const calculateStepsType calculateStepsValues[] = {
 };
 
 using DoubleCalculateStepsTest = CalculateStepsTest<double>;
-INSTANTIATE_TEST_CASE_P(CalculateStepsTest, DoubleCalculateStepsTest,
-                        ::testing::ValuesIn(calculateStepsValues));
+INSTANTIATE_TEST_SUITE_P(CalculateStepsTest, DoubleCalculateStepsTest,
+                         ::testing::ValuesIn(calculateStepsValues));
 TEST_P(DoubleCalculateStepsTest, Count) {
   ASSERT_EQ(expected.size(), got.size());
   ASSERT_EQ(got.size(), 2 + extraSteps);
@@ -340,8 +340,8 @@ TEST_P(DoubleCalculateStepsTest, GotExpectedOutput) {
 }
 
 using IntegerCalculateStepsTest = CalculateStepsTest<int>;
-INSTANTIATE_TEST_CASE_P(CalculateStepsTest, IntegerCalculateStepsTest,
-                        ::testing::ValuesIn(calculateStepsValues));
+INSTANTIATE_TEST_SUITE_P(CalculateStepsTest, IntegerCalculateStepsTest,
+                         ::testing::ValuesIn(calculateStepsValues));
 TEST_P(IntegerCalculateStepsTest, Count) {
   ASSERT_EQ(expected.size(), got.size());
   ASSERT_EQ(got.size(), 2 + extraSteps);
@@ -408,8 +408,8 @@ static const auto constantValues =
                        ::testing::Range(0, 1 + NumExtraSteps));
 
 using IntegerConstantTest = ConstantTest<uint16_t>;
-INSTANTIATE_TEST_CASE_P(IntegerConstantTest, IntegerConstantTest,
-                        constantValues);
+INSTANTIATE_TEST_SUITE_P(IntegerConstantTest, IntegerConstantTest,
+                         constantValues);
 TEST_P(IntegerConstantTest, AllValuesAreEqual) {
   for (const auto value : interpolated)
     ASSERT_EQ(value, constant);
@@ -417,7 +417,8 @@ TEST_P(IntegerConstantTest, AllValuesAreEqual) {
 TEST_P(IntegerConstantTest, SegmentCoeffients) { CheckSegments(); }
 
 using DoubleConstantTest = ConstantTest<double>;
-INSTANTIATE_TEST_CASE_P(DoubleConstantTest, DoubleConstantTest, constantValues);
+INSTANTIATE_TEST_SUITE_P(DoubleConstantTest, DoubleConstantTest,
+                         constantValues);
 TEST_P(DoubleConstantTest, AllValuesAreEqual) {
   for (const auto value : interpolated) {
     ASSERT_DOUBLE_EQ(value, constant);
@@ -520,8 +521,8 @@ static const referenceType sin2PiRefValues[] = {
     make_tuple(14,   1.0E-04),
     // clang-format on
 };
-INSTANTIATE_TEST_CASE_P(Sin2Pi, Sin2PiRefTest,
-                        ::testing::ValuesIn(sin2PiRefValues));
+INSTANTIATE_TEST_SUITE_P(Sin2Pi, Sin2PiRefTest,
+                         ::testing::ValuesIn(sin2PiRefValues));
 TEST_P(Sin2PiRefTest, NearlyMatchesReference) { check(); }
 
 using SinPiRefTest = ReferenceTest<SinReferenceTest<1, 1>>;
@@ -542,8 +543,8 @@ static const referenceType sinPiRefValues[] = {
     make_tuple(12, 1.0E-05),
     // clang-format on
 };
-INSTANTIATE_TEST_CASE_P(SinPi, SinPiRefTest,
-                        ::testing::ValuesIn(sinPiRefValues));
+INSTANTIATE_TEST_SUITE_P(SinPi, SinPiRefTest,
+                         ::testing::ValuesIn(sinPiRefValues));
 TEST_P(SinPiRefTest, NearlyMatchesReference) { check(); }
 
 } // namespace rawspeed_test

@@ -68,8 +68,8 @@ static const powerOfTwoType powerOfTwoValues[] = {
     make_tuple(9, false), make_tuple(10, false), make_tuple(11, false),
 
 };
-INSTANTIATE_TEST_CASE_P(PowerOfTwoTest, PowerOfTwoTest,
-                        ::testing::ValuesIn(powerOfTwoValues));
+INSTANTIATE_TEST_SUITE_P(PowerOfTwoTest, PowerOfTwoTest,
+                         ::testing::ValuesIn(powerOfTwoValues));
 TEST_P(PowerOfTwoTest, PowerOfTwoTest) {
   ASSERT_EQ(isPowerOfTwo(in), expected);
 }
@@ -96,8 +96,8 @@ static const RoundDownType RoundDownValues[] = {
     make_tuple(10, 9, 9),   make_tuple(10, 11, 0), make_tuple(10, 12, 0),
 
 };
-INSTANTIATE_TEST_CASE_P(RoundDownTest, RoundDownTest,
-                        ::testing::ValuesIn(RoundDownValues));
+INSTANTIATE_TEST_SUITE_P(RoundDownTest, RoundDownTest,
+                         ::testing::ValuesIn(RoundDownValues));
 TEST_P(RoundDownTest, RoundDownTest) {
   ASSERT_EQ(roundDown(in, multiple), expected);
 }
@@ -124,8 +124,8 @@ static const RoundUpType RoundUpValues[] = {
     make_tuple(10, 9, 18),  make_tuple(10, 11, 11), make_tuple(10, 12, 12),
 
 };
-INSTANTIATE_TEST_CASE_P(RoundUpTest, RoundUpTest,
-                        ::testing::ValuesIn(RoundUpValues));
+INSTANTIATE_TEST_SUITE_P(RoundUpTest, RoundUpTest,
+                         ::testing::ValuesIn(RoundUpValues));
 TEST_P(RoundUpTest, RoundUpTest) { ASSERT_EQ(roundUp(in, multiple), expected); }
 
 using RoundUpDivisionType = std::tuple<size_t, size_t, size_t>;
@@ -173,8 +173,8 @@ static const RoundUpDivisionType RoundUpDivisionValues[] = {
     make_tuple(numeric_limits<size_t>::max(), numeric_limits<size_t>::max(), 1),
 
 };
-INSTANTIATE_TEST_CASE_P(RoundUpDivisionTest, RoundUpDivisionTest,
-                        ::testing::ValuesIn(RoundUpDivisionValues));
+INSTANTIATE_TEST_SUITE_P(RoundUpDivisionTest, RoundUpDivisionTest,
+                         ::testing::ValuesIn(RoundUpDivisionValues));
 TEST_P(RoundUpDivisionTest, RoundUpDivisionTest) {
   ASSERT_EQ(roundUpDivision(in, divider), expected);
 }
@@ -191,9 +191,9 @@ protected:
   int value;
   int multiple;
 };
-INSTANTIATE_TEST_CASE_P(IsAlignedTest, IsAlignedTest,
-                        ::testing::Combine(::testing::Range(0, 32),
-                                           ::testing::Range(0, 32)));
+INSTANTIATE_TEST_SUITE_P(IsAlignedTest, IsAlignedTest,
+                         ::testing::Combine(::testing::Range(0, 32),
+                                            ::testing::Range(0, 32)));
 TEST_P(IsAlignedTest, IsAlignedAfterRoundUpTest) {
   ASSERT_TRUE(isAligned(roundUp(value, multiple), multiple));
 }
@@ -218,7 +218,7 @@ static const IsInType IsInValues[] = {
     make_tuple("baz-1", false), make_tuple("quz", false),
 
 };
-INSTANTIATE_TEST_CASE_P(IsInTest, IsInTest, ::testing::ValuesIn(IsInValues));
+INSTANTIATE_TEST_SUITE_P(IsInTest, IsInTest, ::testing::ValuesIn(IsInValues));
 TEST_P(IsInTest, IsInTest) {
   ASSERT_EQ(isIn(in, {"foo", "foo2", "bar", "baz"}), expected);
 }
@@ -267,8 +267,8 @@ static const ClampBitsType ClampBitsValues[] = {
     make_tuple(32, 0, 0),   make_tuple(32, 16, 32),
     make_tuple(32, 2, 3),   make_tuple(-32, 0, 0),
     make_tuple(-32, 16, 0), GENERATE()};
-INSTANTIATE_TEST_CASE_P(ClampBitsTest, ClampBitsTest,
-                        ::testing::ValuesIn(ClampBitsValues));
+INSTANTIATE_TEST_SUITE_P(ClampBitsTest, ClampBitsTest,
+                         ::testing::ValuesIn(ClampBitsValues));
 TEST_P(ClampBitsTest, ClampBitsTest) { ASSERT_EQ(clampBits(in, n), expected); }
 TEST(ClampBitsDeathTest, Only16Bit) {
 #ifndef NDEBUG
@@ -315,8 +315,8 @@ static const TrimSpacesType TrimSpacesValues[] = {
     make_tuple("\t  ", ""),
 #undef STR
 };
-INSTANTIATE_TEST_CASE_P(TrimSpacesTest, TrimSpacesTest,
-                        ::testing::ValuesIn(TrimSpacesValues));
+INSTANTIATE_TEST_SUITE_P(TrimSpacesTest, TrimSpacesTest,
+                         ::testing::ValuesIn(TrimSpacesValues));
 TEST_P(TrimSpacesTest, TrimSpacesTest) { ASSERT_EQ(trimSpaces(in), out); }
 
 using splitStringType = std::tuple<string, char, vector<string>>;
@@ -340,8 +340,8 @@ static const splitStringType splitStringValues[] = {
                vector<string>({" 412", " 542", "732 ", " "})),
 
 };
-INSTANTIATE_TEST_CASE_P(SplitStringTest, SplitStringTest,
-                        ::testing::ValuesIn(splitStringValues));
+INSTANTIATE_TEST_SUITE_P(SplitStringTest, SplitStringTest,
+                         ::testing::ValuesIn(splitStringValues));
 TEST_P(SplitStringTest, SplitStringTest) {
   auto split = splitString(in, sep);
   ASSERT_EQ(split.size(), out.size());
@@ -408,11 +408,11 @@ protected:
   int rowSize;
   int height;
 };
-INSTANTIATE_TEST_CASE_P(CopyPixelsTest, CopyPixelsTest,
-                        testing::Combine(testing::Range(0, 4, 1),
-                                         testing::Range(0, 4, 1),
-                                         testing::Range(0, 4, 1),
-                                         testing::Range(0, 4, 1)));
+INSTANTIATE_TEST_SUITE_P(CopyPixelsTest, CopyPixelsTest,
+                         testing::Combine(testing::Range(0, 4, 1),
+                                          testing::Range(0, 4, 1),
+                                          testing::Range(0, 4, 1),
+                                          testing::Range(0, 4, 1)));
 TEST_P(CopyPixelsTest, CopyPixelsTest) {
   generate();
   copy();
