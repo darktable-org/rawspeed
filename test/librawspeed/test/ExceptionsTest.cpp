@@ -97,7 +97,7 @@ using Classes =
                    RawDecoderException, TiffParserException,
                    FiffParserException, RawParserException>;
 
-TYPED_TEST_CASE(ExceptionsTest, Classes);
+TYPED_TEST_SUITE(ExceptionsTest, Classes);
 
 TYPED_TEST(ExceptionsTest, Constructor) {
   ASSERT_NO_THROW({ TypeParam Exception(msg); });
