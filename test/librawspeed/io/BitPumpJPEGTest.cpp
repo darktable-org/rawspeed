@@ -66,7 +66,7 @@ template <>
 const std::array<uint8_t, 8> Pattern<BitPumpJPEG, SaturatedTag>::Data{
     {uint8_t(~0U), 0, uint8_t(~0U), 0, uint8_t(~0U), 0, uint8_t(~0U), 0}};
 
-INSTANTIATE_TYPED_TEST_CASE_P(JPEG, BitPumpTest, Patterns<BitPumpJPEG>);
+INSTANTIATE_TYPED_TEST_SUITE_P(JPEG, BitPumpTest, Patterns<BitPumpJPEG>);
 
 TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
   // If 0xFF0x00 byte sequence is found, it is just 0xFF, i.e. 0x00 is ignored.

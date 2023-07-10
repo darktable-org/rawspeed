@@ -23,7 +23,7 @@
 #include <array>             // for array
 #include <cstdint>           // for uint32_t, uint8_t
 #include <memory>            // for allocator
-#include <gtest/gtest.h>     // for INSTANTIATE_TYPED_TEST_CASE_P
+#include <gtest/gtest.h>     // for INSTANTIATE_TYPED_TEST_SUITE_P
 
 using rawspeed::BitPumpMSB32;
 
@@ -50,6 +50,6 @@ template <> uint32_t Pattern<BitPumpMSB32, InvOnesTag>::data(int index) {
   return set[index];
 }
 
-INSTANTIATE_TYPED_TEST_CASE_P(MSB32, BitPumpTest, Patterns<BitPumpMSB32>);
+INSTANTIATE_TYPED_TEST_SUITE_P(MSB32, BitPumpTest, Patterns<BitPumpMSB32>);
 
 } // namespace rawspeed_test
