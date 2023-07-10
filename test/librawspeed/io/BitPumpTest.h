@@ -143,7 +143,7 @@ protected:
   }
 };
 
-TYPED_TEST_CASE_P(BitPumpTest);
+TYPED_TEST_SUITE_P(BitPumpTest);
 
 TYPED_TEST_P(BitPumpTest, GetTest) {
   this->template runTest<TestGetBitsTag>(TypeParam::PatternT::Data,
