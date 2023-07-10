@@ -101,6 +101,9 @@ jobs:
                                     libxml2-utils \
                                     ninja-build \
                                     zlib1g-dev
+          if [ "${{ inputs.distro }}" = "ubuntu:jammy" ]; then
+            eatmydata apt-get purge googletest
+          fi
           if [ "$COMPILER_FAMILY" = "GNU" ]; then
             eatmydata apt-get install g++-${{ inputs.compiler-version }} \
                                       gcc \
