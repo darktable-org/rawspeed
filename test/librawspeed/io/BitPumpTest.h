@@ -143,7 +143,7 @@ protected:
   }
 };
 
-TYPED_TEST_CASE_P(BitPumpTest);
+TYPED_TEST_SUITE_P(BitPumpTest);
 
 TYPED_TEST_P(BitPumpTest, GetTest) {
   this->template runTest<TestGetBitsTag>(TypeParam::PatternT::Data,
@@ -170,9 +170,9 @@ TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillTest) {
       TypeParam::PatternT::Data, TypeParam::PatternT::data);
 }
 
-REGISTER_TYPED_TEST_CASE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
-                           PeekNoFillTest, IncreasingPeekLengthTest,
-                           IncreasingPeekLengthNoFillTest);
+REGISTER_TYPED_TEST_SUITE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
+                            PeekNoFillTest, IncreasingPeekLengthTest,
+                            IncreasingPeekLengthNoFillTest);
 
 template <typename Pump, typename PatternTag> struct Pattern {};
 

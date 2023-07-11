@@ -59,6 +59,10 @@ set_target_properties(gtest_main PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
 set_target_properties(gmock PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:gmock,INTERFACE_INCLUDE_DIRECTORIES>)
 set_target_properties(gmock_main PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:gmock_main,INTERFACE_INCLUDE_DIRECTORIES>)
 
+foreach(target gtest gtest_main gmock gmock_main)
+  target_compile_definitions(${target} PUBLIC -DGTEST_REMOVE_LEGACY_TEST_CASEAPI_)
+endforeach()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")
 

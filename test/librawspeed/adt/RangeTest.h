@@ -111,11 +111,11 @@ protected:
   Range<int> r0;
   Range<int> r1;
 };
-INSTANTIATE_TEST_CASE_P(Unsigned, TwoRangesTest,
-                        testing::Combine(testing::Range(0, 3),
-                                         testing::Range(0U, 3U),
-                                         testing::Range(0, 3),
-                                         testing::Range(0U, 3U)));
+INSTANTIATE_TEST_SUITE_P(Unsigned, TwoRangesTest,
+                         testing::Combine(testing::Range(0, 3),
+                                          testing::Range(0U, 3U),
+                                          testing::Range(0, 3),
+                                          testing::Range(0U, 3U)));
 
 static const std::set<twoRangesType> AllOverlapped{
     std::make_tuple(0, 0, 0, 0), std::make_tuple(0, 0, 0, 1),

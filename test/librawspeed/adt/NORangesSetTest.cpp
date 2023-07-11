@@ -98,7 +98,7 @@ protected:
   Range<int> r1;
   Range<int> r2;
 };
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     Unsigned, ThreeRangesTest,
     testing::Combine(testing::Range(0, 3), testing::Range(0U, 3U),
                      testing::Range(0, 3), testing::Range(0U, 3U),
