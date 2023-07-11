@@ -34,17 +34,21 @@ env:
 jobs:
   windows-msys2:
     name: ${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+    timeout-minutes: 15
     runs-on: ${{ inputs.os }}
     defaults:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v3
-        name: Fetch/Checkout RawSpeed git repo
+      - name: Fetch/Checkout RawSpeed git repo
+        timeout-minutes: 1
+        uses: actions/checkout@v3
         with:
           path: 'rawspeed'
           fetch-depth: 1
-      - uses: msys2/setup-msys2@v2
+      - name: Install Base Dependencies
+        timeout-minutes: 3
+        uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ inputs.msys2-msystem }}
           update: true
@@ -62,6 +66,7 @@ jobs:
             libjpeg-turbo:p
             zlib:p
       - name: Configure
+        timeout-minutes: 3
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -77,6 +82,7 @@ jobs:
           cmake -E make_directory "${INSTALL_PREFIX}"
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - name: Build
+        timeout-minutes: 12
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -86,6 +92,7 @@ jobs:
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - name: Test (unit tests)
+        timeout-minutes: 1
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -94,8 +101,9 @@ jobs:
         run: |
           set -xe
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
-      - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data (unit tests)
+      - name: Collect source coverage data (unit tests)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -107,8 +115,9 @@ jobs:
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
-      - if: inputs.flavor == 'Coverage'
-        name: Upload coverage to Codecov (unit tests)
+      - name: Upload coverage to Codecov (unit tests)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         uses: codecov/codecov-action@v3
         env:
           OS: windows
@@ -124,6 +133,7 @@ jobs:
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/unittests
           fail_ci_if_error: true
       - name: Install
+        timeout-minutes: 1
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
