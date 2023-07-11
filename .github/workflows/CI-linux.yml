@@ -74,6 +74,29 @@ jobs:
           tee /etc/apt/apt.conf.d/80fixmissing > /dev/null <<EOT
           APT::Get::Fix-Missing "true";
           EOT
+          rm -rf /etc/apt/sources.list*
+          if [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://debian-archive.trafficmanager.net/debian trixie main
+          deb http://debian-archive.trafficmanager.net/debian trixie-updates main
+          deb http://debian-archive.trafficmanager.net/debian-security trixie-security main
+          deb http://debian-archive.trafficmanager.net/debian trixie-backports main
+          EOT
+          elif [ "${{ inputs.distro }}" = "debian:bookworm-slim" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://debian-archive.trafficmanager.net/debian bookworm main
+          deb http://debian-archive.trafficmanager.net/debian bookworm-updates main
+          deb http://debian-archive.trafficmanager.net/debian-security bookworm-security main
+          deb http://debian-archive.trafficmanager.net/debian bookworm-backports main
+          EOT
+          elif [ "${{ inputs.distro }}" = "ubuntu:jammy" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://azure.archive.ubuntu.com/ubuntu jammy main universe
+          deb http://azure.archive.ubuntu.com/ubuntu jammy-updates main universe
+          deb http://azure.archive.ubuntu.com/ubuntu jammy-security main universe
+          deb http://azure.archive.ubuntu.com/ubuntu jammy-backports main universe
+          EOT
+          fi
       - name: Update base packages
         env:
           DEBIAN_FRONTEND: noninteractive
