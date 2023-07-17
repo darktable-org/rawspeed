@@ -54,8 +54,6 @@ RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
   createData();
 }
 
-RawImageData::~RawImageData() { assert(dataRefCount == 0); }
-
 void RawImageData::createData() {
   static constexpr const auto alignment = 16;
 
@@ -200,30 +198,6 @@ void RawImageData::createBadPixelMap() {
                       uint8_t(0));
 }
 
-RawImage::RawImage(RawImageData* p) : p_(p) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
-}
-
-RawImage::RawImage(const RawImage& p) : p_(p.p_) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
-}
-
-RawImage::~RawImage() {
-  p_->mymutex.Lock();
-
-  --p_->dataRefCount;
-
-  if (p_->dataRefCount == 0) {
-    p_->mymutex.Unlock();
-    delete p_;
-    return;
-  }
-
-  p_->mymutex.Unlock();
-}
-
 void RawImageData::transferBadPixelsToMap() {
   MutexLocker guard(&mBadPixelMutex);
   if (mBadPixelPositions.empty())
@@ -310,7 +284,7 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none)                                         \
     firstprivate(threads, y_per_thread, height, task) num_threads(threads)     \
-        schedule(static)
+    schedule(static)
 #endif
   for (int i = 0; i < threads; i++) {
     int y_offset = std::min(i * y_per_thread, height);
@@ -356,25 +330,6 @@ void RawImageData::clearArea(iRectangle2D area) {
       out(y, x) = 0;
     }
   }
-}
-
-RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
-  if (this == &rhs)
-    return *this;
-
-  std::swap(p_, rhs.p_);
-
-  return *this;
-}
-
-RawImage& RawImage::operator=(const RawImage& rhs) noexcept {
-  if (this == &rhs)
-    return *this;
-
-  RawImage tmp(rhs);
-  *this = std::move(tmp);
-
-  return *this;
 }
 
 RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,

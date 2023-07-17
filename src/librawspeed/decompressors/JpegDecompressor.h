@@ -39,7 +39,7 @@ class JpegDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
 public:
-  JpegDecompressor(Buffer bs, const RawImage& img) : input(bs), mRaw(img) {}
+  JpegDecompressor(Buffer bs, RawImage img) : input(bs), mRaw(std::move(img)) {}
 
   void decode(uint32_t offsetX, uint32_t offsetY);
 };

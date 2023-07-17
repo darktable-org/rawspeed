@@ -35,6 +35,7 @@
 #include <cassert>                        // for assert
 #include <cstdint>                        // for uint16_t, uint32_t, int16_t
 #include <cstdio>                         // for size_t
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -464,9 +465,9 @@ NikonDecompressor::createPrefixCodeDecoder<PrefixCodeDecoder<>>(
   return ht;
 }
 
-NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
+NikonDecompressor::NikonDecompressor(RawImage raw, ByteStream metadata,
                                      uint32_t bitsPS_)
-    : mRaw(raw), bitsPS(bitsPS_) {
+    : mRaw(std::move(raw)), bitsPS(bitsPS_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <utility>
+#include <utility> // for move
 
 namespace rawspeed {
 

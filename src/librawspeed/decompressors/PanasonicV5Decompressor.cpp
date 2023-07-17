@@ -36,6 +36,7 @@
 #include <cstdint>                        // for uint8_t, uint16_t, uint32_t
 #include <iterator>                       // for back_insert_iterator, back...
 #include <memory>                         // for allocator_traits<>::value_...
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 namespace rawspeed {
@@ -59,10 +60,10 @@ constexpr PanasonicV5Decompressor::PacketDsc
     PanasonicV5Decompressor::FourteenBitPacket =
         PanasonicV5Decompressor::PacketDsc(/*bps=*/14);
 
-PanasonicV5Decompressor::PanasonicV5Decompressor(const RawImage& img,
+PanasonicV5Decompressor::PanasonicV5Decompressor(RawImage img,
                                                  ByteStream input_,
                                                  uint32_t bps_)
-    : mRaw(img), bps(bps_) {
+    : mRaw(std::move(img)), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

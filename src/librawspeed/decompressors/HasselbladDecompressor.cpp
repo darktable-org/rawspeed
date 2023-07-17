@@ -29,13 +29,14 @@
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/ByteStream.h"                // for ByteStream
 #include <cstdint>                        // for uint16_t
+#include <utility>                        // for move
 
 namespace rawspeed {
 
-HasselbladDecompressor::HasselbladDecompressor(const RawImage& mRaw_,
+HasselbladDecompressor::HasselbladDecompressor(RawImage mRaw_,
                                                const PerComponentRecipe& rec_,
                                                ByteStream input_)
-    : mRaw(mRaw_), rec(rec_), input(input_) {
+    : mRaw(std::move(mRaw_)), rec(rec_), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 

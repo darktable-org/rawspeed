@@ -62,7 +62,7 @@ class UncompressedDecompressor final : public AbstractDecompressor {
   template <typename Pump> void decodePackedInt(int rows, int row) const;
 
 public:
-  UncompressedDecompressor(ByteStream input, const RawImage& img,
+  UncompressedDecompressor(ByteStream input, RawImage img,
                            const iRectangle2D& crop, int inputPitchBytes,
                            int bitPerPixel, BitOrder order);
 

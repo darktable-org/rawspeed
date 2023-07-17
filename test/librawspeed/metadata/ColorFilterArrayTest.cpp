@@ -151,13 +151,13 @@ static const auto Bayer_RGB =
 static const auto Bayer_CYGM = ::testing::Values(
     CFAColor::CYAN, CFAColor::MAGENTA, CFAColor::YELLOW, CFAColor::FUJI_GREEN);
 
-INSTANTIATE_TEST_CASE_P(RGGB, ColorFilterArrayTest,
-                        testing::Combine(Bayer_RGB, Bayer_RGB, Bayer_RGB,
-                                         Bayer_RGB));
+INSTANTIATE_TEST_SUITE_P(RGGB, ColorFilterArrayTest,
+                         testing::Combine(Bayer_RGB, Bayer_RGB, Bayer_RGB,
+                                          Bayer_RGB));
 
-INSTANTIATE_TEST_CASE_P(CYGM, ColorFilterArrayTest,
-                        testing::Combine(Bayer_CYGM, Bayer_CYGM, Bayer_CYGM,
-                                         Bayer_CYGM));
+INSTANTIATE_TEST_SUITE_P(CYGM, ColorFilterArrayTest,
+                         testing::Combine(Bayer_CYGM, Bayer_CYGM, Bayer_CYGM,
+                                          Bayer_CYGM));
 
 static void setHelper(ColorFilterArray* cfa, Bayer2x2 param) {
   cfa->setCFA(square, std::get<0>(param), std::get<1>(param),
@@ -248,15 +248,15 @@ protected:
   int y;
 };
 
-INSTANTIATE_TEST_CASE_P(RGGB, ColorFilterArrayShiftTest,
-                        testing::Combine(Bayer_RGB, Bayer_RGB, Bayer_RGB,
-                                         Bayer_RGB, testing::Range(-2, 2),
-                                         testing::Range(-2, 2)));
+INSTANTIATE_TEST_SUITE_P(RGGB, ColorFilterArrayShiftTest,
+                         testing::Combine(Bayer_RGB, Bayer_RGB, Bayer_RGB,
+                                          Bayer_RGB, testing::Range(-2, 2),
+                                          testing::Range(-2, 2)));
 
-INSTANTIATE_TEST_CASE_P(CYGM, ColorFilterArrayShiftTest,
-                        testing::Combine(Bayer_CYGM, Bayer_CYGM, Bayer_CYGM,
-                                         Bayer_CYGM, testing::Range(-2, 2),
-                                         testing::Range(-2, 2)));
+INSTANTIATE_TEST_SUITE_P(CYGM, ColorFilterArrayShiftTest,
+                         testing::Combine(Bayer_CYGM, Bayer_CYGM, Bayer_CYGM,
+                                          Bayer_CYGM, testing::Range(-2, 2),
+                                          testing::Range(-2, 2)));
 
 TEST(ColorFilterArrayTestBasic, shiftDcrawFilter) {
   uint32_t bggr = 0x16161616;

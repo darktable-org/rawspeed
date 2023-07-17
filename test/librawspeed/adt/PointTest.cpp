@@ -275,7 +275,7 @@ static const Six valueSum[]{
     make_tuple(make_pair(5, 5), make_pair(5, 5), make_pair(10, 10)),
 };
 
-INSTANTIATE_TEST_CASE_P(SumTest, PointTest, ::testing::ValuesIn(valueSum));
+INSTANTIATE_TEST_SUITE_P(SumTest, PointTest, ::testing::ValuesIn(valueSum));
 TEST_P(PointTest, InPlaceAddTest1) {
   ASSERT_NO_THROW({
     a += b;
@@ -338,9 +338,9 @@ protected:
 
   iPoint2D p;
 };
-INSTANTIATE_TEST_CASE_P(HasPositiveAreaTest, HasPositiveAreaTest,
-                        ::testing::Combine(::testing::Range(-2, 3),
-                                           ::testing::Range(-2, 3)));
+INSTANTIATE_TEST_SUITE_P(HasPositiveAreaTest, HasPositiveAreaTest,
+                         ::testing::Combine(::testing::Range(-2, 3),
+                                            ::testing::Range(-2, 3)));
 static const iPoint2D PositiveAreaData[] = {
     {1, 1},
     {1, 2},
@@ -420,7 +420,7 @@ static const areaType valueArea[]{
     make_tuple(make_pair(maxVal, maxVal), maxAreaVal),
 
 };
-INSTANTIATE_TEST_CASE_P(AreaTest, AreaTest, ::testing::ValuesIn(valueArea));
+INSTANTIATE_TEST_SUITE_P(AreaTest, AreaTest, ::testing::ValuesIn(valueArea));
 TEST_P(AreaTest, AreaTest) {
   ASSERT_NO_THROW({ ASSERT_EQ(p.area(), a); });
 }
@@ -672,8 +672,8 @@ static const operatorsType operatorsValues[]{
     make_tuple(make_pair(1, 1), make_pair(1, 1), true, false, false, true,
                true)};
 
-INSTANTIATE_TEST_CASE_P(OperatorsTests, OperatorsTest,
-                        ::testing::ValuesIn(operatorsValues));
+INSTANTIATE_TEST_SUITE_P(OperatorsTests, OperatorsTest,
+                         ::testing::ValuesIn(operatorsValues));
 
 TEST_P(OperatorsTest, OperatorEQTest) {
   ASSERT_NO_THROW({ ASSERT_EQ(a == b, eq); });
@@ -809,8 +809,8 @@ static const Six smallestValues[]{
 
 class SmallestTest : public PointTest {};
 
-INSTANTIATE_TEST_CASE_P(GetSmallestTest, SmallestTest,
-                        ::testing::ValuesIn(smallestValues));
+INSTANTIATE_TEST_SUITE_P(GetSmallestTest, SmallestTest,
+                         ::testing::ValuesIn(smallestValues));
 TEST_P(SmallestTest, GetSmallestTest) {
   ASSERT_NO_THROW({
     ASSERT_EQ(a.getSmallest(b), c);

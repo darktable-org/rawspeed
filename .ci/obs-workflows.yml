@@ -1,0 +1,18 @@
+develop:
+  steps:
+    - trigger_services:
+        project: graphics:darktable:master
+        package: rawspeed
+  filters:
+    event: push
+    branches:
+      only:
+        - develop
+pr:
+  steps:
+    - branch_package:
+        source_project: graphics:darktable:master
+        source_package: rawspeed
+        target_project: graphics:darktable:github
+  filters:
+    event: pull_request

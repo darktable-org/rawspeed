@@ -103,7 +103,7 @@ protected:
   ColorFilterArray cfa;
 };
 
-INSTANTIATE_TEST_CASE_P(All2x2CFAs, BayerPhaseFromCFATest, AllPossible2x2CFAs);
+INSTANTIATE_TEST_SUITE_P(All2x2CFAs, BayerPhaseFromCFATest, AllPossible2x2CFAs);
 TEST_P(BayerPhaseFromCFATest, getAsBayerPhaseTest) {
   EXPECT_EQ(expected, rawspeed::getAsBayerPhase(cfa));
 }
@@ -126,8 +126,8 @@ protected:
   std::array<CFAColor, 4> expected;
 };
 
-INSTANTIATE_TEST_CASE_P(AllBayerPhases, BayerPhaseToCFATest,
-                        AllKnownBayerPhases);
+INSTANTIATE_TEST_SUITE_P(AllBayerPhases, BayerPhaseToCFATest,
+                         AllKnownBayerPhases);
 TEST_P(BayerPhaseToCFATest, getAsCFAColorsTest) {
   EXPECT_EQ(expected, rawspeed::getAsCFAColors(*in));
 }
@@ -144,8 +144,8 @@ protected:
   BayerPhase src;
   BayerPhase tgt;
 };
-INSTANTIATE_TEST_CASE_P(AllBayerPhaseShifts, BayerPhaseShifTest,
-                        AllPossibleBayerPhaseShifts);
+INSTANTIATE_TEST_SUITE_P(AllBayerPhaseShifts, BayerPhaseShifTest,
+                         AllPossibleBayerPhaseShifts);
 
 struct AbstractElement {};
 

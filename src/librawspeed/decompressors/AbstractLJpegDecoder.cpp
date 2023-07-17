@@ -39,8 +39,8 @@
 
 namespace rawspeed {
 
-AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, const RawImage& img)
-    : input(bs), mRaw(img) {
+AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, RawImage img)
+    : input(bs), mRaw(std::move(img)) {
   input.setByteOrder(Endianness::big);
 
   if (!mRaw->dim.hasPositiveArea())
@@ -66,13 +66,7 @@ void AbstractLJpegDecoder::decodeSOI() {
     bool SOS = false;
   } FoundMarkers;
 
-  JpegMarker m;
-  do {
-    m = getNextMarker(true);
-
-    if (m == JpegMarker::EOI)
-      break;
-
+  for (JpegMarker m; (m = getNextMarker(true)) != JpegMarker::EOI;) {
     ByteStream data(input.getStream(input.peekU16()));
     data.skipBytes(2); // headerLength
 
@@ -115,7 +109,7 @@ void AbstractLJpegDecoder::decodeSOI() {
     default: // Just let it skip to next marker
       break;
     }
-  } while (m != JpegMarker::EOI);
+  }
 
   if (!FoundMarkers.SOS)
     ThrowRDE("Did not find SOS marker.");

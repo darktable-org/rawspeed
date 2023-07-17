@@ -135,9 +135,9 @@ B=2 # sizeof, bytes
 */
 class ushort16Test
     : public AbstractGetByteSwappedTest<ushort16TType, uint16_t> {};
-INSTANTIATE_TEST_CASE_P(ushort16Test, ushort16Test,
-                        ::testing::Combine(::testing::ValuesIn(ushort16Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(ushort16Test, ushort16Test,
+                         ::testing::Combine(::testing::ValuesIn(ushort16Values),
+                                            ::testing::Bool()));
 TEST_P(ushort16Test, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }
@@ -179,9 +179,9 @@ TEST_P(ushort16Test, getU16NOP) {
 
 class short16Test : public AbstractGetByteSwappedTest<ushort16TType, int16_t> {
 };
-INSTANTIATE_TEST_CASE_P(short16Test, short16Test,
-                        ::testing::Combine(::testing::ValuesIn(ushort16Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(short16Test, short16Test,
+                         ::testing::Combine(::testing::ValuesIn(ushort16Values),
+                                            ::testing::Bool()));
 TEST_P(short16Test, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }
@@ -210,9 +210,9 @@ TEST_P(short16Test, getNOP) {
 B=4 # sizeof, bytes
 */
 class uint32Test : public AbstractGetByteSwappedTest<uint32TType, uint32_t> {};
-INSTANTIATE_TEST_CASE_P(uint32Test, uint32Test,
-                        ::testing::Combine(::testing::ValuesIn(uint32Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(uint32Test, uint32Test,
+                         ::testing::Combine(::testing::ValuesIn(uint32Values),
+                                            ::testing::Bool()));
 TEST_P(uint32Test, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }
@@ -253,9 +253,9 @@ TEST_P(uint32Test, getU32NOP) {
 }
 
 class int32Test : public AbstractGetByteSwappedTest<uint32TType, int32_t> {};
-INSTANTIATE_TEST_CASE_P(int32Test, int32Test,
-                        ::testing::Combine(::testing::ValuesIn(uint32Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(int32Test, int32Test,
+                         ::testing::Combine(::testing::ValuesIn(uint32Values),
+                                            ::testing::Bool()));
 TEST_P(int32Test, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }
@@ -284,9 +284,9 @@ TEST_P(int32Test, getNOP) {
 B=8 # sizeof, bytes
 */
 class uint64Test : public AbstractGetByteSwappedTest<uint64TType, uint64_t> {};
-INSTANTIATE_TEST_CASE_P(uint64Test, uint64Test,
-                        ::testing::Combine(::testing::ValuesIn(uint64Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(uint64Test, uint64Test,
+                         ::testing::Combine(::testing::ValuesIn(uint64Values),
+                                            ::testing::Bool()));
 TEST_P(uint64Test, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }
@@ -312,9 +312,9 @@ TEST_P(uint64Test, getNOP) {
 }
 
 class floatTest : public AbstractGetByteSwappedTest<uint32TType, float> {};
-INSTANTIATE_TEST_CASE_P(floatTest, floatTest,
-                        ::testing::Combine(::testing::ValuesIn(uint32Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(floatTest, floatTest,
+                         ::testing::Combine(::testing::ValuesIn(uint32Values),
+                                            ::testing::Bool()));
 TEST_P(floatTest, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }
@@ -340,9 +340,9 @@ TEST_P(floatTest, getNOP) {
 }
 
 class doubleTest : public AbstractGetByteSwappedTest<uint64TType, double> {};
-INSTANTIATE_TEST_CASE_P(doubleTest, doubleTest,
-                        ::testing::Combine(::testing::ValuesIn(uint64Values),
-                                           ::testing::Bool()));
+INSTANTIATE_TEST_SUITE_P(doubleTest, doubleTest,
+                         ::testing::Combine(::testing::ValuesIn(uint64Values),
+                                            ::testing::Bool()));
 TEST_P(doubleTest, swap) {
   ASSERT_PRED_FORMAT2(HexEquals{}, getByteSwapped(in), expected);
 }

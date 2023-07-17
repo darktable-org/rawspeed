@@ -279,12 +279,12 @@ struct Dsc {
 
 template <typename PrefixCodeDecoder>
 Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
-    const RawImage& mRaw_,
+    RawImage mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
     iPoint2D frame_, Cr2SliceWidths slicing_,
     std::vector<PerComponentRecipe> rec_, ByteStream input_)
-    : mRaw(mRaw_), format(std::move(format_)), frame(frame_), slicing(slicing_),
-      rec(std::move(rec_)), input(input_) {
+    : mRaw(std::move(mRaw_)), format(std::move(format_)), frame(frame_),
+      slicing(slicing_), rec(std::move(rec_)), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 

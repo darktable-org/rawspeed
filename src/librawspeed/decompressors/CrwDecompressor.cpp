@@ -37,15 +37,17 @@
 #include <array>                          // for array
 #include <cstdint>                        // for uint8_t, uint16_t, int...
 #include <tuple>                          // for array
+#include <utility>                        // for move
 #include <vector>                         // for vector
 
 using std::array;
 
 namespace rawspeed {
 
-CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
+CrwDecompressor::CrwDecompressor(RawImage img, uint32_t dec_table,
                                  bool lowbits_, ByteStream rawData)
-    : mRaw(img), mHuff(initHuffTables(dec_table)), lowbits(lowbits_) {
+    : mRaw(std::move(img)), mHuff(initHuffTables(dec_table)),
+      lowbits(lowbits_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

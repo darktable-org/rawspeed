@@ -161,7 +161,7 @@ class AbstractLJpegDecoder : public AbstractDecompressor {
       {}}; // 4 pointers into the store
 
 public:
-  AbstractLJpegDecoder(ByteStream bs, const RawImage& img);
+  AbstractLJpegDecoder(ByteStream bs, RawImage img);
 
   virtual ~AbstractLJpegDecoder() = default;
 

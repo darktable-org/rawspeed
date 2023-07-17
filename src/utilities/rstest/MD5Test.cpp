@@ -68,7 +68,7 @@ static const std::array<MD5Testcase, 7> testCases = {
              "678901234567890"),
 };
 
-INSTANTIATE_TEST_CASE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
+INSTANTIATE_TEST_SUITE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
 TEST_P(MD5Test, CheckTestCaseSet) {
   ASSERT_NO_THROW({
     rawspeed::md5::md5_state hash;

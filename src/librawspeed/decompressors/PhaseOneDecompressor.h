@@ -50,8 +50,7 @@ class PhaseOneDecompressor final : public AbstractDecompressor {
   void prepareStrips();
 
 public:
-  PhaseOneDecompressor(const RawImage& img,
-                       std::vector<PhaseOneStrip>&& strips_);
+  PhaseOneDecompressor(RawImage img, std::vector<PhaseOneStrip>&& strips_);
 
   void decompress() const;
 };

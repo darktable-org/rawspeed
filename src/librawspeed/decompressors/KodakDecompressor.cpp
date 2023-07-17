@@ -32,12 +32,13 @@
 #include <algorithm>                      // for min, fill_n
 #include <array>                          // for array
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
+#include <utility>                        // for move
 
 namespace rawspeed {
 
-KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
-                                     int bps_, bool uncorrectedRawValues_)
-    : mRaw(img), input(bs), bps(bps_),
+KodakDecompressor::KodakDecompressor(RawImage img, ByteStream bs, int bps_,
+                                     bool uncorrectedRawValues_)
+    : mRaw(std::move(img)), input(bs), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))

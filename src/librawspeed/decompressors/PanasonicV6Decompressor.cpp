@@ -30,6 +30,7 @@
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include <array>                          // for array
 #include <cstdint>                        // for uint16_t, uint32_t
+#include <utility>                        // for move
 
 namespace rawspeed {
 
@@ -130,10 +131,10 @@ pana_cs6_page_decoder<14>::fillBuffer(ByteStream bs_) noexcept {
 
 } // namespace
 
-PanasonicV6Decompressor::PanasonicV6Decompressor(const RawImage& img,
+PanasonicV6Decompressor::PanasonicV6Decompressor(RawImage img,
                                                  ByteStream input_,
                                                  uint32_t bps_)
-    : mRaw(img), bps(bps_) {
+    : mRaw(std::move(img)), bps(bps_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

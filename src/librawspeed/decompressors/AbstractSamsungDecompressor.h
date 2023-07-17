@@ -22,6 +22,7 @@
 
 #include "common/RawImage.h"                    // for RawImage
 #include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
+#include <utility>                              // for move
 
 namespace rawspeed {
 
@@ -30,7 +31,7 @@ protected:
   RawImage mRaw;
 
 public:
-  explicit AbstractSamsungDecompressor(const RawImage& raw) : mRaw(raw) {}
+  explicit AbstractSamsungDecompressor(RawImage raw) : mRaw(std::move(raw)) {}
 };
 
 } // namespace rawspeed

@@ -55,7 +55,7 @@ class OlympusDecompressor final : public AbstractDecompressor {
   void decompressRow(BitPumpMSB& bits, int row) const;
 
 public:
-  explicit OlympusDecompressor(const RawImage& img);
+  explicit OlympusDecompressor(RawImage img);
   void decompress(ByteStream input) const;
 };
 

@@ -32,6 +32,7 @@
 #include <array>                          // for array
 #include <cstdlib>                        // for abs
 #include <type_traits>                    // for enable_if_t
+#include <utility>                        // for move
 
 namespace {
 
@@ -49,7 +50,7 @@ constexpr RAWSPEED_READNONE bool SignBit(T x) {
 
 namespace rawspeed {
 
-OlympusDecompressor::OlympusDecompressor(const RawImage& img) : mRaw(img) {
+OlympusDecompressor::OlympusDecompressor(RawImage img) : mRaw(std::move(img)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");

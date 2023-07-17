@@ -57,11 +57,12 @@ protected:
   bool isVertical{false}; // Otherwise horizontal
 };
 
-INSTANTIATE_TEST_CASE_P(BlackAreas, BlackAreaTest,
-                        testing::Combine(testing::Range(0, 1000, 250), // offset
-                                         testing::Range(0, 1000, 250), // size
-                                         testing::Bool() // isVertical
-                                         ));
+INSTANTIATE_TEST_SUITE_P(BlackAreas, BlackAreaTest,
+                         testing::Combine(testing::Range(0, 1000,
+                                                         250), // offset
+                                          testing::Range(0, 1000, 250), // size
+                                          testing::Bool() // isVertical
+                                          ));
 
 TEST_P(BlackAreaTest, Constructor) {
   ASSERT_NO_THROW({ BlackArea Area(offset, size, isVertical); });
