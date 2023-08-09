@@ -11632,7 +11632,14 @@
 		<Sensor black="142" white="4095"/>
 		<Aliases>
 			<Alias>DC-TZ200</Alias>
+			<Alias>DC-TZ200D</Alias>
+			<Alias>DC-TZ202D</Alias>
+			<Alias>DC-TZ220</Alias>
+			<Alias>DC-TZ220D</Alias>
 			<Alias>DC-ZS200</Alias>
+			<Alias>DC-ZS200D</Alias>
+			<Alias>DC-ZS220</Alias>
+			<Alias>DC-ZS220D</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
