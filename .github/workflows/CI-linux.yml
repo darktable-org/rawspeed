@@ -203,7 +203,7 @@ jobs:
           path: ${{ env.RPUU_DST }}
           key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
       - name: Fetch/update raw.pixls.us masterset
-        timeout-minutes: 1
+        timeout-minutes: 2
         if: inputs.flavor == 'Coverage'
         env:
           RPUU_DST: ${{ env.RPUU_DST }}

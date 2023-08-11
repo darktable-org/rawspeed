@@ -34,14 +34,14 @@ env:
 jobs:
   windows-msys2:
     name: ${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-    timeout-minutes: 15
+    timeout-minutes: 16
     runs-on: ${{ inputs.os }}
     defaults:
       run:
         shell: msys2 {0}
     steps:
       - name: Fetch/Checkout RawSpeed git repo
-        timeout-minutes: 1
+        timeout-minutes: 2
         uses: actions/checkout@v3
         with:
           path: 'rawspeed'
@@ -82,7 +82,7 @@ jobs:
           cmake -E make_directory "${INSTALL_PREFIX}"
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
       - name: Build
-        timeout-minutes: 12
+        timeout-minutes: 13
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
