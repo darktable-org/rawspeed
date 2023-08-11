@@ -196,14 +196,14 @@ jobs:
           rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/
           echo "::set-output name=rpuu-digest-hash::$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')"
       - name: Cache raw.pixls.us masterset
-        timeout-minutes: 1
+        timeout-minutes: 2
         if: inputs.flavor == 'Coverage'
         uses: actions/cache@v3
         with:
           path: ${{ env.RPUU_DST }}
           key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
       - name: Fetch/update raw.pixls.us masterset
-        timeout-minutes: 10
+        timeout-minutes: 3
         if: inputs.flavor == 'Coverage'
         env:
           RPUU_DST: ${{ env.RPUU_DST }}
@@ -293,7 +293,7 @@ jobs:
           fi
           "${SRC_DIR}/.ci/ci-script.sh"
       - name: Build
-        timeout-minutes: ${{ inputs.flavor != 'ClangTidy' && (inputs.flavor != 'CodeQLAnalysis' && 7 || 12) || 22 }}
+        timeout-minutes: ${{ inputs.flavor != 'ClangTidy' && (inputs.flavor != 'CodeQLAnalysis' && 7 || 12) || 25 }}
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
