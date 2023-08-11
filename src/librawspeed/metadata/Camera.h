@@ -107,6 +107,12 @@ public:
   int decoderVersion;
   Hints hints;
   std::vector<NotARational<int>> color_matrix;
+  /*
+    Signals if there's a proper crop info available in the database entry.
+    This flag can be used to decide whether to figure out the crop based on
+    the camera vendor specs.
+  */
+  bool cropAvailable = false;
 
 protected:
 #ifdef HAVE_PUGIXML

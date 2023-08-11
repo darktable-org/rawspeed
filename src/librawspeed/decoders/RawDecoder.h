@@ -142,6 +142,10 @@ protected:
                            const std::string& model, const std::string& mode,
                            int iso_speed = 0);
 
+  /* Shall return a crop area if none is specified in the camera database
+   * entry. Override this to apply camera vendor defaults (where available). */
+  virtual iRectangle2D getDefaultCrop();
+
   /* Generic decompressor for uncompressed images */
   /* order: Order of the bits - see Common.h for possibilities. */
   void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order) const;

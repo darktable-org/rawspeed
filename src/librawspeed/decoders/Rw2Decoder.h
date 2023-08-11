@@ -42,12 +42,14 @@ public:
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
+  iRectangle2D getDefaultCrop() override;
 
 protected:
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
 
 private:
   void parseCFA() const;
+  [[nodiscard]] const TiffIFD* getRaw() const;
   [[nodiscard]] std::string guessMode() const;
 };
 
