@@ -17563,6 +17563,9 @@
 	<Camera make="SIGMA" model="SIGMA DP1 Merrill" mode="dng" supported="no-samples">
 		<ID make="Sigma" model="DP1 Merrill">Sigma DP1 Merrill</ID>
 	</Camera>
+	<Camera make="SIGMA" model="sd Quattro" mode="dng">
+		<ID make="Sigma" model="sd Quattro">sd Quattro</ID>
+	</Camera>
 	<Camera make="LGE" model="Nexus 5X" mode="dng">
 		<ID make="LG" model="Nexus 5X">LG Nexus 5X</ID>
 	</Camera>
