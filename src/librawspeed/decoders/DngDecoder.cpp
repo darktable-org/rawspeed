@@ -662,6 +662,8 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
   }
 
+  parseColorMatrix();
+
   // Fetch the white balance
   if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
     const TiffEntry* as_shot_neutral =
@@ -672,22 +674,30 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
       }
     }
-  } else if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
+  } else if (!mRaw->metadata.colorMatrix.empty() &&
+             mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
     const TiffEntry* as_shot_white_xy =
         mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
     if (as_shot_white_xy->count == 2) {
-      mRaw->metadata.wbCoeffs[0] = as_shot_white_xy->getFloat(0);
-      mRaw->metadata.wbCoeffs[1] = as_shot_white_xy->getFloat(1);
-      mRaw->metadata.wbCoeffs[2] =
-          1 - mRaw->metadata.wbCoeffs[0] - mRaw->metadata.wbCoeffs[1];
+      // See http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
+      const float x = as_shot_white_xy->getFloat(0);
+      const float y = as_shot_white_xy->getFloat(1);
+      if (y > 0.0F) {
+        constexpr float Y = 1.0F;
+        const std::array<float, 3> as_shot_white = {
+            {x * Y / y, Y, (1 - x - y) * Y / y}};
 
-      const std::array<float, 3> d65_white = {{0.950456, 1, 1.088754}};
-      for (uint32_t i = 0; i < 3; i++)
-        mRaw->metadata.wbCoeffs[i] /= d65_white[i];
+        // Convert from XYZ to camera reference values first
+        for (uint32_t i = 0; i < 3; i++) {
+          float c =
+              float(mRaw->metadata.colorMatrix[i * 3 + 0]) * as_shot_white[0] +
+              float(mRaw->metadata.colorMatrix[i * 3 + 1]) * as_shot_white[1] +
+              float(mRaw->metadata.colorMatrix[i * 3 + 2]) * as_shot_white[2];
+          mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
+        }
+      }
     }
   }
-
-  parseColorMatrix();
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */
