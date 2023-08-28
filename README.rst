@@ -84,9 +84,6 @@ The main objectives were to make a very fast loader that worked for 75% of the c
 
 RawSpeed is not at the moment a separate library, so you have to include it in your project directly.
 
-Please see <https://rawspeed.org/> for documentation.
-Doxygen-generated documentation is available at <https://rawspeed.org/doxygen>
-
 Submitting Requests and Patches
 --------------------------------------------------------------------------------
 Please go to the `github page <rawspeed_>`_ and submit your (pull)requests and issues there.

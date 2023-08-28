@@ -11372,7 +11372,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
-		<Crop x="0" y="0" width="-58" height="0"/>
 		<Sensor black="148" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -11384,7 +11383,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DC-G9" mode="4:3">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
-		<Crop x="0" y="0" width="-58" height="0"/>
 		<Sensor black="148" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -11632,7 +11630,14 @@
 		<Sensor black="142" white="4095"/>
 		<Aliases>
 			<Alias>DC-TZ200</Alias>
+			<Alias>DC-TZ200D</Alias>
+			<Alias>DC-TZ202D</Alias>
+			<Alias>DC-TZ220</Alias>
+			<Alias>DC-TZ220D</Alias>
 			<Alias>DC-ZS200</Alias>
+			<Alias>DC-ZS200D</Alias>
+			<Alias>DC-ZS220</Alias>
+			<Alias>DC-ZS220D</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -13667,6 +13672,24 @@
 				<ColorMatrixRow plane="0">7657 -2847 -607</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4083 11966 2389</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-684 1418 5844</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="SONY" model="ILCE-6700">
+		<ID make="Sony" model="ILCE-6700">Sony ILCE-6700</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-28" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">6972 -2408 -600</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4330 12101 2515</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-388 1277 5847</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -17514,16 +17537,16 @@
 	<Camera make="SAMSUNG DIGITAL IMA" model="SAMSUNG GX20" mode="dng" supported="no-samples">
 		<ID make="Samsung" model="GX20">Samsung GX20</ID>
 	</Camera>
-	<Camera make="samsung" model="SM-G920F" supported="no-samples">
+	<Camera make="samsung" model="SM-G920F" mode="dng">
 		<ID make="Samsung" model="G920F">Samsung G920F</ID>
 	</Camera>
-	<Camera make="samsung" model="SM-G935F" supported="no-samples">
+	<Camera make="samsung" model="SM-G935F" mode="dng">
 		<ID make="Samsung" model="G935F">Samsung G935F</ID>
 	</Camera>
-	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX10" supported="no-samples">
+	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX10" mode="dng">
 		<ID make="Samsung" model="GX10">Samsung GX10</ID>
 	</Camera>
-	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX20" supported="no-samples">
+	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX20" mode="dng">
 		<ID make="Samsung" model="GX20">Samsung GX20</ID>
 	</Camera>
 	<Camera make="Nokia" model="Lumia 1020" mode="dng">
@@ -17557,6 +17580,9 @@
 	</Camera>
 	<Camera make="SIGMA" model="SIGMA DP1 Merrill" mode="dng" supported="no-samples">
 		<ID make="Sigma" model="DP1 Merrill">Sigma DP1 Merrill</ID>
+	</Camera>
+	<Camera make="SIGMA" model="sd Quattro" mode="dng">
+		<ID make="Sigma" model="sd Quattro">sd Quattro</ID>
 	</Camera>
 	<Camera make="LGE" model="Nexus 5X" mode="dng">
 		<ID make="LG" model="Nexus 5X">LG Nexus 5X</ID>

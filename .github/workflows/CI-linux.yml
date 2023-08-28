@@ -49,6 +49,7 @@ jobs:
       options: --tmpfs /tmp:exec --tmpfs /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}:exec
     steps:
       - name: Configure APT
+        timeout-minutes: 1
         run: |
           set -xe
           tee /etc/dpkg/dpkg.cfg.d/force-unsafe-io > /dev/null <<EOT
@@ -74,7 +75,31 @@ jobs:
           tee /etc/apt/apt.conf.d/80fixmissing > /dev/null <<EOT
           APT::Get::Fix-Missing "true";
           EOT
+          rm -rf /etc/apt/sources.list*
+          if [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://debian-archive.trafficmanager.net/debian trixie main
+          deb http://debian-archive.trafficmanager.net/debian trixie-updates main
+          deb http://debian-archive.trafficmanager.net/debian-security trixie-security main
+          deb http://debian-archive.trafficmanager.net/debian trixie-backports main
+          EOT
+          elif [ "${{ inputs.distro }}" = "debian:bookworm-slim" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://debian-archive.trafficmanager.net/debian bookworm main
+          deb http://debian-archive.trafficmanager.net/debian bookworm-updates main
+          deb http://debian-archive.trafficmanager.net/debian-security bookworm-security main
+          deb http://debian-archive.trafficmanager.net/debian bookworm-backports main
+          EOT
+          elif [ "${{ inputs.distro }}" = "ubuntu:jammy" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://azure.archive.ubuntu.com/ubuntu jammy main universe
+          deb http://azure.archive.ubuntu.com/ubuntu jammy-updates main universe
+          deb http://azure.archive.ubuntu.com/ubuntu jammy-security main universe
+          deb http://azure.archive.ubuntu.com/ubuntu jammy-backports main universe
+          EOT
+          fi
       - name: Update base packages
+        timeout-minutes: 1
         env:
           DEBIAN_FRONTEND: noninteractive
           COMPILER_FAMILY: ${{ inputs.compiler-family }}
@@ -86,6 +111,7 @@ jobs:
           apt-get install eatmydata
           eatmydata apt-get upgrade
       - name: Install necessary packages
+        timeout-minutes: 1
         env:
           DEBIAN_FRONTEND: noninteractive
           COMPILER_FAMILY: ${{ inputs.compiler-family }}
@@ -148,16 +174,19 @@ jobs:
           fi
           ln -s /usr/bin/ld.gold /usr/bin/ld
       - name: Configure git
+        timeout-minutes: 1
         run: |
           set -xe
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - uses: actions/checkout@v3
-        name: Fetch/Checkout RawSpeed git repo
+      - name: Fetch/Checkout RawSpeed git repo
+        timeout-minutes: 1
+        uses: actions/checkout@v3
         with:
           path: 'rawspeed'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - if: inputs.flavor == 'Coverage'
-        name: Fetch raw.pixls.us masterset digest
+      - name: Fetch raw.pixls.us masterset digest
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         env:
           RPUU_DST: ${{ env.RPUU_DST }}
         id: fetch-rpuu-digest
@@ -166,29 +195,33 @@ jobs:
           mkdir -p ${RPUU_DST}
           rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/
           echo "::set-output name=rpuu-digest-hash::$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')"
-      - if: inputs.flavor == 'Coverage'
-        name: Cache raw.pixls.us masterset
+      - name: Cache raw.pixls.us masterset
+        timeout-minutes: 2
+        if: inputs.flavor == 'Coverage'
         uses: actions/cache@v3
         with:
           path: ${{ env.RPUU_DST }}
           key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
-      - if: inputs.flavor == 'Coverage'
-        name: Fetch/update raw.pixls.us masterset
+      - name: Fetch/update raw.pixls.us masterset
+        timeout-minutes: 3
+        if: inputs.flavor == 'Coverage'
         env:
           RPUU_DST: ${{ env.RPUU_DST }}
         run: |
           set -xe
           rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ ${RPUU_DST}/
           cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1
-      - if: inputs.flavor == 'ClangStaticAnalysis'
-        name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
+      - name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'ClangStaticAnalysis'
         uses: actions/checkout@v3
         with:
           repository: 'Ericsson/codechecker'
           path: 'codechecker'
           fetch-depth: '1'
-      - if: inputs.flavor == 'ClangStaticAnalysis'
-        name: Install CodeChecker (for clang static analysis)
+      - name: Install CodeChecker (for clang static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'ClangStaticAnalysis'
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -199,19 +232,22 @@ jobs:
           . $PWD/venv/bin/activate
           BUILD_LOGGER_64_BIT_ONLY=YES BUILD_UI_DIST=NO make package
           export PATH="$PWD/build/CodeChecker/bin:$PATH"
-      - if: inputs.flavor == 'CodeQLAnalysis'
-        name: Initialize CodeQL (for CodeQL static analysis)
+      - name: Initialize CodeQL (for CodeQL static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'CodeQLAnalysis'
         uses: github/codeql-action/init@v2
         with:
           languages: cpp
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'stable'
-        name: Set up JDK 11 (for SonarCloud static analysis)
+      - name: Set up JDK 11 (for SonarCloud static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: 11
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'stable'
-        name: Download and set up sonar-scanner (for SonarCloud static analysis)
+      - name: Download and set up sonar-scanner (for SonarCloud static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
         env:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
         run: |
@@ -224,8 +260,9 @@ jobs:
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
           echo "$HOME/.sonar/sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux/bin" >> $GITHUB_PATH
-      - if: inputs.flavor == 'ClangTidy'
-        name: Verify that the source code is properly formatted
+      - name: Verify that the source code is properly formatted
+        timeout-minutes: 1
+        if: inputs.flavor == 'ClangTidy'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
         run: |
@@ -233,6 +270,7 @@ jobs:
           cd "$SRC_DIR"
           git ls-tree -r --name-only HEAD | grep -vf .clang-format-ignore | xargs clang-format-${{ inputs.compiler-version }} --verbose --dry-run -Werror
       - name: Configure
+        timeout-minutes: 1
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -255,6 +293,7 @@ jobs:
           fi
           "${SRC_DIR}/.ci/ci-script.sh"
       - name: Build
+        timeout-minutes: ${{ inputs.flavor != 'ClangTidy' && (inputs.flavor != 'CodeQLAnalysis' && 7 || 12) || 25 }}
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -264,6 +303,7 @@ jobs:
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
       - name: Test (unit tests)
+        timeout-minutes: 1
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -272,8 +312,9 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data (unit tests)
+      - name: Collect source coverage data (unit tests)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -285,8 +326,9 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
-      - if: inputs.flavor == 'Coverage'
-        name: Upload coverage to Codecov (unit tests)
+      - name: Upload coverage to Codecov (unit tests)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         uses: codecov/codecov-action@v3
         env:
           OS: linux
@@ -302,6 +344,7 @@ jobs:
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/unittests
           fail_ci_if_error: true
       - name: Test (benchmarks)
+        timeout-minutes: 1
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -310,8 +353,9 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data (benchmarks)
+      - name: Collect source coverage data (benchmarks)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -323,8 +367,9 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
-      - if: inputs.flavor == 'Coverage'
-        name: Upload coverage to Codecov (benchmarks)
+      - name: Upload coverage to Codecov (benchmarks)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         uses: codecov/codecov-action@v3
         env:
           OS: linux
@@ -339,8 +384,9 @@ jobs:
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/benchmarks
           fail_ci_if_error: true
-      - if: inputs.flavor == 'Coverage'
-        name: Test (integration)
+      - name: Test (integration)
+        timeout-minutes: ${{ inputs.flavor != 'Coverage' && 1 || 31 }}
+        if: inputs.flavor == 'Coverage'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -350,8 +396,9 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - if: inputs.flavor == 'Coverage'
-        name: Collect source coverage data (integration)
+      - name: Collect source coverage data (integration)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -363,8 +410,9 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-rsa" "${COVERAGE_REPORT_PREFIX}/integration"
-      - if: inputs.flavor == 'Coverage'
-        name: Upload coverage to Codecov (integration)
+      - name: Upload coverage to Codecov (integration)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
         uses: codecov/codecov-action@v3
         env:
           OS: linux
@@ -380,6 +428,7 @@ jobs:
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/integration
           fail_ci_if_error: true
       - name: Install
+        timeout-minutes: 1
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -388,8 +437,9 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
-      - if: inputs.flavor == 'ClangStaticAnalysis'
-        name: Perform clang static analysis (plain mode)
+      - name: Perform clang static analysis (plain mode)
+        timeout-minutes: 25
+        if: inputs.flavor == 'ClangStaticAnalysis'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -406,14 +456,16 @@ jobs:
           set -xe
           tar -cvJ -f "$GITHUB_WORKSPACE/codechecker_report.tar.xz" -C "${BUILD_DIR}" "codechecker_report"
           [ $bugs -eq 0 ] || exit 1
-      - uses: actions/upload-artifact@v3
+      - name: Upload results of clang static analysis (plain mode)
+        timeout-minutes: 1
         if: failure()
-        name: Upload results of clang static analysis (plain mode)
+        uses: actions/upload-artifact@v3
         with:
           name: codechecker_report.tar.xz
           path: ${{ github.workspace }}/codechecker_report.tar.xz
-      - if: inputs.flavor == 'ClangStaticAnalysis'
-        name: Perform clang static analysis (CTU mode)
+      - name: Perform clang static analysis (CTU mode)
+        timeout-minutes: 25
+        if: inputs.flavor == 'ClangStaticAnalysis'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
@@ -430,17 +482,20 @@ jobs:
           set -xe
           tar -cvJ -f "$GITHUB_WORKSPACE/codechecker_ctu_report.tar.xz" -C "${BUILD_DIR}" "codechecker_ctu_report"
           [ $bugs -eq 0 ] || exit 1
-      - uses: actions/upload-artifact@v3
+      - name: Upload results of clang static analysis (CTU mode)
+        timeout-minutes: 1
+        uses: actions/upload-artifact@v3
         if: failure()
-        name: Upload results of clang static analysis (CTU mode)
         with:
           name: codechecker_ctu_report.tar.xz
           path: ${{ github.workspace }}/codechecker_ctu_report.tar.xz
-      - if: inputs.flavor == 'CodeQLAnalysis'
-        name: Perform CodeQL static analysis
+      - name: Perform CodeQL static analysis
+        timeout-minutes: 11
+        if: inputs.flavor == 'CodeQLAnalysis'
         uses: github/codeql-action/analyze@v2
-      - if: inputs.flavor == 'SonarCloudStaticAnalysis'
-        name: Perform SonarCloud static analysis
+      - name: Perform SonarCloud static analysis
+        timeout-minutes: 6
+        if: inputs.flavor == 'SonarCloudStaticAnalysis'
         env:
           SONAR_SERVER_URL: "https://sonarcloud.io"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

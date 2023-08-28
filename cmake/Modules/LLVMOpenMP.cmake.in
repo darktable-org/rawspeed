@@ -33,8 +33,8 @@ else()
     message(WARNING "Did not find LLVM OpenMP runtime library sources! Fetching from web...")
     ExternalProject_Add(
       llvm-openmp
-      URL               https://releases.llvm.org/7.0.0/openmp-7.0.0.src.tar.xz
-      URL_HASH          SHA512=bda383d62c822db41504d7774974809cd2af042b03a0b4ca450cc1478c5977682f5c646734801c1b7a16233141d62359c17e87e1435c48a222e159a8763f8857
+      URL               https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/openmp-14.0.6.src.tar.xz
+      URL_HASH          SHA512=0b29e25354d58d3f851c60fa4cd3e4e251092c4dadca995598b11757fa8d5d184e9895a362a6a23b67d6dd2a210ca64e681c3b47f3f225edbf048012762f0988
       PREFIX            "${CMAKE_BINARY_DIR}"
       STAMP_DIR         "${CMAKE_BINARY_DIR}/stamp"
       DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
@@ -50,6 +50,6 @@ endif()
 
 ExternalProject_Get_Property(llvm-openmp SOURCE_DIR BINARY_DIR)
 file(WRITE llvm-openmp-paths.cmake
-"set(LLVMOPENMP_SOURCE_DIR \"${SOURCE_DIR}\")
+"set(LLVMOPENMP_SOURCE_DIR \"${SOURCE_DIR}/openmp-14.0.6.src\")
 set(LLVMOPENMP_BINARY_DIR \"${BINARY_DIR}\")
 ")
