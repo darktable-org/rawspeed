@@ -16269,6 +16269,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="ImBack" model="ImB35mm" mode="chdk">
+		<ID make="Imback" model="ImB35mm">ImBack</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="255"/>
+		<Hints>
+			<Hint name="filesize" value="15335424"/>
+			<Hint name="full_width" value="4608"/>
+			<Hint name="full_height" value="3328"/>
+			<Hint name="order" value="jpeg"/>
+		</Hints>
+	</Camera>
 	<Camera make="KONICA MINOLTA" model="DYNAX 5D">
 		<ID make="Minolta" model="Dynax 5D">Konica Minolta Maxxum 5D</ID>
 		<CFA width="2" height="2">
