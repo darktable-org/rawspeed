@@ -16270,7 +16270,7 @@
 		</ColorMatrices>
 	</Camera>
 	<Camera make="ImBack" model="ImB35mm" mode="chdk">
-		<ID make="Imback" model="ImB35mm">ImBack</ID>
+		<ID make="ImBack" model="ImB35mm">ImBack</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
