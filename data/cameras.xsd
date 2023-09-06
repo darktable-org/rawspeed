@@ -27,6 +27,7 @@
       <xs:enumeration value="GITUP"/>
       <xs:enumeration value="GoPro"/>
       <xs:enumeration value="Hasselblad"/>
+      <xs:enumeration value="ImBack"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="LG"/>
       <xs:enumeration value="Leaf"/>
@@ -426,6 +427,7 @@
       <xs:enumeration value="Generic"/>
       <xs:enumeration value="GoPro"/>
       <xs:enumeration value="Hasselblad"/>
+      <xs:enumeration value="ImBack"/>
       <xs:enumeration value="KODAK"/>
       <xs:enumeration value="KONICA MINOLTA"/>
       <xs:enumeration value="Kodak"/>
