@@ -8164,6 +8164,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8176,6 +8179,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8188,6 +8194,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8200,6 +8209,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8212,6 +8224,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
