@@ -767,9 +767,13 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   iPoint2D blackdim(1, 1);
   if (raw->hasEntry(TiffTag::BLACKLEVELREPEATDIM)) {
     const TiffEntry* bleveldim = raw->getEntry(TiffTag::BLACKLEVELREPEATDIM);
-    if (bleveldim->count != 2)
+    if (bleveldim->count == 2)
+      blackdim = iPoint2D(bleveldim->getU32(0), bleveldim->getU32(1));
+    else if (bleveldim->count != 1 || 1 != bleveldim->getU32(0)) {
+      writeLog(DEBUG_PRIO::EXTRA,
+               "BLACKLEVELREPEATDIM entry is invalid, not allowed to guess");
       return false;
-    blackdim = iPoint2D(bleveldim->getU32(0), bleveldim->getU32(1));
+    }
   }
 
   if (!blackdim.hasPositiveArea())
