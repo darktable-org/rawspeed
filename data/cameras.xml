@@ -1407,6 +1407,7 @@
 		<Aliases>
 			<Alias id="EOS Digital Rebel XS">Canon EOS DIGITAL REBEL XS</Alias>
 			<Alias id="EOS Kiss Digital F">Canon EOS Kiss Digital F</Alias>
+			<Alias id="EOS Kiss F">Canon EOS Kiss F</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
