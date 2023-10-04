@@ -1407,6 +1407,7 @@
 		<Aliases>
 			<Alias id="EOS Digital Rebel XS">Canon EOS DIGITAL REBEL XS</Alias>
 			<Alias id="EOS Kiss Digital F">Canon EOS Kiss Digital F</Alias>
+			<Alias id="EOS Kiss F">Canon EOS Kiss F</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -1432,6 +1433,7 @@
 		</BlackAreas>
 		<Aliases>
 			<Alias id="EOS Rebel T3">Canon EOS REBEL T3</Alias>
+			<Alias id="EOS Kiss X50">Canon EOS Kiss X50</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -1515,6 +1517,7 @@
 		<Aliases>
 			<Alias id="EOS Rebel T7">Canon EOS Rebel T7</Alias>
 			<Alias id="EOS 1500D">Canon EOS 1500D</Alias>
+			<Alias id="EOS Kiss X90">Canon EOS Kiss X90</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -8164,6 +8167,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8176,6 +8182,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8188,6 +8197,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8200,6 +8212,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -8212,6 +8227,9 @@
 		<ID make="Panasonic" model="DMC-GM1">Panasonic DMC-GM1</ID>
 		<Crop x="0" y="0" width="-206" height="0"/>
 		<Sensor black="143" white="3971"/>
+		<Aliases>
+			<Alias>DMC-GM1S</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6770 -1895 -744</ColorMatrixRow>
@@ -16268,6 +16286,23 @@
 				<ColorMatrixRow plane="2">-610 1217 6147</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="ImBack" model="ImB35mm" mode="chdk">
+		<ID make="ImBack" model="ImB35mm">ImBack</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="255"/>
+		<Hints>
+			<Hint name="filesize" value="15335424"/>
+			<Hint name="full_width" value="4608"/>
+			<Hint name="full_height" value="3328"/>
+			<Hint name="order" value="jpeg"/>
+		</Hints>
 	</Camera>
 	<Camera make="KONICA MINOLTA" model="DYNAX 5D">
 		<ID make="Minolta" model="Dynax 5D">Konica Minolta Maxxum 5D</ID>
