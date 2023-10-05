@@ -136,4 +136,3 @@ This is a possibility to add one or more model aliases for a camera, which may h
 ```
 
 This may contain manufacturer-specific hints for decoding. This can result in the code taking a specific decoder path, or otherwise treat the image differently. This is mainly used when it isn’t possible to determine which way to decode the image directly from the image data.
-
