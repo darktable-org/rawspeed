@@ -176,8 +176,13 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
 void Rw2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
-  if (!checkCameraSupported(meta, id, guessMode()))
+  bool failBak = failOnUnknown;
+  failOnUnknown = false;
+  if (!checkCameraSupported(meta, id, guessMode())) {
+    failOnUnknown = failBak;
     checkCameraSupported(meta, id, "");
+  }
+  failOnUnknown = failBak;
 }
 
 void Rw2Decoder::parseCFA() const {
@@ -228,13 +233,19 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_ISO_SPEED))
     iso = mRootIFD->getEntryRecursive(TiffTag::PANASONIC_ISO_SPEED)->getU32();
 
-  if (this->checkCameraSupported(meta, id, mode)) {
+  bool failBak = failOnUnknown;
+  failOnUnknown = false;
+  if (checkCameraSupported(meta, id, mode)) {
     setMetaData(meta, id, mode, iso);
   } else {
-    mRaw->metadata.mode = mode;
-    writeLog(DEBUG_PRIO::EXTRA, "Mode not found in DB: %s", mode.c_str());
-    setMetaData(meta, id, "", iso);
+    failOnUnknown = failBak;
+    if (checkCameraSupported(meta, id, "")) {
+      mRaw->metadata.mode = mode;
+      writeLog(DEBUG_PRIO::EXTRA, "Mode not found in DB: %s", mode.c_str());
+      setMetaData(meta, id, "", iso);
+    }
   }
+  failOnUnknown = failBak;
 
   const TiffIFD* raw = getRaw();
 
