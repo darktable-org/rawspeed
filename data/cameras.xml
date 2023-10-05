@@ -7882,6 +7882,42 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-G10" mode="3:2">
+		<ID make="Panasonic" model="DMC-G10">Panasonic DMC-G10</ID>
+		<Crop x="0" y="0" width="-44" height="0"/>
+		<Sensor black="0" white="3900"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10113 -3400 -1114</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4765 12683 2317</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-377 1437 6710</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-G10" mode="16:9">
+		<ID make="Panasonic" model="DMC-G10">Panasonic DMC-G10</ID>
+		<Crop x="0" y="0" width="-44" height="0"/>
+		<Sensor black="0" white="3900"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10113 -3400 -1114</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4765 12683 2317</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-377 1437 6710</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-G10" mode="1:1">
+		<ID make="Panasonic" model="DMC-G10">Panasonic DMC-G10</ID>
+		<Crop x="0" y="0" width="-44" height="0"/>
+		<Sensor black="0" white="3900"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10113 -3400 -1114</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4765 12683 2317</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-377 1437 6710</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-GH1" mode="4:3">
 		<ID make="Panasonic" model="DMC-GH1">Panasonic DMC-GH1</ID>
 		<Crop x="0" y="0" width="-44" height="0"/>
