@@ -14305,6 +14305,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SONY" model="ZV-E1">
+		<ID make="Sony" model="ZV-E1">Sony ZV-E1</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-24" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">6912 -2127 -469</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4470 12175 2587</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-398 1478 6492</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="SONY" model="ZV-E10">
 		<ID make="Sony" model="ZV-E10">Sony ZV-E10</ID>
 		<CFA width="2" height="2">
