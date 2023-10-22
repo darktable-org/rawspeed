@@ -44,6 +44,8 @@ FILE(GLOB SOURCES
   "SimpleTiffDecoder.h"
   "SrwDecoder.cpp"
   "SrwDecoder.h"
+  "StiDecoder.cpp"
+  "StiDecoder.h"
   "ThreefrDecoder.cpp"
   "ThreefrDecoder.h"
 )

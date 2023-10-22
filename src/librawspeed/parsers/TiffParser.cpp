@@ -38,6 +38,7 @@
 #include "decoders/PefDecoder.h"         // for PefDecoder
 #include "decoders/Rw2Decoder.h"         // for Rw2Decoder
 #include "decoders/SrwDecoder.h"         // for SrwDecoder
+#include "decoders/StiDecoder.h"         // for StiDecoder
 #include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
 #include "io/Buffer.h"                   // for Buffer, DataBuffer
 #include "io/ByteStream.h"               // for ByteStream
@@ -120,7 +121,7 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
   }
 
 const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
-                 16>
+                 17>
     TiffParser::Map = {{
         DECODER(DngDecoder),
         DECODER(MosDecoder),
@@ -137,6 +138,7 @@ const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
         DECODER(DcsDecoder),
         DECODER(KdcDecoder),
         DECODER(ErfDecoder),
+        DECODER(StiDecoder),
         DECODER(ThreefrDecoder),
 
     }};
