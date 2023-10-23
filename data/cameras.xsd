@@ -473,6 +473,7 @@
       <xs:enumeration value="SONY"/>
       <xs:enumeration value="ST Micro"/>
       <xs:enumeration value="Samsung"/>
+      <xs:enumeration value="Sinar AG"/>
       <xs:enumeration value="Sinar Photography AG"/>
       <xs:enumeration value="Sinar"/>
       <xs:enumeration value="Sjcam"/>
