@@ -247,10 +247,11 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   return oss.str();
 }
 
-using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
+auto fclose = [](std::FILE* fp) { std::fclose(fp); };
+using file_ptr = std::unique_ptr<FILE, decltype(fclose)>;
 
 void writePPM(const RawImage& raw, const std::string& fn) {
-  file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), &fclose);
+  file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
@@ -274,7 +275,7 @@ void writePPM(const RawImage& raw, const std::string& fn) {
 }
 
 void writePFM(const RawImage& raw, const std::string& fn) {
-  file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), &fclose);
+  file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;

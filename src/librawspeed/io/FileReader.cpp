@@ -53,8 +53,9 @@ FileReader::readFile() {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)
-  using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
-  file_ptr file(fopen(fileName, "rb"), &fclose);
+  auto fclose = [](std::FILE* fp) { std::fclose(fp); };
+  using file_ptr = std::unique_ptr<FILE, decltype(fclose)>;
+  file_ptr file(fopen(fileName, "rb"), fclose);
 
   if (file == nullptr)
     ThrowFIE("Could not open file \"%s\".", fileName);
