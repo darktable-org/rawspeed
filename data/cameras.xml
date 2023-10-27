@@ -17538,6 +17538,15 @@
 	<Camera make="Leica Camera AG" model="LEICA M10 MONOCHROM" mode="dng">
 		<ID make="Leica" model="M10 Monochrom">LEICA M10 MONOCHROM</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M10-D" mode="dng">
+		<ID make="Leica" model="M10-D">LEICA M10-D</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M10-P" mode="dng">
+		<ID make="Leica" model="M10-P">LEICA M10-P</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M10-R" mode="dng">
+		<ID make="Leica" model="M10-R">LEICA M10-R</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M11" mode="dng">
 		<ID make="Leica" model="M11">LEICA M11</ID>
 	</Camera>
