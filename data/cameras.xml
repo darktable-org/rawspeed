@@ -12743,7 +12743,7 @@
 		</ColorMatrices>
 	</Camera>
 	<Camera make="SAMSUNG" model="EK-GN120" decoder_version="3">
-		<ID make="Samsung" model="EK-GN120">Samsung EK-GN120</ID>
+		<ID make="Samsung" model="EK-GN120">Samsung Galaxy NX</ID>
 		<CFA width="2" height="2">
 			<Color x="0" y="0">GREEN</Color>
 			<Color x="1" y="0">RED</Color>
