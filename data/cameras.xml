@@ -7489,6 +7489,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="OM Digital Solutions" model="TG-7">
+		<ID make="OM System" model="TG-7">OM Digital Solutions TG-7</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-24" height="0"/>
+		<Sensor black="257" white="4000"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10899 -3833 -1082</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2112 10736 1575</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-267 1452 5269</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-CM1">
 		<ID make="Panasonic" model="DMC-CM1">Panasonic DMC-CM1</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
