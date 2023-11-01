@@ -6429,6 +6429,27 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="COOLPIX A1000" mode="12bit-uncompressed">
+		<ID make="Nikon" model="Coolpix A1000">Nikon Coolpix A1000</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="3890"/>
+		<Hints>
+			<Hint name="real_bpp" value="16"/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10601 -3487 -1127</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2931 11443 1676</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-587 1740 5278</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="NIKON" model="COOLPIX B700">
 		<ID make="Nikon" model="COOLPIX B700">Nikon Coolpix B700</ID>
 		<CFA width="2" height="2">
