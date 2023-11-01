@@ -4391,6 +4391,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z f" mode="14bit-compressed">
+		<ID make="Nikon" model="Z f">Nikon Z f</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="1008" white="15892"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11607 -4491 -977</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4522 12460 2304</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-458 1519 7616</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Z 30" mode="12bit-compressed">
 		<ID make="Nikon" model="Z 30">Nikon Z 30</ID>
 		<CFA width="2" height="2">
