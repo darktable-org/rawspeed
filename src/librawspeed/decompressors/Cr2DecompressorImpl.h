@@ -183,11 +183,10 @@ public:
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2VerticalOutputStripIterator(
-      Cr2OutputTileIterator&& outputTileIterator_,
-      Cr2OutputTileIterator&& outputTileIterator_end_)
-      : outputTileIterator(std::move(outputTileIterator_)),
-        outputTileIterator_end(std::move(outputTileIterator_end_)) {}
+  Cr2VerticalOutputStripIterator(Cr2OutputTileIterator outputTileIterator_,
+                                 Cr2OutputTileIterator outputTileIterator_end_)
+      : outputTileIterator(outputTileIterator_),
+        outputTileIterator_end(outputTileIterator_end_) {}
 
   value_type operator*() const { return coalesce().first; }
   Cr2VerticalOutputStripIterator& operator++() {
