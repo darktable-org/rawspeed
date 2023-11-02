@@ -75,10 +75,11 @@ public:
 
   // We only support true Huffman codes, not generic prefix codes.
   explicit PrefixCodeLookupDecoder(HuffmanCode<CodeTag>&& hc)
-      : Base(hc.operator rawspeed::PrefixCode<CodeTag>()) {}
+      : Base(std::move(hc).operator rawspeed::PrefixCode<CodeTag>()) {}
 
   PrefixCodeLookupDecoder(PrefixCode<CodeTag>) = delete;
   PrefixCodeLookupDecoder(const PrefixCode<CodeTag>&) = delete;
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
   PrefixCodeLookupDecoder(PrefixCode<CodeTag>&&) = delete;
 
 protected:

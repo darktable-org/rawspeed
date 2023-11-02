@@ -73,6 +73,7 @@ public:
   using Base = BackendPrefixCodeDecoder;
   using Traits = typename Base::Traits;
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
   using Base::Base;
 
 private:
