@@ -19,8 +19,8 @@
 */
 
 #include "common/Common.h"
-#include <cstdarg> // for va_end, va_list, va_start
-#include <cstdio>  // for fprintf, stdout, vfprintf
+#include <cstdarg>
+#include <cstdio>
 
 // #define _DEBUG
 

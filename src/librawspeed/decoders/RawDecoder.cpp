@@ -20,29 +20,29 @@
 */
 
 #include "decoders/RawDecoder.h"
-#include "MemorySanitizer.h" // for MSan
-#include "adt/Point.h"       // for iPoint2D, iRecta...
-#include "common/Common.h"   // for writeLog, roundU...
+#include "MemorySanitizer.h"
+#include "adt/Point.h"
+#include "common/Common.h"
 #include "common/RawImage.h"
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "io/FileIOException.h"                     // for ThrowException
-#include "io/IOException.h"                         // for IOException
-#include "metadata/Camera.h"                        // for Camera, Camera::...
-#include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
-#include "parsers/TiffParserException.h"            // for TiffParserException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffIFD
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/FileIOException.h"
+#include "io/IOException.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
 #include <cstdint>
-#include <string> // for string, allocator
-#include <vector> // for vector
+#include <string>
+#include <vector>
 
 using std::vector;
 

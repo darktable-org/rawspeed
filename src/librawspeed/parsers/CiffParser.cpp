@@ -21,20 +21,20 @@
 */
 
 #include "parsers/CiffParser.h"
-#include "common/Common.h"               // for trimSpaces
-#include "decoders/CrwDecoder.h"         // for CrwDecoder
-#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::little
-#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
+#include "common/Common.h"
+#include "decoders/CrwDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/CiffParserException.h"
 #include "parsers/RawParser.h"
-#include "tiff/CiffEntry.h" // for CiffEntry
-#include "tiff/CiffIFD.h"   // for CiffIFD
-#include "tiff/CiffTag.h"   // for CiffTag, CiffTag::MAKEMODEL
-#include <cstdint>          // for uint16_t, uint32_t
+#include "tiff/CiffEntry.h"
+#include "tiff/CiffIFD.h"
+#include "tiff/CiffTag.h"
+#include <cstdint>
 #include <memory>
-#include <string>  // for operator==, string
-#include <utility> // for move
+#include <string>
+#include <utility>
 
 namespace rawspeed {
 

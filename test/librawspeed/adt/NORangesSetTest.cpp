@@ -18,12 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/NORangesSet.h" // for NORangesSet, operator!=, set, set<>::co...
-#include "adt/Range.h"       // for Range, RangesOverlap
-#include "adt/RangeTest.h"   // for AllOverlapped, TwoRangesTest, twoRanges...
-#include <string>            // for string, allocator
-#include <tuple>             // for get, tuple
-#include <gtest/gtest.h>     // for ParamIteratorInterface, AssertionResult
+#include "adt/NORangesSet.h"
+#include "adt/Range.h"
+#include "adt/RangeTest.h"
+#include <string>
+#include <tuple>
+#include <gtest/gtest.h>
 
 // IWYU pragma: no_forward_declare rawspeed::Range
 

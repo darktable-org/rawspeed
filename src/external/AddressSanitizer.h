@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <cstddef> // for size_t
+#include <cstddef>
 
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.

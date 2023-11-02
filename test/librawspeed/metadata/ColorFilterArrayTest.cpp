@@ -19,14 +19,14 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray, CFAColor
-#include "adt/Point.h"                 // for iPoint2D
-#include <algorithm>                   // for copy
-#include <cstdint>                     // for uint32_t
-#include <iosfwd>                      // for ostream
-#include <string>                      // for allocator, basic_string, oper...
-#include <tuple>                       // for get, make_tuple, tuple
-#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
+#include "metadata/ColorFilterArray.h"
+#include "adt/Point.h"
+#include <algorithm>
+#include <cstdint>
+#include <iosfwd>
+#include <string>
+#include <tuple>
+#include <gtest/gtest.h>
 
 using rawspeed::CFAColor;
 using rawspeed::ColorFilterArray;

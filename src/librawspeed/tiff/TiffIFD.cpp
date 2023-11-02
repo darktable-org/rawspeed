@@ -23,22 +23,22 @@
 
 #include "rawspeedconfig.h"
 #include "tiff/TiffIFD.h"
-#include "adt/NORangesSet.h"          // for NORangesSet
-#include "common/Common.h"            // for trimSpaces
-#include "common/RawspeedException.h" // for ThrowException, RawspeedException
+#include "adt/NORangesSet.h"
+#include "common/Common.h"
+#include "common/RawspeedException.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
-#include "io/IOException.h" // for IOException
+#include "io/IOException.h"
 #include "parsers/TiffParserException.h"
-#include "tiff/TiffEntry.h" // for TiffEntry
-#include "tiff/TiffTag.h"   // for TiffTag, TiffTag::MAKE, TiffTa...
-#include <cassert>          // for assert
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffTag.h"
+#include <cassert>
 #include <cstdint>
-#include <map>     // for map, operator!=, operator==
-#include <memory>  // for unique_ptr, make_unique, alloc...
-#include <string>  // for string, operator==, basic_string
-#include <utility> // for move, pair
-#include <vector>  // for vector<>::iterator, vector
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 using std::vector;
 

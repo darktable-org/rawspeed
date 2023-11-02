@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h" // for clampBits
-#include <algorithm>       // for generate_n, max
-#include <cassert>         // for assert
-#include <functional>      // for function
-#include <iterator>        // for back_inserter
-#include <type_traits>     // for enable_if
-#include <vector>          // for vector
+#include "common/Common.h"
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <iterator>
+#include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 

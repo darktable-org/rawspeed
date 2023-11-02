@@ -19,26 +19,26 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP, HAV...
+#include "rawspeedconfig.h"
 #include "decompressors/AbstractDngDecompressor.h"
-#include "adt/Invariant.h"                          // for invariant
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for rawspeed_get_num...
-#include "common/RawImage.h"                        // for RawImageData
-#include "decoders/RawDecoderException.h"           // for RawDecoderException
-#include "decompressors/DeflateDecompressor.h"      // for DeflateDecompressor
-#include "decompressors/JpegDecompressor.h"         // for JpegDecompressor
-#include "decompressors/LJpegDecoder.h"             // for LJpegDecoder
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "decompressors/VC5Decompressor.h"          // for VC5Decompressor
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "io/IOException.h"                         // for IOException, Thr...
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/DeflateDecompressor.h"
+#include "decompressors/JpegDecompressor.h"
+#include "decompressors/LJpegDecoder.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "decompressors/VC5Decompressor.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
 #include <cstdint>
-#include <limits> // for numeric_limits
-#include <memory> // for unique_ptr
-#include <string> // for string
-#include <vector> // for vector, allocator
+#include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

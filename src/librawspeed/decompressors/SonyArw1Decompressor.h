@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include <cstdint>                              // for uint32_t
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/BitPumpMSB.h"
+#include <cstdint>
 
 namespace rawspeed {
 

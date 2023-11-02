@@ -20,21 +20,21 @@
 
 #include "rawspeedconfig.h"
 #include "metadata/CameraMetaData.h"
-#include "common/Common.h"                    // for trimSpaces, writeLog
-#include "metadata/Camera.h"                  // for Camera, Camera::Suppor...
-#include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
-#include <algorithm>                          // for find_if
+#include "common/Common.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetadataException.h"
+#include <algorithm>
 #include <cstdint>
-#include <map> // for map, map<>::const_iter...
+#include <map>
 #include <memory>
-#include <string> // for string, operator==
+#include <string>
 #include <string_view>
 #include <tuple>
-#include <utility> // for pair, move
-#include <vector>  // for vector
+#include <utility>
+#include <vector>
 
 #ifdef HAVE_PUGIXML
-#include <pugixml.hpp> // for xml_document, xml_pars...
+#include <pugixml.hpp>
 
 using pugi::xml_document;
 using pugi::xml_node;

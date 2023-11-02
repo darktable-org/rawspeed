@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "adt/BitIterator.h"              // for BitMSBIterator
-#include "adt/iterator_range.h"           // for iterator_range
-#include "common/Common.h"                // for bitwidth
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include <cstdint>                        // for uint16_t
-#include <type_traits>                    // for is_integral
+#include "adt/BitIterator.h"
+#include "adt/iterator_range.h"
+#include "common/Common.h"
+#include "decoders/RawDecoderException.h"
+#include <cstdint>
+#include <type_traits>
 
 namespace rawspeed {
 

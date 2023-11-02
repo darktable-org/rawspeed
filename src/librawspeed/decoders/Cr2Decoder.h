@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/Buffer.h"                    // for Buffer
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <utility>                        // for move
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <utility>
 
 namespace rawspeed {
 

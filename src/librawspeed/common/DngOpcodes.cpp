@@ -20,26 +20,26 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY
+#include "rawspeedconfig.h"
 #include "common/DngOpcodes.h"
-#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Mutex.h"                    // for MutexLocker
-#include "adt/Point.h"                    // for iRectangle2D, iPoint2D
-#include "common/Common.h"                // for roundUpDivision, clampBits
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianness::big
-#include <algorithm>                      // for generate_n, clamp, fill_n
-#include <cassert>                        // for assert
-#include <cmath>                          // for isfinite, pow
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <algorithm>
+#include <cassert>
+#include <cmath>
 #include <cstdint>
-#include <cstdlib>  // for abs
-#include <iterator> // for back_insert_iterator, back...
-#include <limits>   // for numeric_limits
+#include <cstdlib>
+#include <iterator>
+#include <limits>
 #include <memory>
-#include <optional> // for optional, nullopt
-#include <tuple>    // for tie, tuple
+#include <optional>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>

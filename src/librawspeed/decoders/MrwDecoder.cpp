@@ -21,22 +21,22 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "adt/Point.h"     // for iPoint2D, iRecta...
-#include "common/Common.h" // for BitOrder, BitOrd...
+#include "adt/Point.h"
+#include "common/Common.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParser.h"                     // for TiffParser
-#include "tiff/TiffIFD.h"                           // for TiffRootIFDOwner
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "parsers/TiffParser.h"
+#include "tiff/TiffIFD.h"
 #include <array>
-#include <cassert> // for assert
+#include <cassert>
 #include <cstdint>
-#include <cstring> // for memcmp
-#include <memory>  // for allocator, uniqu...
+#include <cstring>
+#include <memory>
 
 namespace rawspeed {
 

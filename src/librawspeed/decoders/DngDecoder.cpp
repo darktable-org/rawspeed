@@ -18,37 +18,37 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
+#include "rawspeedconfig.h"
 #include "decoders/DngDecoder.h"
-#include "adt/NORangesSet.h"   // for NORangesSet
-#include "adt/NotARational.h"  // for NotARational
-#include "adt/Point.h"         // for iPoint2D, iRectan...
-#include "common/Common.h"     // for roundUpDivision
-#include "common/DngOpcodes.h" // for DngOpcodes
+#include "adt/NORangesSet.h"
+#include "adt/NotARational.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/DngOpcodes.h"
 #include "common/RawImage.h"
 #include "decoders/AbstractTiffDecoder.h"
-#include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
-#include "decompressors/AbstractDngDecompressor.h" // for DngSliceElement
-#include "io/Buffer.h"                             // for Buffer, operator<
-#include "io/ByteStream.h"                         // for ByteStream
-#include "metadata/Camera.h"                       // for Camera
-#include "metadata/CameraMetaData.h"               // for CameraMetaData
-#include "metadata/ColorFilterArray.h"             // for CFAColor, ColorFi...
-#include "parsers/TiffParserException.h"           // for ThrowException
-#include "tiff/TiffEntry.h"                        // for TiffEntry, TiffDa...
-#include "tiff/TiffIFD.h"                          // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                          // for TiffTag, TiffTag:...
-#include <algorithm>                               // for max, transform
-#include <array>                                   // for array, array<>::v...
-#include <cassert>                                 // for assert
+#include "decoders/RawDecoderException.h"
+#include "decompressors/AbstractDngDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/ColorFilterArray.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
 #include <cstdint>
-#include <limits> // for numeric_limits
-#include <map>    // for map
-#include <memory> // for unique_ptr, alloc...
+#include <limits>
+#include <map>
+#include <memory>
 #include <optional>
-#include <string>  // for char_traits, string
-#include <utility> // for move
-#include <vector>  // for vector, allocator
+#include <string>
+#include <utility>
+#include <vector>
 
 using std::map;
 using std::vector;

@@ -20,8 +20,8 @@
 
 #include "rawspeedconfig.h"
 #include "metadata/CameraSensorInfo.h"
-#include <utility> // for move
-#include <vector>  // for vector
+#include <utility>
+#include <vector>
 
 using std::vector;
 

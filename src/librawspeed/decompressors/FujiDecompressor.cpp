@@ -21,32 +21,32 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
+#include "rawspeedconfig.h"
 #include "decompressors/FujiDecompressor.h"
-#include "MemorySanitizer.h"              // for MSan
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/BayerPhase.h"            // for getAsCFAColors, BayerPhase
-#include "common/Common.h"                // for countl_zero, rawspeed_get_...
-#include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/XTransPhase.h"           // for XTransPhase, getAsCFAColors
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
+#include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/BayerPhase.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "common/XTransPhase.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpMSB.h"
 #include "io/ByteStream.h"
-#include "io/Endianness.h"             // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::BLUE
-#include <algorithm>                   // for max, min, fill, minmax
-#include <array>                       // for array, array<>::value_type
-#include <cassert>                     // for assert
-#include <cstdint>                     // for uint16_t, int8_t, uint32_t
-#include <cstdlib>                     // for abs
-#include <cstring>                     // for memcpy, memset
-#include <optional>                    // for optional, operator!=
-#include <string>                      // for string
-#include <utility>                     // for pair
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <optional>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace rawspeed {

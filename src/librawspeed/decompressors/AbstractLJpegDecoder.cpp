@@ -21,24 +21,24 @@
 */
 
 #include "decompressors/AbstractLJpegDecoder.h"
-#include "adt/Array1DRef.h" // for Array1DRef
-#include "adt/Invariant.h"  // for invariant
-#include "adt/Point.h"      // for iPoint2D
+#include "adt/Array1DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
-#include "codes/HuffmanCode.h"       // for HuffmanCode
-#include "codes/PrefixCodeDecoder.h" // for PrefixCodeDecoder, Huffma...
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianne...
-#include <array>                          // for array
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <array>
 #include <cassert>
 #include <cstdint>
-#include <memory>   // for unique_ptr, make_unique
-#include <optional> // for optional
-#include <utility>  // for move
-#include <vector>   // for vector
+#include <memory>
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

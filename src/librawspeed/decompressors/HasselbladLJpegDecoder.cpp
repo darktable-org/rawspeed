@@ -20,14 +20,14 @@
 */
 
 #include "decompressors/HasselbladLJpegDecoder.h"
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImage...
-#include "decoders/RawDecoderException.h" // for ThrowException
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
-#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
-#include "io/ByteStream.h"                        // for ByteStream
-#include <cstdint>                                // for uint16_t
-#include <vector>                                 // for vector
+#include "decompressors/HasselbladDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 

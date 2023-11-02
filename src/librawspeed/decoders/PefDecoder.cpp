@@ -20,23 +20,23 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "adt/Point.h"     // for iPoint2D
-#include "common/Common.h" // for BitOrder, BitOrder::MSB
+#include "adt/Point.h"
+#include "common/Common.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoderException.h"     // for ThrowException, ThrowRDE
-#include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
-#include "io/Buffer.h"                        // for Buffer, DataBuffer
-#include "io/ByteStream.h"                    // for ByteStream
-#include "io/Endianness.h"                    // for Endianness, Endianness...
-#include "metadata/ColorFilterArray.h"        // for CFAColor, CFAColor::GREEN
-#include "tiff/TiffEntry.h"                   // for TiffEntry, TiffDataType
-#include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
-#include <array>                              // for array
-#include <cstdint>                            // for uint32_t
-#include <memory>                             // for unique_ptr, allocator
-#include <optional>                           // for optional
-#include <string>                             // for operator==, string
+#include "decoders/RawDecoderException.h"
+#include "decompressors/PentaxDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
 
 namespace rawspeed {
 

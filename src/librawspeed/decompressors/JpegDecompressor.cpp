@@ -19,24 +19,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"       // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
-#include "adt/AlignedAllocator.h" // for AlignedAllocator
+#include "rawspeedconfig.h"
+#include "adt/AlignedAllocator.h"
 #include <cstdint>
 
 #ifdef HAVE_JPEG
 
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Point.h"                    // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "decoders/RawDecoderException.h"
 #include "decompressors/JpegDecompressor.h"
-#include <algorithm> // for min, fill_n, max
-#include <array>     // for array
-#include <jpeglib.h> // for jpeg_destroy_decompress
-#include <memory>    // for unique_ptr
-#include <vector>    // for vector
+#include <algorithm>
+#include <array>
+#include <jpeglib.h>
+#include <memory>
+#include <vector>
 
 #ifndef HAVE_JPEG_MEM_SRC
-#include "io/IOException.h" // for ThrowIOE
+#include "io/IOException.h"
 #endif
 
 using std::min;

@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "adt/Array2DRef.h"        // for Array2DRef
-#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
-#include "adt/Invariant.h"         // for invariant
-#include <type_traits> // for enable_if_t, remove_const_t, remove_cv_t
+#include "adt/Array2DRef.h"
+#include "adt/CroppedArray1DRef.h"
+#include "adt/Invariant.h"
+#include <type_traits>
 
 namespace rawspeed {
 

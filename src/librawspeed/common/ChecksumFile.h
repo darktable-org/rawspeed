@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <string> // for string, allocator
-#include <vector> // for vector
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

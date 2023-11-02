@@ -20,20 +20,20 @@
 
 #include "metadata/ColorFilterArray.h"
 #include "adt/Invariant.h"
-#include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include <algorithm>                      // for copy, fill_n, fill, max
-#include <cassert>                        // for assert
-#include <cinttypes>                      // for PRId64
-#include <cstdarg>                        // for va_arg, va_end, va_list
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "decoders/RawDecoderException.h"
+#include <algorithm>
+#include <cassert>
+#include <cinttypes>
+#include <cstdarg>
 #include <cstdint>
-#include <cstdlib>     // for size_t, abs
-#include <map>         // for map
-#include <optional>    // for optional, nullopt
-#include <stdexcept>   // for out_of_range
-#include <string>      // for string
-#include <string_view> // for string_view, basic_string_...
+#include <cstdlib>
+#include <map>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 using std::vector;
 

@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/Camera.h" // for Hints
-#include <string>            // for string, allocator, basic_string, to_string
-#include <tuple>             // for get, tuple
-#include <gtest/gtest.h>     // for AssertionResult, Message, TestPartResult
+#include "metadata/Camera.h"
+#include <string>
+#include <tuple>
+#include <gtest/gtest.h>
 
 using rawspeed::Hints;
 using std::string;

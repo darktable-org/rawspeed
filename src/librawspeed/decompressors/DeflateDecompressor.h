@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for HAVE_ZLIB
+#include "rawspeedconfig.h"
 
 #ifdef HAVE_ZLIB
 
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/Buffer.h"                          // for Buffer
-#include <memory>                               // for unique_ptr
-#include <utility>                              // for move
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/Buffer.h"
+#include <memory>
+#include <utility>
 
 namespace rawspeed {
 

@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "AddressSanitizer.h" // for ASan
-#include "adt/Invariant.h"    // for invariant
-#include "common/Common.h"    // for roundUp
-#include "io/Endianness.h"    // for Endianness, getHostEndianness, Endiannes...
-#include "io/IOException.h"   // for ThrowException, ThrowIOE
-#include <cassert>            // for invariant
-#include <cstdint>            // for uint8_t, uint64_t, uint32_t
-#include <memory>             // for unique_ptr
-#include <utility>            // for move, operator<, pair, swap
+#include "AddressSanitizer.h"
+#include "adt/Invariant.h"
+#include "common/Common.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <utility>
 
 namespace rawspeed {
 

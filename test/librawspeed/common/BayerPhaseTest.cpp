@@ -18,16 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/BayerPhase.h"         // for BayerPhase, BayerPhase::BGGR
-#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
-#include <array>                       // for array
-#include <cassert>                     // for assert
-#include <map>                         // for allocator, map, operator!=
-#include <optional>                    // for optional
-#include <ostream>                     // for operator<<, ostream
-#include <tuple>                       // for get, tuple, apply
-#include <utility>                     // for forward, pair
-#include <gtest/gtest.h>               // for ParamIteratorInterface, Param...
+#include "common/BayerPhase.h"
+#include "metadata/ColorFilterArray.h"
+#include <array>
+#include <cassert>
+#include <map>
+#include <optional>
+#include <ostream>
+#include <tuple>
+#include <utility>
+#include <gtest/gtest.h>
 
 using rawspeed::BayerPhase;
 using rawspeed::CFAColor;

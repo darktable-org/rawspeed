@@ -19,25 +19,25 @@
 */
 
 #include "decompressors/PentaxDecompressor.h"
-#include "adt/Array1DRef.h" // for Array1DRef
-#include "adt/Array2DRef.h" // for Array2DRef
-#include "adt/Invariant.h"  // for invariant
-#include "adt/Point.h"      // for iPoint2D
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
-#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
-#include "common/Common.h"                // for extractHighBits, isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
+#include "codes/PrefixCodeDecoder.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpMSB.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
 #include <array>
-#include <cassert> // for assert
-#include <cstdint> // for uint8_t, uint32_t, uint16_t
+#include <cassert>
+#include <cstdint>
 #include <optional>
-#include <utility> // for move
-#include <vector>  // for vector
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

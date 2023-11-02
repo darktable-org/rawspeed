@@ -22,36 +22,36 @@
 */
 
 #include "decoders/IiqDecoder.h"
-#include "adt/Array2DRef.h" // for Array2DRef
-#include "adt/Mutex.h"      // for MutexLocker
-#include "adt/Point.h"      // for iPoint2D
+#include "adt/Array2DRef.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
-#include "common/Spline.h"                      // for Spline, Spline<>::va...
-#include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
-#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
-#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneStrip, Phase...
-#include "io/Buffer.h"                          // for Buffer, DataBuffer
-#include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h"                      // for Endianness, Endianne...
-#include "metadata/Camera.h"                    // for Camera
-#include "metadata/CameraMetaData.h"            // for CameraMetaData
-#include "metadata/ColorFilterArray.h"          // for ColorFilterArray
-#include "tiff/TiffIFD.h"                       // for TiffID, TiffRootIFD
-#include <algorithm>                            // for max, adjacent_find
-#include <array>                                // for array, array<>::valu...
-#include <cassert>                              // for assert
-#include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for lround
+#include "common/Spline.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/PhaseOneDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffIFD.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cinttypes>
+#include <cmath>
 #include <cstdint>
-#include <cstdlib>    // for abs
-#include <functional> // for greater_equal
-#include <iterator>   // for advance, next, begin
-#include <memory>     // for unique_ptr
-#include <optional>   // for optional, nullopt
-#include <string>     // for operator==, string
-#include <utility>    // for move
-#include <vector>     // for vector, allocator
+#include <cstdlib>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

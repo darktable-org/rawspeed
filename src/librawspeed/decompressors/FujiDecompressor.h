@@ -21,19 +21,19 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"                     // for RAWSPEED_READONLY
-#include "adt/Array2DRef.h"                     // for Array2DRef
-#include "adt/Point.h"                          // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include "io/ByteStream.h"                      // for ByteStream
-#include "metadata/ColorFilterArray.h"          // for CFAColor
-#include <array>                                // for array
-#include <cassert>                              // for assert
-#include <cstdint>                              // for uint16_t, uint8_t
-#include <utility>                              // for pair
-#include <vector>                               // for vector
+#include "rawspeedconfig.h"
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/BitPumpMSB.h"
+#include "io/ByteStream.h"
+#include "metadata/ColorFilterArray.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

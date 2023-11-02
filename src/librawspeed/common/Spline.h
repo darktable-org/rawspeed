@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "adt/Point.h" // for iPoint2D
-#include <algorithm>   // for fill_n, max, copy, min
-#include <cassert>     // for assert
-#include <cstdint>     // for uint16_t
-#include <functional>  // for greater_equal
-#include <limits>      // for numeric_limits
-#include <memory>      // for allocator_traits<>::value_type
-#include <type_traits> // for enable_if_t, is_floating_point
-#include <vector>      // for vector
+#include "adt/Point.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 class iPoint2D;

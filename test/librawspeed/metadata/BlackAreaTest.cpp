@@ -19,11 +19,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/BlackArea.h" // for BlackArea
-#include <memory>               // for unique_ptr, allocator
-#include <string>               // for basic_string
-#include <tuple>                // for get, tuple
-#include <gtest/gtest.h>        // for ParamIteratorInterface, Message, Tes...
+#include "metadata/BlackArea.h"
+#include <memory>
+#include <string>
+#include <tuple>
+#include <gtest/gtest.h>
 
 using rawspeed::BlackArea;
 using std::unique_ptr;

@@ -21,19 +21,19 @@
 
 #pragma once
 
-#include "codes/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
-#include "codes/BinaryPrefixTree.h"          // for BinaryPrefixTree<>:...
-#include "decoders/RawDecoderException.h"    // for ThrowException, Thro...
-#include "io/BitStream.h"                    // for BitStreamTraits
-#include <algorithm>                         // for max, for_each, copy
-#include <cassert>                           // for invariant
-#include <initializer_list>                  // for initializer_list
-#include <iterator>                          // for advance, next
-#include <memory>                            // for unique_ptr, make_unique
-#include <optional>                          // for optional
-#include <tuple>                             // for tie
-#include <utility>                           // for pair
-#include <vector>                            // for vector, vector<>::co...
+#include "codes/AbstractPrefixCodeDecoder.h"
+#include "codes/BinaryPrefixTree.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitStream.h"
+#include <algorithm>
+#include <cassert>
+#include <initializer_list>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <type_traits> // for enable_if_t
+#include <type_traits>
 
 namespace rawspeed {
 

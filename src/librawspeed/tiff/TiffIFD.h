@@ -22,20 +22,20 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"              // for RAWSPEED_READONLY
-#include "adt/NORangesSet.h"             // for set
-#include "common/RawspeedException.h"    // for ThrowException
-#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::big
-#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
-#include "tiff/TiffEntry.h"              // for TiffEntry
-#include "tiff/TiffTag.h"                // for TiffTag
-#include <cstdint>                       // for uint32_t
-#include <map>                           // for map, operator!=, map<>::con...
-#include <memory>                        // for unique_ptr
-#include <string>                        // for string
-#include <vector>                        // for vector
+#include "rawspeedconfig.h"
+#include "adt/NORangesSet.h"
+#include "common/RawspeedException.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffTag.h"
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

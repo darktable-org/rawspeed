@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDecoder
-#include "decompressors/Cr2Decompressor.h"      // for Cr2SliceWidths
-#include <cassert>                              // for assert
-#include <cstdint>                              // for uint16_t
+#include "decompressors/AbstractLJpegDecoder.h"
+#include "decompressors/Cr2Decompressor.h"
+#include <cassert>
+#include <cstdint>
 
 namespace rawspeed {
 

@@ -18,16 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
-#include "adt/Array2DRef.h"                    // for Array2DRef
-#include "adt/Point.h"                         // for iPoint2D
-#include "bench/Common.h"                      // for areaToRectangle
-#include "common/Common.h"                     // for roundUp
-#include "common/RawImage.h"                   // for RawImage, RawImageData
-#include <array>                               // for array
-#include <cstdint>                             // for uint16_t
-#include <type_traits>                         // for integral_constant
-#include <benchmark/benchmark.h>               // for State, Benchmark, Cou...
+#include "interpolators/Cr2sRawInterpolator.h"
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "bench/Common.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include <array>
+#include <cstdint>
+#include <type_traits>
+#include <benchmark/benchmark.h>
 
 using rawspeed::Cr2sRawInterpolator;
 using rawspeed::iPoint2D;

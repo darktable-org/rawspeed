@@ -18,23 +18,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
+#include "rawspeedconfig.h"
 #include "common/RawImage.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/TableLookUp.h"
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/IOException.h"               // for IOException
-#include "parsers/TiffParserException.h"  // for TiffParserException
-#include <algorithm>                      // for min, fill, max, fill_n
-#include <cassert>                        // for assert
+#include "decoders/RawDecoderException.h"
+#include "io/IOException.h"
+#include "parsers/TiffParserException.h"
+#include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <limits>  // for numeric_limits
-#include <memory>  // for allocator, unique_ptr, mak...
-#include <utility> // for move, swap
+#include <limits>
+#include <memory>
+#include <utility>
 #include <vector>
 
 #ifdef DEBUG
@@ -42,7 +42,7 @@
 #endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-#include "AddressSanitizer.h" // for ASan::...
+#include "AddressSanitizer.h"
 #endif
 
 namespace rawspeed {

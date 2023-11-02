@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <cstddef>     // for size_t
-#include <memory>      // for allocator, allocator_traits
-#include <new>         // for operator new
-#include <type_traits> // for enable_if_t
+#include <cstddef>
+#include <memory>
+#include <new>
+#include <type_traits>
 
 namespace rawspeed {
 

@@ -18,35 +18,35 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"                    // for RawImage, RawImageData
-#include "adt/AlignedAllocator.h"            // for AlignedAllocator
-#include "adt/Array2DRef.h"                  // for Array2DRef, Array2DRef<...
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
-#include "adt/NotARational.h"                // for NotARational
-#include "md5.h"                             // for md5_state, md5_hash
-#include <array>                             // for array
-#include <cassert>                           // for assert
-#include <chrono>                            // for milliseconds, steady_clock
-#include <cstdarg>                           // for va_end, va_list, va_start
-#include <cstddef>                           // for size_t, byte
-#include <cstdint>                           // for uint8_t, uint16_t, uint...
-#include <cstdio>                            // for fclose, fprintf, fopen
-#include <cstdlib>                           // for system
-#include <fstream>                           // for operator<<, basic_ostream
-#include <functional>                        // for less
-#include <iostream>                          // for cout, cerr
-#include <iterator>                          // for istreambuf_iterator
-#include <map>                               // for map, operator!=, _Rb_tr...
-#include <memory>                            // for allocator, unique_ptr
-#include <sstream>                           // for basic_ostringstream
-#include <string>                            // for string, operator+, basi...
-#include <string_view>                       // for operator!=, string_view
-#include <tuple>                             // for tie, tuple
-#include <type_traits>                       // for __type_identity_t
-#include <vector>                            // for vector
+#include "RawSpeed-API.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/Array2DRef.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/NotARational.h"
+#include "md5.h"
+#include <array>
+#include <cassert>
+#include <chrono>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-#include <iomanip> // for operator<<, setw
+#include <iomanip>
 #endif
 
 using std::chrono::steady_clock;

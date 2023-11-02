@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include "adt/Range.h" // for operator<, RangesOverlap
-#include <algorithm>   // for partition_point
-#include <cassert>     // for assert
-#include <cstddef>     // for size_t
-#include <iterator>    // for prev
-#include <set>         // IWYU pragma: export
-#include <utility>     // for pair
+#include "adt/Range.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iterator>
+#include <set> // IWYU pragma: export
+#include <utility>
 
 namespace rawspeed {
 

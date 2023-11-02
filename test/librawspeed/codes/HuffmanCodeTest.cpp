@@ -18,22 +18,22 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "codes/HuffmanCode.h" // for HuffmanCode...
-#include "adt/Array1DRef.h"    // for Array1DRef
+#include "codes/HuffmanCode.h"
+#include "adt/Array1DRef.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
-#include "io/Buffer.h"      // for Buffer
-#include <algorithm>        // for max, min
-#include <bitset>           // for bitset
-#include <cassert>          // for assert
-#include <cstdint>          // for uint8_t, uint32_t
-#include <initializer_list> // for initializer_list
-#include <ostream>          // for operator<<, ostream
-#include <string>           // for allocator, basic_string
-#include <tuple>            // for make_tuple, get, tuple
-#include <type_traits>      // for __decay_and_strip
-#include <utility>          // for move
-#include <vector>           // for vector
-#include <gtest/gtest.h>    // for ParamIteratorInterface
+#include "io/Buffer.h"
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cstdint>
+#include <initializer_list>
+#include <ostream>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
+#include <gtest/gtest.h>
 
 namespace rawspeed {
 struct BaselineCodeTag;

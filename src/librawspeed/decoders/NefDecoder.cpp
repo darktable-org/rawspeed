@@ -20,33 +20,33 @@
 */
 
 #include "decoders/NefDecoder.h"
-#include "adt/Array2DRef.h" // for Array2DRef
-#include "adt/Point.h"      // for iPoint2D
-#include "common/Common.h"  // for clampBits, round...
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "common/Common.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/NikonDecompressor.h"        // for NikonDecompressor
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/BitPumpMSB.h"                          // for BitPumpMSB
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for getU16BE, Endian...
-#include "io/IOException.h"                         // for ThrowException
-#include "metadata/Camera.h"                        // for Hints
-#include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for min, max
+#include "decoders/RawDecoderException.h"
+#include "decompressors/NikonDecompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/BitPumpMSB.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
 #include <array>
-#include <cassert> // for assert
-#include <cmath>   // for pow, exp, log
+#include <cassert>
+#include <cmath>
 #include <cstdint>
-#include <memory>  // for unique_ptr, allo...
-#include <sstream> // for operator<<, basi...
-#include <string>  // for string, basic_st...
-#include <vector>  // for vector
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using std::vector;
 

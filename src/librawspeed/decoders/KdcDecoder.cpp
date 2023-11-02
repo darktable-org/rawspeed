@@ -20,26 +20,26 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "adt/NORangesSet.h" // for NORangesSet
-#include "adt/Point.h"       // for iPoint2D, iRecta...
-#include "common/Common.h"   // for BitOrder, BitOrd...
+#include "adt/NORangesSet.h"
+#include "adt/Point.h"
+#include "common/Common.h"
 #include "common/RawImage.h"
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParserException.h"            // for ThrowException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t, uint64_t
-#include <limits>                                   // for numeric_limits
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 

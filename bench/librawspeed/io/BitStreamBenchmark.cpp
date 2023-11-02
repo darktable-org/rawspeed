@@ -18,23 +18,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "bench/Common.h"        // for benchmarkDryRun
-#include "io/BitPumpJPEG.h"      // for BitPumpJPEG, BitStream<>::fillCache
-#include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache
-#include "io/BitPumpMSB.h"       // for BitPumpMSB, BitStream<>::fillCache
-#include "io/BitPumpMSB16.h"     // for BitPumpMSB16, BitStream<>::fillCache
-#include "io/BitPumpMSB32.h"     // for BitPumpMSB32, BitStream<>::fillCache
-#include "io/Buffer.h"           // for Buffer, DataBuffer
-#include "io/ByteStream.h"       // for ByteStream
-#include "io/Endianness.h"       // for Endianness, Endianness::unknown
-#include <cassert>               // for assert
-#include <cstddef>               // for size_t
-#include <benchmark/benchmark.h> // for State, Benchmark, Initialize, RunSp...
+#include "bench/Common.h"
+#include "io/BitPumpJPEG.h"
+#include "io/BitPumpLSB.h"
+#include "io/BitPumpMSB.h"
+#include "io/BitPumpMSB16.h"
+#include "io/BitPumpMSB32.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <cassert>
+#include <cstddef>
+#include <benchmark/benchmark.h>
 
 #ifndef DEBUG
-#include <cstdint> // for uint8_t
-#include <string>  // for string, to_string, allocator
-#include <vector>  // for vector
+#include <cstdint>
+#include <string>
+#include <vector>
 #endif
 
 #ifdef DEBUG

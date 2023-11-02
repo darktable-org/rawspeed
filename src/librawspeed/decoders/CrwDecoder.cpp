@@ -20,29 +20,29 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "rawspeedconfig.h"
 #include "decoders/CrwDecoder.h"
-#include "adt/Point.h" // for iPoint2D
+#include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
-#include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
-#include "decompressors/CrwDecompressor.h" // for CrwDecompressor
-#include "io/Buffer.h"                     // for Buffer
-#include "metadata/Camera.h"               // for Hints
-#include "metadata/ColorFilterArray.h"     // for CFAColor, CFAColor::GREEN
-#include "tiff/CiffEntry.h"                // for CiffEntry, CiffDataType
-#include "tiff/CiffIFD.h"                  // for CiffIFD
-#include "tiff/CiffTag.h"                  // for CiffTag, CiffTag::MAKEMODEL
-#include <array>                           // for array
-#include <cassert>                         // for assert
-#include <cmath>                           // for copysignf, expf, logf
+#include "decoders/RawDecoderException.h"
+#include "decompressors/CrwDecompressor.h"
+#include "io/Buffer.h"
+#include "metadata/Camera.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/CiffEntry.h"
+#include "tiff/CiffIFD.h"
+#include "tiff/CiffTag.h"
+#include <array>
+#include <cassert>
+#include <cmath>
 #include <cstdint>
-#include <cstdlib> // for abs, size_t
-#include <cstring> // for memcmp
-#include <memory>  // for unique_ptr, allocator
-#include <string>  // for string
-#include <utility> // for move
-#include <vector>  // for vector
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 using std::vector;
 

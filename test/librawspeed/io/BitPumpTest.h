@@ -18,16 +18,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"  // for uint8_t
-#include "io/BitStream.h"   // for BitStream
-#include "io/Buffer.h"      // for Buffer, DataBuffer
-#include "io/ByteStream.h"  // for ByteStream
-#include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
-#include <array>            // for array
-#include <cassert>          // for assert
-#include <cstdint>          // for uint8_t, uint32_t
-#include <initializer_list> // for initializer_list
-#include <gtest/gtest.h>    // for ParamIteratorInterface, Message
+#include "common/Common.h"
+#include "io/BitStream.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <initializer_list>
+#include <gtest/gtest.h>
 
 using rawspeed::Buffer;
 using rawspeed::ByteStream;

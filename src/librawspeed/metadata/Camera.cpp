@@ -21,23 +21,23 @@
 
 #include "metadata/Camera.h"
 #include "adt/NotARational.h"
-#include "adt/Point.h"                        // for iPoint2D
-#include "common/Common.h"                    // for splitString
-#include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "metadata/CameraMetadataException.h"
 #include "metadata/CameraSensorInfo.h"
 #include "metadata/ColorFilterArray.h"
-#include <algorithm> // for max, fill, transform
-#include <cctype>    // for tolower
+#include <algorithm>
+#include <cctype>
 #include <cstdint>
-#include <cstdio>      // for size_t
-#include <map>         // for map
-#include <optional>    // for optional, nullopt
-#include <string>      // for string, allocator, ope...
-#include <string_view> // for operator==, basic_stri...
-#include <vector>      // for vector
+#include <cstdio>
+#include <map>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #ifdef HAVE_PUGIXML
-#include <pugixml.hpp> // for xml_node, xml_attribute
+#include <pugixml.hpp>
 
 using pugi::xml_node;
 #endif

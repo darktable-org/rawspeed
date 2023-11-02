@@ -18,21 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "adt/Point.h"                              // for iPoint2D, iRecta...
-#include "bench/Common.h"                           // for areaToRectangle
-#include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/RawImage.h"                        // for RawImageType
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include <cassert>                                  // for assert
-#include <cstddef>                                  // for size_t
-#include <cstdint>                                  // for uint16_t, uint8_t
-#include <numeric>                                  // for lcm
-#include <type_traits>                              // for integral_constant
-#include <vector>                                   // for vector
-#include <benchmark/benchmark.h>                    // for State, Benchmark
+#include "decompressors/UncompressedDecompressor.h"
+#include "adt/Point.h"
+#include "bench/Common.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <numeric>
+#include <type_traits>
+#include <vector>
+#include <benchmark/benchmark.h>
 
 using rawspeed::BitOrder;
 using rawspeed::Buffer;

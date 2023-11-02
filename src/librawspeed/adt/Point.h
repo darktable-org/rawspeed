@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
-#include <algorithm>        // for max, min
-#include <cmath>            // for abs
-#include <cstdint>          // for int32_t, uint64_t
-#include <cstdlib>          // for abs
-#include <tuple>            // for tie, operator==, tuple
-#include <type_traits>      // for make_signed_t
+#include "rawspeedconfig.h"
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <tuple>
+#include <type_traits>
 
 namespace rawspeed {
 

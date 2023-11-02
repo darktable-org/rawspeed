@@ -20,11 +20,11 @@
 
 #include "rawspeedconfig.h"
 #include "bench/Common.h"
-#include "adt/Point.h"     // for iPoint2D
-#include "common/Common.h" // for roundUp
-#include <cassert>         // for assert
-#include <cmath>           // for ceil, sqrt
-#include <cstdlib>         // for getenv
+#include "adt/Point.h"
+#include "common/Common.h"
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
 
 using rawspeed::iPoint2D;
 using rawspeed::roundUp;

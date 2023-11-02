@@ -22,14 +22,14 @@
 
 #include "rawspeedconfig.h"
 #include "tiff/CiffEntry.h"
-#include "adt/NORangesSet.h"             // for NORangesSet
-#include "io/Buffer.h"                   // for Buffer, operator<
-#include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
+#include "adt/NORangesSet.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "parsers/CiffParserException.h"
 #include <cstdint>
-#include <string> // for string, basic_string, alloc...
+#include <string>
 #include <string_view>
-#include <vector> // for vector
+#include <vector>
 
 using std::vector;
 

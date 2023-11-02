@@ -1,7 +1,7 @@
-#include <iostream> // for endl, basic_ostream<>::__ostream_type, cout, ost...
+#include <iostream>
 
 #if defined(__unix__)
-#include <unistd.h> // for _POSIX_C_VERSION, sysconf, _SC_LEVEL1_DCACHE_LINESIZE
+#include <unistd.h>
 #endif
 
 #if defined(_SC_LEVEL1_DCACHE_LINESIZE)
@@ -17,7 +17,7 @@ int main() {
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||   \
     defined(__DragonFly__) || defined(__APPLE__)
 
-#include <stddef.h> // for size_t
+#include <stddef.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
 int main() {

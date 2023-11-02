@@ -20,21 +20,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/RawImage.h"              // for RawImageData, RawImage
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include <algorithm>                      // for sort, fill_n
-#include <array>                          // for array
-#include <cstdint>                        // for int32_t, uint16_t
-#include <string>                         // for string
-#include <utility>                        // for move
-#include <vector>                         // for vector<>::iterator, vector
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpMSB32.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
