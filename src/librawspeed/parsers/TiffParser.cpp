@@ -53,7 +53,6 @@
 #include <tuple>   // for tie, tuple
 #include <utility>
 #include <vector> // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {
 class RawDecoder;

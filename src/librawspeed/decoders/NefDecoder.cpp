@@ -47,7 +47,6 @@
 #include <sstream> // for operator<<, basi...
 #include <string>  // for string, basic_st...
 #include <vector>  // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::vector;
 

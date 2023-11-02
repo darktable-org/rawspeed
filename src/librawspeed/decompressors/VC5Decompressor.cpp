@@ -56,7 +56,6 @@
 #include <type_traits>
 #include <utility> // for pair
 #include <vector>
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace {
 

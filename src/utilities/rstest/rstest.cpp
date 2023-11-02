@@ -44,7 +44,6 @@
 #include <tuple>                             // for tie, tuple
 #include <type_traits>                       // for __type_identity_t
 #include <vector>                            // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
 #include <iomanip> // for operator<<, setw

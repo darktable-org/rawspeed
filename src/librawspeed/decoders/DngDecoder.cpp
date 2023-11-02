@@ -49,7 +49,6 @@
 #include <string>  // for char_traits, string
 #include <utility> // for move
 #include <vector>  // for vector, allocator
-// IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::map;
 using std::vector;

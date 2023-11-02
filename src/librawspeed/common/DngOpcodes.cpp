@@ -43,8 +43,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-// IWYU pragma: no_include <ext/alloc_traits.h>
-// IWYU pragma: no_include <type_traits>
 
 #ifndef NDEBUG
 #include <exception>

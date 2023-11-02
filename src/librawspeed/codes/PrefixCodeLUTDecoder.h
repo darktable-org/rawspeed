@@ -31,7 +31,6 @@
 #include <memory>                          // for allocator_traits<>::...
 #include <tuple>                           // for tie
 #include <vector>                          // for vector
-// IWYU pragma: no_include <algorithm>
 
 /*
  * The following code is inspired by the IJG JPEG library.

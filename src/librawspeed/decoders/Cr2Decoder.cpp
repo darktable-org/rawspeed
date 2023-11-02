@@ -21,8 +21,9 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "adt/Array2DRef.h" // for Array2DRef
-#include "adt/Point.h"      // for iPoint2D
+#include "MemorySanitizer.h" // for MSan
+#include "adt/Array2DRef.h"  // for Array2DRef
+#include "adt/Point.h"       // for iPoint2D
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
 #include "decompressors/Cr2Decompressor.h"     // for Cr2SliceWidths
@@ -43,8 +44,6 @@
 #include <memory>         // for unique_ptr, allocator
 #include <string>         // for operator==, string
 #include <vector>         // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
-#include "MemorySanitizer.h" // for MSan
 
 namespace rawspeed {
 class CameraMetaData;

@@ -30,8 +30,6 @@
 #include <variant>       // for tuple
 #include <gtest/gtest.h> // for Message, TestPartResult, ParamIteratorInter...
 
-// IWYU pragma: no_include <pstl/glue_algorithm_defs.h>
-
 using rawspeed::iPoint2D;
 using std::make_pair;
 using std::move;
