@@ -12307,6 +12307,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX KF">
+		<ID make="Pentax" model="KF">PENTAX KF</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="62" y="30" width="0" height="-14"/>
+		<Sensor black="64" white="16319"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8113 -2078 -1275</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4359 12953 1514</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1091 1955 6044</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX KP">
 		<ID make="Pentax" model="KP">Pentax KP</ID>
 		<CFA width="2" height="2">
