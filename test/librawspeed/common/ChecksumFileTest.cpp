@@ -18,12 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/ChecksumFile.h" // for ParseChecksumFileContent, ChecksumF...
-#include "common/RawspeedException.h" // for RawspeedException (ptr only)
-#include <memory>        // for allocator, allocator_traits<>::valu...
-#include <string>        // for operator+, string, char_traits, bas...
-#include <vector>        // for vector
-#include <gtest/gtest.h> // for AssertionResult, Message, TestPartR...
+#include "common/ChecksumFile.h"
+#include "common/RawspeedException.h"
+#include <memory>
+#include <string>
+#include <vector>
+#include <gtest/gtest.h>
 
 using rawspeed::ParseChecksumFileContent;
 

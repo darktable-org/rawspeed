@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "adt/Array2DRef.h"        // for Array2DRef
-#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
-#include "adt/Invariant.h"         // for invariant
-#include <type_traits> // for enable_if_t, remove_const_t, remove_cv_t
+#include "adt/Array2DRef.h"
+#include "adt/CroppedArray1DRef.h"
+#include "adt/Invariant.h"
+#include <type_traits>
 
 namespace rawspeed {
 
@@ -46,8 +46,7 @@ public:
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
-      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width),
-        croppedHeight(base.height) {}
+      : base(RHS), croppedWidth(base.width), croppedHeight(base.height) {}
 
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);

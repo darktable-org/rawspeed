@@ -20,17 +20,17 @@
 
 #pragma once
 
-#include "adt/Array2DRef.h"            // for Array2DRef
-#include "adt/Point.h"                 // for iPoint2D
-#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
-#include <algorithm>                   // for find_if, equal
-#include <array>                       // for array, operator==
-#include <cassert>                     // for assert
-#include <cmath>                       // for abs
-#include <cstdlib>                     // for abs
-#include <iterator>                    // for distance
-#include <optional>                    // for optional
-#include <utility>                     // for swap
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "metadata/ColorFilterArray.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+#include <iterator>
+#include <optional>
+#include <utility>
 
 namespace rawspeed {
 

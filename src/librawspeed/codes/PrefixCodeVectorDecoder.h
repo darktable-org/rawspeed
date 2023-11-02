@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "codes/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCodeDecoder...
-#include "decoders/RawDecoderException.h"    // for ThrowRDE
-#include "io/BitStream.h"                    // for BitStreamTraits
-#include <algorithm>                         // for max, fill_n
-#include <cassert>                           // for invariant
-#include <cstdint>                           // for uint64_t
-#include <tuple>                             // for tie
-#include <utility>                           // for pair
-#include <vector>                            // for vector
+#include "codes/AbstractPrefixCodeDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitStream.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

@@ -18,22 +18,22 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"                  // for HAVE_OPENMP
-#include "adt/AlignedAllocator.h"            // for AlignedAllocator
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
-#include "io/Buffer.h"                       // for Buffer
-#include "io/FileIOException.h"              // for FileIOException
-#include "io/FileReader.h"                   // for FileReader
-#include <cstdint>                           // for uint8_t
-#include <cstdlib>                           // for EXIT_SUCCESS, size_t
-#include <iostream>                          // for operator<<, cout, ostream
-#include <memory>                            // for unique_ptr, allocator
-#include <string>                            // for operator==, string
-#include <tuple>                             // for tie, tuple
-#include <vector>                            // for vector
+#include "rawspeedconfig.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "io/Buffer.h"
+#include "io/FileIOException.h"
+#include "io/FileReader.h"
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #ifdef HAVE_OPENMP
-#include <omp.h> // for omp_get_num_threads
+#include <omp.h>
 #endif
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);

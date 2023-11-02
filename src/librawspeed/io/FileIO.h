@@ -23,12 +23,12 @@
 #define NOMINMAX // do not want the min()/max() macros!
 #endif
 
-#include "io/FileIOException.h" // for FileIOException (ptr only), ThrowFIE
+#include "io/FileIOException.h"
 #include <Windows.h>
-#include <functional> // for bind
+#include <functional>
 #include <io.h>
 #include <tchar.h>
-#include <vector> // for vector
+#include <vector>
 
 namespace rawspeed {
 

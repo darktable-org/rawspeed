@@ -18,12 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
-#include "bench/Common.h"                    // for benchmarkDryRun
-#include <cstddef>                           // for byte
-#include <map>                               // for map<>::mapped_type
-#include <vector>                            // for allocator, vector
-#include <benchmark/benchmark.h>             // for State, Benchmark, BENCH...
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "bench/Common.h"
+#include <cstddef>
+#include <map>
+#include <memory>
+#include <vector>
+#include <benchmark/benchmark.h>
 
 using Type = std::byte;
 
@@ -41,7 +42,7 @@ void construct_with_zeroinit(benchmark::State& state) {
 }
 
 template <typename Worker>
-void BM_std_vector(benchmark::State& state, Worker&& worker) {
+void BM_std_vector(benchmark::State& state, Worker worker) {
   // Do it once outside of the loop to maybe offset the initial alloc time.
   worker(state);
 

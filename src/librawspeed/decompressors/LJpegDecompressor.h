@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include "adt/Point.h"               // for iPoint2D, iRectangle2D
-#include "codes/PrefixCodeDecoder.h" // for PrefixCodeDecoder
-#include "common/RawImage.h"         // for RawImage
-#include "io/ByteStream.h"           // for ByteStream
-#include <array>                     // for array
-#include <cstdint>                   // for uint16_t
-#include <functional>                // for reference_wrapper
-#include <stddef.h>                  // for size_t
-#include <tuple>                     // for array
-#include <vector>                    // for vector
+#include "adt/Point.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cstdint>
+#include <functional>
+#include <stddef.h>
+#include <tuple>
+#include <vector>
 
 namespace rawspeed {
 

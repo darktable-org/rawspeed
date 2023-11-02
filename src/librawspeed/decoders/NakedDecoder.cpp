@@ -20,18 +20,20 @@
 */
 
 #include "decoders/NakedDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Camera, Hints
-#include <map>                                      // for map
-#include <optional>                                 // for optional, nullopt
-#include <string>                                   // for string, char_traits
-#include <string_view>                              // for operator==, basi...
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include <map>
+#include <optional>
+#include <string>
+#include <string_view>
 
 using std::map;
 

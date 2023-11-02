@@ -18,17 +18,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpJPEG.h" // for BitPumpJPEG
-#include "io/BitPumpTest.h" // for Pattern, (anonymous), GenOnesBE, Patterns
-#include "io/BitStream.h"   // for BitStream
-#include "io/Buffer.h"      // for Buffer, DataBuffer
-#include "io/ByteStream.h"  // for ByteStream
-#include "io/Endianness.h"  // for Endianness, Endianness::big, Endianness:...
-#include <array>            // for array
-#include <cstdint>          // for uint8_t, uint32_t
-#include <initializer_list> // for initializer_list
-#include <memory>           // for allocator
-#include <gtest/gtest.h>    // for Message, TestPartResult, INSTANTIATE_TYP...
+#include "io/BitPumpJPEG.h"
+#include "io/BitPumpTest.h"
+#include "io/BitStream.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <array>
+#include <cstdint>
+#include <initializer_list>
+#include <memory>
+#include <gtest/gtest.h>
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::Buffer;

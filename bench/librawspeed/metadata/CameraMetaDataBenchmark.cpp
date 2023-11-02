@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"          // for HAVE_PUGIXML, RAWSPEED_SOURCE_DIR
-#include "metadata/CameraMetaData.h" // for CameraMetaData
-#include <pugixml.hpp>               // for xml_document, xml_parse_result
-#include <benchmark/benchmark.h>     // for DoNotOptimize, State, State::St...
+#include "rawspeedconfig.h"
+#include "metadata/CameraMetaData.h"
+#include <pugixml.hpp>
+#include <benchmark/benchmark.h>
 
 #ifndef HAVE_PUGIXML
 #error This benchmark requires to be built with pugixml being present.

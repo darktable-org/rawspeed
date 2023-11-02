@@ -21,7 +21,7 @@
 #include "common/Cpuid.h"
 
 #if defined(__i386__) || defined(__x86_64__)
-#include <cpuid.h> // for __get_cpuid, bit_SSE2
+#include <cpuid.h>
 #endif
 
 namespace rawspeed {

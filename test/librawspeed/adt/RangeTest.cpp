@@ -18,9 +18,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/Range.h"     // for Range
-#include "adt/RangeTest.h" // for RangeDoesntContain, RangeContains
-#include <set>             // for allocator, operator!=, set, set<>::const_i...
+#include "adt/Range.h"
+#include "adt/RangeTest.h"
+#include <set>
 
 using rawspeed::Range;
 

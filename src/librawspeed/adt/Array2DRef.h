@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h" // for Array1DRef
-#include "adt/Invariant.h"  // for invariant
-#include <cstddef>          // for byte
-#include <type_traits>      // for negation, is_const, remove_const_t, is_same
-#include <vector>           // for vector
+#include "adt/Array1DRef.h"
+#include "adt/Invariant.h"
+#include <cstddef>
+#include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 

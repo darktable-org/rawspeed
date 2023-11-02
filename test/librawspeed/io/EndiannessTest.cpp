@@ -19,13 +19,13 @@
 */
 
 #include "EndiannessTest.h"
-#include "io/Endianness.h" // for getHostEndianness, Endianness, getByteSwa...
-#include <algorithm>       // for copy
-#include <cstring>         // for memcpy, memcmp
-#include <iomanip>         // for operator<<, setfill, setw, _Setw, _Setfill
-#include <iostream>        // for hex, endl, ostream
-#include <memory>          // for allocator
-#include <gtest/gtest.h>   // for ParamIteratorInterface, Message, TestPart...
+#include "io/Endianness.h"
+#include <algorithm>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <gtest/gtest.h>
 
 using rawspeed::Endianness;
 using rawspeed::getBE;

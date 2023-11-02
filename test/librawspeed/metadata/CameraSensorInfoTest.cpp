@@ -19,17 +19,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include <algorithm>                   // for copy, generate, fill_n, max
-#include <cstdlib>                     // for rand, srand
-#include <iostream>                    // for operator<<, basic_ostream::op...
-#include <limits>                      // for numeric_limits
-#include <memory>                      // for unique_ptr, allocator
-#include <string>                      // for basic_string, string
-#include <tuple>                       // for get, tuple
-#include <vector>                      // for vector
-#include <gmock/gmock.h>               // for testing::InitGoogleMock
-#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
+#include "metadata/CameraSensorInfo.h"
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <limits>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using rawspeed::CameraSensorInfo;
 using std::unique_ptr;

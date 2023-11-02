@@ -19,16 +19,17 @@
 */
 
 #include "io/FileWriter.h"
-#include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for ThrowException, ThrowFIE
-#include <cstdio>               // for fclose, fopen, fwrite, FILE, size_t
+#include "io/Buffer.h"
+#include "io/FileIOException.h"
+#include <cstdint>
+#include <cstdio>
 
 #if !defined(__unix__) && !defined(__APPLE__)
 #ifndef NOMINMAX
 #define NOMINMAX // do not want the min()/max() macros!
 #endif
 
-#include "io/FileIO.h" // for widenFileName
+#include "io/FileIO.h"
 #include <Windows.h>
 #include <io.h>
 #include <tchar.h>

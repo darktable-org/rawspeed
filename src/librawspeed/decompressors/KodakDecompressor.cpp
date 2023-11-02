@@ -21,18 +21,22 @@
 */
 
 #include "decompressors/KodakDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
-#include "common/Common.h"                // for extractHighBits, isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min, fill_n
-#include <array>                          // for array
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <utility>                        // for move
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/ByteStream.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <utility>
+
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+#include <sanitizer/asan_interface.h>
+#endif
 
 namespace rawspeed {
 

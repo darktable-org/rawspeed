@@ -21,17 +21,16 @@
 
 #pragma once
 
-#include "codes/AbstractPrefixCodeDecoder.h" // for AbstractPrefixCod...
-#include "codes/HuffmanCode.h"               // for HuffmanCode...
-#include "decoders/RawDecoderException.h"    // for ThrowRDE
-#include "io/BitStream.h"                    // for BitStreamTraits
-#include <cassert>                           // for invariant
-#include <cstdint>                           // for uint32_t, uint16_t
-#include <memory>                            // for allocator_traits...
-#include <tuple>                             // for tie
-#include <utility>                           // for pair
-#include <vector>                            // for vector
-// IWYU pragma: no_include <algorithm>
+#include "codes/AbstractPrefixCodeDecoder.h"
+#include "codes/HuffmanCode.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitStream.h"
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 /*
  * The following code is inspired by the IJG JPEG library.
@@ -76,10 +75,11 @@ public:
 
   // We only support true Huffman codes, not generic prefix codes.
   explicit PrefixCodeLookupDecoder(HuffmanCode<CodeTag>&& hc)
-      : Base(hc.operator rawspeed::PrefixCode<CodeTag>()) {}
+      : Base(std::move(hc).operator rawspeed::PrefixCode<CodeTag>()) {}
 
   PrefixCodeLookupDecoder(PrefixCode<CodeTag>) = delete;
   PrefixCodeLookupDecoder(const PrefixCode<CodeTag>&) = delete;
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
   PrefixCodeLookupDecoder(PrefixCode<CodeTag>&&) = delete;
 
 protected:

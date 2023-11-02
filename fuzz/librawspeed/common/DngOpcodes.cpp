@@ -19,19 +19,19 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "MemorySanitizer.h"           // for MSan
-#include "adt/Array2DRef.h"            // for Array2DRef
-#include "adt/Point.h"                 // for iPoint2D, iRectangle2D
-#include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
-#include "fuzz/Common.h"               // for CreateCFA, CreateRawImage
-#include "io/Buffer.h"                 // for Buffer, DataBuffer
-#include "io/ByteStream.h"             // for ByteStream
-#include "io/Endianness.h"             // for Endianness, Endianness::little
-#include "io/IOException.h"            // for ThrowException, RawspeedExcep...
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <cassert>                     // for assert
-#include <cstdint>                     // for uint16_t, uint8_t
-#include <cstdio>                      // for size_t
+#include "MemorySanitizer.h"
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include "metadata/ColorFilterArray.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -96,7 +96,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
         mRaw->getByteDataAsUncroppedArray2DRef());
 
     mRaw->transferBadPixelsToMap();
-  } catch (const rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

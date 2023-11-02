@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "adt/Invariant.h"            // for invariant
-#include "codes/AbstractPrefixCode.h" // for AbstractPrefixCode
-#include <cassert>                    // for assert
-#include <functional>                 // for reference_wrapper
-#include <initializer_list>           // IWYU pragma: keep
-#include <memory>                     // for unique_ptr, make_unique
+#include "adt/Invariant.h"
+#include "codes/AbstractPrefixCode.h"
+#include <cassert>
+#include <functional>
+#include <initializer_list> // IWYU pragma: keep
+#include <memory>
 
 namespace rawspeed {
 

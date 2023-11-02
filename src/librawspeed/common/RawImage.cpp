@@ -18,20 +18,31 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
+#include "rawspeedconfig.h"
 #include "common/RawImage.h"
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/IOException.h"               // for IOException
-#include "parsers/TiffParserException.h"  // for TiffParserException
-#include <algorithm>                      // for min, fill, max, fill_n
-#include <cassert>                        // for assert
-#include <limits>                         // for numeric_limits
-#include <memory>                         // for allocator, unique_ptr, mak...
-#include <utility>                        // for move, swap
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/TableLookUp.h"
+#include "decoders/RawDecoderException.h"
+#include "io/IOException.h"
+#include "parsers/TiffParserException.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#ifdef DEBUG
+#include "adt/Array2DRef.h"
+#endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-#include "AddressSanitizer.h" // for ASan::...
+#include "AddressSanitizer.h"
 #endif
 
 namespace rawspeed {
@@ -223,16 +234,6 @@ void RawImageData::fixBadPixels() {
 
   /* Transfer if not already done */
   transferBadPixelsToMap();
-
-#if 0 // For testing purposes
-  if (!mBadPixelMap)
-    createBadPixelMap();
-  for (int y = 400; y < 700; y++){
-    for (int x = 1200; x < 1700; x++) {
-      mBadPixelMap[mBadPixelMapPitch * y + (x >> 3)] |= 1 << (x&7);
-    }
-  }
-#endif
 
   /* Process bad pixels, if any */
   if (!mBadPixelMap.empty())

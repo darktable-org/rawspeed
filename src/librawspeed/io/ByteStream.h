@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "AddressSanitizer.h" // for ASan
-#include "adt/Invariant.h"    // for invariant
-#include "common/Common.h"    // for roundUp
-#include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
-#include "io/IOException.h"   // for ThrowException, ThrowIOE
-#include <cassert>            // for invariant
-#include <cstdint>            // for uint8_t, uint16_t, int32_t, uint32_t
-#include <cstring>            // for memchr, memcmp, memcpy
-#include <limits>             // for numeric_limits
+#include "AddressSanitizer.h"
+#include "adt/Invariant.h"
+#include "common/Common.h"
+#include "io/Buffer.h"
+#include "io/IOException.h"
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <limits>
 
 namespace rawspeed {
 

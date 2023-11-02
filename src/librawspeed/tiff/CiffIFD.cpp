@@ -20,21 +20,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/CiffIFD.h"
-#include "adt/NORangesSet.h"             // for NORangesSet
-#include "common/Common.h"               // for isIn
-#include "io/Buffer.h"                   // for Buffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
-#include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType
-#include <algorithm>                     // for copy, max, any_of
-#include <cassert>                       // for assert
-#include <map>                           // for map, operator!=, _Rb_tree_c...
-#include <memory>                        // for unique_ptr, make_unique
-#include <string>                        // for string, basic_string<>::__s...
-#include <string_view>                   // for operator==
-#include <utility>                       // for move, pair
-#include <vector>                        // for vector, vector<>::const_ite...
+#include "adt/NORangesSet.h"
+#include "common/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "parsers/CiffParserException.h"
+#include "tiff/CiffEntry.h"
+#include "tiff/CiffTag.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 using std::vector;
 

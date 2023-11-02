@@ -22,17 +22,17 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY
-#include "adt/Invariant.h"  // for invariant
-#include "common/Common.h"  // for bitwidth, extractHighBits
-#include "io/Buffer.h"      // for Buffer
-#include "io/ByteStream.h"  // for ByteStream
-#include "io/Endianness.h"  // for Endianness, Endianness::unknown
-#include "io/IOException.h" // for ThrowIOE
-#include <algorithm>        // for fill_n, min
-#include <array>            // for array
-#include <cstdint>          // for uint32_t, uint8_t, uint64_t
-#include <cstring>          // for memcpy
+#include "rawspeedconfig.h"
+#include "adt/Invariant.h"
+#include "common/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstring>
 
 namespace rawspeed {
 

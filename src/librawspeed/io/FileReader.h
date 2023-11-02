@@ -21,12 +21,12 @@
 #pragma once
 
 #include "adt/AlignedAllocator.h"
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
-#include "io/Buffer.h"                       // for Buffer
-#include <cstdint>                           // for uint8_t
-#include <memory>                            // for unique_ptr
-#include <utility>                           // for pair
-#include <vector>                            // for vector
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "io/Buffer.h"
+#include <cstdint>
+#include <memory>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

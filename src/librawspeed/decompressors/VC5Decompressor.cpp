@@ -27,26 +27,35 @@
   implementation.
  */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP, RAWSPEED_CACH...
+#include "rawspeedconfig.h"
 #include "decompressors/VC5Decompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for roundUpDivision, rawspeed_...
-#include "common/ErrorLog.h"              // for ErrorLog
-#include "common/SimpleLUT.h"             // for SimpleLUT, SimpleLUT<>::va...
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/Endianness.h"                // for Endianness, Endianness::big
-#include <algorithm>                      // for all_of, max
-#include <cassert>                        // for assert
-#include <cmath>                          // for pow
-#include <initializer_list>               // for initializer_list
-#include <limits>                         // for numeric_limits
-#include <optional>                       // for optional, operator==
-#include <string>                         // for string
-#include <tuple>                          // for tie, tuple
-#include <utility>                        // for pair
-// IWYU pragma: no_include <ext/alloc_traits.h>
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/PrefixCode.h"
+#include "common/BayerPhase.h"
+#include "common/Common.h"
+#include "common/ErrorLog.h"
+#include "common/RawImage.h"
+#include "common/SimpleLUT.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpMSB.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <optional>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace {
 
@@ -64,7 +73,7 @@ struct RLV {
     const uint32_t length;                                                     \
     const RLV entries[n];                                                      \
   } constexpr
-#include "gopro/vc5/table17.inc" // for table17
+#include "gopro/vc5/table17.inc"
 
 constexpr int16_t decompand(int16_t val) {
   double c = val;

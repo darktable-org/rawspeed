@@ -22,33 +22,33 @@
 #error DECODER must be defined
 #endif
 
-#include "common/RawspeedException.h" // for RawspeedException
-#include "decoders/ArwDecoder.h"      // IWYU pragma: keep
-#include "decoders/Cr2Decoder.h"      // IWYU pragma: keep
-#include "decoders/DcrDecoder.h"      // IWYU pragma: keep
-#include "decoders/DcsDecoder.h"      // IWYU pragma: keep
-#include "decoders/DngDecoder.h"      // IWYU pragma: keep
-#include "decoders/ErfDecoder.h"      // IWYU pragma: keep
-#include "decoders/IiqDecoder.h"      // IWYU pragma: keep
-#include "decoders/KdcDecoder.h"      // IWYU pragma: keep
-#include "decoders/MefDecoder.h"      // IWYU pragma: keep
-#include "decoders/MosDecoder.h"      // IWYU pragma: keep
-#include "decoders/NefDecoder.h"      // IWYU pragma: keep
-#include "decoders/OrfDecoder.h"      // IWYU pragma: keep
-#include "decoders/PefDecoder.h"      // IWYU pragma: keep
-#include "decoders/RafDecoder.h"      // IWYU pragma: keep
-#include "decoders/Rw2Decoder.h"      // IWYU pragma: keep
-#include "decoders/SrwDecoder.h"      // IWYU pragma: keep
-#include "decoders/StiDecoder.h"      // IWYU pragma: keep
-#include "decoders/ThreefrDecoder.h"  // IWYU pragma: keep
-#include "io/Buffer.h"                // for Buffer
-#include "metadata/CameraMetaData.h"  // for CameraMetaData
-#include "parsers/TiffParser.h"       // for TiffParser
-#include <cassert>                    // for assert
-#include <cstdint>                    // for uint8_t
-#include <cstdio>                     // for size_t
-#include <memory>                     // for unique_ptr, make_unique
-#include <utility>                    // for move
+#include "common/RawspeedException.h"
+#include "decoders/ArwDecoder.h"     // IWYU pragma: keep
+#include "decoders/Cr2Decoder.h"     // IWYU pragma: keep
+#include "decoders/DcrDecoder.h"     // IWYU pragma: keep
+#include "decoders/DcsDecoder.h"     // IWYU pragma: keep
+#include "decoders/DngDecoder.h"     // IWYU pragma: keep
+#include "decoders/ErfDecoder.h"     // IWYU pragma: keep
+#include "decoders/IiqDecoder.h"     // IWYU pragma: keep
+#include "decoders/KdcDecoder.h"     // IWYU pragma: keep
+#include "decoders/MefDecoder.h"     // IWYU pragma: keep
+#include "decoders/MosDecoder.h"     // IWYU pragma: keep
+#include "decoders/NefDecoder.h"     // IWYU pragma: keep
+#include "decoders/OrfDecoder.h"     // IWYU pragma: keep
+#include "decoders/PefDecoder.h"     // IWYU pragma: keep
+#include "decoders/RafDecoder.h"     // IWYU pragma: keep
+#include "decoders/Rw2Decoder.h"     // IWYU pragma: keep
+#include "decoders/SrwDecoder.h"     // IWYU pragma: keep
+#include "decoders/StiDecoder.h"     // IWYU pragma: keep
+#include "decoders/ThreefrDecoder.h" // IWYU pragma: keep
+#include "io/Buffer.h"
+#include "metadata/CameraMetaData.h"
+#include "parsers/TiffParser.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
+#include <memory>
+#include <utility>
 
 static const rawspeed::CameraMetaData metadata{};
 

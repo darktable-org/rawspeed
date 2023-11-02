@@ -18,9 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "metadata/CameraSensorInfo.h"
-#include <utility> // for move
-#include <vector>  // for vector
+#include <utility>
+#include <vector>
 
 using std::vector;
 

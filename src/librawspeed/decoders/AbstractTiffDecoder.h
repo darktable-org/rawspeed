@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h" // for RawDecoder
-#include "io/Buffer.h"           // for Buffer
-#include "tiff/TiffIFD.h"        // for TiffID, TiffRootIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"        // for TiffTag, TiffTag::IMAGEWIDTH
-#include <memory>                // for allocator, unique_ptr
-#include <string>                // for string
-#include <utility>               // for move
+#include "decoders/RawDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <memory>
+#include <string>
+#include <utility>
 
 namespace rawspeed {
 

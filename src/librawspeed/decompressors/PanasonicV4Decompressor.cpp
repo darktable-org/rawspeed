@@ -20,25 +20,25 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h"
 #include "decompressors/PanasonicV4Decompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Mutex.h"                    // for MutexLocker
-#include "adt/Point.h"                    // for iPoint2D, iPoint2D::value_...
-#include "common/Common.h"                // for extractHighBits, rawspeed_...
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/Buffer.h"                    // for Buffer, Buffer::size_type
-#include <algorithm>                      // for copy, max, fill_n, generate_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <iterator>                       // for back_insert_iterator, back...
-#include <limits>                         // for numeric_limits
-#include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
-#include <vector>                         // for vector, vector<>::iterator
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <iterator>
+#include <limits>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

@@ -18,8 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/Cr2Decompressor.h"     // for Cr2Decompressor
-#include "codes/PrefixCodeDecoder.h"           // for PrefixCodeDecoder
+#include "decompressors/Cr2Decompressor.h"
+#include "codes/PrefixCodeDecoder.h"
 #include "decompressors/Cr2DecompressorImpl.h" // IWYU pragma: keep
 
 namespace rawspeed {

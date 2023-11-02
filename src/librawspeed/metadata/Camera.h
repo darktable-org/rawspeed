@@ -20,20 +20,20 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"            // for HAVE_PUGIXML
-#include "adt/NotARational.h"          // for NotARational
-#include "adt/Point.h"                 // for iPoint2D
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h" // for CFAColor, ColorFilterArray
-#include <algorithm>                   // for copy
-#include <cstdint>                     // for uint32_t
-#include <functional>                  // for less
-#include <map>                         // for map, operator!=, _Rb_tree_con...
-#include <sstream>                     // for basic_istream::operator>>
-#include <string>                      // for string, basic_string, operator<
-#include <utility>                     // for pair
-#include <vector>                      // for vector
+#include "rawspeedconfig.h"
+#include "adt/NotARational.h"
+#include "adt/Point.h"
+#include "metadata/BlackArea.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include <algorithm>
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #ifdef HAVE_PUGIXML
 

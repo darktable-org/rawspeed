@@ -21,10 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h" // for bit_cast
-#include <cassert>         // for assert
-#include <cstdint>         // for uint32_t, uint16_t, uint64_t, int16_t
-#include <cstring>         // for memcpy
+#include "common/Common.h"
+#include <cassert>
+#include <cstdint>
+#include <cstring>
 
 namespace rawspeed {
 

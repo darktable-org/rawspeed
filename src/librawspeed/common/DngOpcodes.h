@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include <cstdint>  // for uint32_t
-#include <map>      // for map
-#include <memory>   // for unique_ptr
-#include <optional> // for optional
-#include <utility>  // for pair
-#include <vector>   // for vector
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

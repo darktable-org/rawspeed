@@ -20,21 +20,23 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/HasselbladLJpegDecoder.h"   // for HasselbladLJpegDec...
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endian...
-#include "metadata/ColorFilterArray.h"              // for CFAColor, CFAColor...
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag::...
-#include <array>                                    // for array
-#include <cstdint>                                  // for uint32_t
-#include <memory>                                   // for unique_ptr, allocator
-#include <string>                                   // for operator==, string
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/HasselbladLJpegDecoder.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 

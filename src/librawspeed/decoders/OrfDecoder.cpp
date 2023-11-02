@@ -21,25 +21,27 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "adt/Array2DRef.h"                         // for Array2DRef
-#include "adt/NORangesSet.h"                        // for NORangesSet
-#include "adt/Point.h"                              // for iPoint2D, iRecta...
-#include "common/Common.h"                          // for BitOrder, roundUp
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/OlympusDecompressor.h"      // for OlympusDecompressor
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/BitPumpMSB.h"                          // for BitPumpMSB
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, getH...
-#include "metadata/ColorFilterArray.h"              // for CFAColor, ColorF...
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
+#include "adt/Array2DRef.h"
+#include "adt/NORangesSet.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/OlympusDecompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/BitPumpMSB.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 

@@ -19,11 +19,12 @@
 */
 
 #include "fuzz/Common.h"
-#include "adt/Point.h"       // for iPoint2D, iPoint2D::value_type
-#include "common/RawImage.h" // for RawImage, RawImageData, RawImageType
-#include "io/ByteStream.h"   // for ByteStream
-#include "io/IOException.h"  // for ThrowException, ThrowRSE, ThrowIOE
-#include <cstdint>           // for uint32_t, int32_t
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "io/ByteStream.h"
+#include "io/IOException.h"
+#include "metadata/ColorFilterArray.h"
+#include <cstdint>
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream& bs) {
   const uint32_t width = bs.getU32();

@@ -22,12 +22,12 @@
 
 #include "rawspeedconfig.h"
 #include "AddressSanitizer.h"
-#include "adt/Invariant.h" // for invariant
+#include "adt/Invariant.h"
 #include "common/Common.h"
 #include "common/RawspeedException.h"
-#include <cstddef> // for size_t
-#include <cstdint> // for SIZE_MAX
-#include <memory>  // for allocator_traits
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 
 namespace rawspeed {
 

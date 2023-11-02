@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "adt/Invariant.h" // for invariant
-#include "common/Common.h" // for bitwidth
-#include <iterator>        // for input_iterator_tag
-#include <utility>         // for enable_if_t, is_unsigned_v
+#include "adt/Invariant.h"
+#include "common/Common.h"
+#include <iterator>
+#include <utility>
 
 namespace rawspeed {
 

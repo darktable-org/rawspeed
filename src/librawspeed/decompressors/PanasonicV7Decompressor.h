@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include <climits>                              // for CHAR_BIT
-#include <cstdint>                              // for uint16_t
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include <climits>
+#include <cstdint>
 #include <functional>
 
 namespace rawspeed {

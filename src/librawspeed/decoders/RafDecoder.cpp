@@ -20,32 +20,30 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "adt/Array2DRef.h"                         // for Array2DRef
-#include "adt/NotARational.h"                       // for NotARational
-#include "adt/Point.h"                              // for iPoint2D, iRecta...
-#include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, getH...
-#include "metadata/BlackArea.h"                     // for BlackArea
-#include "metadata/Camera.h"                        // for Camera, Hints
-#include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for copy
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t
-#include <cstring>                                  // for memcmp
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for string, operator==
-#include <vector>                                   // for vector
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/FujiDecompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

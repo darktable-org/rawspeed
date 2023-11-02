@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "parsers/RawParser.h" // for RawParser
-#include "tiff/CiffIFD.h"      // for CiffIFD
-#include <memory>              // for unique_ptr
+#include "parsers/RawParser.h"
+#include "tiff/CiffIFD.h"
+#include <memory>
 
 namespace rawspeed {
 

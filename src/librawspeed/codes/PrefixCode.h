@@ -20,17 +20,17 @@
 
 #pragma once
 
-#include "codes/AbstractPrefixCode.h"     // for AbstractPrefixCode
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include <algorithm>                      // for copy, equal, fill, max
-#include <cassert>                        // for invariant
-#include <cstddef>                        // for size_t
-#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
-#include <functional>                     // for less, less_equal
-#include <iterator>                       // for back_insert_iterator, ba...
-#include <numeric>                        // for accumulate
-#include <type_traits>                    // for is_integral
-#include <vector>                         // for vector, vector<>::const_...
+#include "codes/AbstractPrefixCode.h"
+#include "decoders/RawDecoderException.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <iterator>
+#include <numeric>
+#include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 

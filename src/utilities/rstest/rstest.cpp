@@ -18,38 +18,35 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"                    // for RawImage, RawImageData
-#include "adt/AlignedAllocator.h"            // for AlignedAllocator
-#include "adt/Array2DRef.h"                  // for Array2DRef, Array2DRef<...
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
-#include "adt/NotARational.h"                // for NotARational
-#include "md5.h"                             // for md5_state, md5_hash
-#include <algorithm>                         // for fill, copy, fill_n, max
-#include <array>                             // for array
-#include <cassert>                           // for assert
-#include <chrono>                            // for milliseconds, steady_clock
-#include <cstdarg>                           // for va_end, va_list, va_start
-#include <cstddef>                           // for size_t, byte
-#include <cstdint>                           // for uint8_t, uint16_t, uint...
-#include <cstdio>                            // for fclose, fprintf, fopen
-#include <cstdlib>                           // for system
-#include <fstream>                           // for operator<<, basic_ostream
-#include <functional>                        // for less
-#include <iostream>                          // for cout, cerr
-#include <iterator>                          // for istreambuf_iterator
-#include <map>                               // for map, operator!=, _Rb_tr...
-#include <memory>                            // for allocator, unique_ptr
-#include <sstream>                           // for basic_ostringstream
-#include <string>                            // for string, operator+, basi...
-#include <string_view>                       // for operator!=, string_view
-#include <tuple>                             // for tie, tuple
-#include <type_traits>                       // for __type_identity_t
-#include <utility>                           // for tuple_element<>::type
-#include <vector>                            // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
+#include "RawSpeed-API.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/Array2DRef.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/NotARational.h"
+#include "md5.h"
+#include <array>
+#include <cassert>
+#include <chrono>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-#include <iomanip> // for operator<<, setw
+#include <iomanip>
 #endif
 
 using std::chrono::steady_clock;
@@ -65,7 +62,6 @@ using rawspeed::RawspeedException;
 using rawspeed::roundUp;
 using std::cerr;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::istreambuf_iterator;
 using std::map;
@@ -353,7 +349,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #pragma omp critical(io)
 #endif
     cout << left << setw(55) << filename << ": hash "
-         << (o.create ? "exists" : "missing") << ", skipping" << endl;
+         << (o.create ? "exists" : "missing") << ", skipping" << '\n';
 #endif
     return 0;
   }
@@ -363,7 +359,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
-  cout << left << setw(55) << filename << ": starting decoding ... " << endl;
+  cout << left << setw(55) << filename << ": starting decoding ... " << '\n';
 #endif
 
   FileReader reader(filename.c_str());
@@ -397,7 +393,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #endif
   cout << left << setw(55) << filename << ": " << internal << setw(3)
        << buf.getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
-       << endl;
+       << '\n';
 #endif
 
   if (o.create) {
@@ -438,9 +434,9 @@ int results(const map<std::string, std::string, std::less<>>& failedTests,
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
-      cout << "no tests failed!" << endl;
+      cout << "no tests failed!" << '\n';
     else
-      cout << "all hashes created!" << endl;
+      cout << "all hashes created!" << '\n';
     return 0;
   }
 
@@ -567,14 +563,14 @@ int main(int argc, char **argv) {
       {
         std::string msg = std::string(argv[i]) + " failed: " + e.what();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-        cerr << msg << endl;
+        cerr << msg << '\n';
 #endif
         failedTests.try_emplace(argv[i], msg);
       }
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << endl << endl;
+  cout << "Total decoding time: " << time / 1000.0 << "s" << '\n' << '\n';
 
   return results(failedTests, o);
 }

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
+#include "rawspeedconfig.h"
 
 namespace rawspeed {
 

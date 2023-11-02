@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <cstdint> // for uint32_t
+#include <cstdint>
 
 namespace rawspeed {
 

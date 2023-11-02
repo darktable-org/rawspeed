@@ -20,28 +20,28 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"                  // for RAWSPEED_READONLY, WITH...
-#include "ThreadSafetyAnalysis.h"            // for GUARDED_BY, REQUIRES
-#include "adt/AlignedAllocator.h"            // for AlignedAllocator
-#include "adt/Array2DRef.h"                  // for Array2DRef
-#include "adt/CroppedArray2DRef.h"           // for CroppedArray2DRef
-#include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
-#include "adt/Mutex.h"                       // for Mutex
-#include "adt/NotARational.h"                // for NotARational
-#include "adt/Point.h"                       // for iPoint2D, iRectangle2D ...
-#include "common/Common.h"                   // for writeLog, DEBUG_PRIO
-#include "common/ErrorLog.h"                 // for ErrorLog
-#include "common/TableLookUp.h"              // for TableLookUp
-#include "metadata/BlackArea.h"              // for BlackArea
-#include "metadata/ColorFilterArray.h"       // for ColorFilterArray
-#include <array>                             // for array
-#include <cassert>                           // for assert
-#include <cmath>                             // for NAN
-#include <cstddef>                           // for byte
-#include <cstdint>                           // for uint32_t, uint16_t, uin...
-#include <memory>                            // for unique_ptr, operator==
-#include <string>                            // for string
-#include <vector>                            // for vector
+#include "rawspeedconfig.h"
+#include "ThreadSafetyAnalysis.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/Array2DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/Mutex.h"
+#include "adt/NotARational.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/ErrorLog.h"
+#include "common/TableLookUp.h"
+#include "metadata/BlackArea.h"
+#include "metadata/ColorFilterArray.h"
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

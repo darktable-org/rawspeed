@@ -22,9 +22,9 @@
 
 #include "codes/HuffmanCode.h"
 #include "common/RawspeedException.h"
-#include "io/ByteStream.h" // for ByteStream
-#include <optional>        // for optional
-#include <type_traits>     // for is_same
+#include "io/ByteStream.h"
+#include <optional>
+#include <type_traits>
 
 template <typename CodeTag>
 auto getCodeValues(rawspeed::ByteStream& bs, unsigned numEntries) {

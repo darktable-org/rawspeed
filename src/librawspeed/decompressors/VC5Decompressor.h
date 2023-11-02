@@ -21,23 +21,23 @@
 
 #pragma once
 
-#include "adt/Array2DRef.h"                     // for Array2DRef
-#include "adt/DefaultInitAllocatorAdaptor.h"    // for DefaultInitAllocator...
-#include "codes/PrefixCodeLUTDecoder.h"         // for PrefixCodeLUTDecoder
-#include "codes/PrefixCodeVectorDecoder.h"      // for PrefixCodeVectorDe...
-#include "common/BayerPhase.h"                  // for BayerPhase
-#include "common/RawImage.h"                    // for RawImage
-#include "common/SimpleLUT.h"                   // for SimpleLUT, SimpleLUT...
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include "io/ByteStream.h"                      // for ByteStream
-#include <array>                                // for array
-#include <cstdint>                              // for int16_t, uint16_t
-#include <memory>                               // for unique_ptr
-#include <optional>                             // for optional
-#include <type_traits>                          // for underlying_type_t
-#include <utility>                              // for move, pair
-#include <vector>                               // for vector
+#include "adt/Array2DRef.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "codes/PrefixCodeLUTDecoder.h"
+#include "codes/PrefixCodeVectorDecoder.h"
+#include "common/BayerPhase.h"
+#include "common/RawImage.h"
+#include "common/SimpleLUT.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/BitPumpMSB.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 class ErrorLog;

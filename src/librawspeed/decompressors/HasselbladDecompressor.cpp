@@ -20,16 +20,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompressor, HasselbladSliceWidths
-#include "adt/Array2DRef.h"                       // for Array2DRef
-#include "adt/Invariant.h"                        // for invariant
-#include "adt/Point.h"                            // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "common/RawspeedException.h"     // for ThrowException
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include <cstdint>                        // for uint16_t
-#include <utility>                        // for move
+#include "decompressors/HasselbladDecompressor.h"
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpMSB32.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 

@@ -20,15 +20,15 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for HAVE_JPEG
+#include "rawspeedconfig.h"
 
 #ifdef HAVE_JPEG
 
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/Buffer.h"                          // for Buffer
-#include <cstdint>                              // for uint32_t
-#include <utility>                              // for move
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/Buffer.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 

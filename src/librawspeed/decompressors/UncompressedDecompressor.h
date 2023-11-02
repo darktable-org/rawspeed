@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include "adt/Point.h"                          // for iPoint2D, iRectangle...
-#include "common/Common.h"                      // for BitOrder
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h"                      // for Endianness
-#include <cstdint>                              // for uint32_t
-#include <utility>                              // for move
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 

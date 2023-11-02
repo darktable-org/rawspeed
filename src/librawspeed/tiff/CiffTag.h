@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <initializer_list> // for initializer_list
+#include <initializer_list>
 
 namespace rawspeed {
 

@@ -20,17 +20,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for isIn
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/Endianness.h"               // for Endianness, Endianness::little
-#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
-#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
-#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::DNGPRIVAT...
-#include <cassert>                       // for assert
-#include <cstdint>                       // for uint32_t, uint8_t, int32_t
-#include <cstring>                       // for strnlen
-#include <string>                        // for string
+#include "adt/NotARational.h"
+#include "common/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <string>
 
 namespace rawspeed {
 
@@ -66,18 +70,20 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
                    TiffTag::MAKERNOTE_ALT, TiffTag::FUJI_RAW_IFD,
                    TiffTag::SUBIFDS, TiffTag::EXIFIFDPOINTER})) {
       // preserve offset for SUB_IFD/EXIF/MAKER_NOTE data
-#if 0
-      // limit access to range from 0 to data_offset+byte_size
-      data = ByteStream(bs, data_offset, byte_size, bs.getByteOrder());
-#else
-      // allow access to whole file, necessary if offsets inside the maker note
-      // point to outside data, which is forbidden due to the TIFF/DNG spec but
-      // may happen none the less (see e.g. "old" ORF files like EX-1, note:
-      // the tags outside of the maker note area are currently not used anyway)
-      data = bs;
-      data.setPosition(data_offset);
-      (void)data.check(byte_size);
-#endif
+      // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+      if constexpr ((false)) {
+        // limit access to range from 0 to data_offset+byte_size
+        data = bs.getSubStream(data_offset, byte_size);
+      } else {
+        // allow access to whole file, necessary if offsets inside the maker
+        // note point to outside data, which is forbidden due to the TIFF/DNG
+        // spec but may happen none the less (see e.g. "old" ORF files like
+        // EX-1, note: the tags outside of the maker note area are currently not
+        // used anyway)
+        data = bs;
+        data.setPosition(data_offset);
+        (void)data.check(byte_size);
+      }
     } else {
       data = bs.getSubStream(data_offset, byte_size);
     }
@@ -277,10 +283,10 @@ std::string TiffEntry::getString() const {
              static_cast<unsigned>(type));
 
   // *NOT* ByteStream::peekString() !
-  const auto bufSize = data.getRemainSize();
-  const auto* buf = data.peekData(bufSize);
-  const auto* s = reinterpret_cast<const char*>(buf);
-  return {s, strnlen(s, bufSize)};
+  Buffer tmp = data.peekBuffer(data.getRemainSize());
+  const auto* termIter = std::find(tmp.begin(), tmp.end(), '\0');
+  return {reinterpret_cast<const char*>(tmp.begin()),
+          reinterpret_cast<const char*>(termIter)};
 }
 
 DataBuffer TiffEntry::getRootIfdData() const {
