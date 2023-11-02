@@ -49,7 +49,7 @@ public:
       typename = std::enable_if<std::is_convertible_v<
           F, std::function<value_type(typename decltype(table)::size_type,
                                       typename decltype(table)::size_type)>>>>
-  explicit SimpleLUT(F&& f) {
+  explicit SimpleLUT(F f) {
     const auto fullTableSize = 1U << TableBitWidth;
     table.reserve(fullTableSize);
     std::generate_n(std::back_inserter(table), fullTableSize,

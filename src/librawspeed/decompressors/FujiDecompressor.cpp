@@ -256,7 +256,7 @@ struct fuji_compressed_block {
   void fuji_decode_strip(const FujiStrip& strip);
 
   template <typename Tag, typename T>
-  void copy_line(const FujiStrip& strip, int cur_line, T&& idx) const;
+  void copy_line(const FujiStrip& strip, int cur_line, T idx) const;
 
   void copy_line_to_xtrans(const FujiStrip& strip, int cur_line) const;
   void copy_line_to_bayer(const FujiStrip& strip, int cur_line) const;
@@ -286,7 +286,7 @@ struct fuji_compressed_block {
   void fuji_extend_blue() const;
 
   template <typename T>
-  inline void fuji_decode_block(T&& func_even, int cur_line);
+  inline void fuji_decode_block(T func_even, int cur_line);
   void xtrans_decode_block(int cur_line);
   void fuji_bayer_decode_block(int cur_line);
 };
@@ -334,7 +334,7 @@ void fuji_compressed_block::reset(const fuji_compressed_params& params) {
 
 template <typename Tag, typename T>
 void fuji_compressed_block::copy_line(const FujiStrip& strip, int cur_line,
-                                      T&& idx) const {
+                                      T idx) const {
   std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData;
   if constexpr (std::is_same_v<XTransTag, Tag>)
     CFAData = getAsCFAColors(XTransPhase(0, 0));
@@ -601,7 +601,7 @@ void fuji_compressed_block::fuji_extend_blue() const {
 
 template <typename T>
 __attribute__((always_inline)) void
-fuji_compressed_block::fuji_decode_block(T&& func_even,
+fuji_compressed_block::fuji_decode_block(T func_even,
                                          [[maybe_unused]] int cur_line) {
   invariant(common_info.line_width % 2 == 0);
   const int line_width = common_info.line_width / 2;

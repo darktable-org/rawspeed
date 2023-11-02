@@ -42,7 +42,7 @@ void construct_with_zeroinit(benchmark::State& state) {
 }
 
 template <typename Worker>
-void BM_std_vector(benchmark::State& state, Worker&& worker) {
+void BM_std_vector(benchmark::State& state, Worker worker) {
   // Do it once outside of the loop to maybe offset the initial alloc time.
   worker(state);
 
