@@ -22,8 +22,9 @@
 #include "bench/Common.h"                    // for benchmarkDryRun
 #include <cstddef>                           // for byte
 #include <map>                               // for map<>::mapped_type
-#include <vector>                            // for allocator, vector
-#include <benchmark/benchmark.h>             // for State, Benchmark, BENCH...
+#include <memory>
+#include <vector>                // for allocator, vector
+#include <benchmark/benchmark.h> // for State, Benchmark, BENCH...
 
 using Type = std::byte;
 

@@ -20,17 +20,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/TiffEntry.h"
-#include "common/Common.h"               // for isIn
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
+#include "adt/NotARational.h"
+#include "common/Common.h" // for isIn
+#include "io/Buffer.h"     // for Buffer, DataBuffer
+#include "io/ByteStream.h"
 #include "io/Endianness.h"               // for Endianness, Endianness::little
 #include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::DNGPRIVAT...
-#include <cassert>                       // for assert
-#include <cstdint>                       // for uint32_t, uint8_t, int32_t
-#include <cstring>                       // for strnlen
-#include <string>                        // for string
+#include <array>
+#include <cassert> // for assert
+#include <cstdint> // for uint32_t, uint8_t, int32_t
+#include <cstring>
+#include <string> // for string
 
 namespace rawspeed {
 

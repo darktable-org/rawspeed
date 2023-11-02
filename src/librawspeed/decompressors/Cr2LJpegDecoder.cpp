@@ -25,15 +25,16 @@
 #include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for generate_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t
-#include <initializer_list>               // for initializer_list
-#include <iterator>                       // for back_insert_iterator, back...
-#include <tuple>                          // for tuple, get
-#include <vector>                         // for vector
+#include "decompressors/AbstractLJpegDecoder.h"
+#include "decompressors/Cr2Decompressor.h"
+#include "io/ByteStream.h" // for ByteStream
+#include <algorithm>       // for generate_n
+#include <array>           // for array
+#include <cassert>         // for assert
+#include <cstdint>         // for uint16_t, uint32_t
+#include <iterator>        // for back_insert_iterator, back...
+#include <tuple>           // for tuple, get
+#include <vector>          // for vector
 
 namespace rawspeed {
 

@@ -20,17 +20,16 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "adt/Array2DRef.h"                         // for Array2DRef
-#include "adt/NotARational.h"                       // for NotARational
-#include "adt/Point.h"                              // for iPoint2D, iRecta...
-#include "common/Common.h"                          // for BitOrder, BitOrd...
+#include "adt/Array2DRef.h" // for Array2DRef
+#include "adt/Point.h"      // for iPoint2D, iRecta...
+#include "common/Common.h"  // for BitOrder, BitOrd...
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, getH...
-#include "metadata/BlackArea.h"                     // for BlackArea
 #include "metadata/Camera.h"                        // for Camera, Hints
 #include "metadata/CameraMetaData.h"                // for CameraMetaData
 #include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
@@ -38,7 +37,6 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for copy
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
 #include <cstdint>                                  // for uint32_t

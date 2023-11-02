@@ -26,7 +26,6 @@
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include <array>                               // for array
 #include <cstdint>                             // for uint16_t
-#include <tuple>                               // for array
 #include <type_traits>                         // for integral_constant
 #include <benchmark/benchmark.h>               // for State, Benchmark, Cou...
 

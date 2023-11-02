@@ -26,7 +26,6 @@
 #include "MemorySanitizer.h"              // for MSan
 #include "adt/Array1DRef.h"               // for Array1DRef
 #include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Invariant.h"                // for invariant
 #include "adt/Point.h"                    // for iPoint2D
@@ -36,18 +35,19 @@
 #include "common/XTransPhase.h"           // for XTransPhase, getAsCFAColors
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
-#include <algorithm>                      // for max, min, fill, minmax
-#include <array>                          // for array, array<>::value_type
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, int8_t, uint32_t
-#include <cstdlib>                        // for abs
-#include <cstring>                        // for memcpy, memset
-#include <initializer_list>               // for initializer_list
-#include <optional>                       // for optional, operator!=
-#include <string>                         // for string
-#include <utility>                        // for pair
+#include "io/ByteStream.h"
+#include "io/Endianness.h"             // for Endianness, Endianness::big
+#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::BLUE
+#include <algorithm>                   // for max, min, fill, minmax
+#include <array>                       // for array, array<>::value_type
+#include <cassert>                     // for assert
+#include <cstdint>                     // for uint16_t, int8_t, uint32_t
+#include <cstdlib>                     // for abs
+#include <cstring>                     // for memcpy, memset
+#include <optional>                    // for optional, operator!=
+#include <string>                      // for string
+#include <utility>                     // for pair
+#include <vector>
 
 namespace rawspeed {
 

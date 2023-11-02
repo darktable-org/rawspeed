@@ -22,33 +22,37 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "adt/NORangesSet.h"             // for NORangesSet
-#include "decoders/ArwDecoder.h"         // for ArwDecoder
-#include "decoders/Cr2Decoder.h"         // for Cr2Decoder
-#include "decoders/DcrDecoder.h"         // for DcrDecoder
-#include "decoders/DcsDecoder.h"         // for DcsDecoder
-#include "decoders/DngDecoder.h"         // for DngDecoder
-#include "decoders/ErfDecoder.h"         // for ErfDecoder
-#include "decoders/IiqDecoder.h"         // for IiqDecoder
-#include "decoders/KdcDecoder.h"         // for KdcDecoder
-#include "decoders/MefDecoder.h"         // for MefDecoder
-#include "decoders/MosDecoder.h"         // for MosDecoder
-#include "decoders/NefDecoder.h"         // for NefDecoder
-#include "decoders/OrfDecoder.h"         // for OrfDecoder
-#include "decoders/PefDecoder.h"         // for PefDecoder
-#include "decoders/Rw2Decoder.h"         // for Rw2Decoder
-#include "decoders/SrwDecoder.h"         // for SrwDecoder
-#include "decoders/StiDecoder.h"         // for StiDecoder
-#include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::unk...
+#include "adt/NORangesSet.h"         // for NORangesSet
+#include "decoders/ArwDecoder.h"     // for ArwDecoder
+#include "decoders/Cr2Decoder.h"     // for Cr2Decoder
+#include "decoders/DcrDecoder.h"     // for DcrDecoder
+#include "decoders/DcsDecoder.h"     // for DcsDecoder
+#include "decoders/DngDecoder.h"     // for DngDecoder
+#include "decoders/ErfDecoder.h"     // for ErfDecoder
+#include "decoders/IiqDecoder.h"     // for IiqDecoder
+#include "decoders/KdcDecoder.h"     // for KdcDecoder
+#include "decoders/MefDecoder.h"     // for MefDecoder
+#include "decoders/MosDecoder.h"     // for MosDecoder
+#include "decoders/NefDecoder.h"     // for NefDecoder
+#include "decoders/OrfDecoder.h"     // for OrfDecoder
+#include "decoders/PefDecoder.h"     // for PefDecoder
+#include "decoders/Rw2Decoder.h"     // for Rw2Decoder
+#include "decoders/SrwDecoder.h"     // for SrwDecoder
+#include "decoders/StiDecoder.h"     // for StiDecoder
+#include "decoders/ThreefrDecoder.h" // for ThreefrDecoder
+#include "io/Buffer.h"               // for Buffer, DataBuffer
+#include "io/ByteStream.h"           // for ByteStream
+#include "io/Endianness.h"           // for Endianness, Endianness::unk...
+#include "parsers/RawParser.h"
 #include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
-#include <cassert>                       // for assert
-#include <cstdint>                       // for UINT32_MAX, uint16_t, uint32_t
-#include <memory>                        // for make_unique, unique_ptr
-#include <tuple>                         // for tie, tuple
-#include <vector>                        // for vector
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <cassert> // for assert
+#include <cstdint> // for UINT32_MAX, uint16_t, uint32_t
+#include <memory>  // for make_unique, unique_ptr
+#include <tuple>   // for tie, tuple
+#include <utility>
+#include <vector> // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 namespace rawspeed {

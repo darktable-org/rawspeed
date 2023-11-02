@@ -30,8 +30,9 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
-#include <cstdint>                        // for uint16_t
-#include <utility>                        // for move
+#include "io/ByteStream.h"
+#include <cstdint> // for uint16_t
+#include <utility> // for move
 
 namespace rawspeed {
 

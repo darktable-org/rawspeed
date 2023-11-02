@@ -20,8 +20,10 @@
 */
 
 #include "decoders/DcrDecoder.h"
-#include "adt/NORangesSet.h"                 // for NORangesSet
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
+#include "adt/NORangesSet.h" // for NORangesSet
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "decoders/SimpleTiffDecoder.h"
 #include "decompressors/KodakDecompressor.h" // for KodakDecompressor
 #include "io/Buffer.h"                       // for Buffer, DataBuffer
 #include "io/ByteStream.h"                   // for ByteStream
@@ -31,7 +33,6 @@
 #include "tiff/TiffTag.h"                    // for TiffTag, TiffTag::COMPR...
 #include <array>                             // for array
 #include <cassert>                           // for assert
-#include <cstdint>                           // for uint32_t
 #include <memory>                            // for allocator, unique_ptr
 #include <string>                            // for operator==, string
 

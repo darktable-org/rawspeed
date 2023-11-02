@@ -20,8 +20,9 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "adt/Point.h"                        // for iPoint2D
-#include "common/Common.h"                    // for BitOrder, BitOrder::MSB
+#include "adt/Point.h"     // for iPoint2D
+#include "common/Common.h" // for BitOrder, BitOrder::MSB
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"     // for ThrowException, ThrowRDE
 #include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
 #include "io/Buffer.h"                        // for Buffer, DataBuffer

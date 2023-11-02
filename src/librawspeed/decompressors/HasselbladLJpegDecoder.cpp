@@ -20,9 +20,10 @@
 */
 
 #include "decompressors/HasselbladLJpegDecoder.h"
-#include "adt/Point.h"                            // for iPoint2D
-#include "common/RawImage.h"                      // for RawImage, RawImage...
-#include "decoders/RawDecoderException.h"         // for ThrowException
+#include "adt/Point.h"                    // for iPoint2D
+#include "common/RawImage.h"              // for RawImage, RawImage...
+#include "decoders/RawDecoderException.h" // for ThrowException
+#include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/HasselbladDecompressor.h" // for HasselbladDecompre...
 #include "io/ByteStream.h"                        // for ByteStream
 #include <cstdint>                                // for uint16_t

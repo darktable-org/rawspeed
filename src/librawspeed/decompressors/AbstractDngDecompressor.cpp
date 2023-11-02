@@ -34,10 +34,11 @@
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
 #include "io/IOException.h"                         // for IOException, Thr...
-#include <limits>                                   // for numeric_limits
-#include <memory>                                   // for unique_ptr
-#include <string>                                   // for string
-#include <vector>                                   // for vector, allocator
+#include <cstdint>
+#include <limits> // for numeric_limits
+#include <memory> // for unique_ptr
+#include <string> // for string
+#include <vector> // for vector, allocator
 
 namespace rawspeed {
 

@@ -22,7 +22,9 @@
 
 #include "rawspeedconfig.h" // for RAWSPEED_READNONE
 #include "decoders/CrwDecoder.h"
-#include "adt/Point.h"                     // for iPoint2D
+#include "adt/Point.h" // for iPoint2D
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
 #include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
 #include "decompressors/CrwDecompressor.h" // for CrwDecompressor
 #include "io/Buffer.h"                     // for Buffer
@@ -34,12 +36,13 @@
 #include <array>                           // for array
 #include <cassert>                         // for assert
 #include <cmath>                           // for copysignf, expf, logf
-#include <cstdlib>                         // for abs, size_t
-#include <cstring>                         // for memcmp
-#include <memory>                          // for unique_ptr, allocator
-#include <string>                          // for string
-#include <utility>                         // for move
-#include <vector>                          // for vector
+#include <cstdint>
+#include <cstdlib> // for abs, size_t
+#include <cstring> // for memcmp
+#include <memory>  // for unique_ptr, allocator
+#include <string>  // for string
+#include <utility> // for move
+#include <vector>  // for vector
 
 using std::vector;
 

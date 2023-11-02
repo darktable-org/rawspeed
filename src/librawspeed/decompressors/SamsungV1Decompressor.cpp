@@ -28,11 +28,11 @@
 #include "common/Common.h"                // for isIntN
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include <algorithm>                      // for fill_n
-#include <array>                          // for array
-#include <memory>                         // for allocator_traits<>::value_...
-#include <vector>                         // for vector
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include "io/BitPumpMSB.h" // for BitPumpMSB
+#include <array>           // for array
+#include <cstdint>
+#include <vector> // for vector
 
 namespace rawspeed {
 

@@ -23,8 +23,10 @@
 #include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
 #include "adt/Invariant.h"         // for invariant
 #include "common/Common.h"         // for bit_cast
-#include <array>                   // for array
-#include <climits>                 // for CHAR_BIT
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include <array>   // for array
+#include <climits> // for CHAR_BIT
 
 #ifdef HAVE_ZLIB
 
@@ -36,7 +38,8 @@
 #include <cstdint>         // for uint32_t, uint16_t
 #include <cstdio>          // for size_t
 #include <utility>         // for move
-#include <zlib.h>          // for uncompress, zError, Z_OK
+#include <zconf.h>
+#include <zlib.h> // for uncompress, zError, Z_OK
 
 namespace rawspeed {
 

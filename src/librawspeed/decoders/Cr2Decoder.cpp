@@ -21,8 +21,9 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "adt/Array2DRef.h"                    // for Array2DRef
-#include "adt/Point.h"                         // for iPoint2D
+#include "adt/Array2DRef.h" // for Array2DRef
+#include "adt/Point.h"      // for iPoint2D
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"      // for ThrowRDE
 #include "decompressors/Cr2Decompressor.h"     // for Cr2SliceWidths
 #include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder
@@ -34,13 +35,14 @@
 #include "metadata/ColorFilterArray.h"         // for CFAColor, CFAColor::G...
 #include "parsers/TiffParserException.h"       // for ThrowException, Rawsp...
 #include "tiff/TiffEntry.h"                    // for TiffEntry, TiffDataType
-#include "tiff/TiffTag.h"                      // for TiffTag, TiffTag::CAN...
-#include <array>                               // for array
-#include <cassert>                             // for assert
-#include <cstdint>                             // for uint32_t, uint16_t
-#include <memory>                              // for unique_ptr, allocator
-#include <string>                              // for operator==, string
-#include <vector>                              // for vector
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h" // for TiffTag, TiffTag::CAN...
+#include <array>          // for array
+#include <cassert>        // for assert
+#include <cstdint>        // for uint32_t, uint16_t
+#include <memory>         // for unique_ptr, allocator
+#include <string>         // for operator==, string
+#include <vector>         // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 #include "MemorySanitizer.h" // for MSan
 

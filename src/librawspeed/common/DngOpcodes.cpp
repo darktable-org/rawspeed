@@ -22,7 +22,6 @@
 
 #include "rawspeedconfig.h" // for RAWSPEED_READONLY
 #include "common/DngOpcodes.h"
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Mutex.h"                    // for MutexLocker
 #include "adt/Point.h"                    // for iRectangle2D, iPoint2D
@@ -34,12 +33,16 @@
 #include <algorithm>                      // for generate_n, clamp, fill_n
 #include <cassert>                        // for assert
 #include <cmath>                          // for isfinite, pow
-#include <cstdlib>                        // for abs
-#include <initializer_list>               // for initializer_list
-#include <iterator>                       // for back_insert_iterator, back...
-#include <limits>                         // for numeric_limits
-#include <optional>                       // for optional, nullopt
-#include <tuple>                          // for tie, tuple
+#include <cstdint>
+#include <cstdlib>  // for abs
+#include <iterator> // for back_insert_iterator, back...
+#include <limits>   // for numeric_limits
+#include <memory>
+#include <optional> // for optional, nullopt
+#include <tuple>    // for tie, tuple
+#include <type_traits>
+#include <utility>
+#include <vector>
 // IWYU pragma: no_include <ext/alloc_traits.h>
 // IWYU pragma: no_include <type_traits>
 

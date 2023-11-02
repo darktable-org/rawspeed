@@ -24,15 +24,15 @@
 #include "common/Common.h"                     // for isAligned
 #include "common/RawImage.h"                   // for RawImage, RawImageData
 #include "io/Buffer.h"                         // for Buffer
-#include <algorithm>                           // for fill_n
 #include <cassert>                             // for assert
 #include <cstddef>                             // for size_t
 #include <cstdint>                             // for uint8_t
 #include <memory>                              // for unique_ptr
 #include <type_traits>                         // for integral_constant
 #include <vector>                              // for vector
-#include <zlib.h>                              // for compress, compressBound
-#include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
+#include <zconf.h>
+#include <zlib.h>                // for compress, compressBound
+#include <benchmark/benchmark.h> // for State, Benchmark, BEN...
 
 #ifndef NDEBUG
 #include <limits> // for numeric_limits

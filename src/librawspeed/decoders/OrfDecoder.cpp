@@ -21,10 +21,11 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "adt/Array2DRef.h"                         // for Array2DRef
-#include "adt/NORangesSet.h"                        // for NORangesSet
-#include "adt/Point.h"                              // for iPoint2D, iRecta...
-#include "common/Common.h"                          // for BitOrder, roundUp
+#include "adt/Array2DRef.h"  // for Array2DRef
+#include "adt/NORangesSet.h" // for NORangesSet
+#include "adt/Point.h"       // for iPoint2D, iRecta...
+#include "common/Common.h"   // for BitOrder, roundUp
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/OlympusDecompressor.h"      // for OlympusDecompressor
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
@@ -38,8 +39,9 @@
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
+#include <cstdint>
+#include <memory> // for unique_ptr, allo...
+#include <string> // for operator==, string
 
 namespace rawspeed {
 

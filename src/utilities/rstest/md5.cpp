@@ -29,6 +29,7 @@
 
 #include "rawspeedconfig.h" // for RAWSPEED_READNONE
 #include "md5.h"
+#include <array>
 #include <cstdint> // for uint32_t, uint8_t
 #include <cstdio>  // for size_t, snprintf
 #include <cstring> // for memset, memcpy

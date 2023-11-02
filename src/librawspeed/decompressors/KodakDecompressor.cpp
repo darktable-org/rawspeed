@@ -34,6 +34,10 @@
 #include <cstdint>                        // for uint32_t, uint8_t, uint16_t
 #include <utility>                        // for move
 
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+#include <sanitizer/asan_interface.h>
+#endif
+
 namespace rawspeed {
 
 KodakDecompressor::KodakDecompressor(RawImage img, ByteStream bs, int bps_,

@@ -30,7 +30,8 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
-#include <utility>                        // for move
+#include <cstdint>
+#include <utility> // for move
 
 namespace rawspeed {
 

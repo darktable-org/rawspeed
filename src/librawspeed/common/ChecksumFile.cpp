@@ -24,7 +24,6 @@
 #include "io/FileReader.h"            // for FileReader
 #include <cassert>                    // for assert
 #include <string>                     // for string, allocator, operator+
-#include <type_traits>                // for add_const<>::type
 #include <vector>                     // for vector
 
 namespace rawspeed {

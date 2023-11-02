@@ -30,14 +30,14 @@
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
-#include "io/Endianness.h"                // for Endianness, Endianness::li...
-#include <algorithm>                      // for copy, generate_n, max
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint8_t, uint16_t, uint32_t
-#include <iterator>                       // for back_insert_iterator, back...
-#include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include "io/ByteStream.h"
+#include "io/Endianness.h" // for Endianness, Endianness::li...
+#include <algorithm>       // for copy, generate_n, max
+#include <cassert>         // for assert
+#include <cstdint>         // for uint8_t, uint16_t, uint32_t
+#include <iterator>        // for back_insert_iterator, back...
+#include <utility>         // for move
+#include <vector>          // for vector
 
 namespace rawspeed {
 

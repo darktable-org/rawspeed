@@ -20,9 +20,10 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D, iRectangle2D
+#include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
+#include "adt/Invariant.h"         // for invariant
+#include "adt/Point.h"             // for iPoint2D, iRectangle2D
+#include "codes/PrefixCodeDecoder.h"
 #include "common/Common.h"                // for roundUpDivision
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
@@ -30,8 +31,12 @@
 #include "io/ByteStream.h"                // for ByteStream
 #include <algorithm>                      // for transform
 #include <array>                          // for array
-#include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <utility> // for move
+#include <vector>
 
 using std::copy_n;
 

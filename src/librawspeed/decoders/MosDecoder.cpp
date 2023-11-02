@@ -20,8 +20,10 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for trimSpaces
+#include "adt/Point.h"     // for iPoint2D
+#include "common/Common.h" // for trimSpaces
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
 #include "decoders/IiqDecoder.h"                    // for IiqDecoder
 #include "decoders/RawDecoder.h"                    // for RawDecoder
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
@@ -39,8 +41,10 @@
 #include <cstring>                                  // for memchr
 #include <istream>                                  // for istringstream
 #include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, allocator
-#include <utility>                                  // for move
+#include <sstream>
+#include <string> // for string, allocator
+#include <string_view>
+#include <utility> // for move
 
 namespace rawspeed {
 

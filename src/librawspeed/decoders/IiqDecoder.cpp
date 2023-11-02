@@ -22,9 +22,11 @@
 */
 
 #include "decoders/IiqDecoder.h"
-#include "adt/Array2DRef.h"                     // for Array2DRef
-#include "adt/Mutex.h"                          // for MutexLocker
-#include "adt/Point.h"                          // for iPoint2D
+#include "adt/Array2DRef.h" // for Array2DRef
+#include "adt/Mutex.h"      // for MutexLocker
+#include "adt/Point.h"      // for iPoint2D
+#include "common/Common.h"
+#include "common/RawImage.h"
 #include "common/Spline.h"                      // for Spline, Spline<>::va...
 #include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
 #include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
@@ -41,14 +43,15 @@
 #include <cassert>                              // for assert
 #include <cinttypes>                            // for PRIu64
 #include <cmath>                                // for lround
-#include <cstdlib>                              // for abs
-#include <functional>                           // for greater_equal
-#include <iterator>                             // for advance, next, begin
-#include <memory>                               // for unique_ptr
-#include <optional>                             // for optional, nullopt
-#include <string>                               // for operator==, string
-#include <utility>                              // for move
-#include <vector>                               // for vector, allocator
+#include <cstdint>
+#include <cstdlib>    // for abs
+#include <functional> // for greater_equal
+#include <iterator>   // for advance, next, begin
+#include <memory>     // for unique_ptr
+#include <optional>   // for optional, nullopt
+#include <string>     // for operator==, string
+#include <utility>    // for move
+#include <vector>     // for vector, allocator
 
 namespace rawspeed {
 

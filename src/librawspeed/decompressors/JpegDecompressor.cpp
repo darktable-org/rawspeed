@@ -21,6 +21,7 @@
 
 #include "rawspeedconfig.h"       // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
 #include "adt/AlignedAllocator.h" // for AlignedAllocator
+#include <cstdint>
 
 #ifdef HAVE_JPEG
 

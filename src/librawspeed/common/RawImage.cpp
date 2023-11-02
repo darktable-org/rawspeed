@@ -20,15 +20,26 @@
 
 #include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
 #include "common/RawImage.h"
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/TableLookUp.h"
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/IOException.h"               // for IOException
 #include "parsers/TiffParserException.h"  // for TiffParserException
 #include <algorithm>                      // for min, fill, max, fill_n
 #include <cassert>                        // for assert
-#include <limits>                         // for numeric_limits
-#include <memory>                         // for allocator, unique_ptr, mak...
-#include <utility>                        // for move, swap
+#include <cstddef>
+#include <cstdint>
+#include <limits>  // for numeric_limits
+#include <memory>  // for allocator, unique_ptr, mak...
+#include <utility> // for move, swap
+#include <vector>
+
+#ifdef DEBUG
+#include "adt/Array2DRef.h"
+#endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
 #include "AddressSanitizer.h" // for ASan::...

@@ -32,7 +32,6 @@
 #include <algorithm>                      // for sort, fill_n
 #include <array>                          // for array
 #include <cstdint>                        // for int32_t, uint16_t
-#include <memory>                         // for allocator_traits<>::value_...
 #include <string>                         // for string
 #include <utility>                        // for move
 #include <vector>                         // for vector<>::iterator, vector

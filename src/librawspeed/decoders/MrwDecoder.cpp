@@ -21,8 +21,9 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D, iRecta...
-#include "common/Common.h"                          // for BitOrder, BitOrd...
+#include "adt/Point.h"     // for iPoint2D, iRecta...
+#include "common/Common.h" // for BitOrder, BitOrd...
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
@@ -31,9 +32,11 @@
 #include "metadata/Camera.h"                        // for Hints
 #include "parsers/TiffParser.h"                     // for TiffParser
 #include "tiff/TiffIFD.h"                           // for TiffRootIFDOwner
-#include <cassert>                                  // for assert
-#include <cstring>                                  // for memcmp
-#include <memory>                                   // for allocator, uniqu...
+#include <array>
+#include <cassert> // for assert
+#include <cstdint>
+#include <cstring> // for memcmp
+#include <memory>  // for allocator, uniqu...
 
 namespace rawspeed {
 

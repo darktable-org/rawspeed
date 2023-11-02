@@ -26,11 +26,10 @@
 #include "io/FileIOException.h"              // for ThrowException, ThrowFIE
 #include <cstdint>                           // for uint8_t
 #include <cstdio>                            // for fclose, fseek, feof
-#include <fcntl.h>                           // for SEEK_END, SEEK_SET
 #include <limits>                            // for numeric_limits
 #include <memory>                            // for unique_ptr, make_unique
-#include <type_traits>                       // for remove_reference<>::type
 #include <utility>                           // for move, pair
+#include <vector>
 
 #if !(defined(__unix__) || defined(__APPLE__))
 #ifndef NOMINMAX

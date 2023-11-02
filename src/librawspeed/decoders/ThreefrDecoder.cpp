@@ -20,7 +20,9 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D
+#include "adt/Point.h" // for iPoint2D
+#include "common/Common.h"
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"           // for ThrowException
 #include "decompressors/HasselbladLJpegDecoder.h"   // for HasselbladLJpegDec...
 #include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...

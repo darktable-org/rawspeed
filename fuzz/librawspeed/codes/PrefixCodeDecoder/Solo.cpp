@@ -22,7 +22,6 @@
 #error IMPL must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "codes/BinaryPrefixTree.h"         // for BinaryPrefixTree<>::...
 #include "codes/PrefixCodeDecoder.h"        // IWYU pragma: keep
 #include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
 #include "codes/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep
@@ -36,12 +35,9 @@
 #include "io/Buffer.h"                      // for Buffer, DataBuffer
 #include "io/ByteStream.h"                  // for ByteStream
 #include "io/Endianness.h"                  // for Endianness, Endiannes...
-#include <algorithm>                        // for generate_n
 #include <cassert>                          // for assert
 #include <cstdint>                          // for uint8_t
 #include <cstdio>                           // for size_t
-#include <initializer_list>                 // for initializer_list
-#include <vector>                           // for vector
 
 namespace rawspeed {
 struct BaselineCodeTag;

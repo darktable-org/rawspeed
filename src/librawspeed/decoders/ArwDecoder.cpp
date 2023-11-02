@@ -20,10 +20,13 @@
 */
 
 #include "decoders/ArwDecoder.h"
-#include "MemorySanitizer.h"                        // for MSan
-#include "adt/NORangesSet.h"                        // for NORangesSet
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for roundDown
+#include "MemorySanitizer.h" // for MSan
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/NORangesSet.h" // for NORangesSet
+#include "adt/Point.h"       // for iPoint2D
+#include "common/Common.h"   // for roundDown
+#include "common/RawImage.h"
 #include "common/RawspeedException.h"               // for RawspeedException
 #include "decoders/RawDecoderException.h"           // for ThrowRDE
 #include "decompressors/LJpegDecoder.h"             // for LJpegDecoder
@@ -38,13 +41,13 @@
 #include "tiff/TiffEntry.h"                         // for TiffEntry
 #include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
 #include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for fill_n
 #include <array>                                    // for array
 #include <cassert>                                  // for assert
-#include <cstring>                                  // for memcpy, size_t
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
-#include <vector>                                   // for vector
+#include <cstdint>
+#include <cstring> // for memcpy, size_t
+#include <memory>  // for unique_ptr, allo...
+#include <string>  // for operator==, string
+#include <vector>  // for vector
 
 using std::vector;
 

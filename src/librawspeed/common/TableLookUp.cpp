@@ -20,11 +20,14 @@
 */
 
 #include "common/TableLookUp.h"
+#include "adt/Invariant.h"
 #include "common/Common.h"                // for clampBits
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t
-#include <limits>                         // for numeric_limits
+#include <algorithm>
+#include <cassert> // for assert
+#include <cstdint> // for uint16_t
+#include <limits>  // for numeric_limits
+#include <vector>
 
 namespace rawspeed {
 

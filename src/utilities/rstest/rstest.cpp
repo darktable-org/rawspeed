@@ -24,7 +24,6 @@
 #include "adt/DefaultInitAllocatorAdaptor.h" // for DefaultInitAllocatorAda...
 #include "adt/NotARational.h"                // for NotARational
 #include "md5.h"                             // for md5_state, md5_hash
-#include <algorithm>                         // for fill, copy, fill_n, max
 #include <array>                             // for array
 #include <cassert>                           // for assert
 #include <chrono>                            // for milliseconds, steady_clock
@@ -44,7 +43,6 @@
 #include <string_view>                       // for operator!=, string_view
 #include <tuple>                             // for tie, tuple
 #include <type_traits>                       // for __type_identity_t
-#include <utility>                           // for tuple_element<>::type
 #include <vector>                            // for vector
 // IWYU pragma: no_include <ext/alloc_traits.h>
 

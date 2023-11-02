@@ -30,15 +30,15 @@
 #include "common/RawImage.h"              // for RawImage, RawImageData
 #include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
 #include "io/Buffer.h"                    // for Buffer, Buffer::size_type
-#include <algorithm>                      // for copy, max, fill_n, generate_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <iterator>                       // for back_insert_iterator, back...
-#include <limits>                         // for numeric_limits
-#include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
-#include <vector>                         // for vector, vector<>::iterator
+#include "io/ByteStream.h"
+#include <algorithm> // for copy, max, fill_n, generate_n
+#include <array>     // for array
+#include <cassert>   // for assert
+#include <cstdint>   // for uint32_t, uint8_t, uint16_t
+#include <iterator>  // for back_insert_iterator, back...
+#include <limits>    // for numeric_limits
+#include <utility>   // for move
+#include <vector>    // for vector, vector<>::iterator
 
 namespace rawspeed {
 

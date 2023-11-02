@@ -19,7 +19,8 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "MemorySanitizer.h"                // for MSan
+#include "MemorySanitizer.h" // for MSan
+#include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"        // for PrefixCodeDecoder
 #include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
 #include "common/RawImage.h"                // for RawImage, RawImageData
@@ -30,8 +31,10 @@
 #include "io/Endianness.h"            // for Endianness, Endianness::little
 #include <algorithm>                  // for generate_n, copy, fill, fill_n
 #include <cassert>                    // for assert
-#include <cstdint>                    // for uint16_t, uint8_t
-#include <iterator>                   // for back_insert_iterator, back_i...
+#include <cstddef>
+#include <cstdint>  // for uint16_t, uint8_t
+#include <iterator> // for back_insert_iterator, back_i...
+#include <vector>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

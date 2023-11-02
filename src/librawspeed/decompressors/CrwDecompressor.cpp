@@ -21,10 +21,11 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
+#include "adt/Array1DRef.h" // for Array1DRef
+#include "adt/Array2DRef.h" // for Array2DRef
+#include "adt/Invariant.h"  // for invariant
+#include "adt/Point.h"      // for iPoint2D
+#include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"            // for HuffmanCode
 #include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder, HuffmanT...
 #include "common/Common.h"                // for isIntN
@@ -33,12 +34,9 @@
 #include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStrea...
 #include "io/Buffer.h"                    // for Buffer
 #include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for fill, copy, fill_n, max
 #include <array>                          // for array
 #include <cstdint>                        // for uint8_t, uint16_t, int...
-#include <tuple>                          // for array
 #include <utility>                        // for move
-#include <vector>                         // for vector
 
 using std::array;
 

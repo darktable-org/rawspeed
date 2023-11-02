@@ -20,17 +20,21 @@
 */
 
 #include "metadata/Camera.h"
+#include "adt/NotARational.h"
 #include "adt/Point.h"                        // for iPoint2D
 #include "common/Common.h"                    // for splitString
 #include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
-#include <algorithm>                          // for max, fill, transform
-#include <cctype>                             // for tolower
-#include <cstdio>                             // for size_t
-#include <map>                                // for map
-#include <optional>                           // for optional, nullopt
-#include <string>                             // for string, allocator, ope...
-#include <string_view>                        // for operator==, basic_stri...
-#include <vector>                             // for vector
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include <algorithm> // for max, fill, transform
+#include <cctype>    // for tolower
+#include <cstdint>
+#include <cstdio>      // for size_t
+#include <map>         // for map
+#include <optional>    // for optional, nullopt
+#include <string>      // for string, allocator, ope...
+#include <string_view> // for operator==, basic_stri...
+#include <vector>      // for vector
 
 #ifdef HAVE_PUGIXML
 #include <pugixml.hpp> // for xml_node, xml_attribute

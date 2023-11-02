@@ -26,7 +26,6 @@
 #include "io/Buffer.h"                              // for Buffer, DataBuffer
 #include "io/ByteStream.h"                          // for ByteStream
 #include "io/Endianness.h"                          // for Endianness, Endi...
-#include <algorithm>                                // for fill_n
 #include <cassert>                                  // for assert
 #include <cstddef>                                  // for size_t
 #include <cstdint>                                  // for uint16_t, uint8_t

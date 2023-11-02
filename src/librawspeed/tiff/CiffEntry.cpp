@@ -20,14 +20,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/CiffEntry.h"
 #include "adt/NORangesSet.h"             // for NORangesSet
 #include "io/Buffer.h"                   // for Buffer, operator<
 #include "io/ByteStream.h"               // for ByteStream
 #include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
-#include <algorithm>                     // for max
-#include <string>                        // for string, basic_string, alloc...
-#include <vector>                        // for vector
+#include <cstdint>
+#include <string> // for string, basic_string, alloc...
+#include <string_view>
+#include <vector> // for vector
 
 using std::vector;
 

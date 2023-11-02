@@ -21,7 +21,6 @@
 #include "rawspeedconfig.h"               // for WITH_SSE2
 #include "common/RawImage.h"              // for RawImageDataU16, RawImageType
 #include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
 #include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
 #include "adt/Point.h"                    // for iPoint2D
 #include "common/Common.h"                // for clampBits, roundDown, writ...
@@ -32,7 +31,6 @@
 #include <array>                          // for array
 #include <cstdint>                        // for uint16_t, uint32_t, uint8_t
 #include <memory>                         // for unique_ptr
-#include <tuple>                          // for array
 #include <vector>                         // for vector
 
 #ifdef WITH_SSE2

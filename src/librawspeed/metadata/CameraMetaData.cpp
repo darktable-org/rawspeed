@@ -18,15 +18,20 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "metadata/CameraMetaData.h"
 #include "common/Common.h"                    // for trimSpaces, writeLog
 #include "metadata/Camera.h"                  // for Camera, Camera::Suppor...
 #include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
 #include <algorithm>                          // for find_if
-#include <map>                                // for map, map<>::const_iter...
-#include <string>                             // for string, operator==
-#include <utility>                            // for pair, move
-#include <vector>                             // for vector
+#include <cstdint>
+#include <map> // for map, map<>::const_iter...
+#include <memory>
+#include <string> // for string, operator==
+#include <string_view>
+#include <tuple>
+#include <utility> // for pair, move
+#include <vector>  // for vector
 
 #ifdef HAVE_PUGIXML
 #include <pugixml.hpp> // for xml_document, xml_pars...

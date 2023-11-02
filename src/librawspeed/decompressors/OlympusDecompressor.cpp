@@ -30,9 +30,10 @@
 #include "io/BitPumpMSB.h"                // for BitPumpMSB
 #include "io/ByteStream.h"                // for ByteStream
 #include <array>                          // for array
-#include <cstdlib>                        // for abs
-#include <type_traits>                    // for enable_if_t
-#include <utility>                        // for move
+#include <cstdint>
+#include <cstdlib>     // for abs
+#include <type_traits> // for enable_if_t
+#include <utility>     // for move
 
 namespace {
 

@@ -24,12 +24,13 @@
 #include "adt/Array2DRef.h"                       // for Array2DRef
 #include "adt/Invariant.h"                        // for invariant
 #include "adt/Point.h"                            // for iPoint2D
+#include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"              // for RawImage, RawImageData
-#include "common/RawspeedException.h"     // for ThrowException
 #include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/ByteStream.h"                // for ByteStream
-#include <cstdint>                        // for uint16_t
-#include <utility>                        // for move
+#include "io/BitPumpMSB32.h"
+#include "io/ByteStream.h" // for ByteStream
+#include <cstdint>         // for uint16_t
+#include <utility>         // for move
 
 namespace rawspeed {
 

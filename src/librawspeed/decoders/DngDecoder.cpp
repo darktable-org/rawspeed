@@ -20,16 +20,17 @@
 
 #include "rawspeedconfig.h" // for HAVE_JPEG, HAVE_ZLIB
 #include "decoders/DngDecoder.h"
-#include "adt/NORangesSet.h"                       // for NORangesSet
-#include "adt/NotARational.h"                      // for NotARational
-#include "adt/Point.h"                             // for iPoint2D, iRectan...
-#include "common/Common.h"                         // for roundUpDivision
-#include "common/DngOpcodes.h"                     // for DngOpcodes
+#include "adt/NORangesSet.h"   // for NORangesSet
+#include "adt/NotARational.h"  // for NotARational
+#include "adt/Point.h"         // for iPoint2D, iRectan...
+#include "common/Common.h"     // for roundUpDivision
+#include "common/DngOpcodes.h" // for DngOpcodes
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
 #include "decoders/RawDecoderException.h"          // for ThrowRDE, RawDeco...
 #include "decompressors/AbstractDngDecompressor.h" // for DngSliceElement
 #include "io/Buffer.h"                             // for Buffer, operator<
 #include "io/ByteStream.h"                         // for ByteStream
-#include "metadata/BlackArea.h"                    // for BlackArea
 #include "metadata/Camera.h"                       // for Camera
 #include "metadata/CameraMetaData.h"               // for CameraMetaData
 #include "metadata/ColorFilterArray.h"             // for CFAColor, ColorFi...
@@ -40,12 +41,14 @@
 #include <algorithm>                               // for max, transform
 #include <array>                                   // for array, array<>::v...
 #include <cassert>                                 // for assert
-#include <limits>                                  // for numeric_limits
-#include <map>                                     // for map
-#include <memory>                                  // for unique_ptr, alloc...
-#include <string>                                  // for char_traits, string
-#include <utility>                                 // for move
-#include <vector>                                  // for vector, allocator
+#include <cstdint>
+#include <limits> // for numeric_limits
+#include <map>    // for map
+#include <memory> // for unique_ptr, alloc...
+#include <optional>
+#include <string>  // for char_traits, string
+#include <utility> // for move
+#include <vector>  // for vector, allocator
 // IWYU pragma: no_include <ext/alloc_traits.h>
 
 using std::map;

@@ -28,11 +28,9 @@
 #include "io/Buffer.h"                      // for Buffer, DataBuffer
 #include "io/ByteStream.h"                  // for ByteStream
 #include "io/Endianness.h" // for Endianness, Endianness::little
-#include <algorithm>       // for fill, copy, fill_n, generate_n
 #include <cassert>         // for assert
 #include <cstddef>         // for size_t
 #include <cstdint>         // for uint16_t, uint8_t
-#include <vector>          // for vector
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 

@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "bench/Common.h"
 #include "adt/Point.h"     // for iPoint2D
 #include "common/Common.h" // for roundUp

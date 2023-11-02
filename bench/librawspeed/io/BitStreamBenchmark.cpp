@@ -18,7 +18,6 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitStream.h"        // for BitStream
 #include "bench/Common.h"        // for benchmarkDryRun
 #include "io/BitPumpJPEG.h"      // for BitPumpJPEG, BitStream<>::fillCache
 #include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache
@@ -28,13 +27,20 @@
 #include "io/Buffer.h"           // for Buffer, DataBuffer
 #include "io/ByteStream.h"       // for ByteStream
 #include "io/Endianness.h"       // for Endianness, Endianness::unknown
-#include <algorithm>             // for fill_n
 #include <cassert>               // for assert
 #include <cstddef>               // for size_t
-#include <cstdint>               // for uint8_t
-#include <string>                // for string, to_string, allocator
-#include <vector>                // for vector
 #include <benchmark/benchmark.h> // for State, Benchmark, Initialize, RunSp...
+
+#ifndef DEBUG
+#include <cstdint> // for uint8_t
+#include <string>  // for string, to_string, allocator
+#include <vector>  // for vector
+#endif
+
+#ifdef DEBUG
+#include "common/Common.h"
+#include <limits>
+#endif
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::BitPumpLSB;

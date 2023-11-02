@@ -27,13 +27,14 @@
 #include "io/ByteStream.h"               // for ByteStream
 #include "io/Endianness.h"               // for Endianness, Endianness::little
 #include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
-#include "tiff/CiffEntry.h"              // for CiffEntry
-#include "tiff/CiffIFD.h"                // for CiffIFD
-#include "tiff/CiffTag.h"                // for CiffTag, CiffTag::MAKEMODEL
-#include <cstdint>                       // for uint16_t, uint32_t
-#include <string>                        // for operator==, string
-#include <utility>                       // for move
-#include <vector>                        // for vector
+#include "parsers/RawParser.h"
+#include "tiff/CiffEntry.h" // for CiffEntry
+#include "tiff/CiffIFD.h"   // for CiffIFD
+#include "tiff/CiffTag.h"   // for CiffTag, CiffTag::MAKEMODEL
+#include <cstdint>          // for uint16_t, uint32_t
+#include <memory>
+#include <string>  // for operator==, string
+#include <utility> // for move
 
 namespace rawspeed {
 

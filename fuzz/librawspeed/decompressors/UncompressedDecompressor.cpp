@@ -19,7 +19,9 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
-#include "MemorySanitizer.h"          // for MSan
+#include "MemorySanitizer.h" // for MSan
+#include "adt/Point.h"
+#include "common/Common.h"
 #include "common/RawImage.h"          // for RawImage, RawImageData
 #include "common/RawspeedException.h" // for ThrowException, RawspeedException
 #include "fuzz/Common.h"              // for CreateRawImage

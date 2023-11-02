@@ -21,11 +21,12 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D, iRectangle2D
-#include "common/Common.h"                // for BitOrder, copyPixels, BitO...
-#include "common/FloatingPoint.h"         // for Binary16, Binary24, Binary...
+#include "adt/Array2DRef.h"       // for Array2DRef
+#include "adt/Invariant.h"        // for invariant
+#include "adt/Point.h"            // for iPoint2D, iRectangle2D
+#include "common/Common.h"        // for BitOrder, copyPixels, BitO...
+#include "common/FloatingPoint.h" // for Binary16, Binary24, Binary...
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h" // for ThrowRDE
 #include "io/BitPumpLSB.h"                // for BitPumpLSB, BitStream<>::f...
 #include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
@@ -36,7 +37,8 @@
 #include "io/IOException.h"               // for ThrowException, ThrowIOE
 #include <algorithm>                      // for min
 #include <cinttypes>                      // for PRIu64
-#include <utility>                        // for move
+#include <cstdint>
+#include <utility> // for move
 
 using std::min;
 

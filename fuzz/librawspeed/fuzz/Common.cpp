@@ -23,7 +23,8 @@
 #include "common/RawImage.h" // for RawImage, RawImageData, RawImageType
 #include "io/ByteStream.h"   // for ByteStream
 #include "io/IOException.h"  // for ThrowException, ThrowRSE, ThrowIOE
-#include <cstdint>           // for uint32_t, int32_t
+#include "metadata/ColorFilterArray.h"
+#include <cstdint> // for uint32_t, int32_t
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream& bs) {
   const uint32_t width = bs.getU32();

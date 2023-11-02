@@ -42,7 +42,6 @@
 #include <cstdio>                       // for size_t
 
 #if GETDECODER
-#include "decoders/RawDecoder.h"          // for RawDecoder
 #include "decoders/RawDecoderException.h" // for RawDecoderException
 #if DECODE
 #include "common/RawspeedException.h" // for RawspeedException
