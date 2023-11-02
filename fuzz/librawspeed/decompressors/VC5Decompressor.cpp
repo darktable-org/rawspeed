@@ -58,7 +58,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     // It is expected to be the only DNG tile, and to fill the entire image.
     rawspeed::MSan::CheckMemIsInitialized(
         mRaw->getByteDataAsUncroppedArray2DRef());
-  } catch (const rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

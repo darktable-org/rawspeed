@@ -50,7 +50,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   if (MrwDecoder::isMRW(mInput)) {
     try {
       return std::make_unique<MrwDecoder>(mInput);
-    } catch (const RawDecoderException&) {
+    } catch (const RawDecoderException&) { // NOLINT(bugprone-empty-catch)
+      // Yes, just ignore the exception.
     }
   }
 
@@ -60,7 +61,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
     try {
       FiffParser p(mInput);
       return p.getDecoder(meta);
-    } catch (const FiffParserException&) {
+    } catch (const FiffParserException&) { // NOLINT(bugprone-empty-catch)
+      // Yes, just ignore the exception.
     }
   }
 
@@ -68,14 +70,16 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   try {
     TiffParser p(mInput);
     return p.getDecoder(meta);
-  } catch (const TiffParserException&) {
+  } catch (const TiffParserException&) { // NOLINT(bugprone-empty-catch)
+                                         // Yes, just ignore the exception.
   }
 
   // CIFF images
   try {
     CiffParser p(mInput);
     return p.getDecoder(meta);
-  } catch (const CiffParserException&) {
+  } catch (const CiffParserException&) { // NOLINT(bugprone-empty-catch)
+                                         // Yes, just ignore the exception.
   }
 
   // Detect camera on filesize (CHDK).
@@ -84,7 +88,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
 
     try {
       return std::make_unique<NakedDecoder>(mInput, c);
-    } catch (const RawDecoderException&) {
+    } catch (const RawDecoderException&) { // NOLINT(bugprone-empty-catch)
+      // Yes, just ignore the exception.
     }
   }
 

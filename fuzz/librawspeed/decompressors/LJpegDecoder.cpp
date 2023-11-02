@@ -53,7 +53,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     // we can not check that all the image was initialized, because normally
     // LJpegDecoder decodes just some one tile/slice.
-  } catch (const rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 
