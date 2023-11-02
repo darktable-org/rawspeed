@@ -70,18 +70,20 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
                    TiffTag::MAKERNOTE_ALT, TiffTag::FUJI_RAW_IFD,
                    TiffTag::SUBIFDS, TiffTag::EXIFIFDPOINTER})) {
       // preserve offset for SUB_IFD/EXIF/MAKER_NOTE data
-#if 0
-      // limit access to range from 0 to data_offset+byte_size
-      data = ByteStream(bs, data_offset, byte_size, bs.getByteOrder());
-#else
-      // allow access to whole file, necessary if offsets inside the maker note
-      // point to outside data, which is forbidden due to the TIFF/DNG spec but
-      // may happen none the less (see e.g. "old" ORF files like EX-1, note:
-      // the tags outside of the maker note area are currently not used anyway)
-      data = bs;
-      data.setPosition(data_offset);
-      (void)data.check(byte_size);
-#endif
+      // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+      if constexpr ((false)) {
+        // limit access to range from 0 to data_offset+byte_size
+        data = bs.getSubStream(data_offset, byte_size);
+      } else {
+        // allow access to whole file, necessary if offsets inside the maker
+        // note point to outside data, which is forbidden due to the TIFF/DNG
+        // spec but may happen none the less (see e.g. "old" ORF files like
+        // EX-1, note: the tags outside of the maker note area are currently not
+        // used anyway)
+        data = bs;
+        data.setPosition(data_offset);
+        (void)data.check(byte_size);
+      }
     } else {
       data = bs.getSubStream(data_offset, byte_size);
     }

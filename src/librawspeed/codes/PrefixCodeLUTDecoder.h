@@ -77,11 +77,6 @@ public:
   using Base::Base;
 
 private:
-  // The code can be compiled with two different decode lookup table layouts.
-  // The idea is that different CPU architectures may perform better with
-  // one or the other, depending on the relative performance of their arithmetic
-  // core vs their memory access. For an Intel Core i7, the big table is better.
-#if 1
   // lookup table containing 3 fields: payload:16|flag:8|len:8
   // The payload may be the fully decoded diff or the length of the diff.
   // The len field contains the number of bits, this lookup consumed.
@@ -94,15 +89,6 @@ private:
   using LUTEntryTy = int32_t;
   using LUTUnsignedEntryTy = std::make_unsigned_t<LUTEntryTy>;
   std::vector<LUTEntryTy> decodeLookup;
-#else
-  // lookup table containing 2 fields: payload:4|len:4
-  // the payload is the length of the diff, len is the length of the code
-  static constexpr unsigned LookupDepth = 15;
-  static constexpr unsigned PayloadShift = 4;
-  static constexpr unsigned FlagMask = 0;
-  static constexpr unsigned LenMask = 0x0f;
-  std::vector<uint8_t> decodeLookup;
-#endif
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {

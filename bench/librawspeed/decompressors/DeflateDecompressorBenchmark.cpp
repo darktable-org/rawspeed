@@ -125,12 +125,13 @@ inline void CustomArgs(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-// FIXME: appears to not like 1GPix+ buffers
-#if 1
-  b->Arg(128 << 20);
-#else
-  b->Range(1, 1023 << 20)->Complexity(benchmark::oN);
-#endif
+  // FIXME: appears to not like 1GPix+ buffers
+  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+  if constexpr ((true)) {
+    b->Arg(128 << 20);
+  } else {
+    b->Range(1, 1023 << 20)->Complexity(benchmark::oN);
+  }
   b->Unit(benchmark::kMillisecond);
 }
 

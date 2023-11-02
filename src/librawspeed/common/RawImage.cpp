@@ -235,16 +235,6 @@ void RawImageData::fixBadPixels() {
   /* Transfer if not already done */
   transferBadPixelsToMap();
 
-#if 0 // For testing purposes
-  if (!mBadPixelMap)
-    createBadPixelMap();
-  for (int y = 400; y < 700; y++){
-    for (int x = 1200; x < 1700; x++) {
-      mBadPixelMap[mBadPixelMapPitch * y + (x >> 3)] |= 1 << (x&7);
-    }
-  }
-#endif
-
   /* Process bad pixels, if any */
   if (!mBadPixelMap.empty())
     startWorker(RawImageWorker::RawImageWorkerTask::FIX_BAD_PIXELS, false);

@@ -92,11 +92,12 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-#if 1
-  b->Arg(2 * 3 * 2 * 1'000'000);
-#else
-  b->Range(1, 256 << 20)->Complexity(benchmark::oN);
-#endif
+  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+  if constexpr ((true)) {
+    b->Arg(2 * 3 * 2 * 1'000'000);
+  } else {
+    b->Range(1, 256 << 20)->Complexity(benchmark::oN);
+  }
   b->Unit(benchmark::kMillisecond);
 }
 

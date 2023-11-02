@@ -111,12 +111,13 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-#if 1
-  b->Arg(256 << 20);
-#else
-  b->Range(1, 1024 << 20);
-  b->Complexity(benchmark::oN);
-#endif
+  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+  if constexpr ((true)) {
+    b->Arg(256 << 20);
+  } else {
+    b->Range(1, 1024 << 20);
+    b->Complexity(benchmark::oN);
+  }
   b->Unit(benchmark::kMillisecond);
 }
 
