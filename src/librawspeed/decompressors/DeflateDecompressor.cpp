@@ -163,6 +163,8 @@ void DeflateDecompressor::decode(
     case 4:
       decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out[row]);
       break;
+    default:
+      __builtin_unreachable();
     }
   }
 }
