@@ -46,8 +46,7 @@ public:
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
-      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width),
-        croppedHeight(base.height) {}
+      : base(RHS), croppedWidth(base.width), croppedHeight(base.height) {}
 
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);
