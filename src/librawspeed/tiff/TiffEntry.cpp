@@ -30,11 +30,11 @@
 #include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
 #include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFD
 #include "tiff/TiffTag.h"                // for TiffTag, TiffTag::DNGPRIVAT...
+#include <algorithm>
 #include <array>
 #include <cassert> // for assert
 #include <cstdint> // for uint32_t, uint8_t, int32_t
-#include <cstring>
-#include <string> // for string
+#include <string>  // for string
 
 namespace rawspeed {
 
@@ -283,10 +283,10 @@ std::string TiffEntry::getString() const {
              static_cast<unsigned>(type));
 
   // *NOT* ByteStream::peekString() !
-  const auto bufSize = data.getRemainSize();
-  const auto* buf = data.peekData(bufSize);
-  const auto* s = reinterpret_cast<const char*>(buf);
-  return {s, strnlen(s, bufSize)};
+  Buffer tmp = data.peekBuffer(data.getRemainSize());
+  const auto* termIter = std::find(tmp.begin(), tmp.end(), '\0');
+  return {reinterpret_cast<const char*>(tmp.begin()),
+          reinterpret_cast<const char*>(termIter)};
 }
 
 DataBuffer TiffEntry::getRootIfdData() const {
