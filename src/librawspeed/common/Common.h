@@ -85,7 +85,7 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
 template <typename T>
 constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
     T value, size_t multiple,
-    typename std::enable_if<std::is_pointer_v<T>>::type* /*unused*/ = nullptr) {
+    std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
   if (multiple == 0)
     return 0;
   static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
@@ -96,8 +96,7 @@ constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
 template <typename T>
 constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
     T value, size_t multiple,
-    typename std::enable_if<std::is_integral_v<T>>::type* /*unused*/ =
-        nullptr) {
+    std::enable_if_t<std::is_integral_v<T>>* /*unused*/ = nullptr) {
   if (multiple == 0)
     return 0;
   return value % multiple;

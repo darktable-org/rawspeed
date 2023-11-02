@@ -81,10 +81,10 @@ template <> struct CodeTraits<VC5CodeTag> final {
 template <typename CodeTag> struct CodeTraitsValidator final {
   using Traits = CodeTraits<CodeTag>;
 
-  static_assert(std::is_integral<typename Traits::CodeTy>::value);
-  static_assert(std::is_unsigned<typename Traits::CodeTy>::value);
-  static_assert(std::is_same<typename Traits::CodeTy, uint16_t>::value ||
-                std::is_same<typename Traits::CodeTy, uint32_t>::value);
+  static_assert(std::is_integral_v<typename Traits::CodeTy>);
+  static_assert(std::is_unsigned_v<typename Traits::CodeTy>);
+  static_assert(std::is_same_v<typename Traits::CodeTy, uint16_t> ||
+                std::is_same_v<typename Traits::CodeTy, uint32_t>);
 
   static_assert(Traits::MaxCodeLenghtBits > 0 &&
                 Traits::MaxCodeLenghtBits <=
@@ -98,10 +98,10 @@ template <typename CodeTag> struct CodeTraitsValidator final {
   static_assert(Traits::MaxNumCodeValues == 162 ||
                 Traits::MaxNumCodeValues == 264);
 
-  static_assert(std::is_integral<typename Traits::CodeValueTy>::value);
-  static_assert(std::is_unsigned<typename Traits::CodeValueTy>::value);
-  static_assert(std::is_same<typename Traits::CodeValueTy, uint8_t>::value ||
-                std::is_same<typename Traits::CodeValueTy, uint32_t>::value);
+  static_assert(std::is_integral_v<typename Traits::CodeValueTy>);
+  static_assert(std::is_unsigned_v<typename Traits::CodeValueTy>);
+  static_assert(std::is_same_v<typename Traits::CodeValueTy, uint8_t> ||
+                std::is_same_v<typename Traits::CodeValueTy, uint32_t>);
 
   static_assert(Traits::MaxCodeValueLenghtBits > 0 &&
                 Traits::MaxCodeValueLenghtBits <=
@@ -115,7 +115,7 @@ template <typename CodeTag> struct CodeTraitsValidator final {
   static_assert(Traits::MaxCodeValue == 255 || Traits::MaxCodeValue == 524287);
 
   static_assert(
-      std::is_same<decltype(Traits::SupportsFullDecode), const bool>::value);
+      std::is_same_v<decltype(Traits::SupportsFullDecode), const bool>);
 
   static_assert(!Traits::SupportsFullDecode ||
                 (Traits::MaxDiffLengthBits > 0 &&
