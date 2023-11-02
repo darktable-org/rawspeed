@@ -62,7 +62,6 @@ using rawspeed::RawspeedException;
 using rawspeed::roundUp;
 using std::cerr;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::istreambuf_iterator;
 using std::map;
@@ -350,7 +349,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #pragma omp critical(io)
 #endif
     cout << left << setw(55) << filename << ": hash "
-         << (o.create ? "exists" : "missing") << ", skipping" << endl;
+         << (o.create ? "exists" : "missing") << ", skipping" << '\n';
 #endif
     return 0;
   }
@@ -360,7 +359,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
-  cout << left << setw(55) << filename << ": starting decoding ... " << endl;
+  cout << left << setw(55) << filename << ": starting decoding ... " << '\n';
 #endif
 
   FileReader reader(filename.c_str());
@@ -394,7 +393,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #endif
   cout << left << setw(55) << filename << ": " << internal << setw(3)
        << buf.getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
-       << endl;
+       << '\n';
 #endif
 
   if (o.create) {
@@ -435,9 +434,9 @@ int results(const map<std::string, std::string, std::less<>>& failedTests,
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
-      cout << "no tests failed!" << endl;
+      cout << "no tests failed!" << '\n';
     else
-      cout << "all hashes created!" << endl;
+      cout << "all hashes created!" << '\n';
     return 0;
   }
 
@@ -564,14 +563,14 @@ int main(int argc, char **argv) {
       {
         std::string msg = std::string(argv[i]) + " failed: " + e.what();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-        cerr << msg << endl;
+        cerr << msg << '\n';
 #endif
         failedTests.try_emplace(argv[i], msg);
       }
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << endl << endl;
+  cout << "Total decoding time: " << time / 1000.0 << "s" << '\n' << '\n';
 
   return results(failedTests, o);
 }
