@@ -3,9 +3,9 @@ name: CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, stable ]
   pull_request:
-    branches: [ develop ]
+    branches: [ develop, stable ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -103,7 +103,7 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   linux-sonarcloud-static-analysis:
-    if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && github.ref_name == 'develop'
+    if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
     strategy:
       fail-fast: false
       matrix:
