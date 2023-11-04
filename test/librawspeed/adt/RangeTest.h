@@ -18,12 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/Range.h"   // for Range
-#include <ostream>       // for basic_ostream::operator<<, operator<<, ost...
-#include <set>           // for allocator, set
-#include <tuple>         // for make_tuple, tuple, get
-#include <utility>       // for __tuple_element_t
-#include <gtest/gtest.h> // for ParamIteratorInterface, AssertionFailure
+#include "adt/Range.h"
+#include <ostream>
+#include <set>
+#include <tuple>
+#include <utility>
+#include <gtest/gtest.h>
 
 using rawspeed::Range;
 

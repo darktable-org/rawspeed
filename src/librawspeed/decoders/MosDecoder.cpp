@@ -20,27 +20,31 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for trimSpaces
-#include "decoders/IiqDecoder.h"                    // for IiqDecoder
-#include "decoders/RawDecoder.h"                    // for RawDecoder
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for DataBuffer, Buffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "parsers/TiffParserException.h"            // for ThrowException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t
-#include <cstring>                                  // for memchr
-#include <istream>                                  // for istringstream
-#include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, allocator
-#include <utility>                                  // for move
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "decoders/IiqDecoder.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <istream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 namespace rawspeed {
 

@@ -18,25 +18,28 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"        // for HAVE_ZLIB
-#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
-#include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
-#include "adt/Invariant.h"         // for invariant
-#include "common/Common.h"         // for bit_cast
-#include <array>                   // for array
-#include <climits>                 // for CHAR_BIT
+#include "rawspeedconfig.h"
+#include "adt/CroppedArray1DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Invariant.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include <array>
+#include <climits>
 
 #ifdef HAVE_ZLIB
 
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/FloatingPoint.h"         // for Binary32, Binary16, Binary24
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "adt/Point.h"
+#include "common/FloatingPoint.h"
+#include "decoders/RawDecoderException.h"
 #include "decompressors/DeflateDecompressor.h"
-#include "io/Endianness.h" // for getBE
-#include <cstdint>         // for uint32_t, uint16_t
-#include <cstdio>          // for size_t
-#include <utility>         // for move
-#include <zlib.h>          // for uncompress, zError, Z_OK
+#include "io/Endianness.h"
+#include <cstdint>
+#include <cstdio>
+#include <utility>
+#include <zconf.h>
+#include <zlib.h>
 
 namespace rawspeed {
 
@@ -160,6 +163,8 @@ void DeflateDecompressor::decode(
     case 4:
       decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out[row]);
       break;
+    default:
+      __builtin_unreachable();
     }
   }
 }

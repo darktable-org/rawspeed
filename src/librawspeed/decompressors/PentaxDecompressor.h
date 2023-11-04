@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "codes/PrefixCodeDecoder.h"            // for PrefixCodeDecoder
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include <array>                                // for array
-#include <cstdint>                              // for uint8_t
-#include <optional>                             // for optional
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include <array>
+#include <cstdint>
+#include <optional>
 
 namespace rawspeed {
 

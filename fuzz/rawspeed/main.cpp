@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h" // for RawDecoder, RawParser, Buffer, CameraMetaData
-#include <cstddef>        // for size_t
-#include <cstdint>        // for uint8_t
-#include <memory>         // for unique_ptr
+#include "RawSpeed-API.h"
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 
 static const rawspeed::CameraMetaData metadata{};
 

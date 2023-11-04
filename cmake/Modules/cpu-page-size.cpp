@@ -1,7 +1,7 @@
-#include <iostream> // for endl, basic_ostream<>::__ostream_type, cout, ost...
+#include <iostream>
 
 #if defined(__unix__) || defined(__APPLE__)
-#include <unistd.h> // for _POSIX_C_SOURCE, sysconf, _SC_PAGESIZE
+#include <unistd.h>
 #endif
 
 #if (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 1) || defined(__APPLE__)

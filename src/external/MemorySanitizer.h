@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "adt/CroppedArray1DRef.h" // for CroppedArray1DRef
-#include "adt/CroppedArray2DRef.h" // for CroppedArray2DRef
-#include <cstddef>                 // for byte, size_t
+#include "adt/CroppedArray1DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include <cstddef>
 
 // see http://clang.llvm.org/docs/LanguageExtensions.html
 #ifndef __has_feature      // Optional of course.

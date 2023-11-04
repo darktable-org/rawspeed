@@ -18,23 +18,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Spline.h" // for Spline, Spline<>::value_type
-#include "adt/Point.h"     // for iPoint2D, iPoint2D::value_type
-#include <algorithm>       // for copy, max, generate_n, fill_n
-#include <array>           // for array
-#include <cassert>         // for assert
-#include <cmath>           // for lround, acos, sin
-#include <cstdint>         // for uint16_t
-#include <cstdlib>         // for exit
-#include <iterator>        // for begin, end, back_inserter
-#include <limits>          // for numeric_limits
-#include <memory>          // for allocator, allocator_traits<>::value_type
-#include <ostream>         // for operator<<, basic_ostream::operator<<
-#include <string>          // for string
-#include <tuple>           // for make_tuple, get, tuple
-#include <type_traits>     // for __strip_reference_wrapper<>::__type, enab...
-#include <vector>          // for vector
-#include <gtest/gtest.h>   // for ParamIteratorInterface, ParamGeneratorInt...
+#include "common/Spline.h"
+#include "adt/Point.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <vector>
+#include <gtest/gtest.h>
 
 using rawspeed::Spline;
 using std::make_tuple;

@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"  // for RAWSPEED_READONLY, HAVE_PUGIXML
-#include "metadata/Camera.h" // for Camera (ptr only)
-#include <cstdint>           // for uint32_t
-#include <map>               // for map
-#include <memory>            // for unique_ptr
-#include <string>            // for operator<, string
-#include <string_view>       // for string_view
-#include <tuple>             // for tie, operator<, tuple
+#include "rawspeedconfig.h"
+#include "metadata/Camera.h"
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <tuple>
 
 namespace rawspeed {
 class Camera;

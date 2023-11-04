@@ -20,17 +20,18 @@
 */
 
 #include "decompressors/LJpegDecoder.h"
-#include "adt/Invariant.h"                   // for invariant
-#include "adt/Point.h"                       // for iPoint2D, iRectangle2D
-#include "codes/PrefixCodeDecoder.h"         // for PrefixCodeDecoder
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor::PerC...
-#include "io/ByteStream.h"                   // for ByteStream
-#include <algorithm>                         // for generate_n
-#include <array>                             // for array
-#include <iterator>                          // for back_insert_iterator
-#include <vector>                            // for vector
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/AbstractLJpegDecoder.h"
+#include "decompressors/LJpegDecompressor.h"
+#include "io/ByteStream.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <iterator>
+#include <vector>
 
 using std::copy_n;
 

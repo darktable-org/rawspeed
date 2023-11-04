@@ -91,7 +91,6 @@ else()
   set(ALLOW_DOWNLOADING_ZLIB OFF CACHE BOOL "If ZLIB src tree is not found in location specified by ZLIB_PATH, do fetch the archive from internet" FORCE)
 endif()
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
-option(USE_IWYU "Run iwyu tool when compiling sources" OFF)
 option(USE_CLANG_TIDY "Run clang-tidy tool when compiling sources" OFF)
 option(BUILD_TESTING "Build the testing tree." ON)
 if(BUILD_TESTING)
@@ -168,10 +167,6 @@ include(build-type)
 
 if(RAWSPEED_USE_LIBCXX)
   include(libc++)
-endif()
-
-if(USE_IWYU)
-  include(iwyu)
 endif()
 
 if(USE_LLVM_OPT_REPORT)

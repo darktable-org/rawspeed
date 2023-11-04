@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY
-#include <algorithm>        // for copy
-#include <vector>           // for vector
+#include "rawspeedconfig.h"
+#include <algorithm>
+#include <vector>
 
 namespace rawspeed {
 

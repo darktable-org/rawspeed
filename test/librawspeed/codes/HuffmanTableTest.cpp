@@ -18,21 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "adt/Array1DRef.h" // for Array1DRef
+#include "adt/Array1DRef.h"
 #include "codes/HuffmanCode.h"
-#include "codes/PrefixCodeDecoder.h" // for PrefixCodeLUTDecoder, PrefixCodeDecoder
-#include "io/BitPumpMSB.h"           // for BitStream<>::fillCache, BitP...
-#include "io/BitStream.h"            // for BitStream
-#include "io/Buffer.h"               // for Buffer, DataBuffer
-#include "io/ByteStream.h"           // for ByteStream
-#include "io/Endianness.h"           // for Endianness, Endianness::little
-#include <algorithm>                 // for copy, fill_n, max
-#include <array>                     // for array
-#include <cstdint>                   // for uint8_t
-#include <initializer_list>          // for initializer_list
-#include <utility>                   // for move
-#include <vector>                    // for vector, allocator
-#include <gtest/gtest.h>             // for Message, TestPartResult
+#include "codes/PrefixCodeDecoder.h"
+#include "io/BitPumpMSB.h"
+#include "io/BitStream.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <initializer_list>
+#include <utility>
+#include <vector>
+#include <gtest/gtest.h>
 
 namespace rawspeed {
 class RawDecoderException;

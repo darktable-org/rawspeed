@@ -18,23 +18,29 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitStream.h"        // for BitStream
-#include "bench/Common.h"        // for benchmarkDryRun
-#include "io/BitPumpJPEG.h"      // for BitPumpJPEG, BitStream<>::fillCache
-#include "io/BitPumpLSB.h"       // for BitPumpLSB, BitStream<>::fillCache
-#include "io/BitPumpMSB.h"       // for BitPumpMSB, BitStream<>::fillCache
-#include "io/BitPumpMSB16.h"     // for BitPumpMSB16, BitStream<>::fillCache
-#include "io/BitPumpMSB32.h"     // for BitPumpMSB32, BitStream<>::fillCache
-#include "io/Buffer.h"           // for Buffer, DataBuffer
-#include "io/ByteStream.h"       // for ByteStream
-#include "io/Endianness.h"       // for Endianness, Endianness::unknown
-#include <algorithm>             // for fill_n
-#include <cassert>               // for assert
-#include <cstddef>               // for size_t
-#include <cstdint>               // for uint8_t
-#include <string>                // for string, to_string, allocator
-#include <vector>                // for vector
-#include <benchmark/benchmark.h> // for State, Benchmark, Initialize, RunSp...
+#include "bench/Common.h"
+#include "io/BitPumpJPEG.h"
+#include "io/BitPumpLSB.h"
+#include "io/BitPumpMSB.h"
+#include "io/BitPumpMSB16.h"
+#include "io/BitPumpMSB32.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <cassert>
+#include <cstddef>
+#include <benchmark/benchmark.h>
+
+#ifndef DEBUG
+#include <cstdint>
+#include <string>
+#include <vector>
+#endif
+
+#ifdef DEBUG
+#include "common/Common.h"
+#include <limits>
+#endif
 
 using rawspeed::BitPumpJPEG;
 using rawspeed::BitPumpLSB;
@@ -105,12 +111,13 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-#if 1
-  b->Arg(256 << 20);
-#else
-  b->Range(1, 1024 << 20);
-  b->Complexity(benchmark::oN);
-#endif
+  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+  if constexpr ((true)) {
+    b->Arg(256 << 20);
+  } else {
+    b->Range(1, 1024 << 20);
+    b->Complexity(benchmark::oN);
+  }
   b->Unit(benchmark::kMillisecond);
 }
 

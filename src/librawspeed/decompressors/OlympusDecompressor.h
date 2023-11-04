@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for extractHighBits
-#include "common/RawImage.h"                    // for RawImage
-#include "common/SimpleLUT.h"                   // for SimpleLUT<>::value_type
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpMSB.h"                      // for BitPumpMSB
-#include <algorithm>                            // for min
-#include <array>                                // for array
-#include <cstdint>                              // for uint16_t
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "common/SimpleLUT.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/BitPumpMSB.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
 
 namespace rawspeed {
 

@@ -66,6 +66,7 @@ TiffDecoderFuzzer-OrfDecoder
 TiffDecoderFuzzer-PefDecoder
 TiffDecoderFuzzer-Rw2Decoder
 TiffDecoderFuzzer-SrwDecoder
+TiffDecoderFuzzer-StiDecoder
 TiffDecoderFuzzer-ThreefrDecoder
 TiffParserFuzzer-GetDecoder
 TiffParserFuzzer-GetDecoder-Decode

@@ -21,24 +21,22 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "codes/HuffmanCode.h"            // for HuffmanCode
-#include "codes/PrefixCodeDecoder.h"      // for PrefixCodeDecoder, HuffmanT...
-#include "common/Common.h"                // for isIntN
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStrea...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for fill, copy, fill_n, max
-#include <array>                          // for array
-#include <cstdint>                        // for uint8_t, uint16_t, int...
-#include <tuple>                          // for array
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpJPEG.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cstdint>
+#include <utility>
 
 using std::array;
 

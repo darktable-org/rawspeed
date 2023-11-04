@@ -20,19 +20,19 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
-#include "adt/Invariant.h"  // for invariant
-#include <algorithm>        // for max, clamp
-#include <array>            // for array
-#include <cassert>          // for invariant
-#include <climits>          // for CHAR_BIT
-#include <cstdint>          // for uintptr_t, uint8_t, uint16_t
-#include <cstring>          // for size_t, memcpy
-#include <initializer_list> // for initializer_list
-#include <string>           // for string, basic_string, allocator
-#include <string_view>      // for string_view
-#include <type_traits>      // for enable_if_t, enable_if, make_signed_t
-#include <vector>           // for vector
+#include "rawspeedconfig.h"
+#include "adt/Invariant.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <climits>
+#include <cstdint>
+#include <cstring>
+#include <initializer_list>
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <vector>
 
 extern "C" int rawspeed_get_number_of_processor_cores();
 
@@ -85,7 +85,7 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
 template <typename T>
 constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
     T value, size_t multiple,
-    typename std::enable_if<std::is_pointer_v<T>>::type* /*unused*/ = nullptr) {
+    std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
   if (multiple == 0)
     return 0;
   static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
@@ -96,8 +96,7 @@ constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
 template <typename T>
 constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
     T value, size_t multiple,
-    typename std::enable_if<std::is_integral_v<T>>::type* /*unused*/ =
-        nullptr) {
+    std::enable_if_t<std::is_integral_v<T>>* /*unused*/ = nullptr) {
   if (multiple == 0)
     return 0;
   return value % multiple;

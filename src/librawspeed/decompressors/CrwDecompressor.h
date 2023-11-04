@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include "codes/PrefixCodeDecoder.h"            // for PrefixCodeDecoder
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpJPEG.h"                     // for BitPumpJPEG
-#include "io/ByteStream.h"                      // for ByteStream
-#include <array>                                // for array
-#include <cstdint>                              // for uint32_t, uint8_t
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/BitPumpJPEG.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cstdint>
 
 namespace rawspeed {
 

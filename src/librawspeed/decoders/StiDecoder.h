@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,25 +20,29 @@
 
 #pragma once
 
-#include "parsers/RawParser.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
 #include "tiff/TiffIFD.h"
-#include <memory>
+#include <utility>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
-class RawDecoder;
 
-class FiffParser final : public RawParser {
-  TiffRootIFDOwner rootIFD;
-
+class StiDecoder final : public AbstractTiffDecoder {
 public:
-  explicit FiffParser(Buffer input);
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  StiDecoder(TiffRootIFDOwner&& root, Buffer file)
+      : AbstractTiffDecoder(std::move(root), file) {}
 
-  void parseData();
-  std::unique_ptr<RawDecoder>
-  getDecoder(const CameraMetaData* meta = nullptr) override;
+  RawImage decodeRawInternal() override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+
+private:
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  void DecodeUncompressed(const TiffIFD* raw) const;
 };
 
 } // namespace rawspeed

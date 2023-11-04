@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include "decoders/RawDecoder.h" // for RawDecoder (ptr only)
-#include "io/Buffer.h"           // for Buffer
-#include "parsers/RawParser.h"   // for RawParser
-#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner, TiffIFD (ptr only)
-#include <array>                 // for array
-#include <memory>                // for unique_ptr
-#include <utility>               // for pair
+#include "decoders/RawDecoder.h"
+#include "io/Buffer.h"
+#include "parsers/RawParser.h"
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <memory>
+#include <utility>
 
 namespace rawspeed {
 
@@ -55,7 +55,7 @@ public:
   using checker_t = bool (*)(const TiffRootIFD* root, Buffer data);
   using constructor_t = std::unique_ptr<RawDecoder> (*)(TiffRootIFDOwner&& root,
                                                         Buffer data);
-  static const std::array<std::pair<checker_t, constructor_t>, 16> Map;
+  static const std::array<std::pair<checker_t, constructor_t>, 17> Map;
 };
 
 } // namespace rawspeed

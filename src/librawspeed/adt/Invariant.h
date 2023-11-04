@@ -22,7 +22,7 @@
 
 #ifndef NDEBUG
 
-#include <cassert> // for assert
+#include <cassert>
 
 #define invariant(expr) assert(expr)
 

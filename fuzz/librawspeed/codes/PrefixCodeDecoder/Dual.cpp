@@ -25,27 +25,22 @@
 #error IMPL1 must be defined to one of rawspeeds huffman table implementations
 #endif
 
-#include "codes/BinaryPrefixTree.h"         // for BinaryPrefixTree<>::...
-#include "codes/PrefixCodeDecoder.h"        // IWYU pragma: keep
-#include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
-#include "codes/PrefixCodeLUTDecoder.h"     // IWYU pragma: keep
-#include "codes/PrefixCodeLookupDecoder.h"  // IWYU pragma: keep
-#include "codes/PrefixCodeTreeDecoder.h"    // IWYU pragma: keep
-#include "codes/PrefixCodeVectorDecoder.h"  // IWYU pragma: keep
-#include "io/BitPumpJPEG.h"                 // for BitStream<>::fillCache
-#include "io/BitPumpMSB.h"                  // for BitStream<>::fillCache
-#include "io/BitPumpMSB32.h"                // for BitStream<>::fillCache
-#include "io/Buffer.h"                      // for Buffer, DataBuffer
-#include "io/ByteStream.h"                  // for ByteStream
-#include "io/Endianness.h"                  // for Endianness, Endiannes...
-#include "io/IOException.h"                 // for RawspeedException
-#include <algorithm>                        // for generate_n, max
-#include <cassert>                          // for assert
-#include <cstdint>                          // for uint8_t
-#include <cstdio>                           // for size_t
-#include <initializer_list>                 // for initializer_list
-#include <optional>                         // for optional
-#include <vector>                           // for vector
+#include "codes/PrefixCodeDecoder.h" // IWYU pragma: keep
+#include "codes/PrefixCodeDecoder/Common.h"
+#include "codes/PrefixCodeLUTDecoder.h"    // IWYU pragma: keep
+#include "codes/PrefixCodeLookupDecoder.h" // IWYU pragma: keep
+#include "codes/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
+#include "codes/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
+#include "io/BitPumpJPEG.h"
+#include "io/BitPumpMSB.h"
+#include "io/BitPumpMSB32.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 namespace rawspeed {
 struct BaselineCodeTag;

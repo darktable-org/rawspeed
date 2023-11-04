@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
-#include <algorithm>        // for minmax
-#include <cassert>          // for assert
-#include <iterator>         // for begin, end
-#include <type_traits>      // for enable_if_t, make_unsigned_t
-#include <utility>          // for pair
+#include "rawspeedconfig.h"
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <type_traits>
+#include <utility>
 
 namespace rawspeed {
 

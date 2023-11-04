@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
-#include "io/Buffer.h"           // for Buffer
-#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
-#include <array>                 // for array
-#include <cmath>                 // for NAN
-#include <cstdint>               // for uint32_t
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <cmath>
+#include <cstdint>
 
 namespace rawspeed {
 

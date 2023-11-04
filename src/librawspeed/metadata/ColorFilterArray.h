@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READNONE
-#include "adt/Point.h"      // for iPoint2D
-#include <algorithm>        // for copy
-#include <cstdint>          // for uint32_t, uint8_t
-#include <map>              // for map
-#include <string>           // for string
-#include <vector>           // for vector
+#include "rawspeedconfig.h"
+#include "adt/Point.h"
+#include <algorithm>
+#include <cstdint>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY
-#include "adt/Invariant.h"  // for invariant
-#include <type_traits>      // for negation, is_const, remove_const_t, is_same
-#include <vector>           // for vector
+#include "rawspeedconfig.h"
+#include "adt/Invariant.h"
+#include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 

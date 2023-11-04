@@ -19,19 +19,22 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
-#include "MemorySanitizer.h"                // for MSan
-#include "codes/PrefixCodeDecoder.h"        // for PrefixCodeDecoder
-#include "codes/PrefixCodeDecoder/Common.h" // for createPrefixCodeDecoder
-#include "common/RawImage.h"                // for RawImage, RawImageData
-#include "common/RawspeedException.h" // for ThrowException, RawspeedExce...
-#include "fuzz/Common.h"              // for CreateRawImage
-#include "io/Buffer.h"                // for Buffer, DataBuffer
-#include "io/ByteStream.h"            // for ByteStream
-#include "io/Endianness.h"            // for Endianness, Endianness::little
-#include <algorithm>                  // for generate_n, copy, fill, fill_n
-#include <cassert>                    // for assert
-#include <cstdint>                    // for uint16_t, uint8_t
-#include <iterator>                   // for back_insert_iterator, back_i...
+#include "MemorySanitizer.h"
+#include "adt/Point.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "codes/PrefixCodeDecoder/Common.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <vector>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -89,7 +92,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::MSan::CheckMemIsInitialized(
         mRaw->getByteDataAsUncroppedArray2DRef());
-  } catch (const rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

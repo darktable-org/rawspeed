@@ -20,27 +20,28 @@
 */
 
 #include "decoders/Rw2Decoder.h"
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for writeLog, DEBUG_...
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/PanasonicV4Decompressor.h"  // for PanasonicV4Decom...
-#include "decompressors/PanasonicV5Decompressor.h"  // for PanasonicV5Decom...
-#include "decompressors/PanasonicV6Decompressor.h"  // for PanasonicV6Decom...
-#include "decompressors/PanasonicV7Decompressor.h"  // for PanasonicV7Decom...
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cmath>                                    // for fabs
-#include <cstdint>                                  // for uint32_t, uint16_t
-#include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, operator==
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/PanasonicV4Decompressor.h"
+#include "decompressors/PanasonicV5Decompressor.h"
+#include "decompressors/PanasonicV6Decompressor.h"
+#include "decompressors/PanasonicV7Decompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 using std::fabs;
 

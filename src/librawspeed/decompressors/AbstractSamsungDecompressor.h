@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include <utility>                              // for move
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include <utility>
 
 namespace rawspeed {
 

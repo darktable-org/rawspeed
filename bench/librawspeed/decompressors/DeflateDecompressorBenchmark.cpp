@@ -18,24 +18,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/DeflateDecompressor.h" // for DeflateDecompressor
-#include "adt/Point.h"                         // for iPoint2D
-#include "bench/Common.h"                      // for areaToRectangle, benc...
-#include "common/Common.h"                     // for isAligned
-#include "common/RawImage.h"                   // for RawImage, RawImageData
-#include "io/Buffer.h"                         // for Buffer
-#include <algorithm>                           // for fill_n
-#include <cassert>                             // for assert
-#include <cstddef>                             // for size_t
-#include <cstdint>                             // for uint8_t
-#include <memory>                              // for unique_ptr
-#include <type_traits>                         // for integral_constant
-#include <vector>                              // for vector
-#include <zlib.h>                              // for compress, compressBound
-#include <benchmark/benchmark.h>               // for State, Benchmark, BEN...
+#include "decompressors/DeflateDecompressor.h"
+#include "adt/Point.h"
+#include "bench/Common.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <type_traits>
+#include <vector>
+#include <zconf.h>
+#include <zlib.h>
+#include <benchmark/benchmark.h>
 
 #ifndef NDEBUG
-#include <limits> // for numeric_limits
+#include <limits>
 #endif
 
 using rawspeed::Buffer;
@@ -125,12 +125,13 @@ inline void CustomArgs(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-// FIXME: appears to not like 1GPix+ buffers
-#if 1
-  b->Arg(128 << 20);
-#else
-  b->Range(1, 1023 << 20)->Complexity(benchmark::oN);
-#endif
+  // FIXME: appears to not like 1GPix+ buffers
+  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
+  if constexpr ((true)) {
+    b->Arg(128 << 20);
+  } else {
+    b->Range(1, 1023 << 20)->Complexity(benchmark::oN);
+  }
   b->Unit(benchmark::kMillisecond);
 }
 

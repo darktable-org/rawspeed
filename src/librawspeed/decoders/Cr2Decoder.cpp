@@ -21,28 +21,29 @@
 */
 
 #include "decoders/Cr2Decoder.h"
-#include "adt/Array2DRef.h"                    // for Array2DRef
-#include "adt/Point.h"                         // for iPoint2D
-#include "decoders/RawDecoderException.h"      // for ThrowRDE
-#include "decompressors/Cr2Decompressor.h"     // for Cr2SliceWidths
-#include "decompressors/Cr2LJpegDecoder.h"     // for Cr2LJpegDecoder
-#include "interpolators/Cr2sRawInterpolator.h" // for Cr2sRawInterpolator
-#include "io/Buffer.h"                         // for Buffer, DataBuffer
-#include "io/ByteStream.h"                     // for ByteStream
-#include "io/Endianness.h"                     // for Endianness, Endiannes...
-#include "metadata/Camera.h"                   // for Hints
-#include "metadata/ColorFilterArray.h"         // for CFAColor, CFAColor::G...
-#include "parsers/TiffParserException.h"       // for ThrowException, Rawsp...
-#include "tiff/TiffEntry.h"                    // for TiffEntry, TiffDataType
-#include "tiff/TiffTag.h"                      // for TiffTag, TiffTag::CAN...
-#include <array>                               // for array
-#include <cassert>                             // for assert
-#include <cstdint>                             // for uint32_t, uint16_t
-#include <memory>                              // for unique_ptr, allocator
-#include <string>                              // for operator==, string
-#include <vector>                              // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
-#include "MemorySanitizer.h" // for MSan
+#include "MemorySanitizer.h"
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/Cr2Decompressor.h"
+#include "decompressors/Cr2LJpegDecoder.h"
+#include "interpolators/Cr2sRawInterpolator.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/ColorFilterArray.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 class CameraMetaData;

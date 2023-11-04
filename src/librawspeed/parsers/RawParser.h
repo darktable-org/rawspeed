@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "io/Buffer.h" // for Buffer
-#include <memory>      // for unique_ptr
+#include "io/Buffer.h"
+#include <memory>
 
 namespace rawspeed {
 

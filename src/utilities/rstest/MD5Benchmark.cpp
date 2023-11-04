@@ -18,11 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "md5.h"                 // for md5_hash, md5_state
-#include <cstdint>               // for uint8_t
-#include <cstdlib>               // for free, malloc, size_t
-#include <memory>                // for unique_ptr
-#include <benchmark/benchmark.h> // for State, Benchmark, State::StateIterator
+#include "md5.h"
+#include <cstdint>
+#include <cstdlib>
+#include <memory>
+#include <benchmark/benchmark.h>
 
 static inline void BM_MD5(benchmark::State& state) {
   // Create a zero-initialized data. Content does not matter for our purpose.

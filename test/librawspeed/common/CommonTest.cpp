@@ -18,18 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h" // for roundUp, clampBits, copyPixels, isAligned
-#include <algorithm>       // for fill, min, copy, equal, fill_n, max
-#include <cassert>         // for assert
-#include <cstddef>         // for size_t
-#include <cstdint>         // for uint8_t, uint16_t
-#include <limits>          // for numeric_limits
-#include <memory>          // for allocator, make_unique, unique_ptr
-#include <string>          // for basic_string, string, operator==
-#include <tuple>           // for make_tuple, get, tuple
-#include <type_traits>     // for __strip_reference_wrapper<>::__type
-#include <vector>          // for vector, vector<>::iterator, vector<>::val...
-#include <gtest/gtest.h>   // for ParamIteratorInterface, ParamGeneratorInt...
+#include "common/Common.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <vector>
+#include <gtest/gtest.h>
 
 using rawspeed::clampBits;
 using rawspeed::copyPixels;

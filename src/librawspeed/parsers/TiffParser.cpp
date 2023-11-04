@@ -22,33 +22,37 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "adt/NORangesSet.h"             // for NORangesSet
-#include "decoders/ArwDecoder.h"         // for ArwDecoder
-#include "decoders/Cr2Decoder.h"         // for Cr2Decoder
-#include "decoders/DcrDecoder.h"         // for DcrDecoder
-#include "decoders/DcsDecoder.h"         // for DcsDecoder
-#include "decoders/DngDecoder.h"         // for DngDecoder
-#include "decoders/ErfDecoder.h"         // for ErfDecoder
-#include "decoders/IiqDecoder.h"         // for IiqDecoder
-#include "decoders/KdcDecoder.h"         // for KdcDecoder
-#include "decoders/MefDecoder.h"         // for MefDecoder
-#include "decoders/MosDecoder.h"         // for MosDecoder
-#include "decoders/NefDecoder.h"         // for NefDecoder
-#include "decoders/OrfDecoder.h"         // for OrfDecoder
-#include "decoders/PefDecoder.h"         // for PefDecoder
-#include "decoders/Rw2Decoder.h"         // for Rw2Decoder
-#include "decoders/SrwDecoder.h"         // for SrwDecoder
-#include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::unk...
-#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
-#include <cassert>                       // for assert
-#include <cstdint>                       // for UINT32_MAX, uint16_t, uint32_t
-#include <memory>                        // for make_unique, unique_ptr
-#include <tuple>                         // for tie, tuple
-#include <vector>                        // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
+#include "adt/NORangesSet.h"
+#include "decoders/ArwDecoder.h"
+#include "decoders/Cr2Decoder.h"
+#include "decoders/DcrDecoder.h"
+#include "decoders/DcsDecoder.h"
+#include "decoders/DngDecoder.h"
+#include "decoders/ErfDecoder.h"
+#include "decoders/IiqDecoder.h"
+#include "decoders/KdcDecoder.h"
+#include "decoders/MefDecoder.h"
+#include "decoders/MosDecoder.h"
+#include "decoders/NefDecoder.h"
+#include "decoders/OrfDecoder.h"
+#include "decoders/PefDecoder.h"
+#include "decoders/Rw2Decoder.h"
+#include "decoders/SrwDecoder.h"
+#include "decoders/StiDecoder.h"
+#include "decoders/ThreefrDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/RawParser.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 class RawDecoder;
@@ -120,7 +124,7 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
   }
 
 const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
-                 16>
+                 17>
     TiffParser::Map = {{
         DECODER(DngDecoder),
         DECODER(MosDecoder),
@@ -137,6 +141,7 @@ const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
         DECODER(DcsDecoder),
         DECODER(KdcDecoder),
         DECODER(ErfDecoder),
+        DECODER(StiDecoder),
         DECODER(ThreefrDecoder),
 
     }};

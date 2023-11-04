@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecoder.h" // for AbstractLJpegDecoder
-#include "io/BitPumpMSB32.h"                    // for BitPumpMSB32
+#include "decompressors/AbstractLJpegDecoder.h"
+#include "io/BitPumpMSB32.h"
 
 namespace rawspeed {
 

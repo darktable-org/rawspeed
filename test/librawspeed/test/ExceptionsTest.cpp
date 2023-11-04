@@ -18,18 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawspeedException.h"         // for RawspeedException (ptr...
-#include "decoders/RawDecoderException.h"     // for RawDecoderException (p...
-#include "io/FileIOException.h"               // for FileIOException (ptr o...
-#include "io/IOException.h"                   // for IOException (ptr only)
-#include "metadata/CameraMetadataException.h" // for CameraMetadataExceptio...
-#include "parsers/CiffParserException.h"      // for CiffParserException (p...
-#include "parsers/FiffParserException.h"      // for FiffParserException (p...
-#include "parsers/RawParserException.h"       // for RawParserException (pt...
-#include "parsers/TiffParserException.h"      // for TiffParserException (p...
-#include <exception>                          // for exception
-#include <memory>                             // for unique_ptr
-#include <stdexcept>                          // for runtime_error
+#include "common/RawspeedException.h"
+#include "decoders/RawDecoderException.h"
+#include "io/FileIOException.h"
+#include "io/IOException.h"
+#include "metadata/CameraMetadataException.h"
+#include "parsers/CiffParserException.h"
+#include "parsers/FiffParserException.h"
+#include "parsers/RawParserException.h"
+#include "parsers/TiffParserException.h"
+#include <exception>
+#include <memory>
+#include <stdexcept>
 
 using rawspeed::CameraMetadataException;
 using rawspeed::CiffParserException;

@@ -18,12 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpMSB32.h" // for BitPumpMSB32
-#include "io/BitPumpTest.h"  // for Pattern, (anonymous), GenOnesBE, Patterns
-#include <array>             // for array
-#include <cstdint>           // for uint32_t, uint8_t
-#include <memory>            // for allocator
-#include <gtest/gtest.h>     // for INSTANTIATE_TYPED_TEST_SUITE_P
+#include "io/BitPumpMSB32.h"
+#include "io/BitPumpTest.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <gtest/gtest.h>
 
 using rawspeed::BitPumpMSB32;
 

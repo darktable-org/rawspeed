@@ -21,18 +21,18 @@
 
 #pragma once
 
-#include "codes/HuffmanCode.h"                  // for HuffmanCode
-#include "codes/PrefixCodeDecoder.h"            // for PrefixCodeDecoder
-#include "common/RawImage.h"                    // for RawImage
-#include "common/RawspeedException.h"           // for ThrowException
-#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include <algorithm>                            // for fill_n, fill
-#include <array>                                // for array
-#include <cstdint>                              // for uint16_t, uint32_t
-#include <memory>                               // for unique_ptr
-#include <vector>                               // for vector
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <vector>
 
 /*
  * The following enum and two structs are stolen from the IJG JPEG library

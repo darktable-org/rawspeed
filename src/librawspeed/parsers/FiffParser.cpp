@@ -21,21 +21,21 @@
 */
 
 #include "parsers/FiffParser.h"
-#include "decoders/RafDecoder.h"         // for RafDecoder
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::big
-#include "parsers/FiffParserException.h" // for ThrowFPE
-#include "parsers/RawParser.h"           // for RawParser
-#include "parsers/TiffParser.h"          // for TiffParser
-#include "parsers/TiffParserException.h" // for ThrowException, TiffParserE...
-#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType
-#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::FUJIOLDWB
-#include <cstdint>                       // for uint32_t, uint16_t
-#include <limits>                        // for numeric_limits
-#include <memory>                        // for make_unique, unique_ptr
-#include <utility>                       // for move
+#include "decoders/RafDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/FiffParserException.h"
+#include "parsers/RawParser.h"
+#include "parsers/TiffParser.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <utility>
 
 using std::numeric_limits;
 

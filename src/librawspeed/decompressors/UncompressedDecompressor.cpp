@@ -21,22 +21,24 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D, iRectangle2D
-#include "common/Common.h"                // for BitOrder, copyPixels, BitO...
-#include "common/FloatingPoint.h"         // for Binary16, Binary24, Binary...
-#include "decoders/RawDecoderException.h" // for ThrowRDE
-#include "io/BitPumpLSB.h"                // for BitPumpLSB, BitStream<>::f...
-#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
-#include "io/BitPumpMSB16.h"              // for BitPumpMSB16, BitStream<>:...
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32, BitStream<>:...
-#include "io/ByteStream.h"                // for ByteStream
-#include "io/Endianness.h"                // for Endianness, Endianness::li...
-#include "io/IOException.h"               // for ThrowException, ThrowIOE
-#include <algorithm>                      // for min
-#include <cinttypes>                      // for PRIu64
-#include <utility>                        // for move
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/FloatingPoint.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpLSB.h"
+#include "io/BitPumpMSB.h"
+#include "io/BitPumpMSB16.h"
+#include "io/BitPumpMSB32.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include <algorithm>
+#include <cinttypes>
+#include <cstdint>
+#include <utility>
 
 using std::min;
 

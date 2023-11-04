@@ -1,8 +1,8 @@
-#include <iostream> // for endl, basic_ostream<>::__ostream_type, cout, ost...
+#include <iostream>
 
 #if defined(__i386__) || defined(__x86_64__)
 
-#include <cpuid.h> // for __get_cpuid
+#include <cpuid.h>
 
 /* Features in %edx for leaf 1 */
 #if !defined(bit_PSE)

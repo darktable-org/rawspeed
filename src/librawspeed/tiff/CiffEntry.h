@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"  // for RAWSPEED_READONLY
-#include "adt/NORangesSet.h" // for set
-#include "io/ByteStream.h"   // for ByteStream
-#include "tiff/CiffTag.h"    // for CiffTag
-#include <cstdint>           // for uint32_t, uint16_t, uint8_t
-#include <string>            // for string
-#include <string_view>       // for string_view
-#include <vector>            // for vector
+#include "rawspeedconfig.h"
+#include "adt/NORangesSet.h"
+#include "io/ByteStream.h"
+#include "tiff/CiffTag.h"
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace rawspeed {
 

@@ -21,33 +21,33 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for RAWSPEED_READONLY, HAVE_OP...
+#include "rawspeedconfig.h"
 #include "decompressors/FujiDecompressor.h"
-#include "MemorySanitizer.h"              // for MSan
-#include "adt/Array1DRef.h"               // for Array1DRef
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/CroppedArray1DRef.h"        // for CroppedArray1DRef
-#include "adt/CroppedArray2DRef.h"        // for CroppedArray2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/BayerPhase.h"            // for getAsCFAColors, BayerPhase
-#include "common/Common.h"                // for countl_zero, rawspeed_get_...
-#include "common/RawImage.h"              // for RawImageData, RawImage
-#include "common/XTransPhase.h"           // for XTransPhase, getAsCFAColors
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include "io/Endianness.h"                // for Endianness, Endianness::big
-#include "metadata/ColorFilterArray.h"    // for CFAColor, CFAColor::BLUE
-#include <algorithm>                      // for max, min, fill, minmax
-#include <array>                          // for array, array<>::value_type
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, int8_t, uint32_t
-#include <cstdlib>                        // for abs
-#include <cstring>                        // for memcpy, memset
-#include <initializer_list>               // for initializer_list
-#include <optional>                       // for optional, operator!=
-#include <string>                         // for string
-#include <utility>                        // for pair
+#include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/BayerPhase.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "common/XTransPhase.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitPumpMSB.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
@@ -256,7 +256,7 @@ struct fuji_compressed_block {
   void fuji_decode_strip(const FujiStrip& strip);
 
   template <typename Tag, typename T>
-  void copy_line(const FujiStrip& strip, int cur_line, T&& idx) const;
+  void copy_line(const FujiStrip& strip, int cur_line, T idx) const;
 
   void copy_line_to_xtrans(const FujiStrip& strip, int cur_line) const;
   void copy_line_to_bayer(const FujiStrip& strip, int cur_line) const;
@@ -286,7 +286,7 @@ struct fuji_compressed_block {
   void fuji_extend_blue() const;
 
   template <typename T>
-  inline void fuji_decode_block(T&& func_even, int cur_line);
+  inline void fuji_decode_block(T func_even, int cur_line);
   void xtrans_decode_block(int cur_line);
   void fuji_bayer_decode_block(int cur_line);
 };
@@ -334,7 +334,7 @@ void fuji_compressed_block::reset(const fuji_compressed_params& params) {
 
 template <typename Tag, typename T>
 void fuji_compressed_block::copy_line(const FujiStrip& strip, int cur_line,
-                                      T&& idx) const {
+                                      T idx) const {
   std::array<CFAColor, MCU<Tag>.x * MCU<Tag>.y> CFAData;
   if constexpr (std::is_same_v<XTransTag, Tag>)
     CFAData = getAsCFAColors(XTransPhase(0, 0));
@@ -601,7 +601,7 @@ void fuji_compressed_block::fuji_extend_blue() const {
 
 template <typename T>
 __attribute__((always_inline)) void
-fuji_compressed_block::fuji_decode_block(T&& func_even,
+fuji_compressed_block::fuji_decode_block(T func_even,
                                          [[maybe_unused]] int cur_line) {
   invariant(common_info.line_width % 2 == 0);
   const int line_width = common_info.line_width / 2;

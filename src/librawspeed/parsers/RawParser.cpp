@@ -20,19 +20,20 @@
 */
 
 #include "parsers/RawParser.h"
-#include "decoders/MrwDecoder.h"          // for MrwDecoder
-#include "decoders/NakedDecoder.h"        // for NakedDecoder
-#include "decoders/RafDecoder.h"          // for RafDecoder
-#include "decoders/RawDecoder.h"          // for RawDecoder
-#include "decoders/RawDecoderException.h" // for RawDecoderException, ThrowRDE
-#include "io/Buffer.h"                    // for Buffer
-#include "metadata/CameraMetaData.h"      // for CameraMetaData
-#include "parsers/CiffParser.h"           // for CiffParser
-#include "parsers/CiffParserException.h"  // for CiffParserException
-#include "parsers/FiffParser.h"           // for FiffParser
-#include "parsers/FiffParserException.h"  // for FiffParserException
-#include "parsers/TiffParser.h"           // for TiffParser
-#include "parsers/TiffParserException.h"  // for ThrowException, TiffParser...
+#include "decoders/MrwDecoder.h"
+#include "decoders/NakedDecoder.h"
+#include "decoders/RafDecoder.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "metadata/CameraMetaData.h"
+#include "parsers/CiffParser.h"
+#include "parsers/CiffParserException.h"
+#include "parsers/FiffParser.h"
+#include "parsers/FiffParserException.h"
+#include "parsers/TiffParser.h"
+#include "parsers/TiffParserException.h"
+#include <memory>
 
 namespace rawspeed {
 
@@ -49,7 +50,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   if (MrwDecoder::isMRW(mInput)) {
     try {
       return std::make_unique<MrwDecoder>(mInput);
-    } catch (const RawDecoderException&) {
+    } catch (const RawDecoderException&) { // NOLINT(bugprone-empty-catch)
+      // Yes, just ignore the exception.
     }
   }
 
@@ -59,7 +61,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
     try {
       FiffParser p(mInput);
       return p.getDecoder(meta);
-    } catch (const FiffParserException&) {
+    } catch (const FiffParserException&) { // NOLINT(bugprone-empty-catch)
+      // Yes, just ignore the exception.
     }
   }
 
@@ -67,14 +70,16 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
   try {
     TiffParser p(mInput);
     return p.getDecoder(meta);
-  } catch (const TiffParserException&) {
+  } catch (const TiffParserException&) { // NOLINT(bugprone-empty-catch)
+                                         // Yes, just ignore the exception.
   }
 
   // CIFF images
   try {
     CiffParser p(mInput);
     return p.getDecoder(meta);
-  } catch (const CiffParserException&) {
+  } catch (const CiffParserException&) { // NOLINT(bugprone-empty-catch)
+                                         // Yes, just ignore the exception.
   }
 
   // Detect camera on filesize (CHDK).
@@ -83,7 +88,8 @@ std::unique_ptr<RawDecoder> RawParser::getDecoder(const CameraMetaData* meta) {
 
     try {
       return std::make_unique<NakedDecoder>(mInput, c);
-    } catch (const RawDecoderException&) {
+    } catch (const RawDecoderException&) { // NOLINT(bugprone-empty-catch)
+      // Yes, just ignore the exception.
     }
   }
 

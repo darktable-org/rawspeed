@@ -21,18 +21,19 @@
 */
 
 #include "decompressors/SamsungV2Decompressor.h"
-#include "adt/Array2DRef.h"               // for Array2DRef
-#include "adt/Invariant.h"                // for invariant
-#include "adt/Point.h"                    // for iPoint2D
-#include "common/Common.h"                // for clampBits, signExtend
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for fill_n
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t, int32_t
-#include <type_traits>                    // for underlying_type_t
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include "io/BitPumpMSB32.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <type_traits>
 
 namespace rawspeed {
 

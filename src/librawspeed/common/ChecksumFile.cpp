@@ -19,13 +19,12 @@
 */
 
 #include "common/ChecksumFile.h"
-#include "common/Common.h"            // for splitString
-#include "common/RawspeedException.h" // for ThrowException, ThrowRSE
-#include "io/FileReader.h"            // for FileReader
-#include <cassert>                    // for assert
-#include <string>                     // for string, allocator, operator+
-#include <type_traits>                // for add_const<>::type
-#include <vector>                     // for vector
+#include "common/Common.h"
+#include "common/RawspeedException.h"
+#include "io/FileReader.h"
+#include <cassert>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

@@ -22,15 +22,15 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"   // for RAWSPEED_READONLY
-#include "adt/NotARational.h" // for NotARational
-#include "io/ByteStream.h"    // for ByteStream
-#include "tiff/TiffTag.h"     // for TiffTag
-#include <algorithm>          // for fill_n
-#include <array>              // for array
-#include <cstdint>            // for uint32_t, uint16_t, uint8_t, int32_t
-#include <string>             // for string
-#include <vector>             // for vector
+#include "rawspeedconfig.h"
+#include "adt/NotARational.h"
+#include "io/ByteStream.h"
+#include "tiff/TiffTag.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

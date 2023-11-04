@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "common/Common.h"   // for BitOrder
-#include "common/RawImage.h" // for RawImage
-#include "io/Buffer.h"       // for Buffer
-#include "metadata/Camera.h" // for Hints
-#include <cstdint>           // for uint32_t
-#include <string>            // for string
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include "metadata/Camera.h"
+#include <cstdint>
+#include <string>
 
 namespace rawspeed {
 
@@ -81,27 +81,27 @@ public:
   /* support unknown cameras, you can enable this */
   /* DNGs are always attempted to be decoded, so this variable has no effect on
    * DNGs */
-  bool failOnUnknown;
+  bool failOnUnknown{false};
 
   /* Set how to handle bad pixels. */
   /* If you disable this parameter, no bad pixel interpolation will be done */
-  bool interpolateBadPixels;
+  bool interpolateBadPixels{true};
 
   /* Apply stage 1 DNG opcodes. */
   /* This usually maps out bad pixels, etc */
-  bool applyStage1DngOpcodes;
+  bool applyStage1DngOpcodes{true};
 
   /* Apply crop - if false uncropped image is delivered */
-  bool applyCrop;
+  bool applyCrop{true};
 
   /* This will skip all corrections, and deliver the raw data */
   /* This will skip any compression curves or other things that */
   /* is needed to get the correct values */
   /* Only enable if you are sure that is what you want */
-  bool uncorrectedRawValues;
+  bool uncorrectedRawValues{false};
 
   /* Should Fuji images be rotated? */
-  bool fujiRotate;
+  bool fujiRotate{true};
 
   struct {
     /* Should Quadrant Multipliers be applied to the IIQ raws? */

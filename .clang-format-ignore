@@ -12,7 +12,6 @@
 .mailmap
 CMakeLists.txt
 LICENSE
-cmake/iwyu.imp
 docs/Doxyfile.in
 fuzz/all-fuzzers.txt
 fuzz/common.dict

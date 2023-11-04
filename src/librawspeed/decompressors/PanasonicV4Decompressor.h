@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include "adt/Point.h"                          // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include <cstdint>                              // for uint32_t
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 

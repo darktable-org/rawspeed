@@ -21,17 +21,16 @@
 
 #pragma once
 
-#include "codes/PrefixCodeLookupDecoder.h" // for PrefixCodeLookupDecoder
-#include "common/Common.h"                 // for extractHighBits
-#include "decoders/RawDecoderException.h"  // for ThrowException, Thro...
-#include "io/BitStream.h"                  // for BitStreamTraits
-#include <cassert>                         // for invariant
-#include <cstddef>                         // for size_t
-#include <cstdint>                         // for int32_t, uint16_t
-#include <memory>                          // for allocator_traits<>::...
-#include <tuple>                           // for tie
-#include <vector>                          // for vector
-// IWYU pragma: no_include <algorithm>
+#include "codes/PrefixCodeLookupDecoder.h"
+#include "common/Common.h"
+#include "decoders/RawDecoderException.h"
+#include "io/BitStream.h"
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <tuple>
+#include <vector>
 
 /*
  * The following code is inspired by the IJG JPEG library.
@@ -74,14 +73,10 @@ public:
   using Base = BackendPrefixCodeDecoder;
   using Traits = typename Base::Traits;
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
   using Base::Base;
 
 private:
-  // The code can be compiled with two different decode lookup table layouts.
-  // The idea is that different CPU architectures may perform better with
-  // one or the other, depending on the relative performance of their arithmetic
-  // core vs their memory access. For an Intel Core i7, the big table is better.
-#if 1
   // lookup table containing 3 fields: payload:16|flag:8|len:8
   // The payload may be the fully decoded diff or the length of the diff.
   // The len field contains the number of bits, this lookup consumed.
@@ -94,15 +89,6 @@ private:
   using LUTEntryTy = int32_t;
   using LUTUnsignedEntryTy = std::make_unsigned_t<LUTEntryTy>;
   std::vector<LUTEntryTy> decodeLookup;
-#else
-  // lookup table containing 2 fields: payload:4|len:4
-  // the payload is the length of the diff, len is the length of the code
-  static constexpr unsigned LookupDepth = 15;
-  static constexpr unsigned PayloadShift = 4;
-  static constexpr unsigned FlagMask = 0;
-  static constexpr unsigned LenMask = 0x0f;
-  std::vector<uint8_t> decodeLookup;
-#endif
 
 public:
   void setup(bool fullDecode_, bool fixDNGBug16_) {

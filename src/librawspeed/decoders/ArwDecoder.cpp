@@ -20,31 +20,34 @@
 */
 
 #include "decoders/ArwDecoder.h"
-#include "MemorySanitizer.h"                        // for MSan
-#include "adt/NORangesSet.h"                        // for NORangesSet
-#include "adt/Point.h"                              // for iPoint2D
-#include "common/Common.h"                          // for roundDown
-#include "common/RawspeedException.h"               // for RawspeedException
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/LJpegDecoder.h"             // for LJpegDecoder
-#include "decompressors/SonyArw1Decompressor.h"     // for SonyArw1Decompre...
-#include "decompressors/SonyArw2Decompressor.h"     // for SonyArw2Decompre...
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for fill_n
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstring>                                  // for memcpy, size_t
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
-#include <vector>                                   // for vector
+#include "MemorySanitizer.h"
+#include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
+#include "adt/NORangesSet.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/LJpegDecoder.h"
+#include "decompressors/SonyArw1Decompressor.h"
+#include "decompressors/SonyArw2Decompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <vector>
 
 using std::vector;
 
