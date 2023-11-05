@@ -23,14 +23,11 @@
 #include "adt/Array2DRef.h"
 #include "adt/Point.h"
 #include "metadata/ColorFilterArray.h"
-#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include <iterator>
 #include <optional>
-#include <utility>
 
 namespace rawspeed {
 

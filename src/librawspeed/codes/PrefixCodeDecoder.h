@@ -22,7 +22,9 @@
 
 // IWYU pragma: begin_exports
 
+#include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCodeLUTDecoder.h"
+#include "codes/PrefixCodeLookupDecoder.h"
 // #include "codes/PrefixCodeLookupDecoder.h"
 // #include "codes/PrefixCodeTreeDecoder.h"
 // #include "codes/PrefixCodeVectorDecoder.h"

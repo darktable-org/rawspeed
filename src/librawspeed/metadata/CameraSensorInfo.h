@@ -21,7 +21,6 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include <algorithm>
 #include <vector>
 
 namespace rawspeed {

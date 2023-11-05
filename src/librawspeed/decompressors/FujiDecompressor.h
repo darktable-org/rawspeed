@@ -22,17 +22,11 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "adt/Array2DRef.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpMSB.h"
 #include "io/ByteStream.h"
-#include "metadata/ColorFilterArray.h"
-#include <array>
-#include <cassert>
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 namespace rawspeed {

@@ -20,11 +20,17 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
+#include "codes/PrefixCode.h"
 #include "common/RawspeedException.h"
 #include "io/ByteStream.h"
+#include <cassert>
+#include <cstdint>
 #include <optional>
 #include <type_traits>
+#include <vector>
 
 template <typename CodeTag>
 auto getCodeValues(rawspeed::ByteStream& bs, unsigned numEntries) {

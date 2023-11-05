@@ -25,11 +25,13 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <functional>
 #include <limits>
-#include <memory>
 #include <type_traits>
 #include <vector>
+
+#ifndef NDEBUG
+#include <functional>
+#endif
 
 namespace rawspeed {
 class iPoint2D;

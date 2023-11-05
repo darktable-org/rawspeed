@@ -25,7 +25,6 @@
 #include "io/ByteStream.h"
 #include <climits>
 #include <cstdint>
-#include <functional>
 
 namespace rawspeed {
 template <class T> class CroppedArray1DRef;

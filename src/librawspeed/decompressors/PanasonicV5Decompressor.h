@@ -28,7 +28,6 @@
 #include "io/ByteStream.h"
 #include <cstddef>
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 namespace rawspeed {

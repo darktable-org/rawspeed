@@ -20,12 +20,15 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "adt/BitIterator.h"
 #include "adt/iterator_range.h"
 #include "common/Common.h"
 #include "decoders/RawDecoderException.h"
+#include <cassert>
 #include <cstdint>
 #include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 

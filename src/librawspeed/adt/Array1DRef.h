@@ -23,7 +23,6 @@
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
 #include <type_traits>
-#include <vector>
 
 namespace rawspeed {
 

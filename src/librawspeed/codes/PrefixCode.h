@@ -24,12 +24,7 @@
 #include "decoders/RawDecoderException.h"
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
-#include <cstdint>
 #include <functional>
-#include <iterator>
-#include <numeric>
-#include <type_traits>
 #include <vector>
 
 namespace rawspeed {

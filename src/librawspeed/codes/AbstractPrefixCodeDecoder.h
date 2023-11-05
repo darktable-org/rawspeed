@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "adt/Invariant.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCode.h"
@@ -29,11 +30,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <iterator>
-#include <numeric>
-#include <type_traits>
-#include <vector>
 
 namespace rawspeed {
 

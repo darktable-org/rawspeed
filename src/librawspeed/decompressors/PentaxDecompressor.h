@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "codes/AbstractPrefixCode.h"
+#include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
