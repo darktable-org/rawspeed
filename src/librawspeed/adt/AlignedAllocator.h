@@ -51,14 +51,23 @@ alignedMalloc(size_t size, size_t alignment) {
     return ptr;
 #endif
 
+#if defined(_WIN32) || defined(_WIN64)
+  ptr = _aligned_malloc(size, alignment);
+#else
   ptr = std::aligned_alloc(alignment, size);
+#endif
+
   invariant(isAligned(ptr, alignment));
 
   return ptr;
 }
 
 inline void alignedFree(void* ptr) {
+#if defined(_WIN32) || defined(_WIN64)
+  _aligned_free(ptr);
+#else
   std::free(ptr); // NOLINT
+#endif
 }
 
 } // namespace impl
