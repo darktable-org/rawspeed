@@ -27,7 +27,6 @@
 #include "common/Common.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
-#include "io/Endianness.h"
 #include "io/IOException.h"
 #include <algorithm>
 #include <array>

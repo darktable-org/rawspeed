@@ -21,10 +21,10 @@
 
 #pragma once
 
+#include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "common/RawspeedException.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractDecompressor.h"
 #include "io/ByteStream.h"

@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "codes/PrefixCodeLookupDecoder.h"
+#include "adt/Invariant.h"
 #include "common/Common.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStream.h"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 /*

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"

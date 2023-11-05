@@ -24,14 +24,11 @@
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
-#include "codes/DummyPrefixCodeDecoder.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "common/RawspeedException.h"
 #include "decoders/RawDecoderException.h"
 #include "io/ByteStream.h"
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>

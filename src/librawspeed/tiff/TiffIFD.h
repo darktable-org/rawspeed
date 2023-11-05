@@ -24,7 +24,6 @@
 
 #include "rawspeedconfig.h"
 #include "adt/NORangesSet.h"
-#include "common/RawspeedException.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"

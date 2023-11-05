@@ -22,6 +22,7 @@
 
 #include "adt/Invariant.h"
 #include "codes/AbstractPrefixCode.h"
+#include <array>
 #include <cassert>
 #include <functional>
 #include <initializer_list> // IWYU pragma: keep

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "io/Buffer.h"

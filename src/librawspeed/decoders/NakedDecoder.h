@@ -25,9 +25,6 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
 #include <cstdint>
-#include <functional>
-#include <map>
-#include <string>
 
 namespace rawspeed {
 

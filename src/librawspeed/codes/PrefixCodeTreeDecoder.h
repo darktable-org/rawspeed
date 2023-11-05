@@ -21,19 +21,15 @@
 
 #pragma once
 
+#include "adt/Invariant.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "codes/BinaryPrefixTree.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStream.h"
-#include <algorithm>
 #include <cassert>
-#include <initializer_list>
-#include <iterator>
-#include <memory>
 #include <optional>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 namespace rawspeed {
 

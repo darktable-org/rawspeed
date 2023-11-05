@@ -26,7 +26,6 @@
 #include "metadata/BlackArea.h"
 #include "metadata/CameraSensorInfo.h"
 #include "metadata/ColorFilterArray.h"
-#include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <map>

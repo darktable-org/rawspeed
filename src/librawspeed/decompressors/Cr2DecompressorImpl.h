@@ -20,11 +20,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
-#include "codes/DummyPrefixCodeDecoder.h"
-#include "codes/PrefixCodeLUTDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/Cr2Decompressor.h"
@@ -36,7 +36,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <initializer_list>
+#include <iterator>
 #include <optional>
 #include <tuple>
 #include <utility>

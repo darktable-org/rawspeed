@@ -29,7 +29,7 @@
 #include <cstdint>
 #include <functional>
 #include <stddef.h>
-#include <tuple>
+#include <utility>
 #include <vector>
 
 namespace rawspeed {

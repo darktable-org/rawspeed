@@ -29,7 +29,6 @@
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <cstdint>
-#include <utility>
 
 namespace rawspeed {
 

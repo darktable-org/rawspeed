@@ -24,7 +24,6 @@
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include <type_traits>
-#include <vector>
 
 namespace rawspeed {
 

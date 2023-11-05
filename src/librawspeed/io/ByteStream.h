@@ -21,15 +21,21 @@
 
 #pragma once
 
-#include "AddressSanitizer.h"
+#include "rawspeedconfig.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "io/Buffer.h"
 #include "io/IOException.h"
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <iterator>
 #include <limits>
+#include <string_view>
+
+#ifndef NDEBUG
+#include "AddressSanitizer.h"
+#endif
 
 namespace rawspeed {
 

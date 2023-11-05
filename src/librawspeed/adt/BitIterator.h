@@ -22,8 +22,9 @@
 
 #include "adt/Invariant.h"
 #include "common/Common.h"
+#include <cstddef>
 #include <iterator>
-#include <utility>
+#include <type_traits>
 
 namespace rawspeed {
 

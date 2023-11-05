@@ -24,10 +24,12 @@
 #include "adt/Invariant.h"
 #include "common/Common.h"
 #include "common/RawspeedException.h"
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <type_traits>
 
 namespace rawspeed {
 

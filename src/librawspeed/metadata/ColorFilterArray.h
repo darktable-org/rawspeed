@@ -22,9 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Point.h"
-#include <algorithm>
 #include <cstdint>
-#include <map>
 #include <string>
 #include <vector>
 

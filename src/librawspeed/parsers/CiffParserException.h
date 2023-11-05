@@ -22,8 +22,6 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
-
 // IWYU pragma: begin_exports
 #include "common/RawspeedException.h"
 #include "parsers/RawParserException.h"

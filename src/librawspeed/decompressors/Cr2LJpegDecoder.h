@@ -23,8 +23,6 @@
 
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/Cr2Decompressor.h"
-#include <cassert>
-#include <cstdint>
 
 namespace rawspeed {
 
