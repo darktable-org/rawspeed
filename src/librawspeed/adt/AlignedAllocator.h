@@ -20,13 +20,13 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"
 #include "AddressSanitizer.h"
 #include "adt/Invariant.h"
 #include "common/Common.h"
 #include "common/RawspeedException.h"
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <memory>
 
 namespace rawspeed {
@@ -51,15 +51,10 @@ alignedMalloc(size_t size, size_t alignment) {
     return ptr;
 #endif
 
-#if defined(HAVE_ALIGNED_ALLOC)
-  ptr = aligned_alloc(alignment, size);
-#elif defined(HAVE_POSIX_MEMALIGN)
-  if (0 != posix_memalign(&ptr, alignment, size))
-    return nullptr;
-#elif defined(HAVE_ALIGNED_MALLOC)
+#if defined(_WIN32) || defined(_WIN64)
   ptr = _aligned_malloc(size, alignment);
 #else
-#error "No aligned malloc() implementation available!"
+  ptr = std::aligned_alloc(alignment, size);
 #endif
 
   invariant(isAligned(ptr, alignment));
@@ -68,10 +63,10 @@ alignedMalloc(size_t size, size_t alignment) {
 }
 
 inline void alignedFree(void* ptr) {
-#if defined(HAVE_ALIGNED_MALLOC)
+#if defined(_WIN32) || defined(_WIN64)
   _aligned_free(ptr);
 #else
-  free(ptr); // NOLINT
+  std::free(ptr); // NOLINT
 #endif
 }
 
