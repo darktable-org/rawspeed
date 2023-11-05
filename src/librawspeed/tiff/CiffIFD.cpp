@@ -231,13 +231,13 @@ CiffIFD::getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const {
 bool RAWSPEED_READONLY CiffIFD::hasEntry(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  return mEntry.count(tag) > 0;
+  return mEntry.contains(tag);
 }
 
 bool RAWSPEED_READONLY CiffIFD::hasEntryRecursive(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  if (mEntry.count(tag) > 0)
+  if (mEntry.contains(tag))
     return true;
 
   return std::any_of(mSubIFD.begin(), mSubIFD.end(),
