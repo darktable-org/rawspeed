@@ -20,24 +20,24 @@
 */
 
 #include "metadata/Camera.h"
-#include "adt/NotARational.h"
 #include "adt/Point.h"
-#include "common/Common.h"
 #include "metadata/CameraMetadataException.h"
 #include "metadata/CameraSensorInfo.h"
 #include "metadata/ColorFilterArray.h"
-#include <algorithm>
-#include <cctype>
 #include <cstdint>
-#include <cstdio>
 #include <map>
-#include <optional>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #ifdef HAVE_PUGIXML
+#include "adt/NotARational.h"
+#include "common/Common.h"
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <optional>
 #include <pugixml.hpp>
+#include <string_view>
 
 using pugi::xml_node;
 #endif

@@ -18,23 +18,23 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-#include "adt/CroppedArray1DRef.h"
-#include "adt/CroppedArray2DRef.h"
-#include "adt/Invariant.h"
-#include "common/Common.h"
-#include "common/RawImage.h"
-#include "io/Buffer.h"
-#include <array>
-#include <climits>
+#include "rawspeedconfig.h" // IWYU pragma: keep
 
 #ifdef HAVE_ZLIB
 
+#include "adt/CroppedArray1DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "common/Common.h"
 #include "common/FloatingPoint.h"
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/DeflateDecompressor.h"
+#include "io/Buffer.h"
 #include "io/Endianness.h"
+#include <array>
+#include <climits>
 #include <cstdint>
 #include <cstdio>
 #include <utility>

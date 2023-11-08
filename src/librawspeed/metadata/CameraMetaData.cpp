@@ -22,7 +22,6 @@
 #include "metadata/CameraMetaData.h"
 #include "common/Common.h"
 #include "metadata/Camera.h"
-#include "metadata/CameraMetadataException.h"
 #include <algorithm>
 #include <cstdint>
 #include <map>
@@ -31,10 +30,11 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 #ifdef HAVE_PUGIXML
+#include "metadata/CameraMetadataException.h"
 #include <pugixml.hpp>
+#include <vector>
 
 using pugi::xml_document;
 using pugi::xml_node;
