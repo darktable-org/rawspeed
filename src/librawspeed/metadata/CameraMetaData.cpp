@@ -125,7 +125,7 @@ CameraMetaData::getChdkCamera(uint32_t filesize) const {
 }
 
 bool RAWSPEED_READONLY CameraMetaData::hasChdkCamera(uint32_t filesize) const {
-  return chdkCameras.end() != chdkCameras.find(filesize);
+  return chdkCameras.contains(filesize);
 }
 
 const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
