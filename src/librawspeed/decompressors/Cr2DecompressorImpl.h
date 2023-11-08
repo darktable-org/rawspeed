@@ -142,10 +142,6 @@ struct Cr2OutputTileIterator final {
     // NOTE: outPos is correctly omitted here.
     return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
   }
-  friend bool RAWSPEED_READONLY operator!=(const Cr2OutputTileIterator& a,
-                                           const Cr2OutputTileIterator& b) {
-    return !(a == b);
-  }
 };
 
 class Cr2VerticalOutputStripIterator final {
