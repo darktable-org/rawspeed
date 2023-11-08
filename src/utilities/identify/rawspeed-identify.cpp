@@ -198,8 +198,7 @@ int main(int argc, char* argv[]) { // NOLINT
     d->decodeMetaData(meta.get());
     r = d->mRaw;
 
-    const auto errors = r->getErrors();
-    for (const auto& error : errors)
+    for (const auto errors = r->getErrors(); const auto& error : errors)
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
