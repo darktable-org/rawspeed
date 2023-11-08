@@ -130,7 +130,7 @@ bool RAWSPEED_READONLY CameraMetaData::hasChdkCamera(uint32_t filesize) const {
 
 const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   auto id = getId(cam->make, cam->model, cam->mode);
-  if (cameras.end() != cameras.find(id)) {
+  if (cameras.contains(id)) {
     writeLog(
         DEBUG_PRIO::WARNING,
         "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!",
