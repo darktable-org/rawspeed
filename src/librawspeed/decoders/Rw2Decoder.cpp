@@ -343,8 +343,8 @@ std::string Rw2Decoder::guessMode() const {
 }
 
 rawspeed::iRectangle2D Rw2Decoder::getDefaultCrop() {
-  const TiffIFD* raw = getRaw();
-  if (raw->hasEntry(TiffTag::PANASONIC_SENSORLEFTBORDER) &&
+  if (const TiffIFD* raw = getRaw();
+      raw->hasEntry(TiffTag::PANASONIC_SENSORLEFTBORDER) &&
       raw->hasEntry(TiffTag::PANASONIC_SENSORTOPBORDER) &&
       raw->hasEntry(TiffTag::PANASONIC_SENSORRIGHTBORDER) &&
       raw->hasEntry(TiffTag::PANASONIC_SENSORBOTTOMBORDER)) {
