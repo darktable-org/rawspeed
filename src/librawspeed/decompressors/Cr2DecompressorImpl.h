@@ -192,10 +192,6 @@ public:
               "Comparing unrelated iterators.");
     return a.outputTileIterator == b.outputTileIterator;
   }
-  friend bool operator!=(const Cr2VerticalOutputStripIterator& a,
-                         const Cr2VerticalOutputStripIterator& b) {
-    return !(a == b);
-  }
 };
 
 template <typename PrefixCodeDecoder>
