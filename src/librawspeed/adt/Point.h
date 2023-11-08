@@ -58,9 +58,6 @@ public:
   constexpr bool operator==(const iPoint2D& rhs) const {
     return x == rhs.x && y == rhs.y;
   }
-  constexpr bool operator!=(const iPoint2D& rhs) const {
-    return !operator==(rhs);
-  }
 
   constexpr bool operator>(const iPoint2D& rhs) const {
     return x > rhs.x && y > rhs.y;
