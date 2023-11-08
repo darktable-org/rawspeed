@@ -115,7 +115,7 @@ public:
   [[nodiscard]] TiffEntry* RAWSPEED_READONLY
   getEntryRecursive(TiffTag tag) const;
   [[nodiscard]] bool RAWSPEED_READONLY hasEntry(TiffTag tag) const {
-    return entries.find(tag) != entries.end();
+    return entries.contains(tag);
   }
   [[nodiscard]] bool hasEntryRecursive(TiffTag tag) const {
     return getEntryRecursive(tag) != nullptr;
