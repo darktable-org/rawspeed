@@ -53,7 +53,7 @@ public:
   }
 
   [[nodiscard]] bool contains(const std::string& key) const {
-    return data.find(key) != data.end();
+    return data.contains(key);
   }
 
   template <typename T>
