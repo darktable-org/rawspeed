@@ -58,9 +58,6 @@ struct BitMSBIterator {
     invariant(a.bitsPat == b.bitsPat && "Comparing unrelated iterators.");
     return a.bitIdx == b.bitIdx;
   }
-  friend bool operator!=(const BitMSBIterator& a, const BitMSBIterator& b) {
-    return !(a == b);
-  }
 };
 
 } // namespace rawspeed
