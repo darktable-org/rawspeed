@@ -219,8 +219,5 @@ public:
 inline bool operator==(const iRectangle2D& a, const iRectangle2D b) {
   return std::tie(a.pos, a.dim) == std::tie(b.pos, b.dim);
 }
-inline bool operator!=(const iRectangle2D& a, const iRectangle2D b) {
-  return !(a == b);
-}
 
 } // namespace rawspeed
