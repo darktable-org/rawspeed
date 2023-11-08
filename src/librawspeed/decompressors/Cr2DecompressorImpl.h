@@ -91,9 +91,6 @@ struct Cr2SliceIterator final {
     invariant(a.frameHeight == b.frameHeight && "Unrelated iterators.");
     return a.widthIter == b.widthIter;
   }
-  friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
-    return !(a == b);
-  }
 };
 
 struct Cr2OutputTileIterator final {
