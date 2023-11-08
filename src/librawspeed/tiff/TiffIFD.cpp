@@ -216,7 +216,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
 
 std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
   vector<const TiffIFD*> matchingIFDs;
-  if (entries.find(tag) != entries.end()) {
+  if (entries.contains(tag)) {
     matchingIFDs.push_back(this);
   }
   for (const auto& i : subIFDs) {
