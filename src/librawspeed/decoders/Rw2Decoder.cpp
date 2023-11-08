@@ -111,7 +111,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       PanasonicV4Decompressor p(
           mRaw,
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-          hints.has("zero_is_not_bad"), section_split_offset);
+          hints.contains("zero_is_not_bad"), section_split_offset);
       mRaw->createData();
       p.decompress();
     }
@@ -136,7 +136,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
                 raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
-      PanasonicV4Decompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
+      PanasonicV4Decompressor p(mRaw, bs, hints.contains("zero_is_not_bad"),
                                 section_split_offset);
       mRaw->createData();
       p.decompress();

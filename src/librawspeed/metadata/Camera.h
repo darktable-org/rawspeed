@@ -52,7 +52,7 @@ public:
     data.try_emplace(key, value);
   }
 
-  [[nodiscard]] bool has(const std::string& key) const {
+  [[nodiscard]] bool contains(const std::string& key) const {
     return data.find(key) != data.end();
   }
 

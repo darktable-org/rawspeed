@@ -65,7 +65,7 @@ Buffer KdcDecoder::getInputBuffer() const {
     ThrowRDE("Offset is too large.");
 
   // Offset hardcoding gotten from dcraw
-  if (hints.has("easyshare_offset_hack"))
+  if (hints.contains("easyshare_offset_hack"))
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
   return mFile.getSubView(off);

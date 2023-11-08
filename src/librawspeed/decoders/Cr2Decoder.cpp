@@ -326,7 +326,7 @@ iPoint2D Cr2Decoder::getSubSampling() const {
 }
 
 int Cr2Decoder::getHue() const {
-  if (hints.has("old_sraw_hue"))
+  if (hints.contains("old_sraw_hue"))
     return (mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x);
 
   if (!mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x10))) {
@@ -335,7 +335,7 @@ int Cr2Decoder::getHue() const {
   if (uint32_t model_id =
           mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x10))->getU32();
       model_id >= 0x80000281 || model_id == 0x80000218 ||
-      (hints.has("force_new_sraw_hue"))) {
+      (hints.contains("force_new_sraw_hue"))) {
     return ((mRaw->metadata.subsampling.y * mRaw->metadata.subsampling.x) -
             1) >>
            1;
@@ -360,7 +360,7 @@ void Cr2Decoder::sRawInterpolate() {
   sraw_coeffs[1] = (wb->getU16(offset + 1) + wb->getU16(offset + 2) + 1) >> 1;
   sraw_coeffs[2] = wb->getU16(offset + 3);
 
-  if (hints.has("invert_sraw_wb")) {
+  if (hints.contains("invert_sraw_wb")) {
     sraw_coeffs[0] = static_cast<int>(
         1024.0F / (static_cast<float>(sraw_coeffs[0]) / 1024.0F));
     sraw_coeffs[2] = static_cast<int>(
@@ -386,8 +386,8 @@ void Cr2Decoder::sRawInterpolate() {
                         sraw_coeffs, hue);
 
   /* Determine sRaw coefficients */
-  bool isOldSraw = hints.has("sraw_40d");
-  bool isNewSraw = hints.has("sraw_new");
+  bool isOldSraw = hints.contains("sraw_40d");
+  bool isNewSraw = hints.contains("sraw_new");
 
   int version;
   if (isOldSraw)

@@ -31,7 +31,7 @@ namespace rawspeed_test {
 
 TEST(CameraTest, HintsEmpty) {
   Hints hints;
-  ASSERT_FALSE(hints.has("something"));
+  ASSERT_FALSE(hints.contains("something"));
 }
 
 TEST(CameraTest, HintsGetDefault) {
@@ -50,16 +50,16 @@ TEST(CameraTest, HintsAssignmentConstructor) {
   const string key("something");
 
   Hints hints;
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
 
   hints.add(key, "indeed");
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
 
   const Hints hints2(hints);
-  ASSERT_TRUE(hints2.has(key));
+  ASSERT_TRUE(hints2.contains(key));
 
   const Hints hints3(hints2);
-  ASSERT_TRUE(hints3.has(key));
+  ASSERT_TRUE(hints3.contains(key));
 }
 
 TEST(CameraTest, HintsAssignment) {
@@ -67,23 +67,23 @@ TEST(CameraTest, HintsAssignment) {
 
   Hints hints;
 
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, "indeed");
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
 
   const Hints hints2 = hints;
-  ASSERT_TRUE(hints2.has(key));
+  ASSERT_TRUE(hints2.contains(key));
 
   const Hints hints3 = hints2;
-  ASSERT_TRUE(hints3.has(key));
+  ASSERT_TRUE(hints3.contains(key));
 }
 
 TEST(CameraTest, HintsAdd) {
   Hints hints;
   const string key("something"), value("whocares");
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, value);
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_EQ(hints.get(key, string()), value);
 }
 
@@ -91,9 +91,9 @@ TEST(CameraTest, HintsInt) {
   Hints hints;
   const int val = -42;
   const string key("thenum"), value(to_string(val));
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, value);
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_EQ(hints.get(key, 0), val);
 }
 
@@ -101,9 +101,9 @@ TEST(CameraTest, HintsUInt) {
   Hints hints;
   const unsigned int val = 84;
   const string key("thenum"), value(to_string(val));
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, value);
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_EQ(hints.get(key, 0U), val);
 }
 
@@ -111,9 +111,9 @@ TEST(CameraTest, HintsFloat) {
   Hints hints;
   const float val = 3.14f;
   const string key("theflt"), value(to_string(val));
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, value);
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_EQ(hints.get(key, 0.0F), val);
 }
 
@@ -121,9 +121,9 @@ TEST(CameraTest, HintsDouble) {
   Hints hints;
   const double val = 2.71;
   const string key("thedbl"), value(to_string(val));
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, value);
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_EQ(hints.get(key, 0.0), val);
 }
 
@@ -131,9 +131,9 @@ TEST(BoolHintTest, HintsBoolTrue) {
   Hints hints;
 
   const string key("key1");
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, "true");
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_TRUE(hints.get(key, false));
 }
 
@@ -149,9 +149,9 @@ TEST_P(BoolHintTest, HintsBool) {
   Hints hints;
 
   const string key("key");
-  ASSERT_FALSE(hints.has(key));
+  ASSERT_FALSE(hints.contains(key));
   hints.add(key, notTrue);
-  ASSERT_TRUE(hints.has(key));
+  ASSERT_TRUE(hints.contains(key));
   ASSERT_FALSE(hints.get(key, true));
 }
 
