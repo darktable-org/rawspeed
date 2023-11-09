@@ -82,7 +82,7 @@ RawImage NefDecoder::decodeRawInternal() {
     }
   }
 
-  if (compression == 1 || (hints.has("force_uncompressed")) ||
+  if (compression == 1 || (hints.contains("force_uncompressed")) ||
       NEFIsUncompressed(raw)) {
     DecodeUncompressed();
     return mRaw;
@@ -283,19 +283,19 @@ void NefDecoder::DecodeUncompressed() const {
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
 
-    if (hints.has("coolpixmangled")) {
+    if (hints.contains("coolpixmangled")) {
       UncompressedDecompressor u(in, mRaw, iRectangle2D(pos, size),
                                  width * bitPerPixel / 8, 12, BitOrder::MSB32);
       u.readUncompressedRaw();
     } else {
-      if (hints.has("coolpixsplit")) {
+      if (hints.contains("coolpixsplit")) {
         readCoolpixSplitRaw(in, size, pos, width * bitPerPixel / 8);
       } else {
         if (in.getSize() % size.y != 0)
           ThrowRDE("Inconsistent row size");
         const auto inputPitchBytes = in.getSize() / size.y;
         BitOrder bo = (mRootIFD->rootBuffer.getByteOrder() == Endianness::big) ^
-                              hints.has("msb_override")
+                              hints.contains("msb_override")
                           ? BitOrder::MSB
                           : BitOrder::LSB;
         UncompressedDecompressor u(in, mRaw, iRectangle2D(pos, size),
@@ -601,7 +601,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
   }
 
-  if (hints.has("nikon_wb_adjustment")) {
+  if (hints.contains("nikon_wb_adjustment")) {
     mRaw->metadata.wbCoeffs[0] *= 256 / 527.0;
     mRaw->metadata.wbCoeffs[2] *= 256 / 317.0;
   }

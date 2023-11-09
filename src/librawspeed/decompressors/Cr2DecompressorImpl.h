@@ -91,9 +91,6 @@ struct Cr2SliceIterator final {
     invariant(a.frameHeight == b.frameHeight && "Unrelated iterators.");
     return a.widthIter == b.widthIter;
   }
-  friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
-    return !(a == b);
-  }
 };
 
 struct Cr2OutputTileIterator final {
@@ -145,10 +142,6 @@ struct Cr2OutputTileIterator final {
     // NOTE: outPos is correctly omitted here.
     return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
   }
-  friend bool RAWSPEED_READONLY operator!=(const Cr2OutputTileIterator& a,
-                                           const Cr2OutputTileIterator& b) {
-    return !(a == b);
-  }
 };
 
 class Cr2VerticalOutputStripIterator final {
@@ -198,10 +191,6 @@ public:
     invariant(a.outputTileIterator_end == b.outputTileIterator_end &&
               "Comparing unrelated iterators.");
     return a.outputTileIterator == b.outputTileIterator;
-  }
-  friend bool operator!=(const Cr2VerticalOutputStripIterator& a,
-                         const Cr2VerticalOutputStripIterator& b) {
-    return !(a == b);
   }
 };
 

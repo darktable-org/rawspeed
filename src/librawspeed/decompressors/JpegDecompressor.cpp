@@ -19,18 +19,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-#include "adt/AlignedAllocator.h"
-#include <cstdint>
+#include "rawspeedconfig.h" // IWYU pragma: keep
 
 #ifdef HAVE_JPEG
 
+#include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"
 #include "adt/Point.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/JpegDecompressor.h"
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <jpeglib.h>
 #include <memory>
 #include <vector>

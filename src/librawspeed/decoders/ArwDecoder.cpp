@@ -138,7 +138,7 @@ RawImage ArwDecoder::decodeRawInternal() {
       return mRaw;
     }
 
-    if (hints.has("srf_format"))
+    if (hints.contains("srf_format"))
       return decodeSRF(raw);
 
     ThrowRDE("No image data found");
@@ -266,7 +266,7 @@ void ArwDecoder::DecodeUncompressed(const TiffIFD* raw) const {
 
   const Buffer buf(mFile.getSubView(off, c2));
 
-  if (hints.has("sr2_format")) {
+  if (hints.contains("sr2_format")) {
     UncompressedDecompressor u(ByteStream(DataBuffer(buf, Endianness::little)),
                                mRaw,
                                iRectangle2D({0, 0}, iPoint2D(width, height)),

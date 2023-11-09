@@ -183,8 +183,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
   dst = Array2DRef<int16_t>::create(combined.storage, high.width,
                                     2 * high.height);
 
-  auto process = [low, high, dst](auto segment, int row, int col) {
-    using SegmentTy = decltype(segment);
+  auto process = [low, high, dst]<typename SegmentTy>(SegmentTy segment,
+                                                      int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row + SegmentTy::coord_shift + delta, col);
     };
@@ -236,9 +236,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
   dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,
                                     high.height);
 
-  auto process = [low, high, descaleShift, clampUint, dst](auto segment,
-                                                           int row, int col) {
-    using SegmentTy = decltype(segment);
+  auto process = [low, high, descaleShift, clampUint, dst]<typename SegmentTy>(
+                     SegmentTy segment, int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
       return low(row, col + SegmentTy::coord_shift + delta);
     };

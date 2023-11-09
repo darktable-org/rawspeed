@@ -113,10 +113,6 @@ struct Cr2SliceWidthIterator final {
     invariant(&a.slicing == &b.slicing && "Comparing unrelated iterators.");
     return a.sliceId == b.sliceId;
   }
-  friend bool operator!=(const Cr2SliceWidthIterator& a,
-                         const Cr2SliceWidthIterator& b) {
-    return !(a == b);
-  }
 };
 
 inline Cr2SliceWidthIterator Cr2SliceWidths::begin() const {

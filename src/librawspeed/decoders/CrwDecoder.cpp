@@ -87,7 +87,7 @@ RawImage CrwDecoder::decodeRawInternal() {
   assert(decTable != nullptr);
   uint32_t dec_table = decTable->getU32();
 
-  bool lowbits = !hints.has("no_decompressed_lowbits");
+  bool lowbits = !hints.contains("no_decompressed_lowbits");
 
   CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
   mRaw->createData();
@@ -177,7 +177,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         int offset = hints.get("wb_offset", 120);
 
         std::array<uint16_t, 2> key = {{0x410, 0x45f3}};
-        if (!hints.has("wb_mangle"))
+        if (!hints.contains("wb_mangle"))
           key[0] = key[1] = 0;
 
         offset /= 2;

@@ -196,7 +196,7 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = rootIFD->getID();
   setMetaData(meta, id.make, id.model, "", iso);
 
-  if (hints.has("swapped_wb")) {
+  if (hints.contains("swapped_wb")) {
     mRaw->metadata.wbCoeffs[0] = wb_coeffs[2];
     mRaw->metadata.wbCoeffs[1] = wb_coeffs[0];
     mRaw->metadata.wbCoeffs[2] = wb_coeffs[1];

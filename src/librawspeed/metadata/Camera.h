@@ -52,8 +52,8 @@ public:
     data.try_emplace(key, value);
   }
 
-  [[nodiscard]] bool has(const std::string& key) const {
-    return data.find(key) != data.end();
+  [[nodiscard]] bool contains(const std::string& key) const {
+    return data.contains(key);
   }
 
   template <typename T>

@@ -16,6 +16,7 @@ function(add_rs_bench src)
   target_link_libraries(${BENCHNAME} PUBLIC rawspeed_bench)
 
   rawspeed_add_test(NAME ${BENCHNAME}-Dummy COMMAND ${BENCHNAME} --help)
+  set_tests_properties(${BENCHNAME}-Dummy PROPERTIES LABELS "benchmark;dummy")
 
   rawspeed_add_test(NAME ${BENCHNAME} COMMAND ${BENCHNAME} --benchmark_min_time=0)
   set_tests_properties(${BENCHNAME} PROPERTIES LABELS "benchmark")

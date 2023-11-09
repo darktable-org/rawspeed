@@ -63,9 +63,8 @@ std::unique_ptr<RawDecoder> CiffParser::getDecoder(const CameraMetaData* meta) {
   if (!mRootIFD)
     parseData();
 
-  const auto potentials(mRootIFD->getIFDsWithTag(CiffTag::MAKEMODEL));
-
-  for (const auto& potential : potentials) {
+  for (const auto potentials(mRootIFD->getIFDsWithTag(CiffTag::MAKEMODEL));
+       const auto& potential : potentials) {
     const auto* const mm = potential->getEntry(CiffTag::MAKEMODEL);
     const std::string make = trimSpaces(mm->getString());
 
