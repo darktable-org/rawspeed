@@ -95,8 +95,8 @@ inline std::array<T, 4> applyPhaseShift(std::array<T, 4> srcData,
 
 inline std::array<CFAColor, 4> getAsCFAColors(BayerPhase p) {
   const BayerPhase basePhase = BayerPhase::RGGB;
-  const std::array<CFAColor, 4> basePat = {CFAColor::RED, CFAColor::GREEN,
-                                           CFAColor::GREEN, CFAColor::BLUE};
+  using enum CFAColor;
+  const std::array<CFAColor, 4> basePat = {RED, GREEN, GREEN, BLUE};
   return applyPhaseShift(basePat, basePhase, /*tgtPhase=*/p);
 }
 

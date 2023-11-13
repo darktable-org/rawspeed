@@ -249,12 +249,13 @@ void OrfDecoder::parseCFA() const {
 
   auto int2enum = [](uint8_t i) {
     switch (i) {
+      using enum CFAColor;
     case 0:
-      return CFAColor::RED;
+      return RED;
     case 1:
-      return CFAColor::GREEN;
+      return GREEN;
     case 2:
-      return CFAColor::BLUE;
+      return BLUE;
     default:
       ThrowRDE("Unexpected CFA color: %u", i);
     }
@@ -317,13 +318,14 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
           switch (c) {
-          case CFAColor::RED:
+            using enum CFAColor;
+          case RED:
             j = 0;
             break;
-          case CFAColor::GREEN:
+          case GREEN:
             j = i < 2 ? 1 : 2;
             break;
-          case CFAColor::BLUE:
+          case BLUE:
             j = 3;
             break;
           default:

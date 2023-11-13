@@ -175,11 +175,12 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   }
 
   switch (cam->supportStatus) {
-  case Camera::SupportStatus::Supported:
+    using enum Camera::SupportStatus;
+  case Supported:
     break; // Yay us!
-  case Camera::SupportStatus::Unsupported:
+  case Unsupported:
     ThrowRDE("Camera not supported (explicit). Sorry.");
-  case Camera::SupportStatus::NoSamples:
+  case NoSamples:
     noSamples = true;
     writeLog(DEBUG_PRIO::WARNING,
              "Camera support status is unknown: '%s' '%s' '%s'\n"

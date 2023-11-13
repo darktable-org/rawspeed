@@ -342,13 +342,14 @@ RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
 void RawImageWorker::performTask() noexcept {
   try {
     switch (task) {
-    case RawImageWorkerTask::SCALE_VALUES:
+      using enum RawImageWorkerTask;
+    case SCALE_VALUES:
       data->scaleValues(start_y, end_y);
       break;
-    case RawImageWorkerTask::FIX_BAD_PIXELS:
+    case FIX_BAD_PIXELS:
       data->fixBadPixelsThread(start_y, end_y);
       break;
-    case RawImageWorkerTask::APPLY_LOOKUP:
+    case APPLY_LOOKUP:
       data->doLookup(start_y, end_y);
       break;
     default:

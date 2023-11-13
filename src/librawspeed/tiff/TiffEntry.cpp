@@ -116,8 +116,8 @@ TiffEntryWithData::TiffEntryWithData(TiffIFD* parent_, TiffTag tag_,
 }
 
 bool RAWSPEED_READONLY TiffEntry::isInt() const {
-  return type == TiffDataType::LONG || type == TiffDataType::SHORT ||
-         type == TiffDataType::BYTE;
+  using enum TiffDataType;
+  return type == LONG || type == SHORT || type == BYTE;
 }
 
 bool RAWSPEED_READONLY TiffEntry::isString() const {
@@ -126,14 +126,15 @@ bool RAWSPEED_READONLY TiffEntry::isString() const {
 
 bool RAWSPEED_READONLY TiffEntry::isFloat() const {
   switch (type) {
-  case TiffDataType::FLOAT:
-  case TiffDataType::DOUBLE:
-  case TiffDataType::RATIONAL:
-  case TiffDataType::SRATIONAL:
-  case TiffDataType::LONG:
-  case TiffDataType::SLONG:
-  case TiffDataType::SHORT:
-  case TiffDataType::SSHORT:
+    using enum TiffDataType;
+  case FLOAT:
+  case DOUBLE:
+  case RATIONAL:
+  case SRATIONAL:
+  case LONG:
+  case SLONG:
+  case SHORT:
+  case SSHORT:
     return true;
   default:
     return false;
@@ -142,9 +143,10 @@ bool RAWSPEED_READONLY TiffEntry::isFloat() const {
 
 bool RAWSPEED_READONLY TiffEntry::isRational() const {
   switch (type) {
-  case TiffDataType::SHORT:
-  case TiffDataType::LONG:
-  case TiffDataType::RATIONAL:
+    using enum TiffDataType;
+  case SHORT:
+  case LONG:
+  case RATIONAL:
     return true;
   default:
     return false;
@@ -153,9 +155,10 @@ bool RAWSPEED_READONLY TiffEntry::isRational() const {
 
 bool RAWSPEED_READONLY TiffEntry::isSRational() const {
   switch (type) {
-  case TiffDataType::SSHORT:
-  case TiffDataType::SLONG:
-  case TiffDataType::SRATIONAL:
+    using enum TiffDataType;
+  case SSHORT:
+  case SLONG:
+  case SRATIONAL:
     return true;
   default:
     return false;
@@ -187,15 +190,16 @@ int16_t TiffEntry::getI16(uint32_t index) const {
 }
 
 uint32_t TiffEntry::getU32(uint32_t index) const {
-  if (type == TiffDataType::SHORT)
+  using enum TiffDataType;
+  if (type == SHORT)
     return getU16(index);
 
   switch (type) {
-  case TiffDataType::LONG:
-  case TiffDataType::OFFSET:
-  case TiffDataType::BYTE:
-  case TiffDataType::UNDEFINED:
-  case TiffDataType::RATIONAL:
+  case LONG:
+  case OFFSET:
+  case BYTE:
+  case UNDEFINED:
+  case RATIONAL:
     break;
   default:
     ThrowTPE("Wrong type %u encountered. Expected Long, Offset, Rational or "
@@ -207,10 +211,10 @@ uint32_t TiffEntry::getU32(uint32_t index) const {
 }
 
 int32_t TiffEntry::getI32(uint32_t index) const {
-  if (type == TiffDataType::SSHORT)
+  using enum TiffDataType;
+  if (type == SSHORT)
     return getI16(index);
-  if (type != TiffDataType::SLONG && type != TiffDataType::SRATIONAL &&
-      type != TiffDataType::UNDEFINED)
+  if (type != SLONG && type != SRATIONAL && type != UNDEFINED)
     ThrowTPE("Wrong type %u encountered. Expected SLong or Undefined on 0x%x",
              static_cast<unsigned>(type), static_cast<unsigned>(tag));
 
@@ -253,21 +257,22 @@ float TiffEntry::getFloat(uint32_t index) const {
   }
 
   switch (type) {
-  case TiffDataType::DOUBLE:
+    using enum TiffDataType;
+  case DOUBLE:
     return data.peek<double>(index);
-  case TiffDataType::FLOAT:
+  case FLOAT:
     return data.peek<float>(index);
-  case TiffDataType::LONG:
-  case TiffDataType::SHORT:
+  case LONG:
+  case SHORT:
     return static_cast<float>(getU32(index));
-  case TiffDataType::SLONG:
-  case TiffDataType::SSHORT:
+  case SLONG:
+  case SSHORT:
     return static_cast<float>(getI32(index));
-  case TiffDataType::RATIONAL: {
+  case RATIONAL: {
     auto r = getRational(index);
     return r.den ? static_cast<float>(r) : 0.0F;
   }
-  case TiffDataType::SRATIONAL: {
+  case SRATIONAL: {
     auto r = getSRational(index);
     return r.den ? static_cast<float>(r) : 0.0F;
   }
