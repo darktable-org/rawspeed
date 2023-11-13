@@ -36,7 +36,8 @@ template <typename T> class Range final {
 public:
   constexpr Range() = default;
 
-  template <typename T2, typename = std::enable_if_t<std::is_unsigned_v<T2>>>
+  template <typename T2>
+    requires std::is_unsigned_v<T2>
   constexpr Range(T base_, T2 size_) : base(base_), size(size_) {}
 
   constexpr T RAWSPEED_READNONE begin() const { return base; }

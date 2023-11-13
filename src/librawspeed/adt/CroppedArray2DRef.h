@@ -53,8 +53,8 @@ public:
                     int croppedWidth_, int croppedHeight_);
 
   // Conversion from CroppedArray2DRef<T> to CroppedArray2DRef<const T>.
-  template <class T2, typename = std::enable_if_t<
-                          std::is_same_v<std::remove_const_t<T>, T2>>>
+  template <class T2>
+    requires std::is_same_v<std::remove_const_t<T>, T2>
   CroppedArray2DRef( // NOLINT google-explicit-constructor
       CroppedArray2DRef<T2> RHS)
       : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
