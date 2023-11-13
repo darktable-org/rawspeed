@@ -361,15 +361,16 @@ void fuji_compressed_block::copy_line(const FujiStrip& strip, int cur_line,
           int row;
 
           switch (CFA(MCURow, MCUCol)) {
-          case CFAColor::RED: // red
+            using enum CFAColor;
+          case RED: // red
             row = R2 + (imgRow >> 1);
             break;
 
-          case CFAColor::GREEN: // green
+          case GREEN: // green
             row = G2 + imgRow;
             break;
 
-          case CFAColor::BLUE: // blue
+          case BLUE: // blue
             row = B2 + (imgRow >> 1);
             break;
 
@@ -646,9 +647,10 @@ fuji_compressed_block::fuji_decode_block(T func_even,
   std::fill(PerColorCounter.begin(), PerColorCounter.end(), 0);
   auto ColorCounter = [&PerColorCounter](CFAColor c) -> int& {
     switch (c) {
-    case CFAColor::RED:
-    case CFAColor::GREEN:
-    case CFAColor::BLUE:
+      using enum CFAColor;
+    case RED:
+    case GREEN:
+    case BLUE:
       return PerColorCounter[static_cast<uint8_t>(c)];
     default:
       __builtin_unreachable();
@@ -658,13 +660,14 @@ fuji_compressed_block::fuji_decode_block(T func_even,
   auto CurLineForColor = [&ColorCounter](CFAColor c) {
     xt_lines res;
     switch (c) {
-    case CFAColor::RED:
+      using enum CFAColor;
+    case RED:
       res = R2;
       break;
-    case CFAColor::GREEN:
+    case GREEN:
       res = G2;
       break;
-    case CFAColor::BLUE:
+    case BLUE:
       res = B2;
       break;
     default:

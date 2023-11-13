@@ -54,14 +54,15 @@ enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
 inline TileSequenceStatus
 evaluateConsecutiveTiles(const iRectangle2D& rect,
                          const iRectangle2D& nextRect) {
+  using enum TileSequenceStatus;
   // Are these two are verically-adjacent rectangles of same width?
   if (rect.getBottomLeft() == nextRect.getTopLeft() &&
       rect.getBottomRight() == nextRect.getTopRight())
-    return TileSequenceStatus::ContinuesColumn;
+    return ContinuesColumn;
   // Otherwise, the next rectangle should be the first row of next column.
   if (nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight())
-    return TileSequenceStatus::BeginsNewColumn;
-  return TileSequenceStatus::Invalid;
+    return BeginsNewColumn;
+  return Invalid;
 }
 
 } // namespace

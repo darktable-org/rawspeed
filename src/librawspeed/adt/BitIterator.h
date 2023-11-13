@@ -28,7 +28,8 @@
 
 namespace rawspeed {
 
-template <typename T, typename = std::enable_if_t<std::is_unsigned_v<T>>>
+template <typename T>
+  requires std::is_unsigned_v<T>
 struct BitMSBIterator {
   T bitsPat;
   int bitIdx;

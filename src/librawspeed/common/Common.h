@@ -83,9 +83,9 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
 }
 
 template <typename T>
-constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
-    T value, size_t multiple,
-    std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
+  requires std::is_pointer_v<T>
+constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                         size_t multiple) {
   if (multiple == 0)
     return 0;
   static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
@@ -94,9 +94,9 @@ constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
 }
 
 template <typename T>
-constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(
-    T value, size_t multiple,
-    std::enable_if_t<std::is_integral_v<T>>* /*unused*/ = nullptr) {
+  requires std::is_integral_v<T>
+constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                         size_t multiple) {
   if (multiple == 0)
     return 0;
   return value % multiple;
@@ -142,9 +142,8 @@ bool RAWSPEED_READONLY isIn(const T value,
 
 // Clamps the given value to the range 0 .. 2^n-1, with n <= 16
 template <typename T>
-constexpr uint16_t RAWSPEED_READNONE clampBits(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
+  requires std::is_arithmetic_v<T>
+constexpr uint16_t RAWSPEED_READNONE clampBits(T value, unsigned int nBits) {
   // We expect to produce uint16_t.
   invariant(nBits <= 16);
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
@@ -155,16 +154,16 @@ constexpr uint16_t RAWSPEED_READNONE clampBits(
 }
 
 template <typename T>
-constexpr bool RAWSPEED_READNONE isIntN(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
+  requires std::is_arithmetic_v<T>
+constexpr bool RAWSPEED_READNONE isIntN(T value, unsigned int nBits) {
   invariant(nBits < bitwidth<T>() && "Check must not be tautological.");
   using UnsignedT = std::make_unsigned_t<T>;
   const auto highBits = static_cast<UnsignedT>(value) >> nBits;
   return highBits == 0;
 }
 
-template <class T, typename std::enable_if_t<std::is_unsigned_v<T>>* = nullptr>
+template <class T>
+  requires std::is_unsigned_v<T>
 constexpr int countl_zero(T x) noexcept {
   if (x == T(0))
     return bitwidth<T>();
@@ -172,9 +171,9 @@ constexpr int countl_zero(T x) noexcept {
 }
 
 template <class T>
+  requires std::is_unsigned_v<T>
 constexpr RAWSPEED_READNONE T extractHighBits(
-    T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>(),
-    typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
+    T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>()) {
   invariant(effectiveBitwidth <= bitwidth<T>());
   invariant(nBits <= effectiveBitwidth);
   auto numLowBitsToSkip = effectiveBitwidth - nBits;
@@ -183,9 +182,9 @@ constexpr RAWSPEED_READNONE T extractHighBits(
 }
 
 template <typename T>
-constexpr typename std::make_signed_t<T> RAWSPEED_READNONE signExtend(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
+  requires std::is_unsigned_v<T>
+constexpr typename std::make_signed_t<T>
+    RAWSPEED_READNONE signExtend(T value, unsigned int nBits) {
   invariant(nBits != 0 && "Only valid for non-zero bit count.");
   const T SpareSignBits = bitwidth<T>() - nBits;
   using SignedT = std::make_signed_t<T>;

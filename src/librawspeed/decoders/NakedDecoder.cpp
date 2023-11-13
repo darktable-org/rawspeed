@@ -47,14 +47,15 @@ NakedDecoder::NakedDecoder(Buffer file, const Camera* c)
 namespace {
 
 std::optional<BitOrder> getAsBitOrder(std::string_view s) {
+  using enum BitOrder;
   if (s == "plain")
-    return BitOrder::LSB;
+    return LSB;
   if (s == "jpeg")
-    return BitOrder::MSB;
+    return MSB;
   if (s == "jpeg16")
-    return BitOrder::MSB16;
+    return MSB16;
   if (s == "jpeg32")
-    return BitOrder::MSB32;
+    return MSB32;
   return std::nullopt;
 }
 

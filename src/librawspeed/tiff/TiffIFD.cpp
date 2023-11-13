@@ -62,7 +62,8 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
 
   try {
     switch (t->tag) {
-    case TiffTag::DNGPRIVATEDATA:
+      using enum TiffTag;
+    case DNGPRIVATEDATA:
       // These are arbitrarily 'rebased', to preserve the offsets, but as it is
       // implemented right now, that could trigger UB (pointer arithmetics,
       // creating pointer to unowned memory, etc). And since this is not even
@@ -72,14 +73,14 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
       add(std::move(t));
       break;
 
-    case TiffTag::MAKERNOTE:
-    case TiffTag::MAKERNOTE_ALT:
+    case MAKERNOTE:
+    case MAKERNOTE_ALT:
       add(parseMakerNote(ifds, t.get()));
       break;
 
-    case TiffTag::FUJI_RAW_IFD:
-    case TiffTag::SUBIFDS:
-    case TiffTag::EXIFIFDPOINTER:
+    case FUJI_RAW_IFD:
+    case SUBIFDS:
+    case EXIFIFDPOINTER:
       for (uint32_t j = 0; j < t->count; j++)
         add(std::make_unique<TiffIFD>(this, ifds, bs, t->getU32(j)));
       break;

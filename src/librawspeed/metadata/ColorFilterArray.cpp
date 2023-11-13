@@ -170,23 +170,24 @@ namespace {
 
 std::optional<std::string_view> getColorAsString(CFAColor c) {
   switch (c) {
-  case CFAColor::RED:
+    using enum CFAColor;
+  case RED:
     return "RED";
-  case CFAColor::GREEN:
+  case GREEN:
     return "GREEN";
-  case CFAColor::BLUE:
+  case BLUE:
     return "BLUE";
-  case CFAColor::CYAN:
+  case CYAN:
     return "CYAN";
-  case CFAColor::MAGENTA:
+  case MAGENTA:
     return "MAGENTA";
-  case CFAColor::YELLOW:
+  case YELLOW:
     return "YELLOW";
-  case CFAColor::WHITE:
+  case WHITE:
     return "WHITE";
-  case CFAColor::FUJI_GREEN:
+  case FUJI_GREEN:
     return "FUJIGREEN";
-  case CFAColor::UNKNOWN:
+  case UNKNOWN:
     return "UNKNOWN";
   default:
     return std::nullopt;
@@ -213,20 +214,21 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
 namespace {
 uint32_t toDcrawColor(CFAColor c) {
   switch (c) {
-  case CFAColor::FUJI_GREEN:
-  case CFAColor::RED:
+    using enum CFAColor;
+  case FUJI_GREEN:
+  case RED:
     return 0;
-  case CFAColor::MAGENTA:
-  case CFAColor::GREEN:
+  case MAGENTA:
+  case GREEN:
     return 1;
-  case CFAColor::CYAN:
-  case CFAColor::BLUE:
+  case CYAN:
+  case BLUE:
     return 2;
-  case CFAColor::YELLOW:
-  case CFAColor::WHITE:
+  case YELLOW:
+  case WHITE:
     return 3;
-  case CFAColor::UNKNOWN:
-  case CFAColor::END:
+  case UNKNOWN:
+  case END:
     throw out_of_range(ColorFilterArray::colorToString(c));
   }
   __builtin_unreachable();

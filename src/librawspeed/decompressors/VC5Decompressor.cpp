@@ -496,64 +496,65 @@ void VC5Decompressor::parseVC5() {
       tag = -tag;
 
     switch (tag) {
-    case VC5Tag::ChannelCount:
+      using enum VC5Tag;
+    case ChannelCount:
       if (val != numChannels)
         ThrowRDE("Bad channel count %u, expected %u", val, numChannels);
       break;
-    case VC5Tag::ImageWidth:
+    case ImageWidth:
       if (val != mRaw->dim.x)
         ThrowRDE("Image width mismatch: %u vs %u", val, mRaw->dim.x);
       break;
-    case VC5Tag::ImageHeight:
+    case ImageHeight:
       if (val != mRaw->dim.y)
         ThrowRDE("Image height mismatch: %u vs %u", val, mRaw->dim.y);
       break;
-    case VC5Tag::LowpassPrecision:
+    case LowpassPrecision:
       if (val < PRECISION_MIN || val > PRECISION_MAX)
         ThrowRDE("Invalid precision %i", val);
       mVC5.lowpassPrecision = val;
       break;
-    case VC5Tag::ChannelNumber:
+    case ChannelNumber:
       if (val >= numChannels)
         ThrowRDE("Bad channel number (%u)", val);
       mVC5.iChannel = val;
       break;
-    case VC5Tag::ImageFormat:
+    case ImageFormat:
       if (val != mVC5.imgFormat)
         ThrowRDE("Image format %i is not 4(RAW)", val);
       break;
-    case VC5Tag::SubbandCount:
+    case SubbandCount:
       if (val != numSubbands)
         ThrowRDE("Unexpected subband count %u, expected %u", val, numSubbands);
       break;
-    case VC5Tag::MaxBitsPerComponent:
+    case MaxBitsPerComponent:
       if (val != VC5_LOG_TABLE_BITWIDTH) {
         ThrowRDE("Bad bits per componend %u, not %u", val,
                  VC5_LOG_TABLE_BITWIDTH);
       }
       break;
-    case VC5Tag::PatternWidth:
+    case PatternWidth:
       if (val != mVC5.patternWidth)
         ThrowRDE("Bad pattern width %u, not %u", val, mVC5.patternWidth);
       break;
-    case VC5Tag::PatternHeight:
+    case PatternHeight:
       if (val != mVC5.patternHeight)
         ThrowRDE("Bad pattern height %u, not %u", val, mVC5.patternHeight);
       break;
-    case VC5Tag::SubbandNumber:
+    case SubbandNumber:
       if (val >= numSubbands)
         ThrowRDE("Bad subband number %u", val);
       mVC5.iSubband = val;
       break;
-    case VC5Tag::Quantization:
+    case Quantization:
       mVC5.quantization = static_cast<int16_t>(val);
       break;
-    case VC5Tag::ComponentsPerSample:
+    case ComponentsPerSample:
       if (val != mVC5.cps)
         ThrowRDE("Bad component per sample count %u, not %u", val, mVC5.cps);
       break;
-    case VC5Tag::PrescaleShift:
-      // FIXME: something is wrong. We get this before VC5Tag::ChannelNumber.
+    case PrescaleShift:
+      // FIXME: something is wrong. We get this before ChannelNumber.
       // Defaulting to 'mVC5.iChannel=0' seems to work *for existing samples*.
       for (int iWavelet = 0; iWavelet < numWaveletLevels; ++iWavelet) {
         auto& channel = channels[mVC5.iChannel];
@@ -564,15 +565,15 @@ void VC5Decompressor::parseVC5() {
       break;
     default: { // A chunk.
       unsigned int chunkSize = 0;
-      if (matches(tag, VC5Tag::LARGE_CHUNK)) {
+      if (matches(tag, LARGE_CHUNK)) {
         chunkSize = static_cast<unsigned int>(
             ((static_cast<std::underlying_type_t<VC5Tag>>(tag) & 0xff) << 16) |
             (val & 0xffff));
-      } else if (matches(tag, VC5Tag::SMALL_CHUNK)) {
+      } else if (matches(tag, SMALL_CHUNK)) {
         chunkSize = (val & 0xffff);
       }
 
-      if (is(tag, VC5Tag::LargeCodeblock)) {
+      if (is(tag, LargeCodeblock)) {
         parseLargeCodeblock(mBs.getStream(chunkSize, 4));
         break;
       }
@@ -581,7 +582,7 @@ void VC5Decompressor::parseVC5() {
 
       // Magic, all the other 'large' chunks are actually optional,
       // and don't specify any chunk bytes-to-be-skipped.
-      if (matches(tag, VC5Tag::LARGE_CHUNK)) {
+      if (matches(tag, LARGE_CHUNK)) {
         optional = true;
         chunkSize = 0;
       }
@@ -915,10 +916,11 @@ void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
 
 void VC5Decompressor::combineFinalLowpassBands() const noexcept {
   switch (phase) {
-  case BayerPhase::RGGB:
+    using enum BayerPhase;
+  case RGGB:
     combineFinalLowpassBandsImpl<BayerPhase::RGGB>();
     return;
-  case BayerPhase::GBRG:
+  case GBRG:
     combineFinalLowpassBandsImpl<BayerPhase::GBRG>();
     return;
   default:

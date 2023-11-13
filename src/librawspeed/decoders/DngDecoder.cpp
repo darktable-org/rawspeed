@@ -209,20 +209,21 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   auto getAsCFAColor = [](uint32_t c) -> std::optional<CFAColor> {
     switch (c) {
+      using enum CFAColor;
     case 0:
-      return CFAColor::RED;
+      return RED;
     case 1:
-      return CFAColor::GREEN;
+      return GREEN;
     case 2:
-      return CFAColor::BLUE;
+      return BLUE;
     case 3:
-      return CFAColor::CYAN;
+      return CYAN;
     case 4:
-      return CFAColor::MAGENTA;
+      return MAGENTA;
     case 5:
-      return CFAColor::YELLOW;
+      return YELLOW;
     case 6:
-      return CFAColor::WHITE;
+      return WHITE;
     default:
       return std::nullopt;
     }

@@ -40,8 +40,8 @@ class iPoint2D;
 // See https://en.wikipedia.org/wiki/Spline_(mathematics)
 // section "Algorithm for computing natural cubic splines"
 
-template <typename T = uint16_t,
-          typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template <typename T = uint16_t>
+  requires std::is_arithmetic_v<T>
 class Spline final {
 public:
   using value_type = T;

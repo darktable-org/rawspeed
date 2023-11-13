@@ -128,18 +128,19 @@ enum class IIQFormat {
 
 std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
   switch (v) {
+    using enum IIQFormat;
   case 1:
-    return IIQFormat::RAW_1;
+    return RAW_1;
   case 2:
-    return IIQFormat::RAW_2;
+    return RAW_2;
   case 3:
-    return IIQFormat::IIQ_L;
+    return IIQ_L;
   case 5:
-    return IIQFormat::IIQ_S;
+    return IIQ_S;
   case 6:
-    return IIQFormat::IIQ_Sv2;
+    return IIQ_Sv2;
   case 8:
-    return IIQFormat::IIQ_L16;
+    return IIQ_L16;
   default:
     return std::nullopt;
   }

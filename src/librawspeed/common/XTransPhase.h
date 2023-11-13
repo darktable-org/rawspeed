@@ -61,16 +61,12 @@ inline std::array<T, 6 * 6> applyPhaseShift(std::array<T, 6 * 6> srcData,
 inline std::array<CFAColor, 6 * 6> getAsCFAColors(XTransPhase p) {
   const XTransPhase basePhase(0, 0);
   // From Fujifilm X-Pro1.
+  using enum CFAColor;
   const std::array<CFAColor, 6 * 6> basePat = {
-      CFAColor::GREEN, CFAColor::GREEN, CFAColor::RED,   CFAColor::GREEN,
-      CFAColor::GREEN, CFAColor::BLUE,  CFAColor::GREEN, CFAColor::GREEN,
-      CFAColor::BLUE,  CFAColor::GREEN, CFAColor::GREEN, CFAColor::RED,
-      CFAColor::BLUE,  CFAColor::RED,   CFAColor::GREEN, CFAColor::RED,
-      CFAColor::BLUE,  CFAColor::GREEN, CFAColor::GREEN, CFAColor::GREEN,
-      CFAColor::BLUE,  CFAColor::GREEN, CFAColor::GREEN, CFAColor::RED,
-      CFAColor::GREEN, CFAColor::GREEN, CFAColor::RED,   CFAColor::GREEN,
-      CFAColor::GREEN, CFAColor::BLUE,  CFAColor::RED,   CFAColor::BLUE,
-      CFAColor::GREEN, CFAColor::BLUE,  CFAColor::RED,   CFAColor::GREEN};
+      GREEN, GREEN, RED,  GREEN, GREEN, BLUE,  GREEN, GREEN, BLUE,
+      GREEN, GREEN, RED,  BLUE,  RED,   GREEN, RED,   BLUE,  GREEN,
+      GREEN, GREEN, BLUE, GREEN, GREEN, RED,   GREEN, GREEN, RED,
+      GREEN, GREEN, BLUE, RED,   BLUE,  GREEN, BLUE,  RED,   GREEN};
   return applyPhaseShift(basePat, basePhase, /*tgtPhase=*/p);
 }
 

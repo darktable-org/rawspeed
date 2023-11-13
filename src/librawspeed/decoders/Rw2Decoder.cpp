@@ -193,21 +193,18 @@ void Rw2Decoder::parseCFA() const {
   }
 
   switch (auto i = CFA->getU16()) {
+    using enum CFAColor;
   case 1:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
-                     CFAColor::GREEN, CFAColor::BLUE);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), RED, GREEN, GREEN, BLUE);
     break;
   case 2:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::RED,
-                     CFAColor::BLUE, CFAColor::GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), GREEN, RED, BLUE, GREEN);
     break;
   case 3:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::BLUE,
-                     CFAColor::RED, CFAColor::GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), GREEN, BLUE, RED, GREEN);
     break;
   case 4:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::BLUE, CFAColor::GREEN,
-                     CFAColor::GREEN, CFAColor::RED);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), BLUE, GREEN, GREEN, RED);
     break;
   default:
     ThrowRDE("Unexpected CFA pattern: %u", i);
