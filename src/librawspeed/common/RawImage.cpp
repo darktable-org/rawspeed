@@ -47,14 +47,11 @@
 
 namespace rawspeed {
 
-RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
-  blackLevelSeparate.fill(-1);
-}
+RawImageData::RawImageData() { blackLevelSeparate.fill(-1); }
 
 RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
                            int _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataType(type),
-      cpp(_cpp) {
+    : dim(_dim), isCFA(_cpp == 1), dataType(type), cpp(_cpp) {
   assert(_bpc > 0);
 
   if (cpp > std::numeric_limits<decltype(cpp)>::max() / _bpc)
