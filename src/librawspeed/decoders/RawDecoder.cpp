@@ -48,7 +48,7 @@ using std::vector;
 
 namespace rawspeed {
 
-RawDecoder::RawDecoder(Buffer file) : mRaw(RawImage::create()), mFile(file) {}
+RawDecoder::RawDecoder(Buffer file) : mFile(file) {}
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
