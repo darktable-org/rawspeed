@@ -48,7 +48,7 @@ std::pair<std::unique_ptr<std::vector<
               uint8_t, DefaultInitAllocatorAdaptor<
                            uint8_t, AlignedAllocator<uint8_t, 16>>>>,
           Buffer>
-FileReader::readFile() {
+FileReader::readFile() const {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)

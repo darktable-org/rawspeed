@@ -118,6 +118,8 @@ inline void decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
     case 4:
       tmp_expanded = tmp;
       break;
+    default:
+      __builtin_unreachable();
     }
 
     out(col) = bit_cast<float>(tmp_expanded);

@@ -274,7 +274,7 @@ RawImage IiqDecoder::decodeRawInternal() {
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
-                                  uint32_t split_col) {
+                                  uint32_t split_col) const {
   meta_data.skipBytes(8);
   const uint32_t bytes_to_entries = meta_data.getU32();
   meta_data.setPosition(bytes_to_entries);

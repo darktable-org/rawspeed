@@ -48,25 +48,19 @@ public:
 
   // Can not cast away constness.
   template <typename T2>
-    requires std::conjunction_v<std::is_const<T2>,
-                                std::negation<std::is_const<T>>>
+    requires(std::is_const_v<T2> && !std::is_const_v<T>)
   CroppedArray1DRef(CroppedArray1DRef<T2> RHS) = delete;
 
   // Can not change type.
   template <typename T2>
-    requires std::conjunction_v<
-                 std::negation<std::conjunction<
-                     std::is_const<T2>, std::negation<std::is_const<T>>>>,
-                 std::negation<std::is_same<std::remove_const_t<T>,
-                                            std::remove_const_t<T2>>>>
+    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
+             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   CroppedArray1DRef(CroppedArray1DRef<T2> RHS) = delete;
 
   // Conversion from CroppedArray1DRef<T> to CroppedArray1DRef<const T>.
   template <typename T2>
-    requires std::conjunction_v<
-                 std::conjunction<std::negation<std::is_const<T2>>,
-                                  std::is_const<T>>,
-                 std::is_same<std::remove_const_t<T>, std::remove_const_t<T2>>>
+    requires(!std::is_const_v<T2> && std::is_const_v<T> &&
+             std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   CroppedArray1DRef( // NOLINT google-explicit-constructor
       CroppedArray1DRef<T2> RHS)
       : base(RHS.base), numElts(RHS.numElts) {}

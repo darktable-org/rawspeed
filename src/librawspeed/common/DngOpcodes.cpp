@@ -180,7 +180,7 @@ protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
                      const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
-    const iRectangle2D subImage = iRectangle2D({0, 0}, integrated_subimg_.dim);
+    const iRectangle2D subImage = {{0, 0}, integrated_subimg_.dim};
 
     uint32_t top = bs.getU32();
     uint32_t left = bs.getU32();
@@ -340,7 +340,8 @@ protected:
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
-  template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
+  template <typename T, typename OP>
+  void applyOP(const RawImage& ri, OP op) const {
     const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
@@ -362,11 +363,11 @@ protected:
 
 class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
-  vector<uint16_t> lookup;
+  vector<uint16_t> lookup = vector<uint16_t>(65536);
 
   explicit LookupOpcode(const RawImage& ri, ByteStream& bs,
                         const iRectangle2D& integrated_subimg_)
-      : PixelOpcode(ri, bs, integrated_subimg_), lookup(65536) {}
+      : PixelOpcode(ri, bs, integrated_subimg_) {}
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);

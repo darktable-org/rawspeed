@@ -153,13 +153,13 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
+  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y() const;
 
-  [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices();
-  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles();
-  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles();
+  [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices() const;
+  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles() const;
+  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles() const;
   [[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
-  getVerticalOutputStrips();
+  getVerticalOutputStrips() const;
 
 public:
   Cr2Decompressor(
@@ -168,7 +168,7 @@ public:
       iPoint2D frame, Cr2SliceWidths slicing,
       std::vector<PerComponentRecipe> rec, ByteStream input);
 
-  void decompress();
+  void decompress() const;
 };
 
 extern template class Cr2Decompressor<PrefixCodeDecoder<>>;

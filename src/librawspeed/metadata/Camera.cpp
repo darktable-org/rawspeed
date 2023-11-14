@@ -82,7 +82,7 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 }
 #endif
 
-Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
+Camera::Camera(const Camera* camera, uint32_t alias_num) {
   if (alias_num >= camera->aliases.size())
     ThrowCME("Internal error, alias number out of range specified.");
 
