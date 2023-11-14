@@ -23,6 +23,7 @@
 
 #include "decoders/IiqDecoder.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -390,7 +391,9 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // appropriate amount before indexing into the curve and
           // then add it back so that subtracting the black level
           // later will work as expected
-          const uint16_t diff = pixel < black_level ? pixel : black_level;
+          const uint16_t diff = pixel < black_level
+                                    ? pixel
+                                    : implicit_cast<uint16_t>(black_level);
           pixel = curve[pixel - diff] + diff;
         }
       }
@@ -461,7 +464,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
                          : 0;
               !(c & 1)) {
             unsigned val = img(row, col) * mult[c];
-            img(row, col) = std::min(val, 0xFFFFU);
+            img(row, col) = implicit_cast<uint16_t>(std::min(val, 0xFFFFU));
           }
           for (int c = 0; c < nc; c += 2)
             mult[c] += mult[c + 1];
@@ -549,7 +552,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
       }
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
-      img(row, col) = (three_pixels + 1) / 3;
+      img(row, col) = implicit_cast<uint16_t>((three_pixels + 1) / 3);
     } else {
       /*
        * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
@@ -565,7 +568,8 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
                        img(row + 2, col + 2) + img(row - 2, col + 2);
       uint32_t horiz = img(row, col - 2) + img(row, col + 2);
       // But this is not just averaging, we bias towards the horizontal pixels.
-      img(row, col) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
+      img(row, col) = implicit_cast<uint16_t>(
+          std::lround(diags * 0.0732233 + horiz * 0.3535534));
     }
   }
 }

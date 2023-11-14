@@ -22,6 +22,7 @@
 #include "decoders/ArwDecoder.h"
 #include "MemorySanitizer.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/NORangesSet.h"
 #include "adt/Point.h"
@@ -217,11 +218,11 @@ RawImage ArwDecoder::decodeRawInternal() {
     sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
 
   for (uint32_t i = 0; i < 0x4001; i++)
-    curve[i] = i;
+    curve[i] = implicit_cast<uint16_t>(i);
 
   for (uint32_t i = 0; i < 5; i++)
     for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
-      curve[j] = curve[j - 1] + (1 << i);
+      curve[j] = implicit_cast<uint16_t>(curve[j - 1] + (1 << i));
 
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 

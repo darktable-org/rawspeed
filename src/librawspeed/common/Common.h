@@ -21,6 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include <algorithm>
 #include <array>
@@ -143,14 +144,14 @@ bool RAWSPEED_READONLY isIn(const T value,
 // Clamps the given value to the range 0 .. 2^n-1, with n <= 16
 template <typename T>
   requires std::is_arithmetic_v<T>
-constexpr uint16_t RAWSPEED_READNONE clampBits(T value, unsigned int nBits) {
+constexpr auto RAWSPEED_READNONE clampBits(T value, unsigned int nBits) {
   // We expect to produce uint16_t.
   invariant(nBits <= 16);
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
   invariant(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
-  const T maxVal = (T(1) << nBits) - T(1);
-  return std::clamp(value, T(0), maxVal);
+  const auto maxVal = implicit_cast<T>((T(1) << nBits) - T(1));
+  return implicit_cast<uint16_t>(std::clamp(value, T(0), maxVal));
 }
 
 template <typename T>

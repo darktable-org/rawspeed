@@ -22,6 +22,7 @@
 
 #include "decompressors/SonyArw1Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
@@ -85,7 +86,7 @@ void SonyArw1Decompressor::decompress(ByteStream input) const {
       if (!isIntN(pred, 12))
         ThrowRDE("Error decompressing");
 
-      out(row, col) = pred;
+      out(row, col) = implicit_cast<uint16_t>(pred);
     }
   }
 }

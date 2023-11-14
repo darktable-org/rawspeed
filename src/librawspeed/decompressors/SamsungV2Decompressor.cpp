@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV2Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -78,7 +79,7 @@ SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
   if (len == 0)
     return 0;
   invariant(len <= 15 && "Difference occupies at most 15 bits.");
-  return signExtend(pump.getBits(len), len);
+  return implicit_cast<int16_t>(signExtend(pump.getBits(len), len));
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
@@ -126,7 +127,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(8); // reserved
   startpump.getBits(8); // Inc
   startpump.getBits(2); // reserved
-  initVal = startpump.getBits(14);
+  initVal = implicit_cast<uint16_t>(startpump.getBits(14));
 
   invariant(startpump.getInputPosition() == headerSize);
 

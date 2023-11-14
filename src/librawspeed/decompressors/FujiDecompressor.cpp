@@ -26,6 +26,7 @@
 #include "MemorySanitizer.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -176,7 +177,10 @@ int8_t GetGradient(const fuji_compressed_params& p, int cur_val) {
   if (abs_cur_val >= p.q_point[3])
     grad = 4;
 
-  return cur_val >= 0 ? grad : -grad;
+  if (cur_val < 0)
+    grad *= -1;
+
+  return implicit_cast<int8_t>(grad);
 }
 
 fuji_compressed_params::fuji_compressed_params(
@@ -620,7 +624,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].even;
           int sample = func_even(c[comp], col, grad_even[grad], row, i, comp);
-          lines(c[comp], 1 + 2 * col + 0) = sample;
+          lines(c[comp], 1 + 2 * col + 0) = implicit_cast<uint16_t>(sample);
           ++col;
         }
       }
@@ -629,7 +633,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].odd;
           int sample = fuji_decode_sample_odd(c[comp], col, grad_odd[grad]);
-          lines(c[comp], 1 + 2 * col + 1) = sample;
+          lines(c[comp], 1 + 2 * col + 1) = implicit_cast<uint16_t>(sample);
           ++col;
         }
       }

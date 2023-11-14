@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV1Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
@@ -132,7 +133,7 @@ void SamsungV1Decompressor::decompress() const {
       int value = pred[col & 1];
       if (!isIntN(value, bits))
         ThrowRDE("decoded value out of bounds");
-      out(row, col) = value;
+      out(row, col) = implicit_cast<uint16_t>(value);
     }
   }
 }

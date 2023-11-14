@@ -102,8 +102,10 @@ public:
       if (code_l > static_cast<int>(LookupDepth))
         break;
 
-      uint16_t ll = Base::code.symbols[i].code << (LookupDepth - code_l);
-      uint16_t ul = ll | ((1 << (LookupDepth - code_l)) - 1);
+      auto ll = implicit_cast<uint16_t>(Base::code.symbols[i].code
+                                        << (LookupDepth - code_l));
+      auto ul =
+          implicit_cast<uint16_t>(ll | ((1 << (LookupDepth - code_l)) - 1));
       static_assert(Traits::MaxCodeValueLenghtBits <=
                     bitwidth<LUTEntryTy>() - PayloadShift);
       LUTUnsignedEntryTy diff_l = Base::code.codeValues[i];
@@ -178,7 +180,8 @@ public:
 
     typename Base::CodeSymbol partial;
     partial.code_len = LookupDepth;
-    partial.code = bs.peekBitsNoFill(partial.code_len);
+    partial.code = implicit_cast<typename Traits::CodeTy>(
+        bs.peekBitsNoFill(partial.code_len));
 
     assert(partial.code < decodeLookup.size());
     auto lutEntry = static_cast<unsigned>(decodeLookup[partial.code]);
@@ -197,8 +200,8 @@ public:
     if (lutEntry) {
       // If the flag is not set, but the entry is not empty,
       // the payload is the code value for this symbol.
-      partial.code_len = len;
-      codeValue = payload;
+      partial.code_len = implicit_cast<uint8_t>(len);
+      codeValue = implicit_cast<typename Traits::CodeValueTy>(payload);
       invariant(!FULL_DECODE || codeValue /*aka diff_l*/ > 0);
     } else {
       // No match in the lookup table, because either the code is longer

@@ -124,12 +124,21 @@ INSTANTIATE_TEST_SUITE_P(CodeSymbolDeathTest, CodeSymbolDeathTest,
                          ::testing::ValuesIn(CodeSymbolData));
 TEST_P(CodeSymbolDeathTest, CodeSymbolDeathTest) {
   if (die) {
-    ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len); },
-                 "code <= \\(\\(1U << code_len\\) - 1U\\)");
+    ASSERT_DEATH(
+        {
+          HuffmanCode<BaselineCodeTag>::CodeSymbol(
+              rawspeed::implicit_cast<
+                  typename rawspeed::CodeTraits<BaselineCodeTag>::CodeTy>(val),
+              rawspeed::implicit_cast<uint8_t>(len));
+        },
+        "code <= \\(\\(1U << code_len\\) - 1U\\)");
   } else {
     ASSERT_EXIT(
         {
-          HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len);
+          HuffmanCode<BaselineCodeTag>::CodeSymbol(
+              rawspeed::implicit_cast<
+                  typename rawspeed::CodeTraits<BaselineCodeTag>::CodeTy>(val),
+              rawspeed::implicit_cast<uint8_t>(len));
           exit(0);
         },
         ::testing::ExitedWithCode(0), "");
@@ -167,9 +176,12 @@ static const CodeSymbolPrintDataType CodeSymbolPrintData[]{
 INSTANTIATE_TEST_SUITE_P(CodeSymbolPrintTest, CodeSymbolPrintTest,
                          ::testing::ValuesIn(CodeSymbolPrintData));
 TEST_P(CodeSymbolPrintTest, CodeSymbolPrintTest) {
-  ASSERT_EQ(::testing::PrintToString(
-                HuffmanCode<BaselineCodeTag>::CodeSymbol(val, len)),
-            str);
+  ASSERT_EQ(
+      ::testing::PrintToString(HuffmanCode<BaselineCodeTag>::CodeSymbol(
+          rawspeed::implicit_cast<
+              typename rawspeed::CodeTraits<BaselineCodeTag>::CodeTy>(val),
+          rawspeed::implicit_cast<uint8_t>(len))),
+      str);
 }
 
 using CodeSymbolHaveCommonPrefixDataType =
@@ -356,7 +368,7 @@ TEST(HuffmanCodeTest, setNCodesPerLengthTooManyCodesForLength) {
     std::vector<uint8_t> v(16, 0);
     Buffer b(v.data(), v.size());
     for (auto i = 1U; i <= (1U << len); i++) {
-      v[len - 1] = i;
+      v[len - 1] = rawspeed::implicit_cast<uint8_t>(i);
       ASSERT_NO_THROW(ht.setNCodesPerLength(b););
     }
     v[len - 1]++;
@@ -391,7 +403,7 @@ TEST(HuffmanCodeDeathTest, setCodeValuesRequiresCount) {
     HuffmanCode<BaselineCodeTag> ht;
     std::vector<uint8_t> l(16, 0);
     Buffer bl(l.data(), l.size());
-    l[len - 1] = (1U << len) - 1U;
+    l[len - 1] = rawspeed::implicit_cast<uint8_t>((1U << len) - 1U);
     const auto count = ht.setNCodesPerLength(bl);
     std::vector<uint8_t> v;
     v.reserve(count + 1);
@@ -427,7 +439,7 @@ TEST(HuffmanCodeTest, setCodeValuesValueLessThan16) {
   std::vector<uint8_t> v(1);
 
   for (int i = 0; i < 256; i++) {
-    v[0] = i;
+    v[0] = rawspeed::implicit_cast<uint8_t>(i);
     rawspeed::Array1DRef<const uint8_t> b(v.data(), v.size());
     ASSERT_NO_THROW(ht.setCodeValues(b););
   }

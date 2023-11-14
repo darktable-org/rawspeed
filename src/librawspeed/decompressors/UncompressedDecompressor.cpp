@@ -22,6 +22,7 @@
 
 #include "decompressors/UncompressedDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -177,7 +178,7 @@ void UncompressedDecompressor::decodePackedInt(int rows, int row) const {
   int cols = size.x * mRaw->getCpp();
   for (; row < rows; row++) {
     for (int x = 0; x < cols; x++) {
-      out(row, x) = bits.getBits(bitPerPixel);
+      out(row, x) = implicit_cast<uint16_t>(bits.getBits(bitPerPixel));
     }
     bits.skipBytes(skipBytes);
   }
@@ -297,9 +298,9 @@ void UncompressedDecompressor::decode12BitRawWithControl() {
                                 uint32_t p2) {
         uint16_t pix;
         if (!(invert ^ (e == Endianness::little)))
-          pix = (p1 << pack) | (p2 >> pack);
+          pix = implicit_cast<uint16_t>((p1 << pack) | (p2 >> pack));
         else
-          pix = ((p2 & mask) << 8) | p1;
+          pix = implicit_cast<uint16_t>(((p2 & mask) << 8) | p1);
         out(row, i) = pix;
       };
 
@@ -339,9 +340,9 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned() {
 
       uint16_t pix;
       if (e == Endianness::little)
-        pix = (g2 << 8) | g1;
+        pix = implicit_cast<uint16_t>((g2 << 8) | g1);
       else
-        pix = (g1 << 8) | g2;
+        pix = implicit_cast<uint16_t>((g1 << 8) | g2);
       out(row, col) = pix >> 4;
     }
   }

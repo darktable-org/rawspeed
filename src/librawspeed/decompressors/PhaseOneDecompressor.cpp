@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -121,9 +122,10 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
     }
 
     int i = len[col & 1];
-    if (i == 14)
-      out(row, col) = pred[col & 1] = pump.getBitsNoFill(16);
-    else {
+    if (i == 14) {
+      pred[col & 1] = pump.getBitsNoFill(16);
+      out(row, col) = implicit_cast<uint16_t>(pred[col & 1]);
+    } else {
       pred[col & 1] +=
           static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
       // FIXME: is the truncation the right solution here?

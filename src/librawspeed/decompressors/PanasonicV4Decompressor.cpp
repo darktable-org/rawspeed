@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/PanasonicV4Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
@@ -201,7 +202,7 @@ inline void PanasonicV4Decompressor::processPixelPacket(
         pred[c] = nonz[c] << 4 | bits.getBits(4);
     }
 
-    out(row, col) = pred[c];
+    out(row, col) = implicit_cast<uint16_t>(pred[c]);
 
     if (zero_is_bad && 0 == pred[c])
       zero_pos->push_back((row << 16) | col);

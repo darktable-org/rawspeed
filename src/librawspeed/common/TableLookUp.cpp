@@ -20,6 +20,7 @@
 */
 
 #include "common/TableLookUp.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "common/Common.h"
 #include "decoders/RawDecoderException.h"
@@ -71,7 +72,7 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     int delta = upper - lower;
     invariant(delta >= 0);
     t[i * 2] = clampBits(center - ((upper - lower + 2) / 4), 16);
-    t[i * 2 + 1] = delta;
+    t[i * 2 + 1] = implicit_cast<uint16_t>(delta);
   }
 
   for (int i = nfilled; i < TABLE_MAX_ELTS; i++) {

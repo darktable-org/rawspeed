@@ -22,6 +22,7 @@
 
 #include "decompressors/KodakDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
@@ -107,7 +108,8 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff);
+    out[i] = implicit_cast<int16_t>(
+        len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff));
   }
 
   return out;
@@ -134,9 +136,10 @@ void KodakDecompressor::decompress() {
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
-          out(row, col) = value;
+          out(row, col) = implicit_cast<uint16_t>(value);
         else
-          mRaw->setWithLookUp(value, reinterpret_cast<uint8_t*>(&out(row, col)),
+          mRaw->setWithLookUp(implicit_cast<uint16_t>(value),
+                              reinterpret_cast<uint8_t*>(&out(row, col)),
                               &random);
       }
     }

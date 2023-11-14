@@ -30,6 +30,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/VC5Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
@@ -397,12 +398,12 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
 
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
-    uint16_t waveletWidth = mRaw->dim.x;
-    uint16_t waveletHeight = mRaw->dim.y;
+    auto waveletWidth = implicit_cast<uint16_t>(mRaw->dim.x);
+    auto waveletHeight = implicit_cast<uint16_t>(mRaw->dim.y);
     for (Wavelet& wavelet : channel.wavelets) {
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
-        *dimension = roundUpDivision(*dimension, 2);
+        *dimension = implicit_cast<uint16_t>(roundUpDivision(*dimension, 2));
       wavelet.width = waveletWidth;
       wavelet.height = waveletHeight;
 
@@ -934,7 +935,7 @@ VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits) {
   unsigned bitfield = decoder.decodeCodeValue(bits);
 
   unsigned int count = bitfield & ((1U << RLVRunLengthBitWidth) - 1U);
-  int16_t value = bitfield >> RLVRunLengthBitWidth;
+  auto value = implicit_cast<int16_t>(bitfield >> RLVRunLengthBitWidth);
 
   if (value != 0 && bits.getBitsNoFill(1))
     value = -value;
