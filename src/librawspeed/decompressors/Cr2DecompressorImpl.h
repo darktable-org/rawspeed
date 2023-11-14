@@ -197,14 +197,14 @@ public:
 
 template <typename PrefixCodeDecoder>
 iterator_range<Cr2SliceIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getSlices() {
+Cr2Decompressor<PrefixCodeDecoder>::getSlices() const {
   return {Cr2SliceIterator(slicing.begin(), frame),
           Cr2SliceIterator(slicing.end(), frame)};
 }
 
 template <typename PrefixCodeDecoder>
 iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() {
+Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() const {
   auto slices = getSlices();
   return {Cr2OutputTileIterator(std::begin(slices), dim),
           Cr2OutputTileIterator(std::end(slices), dim)};
@@ -212,7 +212,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() {
 
 template <typename PrefixCodeDecoder>
 iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() {
+Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() const {
   auto allOutputTiles = getAllOutputTiles();
   auto first = allOutputTiles.begin();
   auto end = allOutputTiles.end();
@@ -226,7 +226,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() {
 
 template <typename PrefixCodeDecoder>
 [[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() {
+Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() const {
   auto outputTiles = getOutputTiles();
   return {Cr2VerticalOutputStripIterator(std::begin(outputTiles),
                                          std::end(outputTiles)),
@@ -385,7 +385,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getInitialPreds() const {
 
 template <typename PrefixCodeDecoder>
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() {
+void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -450,7 +450,7 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() {
 }
 
 template <typename PrefixCodeDecoder>
-void Cr2Decompressor<PrefixCodeDecoder>::decompress() {
+void Cr2Decompressor<PrefixCodeDecoder>::decompress() const {
   if (std::make_tuple(3, 2, 2) == format) {
     decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     return;
