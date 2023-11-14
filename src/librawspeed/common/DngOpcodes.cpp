@@ -363,11 +363,11 @@ protected:
 
 class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
-  vector<uint16_t> lookup;
+  vector<uint16_t> lookup = vector<uint16_t>(65536);
 
   explicit LookupOpcode(const RawImage& ri, ByteStream& bs,
                         const iRectangle2D& integrated_subimg_)
-      : PixelOpcode(ri, bs, integrated_subimg_), lookup(65536) {}
+      : PixelOpcode(ri, bs, integrated_subimg_) {}
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
