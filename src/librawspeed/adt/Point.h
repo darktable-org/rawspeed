@@ -74,7 +74,7 @@ public:
   }
 
   [[nodiscard]] bool RAWSPEED_READONLY hasPositiveArea() const {
-    return operator>({0, 0});
+    return *this > iPoint2D(0, 0);
   }
 
   [[nodiscard]] area_type RAWSPEED_READONLY area() const {
@@ -87,7 +87,7 @@ public:
   }
 
   [[nodiscard]] constexpr bool isThisInside(const iPoint2D& rhs) const {
-    return operator<=(rhs);
+    return *this <= rhs;
   }
 
   [[nodiscard]] constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
