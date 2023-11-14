@@ -340,7 +340,8 @@ protected:
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
-  template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
+  template <typename T, typename OP>
+  void applyOP(const RawImage& ri, OP op) const {
     const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
