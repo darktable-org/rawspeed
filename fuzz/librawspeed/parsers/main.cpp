@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Casts.h"
 #ifndef PARSER
 #error PARSER must be defined
 #endif
@@ -59,7 +60,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
-  const rawspeed::Buffer buffer(Data, Size);
+  const rawspeed::Buffer buffer(
+      Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
 
   try {
     rawspeed::PARSER parser(buffer);

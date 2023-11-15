@@ -20,6 +20,7 @@
 */
 
 #include "decoders/MosDecoder.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -94,7 +95,7 @@ std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
   std::string::size_type end = xmp.find("</tiff:" + std::string(tag) + ">");
   if (start == std::string::npos || end == std::string::npos || end <= start)
     ThrowRDE("Couldn't find tag '%s' in the XMP", tag.data());
-  int startlen = tag.size() + 7;
+  auto startlen = implicit_cast<int>(tag.size() + 7);
   return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 

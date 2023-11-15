@@ -19,6 +19,7 @@
 */
 
 #include "RawSpeed-API.h"
+#include "adt/Casts.h"
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -32,7 +33,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   // "/data/cameras.xml");
 
   try {
-    const rawspeed::Buffer buffer(Data, Size);
+    const rawspeed::Buffer buffer(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     rawspeed::RawParser parser(buffer);
     auto decoder = parser.getDecoder(/*&metadata*/);
 

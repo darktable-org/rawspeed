@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include <algorithm>
 #include <cassert>
@@ -135,7 +136,7 @@ public:
     }
 #endif
 
-    num_coords = control_points.size();
+    num_coords = implicit_cast<int>(control_points.size());
     num_segments = num_coords - 1;
 
     xCp.resize(num_coords);

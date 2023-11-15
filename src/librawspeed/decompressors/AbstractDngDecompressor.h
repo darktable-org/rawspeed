@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -54,8 +55,9 @@ struct DngTilingDescription final {
 
   DngTilingDescription(const iPoint2D& dim_, uint32_t tileW_, uint32_t tileH_)
       : dim(dim_), tileW(tileW_), tileH(tileH_),
-        tilesX(roundUpDivision(dim.x, tileW)),
-        tilesY(roundUpDivision(dim.y, tileH)), numTiles(tilesX * tilesY) {
+        tilesX(implicit_cast<uint32_t>(roundUpDivision(dim.x, tileW))),
+        tilesY(implicit_cast<uint32_t>(roundUpDivision(dim.y, tileH))),
+        numTiles(tilesX * tilesY) {
     invariant(dim.area() > 0);
     invariant(tileW > 0);
     invariant(tileH > 0);

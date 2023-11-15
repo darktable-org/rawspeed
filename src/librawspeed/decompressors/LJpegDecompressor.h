@@ -26,9 +26,9 @@
 #include "common/RawImage.h"
 #include "io/ByteStream.h"
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 

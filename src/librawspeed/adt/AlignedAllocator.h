@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <new>
 #include <type_traits>
 
 namespace rawspeed {

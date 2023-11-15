@@ -42,12 +42,14 @@
 #include "common/SimpleLUT.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpMSB.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -202,7 +204,9 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
 
 #pragma GCC diagnostic push
 // See https://bugs.llvm.org/show_bug.cgi?id=51666
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #ifdef HAVE_OPENMP
 #pragma omp taskloop default(none) firstprivate(dst, process)                  \
     num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(),        \
@@ -261,7 +265,9 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
   // Horizontal reconstruction
 #pragma GCC diagnostic push
   // See https://bugs.llvm.org/show_bug.cgi?id=51666
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #ifdef HAVE_OPENMP
 #pragma omp taskloop if (finalWavelet) default(none)                           \
     firstprivate(dst, process)                                                 \
@@ -455,7 +461,7 @@ void VC5Decompressor::initPrefixCodeDecoder() {
 
 void VC5Decompressor::initVC5LogTable() {
   mVC5LogTable = decltype(mVC5LogTable)(
-      [outputBits_ = outputBits](unsigned i, unsigned tableSize) {
+      [outputBits_ = outputBits](size_t i, unsigned tableSize) {
         // The vanilla "inverse log" curve for decoding.
         auto normalizedCurve = [](auto normalizedI) {
           return (std::pow(113.0, normalizedI) - 1) / 112.0;
@@ -648,7 +654,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   const auto chunksTotal = roundUpDivision(bitsTotal, bitsPerChunk);
   const auto bytesTotal = bytesPerChunk * chunksTotal;
   // And clamp the size / verify sufficient input while we are at it.
-  bs = bs.getStream(bytesTotal);
+  bs = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal));
 }
 
 VC5Decompressor::BandData

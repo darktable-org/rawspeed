@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h"
 #include "decoders/DngDecoder.h"
+#include "adt/Casts.h"
 #include "adt/NORangesSet.h"
 #include "adt/NotARational.h"
 #include "adt/Point.h"
@@ -297,12 +298,14 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
       ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
 
     assert(tilew > 0);
-    const uint32_t tilesX = roundUpDivision(mRaw->dim.x, tilew);
+    const auto tilesX =
+        implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
     if (!tilesX)
       ThrowRDE("Zero tiles horizontally");
 
     assert(tileh > 0);
-    const uint32_t tilesY = roundUpDivision(mRaw->dim.y, tileh);
+    const auto tilesY =
+        implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
     if (!tilesY)
       ThrowRDE("Zero tiles vertically");
 
@@ -588,7 +591,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
   if (mRaw->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
-    mRaw->whitePoint = (1UL << bps) - 1UL;
+    mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
     // Default white level is 1.0f. But we can't represent that here.
     mRaw->whitePoint = 65535;

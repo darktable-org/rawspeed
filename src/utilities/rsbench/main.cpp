@@ -20,6 +20,7 @@
 
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "common/ChecksumFile.h"
 #include <chrono>
@@ -149,7 +150,7 @@ inline void BM_RawSpeed(benchmark::State& state, Entry* entry, int threads) {
 
     benchmark::DoNotOptimize(raw);
 
-    pixels = raw->getUncroppedDim().area();
+    pixels = rawspeed::implicit_cast<unsigned>(raw->getUncroppedDim().area());
   }
 
   // These are total over all the `state.iterations()` iterations.

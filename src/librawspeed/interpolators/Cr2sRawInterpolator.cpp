@@ -28,7 +28,6 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include <array>
-#include <cstddef>
 #include <cstdint>
 
 namespace rawspeed {
@@ -145,7 +144,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
     // For 4:2:2, one MCU encodes 2 pixels, and odd pixels need interpolation,
     // so we need to load three pixels, and thus we must load 2 MCU's.
     std::array<MCUTy, 2> MCUs;
-    for (size_t SubMCUIdx = 0; SubMCUIdx < MCUs.size(); ++SubMCUIdx)
+    for (int SubMCUIdx = 0; static_cast<unsigned>(SubMCUIdx) < MCUs.size();
+         ++SubMCUIdx)
       MCUs[SubMCUIdx] = LoadMCU(MCUIdx + SubMCUIdx);
 
     // Process first pixel, which is full

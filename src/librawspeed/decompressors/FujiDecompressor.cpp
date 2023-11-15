@@ -36,6 +36,7 @@
 #include "common/XTransPhase.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpMSB.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include "metadata/ColorFilterArray.h"
@@ -896,7 +897,10 @@ FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
 
 void FujiDecompressor::decompress() const {
   FujiDecompressorImpl impl(
-      mRaw, Array1DRef<const ByteStream>(strips.data(), strips.size()), header);
+      mRaw,
+      Array1DRef<const ByteStream>(
+          strips.data(), implicit_cast<Buffer::size_type>(strips.size())),
+      header);
   impl.decompress();
 }
 

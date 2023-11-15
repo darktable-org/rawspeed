@@ -22,12 +22,14 @@
 
 #include "rawspeedconfig.h"
 #include "common/DngOpcodes.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <algorithm>
@@ -345,8 +347,9 @@ protected:
     const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
-    const iPoint2D numAffected(roundUpDivision(getRoi().dim.x, colPitch),
-                               roundUpDivision(getRoi().dim.y, rowPitch));
+    const iPoint2D numAffected(
+        implicit_cast<int>(roundUpDivision(getRoi().dim.x, colPitch)),
+        implicit_cast<int>(roundUpDivision(getRoi().dim.y, rowPitch)));
     for (int y = 0; y < numAffected.y; ++y) {
       for (int x = 0; x < numAffected.x; ++x) {
         for (auto p = 0U; p < planes; ++p) {
@@ -413,7 +416,7 @@ public:
     vector<double> polynomial;
 
     const auto polynomial_size = bs.getU32() + 1UL;
-    (void)bs.check(8UL * polynomial_size);
+    (void)bs.check(implicit_cast<Buffer::size_type>(8UL * polynomial_size));
     if (polynomial_size > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 

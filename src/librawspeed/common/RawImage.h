@@ -24,6 +24,7 @@
 #include "ThreadSafetyAnalysis.h"
 #include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Mutex.h"

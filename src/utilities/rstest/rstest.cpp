@@ -21,6 +21,7 @@
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/NotARational.h"
 #include "md5.h"
@@ -107,7 +108,7 @@ public:
 struct Timer {
   mutable std::chrono::steady_clock::time_point start =
       std::chrono::steady_clock::now();
-  size_t operator()() const {
+  int64_t operator()() const {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                   std::chrono::steady_clock::now() - start)
                   .count();
@@ -286,7 +287,8 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   // regardless of padding, we need to write \n separator
   const int realLen = len + 1;
   // the first byte after that \n will be aligned
-  const int paddedLen = roundUp(realLen, dataAlignment);
+  const auto paddedLen =
+      rawspeed::implicit_cast<int>(roundUp(realLen, dataAlignment));
   assert(paddedLen > len);
   assert(rawspeed::isAligned(paddedLen, dataAlignment));
 

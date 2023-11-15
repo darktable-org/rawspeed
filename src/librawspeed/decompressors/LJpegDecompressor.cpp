@@ -20,6 +20,7 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -108,7 +109,8 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
 
   // How many full pixel blocks do we need to consume for that?
-  if (const int blocksToConsume = roundUpDivision(tileRequiredWidth, frame.cps);
+  if (const auto blocksToConsume =
+          implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.cps));
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
       (int64_t)frame.cps * frame.dim.x <
           (int64_t)mRaw->getCpp() * imgFrame.dim.x) {

@@ -22,6 +22,7 @@
 #error DECODER must be defined
 #endif
 
+#include "adt/Casts.h"
 #include "common/RawspeedException.h"
 #include "decoders/ArwDecoder.h"     // IWYU pragma: keep
 #include "decoders/Cr2Decoder.h"     // IWYU pragma: keep
@@ -60,7 +61,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer buffer(Data, Size);
+    const rawspeed::Buffer buffer(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     auto ifd = rawspeed::TiffParser::parse(nullptr, buffer);
 
     // ATM do not care if this is the appropriate decoder.

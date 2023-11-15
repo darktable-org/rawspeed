@@ -29,6 +29,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpLSB.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
@@ -168,7 +169,8 @@ PanasonicV6Decompressor::PanasonicV6Decompressor(RawImage img,
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
-  input = input_.peekStream(numBlocks, dsc->BytesPerBlock);
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(numBlocks),
+                            dsc->BytesPerBlock);
 }
 
 template <const PanasonicV6Decompressor::BlockDsc& dsc>

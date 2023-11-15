@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "tiff/TiffEntry.h"
+#include "adt/Casts.h"
 #include "adt/NotARational.h"
 #include "common/Common.h"
 #include "io/Buffer.h"
@@ -110,8 +111,9 @@ TiffEntryWithData::TiffEntryWithData(TiffIFD* parent_, TiffTag tag_,
                                      Buffer mirror)
     : TiffEntry(parent_, tag_, type_, /*count=*/0, ByteStream()),
       data(mirror.begin(), mirror.end()) {
-  setData(ByteStream(
-      DataBuffer(Buffer(data.data(), data.size()), Endianness::little)));
+  setData(ByteStream(DataBuffer(
+      Buffer(data.data(), implicit_cast<Buffer::size_type>(data.size())),
+      Endianness::little)));
   count = count_;
 }
 

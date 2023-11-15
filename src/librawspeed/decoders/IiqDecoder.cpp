@@ -426,8 +426,8 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
     return;
 
-  int wide = roundUpDivision(head[2], head[4]);
-  int high = roundUpDivision(head[3], head[5]);
+  auto wide = implicit_cast<int>(roundUpDivision(head[2], head[4]));
+  auto high = implicit_cast<int>(roundUpDivision(head[3], head[5]));
 
   std::vector<float> mrow_storage;
   Array2DRef<float> mrow = Array2DRef<float>::create(

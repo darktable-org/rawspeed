@@ -319,12 +319,14 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   tilew *= 2;
 
   assert(tilew > 0);
-  const uint32_t tilesX = roundUpDivision(mRaw->dim.x, tilew);
+  const auto tilesX =
+      implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
   if (!tilesX)
     ThrowRDE("Zero tiles horizontally");
 
   assert(tileh > 0);
-  const uint32_t tilesY = roundUpDivision(mRaw->dim.y, tileh);
+  const auto tilesY =
+      implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
   if (!tilesY)
     ThrowRDE("Zero tiles vertically");
 
@@ -571,7 +573,7 @@ void ArwDecoder::GetWB() const {
 
     assert(sony_length != nullptr);
     // The Decryption is done in blocks of 4 bytes.
-    uint32_t len = roundDown(sony_length->getU32(), 4);
+    auto len = implicit_cast<uint32_t>(roundDown(sony_length->getU32(), 4));
     if (!len)
       ThrowRDE("No buffer to decrypt?");
 

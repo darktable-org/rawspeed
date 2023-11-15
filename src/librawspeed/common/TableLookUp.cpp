@@ -48,7 +48,7 @@ TableLookUp::TableLookUp(int _ntables, bool _dither)
 void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   assert(!table.empty());
 
-  const int nfilled = table.size();
+  const auto nfilled = implicit_cast<int>(table.size());
   if (nfilled > TABLE_MAX_ELTS)
     ThrowRDE("Table lookup with %i entries is unsupported", nfilled);
 
