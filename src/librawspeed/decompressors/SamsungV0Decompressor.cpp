@@ -22,6 +22,7 @@
 
 #include "decompressors/SamsungV0Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -163,7 +164,8 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
         int b = len[c >> 3];
         int32_t adj = calcAdj(bits, b);
 
-        out(row, col + c) = adj + out(row - 1, col + c);
+        out(row, col + c) =
+            implicit_cast<uint16_t>(adj + out(row - 1, col + c));
       }
 
       // Now we decode odd pixels
@@ -173,7 +175,8 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
         int b = len[2 | (c >> 3)];
         int32_t adj = calcAdj(bits, b);
 
-        out(row, col + c) = adj + out(row - 2, col + c);
+        out(row, col + c) =
+            implicit_cast<uint16_t>(adj + out(row - 2, col + c));
       }
     } else {
       // Left to right prediction
@@ -184,7 +187,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
         int32_t adj = calcAdj(bits, b);
 
         if (col + c < out.width)
-          out(row, col + c) = adj + pred_left;
+          out(row, col + c) = implicit_cast<uint16_t>(adj + pred_left);
       }
 
       // Now we decode odd pixels
@@ -194,7 +197,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
         int32_t adj = calcAdj(bits, b);
 
         if (col + c < out.width)
-          out(row, col + c) = adj + pred_left;
+          out(row, col + c) = implicit_cast<uint16_t>(adj + pred_left);
       }
     }
   }

@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/SonyArw2Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -100,8 +101,9 @@ void SonyArw2Decompressor::decompressRow(int row) const {
             p = 0x7ff;
         }
       }
-      rawdata.setWithLookUp(
-          p << 1, reinterpret_cast<uint8_t*>(&out(row, col + i * 2)), &random);
+      rawdata.setWithLookUp(implicit_cast<uint16_t>(p << 1),
+                            reinterpret_cast<uint8_t*>(&out(row, col + i * 2)),
+                            &random);
     }
   }
 }

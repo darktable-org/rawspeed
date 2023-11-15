@@ -21,6 +21,7 @@
 
 #include "decoders/NefDecoder.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -336,10 +337,10 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
   BitPumpMSB odd(input.getStream(size.y / 2, inputPitch));
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
-      img(row, col) = even.getBits(12);
+      img(row, col) = implicit_cast<uint16_t>(even.getBits(12));
     ++row;
     for (int col = offset.x; col < size.x; ++col)
-      img(row, col) = odd.getBits(12);
+      img(row, col) = implicit_cast<uint16_t>(odd.getBits(12));
     ++row;
   }
   assert(even.getRemainingSize() == 0 && odd.getRemainingSize() == 0 &&

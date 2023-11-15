@@ -30,6 +30,7 @@ set (CLANG_DISABLED_WARNING_FLAGS
 # Yes, these have to be *re-enabled* after CLANG_DISABLED_WARNING_FLAGS.
 set (CLANG_REENABLED_WARNING_FLAGS
   "extra-semi"
+  "implicit-int-conversion"
 )
 
 set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")

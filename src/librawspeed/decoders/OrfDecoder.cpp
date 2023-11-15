@@ -22,6 +22,7 @@
 
 #include "decoders/OrfDecoder.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/NORangesSet.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -165,7 +166,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
-        out(row, col) = bs.getBits(12);
+        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
       }
     }
   }
@@ -174,7 +175,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;
-        out(row, col) = bs.getBits(12);
+        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
       }
     }
   }

@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/PanasonicV5Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -189,7 +190,7 @@ inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
   for (int p = 0; p < dsc.pixelsPerPacket;) {
     bs.fill();
     for (; bs.getFillLevel() >= dsc.bps; ++p, ++col)
-      out(row, col) = bs.getBitsNoFill(dsc.bps);
+      out(row, col) = implicit_cast<uint16_t>(bs.getBitsNoFill(dsc.bps));
   }
   bs.skipBitsNoFill(bs.getFillLevel()); // get rid of padding.
 }

@@ -23,6 +23,7 @@
 #include "decoders/Cr2Decoder.h"
 #include "MemorySanitizer.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
@@ -95,7 +96,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
   mRaw->createData();
 
   Cr2SliceWidths slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                         /*lastSliceWidth=*/width);
+                         /*lastSliceWidth=*/implicit_cast<uint16_t>(width));
   l.decode(slicing);
 
   // deal with D2000 GrayResponseCurve

@@ -22,6 +22,7 @@
 
 #include "decompressors/OlympusDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
@@ -137,7 +138,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
     int diff = parseCarry(bits, &carry);
     int pred = getPred(out, row, col);
 
-    out(row, col) = pred + diff;
+    out(row, col) = implicit_cast<uint16_t>(pred + diff);
   }
 }
 

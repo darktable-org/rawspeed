@@ -23,6 +23,7 @@
 #include "decompressors/PanasonicV7Decompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -68,7 +69,7 @@ PanasonicV7Decompressor::decompressBlock(
   invariant(out.size() == PixelsPerBlock);
   BitPumpLSB pump(block);
   for (int pix = 0; pix < PixelsPerBlock; pix++)
-    out(pix) = pump.getBits(BitsPerSample);
+    out(pix) = implicit_cast<uint16_t>(pump.getBits(BitsPerSample));
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.

@@ -339,7 +339,7 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
 
     uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);
     *random = 15700 * (r & 65535) + (r >> 16);
-    *dest = pix;
+    *dest = implicit_cast<uint16_t>(pix);
     return;
   }
   *dest = table->tables[value];

@@ -23,6 +23,7 @@
 #include "decompressors/CrwDecompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
@@ -174,7 +175,8 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
   for (int i = 0; i < 64;) {
     bs.fill(32);
 
-    const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
+    const auto codeValue =
+        implicit_cast<uint8_t>(mHuff[i > 0].decodeCodeValue(bs));
     const int len = codeValue & 0b1111;
     const int index = codeValue >> 4;
     invariant(len >= 0 && index >= 0);
@@ -201,7 +203,7 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
 
     diff = PrefixCodeDecoder<>::extend(diff, len);
 
-    (*diffBuf)[i] = diff;
+    (*diffBuf)[i] = implicit_cast<int16_t>(diff);
     ++i;
   }
 }
@@ -250,7 +252,7 @@ void CrwDecompressor::decompress() {
         if (!isIntN(base[k & 1], 10))
           ThrowRDE("Error decompressing");
 
-        out(row, col) = base[k & 1];
+        out(row, col) = implicit_cast<uint16_t>(base[k & 1]);
         ++col;
       }
     }
@@ -270,7 +272,7 @@ void CrwDecompressor::decompress() {
           uint16_t& pixel = out(row, col);
 
           uint16_t low = (c >> (2 * p)) & 0b11;
-          uint16_t val = (pixel << 2) | low;
+          auto val = implicit_cast<uint16_t>((pixel << 2) | low);
 
           if (out.width == 2672 && val < 512)
             val += 2; // No idea why this is needed
