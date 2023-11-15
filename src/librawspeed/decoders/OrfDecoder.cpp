@@ -144,11 +144,11 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
   int inputPitchBytes = inputPitchBits / 8;
 
-  const int numEvenLines = roundUpDivision(h, 2);
+  const auto numEvenLines = implicit_cast<int>(roundUpDivision(h, 2));
   ByteStream evenLinesInput = s.getStream(numEvenLines, inputPitchBytes);
 
-  const uint32_t oddLinesInputBegin =
-      roundUp(evenLinesInput.getSize(), 1U << 11U);
+  const auto oddLinesInputBegin =
+      implicit_cast<uint32_t>(roundUp(evenLinesInput.getSize(), 1U << 11U));
   assert(oddLinesInputBegin >= evenLinesInput.getSize());
   int padding = oddLinesInputBegin - evenLinesInput.getSize();
   assert(padding >= 0);

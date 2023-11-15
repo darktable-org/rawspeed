@@ -27,6 +27,7 @@
 #include "io/BitPumpMSB.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 
 namespace rawspeed {
@@ -39,7 +40,7 @@ class OlympusDecompressor final : public AbstractDecompressor {
 
   // A table to quickly look up "high" value
   const SimpleLUT<char, 12> bittable{
-      [](unsigned i, [[maybe_unused]] unsigned tableSize) {
+      [](size_t i, [[maybe_unused]] unsigned tableSize) {
         int high;
         for (high = 0; high < 12; high++)
           if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)

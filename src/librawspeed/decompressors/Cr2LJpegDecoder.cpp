@@ -139,7 +139,7 @@ void Cr2LJpegDecoder::decodeScan() {
       [&rec, hts = getPrefixCodeDecoders(N_COMP),
        initPred = getInitialPredictors(N_COMP)]()
           -> Cr2Decompressor<PrefixCodeDecoder<>>::PerComponentRecipe {
-        const int i = rec.size();
+        const auto i = implicit_cast<int>(rec.size());
         return {*hts[i], initPred[i]};
       });
 

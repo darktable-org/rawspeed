@@ -276,7 +276,8 @@ auto genHT = [](std::initializer_list<uint8_t>&& nCodesPerLength)
   HuffmanCode<BaselineCodeTag> hc;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
-  Buffer b(v.data(), v.size());
+  Buffer b(v.data(),
+           rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
   hc.setNCodesPerLength(b);
 
   return hc;
@@ -287,7 +288,8 @@ auto genHTCount =
   HuffmanCode<BaselineCodeTag> hc;
   std::vector<uint8_t> v(nCodesPerLength.begin(), nCodesPerLength.end());
   v.resize(16);
-  Buffer b(v.data(), v.size());
+  Buffer b(v.data(),
+           rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
   return hc.setNCodesPerLength(b);
 };
 
@@ -296,7 +298,8 @@ auto genHTFull = [](std::initializer_list<uint8_t>&& nCodesPerLength,
     -> HuffmanCode<BaselineCodeTag> {
   auto hc = genHT(std::move(nCodesPerLength));
   std::vector<uint8_t> v(codeValues.begin(), codeValues.end());
-  rawspeed::Array1DRef<const uint8_t> b(v.data(), v.size());
+  rawspeed::Array1DRef<const uint8_t> b(
+      v.data(), rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
   hc.setCodeValues(b);
   return hc;
 };
@@ -307,8 +310,10 @@ TEST(HuffmanCodeDeathTest, setNCodesPerLengthRequires16Lengths) {
     std::vector<uint8_t> v(i, 1);
     ASSERT_EQ(v.size(), i);
 
-    Buffer b(v.data(), v.size());
-    ASSERT_EQ(b.getSize(), v.size());
+    Buffer b(v.data(),
+             rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
+    ASSERT_EQ(b.getSize(),
+              rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
 
     HuffmanCode<BaselineCodeTag> hc;
 
@@ -366,7 +371,8 @@ TEST(HuffmanCodeTest, setNCodesPerLengthTooManyCodesForLength) {
   for (int len = 1; len < 8; len++) {
     HuffmanCode<BaselineCodeTag> ht;
     std::vector<uint8_t> v(16, 0);
-    Buffer b(v.data(), v.size());
+    Buffer b(v.data(),
+             rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
     for (auto i = 1U; i <= (1U << len); i++) {
       v[len - 1] = rawspeed::implicit_cast<uint8_t>(i);
       ASSERT_NO_THROW(ht.setNCodesPerLength(b););
@@ -402,14 +408,17 @@ TEST(HuffmanCodeDeathTest, setCodeValuesRequiresCount) {
   for (int len = 1; len < 8; len++) {
     HuffmanCode<BaselineCodeTag> ht;
     std::vector<uint8_t> l(16, 0);
-    Buffer bl(l.data(), l.size());
+    Buffer bl(l.data(),
+              rawspeed::implicit_cast<rawspeed::Buffer::size_type>(l.size()));
     l[len - 1] = rawspeed::implicit_cast<uint8_t>((1U << len) - 1U);
     const auto count = ht.setNCodesPerLength(bl);
     std::vector<uint8_t> v;
     v.reserve(count + 1);
     for (auto cnt = count - 1; cnt <= count + 1; cnt++) {
       v.resize(cnt);
-      rawspeed::Array1DRef<const uint8_t> bv(v.data(), v.size());
+      rawspeed::Array1DRef<const uint8_t> bv(
+          v.data(),
+          rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
       if (cnt != count) {
         ASSERT_DEATH({ ht.setCodeValues(bv); },
                      "\\(unsigned\\)data.size\\(\\) == maxCodesCount\\(\\)");
@@ -428,7 +437,8 @@ TEST(HuffmanCodeDeathTest, setCodeValuesRequiresCount) {
 TEST(HuffmanCodeDeathTest, setCodeValuesRequiresLessThan162) {
   auto ht = genHT({0, 0, 0, 0, 0, 0, 0, 162});
   std::vector<uint8_t> v(163, 0);
-  rawspeed::Array1DRef<const uint8_t> bv(v.data(), v.size());
+  rawspeed::Array1DRef<const uint8_t> bv(
+      v.data(), rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
   ASSERT_DEATH({ ht.setCodeValues(bv); },
                "data.size\\(\\) <= Traits::MaxNumCodeValues");
 }
@@ -440,7 +450,9 @@ TEST(HuffmanCodeTest, setCodeValuesValueLessThan16) {
 
   for (int i = 0; i < 256; i++) {
     v[0] = rawspeed::implicit_cast<uint8_t>(i);
-    rawspeed::Array1DRef<const uint8_t> b(v.data(), v.size());
+    rawspeed::Array1DRef<const uint8_t> b(
+        v.data(),
+        rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
     ASSERT_NO_THROW(ht.setCodeValues(b););
   }
 }
@@ -613,10 +625,13 @@ INSTANTIATE_TEST_SUITE_P(generateCodeSymbolsTest, generateCodeSymbolsTest,
                          ::testing::ValuesIn(generateCodeSymbolsData));
 TEST_P(generateCodeSymbolsTest, generateCodeSymbolsTest) {
   HuffmanCode<BaselineCodeTag> hc;
-  Buffer bl(ncpl.data(), ncpl.size());
+  Buffer bl(ncpl.data(),
+            rawspeed::implicit_cast<rawspeed::Buffer::size_type>(ncpl.size()));
   const auto cnt = hc.setNCodesPerLength(bl);
   std::vector<uint8_t> cv(cnt, 0);
-  rawspeed::Array1DRef<const uint8_t> bv(cv.data(), cv.size());
+  rawspeed::Array1DRef<const uint8_t> bv(
+      cv.data(),
+      rawspeed::implicit_cast<rawspeed::Buffer::size_type>(cv.size()));
   hc.setCodeValues(bv);
 
   ASSERT_EQ(hc.generateCodeSymbols(), expectedSymbols);

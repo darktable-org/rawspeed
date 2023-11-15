@@ -114,13 +114,13 @@ inline std::array<T, 4> applyStablePhaseShift(std::array<T, 4> srcData,
   auto is_green = [](const CFAColor& c) { return c == CFAColor::GREEN; };
 
   const std::array<CFAColor, 4> tgtColors = getAsCFAColors(tgtPhase);
-  int green0Idx =
+  auto green0Idx =
       std::distance(tgtColors.begin(),
                     std::find_if(tgtColors.begin(), tgtColors.end(), is_green));
-  int green1Idx = std::distance(std::find_if(tgtColors.rbegin(),
-                                             tgtColors.rend(), is_green),
-                                tgtColors.rend()) -
-                  1;
+  auto green1Idx = std::distance(std::find_if(tgtColors.rbegin(),
+                                              tgtColors.rend(), is_green),
+                                 tgtColors.rend()) -
+                   1;
 
   std::swap(tgtData[green0Idx], tgtData[green1Idx]);
 

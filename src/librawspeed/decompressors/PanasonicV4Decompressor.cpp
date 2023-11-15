@@ -77,7 +77,7 @@ PanasonicV4Decompressor::PanasonicV4Decompressor(RawImage img,
   if (bufSize > std::numeric_limits<ByteStream::size_type>::max())
     ThrowRDE("Raw dimensions require input buffer larger than supported");
 
-  input = input_.peekStream(bufSize);
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(bufSize));
 
   chopInputIntoBlocks();
 }

@@ -20,6 +20,7 @@
 */
 
 #include "decompressors/LJpegDecoder.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
@@ -108,7 +109,7 @@ void LJpegDecoder::decodeScan() {
                   [&rec, hts = getPrefixCodeDecoders(N_COMP),
                    initPred = getInitialPredictors(
                        N_COMP)]() -> LJpegDecompressor::PerComponentRecipe {
-                    const int i = rec.size();
+                    const auto i = implicit_cast<int>(rec.size());
                     return {*hts[i], initPred[i]};
                   });
 

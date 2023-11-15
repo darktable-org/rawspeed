@@ -29,6 +29,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -59,7 +60,7 @@ KodakDecompressor::KodakDecompressor(RawImage img, ByteStream bs, int bps_,
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
-  (void)input.check(mRaw->dim.area() / 2ULL);
+  (void)input.check(implicit_cast<Buffer::size_type>(mRaw->dim.area() / 2ULL));
 }
 
 KodakDecompressor::segment

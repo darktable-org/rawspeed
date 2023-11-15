@@ -21,6 +21,7 @@
 
 #include "io/FileReader.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "io/Buffer.h"
 #include "io/FileIOException.h"
@@ -128,7 +129,8 @@ FileReader::readFile() const {
 
 #endif // __unix__
 
-  return {std::move(dest), Buffer(dest->data(), fileSize)};
+  return {std::move(dest),
+          Buffer(dest->data(), implicit_cast<Buffer::size_type>(fileSize))};
 }
 
 } // namespace rawspeed

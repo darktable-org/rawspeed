@@ -398,7 +398,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
   uint32_t step = 0;
   uint32_t csize = metadata.getU16();
   if (csize > 1)
-    step = curve.size() / (csize - 1);
+    step = implicit_cast<uint32_t>(curve.size() / (csize - 1));
 
   if (v0 == 68 && (v1 == 32 || v1 == 64) && step > 0) {
     if ((csize - 1) * step != curve.size() - 1)
@@ -409,7 +409,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
     for (size_t i = 0; i < curve.size() - 1; i++) {
       const uint32_t b_scale = i % step;
 
-      const uint32_t a_pos = i - b_scale;
+      const auto a_pos = implicit_cast<uint32_t>(i - b_scale);
       const uint32_t b_pos = a_pos + step;
       assert(a_pos < curve.size());
       assert(b_pos > 0);

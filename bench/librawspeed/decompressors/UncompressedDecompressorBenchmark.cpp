@@ -19,6 +19,7 @@
 */
 
 #include "decompressors/UncompressedDecompressor.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "bench/Common.h"
 #include "common/Common.h"
@@ -49,13 +50,15 @@ inline void BM_UncompressedDecompressor(benchmark::State& state) {
   auto dim = areaToRectangle(state.range(0));
 
   int inputPitchBits = BPS::value * dim.x;
-  inputPitchBits = rawspeed::roundUp(inputPitchBits, std::lcm(8, BPS::value));
+  inputPitchBits = rawspeed::implicit_cast<int>(
+      rawspeed::roundUp(inputPitchBits, std::lcm(8, BPS::value)));
   assert(inputPitchBits % 8 == 0);
   int inputPitchBytes = inputPitchBits / 8;
   assert(inputPitchBits % BPS::value == 0);
   dim.x = inputPitchBits / BPS::value;
 
-  int packedLength = rawspeed::roundUp(inputPitchBytes * dim.y, 4);
+  auto packedLength = rawspeed::implicit_cast<int>(
+      rawspeed::roundUp(inputPitchBytes * dim.y, 4));
   const std::vector<uint8_t> buf(packedLength);
   const rawspeed::ByteStream bs(rawspeed::DataBuffer(
       Buffer(buf.data(), packedLength), rawspeed::Endianness::little));

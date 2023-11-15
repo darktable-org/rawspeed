@@ -33,6 +33,12 @@ set (CLANG_REENABLED_WARNING_FLAGS
   "implicit-int-conversion"
 )
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  list (APPEND CLANG_REENABLED_WARNING_FLAGS
+    "shorten-64-to-32"
+  )
+endif()
+
 set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "-c -Wthread-safety-analysis -Werror=thread-safety-analysis")
 CHECK_CXX_SOURCE_COMPILES(

@@ -25,6 +25,7 @@
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
 #include "common/RawspeedException.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cassert>
 #include <cstdint>
@@ -87,7 +88,8 @@ createHuffmanCode(rawspeed::ByteStream& bs) {
         bs.getStream(count, sizeof(typename Traits::CodeValueTy));
     const auto codesBuf = getCodeValues<CodeTag>(codeValuesStream, count);
     hc.setCodeValues(rawspeed::Array1DRef<const typename Traits::CodeValueTy>(
-        codesBuf.data(), codesBuf.size()));
+        codesBuf.data(),
+        rawspeed::implicit_cast<rawspeed::Buffer::size_type>(codesBuf.size())));
   }
 
   return hc;

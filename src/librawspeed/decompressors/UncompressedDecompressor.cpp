@@ -33,6 +33,7 @@
 #include "io/BitPumpMSB.h"
 #include "io/BitPumpMSB16.h"
 #include "io/BitPumpMSB32.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
@@ -145,7 +146,8 @@ UncompressedDecompressor::UncompressedDecompressor(
   sanityCheck(&h, inputPitchBytes);
 
   invariant((unsigned)inputPitchBytes >= outPixelBytes);
-  skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
+  skipBytes =
+      implicit_cast<uint32_t>(inputPitchBytes - outPixelBytes); // Skip per line
 
   if (oy > static_cast<uint64_t>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
@@ -192,30 +194,38 @@ void UncompressedDecompressor::readUncompressedRaw() {
   uint64_t oy = offset.y;
 
   uint64_t y = oy;
-  h = min(h + oy, static_cast<uint64_t>(mRaw->dim.y));
+  h = implicit_cast<uint32_t>(min(h + oy, static_cast<uint64_t>(mRaw->dim.y)));
 
   if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
       const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
-                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
-                 w * mRaw->getBpp(), h - y);
+      copyPixels(reinterpret_cast<uint8_t*>(
+                     &out(implicit_cast<int>(y), offset.x * cpp)),
+                 outPitch,
+                 input.getData(implicit_cast<Buffer::size_type>(
+                     inputPitchBytes * (h - y))),
+                 inputPitchBytes, w * mRaw->getBpp(),
+                 implicit_cast<int>(h - y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(
+          h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(
+          h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(
+          h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(
+          h, implicit_cast<int>(y));
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
@@ -223,20 +233,24 @@ void UncompressedDecompressor::readUncompressedRaw() {
   }
 
   if (BitOrder::MSB == order) {
-    decodePackedInt<BitPumpMSB>(h, y);
+    decodePackedInt<BitPumpMSB>(h, implicit_cast<int>(y));
   } else if (BitOrder::MSB16 == order) {
-    decodePackedInt<BitPumpMSB16>(h, y);
+    decodePackedInt<BitPumpMSB16>(h, implicit_cast<int>(y));
   } else if (BitOrder::MSB32 == order) {
-    decodePackedInt<BitPumpMSB32>(h, y);
+    decodePackedInt<BitPumpMSB32>(h, implicit_cast<int>(y));
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
-                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
-                 w * mRaw->getBpp(), h - y);
+      copyPixels(reinterpret_cast<uint8_t*>(
+                     &out(implicit_cast<int>(y), offset.x * cpp)),
+                 outPitch,
+                 input.getData(implicit_cast<Buffer::size_type>(
+                     inputPitchBytes * (h - y))),
+                 inputPitchBytes, w * mRaw->getBpp(),
+                 implicit_cast<int>(h - y));
       return;
     }
-    decodePackedInt<BitPumpLSB>(h, y);
+    decodePackedInt<BitPumpLSB>(h, implicit_cast<int>(y));
   }
 }
 

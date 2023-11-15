@@ -22,6 +22,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Casts.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -145,7 +146,9 @@ public:
            getBottomRight() <= superRect.getBottomRight();
   }
 
-  [[nodiscard]] unsigned int area() const { return dim.area(); }
+  [[nodiscard]] auto area() const {
+    return implicit_cast<unsigned int>(dim.area());
+  }
 
   void offset(const iPoint2D& offset_) { pos += offset_; }
 

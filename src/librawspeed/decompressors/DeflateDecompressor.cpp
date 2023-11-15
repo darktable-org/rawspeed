@@ -22,6 +22,7 @@
 
 #ifdef HAVE_ZLIB
 
+#include "adt/Casts.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
@@ -134,7 +135,7 @@ void DeflateDecompressor::decode(
   int bytesps = bps / 8;
   invariant(bytesps >= 2 && bytesps <= 4);
 
-  uLongf dstLen = bytesps * maxDim.area();
+  auto dstLen = implicit_cast<uLongf>(bytesps * maxDim.area());
 
   if (!*uBuffer)
     *uBuffer =

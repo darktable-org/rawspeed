@@ -23,6 +23,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "common/Common.h"
 #include "io/Buffer.h"
@@ -87,9 +88,10 @@ struct BitStreamCacheRightInLeftOut : BitStreamCacheBase {
     fillLevel += count;
   }
 
-  [[nodiscard]] inline uint32_t peek(uint32_t count) const noexcept {
-    return extractHighBits(cache, count,
-                           /*effectiveBitwidth=*/BitStreamCacheBase::Size);
+  [[nodiscard]] inline auto peek(uint32_t count) const noexcept {
+    return implicit_cast<uint32_t>(
+        extractHighBits(cache, count,
+                        /*effectiveBitwidth=*/BitStreamCacheBase::Size));
   }
 
   inline void skip(uint32_t count) noexcept {
