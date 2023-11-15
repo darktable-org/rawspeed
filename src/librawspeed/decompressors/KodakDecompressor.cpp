@@ -137,10 +137,11 @@ void KodakDecompressor::decompress() {
 
         if (uncorrectedRawValues)
           out(row, col) = implicit_cast<uint16_t>(value);
-        else
+        else {
           mRaw->setWithLookUp(implicit_cast<uint16_t>(value),
                               reinterpret_cast<uint8_t*>(&out(row, col)),
                               &random);
+        }
       }
     }
   }
