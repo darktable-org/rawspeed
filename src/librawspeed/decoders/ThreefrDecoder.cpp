@@ -20,6 +20,7 @@
 */
 
 #include "decoders/ThreefrDecoder.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -118,13 +119,13 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::BLACKLEVEL)) {
     const TiffEntry* bl = mRootIFD->getEntryRecursive(TiffTag::BLACKLEVEL);
     if (bl->count == 1)
-      mRaw->blackLevel = bl->getFloat();
+      mRaw->blackLevel = implicit_cast<int>(bl->getFloat());
   }
 
   if (mRootIFD->hasEntryRecursive(TiffTag::WHITELEVEL)) {
     const TiffEntry* wl = mRootIFD->getEntryRecursive(TiffTag::WHITELEVEL);
     if (wl->count == 1)
-      mRaw->whitePoint = wl->getFloat();
+      mRaw->whitePoint = implicit_cast<int>(wl->getFloat());
   }
 
   // Fetch the white balance

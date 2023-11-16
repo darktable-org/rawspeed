@@ -184,9 +184,11 @@ std::string img_hash(const RawImage& r, bool noSamples) {
          r->blackLevelSeparate[1], r->blackLevelSeparate[2],
          r->blackLevelSeparate[3]);
 
-  APPEND(&oss, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-         r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-         r->metadata.wbCoeffs[3]);
+  APPEND(&oss, "wbCoeffs: %f %f %f %f\n",
+         implicit_cast<double>(r->metadata.wbCoeffs[0]),
+         implicit_cast<double>(r->metadata.wbCoeffs[1]),
+         implicit_cast<double>(r->metadata.wbCoeffs[2]),
+         implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
   APPEND(&oss, "colorMatrix:");
   if (r->metadata.colorMatrix.empty())
@@ -571,7 +573,9 @@ int main(int argc, char **argv) {
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << '\n' << '\n';
+  cout << "Total decoding time: "
+       << rawspeed::implicit_cast<double>(time) / 1000.0 << "s" << '\n'
+       << '\n';
 
   return results(failedTests, o);
 }

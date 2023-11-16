@@ -581,9 +581,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (wb->count == 2560 && wb->type == TiffDataType::UNDEFINED) {
       bs.skipBytes(1248);
       bs.setByteOrder(Endianness::big);
-      mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0;
+      mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0F;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
-      mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0;
+      mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0F;
     } else if (bs.hasPatternAt("NRW ", 4, 0)) {
       uint32_t offset = 0;
       if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
@@ -594,17 +594,17 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (offset) {
         bs.skipBytes(offset);
         bs.setByteOrder(Endianness::little);
-        mRaw->metadata.wbCoeffs[0] = 4.0 * bs.getU32();
-        mRaw->metadata.wbCoeffs[1] = bs.getU32();
-        mRaw->metadata.wbCoeffs[1] += bs.getU32();
-        mRaw->metadata.wbCoeffs[2] = 4.0 * bs.getU32();
+        mRaw->metadata.wbCoeffs[0] = 4.0F * implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[1] = implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[1] += implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[2] = 4.0F * implicit_cast<float>(bs.getU32());
       }
     }
   }
 
   if (hints.contains("nikon_wb_adjustment")) {
-    mRaw->metadata.wbCoeffs[0] *= 256 / 527.0;
-    mRaw->metadata.wbCoeffs[2] *= 256 / 317.0;
+    mRaw->metadata.wbCoeffs[0] *= 256.0F / 527.0F;
+    mRaw->metadata.wbCoeffs[2] *= 256.0F / 317.0F;
   }
 
   auto id = mRootIFD->getID();
@@ -663,16 +663,18 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   float wb_b = wb->getFloat(1);
 
   // ((1024/x)*((1<<16)-1)+(1<<9))<=((1<<31)-1), x>0  gives: (0.0312495)
-  if (const float lower_limit = 13'421'568.0 / 429'496'627.0;
+  if (const auto lower_limit =
+          implicit_cast<float>(13'421'568.0 / 429'496'627.0);
       wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
-    ThrowRDE("Whitebalance has bad values (%f, %f)", wb_r, wb_b);
+    ThrowRDE("Whitebalance has bad values (%f, %f)",
+             implicit_cast<double>(wb_r), implicit_cast<double>(wb_b));
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
   mRaw->metadata.wbCoeffs[1] = 1.0F;
   mRaw->metadata.wbCoeffs[2] = wb_b;
 
-  auto inv_wb_r = static_cast<int>(1024.0 / wb_r);
-  auto inv_wb_b = static_cast<int>(1024.0 / wb_b);
+  auto inv_wb_r = static_cast<int>(1024.0F / wb_r);
+  auto inv_wb_b = static_cast<int>(1024.0F / wb_b);
 
   auto curve = gammaCurve(1 / 2.4, 12.92, 1, 4095);
 
@@ -724,28 +726,46 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       cb2 -= 2048;
       cr2 -= 2048;
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.370705 * cr), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y1) +
+                                     1.370705 * implicit_cast<double>(cr)),
+                    12),
+          tmpch, &random);
       out(row, col) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(y1 - 0.337633 * cb - 0.698001 * cr), 12),
+          clampBits(static_cast<int>(implicit_cast<double>(y1) -
+                                     0.337633 * implicit_cast<double>(cb) -
+                                     0.698001 * implicit_cast<double>(cr)),
+                    12),
           reinterpret_cast<uint8_t*>(&out(row, col + 1)), &random);
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.732446 * cb), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y1) +
+                                     1.732446 * implicit_cast<double>(cb)),
+                    12),
+          tmpch, &random);
       out(row, col + 2) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.370705 * cr2), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y2) +
+                                     1.370705 * implicit_cast<double>(cr2)),
+                    12),
+          tmpch, &random);
       out(row, col + 3) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12),
+          clampBits(static_cast<int>(implicit_cast<double>(y2) -
+                                     0.337633 * implicit_cast<double>(cb2) -
+                                     0.698001 * implicit_cast<double>(cr2)),
+                    12),
           reinterpret_cast<uint8_t*>(&out(row, col + 4)), &random);
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.732446 * cb2), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y2) +
+                                     1.732446 * implicit_cast<double>(cb2)),
+                    12),
+          tmpch, &random);
       out(row, col + 5) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
     }
   }
@@ -765,19 +785,19 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   g[1] = ts;
   g[2] = g[3] = g[4] = 0;
   bnd[g[1] >= 1] = 1;
-  if (g[1] && (g[1] - 1) * (g[0] - 1) <= 0) {
+  if (std::abs(g[1]) > 0 && (g[1] - 1) * (g[0] - 1) <= 0) {
     for (i = 0; i < 48; i++) {
       g[2] = (bnd[0] + bnd[1]) / 2;
-      if (g[0])
+      if (std::abs(g[0]) > 0)
         bnd[(pow(g[2] / g[1], -g[0]) - 1) / g[0] - 1 / g[2] > -1] = g[2];
       else
         bnd[g[2] / exp(1 - 1 / g[2]) < g[1]] = g[2];
     }
     g[3] = g[2] / g[1];
-    if (g[0])
+    if (std::abs(g[0]) > 0)
       g[4] = g[2] * (1 / g[0] - 1);
   }
-  if (g[0]) {
+  if (std::abs(g[0]) > 0) {
     g[5] = 1 / (g[1] * SQR(g[3]) / 2 - g[4] * (1 - g[3]) +
                 (1 - pow(g[3], 1 + g[0])) * (1 + g[4]) / (1 + g[0])) -
            1;
@@ -797,12 +817,14 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
     if ((r = static_cast<double>(i) / imax) < 1) {
       curve[i] = static_cast<uint16_t>(
           0x10000 *
-          (mode ? (r < g[3] ? r * g[1]
-                            : (g[0] ? pow(r, g[0]) * (1 + g[4]) - g[4]
-                                    : log(r) * g[2] + 1))
+          (mode ? (r < g[3]
+                       ? r * g[1]
+                       : (std::abs(g[0]) > 0 ? pow(r, g[0]) * (1 + g[4]) - g[4]
+                                             : log(r) * g[2] + 1))
                 : (r < g[2] ? r / g[1]
-                            : (g[0] ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
-                                    : exp((r - 1) / g[2])))));
+                            : (std::abs(g[0]) > 0
+                                   ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
+                                   : exp((r - 1) / g[2])))));
     }
   }
 

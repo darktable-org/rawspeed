@@ -78,7 +78,7 @@ struct RLV {
   } constexpr
 #include "gopro/vc5/table17.inc"
 
-constexpr int16_t decompand(int16_t val) {
+constexpr auto decompand(int16_t val) {
   double c = val;
   // Invert companding curve
   c += (c * c * c * 768) / (255. * 255. * 255.);
@@ -86,7 +86,7 @@ constexpr int16_t decompand(int16_t val) {
     return std::numeric_limits<int16_t>::max();
   if (c < std::numeric_limits<int16_t>::min())
     return std::numeric_limits<int16_t>::min();
-  return c;
+  return rawspeed::implicit_cast<int16_t>(c);
 }
 
 #ifndef NDEBUG
@@ -467,7 +467,9 @@ void VC5Decompressor::initVC5LogTable() {
           return (std::pow(113.0, normalizedI) - 1) / 112.0;
         };
 
-        auto normalizeI = [tableSize](auto x) { return x / (tableSize - 1.0); };
+        auto normalizeI = [tableSize](auto x) {
+          return implicit_cast<double>(x) / (tableSize - 1.0);
+        };
         auto denormalizeY = [maxVal = std::numeric_limits<uint16_t>::max()](
                                 auto y) { return maxVal * y; };
         // Adjust for output whitelevel bitdepth.

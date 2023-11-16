@@ -429,10 +429,11 @@ public:
     for (auto i = 0UL; i < lookup.size(); ++i) {
       double val = polynomial[0];
       for (auto j = 1UL; j < polynomial.size(); ++j)
-        val += polynomial[j] * pow(i / 65536.0, j);
-      lookup[i] = std::clamp<double>(val * 65535.5,
-                                     std::numeric_limits<uint16_t>::min(),
-                                     std::numeric_limits<uint16_t>::max());
+        val += polynomial[j] * pow(implicit_cast<double>(i) / 65536.0,
+                                   implicit_cast<double>(j));
+      lookup[i] = implicit_cast<uint16_t>(std::clamp<double>(
+          val * 65535.5, std::numeric_limits<uint16_t>::min(),
+          std::numeric_limits<uint16_t>::max()));
     }
   }
 };
@@ -468,7 +469,8 @@ public:
     deltaI.reserve(deltaF.size());
     for (const auto f : deltaF) {
       if (!valueIsOk(f))
-        ThrowRDE("Got float %f which is unacceptable.", f);
+        ThrowRDE("Got float %f which is unacceptable.",
+                 implicit_cast<double>(f));
       deltaI.emplace_back(static_cast<int>(f2iScale * f));
     }
   }
@@ -502,7 +504,7 @@ protected:
     std::generate_n(std::back_inserter(deltaF), deltaF_count, [&bs]() {
       const auto F = bs.get<float>();
       if (!std::isfinite(F))
-        ThrowRDE("Got bad float %f.", F);
+        ThrowRDE("Got bad float %f.", implicit_cast<double>(F));
       return F;
     });
   }
@@ -518,14 +520,16 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // by f2iScale before applying, we need to divide by f2iScale here.
   const double absLimit;
 
-  bool valueIsOk(float value) override { return std::abs(value) <= absLimit; }
+  bool valueIsOk(float value) override {
+    return implicit_cast<double>(std::abs(value)) <= absLimit;
+  }
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs,
                              const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
-                 this->f2iScale) {}
+                 implicit_cast<double>(this->f2iScale)) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
@@ -550,12 +554,12 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   // signed integer space, so the new value can not be larger than 2^31,
   // else we'd have signed integer overflow. Since the offset is multiplied
   // by f2iScale before applying, we need to divide by f2iScale here.
-  static constexpr const double minLimit = 0.0;
+  static constexpr const float minLimit = 0.0;
   static constexpr int rounding = 512;
   const double maxLimit;
 
   bool valueIsOk(float value) override {
-    return value >= minLimit && value <= maxLimit;
+    return value >= minLimit && implicit_cast<double>(value) <= maxLimit;
   }
 
 public:
@@ -564,7 +568,7 @@ public:
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
-                 this->f2iScale) {}
+                 implicit_cast<double>(this->f2iScale)) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {

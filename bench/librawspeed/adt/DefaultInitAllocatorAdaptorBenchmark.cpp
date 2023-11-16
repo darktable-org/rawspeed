@@ -19,6 +19,7 @@
 */
 
 #include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/Casts.h"
 #include "bench/Common.h"
 #include <cstddef>
 #include <map>
@@ -51,7 +52,8 @@ void BM_std_vector(benchmark::State& state, Worker worker) {
 
   const auto AllocSize = sizeof(Type) * state.range(0);
   state.counters["Allocation,bytes"] = benchmark::Counter(
-      AllocSize, benchmark::Counter::kDefaults, benchmark::Counter::kIs1024);
+      rawspeed::implicit_cast<double>(AllocSize), benchmark::Counter::kDefaults,
+      benchmark::Counter::kIs1024);
   state.SetComplexityN(AllocSize);
   state.SetBytesProcessed(AllocSize * state.iterations());
   state.SetItemsProcessed(state.range(0) * state.iterations());
