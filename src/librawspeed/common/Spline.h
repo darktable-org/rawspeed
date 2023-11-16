@@ -171,7 +171,7 @@ public:
               interpolated, double(std::numeric_limits<value_type>::max()));
         }
 
-        curve[x] = interpolated;
+        curve[x] = implicit_cast<T>(interpolated);
       }
     }
 

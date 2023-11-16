@@ -581,9 +581,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (wb->count == 2560 && wb->type == TiffDataType::UNDEFINED) {
       bs.skipBytes(1248);
       bs.setByteOrder(Endianness::big);
-      mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0;
+      mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0F;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
-      mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0;
+      mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0F;
     } else if (bs.hasPatternAt("NRW ", 4, 0)) {
       uint32_t offset = 0;
       if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
@@ -665,14 +665,15 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   // ((1024/x)*((1<<16)-1)+(1<<9))<=((1<<31)-1), x>0  gives: (0.0312495)
   if (const float lower_limit = 13'421'568.0 / 429'496'627.0;
       wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
-    ThrowRDE("Whitebalance has bad values (%f, %f)", wb_r, wb_b);
+    ThrowRDE("Whitebalance has bad values (%f, %f)",
+             implicit_cast<double>(wb_r), implicit_cast<double>(wb_b));
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
   mRaw->metadata.wbCoeffs[1] = 1.0F;
   mRaw->metadata.wbCoeffs[2] = wb_b;
 
-  auto inv_wb_r = static_cast<int>(1024.0 / wb_r);
-  auto inv_wb_b = static_cast<int>(1024.0 / wb_b);
+  auto inv_wb_r = static_cast<int>(1024.0F / wb_r);
+  auto inv_wb_b = static_cast<int>(1024.0F / wb_b);
 
   auto curve = gammaCurve(1 / 2.4, 12.92, 1, 4095);
 
@@ -724,28 +725,46 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       cb2 -= 2048;
       cr2 -= 2048;
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.370705 * cr), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y1) +
+                                     1.370705 * implicit_cast<double>(cr)),
+                    12),
+          tmpch, &random);
       out(row, col) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(y1 - 0.337633 * cb - 0.698001 * cr), 12),
+          clampBits(static_cast<int>(implicit_cast<double>(y1) -
+                                     0.337633 * implicit_cast<double>(cb) -
+                                     0.698001 * implicit_cast<double>(cr)),
+                    12),
           reinterpret_cast<uint8_t*>(&out(row, col + 1)), &random);
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y1 + 1.732446 * cb), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y1) +
+                                     1.732446 * implicit_cast<double>(cb)),
+                    12),
+          tmpch, &random);
       out(row, col + 2) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.370705 * cr2), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y2) +
+                                     1.370705 * implicit_cast<double>(cr2)),
+                    12),
+          tmpch, &random);
       out(row, col + 3) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(y2 - 0.337633 * cb2 - 0.698001 * cr2), 12),
+          clampBits(static_cast<int>(implicit_cast<double>(y2) -
+                                     0.337633 * implicit_cast<double>(cb2) -
+                                     0.698001 * implicit_cast<double>(cr2)),
+                    12),
           reinterpret_cast<uint8_t*>(&out(row, col + 4)), &random);
 
-      mRaw->setWithLookUp(clampBits(static_cast<int>(y2 + 1.732446 * cb2), 12),
-                          tmpch, &random);
+      mRaw->setWithLookUp(
+          clampBits(static_cast<int>(implicit_cast<double>(y2) +
+                                     1.732446 * implicit_cast<double>(cb2)),
+                    12),
+          tmpch, &random);
       out(row, col + 5) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
     }
   }

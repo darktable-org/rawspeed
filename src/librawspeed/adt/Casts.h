@@ -26,13 +26,15 @@
 namespace rawspeed {
 
 template <typename Ttgt, typename Tsrc>
-  requires(std::is_integral_v<Tsrc> && std::is_integral_v<Ttgt> &&
+  requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
+            (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
            !std::is_same_v<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
   return value;
 #pragma GCC diagnostic pop
 }
@@ -40,7 +42,8 @@ constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
 // Sometimes through templates in some template instantiations
 // the types do end up being the same. This is fine.
 template <typename Ttgt, typename Tsrc>
-  requires(std::is_integral_v<Tsrc> && std::is_integral_v<Ttgt> &&
+  requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
+            (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
            std::is_same_v<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
   return value;

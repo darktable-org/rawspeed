@@ -31,6 +31,7 @@ set (CLANG_DISABLED_WARNING_FLAGS
 set (CLANG_REENABLED_WARNING_FLAGS
   "extra-semi"
   "implicit-int-conversion"
+  "double-promotion"
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
