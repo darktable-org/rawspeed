@@ -126,7 +126,7 @@ public:
            "The X coordinates must all be strictly increasing");
 
 #ifndef NDEBUG
-    if (!std::is_floating_point_v<value_type>) {
+    if constexpr (!std::is_floating_point_v<value_type>) {
       // The Y coords must be limited to the range of value_type
       std::for_each(control_points.cbegin(), control_points.cend(),
                     [](const iPoint2D& p) {
@@ -164,7 +164,7 @@ public:
 
         double interpolated = s.a + s.b * diff + s.c * diff_2 + s.d * diff_3;
 
-        if (!std::is_floating_point_v<value_type>) {
+        if constexpr (!std::is_floating_point_v<value_type>) {
           interpolated = std::max(
               interpolated, double(std::numeric_limits<value_type>::min()));
           interpolated = std::min(
