@@ -628,6 +628,43 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   }
 }
 
+void DngDecoder::parseWhiteBalance() const {
+  // Fetch the white balance
+  if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
+    const TiffEntry* as_shot_neutral =
+        mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
+    if (as_shot_neutral->count == 3) {
+      for (uint32_t i = 0; i < 3; i++) {
+        float c = as_shot_neutral->getFloat(i);
+        mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
+      }
+    }
+  } else if (!mRaw->metadata.colorMatrix.empty() &&
+             mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
+    const TiffEntry* as_shot_white_xy =
+        mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
+    if (as_shot_white_xy->count == 2) {
+      // See http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
+      const float x = as_shot_white_xy->getFloat(0);
+      const float y = as_shot_white_xy->getFloat(1);
+      if (y > 0.0F) {
+        constexpr float Y = 1.0F;
+        const std::array<float, 3> as_shot_white = {
+            {x * Y / y, Y, (1 - x - y) * Y / y}};
+
+        // Convert from XYZ to camera reference values first
+        for (uint32_t i = 0; i < 3; i++) {
+          float c =
+              float(mRaw->metadata.colorMatrix[i * 3 + 0]) * as_shot_white[0] +
+              float(mRaw->metadata.colorMatrix[i * 3 + 1]) * as_shot_white[1] +
+              float(mRaw->metadata.colorMatrix[i * 3 + 2]) * as_shot_white[2];
+          mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
+        }
+      }
+    }
+  }
+}
+
 void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
     mRaw->metadata.isoSpeed =
@@ -670,40 +707,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   parseColorMatrix();
 
-  // Fetch the white balance
-  if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
-    const TiffEntry* as_shot_neutral =
-        mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
-    if (as_shot_neutral->count == 3) {
-      for (uint32_t i = 0; i < 3; i++) {
-        float c = as_shot_neutral->getFloat(i);
-        mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
-      }
-    }
-  } else if (!mRaw->metadata.colorMatrix.empty() &&
-             mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
-    const TiffEntry* as_shot_white_xy =
-        mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
-    if (as_shot_white_xy->count == 2) {
-      // See http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
-      const float x = as_shot_white_xy->getFloat(0);
-      const float y = as_shot_white_xy->getFloat(1);
-      if (y > 0.0F) {
-        constexpr float Y = 1.0F;
-        const std::array<float, 3> as_shot_white = {
-            {x * Y / y, Y, (1 - x - y) * Y / y}};
-
-        // Convert from XYZ to camera reference values first
-        for (uint32_t i = 0; i < 3; i++) {
-          float c =
-              float(mRaw->metadata.colorMatrix[i * 3 + 0]) * as_shot_white[0] +
-              float(mRaw->metadata.colorMatrix[i * 3 + 1]) * as_shot_white[1] +
-              float(mRaw->metadata.colorMatrix[i * 3 + 2]) * as_shot_white[2];
-          mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
-        }
-      }
-    }
-  }
+  parseWhiteBalance();
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */
