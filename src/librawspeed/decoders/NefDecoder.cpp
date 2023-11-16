@@ -594,10 +594,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (offset) {
         bs.skipBytes(offset);
         bs.setByteOrder(Endianness::little);
-        mRaw->metadata.wbCoeffs[0] = 4.0F * bs.getU32();
-        mRaw->metadata.wbCoeffs[1] = bs.getU32();
-        mRaw->metadata.wbCoeffs[1] += bs.getU32();
-        mRaw->metadata.wbCoeffs[2] = 4.0F * bs.getU32();
+        mRaw->metadata.wbCoeffs[0] = 4.0F * implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[1] = implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[1] += implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[2] = 4.0F * implicit_cast<float>(bs.getU32());
       }
     }
   }

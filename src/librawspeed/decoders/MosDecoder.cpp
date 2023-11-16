@@ -174,9 +174,12 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {
-          mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]) / tmp[1];
-          mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[0]) / tmp[2];
-          mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[0]) / tmp[3];
+          mRaw->metadata.wbCoeffs[0] =
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[1]);
+          mRaw->metadata.wbCoeffs[1] =
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[2]);
+          mRaw->metadata.wbCoeffs[2] =
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[3]);
         }
         break;
       }

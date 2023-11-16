@@ -804,8 +804,8 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     // We so not have enough to fill all individually, read a single and copy it
     float value = black_entry->getFloat();
 
-    if (value < std::numeric_limits<BlackType>::min() ||
-        value > std::numeric_limits<BlackType>::max())
+    if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
+        static_cast<double>(value) > std::numeric_limits<BlackType>::max())
       ThrowRDE("Error decoding black level");
 
     for (int y = 0; y < 2; y++) {
@@ -817,8 +817,9 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
       for (int x = 0; x < 2; x++) {
         float value = black_entry->getFloat(y * blackdim.x + x);
 
-        if (value < std::numeric_limits<BlackType>::min() ||
-            value > std::numeric_limits<BlackType>::max())
+        if (static_cast<double>(value) <
+                std::numeric_limits<BlackType>::min() ||
+            static_cast<double>(value) > std::numeric_limits<BlackType>::max())
           ThrowRDE("Error decoding black level");
 
         mRaw->blackLevelSeparate[y * 2 + x] = value;
@@ -839,8 +840,8 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     for (int i = 0; i < 4; i++) {
       const float value =
           black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0F;
-      if (value < std::numeric_limits<BlackType>::min() ||
-          value > std::numeric_limits<BlackType>::max())
+      if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
+          static_cast<double>(value) > std::numeric_limits<BlackType>::max())
         ThrowRDE("Error decoding black level");
 
       if (__builtin_sadd_overflow(mRaw->blackLevelSeparate[i], value,
@@ -861,8 +862,8 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     for (int i = 0; i < 4; i++) {
       const float value =
           black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0F;
-      if (value < std::numeric_limits<BlackType>::min() ||
-          value > std::numeric_limits<BlackType>::max())
+      if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
+          static_cast<double>(value) > std::numeric_limits<BlackType>::max())
         ThrowRDE("Error decoding black level");
 
       if (__builtin_sadd_overflow(mRaw->blackLevelSeparate[i], value,

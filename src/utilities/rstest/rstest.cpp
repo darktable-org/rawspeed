@@ -573,7 +573,9 @@ int main(int argc, char **argv) {
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << '\n' << '\n';
+  cout << "Total decoding time: "
+       << rawspeed::implicit_cast<double>(time) / 1000.0 << "s" << '\n'
+       << '\n';
 
   return results(failedTests, o);
 }

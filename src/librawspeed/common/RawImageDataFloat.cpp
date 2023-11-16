@@ -20,6 +20,7 @@
 
 #include "common/RawImage.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -94,8 +95,8 @@ void RawImageDataFloat::calculateBlackAreas() {
   totalpixels /= 4;
 
   for (int i = 0; i < 4; i++) {
-    blackLevelSeparate[i] =
-        static_cast<int>(65535.0F * accPixels[i] / totalpixels);
+    blackLevelSeparate[i] = static_cast<int>(65535.0F * accPixels[i] /
+                                             implicit_cast<float>(totalpixels));
   }
 
   /* If this is not a CFA image, we do not use separate blacklevels, use average

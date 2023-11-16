@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decoders/CrwDecoder.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
@@ -123,7 +124,8 @@ float RAWSPEED_READNONE CrwDecoder::canonEv(const int64_t in) {
   } else if (frac == 0x14) {
     frac = 64.0F / 3;
   }
-  return copysignf((val + frac) / 32.0F, in);
+  return copysignf(implicit_cast<float>(val + frac) / 32.0F,
+                   implicit_cast<float>(in));
 }
 
 void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {

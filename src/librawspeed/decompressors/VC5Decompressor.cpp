@@ -467,7 +467,9 @@ void VC5Decompressor::initVC5LogTable() {
           return (std::pow(113.0, normalizedI) - 1) / 112.0;
         };
 
-        auto normalizeI = [tableSize](auto x) { return x / (tableSize - 1.0); };
+        auto normalizeI = [tableSize](auto x) {
+          return implicit_cast<double>(x) / (tableSize - 1.0);
+        };
         auto denormalizeY = [maxVal = std::numeric_limits<uint16_t>::max()](
                                 auto y) { return maxVal * y; };
         // Adjust for output whitelevel bitdepth.

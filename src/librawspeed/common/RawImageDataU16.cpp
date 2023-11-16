@@ -21,6 +21,7 @@
 #include "rawspeedconfig.h"
 #include "common/RawImage.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -177,7 +178,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #else
 
   int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0F / depth_values;
+  float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Check SSE2
   if (Cpuid::SSE2() && app_scale < 63) {
@@ -192,7 +193,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #ifdef WITH_SSE2
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0F / depth_values;
+  float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Scale in 30.2 fp
   auto full_scale_fp = static_cast<int>(app_scale * 4.0F);
@@ -329,7 +330,7 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   const CroppedArray2DRef<uint16_t> img(getU16DataAsCroppedArray2DRef());
 
   int depth_values = whitePoint - blackLevelSeparate[0];
-  float app_scale = 65535.0F / depth_values;
+  float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Scale in 30.2 fp
   auto full_scale_fp = static_cast<int>(app_scale * 4.0F);

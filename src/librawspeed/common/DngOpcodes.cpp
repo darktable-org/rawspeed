@@ -429,7 +429,8 @@ public:
     for (auto i = 0UL; i < lookup.size(); ++i) {
       double val = polynomial[0];
       for (auto j = 1UL; j < polynomial.size(); ++j)
-        val += polynomial[j] * pow(i / 65536.0, j);
+        val += polynomial[j] * pow(implicit_cast<double>(i) / 65536.0,
+                                   implicit_cast<double>(j));
       lookup[i] = std::clamp<double>(val * 65535.5,
                                      std::numeric_limits<uint16_t>::min(),
                                      std::numeric_limits<uint16_t>::max());
