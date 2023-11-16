@@ -785,19 +785,19 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   g[1] = ts;
   g[2] = g[3] = g[4] = 0;
   bnd[g[1] >= 1] = 1;
-  if (g[1] && (g[1] - 1) * (g[0] - 1) <= 0) {
+  if (std::abs(g[1]) > 0 && (g[1] - 1) * (g[0] - 1) <= 0) {
     for (i = 0; i < 48; i++) {
       g[2] = (bnd[0] + bnd[1]) / 2;
-      if (g[0])
+      if (std::abs(g[0]) > 0)
         bnd[(pow(g[2] / g[1], -g[0]) - 1) / g[0] - 1 / g[2] > -1] = g[2];
       else
         bnd[g[2] / exp(1 - 1 / g[2]) < g[1]] = g[2];
     }
     g[3] = g[2] / g[1];
-    if (g[0])
+    if (std::abs(g[0]) > 0)
       g[4] = g[2] * (1 / g[0] - 1);
   }
-  if (g[0]) {
+  if (std::abs(g[0]) > 0) {
     g[5] = 1 / (g[1] * SQR(g[3]) / 2 - g[4] * (1 - g[3]) +
                 (1 - pow(g[3], 1 + g[0])) * (1 + g[4]) / (1 + g[0])) -
            1;
@@ -817,12 +817,14 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
     if ((r = static_cast<double>(i) / imax) < 1) {
       curve[i] = static_cast<uint16_t>(
           0x10000 *
-          (mode ? (r < g[3] ? r * g[1]
-                            : (g[0] ? pow(r, g[0]) * (1 + g[4]) - g[4]
-                                    : log(r) * g[2] + 1))
+          (mode ? (r < g[3]
+                       ? r * g[1]
+                       : (std::abs(g[0]) > 0 ? pow(r, g[0]) * (1 + g[4]) - g[4]
+                                             : log(r) * g[2] + 1))
                 : (r < g[2] ? r / g[1]
-                            : (g[0] ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
-                                    : exp((r - 1) / g[2])))));
+                            : (std::abs(g[0]) > 0
+                                   ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
+                                   : exp((r - 1) / g[2])))));
     }
   }
 

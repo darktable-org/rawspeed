@@ -463,7 +463,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
                   nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
                          : 0;
               !(c & 1)) {
-            unsigned val = img(row, col) * mult[c];
+            auto val = implicit_cast<unsigned>(img(row, col) * mult[c]);
             img(row, col) = implicit_cast<uint16_t>(std::min(val, 0xFFFFU));
           }
           for (int c = 0; c < nc; c += 2)

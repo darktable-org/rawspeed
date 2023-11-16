@@ -33,6 +33,7 @@ set (CLANG_REENABLED_WARNING_FLAGS
   "implicit-int-conversion"
   "double-promotion"
   "implicit-float-conversion"
+  "float-conversion"
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
