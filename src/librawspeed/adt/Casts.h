@@ -31,12 +31,7 @@ template <typename Ttgt, typename Tsrc>
            !std::is_same_v<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
-#pragma GCC diagnostic ignored "-Wshorten-64-to-32"
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
-#pragma GCC diagnostic ignored "-Wimplicit-float-conversion"
-#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
   return value;
 #pragma GCC diagnostic pop
 }

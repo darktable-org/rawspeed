@@ -13,7 +13,6 @@ set (CLANG_WARNING_FLAGS
 set (CLANG_DISABLED_WARNING_FLAGS
   "c++98-compat"
   "c++98-compat-pedantic"
-  "conversion" # FIXME: really need to enable this one
   "covered-switch-default"
   "deprecated"
   "double-promotion"
@@ -25,22 +24,19 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "unused-parameter"
   "weak-vtables"
   "unsafe-buffer-usage" # FIXME: really want this. to be reenabled.
+  "sign-conversion" # FIXME: should enable this.
 )
+
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+  list (APPEND CLANG_DISABLED_WARNING_FLAGS
+    "shorten-64-to-32"
+  )
+endif()
 
 # Yes, these have to be *re-enabled* after CLANG_DISABLED_WARNING_FLAGS.
 set (CLANG_REENABLED_WARNING_FLAGS
   "extra-semi"
-  "implicit-int-conversion"
-  "double-promotion"
-  "implicit-float-conversion"
-  "float-conversion"
 )
-
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  list (APPEND CLANG_REENABLED_WARNING_FLAGS
-    "shorten-64-to-32"
-  )
-endif()
 
 set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS "-c -Wthread-safety-analysis -Werror=thread-safety-analysis")
