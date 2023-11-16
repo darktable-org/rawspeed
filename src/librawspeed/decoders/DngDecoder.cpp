@@ -639,8 +639,11 @@ void DngDecoder::parseWhiteBalance() const {
         mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
       }
     }
-  } else if (!mRaw->metadata.colorMatrix.empty() &&
-             mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
+    return;
+  }
+
+  if (!mRaw->metadata.colorMatrix.empty() &&
+      mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
     const TiffEntry* as_shot_white_xy =
         mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
     if (as_shot_white_xy->count == 2) {
