@@ -594,17 +594,17 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       if (offset) {
         bs.skipBytes(offset);
         bs.setByteOrder(Endianness::little);
-        mRaw->metadata.wbCoeffs[0] = 4.0 * bs.getU32();
+        mRaw->metadata.wbCoeffs[0] = 4.0F * bs.getU32();
         mRaw->metadata.wbCoeffs[1] = bs.getU32();
         mRaw->metadata.wbCoeffs[1] += bs.getU32();
-        mRaw->metadata.wbCoeffs[2] = 4.0 * bs.getU32();
+        mRaw->metadata.wbCoeffs[2] = 4.0F * bs.getU32();
       }
     }
   }
 
   if (hints.contains("nikon_wb_adjustment")) {
-    mRaw->metadata.wbCoeffs[0] *= 256 / 527.0;
-    mRaw->metadata.wbCoeffs[2] *= 256 / 317.0;
+    mRaw->metadata.wbCoeffs[0] *= 256.0F / 527.0F;
+    mRaw->metadata.wbCoeffs[2] *= 256.0F / 317.0F;
   }
 
   auto id = mRootIFD->getID();
@@ -663,7 +663,8 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   float wb_b = wb->getFloat(1);
 
   // ((1024/x)*((1<<16)-1)+(1<<9))<=((1<<31)-1), x>0  gives: (0.0312495)
-  if (const float lower_limit = 13'421'568.0 / 429'496'627.0;
+  if (const auto lower_limit =
+          implicit_cast<float>(13'421'568.0 / 429'496'627.0);
       wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
     ThrowRDE("Whitebalance has bad values (%f, %f)",
              implicit_cast<double>(wb_r), implicit_cast<double>(wb_b));

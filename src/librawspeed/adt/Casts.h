@@ -35,6 +35,7 @@ constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
 #pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
+#pragma GCC diagnostic ignored "-Wimplicit-float-conversion"
   return value;
 #pragma GCC diagnostic pop
 }
