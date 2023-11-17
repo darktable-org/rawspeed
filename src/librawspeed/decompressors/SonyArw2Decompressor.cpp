@@ -31,6 +31,7 @@
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpLSB.h"
 #include "io/ByteStream.h"
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -101,9 +102,9 @@ void SonyArw2Decompressor::decompressRow(int row) const {
             p = 0x7ff;
         }
       }
-      rawdata.setWithLookUp(implicit_cast<uint16_t>(p << 1),
-                            reinterpret_cast<uint8_t*>(&out(row, col + i * 2)),
-                            &random);
+      rawdata.setWithLookUp(
+          implicit_cast<uint16_t>(p << 1),
+          reinterpret_cast<std::byte*>(&out(row, col + i * 2)), &random);
     }
   }
 }

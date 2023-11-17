@@ -43,6 +43,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -688,7 +689,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   RawImageCurveGuard curveHandler(&mRaw, curve, false);
 
   uint16_t tmp;
-  auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
+  auto* tmpch = reinterpret_cast<std::byte*>(&tmp);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.peekData(out.width * out.height);
@@ -738,7 +739,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
                                      0.337633 * implicit_cast<double>(cb) -
                                      0.698001 * implicit_cast<double>(cr)),
                     12),
-          reinterpret_cast<uint8_t*>(&out(row, col + 1)), &random);
+          reinterpret_cast<std::byte*>(&out(row, col + 1)), &random);
 
       mRaw->setWithLookUp(
           clampBits(static_cast<int>(implicit_cast<double>(y1) +
@@ -759,7 +760,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
                                      0.337633 * implicit_cast<double>(cb2) -
                                      0.698001 * implicit_cast<double>(cr2)),
                     12),
-          reinterpret_cast<uint8_t*>(&out(row, col + 4)), &random);
+          reinterpret_cast<std::byte*>(&out(row, col + 4)), &random);
 
       mRaw->setWithLookUp(
           clampBits(static_cast<int>(implicit_cast<double>(y2) +

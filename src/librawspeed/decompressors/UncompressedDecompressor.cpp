@@ -39,6 +39,7 @@
 #include "io/IOException.h"
 #include <algorithm>
 #include <cinttypes>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -269,7 +270,7 @@ void UncompressedDecompressor::decode8BitRaw() {
       if constexpr (uncorrectedRawValues)
         out(row, col) = *in;
       else
-        mRaw->setWithLookUp(*in, reinterpret_cast<uint8_t*>(&out(row, col)),
+        mRaw->setWithLookUp(*in, reinterpret_cast<std::byte*>(&out(row, col)),
                             &random);
       in++;
     }

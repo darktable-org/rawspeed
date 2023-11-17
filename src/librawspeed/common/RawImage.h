@@ -138,7 +138,7 @@ public:
   [[nodiscard]] iPoint2D RAWSPEED_READONLY getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(uint16_t value, uint8_t* dst,
+  virtual void setWithLookUp(uint16_t value, std::byte* dst,
                              uint32_t* random) = 0;
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
@@ -202,7 +202,7 @@ public:
 
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
@@ -223,7 +223,7 @@ public:
 
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues(int start_y, int end_y) override;
@@ -324,7 +324,7 @@ RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
 // pointer to a value that will be used to store a random counter that can be
 // reused between calls. this needs to be inline to speed up tight decompressor
 // loops
-inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
+inline void RawImageDataU16::setWithLookUp(uint16_t value, std::byte* dst,
                                            uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
   if (table == nullptr) {
