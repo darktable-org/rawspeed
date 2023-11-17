@@ -200,13 +200,13 @@ void UncompressedDecompressor::readUncompressedRaw() {
   if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
       const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(
-                     &out(implicit_cast<int>(y), offset.x * cpp)),
-                 outPitch,
-                 input.getData(implicit_cast<Buffer::size_type>(
-                     inputPitchBytes * (h - y))),
-                 inputPitchBytes, w * mRaw->getBpp(),
-                 implicit_cast<int>(h - y));
+      copyPixels(
+          reinterpret_cast<std::byte*>(
+              &out(implicit_cast<int>(y), offset.x * cpp)),
+          outPitch,
+          reinterpret_cast<const std::byte*>(input.getData(
+              implicit_cast<Buffer::size_type>(inputPitchBytes * (h - y)))),
+          inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
@@ -242,13 +242,13 @@ void UncompressedDecompressor::readUncompressedRaw() {
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(
-                     &out(implicit_cast<int>(y), offset.x * cpp)),
-                 outPitch,
-                 input.getData(implicit_cast<Buffer::size_type>(
-                     inputPitchBytes * (h - y))),
-                 inputPitchBytes, w * mRaw->getBpp(),
-                 implicit_cast<int>(h - y));
+      copyPixels(
+          reinterpret_cast<std::byte*>(
+              &out(implicit_cast<int>(y), offset.x * cpp)),
+          outPitch,
+          reinterpret_cast<const std::byte*>(input.getData(
+              implicit_cast<Buffer::size_type>(inputPitchBytes * (h - y)))),
+          inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
     decodePackedInt<BitPumpLSB>(h, implicit_cast<int>(y));

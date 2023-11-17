@@ -49,7 +49,7 @@ enum class DEBUG_PRIO {
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
     __attribute__((format(printf, 2, 3)));
 
-inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
+inline void copyPixels(std::byte* dest, int dstPitch, const std::byte* src,
                        int srcPitch, int rowSize, int height) {
   if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
     memcpy(dest, src, static_cast<size_t>(rowSize) * height);
