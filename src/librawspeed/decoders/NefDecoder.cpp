@@ -781,7 +781,6 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
   int i;
   std::array<double, 6> g;
   std::array<double, 2> bnd = {{}};
-  double r;
   g[0] = pwr;
   g[1] = ts;
   g[2] = g[3] = g[4] = 0;
@@ -815,18 +814,19 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
 
   for (i = 0; i < 0x10000; i++) {
     curve[i] = 0xffff;
-    if ((r = static_cast<double>(i) / imax) < 1) {
-      curve[i] = static_cast<uint16_t>(
-          0x10000 *
-          (mode ? (r < g[3]
-                       ? r * g[1]
-                       : (std::abs(g[0]) > 0 ? pow(r, g[0]) * (1 + g[4]) - g[4]
-                                             : log(r) * g[2] + 1))
-                : (r < g[2] ? r / g[1]
-                            : (std::abs(g[0]) > 0
-                                   ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
-                                   : exp((r - 1) / g[2])))));
-    }
+    const double r = static_cast<double>(i) / imax;
+    if (r >= 1)
+      continue;
+    curve[i] = static_cast<uint16_t>(
+        0x10000 *
+        (mode ? (r < g[3]
+                     ? r * g[1]
+                     : (std::abs(g[0]) > 0 ? pow(r, g[0]) * (1 + g[4]) - g[4]
+                                           : log(r) * g[2] + 1))
+              : (r < g[2] ? r / g[1]
+                          : (std::abs(g[0]) > 0
+                                 ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
+                                 : exp((r - 1) / g[2])))));
   }
 
   assert(curve.size() == 65536);
