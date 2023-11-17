@@ -157,7 +157,7 @@ static T createPrefixCodeDecoder(rawspeed::ByteStream& bs) {
   const bool fixDNGBug16 = bs.getByte() != 0;
 
   bool fullDecode = false;
-  if (T::Traits::SupportsFullDecode)
+  if constexpr (T::Traits::SupportsFullDecode)
     fullDecode = bs.getByte() != 0;
 
   ht->setup(fullDecode, fixDNGBug16);

@@ -50,6 +50,7 @@ private:
   std::optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;
   void parseCFA(const TiffIFD* raw) const;
   void parseColorMatrix() const;
+  void parseWhiteBalance() const;
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
   void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);

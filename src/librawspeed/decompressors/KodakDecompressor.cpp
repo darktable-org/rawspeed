@@ -33,6 +33,7 @@
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -140,7 +141,7 @@ void KodakDecompressor::decompress() {
           out(row, col) = implicit_cast<uint16_t>(value);
         else {
           mRaw->setWithLookUp(implicit_cast<uint16_t>(value),
-                              reinterpret_cast<uint8_t*>(&out(row, col)),
+                              reinterpret_cast<std::byte*>(&out(row, col)),
                               &random);
         }
       }

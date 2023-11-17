@@ -35,6 +35,7 @@
 #include "io/ByteStream.h"
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <utility>
@@ -531,7 +532,7 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];
       rawdata->setWithLookUp(clampBits(pred[col & 1], 15),
-                             reinterpret_cast<uint8_t*>(&out(row, col)),
+                             reinterpret_cast<std::byte*>(&out(row, col)),
                              &random);
     }
   }

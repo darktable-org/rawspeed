@@ -43,6 +43,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -676,7 +677,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   auto inv_wb_r = static_cast<int>(1024.0F / wb_r);
   auto inv_wb_b = static_cast<int>(1024.0F / wb_b);
 
-  auto curve = gammaCurve(1 / 2.4, 12.92, 1, 4095);
+  auto curve = gammaCurve(1 / 2.4, 12.92, 4095);
 
   // Scale output values to 16 bits.
   for (int i = 0; i < 4096; i++) {
@@ -688,7 +689,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   RawImageCurveGuard curveHandler(&mRaw, curve, false);
 
   uint16_t tmp;
-  auto* tmpch = reinterpret_cast<uint8_t*>(&tmp);
+  auto* tmpch = reinterpret_cast<std::byte*>(&tmp);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.peekData(out.width * out.height);
@@ -738,7 +739,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
                                      0.337633 * implicit_cast<double>(cb) -
                                      0.698001 * implicit_cast<double>(cr)),
                     12),
-          reinterpret_cast<uint8_t*>(&out(row, col + 1)), &random);
+          reinterpret_cast<std::byte*>(&out(row, col + 1)), &random);
 
       mRaw->setWithLookUp(
           clampBits(static_cast<int>(implicit_cast<double>(y1) +
@@ -759,7 +760,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
                                      0.337633 * implicit_cast<double>(cb2) -
                                      0.698001 * implicit_cast<double>(cr2)),
                     12),
-          reinterpret_cast<uint8_t*>(&out(row, col + 4)), &random);
+          reinterpret_cast<std::byte*>(&out(row, col + 4)), &random);
 
       mRaw->setWithLookUp(
           clampBits(static_cast<int>(implicit_cast<double>(y2) +
@@ -773,14 +774,12 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
 
 // From:  dcraw.c -- Dave Coffin's raw photo decoder
 #define SQR(x) ((x) * (x))
-std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
-                                             int imax) {
+std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int imax) {
   std::vector<uint16_t> curve(65536);
 
   int i;
   std::array<double, 6> g;
   std::array<double, 2> bnd = {{}};
-  double r;
   g[0] = pwr;
   g[1] = ts;
   g[2] = g[3] = g[4] = 0;
@@ -807,25 +806,16 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int mode,
            1;
   }
 
-  if (mode == 0)
-    ThrowRDE("Unimplemented mode");
-
-  mode--;
-
   for (i = 0; i < 0x10000; i++) {
     curve[i] = 0xffff;
-    if ((r = static_cast<double>(i) / imax) < 1) {
-      curve[i] = static_cast<uint16_t>(
-          0x10000 *
-          (mode ? (r < g[3]
-                       ? r * g[1]
-                       : (std::abs(g[0]) > 0 ? pow(r, g[0]) * (1 + g[4]) - g[4]
-                                             : log(r) * g[2] + 1))
-                : (r < g[2] ? r / g[1]
-                            : (std::abs(g[0]) > 0
-                                   ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
-                                   : exp((r - 1) / g[2])))));
-    }
+    const double r = static_cast<double>(i) / imax;
+    if (r >= 1)
+      continue;
+    auto v =
+        (r < g[2] ? r / g[1]
+                  : (std::abs(g[0]) > 0 ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
+                                        : exp((r - 1) / g[2])));
+    curve[i] = static_cast<uint16_t>(0x10000 * v);
   }
 
   assert(curve.size() == 65536);

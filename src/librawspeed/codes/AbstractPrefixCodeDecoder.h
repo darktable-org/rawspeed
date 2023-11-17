@@ -99,7 +99,7 @@ public:
               symbol.code_len <= Traits::MaxCodeLenghtBits);
 
     // If we were only looking for symbol's code value, then just return it.
-    if (!FULL_DECODE)
+    if constexpr (!FULL_DECODE)
       return codeValue;
 
     // Else, treat it as the length of following difference

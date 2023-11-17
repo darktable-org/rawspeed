@@ -28,6 +28,7 @@
 #include "metadata/BlackArea.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
@@ -258,7 +259,7 @@ void RawImageDataFloat::doLookup(int start_y, int end_y) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-void RawImageDataFloat::setWithLookUp(uint16_t value, uint8_t* dst,
+void RawImageDataFloat::setWithLookUp(uint16_t value, std::byte* dst,
                                       uint32_t* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {

@@ -49,6 +49,16 @@ using rawspeed::RawParser;
 
 namespace {
 
+int currThreadCount;
+
+} // namespace
+
+extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
+  return currThreadCount;
+}
+
+namespace {
+
 struct CPUClock {
   using rep = std::clock_t;
   using period = std::ratio<1, CLOCKS_PER_SEC>;
@@ -113,16 +123,6 @@ struct Entry {
     return Content;
   }
 };
-
-namespace {
-
-int currThreadCount;
-
-} // namespace
-
-extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
-  return currThreadCount;
-}
 
 inline void BM_RawSpeed(benchmark::State& state, Entry* entry, int threads) {
   currThreadCount = threads;

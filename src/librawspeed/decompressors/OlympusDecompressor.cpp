@@ -108,7 +108,7 @@ inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
     int upMinusNw = up - leftUp;
 
     // Check if sign is different, and they are both not zero
-    if ((std::signbit(leftMinusNw) ^ std::signbit(upMinusNw)) &&
+    if ((std::signbit(leftMinusNw) != std::signbit(upMinusNw)) &&
         (leftMinusNw != 0 && upMinusNw != 0)) {
       if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
         pred = left + upMinusNw;

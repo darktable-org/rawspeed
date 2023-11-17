@@ -391,7 +391,9 @@ protected:
     if (src.empty() || dst.empty())
       return;
 
-    copyPixels(&(dst[0]), dstPitch, &(src[0]), srcPitch, rowSize, height);
+    copyPixels(reinterpret_cast<std::byte*>(&(dst[0])), dstPitch,
+               reinterpret_cast<const std::byte*>(&(src[0])), srcPitch, rowSize,
+               height);
   }
   void compare() {
     for (int y = 0; y < height; y++) {

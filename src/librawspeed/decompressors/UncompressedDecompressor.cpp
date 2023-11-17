@@ -39,6 +39,7 @@
 #include "io/IOException.h"
 #include <algorithm>
 #include <cinttypes>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -199,13 +200,13 @@ void UncompressedDecompressor::readUncompressedRaw() {
   if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
       const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(
-                     &out(implicit_cast<int>(y), offset.x * cpp)),
-                 outPitch,
-                 input.getData(implicit_cast<Buffer::size_type>(
-                     inputPitchBytes * (h - y))),
-                 inputPitchBytes, w * mRaw->getBpp(),
-                 implicit_cast<int>(h - y));
+      copyPixels(
+          reinterpret_cast<std::byte*>(
+              &out(implicit_cast<int>(y), offset.x * cpp)),
+          outPitch,
+          reinterpret_cast<const std::byte*>(input.getData(
+              implicit_cast<Buffer::size_type>(inputPitchBytes * (h - y)))),
+          inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
@@ -241,13 +242,13 @@ void UncompressedDecompressor::readUncompressedRaw() {
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(
-                     &out(implicit_cast<int>(y), offset.x * cpp)),
-                 outPitch,
-                 input.getData(implicit_cast<Buffer::size_type>(
-                     inputPitchBytes * (h - y))),
-                 inputPitchBytes, w * mRaw->getBpp(),
-                 implicit_cast<int>(h - y));
+      copyPixels(
+          reinterpret_cast<std::byte*>(
+              &out(implicit_cast<int>(y), offset.x * cpp)),
+          outPitch,
+          reinterpret_cast<const std::byte*>(input.getData(
+              implicit_cast<Buffer::size_type>(inputPitchBytes * (h - y)))),
+          inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
     decodePackedInt<BitPumpLSB>(h, implicit_cast<int>(y));
@@ -266,10 +267,10 @@ void UncompressedDecompressor::decode8BitRaw() {
   uint32_t random = 0;
   for (uint32_t row = 0; row < h; row++) {
     for (uint32_t col = 0; col < w; col++) {
-      if (uncorrectedRawValues)
+      if constexpr (uncorrectedRawValues)
         out(row, col) = *in;
       else
-        mRaw->setWithLookUp(*in, reinterpret_cast<uint8_t*>(&out(row, col)),
+        mRaw->setWithLookUp(*in, reinterpret_cast<std::byte*>(&out(row, col)),
                             &random);
       in++;
     }
@@ -353,7 +354,7 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned() {
       uint32_t g2 = in[1];
 
       uint16_t pix;
-      if (e == Endianness::little)
+      if constexpr (e == Endianness::little)
         pix = implicit_cast<uint16_t>((g2 << 8) | g1);
       else
         pix = implicit_cast<uint16_t>((g1 << 8) | g2);

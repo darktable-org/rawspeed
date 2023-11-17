@@ -51,7 +51,7 @@ inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
 
   interpolatedDims.x =
       rawspeed::implicit_cast<int>(roundUp(interpolatedDims.x, 6));
-  if (subSampling.y == 2)
+  if constexpr (subSampling.y == 2)
     interpolatedDims.x =
         rawspeed::implicit_cast<int>(roundUp(interpolatedDims.x, 4));
 

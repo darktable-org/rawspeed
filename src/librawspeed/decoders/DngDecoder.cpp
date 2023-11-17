@@ -183,6 +183,30 @@ DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
   return crop;
 }
 
+namespace {
+std::optional<CFAColor> getDNGCFAPatternAsCFAColor(uint32_t c) {
+  switch (c) {
+    using enum CFAColor;
+  case 0:
+    return RED;
+  case 1:
+    return GREEN;
+  case 2:
+    return BLUE;
+  case 3:
+    return CYAN;
+  case 4:
+    return MAGENTA;
+  case 5:
+    return YELLOW;
+  case 6:
+    return WHITE;
+  default:
+    return std::nullopt;
+  }
+}
+} // namespace
+
 void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Check if layout is OK, if present
@@ -208,33 +232,11 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   mRaw->cfa.setSize(cfaSize);
 
-  auto getAsCFAColor = [](uint32_t c) -> std::optional<CFAColor> {
-    switch (c) {
-      using enum CFAColor;
-    case 0:
-      return RED;
-    case 1:
-      return GREEN;
-    case 2:
-      return BLUE;
-    case 3:
-      return CYAN;
-    case 4:
-      return MAGENTA;
-    case 5:
-      return YELLOW;
-    case 6:
-      return WHITE;
-    default:
-      return std::nullopt;
-    }
-  };
-
   for (int y = 0; y < cfaSize.y; y++) {
     for (int x = 0; x < cfaSize.x; x++) {
       uint32_t c1 = cPat->getByte(x + y * cfaSize.x);
 
-      auto c2 = getAsCFAColor(c1);
+      auto c2 = getDNGCFAPatternAsCFAColor(c1);
       if (!c2)
         ThrowRDE("Unsupported CFA Color: %u", c1);
 
@@ -628,6 +630,46 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
   }
 }
 
+void DngDecoder::parseWhiteBalance() const {
+  // Fetch the white balance
+  if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
+    const TiffEntry* as_shot_neutral =
+        mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
+    if (as_shot_neutral->count == 3) {
+      for (uint32_t i = 0; i < 3; i++) {
+        float c = as_shot_neutral->getFloat(i);
+        mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
+      }
+    }
+    return;
+  }
+
+  if (!mRaw->metadata.colorMatrix.empty() &&
+      mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
+    const TiffEntry* as_shot_white_xy =
+        mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
+    if (as_shot_white_xy->count == 2) {
+      // See http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
+      const float x = as_shot_white_xy->getFloat(0);
+      const float y = as_shot_white_xy->getFloat(1);
+      if (y > 0.0F) {
+        constexpr float Y = 1.0F;
+        const std::array<float, 3> as_shot_white = {
+            {x * Y / y, Y, (1 - x - y) * Y / y}};
+
+        // Convert from XYZ to camera reference values first
+        for (uint32_t i = 0; i < 3; i++) {
+          float c =
+              float(mRaw->metadata.colorMatrix[i * 3 + 0]) * as_shot_white[0] +
+              float(mRaw->metadata.colorMatrix[i * 3 + 1]) * as_shot_white[1] +
+              float(mRaw->metadata.colorMatrix[i * 3 + 2]) * as_shot_white[2];
+          mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
+        }
+      }
+    }
+  }
+}
+
 void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
     mRaw->metadata.isoSpeed =
@@ -670,40 +712,7 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   parseColorMatrix();
 
-  // Fetch the white balance
-  if (mRootIFD->hasEntryRecursive(TiffTag::ASSHOTNEUTRAL)) {
-    const TiffEntry* as_shot_neutral =
-        mRootIFD->getEntryRecursive(TiffTag::ASSHOTNEUTRAL);
-    if (as_shot_neutral->count == 3) {
-      for (uint32_t i = 0; i < 3; i++) {
-        float c = as_shot_neutral->getFloat(i);
-        mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
-      }
-    }
-  } else if (!mRaw->metadata.colorMatrix.empty() &&
-             mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
-    const TiffEntry* as_shot_white_xy =
-        mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
-    if (as_shot_white_xy->count == 2) {
-      // See http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
-      const float x = as_shot_white_xy->getFloat(0);
-      const float y = as_shot_white_xy->getFloat(1);
-      if (y > 0.0F) {
-        constexpr float Y = 1.0F;
-        const std::array<float, 3> as_shot_white = {
-            {x * Y / y, Y, (1 - x - y) * Y / y}};
-
-        // Convert from XYZ to camera reference values first
-        for (uint32_t i = 0; i < 3; i++) {
-          float c =
-              float(mRaw->metadata.colorMatrix[i * 3 + 0]) * as_shot_white[0] +
-              float(mRaw->metadata.colorMatrix[i * 3 + 1]) * as_shot_white[1] +
-              float(mRaw->metadata.colorMatrix[i * 3 + 2]) * as_shot_white[2];
-          mRaw->metadata.wbCoeffs[i] = (c > 0.0F) ? (1.0F / c) : 0.0F;
-        }
-      }
-    }
-  }
+  parseWhiteBalance();
 }
 
 /* DNG Images are assumed to be decodable unless explicitly set so */

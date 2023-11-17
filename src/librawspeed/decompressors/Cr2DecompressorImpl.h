@@ -68,7 +68,7 @@ evaluateConsecutiveTiles(const iRectangle2D& rect,
 } // namespace
 
 struct Cr2SliceIterator final {
-  const int frameHeight;
+  int frameHeight;
 
   Cr2SliceWidthIterator widthIter;
 
@@ -78,7 +78,8 @@ struct Cr2SliceIterator final {
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2SliceIterator(Cr2SliceWidthIterator sliceWidthIter_, const iPoint2D& frame)
+  Cr2SliceIterator(const Cr2SliceWidthIterator& sliceWidthIter_,
+                   const iPoint2D& frame)
       : frameHeight(frame.y), widthIter(sliceWidthIter_) {}
 
   value_type RAWSPEED_READONLY operator*() const {
@@ -107,7 +108,8 @@ struct Cr2OutputTileIterator final {
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2OutputTileIterator(Cr2SliceIterator sliceIter_, const iPoint2D& imgDim_)
+  Cr2OutputTileIterator(const Cr2SliceIterator& sliceIter_,
+                        const iPoint2D& imgDim_)
       : imgDim(imgDim_), sliceIter(sliceIter_) {}
 
   value_type operator*() const {
@@ -177,8 +179,9 @@ public:
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2VerticalOutputStripIterator(Cr2OutputTileIterator outputTileIterator_,
-                                 Cr2OutputTileIterator outputTileIterator_end_)
+  Cr2VerticalOutputStripIterator(
+      const Cr2OutputTileIterator& outputTileIterator_,
+      const Cr2OutputTileIterator& outputTileIterator_end_)
       : outputTileIterator(outputTileIterator_),
         outputTileIterator_end(outputTileIterator_end_) {}
 
