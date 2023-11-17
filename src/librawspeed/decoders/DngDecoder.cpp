@@ -183,6 +183,30 @@ DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
   return crop;
 }
 
+namespace {
+std::optional<CFAColor> getDNGCFAPatternAsCFAColor(uint32_t c) {
+  switch (c) {
+    using enum CFAColor;
+  case 0:
+    return RED;
+  case 1:
+    return GREEN;
+  case 2:
+    return BLUE;
+  case 3:
+    return CYAN;
+  case 4:
+    return MAGENTA;
+  case 5:
+    return YELLOW;
+  case 6:
+    return WHITE;
+  default:
+    return std::nullopt;
+  }
+}
+} // namespace
+
 void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   // Check if layout is OK, if present
@@ -208,33 +232,11 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
 
   mRaw->cfa.setSize(cfaSize);
 
-  auto getAsCFAColor = [](uint32_t c) -> std::optional<CFAColor> {
-    switch (c) {
-      using enum CFAColor;
-    case 0:
-      return RED;
-    case 1:
-      return GREEN;
-    case 2:
-      return BLUE;
-    case 3:
-      return CYAN;
-    case 4:
-      return MAGENTA;
-    case 5:
-      return YELLOW;
-    case 6:
-      return WHITE;
-    default:
-      return std::nullopt;
-    }
-  };
-
   for (int y = 0; y < cfaSize.y; y++) {
     for (int x = 0; x < cfaSize.x; x++) {
       uint32_t c1 = cPat->getByte(x + y * cfaSize.x);
 
-      auto c2 = getAsCFAColor(c1);
+      auto c2 = getDNGCFAPatternAsCFAColor(c1);
       if (!c2)
         ThrowRDE("Unsupported CFA Color: %u", c1);
 
