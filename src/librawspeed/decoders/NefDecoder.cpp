@@ -811,11 +811,11 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int imax) {
     const double r = static_cast<double>(i) / imax;
     if (r >= 1)
       continue;
-    curve[i] = static_cast<uint16_t>(
-        0x10000 *
+    auto v =
         (r < g[2] ? r / g[1]
                   : (std::abs(g[0]) > 0 ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
-                                        : exp((r - 1) / g[2]))));
+                                        : exp((r - 1) / g[2])));
+    curve[i] = static_cast<uint16_t>(0x10000 * v);
   }
 
   assert(curve.size() == 65536);
