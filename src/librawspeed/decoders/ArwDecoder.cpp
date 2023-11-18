@@ -141,6 +141,24 @@ RawImage ArwDecoder::decodeTransitionalArw() {
   ThrowRDE("No image data found");
 }
 
+std::vector<uint16_t> ArwDecoder::decodeCurve(const TiffIFD* raw) {
+  std::vector<uint16_t> curve(0x4001);
+  const TiffEntry* c = raw->getEntry(TiffTag::SONYCURVE);
+  std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
+
+  for (uint32_t i = 0; i < 4; i++)
+    sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
+
+  for (uint32_t i = 0; i < 0x4001; i++)
+    curve[i] = implicit_cast<uint16_t>(i);
+
+  for (uint32_t i = 0; i < 5; i++)
+    for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
+      curve[j] = implicit_cast<uint16_t>(curve[j - 1] + (1 << i));
+
+  return curve;
+}
+
 RawImage ArwDecoder::decodeRawInternal() {
   vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::STRIPOFFSETS);
 
@@ -212,19 +230,7 @@ RawImage ArwDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  std::vector<uint16_t> curve(0x4001);
-  const TiffEntry* c = raw->getEntry(TiffTag::SONYCURVE);
-  std::array<uint32_t, 6> sony_curve = {{0, 0, 0, 0, 0, 4095}};
-
-  for (uint32_t i = 0; i < 4; i++)
-    sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
-
-  for (uint32_t i = 0; i < 0x4001; i++)
-    curve[i] = implicit_cast<uint16_t>(i);
-
-  for (uint32_t i = 0; i < 5; i++)
-    for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
-      curve[j] = implicit_cast<uint16_t>(curve[j - 1] + (1 << i));
+  std::vector<uint16_t> curve = decodeCurve(raw);
 
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 

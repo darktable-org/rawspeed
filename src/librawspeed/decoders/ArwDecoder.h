@@ -47,6 +47,7 @@ private:
   void ParseA100WB() const;
 
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
+  static std::vector<uint16_t> decodeCurve(const TiffIFD* raw);
   RawImage decodeTransitionalArw();
   RawImage decodeSRF();
   void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
