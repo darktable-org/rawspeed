@@ -66,10 +66,11 @@ FileReader::readFile() const {
   if (size <= 0)
     ThrowFIE("File is 0 bytes.");
 
-  fileSize = size;
-
-  if (fileSize > std::numeric_limits<Buffer::size_type>::max())
+  if (static_cast<int64_t>(size) >
+      std::numeric_limits<Buffer::size_type>::max())
     ThrowFIE("File is too big (%zu bytes).", fileSize);
+
+  fileSize = size;
 
   fseek(file.get(), 0, SEEK_SET);
 
