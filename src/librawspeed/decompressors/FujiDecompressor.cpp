@@ -26,6 +26,7 @@
 #include "MemorySanitizer.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -35,6 +36,7 @@
 #include "common/XTransPhase.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpMSB.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include "metadata/ColorFilterArray.h"
@@ -176,7 +178,10 @@ int8_t GetGradient(const fuji_compressed_params& p, int cur_val) {
   if (abs_cur_val >= p.q_point[3])
     grad = 4;
 
-  return cur_val >= 0 ? grad : -grad;
+  if (cur_val < 0)
+    grad *= -1;
+
+  return implicit_cast<int8_t>(grad);
 }
 
 fuji_compressed_params::fuji_compressed_params(
@@ -261,32 +266,30 @@ struct fuji_compressed_block {
   void copy_line_to_xtrans(const FujiStrip& strip, int cur_line) const;
   void copy_line_to_bayer(const FujiStrip& strip, int cur_line) const;
 
-  static inline int fuji_zerobits(BitPumpMSB& pump);
+  static int fuji_zerobits(BitPumpMSB& pump);
   static int bitDiff(int value1, int value2);
 
-  [[nodiscard]] inline int fuji_decode_sample(int grad, int interp_val,
-                                              std::array<int_pair, 41>& grads);
-  [[nodiscard]] inline int
-  fuji_decode_sample_even(xt_lines c, int col, std::array<int_pair, 41>& grads);
-  [[nodiscard]] inline int
-  fuji_decode_sample_odd(xt_lines c, int col, std::array<int_pair, 41>& grads);
+  [[nodiscard]] int fuji_decode_sample(int grad, int interp_val,
+                                       std::array<int_pair, 41>& grads);
+  [[nodiscard]] int fuji_decode_sample_even(xt_lines c, int col,
+                                            std::array<int_pair, 41>& grads);
+  [[nodiscard]] int fuji_decode_sample_odd(xt_lines c, int col,
+                                           std::array<int_pair, 41>& grads);
 
-  [[nodiscard]] inline int fuji_quant_gradient(int v1, int v2) const;
+  [[nodiscard]] int fuji_quant_gradient(int v1, int v2) const;
 
-  [[nodiscard]] inline std::pair<int, int>
+  [[nodiscard]] std::pair<int, int>
   fuji_decode_interpolation_even_inner(xt_lines c, int col) const;
-  [[nodiscard]] inline std::pair<int, int>
+  [[nodiscard]] std::pair<int, int>
   fuji_decode_interpolation_odd_inner(xt_lines c, int col) const;
-  [[nodiscard]] inline int fuji_decode_interpolation_even(xt_lines c,
-                                                          int col) const;
+  [[nodiscard]] int fuji_decode_interpolation_even(xt_lines c, int col) const;
 
   void fuji_extend_generic(int start, int end) const;
   void fuji_extend_red() const;
   void fuji_extend_green() const;
   void fuji_extend_blue() const;
 
-  template <typename T>
-  inline void fuji_decode_block(T func_even, int cur_line);
+  template <typename T> void fuji_decode_block(T func_even, int cur_line);
   void xtrans_decode_block(int cur_line);
   void fuji_bayer_decode_block(int cur_line);
 };
@@ -361,15 +364,16 @@ void fuji_compressed_block::copy_line(const FujiStrip& strip, int cur_line,
           int row;
 
           switch (CFA(MCURow, MCUCol)) {
-          case CFAColor::RED: // red
+            using enum CFAColor;
+          case RED: // red
             row = R2 + (imgRow >> 1);
             break;
 
-          case CFAColor::GREEN: // green
+          case GREEN: // green
             row = G2 + imgRow;
             break;
 
-          case CFAColor::BLUE: // blue
+          case BLUE: // blue
             row = B2 + (imgRow >> 1);
             break;
 
@@ -438,7 +442,7 @@ int RAWSPEED_READNONE fuji_compressed_block::bitDiff(int value1, int value2) {
   return std::min(decBits, 15);
 }
 
-__attribute__((always_inline)) int
+__attribute__((always_inline)) inline int
 fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
                                           std::array<int_pair, 41>& grads) {
   int gradient = std::abs(grad);
@@ -498,14 +502,14 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
   return std::min(interp_val, common_info.q_point[4]);
 }
 
-__attribute__((always_inline)) int
+__attribute__((always_inline)) inline int
 fuji_compressed_block::fuji_quant_gradient(int v1, int v2) const {
   const auto& ci = common_info;
   return 9 * ci.qTableLookup(ci.q_point[4] + v1) +
          ci.qTableLookup(ci.q_point[4] + v2);
 }
 
-__attribute__((always_inline)) std::pair<int, int>
+__attribute__((always_inline)) inline std::pair<int, int>
 fuji_compressed_block::fuji_decode_interpolation_even_inner(xt_lines c,
                                                             int col) const {
   int Rb = lines(c - 1, 1 + 2 * (col + 0) + 0);
@@ -539,7 +543,7 @@ fuji_compressed_block::fuji_decode_interpolation_even_inner(xt_lines c,
   return {grad, interp_val};
 }
 
-__attribute__((always_inline)) std::pair<int, int>
+__attribute__((always_inline)) inline std::pair<int, int>
 fuji_compressed_block::fuji_decode_interpolation_odd_inner(xt_lines c,
                                                            int col) const {
   int Ra = lines(c + 0, 1 + 2 * (col + 0) + 0);
@@ -559,21 +563,21 @@ fuji_compressed_block::fuji_decode_interpolation_odd_inner(xt_lines c,
   return {grad, interp_val};
 }
 
-__attribute__((always_inline)) int
+__attribute__((always_inline)) inline int
 fuji_compressed_block::fuji_decode_sample_even(
     xt_lines c, int col, std::array<int_pair, 41>& grads) {
   auto [grad, interp_val] = fuji_decode_interpolation_even_inner(c, col);
   return fuji_decode_sample(grad, interp_val, grads);
 }
 
-__attribute__((always_inline)) int
+__attribute__((always_inline)) inline int
 fuji_compressed_block::fuji_decode_sample_odd(xt_lines c, int col,
                                               std::array<int_pair, 41>& grads) {
   auto [grad, interp_val] = fuji_decode_interpolation_odd_inner(c, col);
   return fuji_decode_sample(grad, interp_val, grads);
 }
 
-__attribute__((always_inline)) int
+__attribute__((always_inline)) inline int
 fuji_compressed_block::fuji_decode_interpolation_even(xt_lines c,
                                                       int col) const {
   auto [grad, interp_val] = fuji_decode_interpolation_even_inner(c, col);
@@ -600,7 +604,7 @@ void fuji_compressed_block::fuji_extend_blue() const {
 }
 
 template <typename T>
-__attribute__((always_inline)) void
+__attribute__((always_inline)) inline void
 fuji_compressed_block::fuji_decode_block(T func_even,
                                          [[maybe_unused]] int cur_line) {
   invariant(common_info.line_width % 2 == 0);
@@ -621,7 +625,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].even;
           int sample = func_even(c[comp], col, grad_even[grad], row, i, comp);
-          lines(c[comp], 1 + 2 * col + 0) = sample;
+          lines(c[comp], 1 + 2 * col + 0) = implicit_cast<uint16_t>(sample);
           ++col;
         }
       }
@@ -630,7 +634,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].odd;
           int sample = fuji_decode_sample_odd(c[comp], col, grad_odd[grad]);
-          lines(c[comp], 1 + 2 * col + 1) = sample;
+          lines(c[comp], 1 + 2 * col + 1) = implicit_cast<uint16_t>(sample);
           ++col;
         }
       }
@@ -646,9 +650,10 @@ fuji_compressed_block::fuji_decode_block(T func_even,
   std::fill(PerColorCounter.begin(), PerColorCounter.end(), 0);
   auto ColorCounter = [&PerColorCounter](CFAColor c) -> int& {
     switch (c) {
-    case CFAColor::RED:
-    case CFAColor::GREEN:
-    case CFAColor::BLUE:
+      using enum CFAColor;
+    case RED:
+    case GREEN:
+    case BLUE:
       return PerColorCounter[static_cast<uint8_t>(c)];
     default:
       __builtin_unreachable();
@@ -658,13 +663,14 @@ fuji_compressed_block::fuji_decode_block(T func_even,
   auto CurLineForColor = [&ColorCounter](CFAColor c) {
     xt_lines res;
     switch (c) {
-    case CFAColor::RED:
+      using enum CFAColor;
+    case RED:
       res = R2;
       break;
-    case CFAColor::GREEN:
+    case GREEN:
       res = G2;
       break;
-    case CFAColor::BLUE:
+    case BLUE:
       res = B2;
       break;
     default:
@@ -891,7 +897,10 @@ FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
 
 void FujiDecompressor::decompress() const {
   FujiDecompressorImpl impl(
-      mRaw, Array1DRef<const ByteStream>(strips.data(), strips.size()), header);
+      mRaw,
+      Array1DRef<const ByteStream>(
+          strips.data(), implicit_cast<Buffer::size_type>(strips.size())),
+      header);
   impl.decompress();
 }
 

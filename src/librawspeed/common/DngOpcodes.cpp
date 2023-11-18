@@ -22,12 +22,14 @@
 
 #include "rawspeedconfig.h"
 #include "common/DngOpcodes.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <algorithm>
@@ -180,7 +182,7 @@ protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
                      const iRectangle2D& integrated_subimg_)
       : DngOpcodes::DngOpcode(integrated_subimg_) {
-    const iRectangle2D subImage = iRectangle2D({0, 0}, integrated_subimg_.dim);
+    const iRectangle2D subImage = {{0, 0}, integrated_subimg_.dim};
 
     uint32_t top = bs.getU32();
     uint32_t left = bs.getU32();
@@ -340,12 +342,14 @@ protected:
   // traverses the current ROI and applies the operation OP to each pixel,
   // i.e. each pixel value v is replaced by op(x, y, v), where x/y are the
   // coordinates of the pixel value v.
-  template <typename T, typename OP> void applyOP(const RawImage& ri, OP op) {
+  template <typename T, typename OP>
+  void applyOP(const RawImage& ri, OP op) const {
     const CroppedArray2DRef<T> img = getDataAsCroppedArray2DRef<T>(ri);
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
-    const iPoint2D numAffected(roundUpDivision(getRoi().dim.x, colPitch),
-                               roundUpDivision(getRoi().dim.y, rowPitch));
+    const iPoint2D numAffected(
+        implicit_cast<int>(roundUpDivision(getRoi().dim.x, colPitch)),
+        implicit_cast<int>(roundUpDivision(getRoi().dim.y, rowPitch)));
     for (int y = 0; y < numAffected.y; ++y) {
       for (int x = 0; x < numAffected.x; ++x) {
         for (auto p = 0U; p < planes; ++p) {
@@ -362,11 +366,9 @@ protected:
 
 class DngOpcodes::LookupOpcode : public PixelOpcode {
 protected:
-  vector<uint16_t> lookup;
+  vector<uint16_t> lookup = vector<uint16_t>(65536);
 
-  explicit LookupOpcode(const RawImage& ri, ByteStream& bs,
-                        const iRectangle2D& integrated_subimg_)
-      : PixelOpcode(ri, bs, integrated_subimg_), lookup(65536) {}
+  using PixelOpcode::PixelOpcode;
 
   void setup(const RawImage& ri) override {
     PixelOpcode::setup(ri);
@@ -412,7 +414,7 @@ public:
     vector<double> polynomial;
 
     const auto polynomial_size = bs.getU32() + 1UL;
-    (void)bs.check(8UL * polynomial_size);
+    (void)bs.check(implicit_cast<Buffer::size_type>(8UL * polynomial_size));
     if (polynomial_size > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
@@ -425,10 +427,11 @@ public:
     for (auto i = 0UL; i < lookup.size(); ++i) {
       double val = polynomial[0];
       for (auto j = 1UL; j < polynomial.size(); ++j)
-        val += polynomial[j] * pow(i / 65536.0, j);
-      lookup[i] = std::clamp<double>(val * 65535.5,
-                                     std::numeric_limits<uint16_t>::min(),
-                                     std::numeric_limits<uint16_t>::max());
+        val += polynomial[j] * pow(implicit_cast<double>(i) / 65536.0,
+                                   implicit_cast<double>(j));
+      lookup[i] = implicit_cast<uint16_t>(std::clamp<double>(
+          val * 65535.5, std::numeric_limits<uint16_t>::min(),
+          std::numeric_limits<uint16_t>::max()));
     }
   }
 };
@@ -464,7 +467,8 @@ public:
     deltaI.reserve(deltaF.size());
     for (const auto f : deltaF) {
       if (!valueIsOk(f))
-        ThrowRDE("Got float %f which is unacceptable.", f);
+        ThrowRDE("Got float %f which is unacceptable.",
+                 implicit_cast<double>(f));
       deltaI.emplace_back(static_cast<int>(f2iScale * f));
     }
   }
@@ -498,7 +502,7 @@ protected:
     std::generate_n(std::back_inserter(deltaF), deltaF_count, [&bs]() {
       const auto F = bs.get<float>();
       if (!std::isfinite(F))
-        ThrowRDE("Got bad float %f.", F);
+        ThrowRDE("Got bad float %f.", implicit_cast<double>(F));
       return F;
     });
   }
@@ -514,14 +518,16 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // by f2iScale before applying, we need to divide by f2iScale here.
   const double absLimit;
 
-  bool valueIsOk(float value) override { return std::abs(value) <= absLimit; }
+  bool valueIsOk(float value) override {
+    return implicit_cast<double>(std::abs(value)) <= absLimit;
+  }
 
 public:
   explicit OffsetPerRowOrCol(const RawImage& ri, ByteStream& bs,
                              const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
-                 this->f2iScale) {}
+                 implicit_cast<double>(this->f2iScale)) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
@@ -546,12 +552,12 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   // signed integer space, so the new value can not be larger than 2^31,
   // else we'd have signed integer overflow. Since the offset is multiplied
   // by f2iScale before applying, we need to divide by f2iScale here.
-  static constexpr const double minLimit = 0.0;
+  static constexpr const float minLimit = 0.0;
   static constexpr int rounding = 512;
   const double maxLimit;
 
   bool valueIsOk(float value) override {
-    return value >= minLimit && value <= maxLimit;
+    return value >= minLimit && implicit_cast<double>(value) <= maxLimit;
   }
 
 public:
@@ -560,7 +566,7 @@ public:
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
-                 this->f2iScale) {}
+                 implicit_cast<double>(this->f2iScale)) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {

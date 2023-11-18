@@ -24,14 +24,11 @@
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
-#include "codes/DummyPrefixCodeDecoder.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "common/RawspeedException.h"
 #include "decoders/RawDecoderException.h"
 #include "io/ByteStream.h"
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -116,10 +113,6 @@ struct Cr2SliceWidthIterator final {
     invariant(&a.slicing == &b.slicing && "Comparing unrelated iterators.");
     return a.sliceId == b.sliceId;
   }
-  friend bool operator!=(const Cr2SliceWidthIterator& a,
-                         const Cr2SliceWidthIterator& b) {
-    return !(a == b);
-  }
 };
 
 inline Cr2SliceWidthIterator Cr2SliceWidths::begin() const {
@@ -160,13 +153,13 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y();
+  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y() const;
 
-  [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices();
-  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles();
-  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles();
+  [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices() const;
+  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles() const;
+  [[nodiscard]] iterator_range<Cr2OutputTileIterator> getOutputTiles() const;
   [[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
-  getVerticalOutputStrips();
+  getVerticalOutputStrips() const;
 
 public:
   Cr2Decompressor(
@@ -175,7 +168,7 @@ public:
       iPoint2D frame, Cr2SliceWidths slicing,
       std::vector<PerComponentRecipe> rec, ByteStream input);
 
-  void decompress();
+  void decompress() const;
 };
 
 extern template class Cr2Decompressor<PrefixCodeDecoder<>>;

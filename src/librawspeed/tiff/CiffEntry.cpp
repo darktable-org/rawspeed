@@ -74,30 +74,32 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
 
 uint32_t RAWSPEED_READONLY CiffEntry::getElementShift() const {
   switch (type) {
-  case CiffDataType::SHORT:
+    using enum CiffDataType;
+  case SHORT:
     return 1;
-  case CiffDataType::LONG:
-  case CiffDataType::MIX:
-  case CiffDataType::SUB1:
-  case CiffDataType::SUB2:
+  case LONG:
+  case MIX:
+  case SUB1:
+  case SUB2:
     return 2;
   default:
-    // e.g. CiffDataType::BYTE or CiffDataType::ASCII
+    // e.g. BYTE or ASCII
     return 0;
   }
 }
 
 uint32_t RAWSPEED_READONLY CiffEntry::getElementSize() const {
   switch (type) {
-  case CiffDataType::BYTE:
-  case CiffDataType::ASCII:
+    using enum CiffDataType;
+  case BYTE:
+  case ASCII:
     return 1;
-  case CiffDataType::SHORT:
+  case SHORT:
     return 2;
-  case CiffDataType::LONG:
-  case CiffDataType::MIX:
-  case CiffDataType::SUB1:
-  case CiffDataType::SUB2:
+  case LONG:
+  case MIX:
+  case SUB1:
+  case SUB2:
     return 4;
   default:
     return 0;
@@ -105,8 +107,8 @@ uint32_t RAWSPEED_READONLY CiffEntry::getElementSize() const {
 }
 
 bool RAWSPEED_READONLY CiffEntry::isInt() const {
-  return (type == CiffDataType::LONG || type == CiffDataType::SHORT ||
-          type == CiffDataType::BYTE);
+  using enum CiffDataType;
+  return (type == LONG || type == SHORT || type == BYTE);
 }
 
 uint32_t CiffEntry::getU32(uint32_t num) const {

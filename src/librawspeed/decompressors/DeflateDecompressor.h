@@ -28,7 +28,6 @@
 #include "decompressors/AbstractDecompressor.h"
 #include "io/Buffer.h"
 #include <memory>
-#include <utility>
 
 namespace rawspeed {
 

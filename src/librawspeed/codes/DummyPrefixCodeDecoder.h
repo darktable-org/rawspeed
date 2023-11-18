@@ -20,15 +20,11 @@
 
 #pragma once
 
+#include "adt/Invariant.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
 #include "io/BitStream.h"
-#include <cassert>
-#include <cstdint>
-#include <tuple>
-#include <utility>
-#include <vector>
 
 namespace rawspeed {
 class Buffer;

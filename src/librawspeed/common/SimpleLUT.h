@@ -41,14 +41,13 @@ private:
   std::vector<value_type> table;
 
 public:
-  template <
-      typename F,
-      typename = std::enable_if_t<!std::is_same_v<
-          SimpleLUT,
-          typename std::remove_cv_t<typename std::remove_reference_t<F>>>>,
-      typename = std::enable_if<std::is_convertible_v<
-          F, std::function<value_type(typename decltype(table)::size_type,
-                                      typename decltype(table)::size_type)>>>>
+  template <typename F>
+    requires(
+        !std::is_same_v<SimpleLUT, typename std::remove_cv_t<
+                                       typename std::remove_reference_t<F>>> &&
+        std::is_convertible_v<
+            F, std::function<value_type(typename decltype(table)::size_type,
+                                        typename decltype(table)::size_type)>>)
   explicit SimpleLUT(F f) {
     const auto fullTableSize = 1U << TableBitWidth;
     table.reserve(fullTableSize);

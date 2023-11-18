@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "adt/Invariant.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCode.h"
@@ -29,11 +30,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <iterator>
-#include <numeric>
-#include <type_traits>
-#include <vector>
 
 namespace rawspeed {
 
@@ -103,7 +99,7 @@ public:
               symbol.code_len <= Traits::MaxCodeLenghtBits);
 
     // If we were only looking for symbol's code value, then just return it.
-    if (!FULL_DECODE)
+    if constexpr (!FULL_DECODE)
       return codeValue;
 
     // Else, treat it as the length of following difference

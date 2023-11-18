@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h"
 #include "common/RawImage.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
@@ -47,14 +48,11 @@
 
 namespace rawspeed {
 
-RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
-  blackLevelSeparate.fill(-1);
-}
+RawImageData::RawImageData() { blackLevelSeparate.fill(-1); }
 
 RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
                            int _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataType(type),
-      cpp(_cpp) {
+    : dim(_dim), isCFA(_cpp == 1), dataType(type), cpp(_cpp) {
   assert(_bpc > 0);
 
   if (cpp > std::numeric_limits<decltype(cpp)>::max() / _bpc)
@@ -78,7 +76,8 @@ void RawImageData::createData() {
     ThrowRDE("Duplicate data allocation in createData.");
 
   // want each line to start at 16-byte aligned address
-  pitch = roundUp(static_cast<size_t>(dim.x) * bpp, alignment);
+  pitch =
+      implicit_cast<int>(roundUp(static_cast<size_t>(dim.x) * bpp, alignment));
   assert(isAligned(pitch, alignment));
 
 #if defined(DEBUG) || __has_feature(address_sanitizer) ||                      \
@@ -203,7 +202,8 @@ void RawImageData::subFrame(iRectangle2D crop) {
 void RawImageData::createBadPixelMap() {
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
-  mBadPixelMapPitch = roundUp(roundUpDivision(uncropped_dim.x, 8), 16);
+  mBadPixelMapPitch =
+      implicit_cast<uint32_t>(roundUp(roundUpDivision(uncropped_dim.x, 8), 16));
   assert(mBadPixelMap.empty());
   mBadPixelMap.resize(static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y,
                       uint8_t(0));
@@ -342,13 +342,14 @@ RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
 void RawImageWorker::performTask() noexcept {
   try {
     switch (task) {
-    case RawImageWorkerTask::SCALE_VALUES:
+      using enum RawImageWorkerTask;
+    case SCALE_VALUES:
       data->scaleValues(start_y, end_y);
       break;
-    case RawImageWorkerTask::FIX_BAD_PIXELS:
+    case FIX_BAD_PIXELS:
       data->fixBadPixelsThread(start_y, end_y);
       break;
-    case RawImageWorkerTask::APPLY_LOOKUP:
+    case APPLY_LOOKUP:
       data->doLookup(start_y, end_y);
       break;
     default:

@@ -22,6 +22,7 @@
 
 #include "adt/Invariant.h"
 #include "codes/AbstractPrefixCode.h"
+#include <array>
 #include <cassert>
 #include <functional>
 #include <initializer_list> // IWYU pragma: keep
@@ -94,7 +95,8 @@ void BinaryPrefixTree<CodeTag>::add(const CodeSymbol symbol, CodeTy value) {
   std::reference_wrapper<std::unique_ptr<Node>> newBud = root;
   for (unsigned bit : symbol.getBitsMSB()) {
     ++partial.code_len;
-    partial.code = (partial.code << 1) | bit;
+    partial.code =
+        implicit_cast<typename Traits::CodeTy>((partial.code << 1) | bit);
     std::unique_ptr<Node>& bud = newBud;
     if (!bud)
       bud = std::make_unique<Branch>();

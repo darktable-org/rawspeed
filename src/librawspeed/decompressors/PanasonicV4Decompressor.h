@@ -25,7 +25,6 @@
 #include "decompressors/AbstractDecompressor.h"
 #include "io/ByteStream.h"
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 namespace rawspeed {

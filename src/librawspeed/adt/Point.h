@@ -22,6 +22,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Casts.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -58,9 +59,6 @@ public:
   constexpr bool operator==(const iPoint2D& rhs) const {
     return x == rhs.x && y == rhs.y;
   }
-  constexpr bool operator!=(const iPoint2D& rhs) const {
-    return !operator==(rhs);
-  }
 
   constexpr bool operator>(const iPoint2D& rhs) const {
     return x > rhs.x && y > rhs.y;
@@ -77,7 +75,7 @@ public:
   }
 
   [[nodiscard]] bool RAWSPEED_READONLY hasPositiveArea() const {
-    return operator>({0, 0});
+    return *this > iPoint2D(0, 0);
   }
 
   [[nodiscard]] area_type RAWSPEED_READONLY area() const {
@@ -90,7 +88,7 @@ public:
   }
 
   [[nodiscard]] constexpr bool isThisInside(const iPoint2D& rhs) const {
-    return operator<=(rhs);
+    return *this <= rhs;
   }
 
   [[nodiscard]] constexpr iPoint2D getSmallest(const iPoint2D& rhs) const {
@@ -148,7 +146,9 @@ public:
            getBottomRight() <= superRect.getBottomRight();
   }
 
-  [[nodiscard]] unsigned int area() const { return dim.area(); }
+  [[nodiscard]] auto area() const {
+    return implicit_cast<unsigned int>(dim.area());
+  }
 
   void offset(const iPoint2D& offset_) { pos += offset_; }
 
@@ -221,9 +221,6 @@ public:
 
 inline bool operator==(const iRectangle2D& a, const iRectangle2D b) {
   return std::tie(a.pos, a.dim) == std::tie(b.pos, b.dim);
-}
-inline bool operator!=(const iRectangle2D& a, const iRectangle2D b) {
-  return !(a == b);
 }
 
 } // namespace rawspeed

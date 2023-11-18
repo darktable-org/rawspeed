@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Casts.h"
 #include "bench/Common.h"
 #include "io/BitPumpJPEG.h"
 #include "io/BitPumpLSB.h"
@@ -72,7 +73,9 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
 
   const std::vector<uint8_t> storage(state.range(0));
-  const rawspeed::Buffer b(storage.data(), state.range(0));
+  const rawspeed::Buffer b(
+      storage.data(),
+      rawspeed::implicit_cast<rawspeed::Buffer::size_type>(state.range(0)));
   assert(b.getSize() > 0);
   assert(b.getSize() == (size_t)state.range(0));
 

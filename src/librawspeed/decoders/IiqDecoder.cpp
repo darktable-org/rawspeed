@@ -23,6 +23,7 @@
 
 #include "decoders/IiqDecoder.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Mutex.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -128,18 +129,19 @@ enum class IIQFormat {
 
 std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
   switch (v) {
+    using enum IIQFormat;
   case 1:
-    return IIQFormat::RAW_1;
+    return RAW_1;
   case 2:
-    return IIQFormat::RAW_2;
+    return RAW_2;
   case 3:
-    return IIQFormat::IIQ_L;
+    return IIQ_L;
   case 5:
-    return IIQFormat::IIQ_S;
+    return IIQ_S;
   case 6:
-    return IIQFormat::IIQ_Sv2;
+    return IIQ_Sv2;
   case 8:
-    return IIQFormat::IIQ_L16;
+    return IIQ_L16;
   default:
     return std::nullopt;
   }
@@ -273,7 +275,7 @@ RawImage IiqDecoder::decodeRawInternal() {
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
-                                  uint32_t split_col) {
+                                  uint32_t split_col) const {
   meta_data.skipBytes(8);
   const uint32_t bytes_to_entries = meta_data.getU32();
   meta_data.setPosition(bytes_to_entries);
@@ -389,7 +391,9 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // appropriate amount before indexing into the curve and
           // then add it back so that subtracting the black level
           // later will work as expected
-          const uint16_t diff = pixel < black_level ? pixel : black_level;
+          const uint16_t diff = pixel < black_level
+                                    ? pixel
+                                    : implicit_cast<uint16_t>(black_level);
           pixel = curve[pixel - diff] + diff;
         }
       }
@@ -422,8 +426,8 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
     return;
 
-  int wide = roundUpDivision(head[2], head[4]);
-  int high = roundUpDivision(head[3], head[5]);
+  auto wide = implicit_cast<int>(roundUpDivision(head[2], head[4]));
+  auto high = implicit_cast<int>(roundUpDivision(head[3], head[5]));
 
   std::vector<float> mrow_storage;
   Array2DRef<float> mrow = Array2DRef<float>::create(
@@ -433,7 +437,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   for (int y = 0; y < high; y++) {
     for (int x = 0; x < wide; x++) {
       for (int c = 0; c < nc; c += 2) {
-        float num = data.getU16() / 32768.0;
+        float num = data.getU16() / 32768.0F;
         if (y == 0)
           mrow(x, c) = num;
         else
@@ -459,8 +463,8 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
                   nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
                          : 0;
               !(c & 1)) {
-            unsigned val = img(row, col) * mult[c];
-            img(row, col) = std::min(val, 0xFFFFU);
+            auto val = implicit_cast<unsigned>(img(row, col) * mult[c]);
+            img(row, col) = implicit_cast<uint16_t>(std::min(val, 0xFFFFU));
           }
           for (int c = 0; c < nc; c += 2)
             mult[c] += mult[c + 1];
@@ -548,7 +552,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
       }
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
-      img(row, col) = (three_pixels + 1) / 3;
+      img(row, col) = implicit_cast<uint16_t>((three_pixels + 1) / 3);
     } else {
       /*
        * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
@@ -564,7 +568,8 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
                        img(row + 2, col + 2) + img(row - 2, col + 2);
       uint32_t horiz = img(row, col - 2) + img(row, col + 2);
       // But this is not just averaging, we bias towards the horizontal pixels.
-      img(row, col) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
+      img(row, col) = implicit_cast<uint16_t>(
+          std::lround(diags * 0.0732233 + horiz * 0.3535534));
     }
   }
 }

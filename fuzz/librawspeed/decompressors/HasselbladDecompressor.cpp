@@ -20,6 +20,7 @@
 
 #include "decompressors/HasselbladDecompressor.h"
 #include "MemorySanitizer.h"
+#include "adt/Casts.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "codes/PrefixCodeDecoder/Common.h"
 #include "common/RawImage.h"
@@ -38,7 +39,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 

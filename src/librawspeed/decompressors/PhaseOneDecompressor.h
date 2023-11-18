@@ -25,7 +25,6 @@
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
 #include "io/ByteStream.h"
-#include <utility>
 #include <vector>
 
 namespace rawspeed {

@@ -18,23 +18,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
-#include "adt/CroppedArray1DRef.h"
-#include "adt/CroppedArray2DRef.h"
-#include "adt/Invariant.h"
-#include "common/Common.h"
-#include "common/RawImage.h"
-#include "io/Buffer.h"
-#include <array>
-#include <climits>
+#include "rawspeedconfig.h" // IWYU pragma: keep
 
 #ifdef HAVE_ZLIB
 
+#include "adt/Casts.h"
+#include "adt/CroppedArray1DRef.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "common/Common.h"
 #include "common/FloatingPoint.h"
+#include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/DeflateDecompressor.h"
+#include "io/Buffer.h"
 #include "io/Endianness.h"
+#include <array>
+#include <climits>
 #include <cstdint>
 #include <cstdio>
 #include <utility>
@@ -118,6 +119,8 @@ inline void decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
     case 4:
       tmp_expanded = tmp;
       break;
+    default:
+      __builtin_unreachable();
     }
 
     out(col) = bit_cast<float>(tmp_expanded);
@@ -132,7 +135,7 @@ void DeflateDecompressor::decode(
   int bytesps = bps / 8;
   invariant(bytesps >= 2 && bytesps <= 4);
 
-  uLongf dstLen = bytesps * maxDim.area();
+  auto dstLen = implicit_cast<uLongf>(bytesps * maxDim.area());
 
   if (!*uBuffer)
     *uBuffer =

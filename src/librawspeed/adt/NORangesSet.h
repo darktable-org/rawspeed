@@ -26,7 +26,6 @@
 #include <cstddef>
 #include <iterator>
 #include <set> // IWYU pragma: export
-#include <utility>
 
 namespace rawspeed {
 

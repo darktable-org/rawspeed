@@ -29,6 +29,7 @@ macro(add_fuzz_target__base fuzzer)
   set(ALL_FUZZERS "${ALL_FUZZERS}" CACHE INTERNAL "" FORCE)
 
   rawspeed_add_test(NAME fuzzers/${fuzzer} COMMAND ${fuzzer} -help=1)
+  set_tests_properties(fuzzers/${fuzzer} PROPERTIES LABELS "fuzz;dummy")
 endmacro()
 
 if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND RAWSPEED_FUZZ_BUILD))

@@ -21,10 +21,11 @@
 
 #pragma once
 
+#include "adt/Casts.h"
+#include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "common/RawspeedException.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractDecompressor.h"
 #include "io/ByteStream.h"
@@ -181,7 +182,8 @@ protected:
     std::vector<const PrefixCodeDecoder<>*> ht(N_COMP);
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
-      if (const unsigned dcTbls = huff.size(); dcTblNo >= dcTbls) {
+      if (const auto dcTbls = implicit_cast<unsigned>(huff.size());
+          dcTblNo >= dcTbls) {
         ThrowRDE("Decoding table %u for comp %i does not exist (tables = %u)",
                  dcTblNo, i, dcTbls);
       }

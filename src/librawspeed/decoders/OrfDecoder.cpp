@@ -22,6 +22,7 @@
 
 #include "decoders/OrfDecoder.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/NORangesSet.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -143,11 +144,11 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
   int inputPitchBytes = inputPitchBits / 8;
 
-  const int numEvenLines = roundUpDivision(h, 2);
+  const auto numEvenLines = implicit_cast<int>(roundUpDivision(h, 2));
   ByteStream evenLinesInput = s.getStream(numEvenLines, inputPitchBytes);
 
-  const uint32_t oddLinesInputBegin =
-      roundUp(evenLinesInput.getSize(), 1U << 11U);
+  const auto oddLinesInputBegin =
+      implicit_cast<uint32_t>(roundUp(evenLinesInput.getSize(), 1U << 11U));
   assert(oddLinesInputBegin >= evenLinesInput.getSize());
   int padding = oddLinesInputBegin - evenLinesInput.getSize();
   assert(padding >= 0);
@@ -165,7 +166,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
-        out(row, col) = bs.getBits(12);
+        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
       }
     }
   }
@@ -174,7 +175,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;
-        out(row, col) = bs.getBits(12);
+        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
       }
     }
   }
@@ -249,12 +250,13 @@ void OrfDecoder::parseCFA() const {
 
   auto int2enum = [](uint8_t i) {
     switch (i) {
+      using enum CFAColor;
     case 0:
-      return CFAColor::RED;
+      return RED;
     case 1:
-      return CFAColor::GREEN;
+      return GREEN;
     case 2:
-      return CFAColor::BLUE;
+      return BLUE;
     default:
       ThrowRDE("Unexpected CFA color: %u", i);
     }
@@ -317,13 +319,14 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
           switch (c) {
-          case CFAColor::RED:
+            using enum CFAColor;
+          case RED:
             j = 0;
             break;
-          case CFAColor::GREEN:
+          case GREEN:
             j = i < 2 ? 1 : 2;
             break;
-          case CFAColor::BLUE:
+          case BLUE:
             j = 3;
             break;
           default:

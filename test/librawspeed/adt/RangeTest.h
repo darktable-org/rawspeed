@@ -22,7 +22,6 @@
 #include <ostream>
 #include <set>
 #include <tuple>
-#include <utility>
 #include <gtest/gtest.h>
 
 using rawspeed::Range;

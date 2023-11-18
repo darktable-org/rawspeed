@@ -3,6 +3,7 @@ FILE(GLOB SOURCES
   "Array1DRef.h"
   "Array2DRef.h"
   "BitIterator.h"
+  "Casts.h"
   "CroppedArray1DRef.h"
   "CroppedArray2DRef.h"
   "DefaultInitAllocatorAdaptor.h"

@@ -24,7 +24,6 @@
 
 #include "rawspeedconfig.h"
 #include "adt/NORangesSet.h"
-#include "common/RawspeedException.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -116,7 +115,7 @@ public:
   [[nodiscard]] TiffEntry* RAWSPEED_READONLY
   getEntryRecursive(TiffTag tag) const;
   [[nodiscard]] bool RAWSPEED_READONLY hasEntry(TiffTag tag) const {
-    return entries.find(tag) != entries.end();
+    return entries.contains(tag);
   }
   [[nodiscard]] bool hasEntryRecursive(TiffTag tag) const {
     return getEntryRecursive(tag) != nullptr;

@@ -20,11 +20,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "adt/Array2DRef.h"
+#include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
-#include "codes/DummyPrefixCodeDecoder.h"
-#include "codes/PrefixCodeLUTDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/Cr2Decompressor.h"
@@ -36,7 +36,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <initializer_list>
+#include <iterator>
 #include <optional>
 #include <tuple>
 #include <utility>
@@ -54,20 +54,21 @@ enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
 inline TileSequenceStatus
 evaluateConsecutiveTiles(const iRectangle2D& rect,
                          const iRectangle2D& nextRect) {
+  using enum TileSequenceStatus;
   // Are these two are verically-adjacent rectangles of same width?
   if (rect.getBottomLeft() == nextRect.getTopLeft() &&
       rect.getBottomRight() == nextRect.getTopRight())
-    return TileSequenceStatus::ContinuesColumn;
+    return ContinuesColumn;
   // Otherwise, the next rectangle should be the first row of next column.
   if (nextRect.getTop() == 0 && nextRect.getLeft() == rect.getRight())
-    return TileSequenceStatus::BeginsNewColumn;
-  return TileSequenceStatus::Invalid;
+    return BeginsNewColumn;
+  return Invalid;
 }
 
 } // namespace
 
 struct Cr2SliceIterator final {
-  const int frameHeight;
+  int frameHeight;
 
   Cr2SliceWidthIterator widthIter;
 
@@ -77,7 +78,8 @@ struct Cr2SliceIterator final {
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2SliceIterator(Cr2SliceWidthIterator sliceWidthIter_, const iPoint2D& frame)
+  Cr2SliceIterator(const Cr2SliceWidthIterator& sliceWidthIter_,
+                   const iPoint2D& frame)
       : frameHeight(frame.y), widthIter(sliceWidthIter_) {}
 
   value_type RAWSPEED_READONLY operator*() const {
@@ -90,9 +92,6 @@ struct Cr2SliceIterator final {
   friend bool operator==(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
     invariant(a.frameHeight == b.frameHeight && "Unrelated iterators.");
     return a.widthIter == b.widthIter;
-  }
-  friend bool operator!=(const Cr2SliceIterator& a, const Cr2SliceIterator& b) {
-    return !(a == b);
   }
 };
 
@@ -109,7 +108,8 @@ struct Cr2OutputTileIterator final {
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2OutputTileIterator(Cr2SliceIterator sliceIter_, const iPoint2D& imgDim_)
+  Cr2OutputTileIterator(const Cr2SliceIterator& sliceIter_,
+                        const iPoint2D& imgDim_)
       : imgDim(imgDim_), sliceIter(sliceIter_) {}
 
   value_type operator*() const {
@@ -145,10 +145,6 @@ struct Cr2OutputTileIterator final {
     // NOTE: outPos is correctly omitted here.
     return a.sliceIter == b.sliceIter && a.sliceRow == b.sliceRow;
   }
-  friend bool RAWSPEED_READONLY operator!=(const Cr2OutputTileIterator& a,
-                                           const Cr2OutputTileIterator& b) {
-    return !(a == b);
-  }
 };
 
 class Cr2VerticalOutputStripIterator final {
@@ -183,8 +179,9 @@ public:
   using pointer = const value_type*;   // Unusable, but must be here.
   using reference = const value_type&; // Unusable, but must be here.
 
-  Cr2VerticalOutputStripIterator(Cr2OutputTileIterator outputTileIterator_,
-                                 Cr2OutputTileIterator outputTileIterator_end_)
+  Cr2VerticalOutputStripIterator(
+      const Cr2OutputTileIterator& outputTileIterator_,
+      const Cr2OutputTileIterator& outputTileIterator_end_)
       : outputTileIterator(outputTileIterator_),
         outputTileIterator_end(outputTileIterator_end_) {}
 
@@ -199,22 +196,18 @@ public:
               "Comparing unrelated iterators.");
     return a.outputTileIterator == b.outputTileIterator;
   }
-  friend bool operator!=(const Cr2VerticalOutputStripIterator& a,
-                         const Cr2VerticalOutputStripIterator& b) {
-    return !(a == b);
-  }
 };
 
 template <typename PrefixCodeDecoder>
 iterator_range<Cr2SliceIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getSlices() {
+Cr2Decompressor<PrefixCodeDecoder>::getSlices() const {
   return {Cr2SliceIterator(slicing.begin(), frame),
           Cr2SliceIterator(slicing.end(), frame)};
 }
 
 template <typename PrefixCodeDecoder>
 iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() {
+Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() const {
   auto slices = getSlices();
   return {Cr2OutputTileIterator(std::begin(slices), dim),
           Cr2OutputTileIterator(std::end(slices), dim)};
@@ -222,7 +215,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getAllOutputTiles() {
 
 template <typename PrefixCodeDecoder>
 iterator_range<Cr2OutputTileIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() {
+Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() const {
   auto allOutputTiles = getAllOutputTiles();
   auto first = allOutputTiles.begin();
   auto end = allOutputTiles.end();
@@ -236,7 +229,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getOutputTiles() {
 
 template <typename PrefixCodeDecoder>
 [[nodiscard]] iterator_range<Cr2VerticalOutputStripIterator>
-Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() {
+Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() const {
   auto outputTiles = getOutputTiles();
   return {Cr2VerticalOutputStripIterator(std::begin(outputTiles),
                                          std::end(outputTiles)),
@@ -395,7 +388,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getInitialPreds() const {
 
 template <typename PrefixCodeDecoder>
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() {
+void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -460,7 +453,7 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() {
 }
 
 template <typename PrefixCodeDecoder>
-void Cr2Decompressor<PrefixCodeDecoder>::decompress() {
+void Cr2Decompressor<PrefixCodeDecoder>::decompress() const {
   if (std::make_tuple(3, 2, 2) == format) {
     decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
     return;

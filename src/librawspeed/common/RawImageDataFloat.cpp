@@ -20,6 +20,7 @@
 
 #include "common/RawImage.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -27,7 +28,9 @@
 #include "metadata/BlackArea.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <vector>
 
 using std::max;
@@ -94,8 +97,8 @@ void RawImageDataFloat::calculateBlackAreas() {
   totalpixels /= 4;
 
   for (int i = 0; i < 4; i++) {
-    blackLevelSeparate[i] =
-        static_cast<int>(65535.0F * accPixels[i] / totalpixels);
+    blackLevelSeparate[i] = static_cast<int>(65535.0F * accPixels[i] /
+                                             implicit_cast<float>(totalpixels));
   }
 
   /* If this is not a CFA image, we do not use separate blacklevels, use average
@@ -221,18 +224,18 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
     }
     y_find += step;
   }
-  // Find x weights
-  float total_dist_x = dist[0] + dist[1];
 
   float total_div = 0.000001F;
-  if (total_dist_x) {
+
+  // Find x weights
+  if (float total_dist_x = dist[0] + dist[1]; std::abs(total_dist_x) > 0) {
     weight[0] = dist[0] > 0.0F ? (total_dist_x - dist[0]) / total_dist_x : 0;
     weight[1] = 1.0F - weight[0];
     total_div += 1;
   }
 
   // Find y weights
-  if (float total_dist_y = dist[2] + dist[3]; total_dist_y) {
+  if (float total_dist_y = dist[2] + dist[3]; std::abs(total_dist_y) > 0) {
     weight[2] = dist[2] > 0.0F ? (total_dist_y - dist[2]) / total_dist_y : 0;
     weight[3] = 1.0F - weight[2];
     total_div += 1;
@@ -256,7 +259,7 @@ void RawImageDataFloat::doLookup(int start_y, int end_y) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-void RawImageDataFloat::setWithLookUp(uint16_t value, uint8_t* dst,
+void RawImageDataFloat::setWithLookUp(uint16_t value, std::byte* dst,
                                       uint32_t* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {

@@ -23,6 +23,7 @@
 #include "decompressors/PanasonicV7Decompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -30,6 +31,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpLSB.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <utility>
@@ -58,7 +60,8 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(RawImage img,
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
-  input = input_.peekStream(numBlocks, BytesPerBlock);
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(numBlocks),
+                            BytesPerBlock);
 }
 
 inline void __attribute__((always_inline))
@@ -68,7 +71,7 @@ PanasonicV7Decompressor::decompressBlock(
   invariant(out.size() == PixelsPerBlock);
   BitPumpLSB pump(block);
   for (int pix = 0; pix < PixelsPerBlock; pix++)
-    out(pix) = pump.getBits(BitsPerSample);
+    out(pix) = implicit_cast<uint16_t>(pump.getBits(BitsPerSample));
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.

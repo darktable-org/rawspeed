@@ -194,10 +194,7 @@
   </xs:simpleType>
   <xs:complexType name="CFA2Type">
     <xs:sequence>
-      <xs:choice>
-        <xs:element type="ColorRowType" name="ColorRow" minOccurs="2" maxOccurs="2"/>
-        <xs:element type="ColorRowType" name="ColorRow" minOccurs="6" maxOccurs="6"/>
-      </xs:choice>
+      <xs:element type="ColorRowType" name="ColorRow" minOccurs="2" maxOccurs="6"/>
     </xs:sequence>
     <xs:attribute type="CFA2TypeWidthType" name="width" use="required"/>
     <xs:attribute type="CFA2TypeHeightType" name="height" use="required"/>

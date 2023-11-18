@@ -33,10 +33,12 @@ if(BUILD_TESTING)
   target_include_directories(MD5Test PRIVATE "${RAWSPEED_BINARY_DIR}/src")
   target_link_libraries(MD5Test gtest_main)
   rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  set_tests_properties(utilities/rstest/md5 PROPERTIES LABELS "unittest")
   add_dependencies(tests MD5Test)
 
   rawspeed_add_test(NAME utilities/rstest COMMAND rstest
                     WORKING_DIRECTORY "$<TARGET_PROPERTY:rawspeed_get_number_of_processor_cores,BINARY_DIR>")
+  set_tests_properties(utilities/rstest PROPERTIES LABELS "dummy")
 endif()
 
 if(BUILD_BENCHMARKING)
@@ -44,6 +46,7 @@ if(BUILD_BENCHMARKING)
   target_include_directories(MD5Benchmark PRIVATE "${RAWSPEED_BINARY_DIR}/src")
   target_link_libraries(MD5Benchmark benchmark)
   rawspeed_add_test(NAME benchmarks/rstest/MD5Benchmark COMMAND MD5Benchmark --help)
+  set_tests_properties(benchmarks/rstest/MD5Benchmark PROPERTIES LABELS "benchmark;dummy")
 
   add_dependencies(benchmarks MD5Benchmark)
 endif()

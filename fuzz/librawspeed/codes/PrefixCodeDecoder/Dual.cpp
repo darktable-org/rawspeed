@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Casts.h"
 #ifndef IMPL0
 #error IMPL0 must be defined to one of rawspeeds huffman table implementations
 #endif
@@ -153,7 +154,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 

@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 #include "decompressors/PanasonicV5Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -101,7 +102,8 @@ PanasonicV5Decompressor::PanasonicV5Decompressor(RawImage img,
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
-  input = input_.peekStream(numBlocks, BlockSize);
+  input =
+      input_.peekStream(implicit_cast<Buffer::size_type>(numBlocks), BlockSize);
 
   chopInputIntoBlocks(*dsc);
 }
@@ -162,8 +164,9 @@ class PanasonicV5Decompressor::ProxyStream {
     invariant(block.getRemainSize() == 0);
 
     // And reset the clock.
-    input = ByteStream(
-        DataBuffer(Buffer(buf.data(), buf.size()), Endianness::little));
+    input = ByteStream(DataBuffer(
+        Buffer(buf.data(), implicit_cast<Buffer::size_type>(buf.size())),
+        Endianness::little));
     // input.setByteOrder(Endianness::big); // does not seem to matter?!
   }
 
@@ -189,7 +192,7 @@ inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
   for (int p = 0; p < dsc.pixelsPerPacket;) {
     bs.fill();
     for (; bs.getFillLevel() >= dsc.bps; ++p, ++col)
-      out(row, col) = bs.getBitsNoFill(dsc.bps);
+      out(row, col) = implicit_cast<uint16_t>(bs.getBitsNoFill(dsc.bps));
   }
   bs.skipBitsNoFill(bs.getFillLevel()); // get rid of padding.
 }

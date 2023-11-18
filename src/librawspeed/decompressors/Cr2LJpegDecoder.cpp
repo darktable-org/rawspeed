@@ -21,6 +21,7 @@
 */
 
 #include "decompressors/Cr2LJpegDecoder.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
@@ -62,8 +63,9 @@ void Cr2LJpegDecoder::decodeScan() {
     if (slicesWidth > mRaw->dim.x)
       ThrowRDE("Don't know slicing pattern, and failed to guess it.");
 
-    slicing = Cr2SliceWidths(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                             /*lastSliceWidth=*/slicesWidth);
+    slicing =
+        Cr2SliceWidths(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
+                       /*lastSliceWidth=*/implicit_cast<uint16_t>(slicesWidth));
   }
 
   bool isSubSampled = false;
@@ -137,7 +139,7 @@ void Cr2LJpegDecoder::decodeScan() {
       [&rec, hts = getPrefixCodeDecoders(N_COMP),
        initPred = getInitialPredictors(N_COMP)]()
           -> Cr2Decompressor<PrefixCodeDecoder<>>::PerComponentRecipe {
-        const int i = rec.size();
+        const auto i = implicit_cast<int>(rec.size());
         return {*hts[i], initPred[i]};
       });
 

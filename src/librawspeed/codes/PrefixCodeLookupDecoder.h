@@ -21,13 +21,15 @@
 
 #pragma once
 
+#include "adt/Invariant.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "codes/HuffmanCode.h"
+#include "codes/PrefixCode.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStream.h"
 #include <cassert>
 #include <cstdint>
-#include <memory>
+#include <limits>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -103,8 +105,8 @@ public:
          codeLen <= Base::maxCodeLength(); codeLen++) {
       if (!Base::code.nCodesPerLength[codeLen])
         continue;
-      codeOffsetOL[codeLen] =
-          Base::code.symbols[numCodesSoFar].code - numCodesSoFar;
+      codeOffsetOL[codeLen] = implicit_cast<typename Traits::CodeTy>(
+          Base::code.symbols[numCodesSoFar].code - numCodesSoFar);
       assert(codeOffsetOL[codeLen] != MaxCodeValue);
       numCodesSoFar += Base::code.nCodesPerLength[codeLen];
       maxCodeOL[codeLen] = Base::code.symbols[numCodesSoFar - 1].code;
@@ -141,7 +143,8 @@ protected:
            (MaxCodeValue == maxCodeOL[partial.code_len] ||
             partial.code > maxCodeOL[partial.code_len])) {
       uint32_t temp = bs.getBitsNoFill(1);
-      partial.code = (partial.code << 1) | temp;
+      partial.code =
+          implicit_cast<typename Traits::CodeTy>((partial.code << 1) | temp);
       partial.code_len++;
     }
 

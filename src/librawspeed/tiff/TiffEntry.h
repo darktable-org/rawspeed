@@ -26,7 +26,6 @@
 #include "adt/NotARational.h"
 #include "io/ByteStream.h"
 #include "tiff/TiffTag.h"
-#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <string>

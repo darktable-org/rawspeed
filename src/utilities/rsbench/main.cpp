@@ -20,6 +20,7 @@
 
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "common/ChecksumFile.h"
 #include <chrono>
@@ -45,6 +46,16 @@ using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
 using rawspeed::RawImage;
 using rawspeed::RawParser;
+
+namespace {
+
+int currThreadCount;
+
+} // namespace
+
+extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
+  return currThreadCount;
+}
 
 namespace {
 
@@ -113,16 +124,6 @@ struct Entry {
   }
 };
 
-namespace {
-
-int currThreadCount;
-
-} // namespace
-
-extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
-  return currThreadCount;
-}
-
 inline void BM_RawSpeed(benchmark::State& state, Entry* entry, int threads) {
   currThreadCount = threads;
 
@@ -149,7 +150,7 @@ inline void BM_RawSpeed(benchmark::State& state, Entry* entry, int threads) {
 
     benchmark::DoNotOptimize(raw);
 
-    pixels = raw->getUncroppedDim().area();
+    pixels = rawspeed::implicit_cast<unsigned>(raw->getUncroppedDim().area());
   }
 
   // These are total over all the `state.iterations()` iterations.

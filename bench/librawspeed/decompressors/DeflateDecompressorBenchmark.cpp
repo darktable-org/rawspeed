@@ -19,6 +19,7 @@
 */
 
 #include "decompressors/DeflateDecompressor.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "bench/Common.h"
 #include "common/Common.h"
@@ -85,7 +86,7 @@ inline void BM_DeflateDecompressor(benchmark::State& state) {
   const std::vector<uint8_t> cBuf = compressChunk<BPS>(mRaw, &cBufSize);
   assert(cBufSize > 0);
 
-  Buffer buf(cBuf.data(), cBufSize);
+  Buffer buf(cBuf.data(), rawspeed::implicit_cast<Buffer::size_type>(cBufSize));
   assert(buf.getSize() == cBufSize);
 
   int predictor = 0;

@@ -20,24 +20,24 @@
 */
 
 #include "metadata/Camera.h"
-#include "adt/NotARational.h"
 #include "adt/Point.h"
-#include "common/Common.h"
 #include "metadata/CameraMetadataException.h"
 #include "metadata/CameraSensorInfo.h"
 #include "metadata/ColorFilterArray.h"
-#include <algorithm>
-#include <cctype>
 #include <cstdint>
-#include <cstdio>
 #include <map>
-#include <optional>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #ifdef HAVE_PUGIXML
+#include "adt/NotARational.h"
+#include "common/Common.h"
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <optional>
 #include <pugixml.hpp>
+#include <string_view>
 
 using pugi::xml_node;
 #endif
@@ -64,12 +64,13 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 
   supportStatus = [&camera]() {
     const std::string_view v = camera.attribute("supported").as_string("yes");
+    using enum Camera::SupportStatus;
     if (v == "yes")
-      return Camera::SupportStatus::Supported;
+      return Supported;
     if (v == "no")
-      return Camera::SupportStatus::Unsupported;
+      return Unsupported;
     if (v == "no-samples")
-      return Camera::SupportStatus::NoSamples;
+      return NoSamples;
     ThrowCME("Attribute 'supported' has unknown value.");
   }();
   mode = camera.attribute("mode").as_string("");
@@ -81,7 +82,7 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 }
 #endif
 
-Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
+Camera::Camera(const Camera* camera, uint32_t alias_num) {
   if (alias_num >= camera->aliases.size())
     ThrowCME("Internal error, alias number out of range specified.");
 
@@ -100,40 +101,42 @@ std::string name(const xml_node& a) { return a.name(); }
 
 std::optional<CFAColor> getAsCFAColor(char c) {
   switch (c) {
+    using enum CFAColor;
   case 'g':
-    return CFAColor::GREEN;
+    return GREEN;
   case 'r':
-    return CFAColor::RED;
+    return RED;
   case 'b':
-    return CFAColor::BLUE;
+    return BLUE;
   case 'f':
-    return CFAColor::FUJI_GREEN;
+    return FUJI_GREEN;
   case 'c':
-    return CFAColor::CYAN;
+    return CYAN;
   case 'm':
-    return CFAColor::MAGENTA;
+    return MAGENTA;
   case 'y':
-    return CFAColor::YELLOW;
+    return YELLOW;
   default:
     return std::nullopt;
   }
 }
 
 std::optional<CFAColor> getAsCFAColor(std::string_view c) {
+  using enum CFAColor;
   if (c == "GREEN")
-    return CFAColor::GREEN;
+    return GREEN;
   if (c == "RED")
-    return CFAColor::RED;
+    return RED;
   if (c == "BLUE")
-    return CFAColor::BLUE;
+    return BLUE;
   if (c == "FUJI_GREEN")
-    return CFAColor::FUJI_GREEN;
+    return FUJI_GREEN;
   if (c == "CYAN")
-    return CFAColor::CYAN;
+    return CYAN;
   if (c == "MAGENTA")
-    return CFAColor::MAGENTA;
+    return MAGENTA;
   if (c == "YELLOW")
-    return CFAColor::YELLOW;
+    return YELLOW;
   return std::nullopt;
 }
 

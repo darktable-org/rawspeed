@@ -21,15 +21,22 @@
 
 #pragma once
 
-#include "AddressSanitizer.h"
+#include "rawspeedconfig.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "io/Buffer.h"
 #include "io/IOException.h"
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <iterator>
 #include <limits>
+#include <string_view>
+
+#ifndef NDEBUG
+#include "AddressSanitizer.h"
+#endif
 
 namespace rawspeed {
 
@@ -182,7 +189,7 @@ public:
   // between (not a copy). If the first byte is zero, stream is incremented one.
   [[nodiscard]] std::string_view getString() {
     std::string_view str = peekString();
-    skipBytes(1 + str.size());
+    skipBytes(implicit_cast<Buffer::size_type>(1 + str.size()));
     return str;
   }
 };

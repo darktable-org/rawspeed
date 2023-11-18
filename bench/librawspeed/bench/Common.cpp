@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h"
 #include "bench/Common.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include <cassert>
@@ -42,10 +43,11 @@ areaToRectangle(size_t area, iPoint2D aspect) {
   double sqARatio =
       sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));
 
-  iPoint2D dim(ceil(sqSide * sqARatio), ceil(sqSide / sqARatio));
+  iPoint2D dim(rawspeed::implicit_cast<int>(ceil(sqSide * sqARatio)),
+               rawspeed::implicit_cast<int>(ceil(sqSide / sqARatio)));
 
-  dim.x = roundUp(dim.x, aspect.x);
-  dim.y = roundUp(dim.y, aspect.y);
+  dim.x = rawspeed::implicit_cast<int>(roundUp(dim.x, aspect.x));
+  dim.y = rawspeed::implicit_cast<int>(roundUp(dim.y, aspect.y));
 
   assert(dim.area() >= area);
 

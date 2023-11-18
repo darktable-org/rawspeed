@@ -110,6 +110,7 @@ std::string find_cameras_xml(const char* argv0) {
 using rawspeed::Buffer;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
+using rawspeed::implicit_cast;
 using rawspeed::iPoint2D;
 using rawspeed::RawImage;
 using rawspeed::RawParser;
@@ -198,8 +199,7 @@ int main(int argc, char* argv[]) { // NOLINT
     d->decodeMetaData(meta.get());
     r = d->mRaw;
 
-    const auto errors = r->getErrors();
-    for (const auto& error : errors)
+    for (const auto errors = r->getErrors(); const auto& error : errors)
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
@@ -209,9 +209,11 @@ int main(int argc, char* argv[]) { // NOLINT
             r->blackLevelSeparate[0], r->blackLevelSeparate[1],
             r->blackLevelSeparate[2], r->blackLevelSeparate[3]);
 
-    fprintf(stdout, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-            r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-            r->metadata.wbCoeffs[3]);
+    fprintf(stdout, "wbCoeffs: %f %f %f %f\n",
+            implicit_cast<double>(r->metadata.wbCoeffs[0]),
+            implicit_cast<double>(r->metadata.wbCoeffs[1]),
+            implicit_cast<double>(r->metadata.wbCoeffs[2]),
+            implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
     fprintf(stdout, "isCFA: %d\n", r->isCFA);
     uint32_t filters = r->cfa.getDcrawFilter();
@@ -237,7 +239,7 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
     fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
-    double sum = 0.0F;
+    double sum = 0.0;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp)    \
     schedule(static) reduction(+ : sum)
@@ -253,7 +255,7 @@ int main(int argc, char* argv[]) { // NOLINT
             sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
     if (r->getDataType() == rawspeed::RawImageType::F32) {
-      sum = 0.0F;
+      sum = 0.0;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp)    \
@@ -270,7 +272,7 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image float avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     } else if (r->getDataType() == rawspeed::RawImageType::UINT16) {
-      sum = 0.0F;
+      sum = 0.0;
 
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp)    \

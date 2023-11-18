@@ -21,6 +21,7 @@
 
 #include "decoders/RafDecoder.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -146,7 +147,7 @@ RawImage RafDecoder::decodeRawInternal() {
              counts->getU32(), width, height);
   }
 
-  double_width = hints.has("double_width_unpacked");
+  double_width = hints.contains("double_width_unpacked");
   const uint32_t real_width = double_width ? 2U * width : width;
 
   mRaw->dim = iPoint2D(real_width, height);
@@ -167,7 +168,7 @@ RawImage RafDecoder::decodeRawInternal() {
     u.readUncompressedRaw();
   } else {
     iPoint2D pos(0, 0);
-    if (hints.has("jpeg32_bitorder")) {
+    if (hints.contains("jpeg32_bitorder")) {
       UncompressedDecompressor u(input, mRaw, iRectangle2D(pos, mRaw->dim),
                                  width * bps / 8, bps, BitOrder::MSB32);
       mRaw->createData();
@@ -206,7 +207,7 @@ void RafDecoder::applyCorrections(const Camera* cam) {
   if (applyCrop) {
     new_size = cam->cropSize;
     crop_offset = cam->cropPos;
-    bool double_width = hints.has("double_width_unpacked");
+    bool double_width = hints.contains("double_width_unpacked");
     // If crop size is negative, use relative cropping
     if (new_size.x <= 0) {
       new_size.x =
@@ -217,7 +218,7 @@ void RafDecoder::applyCorrections(const Camera* cam) {
       new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
   }
 
-  bool rotate = hints.has("fuji_rotate");
+  bool rotate = hints.contains("fuji_rotate");
   rotate = rotate && fujiRotate;
 
   // Rotate 45 degrees - could be multithreaded.
@@ -278,7 +279,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
     if (bps > 16)
       ThrowRDE("Unexpected bit depth: %i", bps);
-    mRaw->whitePoint = (1UL << bps) - 1UL;
+    mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
   }
 
   // This is where we'd normally call setMetaData but since we may still need

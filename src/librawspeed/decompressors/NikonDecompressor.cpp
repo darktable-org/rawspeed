@@ -21,6 +21,7 @@
 #include "decompressors/NikonDecompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
@@ -34,6 +35,7 @@
 #include "io/ByteStream.h"
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <utility>
@@ -159,7 +161,7 @@ class NikonLASDecompressor {
     p = 0;
     for (l = 1; l <= 16; l++) {
       if (dctbl1.bits[l]) {
-        dctbl1.valptr[l] = p;
+        dctbl1.valptr[l] = implicit_cast<int16_t>(p);
         dctbl1.mincode[l] = huffcode[p];
         p += dctbl1.bits[l];
         dctbl1.maxcode[l] = huffcode[p - 1];
@@ -232,8 +234,8 @@ class NikonLASDecompressor {
 
     dctbl1.bigTable.resize(size);
     for (uint32_t i = 0; i < size; i++) {
-      uint16_t input = i << 2; // Calculate input value
-      int code = input >> 8;   // Get 8 bits
+      auto input = implicit_cast<uint16_t>(i << 2); // Calculate input value
+      int code = input >> 8;                        // Get 8 bits
       uint32_t val = dctbl1.numbits[code];
       l = val & 15;
       if (l) {
@@ -392,12 +394,12 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
   assert(curve.size() > 1);
 
   for (size_t i = 0; i < curve.size(); i++)
-    curve[i] = i;
+    curve[i] = implicit_cast<uint16_t>(i);
 
   uint32_t step = 0;
   uint32_t csize = metadata.getU16();
   if (csize > 1)
-    step = curve.size() / (csize - 1);
+    step = implicit_cast<uint32_t>(curve.size() / (csize - 1));
 
   if (v0 == 68 && (v1 == 32 || v1 == 64) && step > 0) {
     if ((csize - 1) * step != curve.size() - 1)
@@ -408,7 +410,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
     for (size_t i = 0; i < curve.size() - 1; i++) {
       const uint32_t b_scale = i % step;
 
-      const uint32_t a_pos = i - b_scale;
+      const auto a_pos = implicit_cast<uint32_t>(i - b_scale);
       const uint32_t b_pos = a_pos + step;
       assert(a_pos < curve.size());
       assert(b_pos > 0);
@@ -416,7 +418,8 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
       assert(a_pos < b_pos);
 
       const uint32_t a_scale = step - b_scale;
-      curve[i] = (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step;
+      curve[i] = implicit_cast<uint16_t>(
+          (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step);
     }
 
     metadata.setPosition(562);
@@ -529,7 +532,7 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];
       rawdata->setWithLookUp(clampBits(pred[col & 1], 15),
-                             reinterpret_cast<uint8_t*>(&out(row, col)),
+                             reinterpret_cast<std::byte*>(&out(row, col)),
                              &random);
     }
   }

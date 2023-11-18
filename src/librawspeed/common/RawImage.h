@@ -24,6 +24,7 @@
 #include "ThreadSafetyAnalysis.h"
 #include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Mutex.h"
@@ -41,6 +42,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace rawspeed {
@@ -136,7 +138,7 @@ public:
   [[nodiscard]] iPoint2D RAWSPEED_READONLY getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(uint16_t value, uint8_t* dst,
+  virtual void setWithLookUp(uint16_t value, std::byte* dst,
                              uint32_t* random) = 0;
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
@@ -200,7 +202,7 @@ public:
 
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
@@ -221,7 +223,7 @@ public:
 
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues(int start_y, int end_y) override;
@@ -322,7 +324,7 @@ RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
 // pointer to a value that will be used to store a random counter that can be
 // reused between calls. this needs to be inline to speed up tight decompressor
 // loops
-inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
+inline void RawImageDataU16::setWithLookUp(uint16_t value, std::byte* dst,
                                            uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
   if (table == nullptr) {
@@ -338,7 +340,7 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
 
     uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);
     *random = 15700 * (r & 65535) + (r >> 16);
-    *dest = pix;
+    *dest = implicit_cast<uint16_t>(pix);
     return;
   }
   *dest = table->tables[value];

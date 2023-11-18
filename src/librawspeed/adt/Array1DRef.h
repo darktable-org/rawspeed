@@ -23,7 +23,6 @@
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
 #include <type_traits>
-#include <vector>
 
 namespace rawspeed {
 
@@ -44,33 +43,20 @@ public:
   Array1DRef(T* data, int numElts);
 
   // Can not cast away constness.
-  template <
-      typename T2,
-      std::enable_if_t<std::conjunction_v<std::is_const<T2>,
-                                          std::negation<std::is_const<T>>>,
-                       bool> = true>
+  template <typename T2>
+    requires(std::is_const_v<T2> && !std::is_const_v<T>)
   Array1DRef(Array1DRef<T2> RHS) = delete;
 
   // Can not change type.
-  template <typename T2,
-            std::enable_if_t<
-                std::conjunction_v<
-                    std::negation<std::conjunction<
-                        std::is_const<T2>, std::negation<std::is_const<T>>>>,
-                    std::negation<std::is_same<std::remove_const_t<T>,
-                                               std::remove_const_t<T2>>>>,
-                bool> = true>
+  template <typename T2>
+    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
+             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   Array1DRef(Array1DRef<T2> RHS) = delete;
 
   // Conversion from Array1DRef<T> to Array1DRef<const T>.
-  template <
-      typename T2,
-      std::enable_if_t<
-          std::conjunction_v<
-              std::conjunction<std::negation<std::is_const<T2>>,
-                               std::is_const<T>>,
-              std::is_same<std::remove_const_t<T>, std::remove_const_t<T2>>>,
-          bool> = true>
+  template <typename T2>
+    requires(!std::is_const_v<T2> && std::is_const_v<T> &&
+             std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : data(RHS.data), numElts(RHS.numElts) {}
 

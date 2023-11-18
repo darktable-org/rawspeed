@@ -26,8 +26,6 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "decompressors/DeflateDecompressor.h"
-#include "decompressors/JpegDecompressor.h"
 #include "decompressors/LJpegDecoder.h"
 #include "decompressors/UncompressedDecompressor.h"
 #include "decompressors/VC5Decompressor.h"
@@ -36,9 +34,17 @@
 #include "io/IOException.h"
 #include <cstdint>
 #include <limits>
-#include <memory>
 #include <string>
 #include <vector>
+
+#ifdef HAVE_ZLIB
+#include "decompressors/DeflateDecompressor.h"
+#include <memory>
+#endif
+
+#ifdef HAVE_JPEG
+#include "decompressors/JpegDecompressor.h"
+#endif
 
 namespace rawspeed {
 

@@ -39,11 +39,12 @@ class FileReader {
 public:
   explicit FileReader(const char* fileName_) : fileName(fileName_) {}
 
-  std::pair<std::unique_ptr<std::vector<
-                uint8_t, DefaultInitAllocatorAdaptor<
-                             uint8_t, AlignedAllocator<uint8_t, 16>>>>,
-            Buffer>
-  readFile();
+  [[nodiscard]] std::pair<
+      std::unique_ptr<std::vector<
+          uint8_t,
+          DefaultInitAllocatorAdaptor<uint8_t, AlignedAllocator<uint8_t, 16>>>>,
+      Buffer>
+  readFile() const;
 };
 
 } // namespace rawspeed

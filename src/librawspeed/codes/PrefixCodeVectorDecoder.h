@@ -21,10 +21,10 @@
 
 #pragma once
 
+#include "adt/Invariant.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStream.h"
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <tuple>

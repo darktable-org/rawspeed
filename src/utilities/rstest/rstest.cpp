@@ -21,6 +21,7 @@
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/NotARational.h"
 #include "md5.h"
@@ -107,7 +108,7 @@ public:
 struct Timer {
   mutable std::chrono::steady_clock::time_point start =
       std::chrono::steady_clock::now();
-  size_t operator()() const {
+  int64_t operator()() const {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                   std::chrono::steady_clock::now() - start)
                   .count();
@@ -183,9 +184,11 @@ std::string img_hash(const RawImage& r, bool noSamples) {
          r->blackLevelSeparate[1], r->blackLevelSeparate[2],
          r->blackLevelSeparate[3]);
 
-  APPEND(&oss, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-         r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-         r->metadata.wbCoeffs[3]);
+  APPEND(&oss, "wbCoeffs: %f %f %f %f\n",
+         implicit_cast<double>(r->metadata.wbCoeffs[0]),
+         implicit_cast<double>(r->metadata.wbCoeffs[1]),
+         implicit_cast<double>(r->metadata.wbCoeffs[2]),
+         implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
   APPEND(&oss, "colorMatrix:");
   if (r->metadata.colorMatrix.empty())
@@ -236,8 +239,7 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   APPEND(&oss, "md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
-  const auto errors = r->getErrors();
-  for (const std::string& e : errors)
+  for (const auto errors = r->getErrors(); const std::string& e : errors)
     APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
 
   return oss.str();
@@ -287,7 +289,8 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   // regardless of padding, we need to write \n separator
   const int realLen = len + 1;
   // the first byte after that \n will be aligned
-  const int paddedLen = roundUp(realLen, dataAlignment);
+  const auto paddedLen =
+      rawspeed::implicit_cast<int>(roundUp(realLen, dataAlignment));
   assert(paddedLen > len);
   assert(rawspeed::isAligned(paddedLen, dataAlignment));
 
@@ -570,7 +573,9 @@ int main(int argc, char **argv) {
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << '\n' << '\n';
+  cout << "Total decoding time: "
+       << rawspeed::implicit_cast<double>(time) / 1000.0 << "s" << '\n'
+       << '\n';
 
   return results(failedTests, o);
 }

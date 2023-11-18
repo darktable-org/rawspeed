@@ -23,6 +23,7 @@
 
 #include "adt/Array2DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
+#include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCodeLUTDecoder.h"
 #include "codes/PrefixCodeVectorDecoder.h"
 #include "common/BayerPhase.h"

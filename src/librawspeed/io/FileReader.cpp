@@ -21,6 +21,7 @@
 
 #include "io/FileReader.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "io/Buffer.h"
 #include "io/FileIOException.h"
@@ -48,7 +49,7 @@ std::pair<std::unique_ptr<std::vector<
               uint8_t, DefaultInitAllocatorAdaptor<
                            uint8_t, AlignedAllocator<uint8_t, 16>>>>,
           Buffer>
-FileReader::readFile() {
+FileReader::readFile() const {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)
@@ -65,10 +66,11 @@ FileReader::readFile() {
   if (size <= 0)
     ThrowFIE("File is 0 bytes.");
 
-  fileSize = size;
-
-  if (fileSize > std::numeric_limits<Buffer::size_type>::max())
+  if (static_cast<int64_t>(size) >
+      std::numeric_limits<Buffer::size_type>::max())
     ThrowFIE("File is too big (%zu bytes).", fileSize);
+
+  fileSize = size;
 
   fseek(file.get(), 0, SEEK_SET);
 
@@ -128,7 +130,8 @@ FileReader::readFile() {
 
 #endif // __unix__
 
-  return {std::move(dest), Buffer(dest->data(), fileSize)};
+  return {std::move(dest),
+          Buffer(dest->data(), implicit_cast<Buffer::size_type>(fileSize))};
 }
 
 } // namespace rawspeed

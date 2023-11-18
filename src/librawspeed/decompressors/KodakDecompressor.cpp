@@ -22,15 +22,18 @@
 
 #include "decompressors/KodakDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -58,7 +61,7 @@ KodakDecompressor::KodakDecompressor(RawImage img, ByteStream bs, int bps_,
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
-  (void)input.check(mRaw->dim.area() / 2ULL);
+  (void)input.check(implicit_cast<Buffer::size_type>(mRaw->dim.area() / 2ULL));
 }
 
 KodakDecompressor::segment
@@ -107,7 +110,8 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff);
+    out[i] = implicit_cast<int16_t>(
+        len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff));
   }
 
   return out;
@@ -134,10 +138,12 @@ void KodakDecompressor::decompress() {
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
-          out(row, col) = value;
-        else
-          mRaw->setWithLookUp(value, reinterpret_cast<uint8_t*>(&out(row, col)),
+          out(row, col) = implicit_cast<uint16_t>(value);
+        else {
+          mRaw->setWithLookUp(implicit_cast<uint16_t>(value),
+                              reinterpret_cast<std::byte*>(&out(row, col)),
                               &random);
+        }
       }
     }
   }

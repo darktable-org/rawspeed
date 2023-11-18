@@ -20,9 +20,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"
 #include "decompressors/OlympusDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
@@ -30,24 +30,10 @@
 #include "io/BitPumpMSB.h"
 #include "io/ByteStream.h"
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <type_traits>
 #include <utility>
-
-namespace {
-
-// Normally, we'd just use std::signbit(int) here. But, some (non-conforming?)
-// compilers do not provide that overload, so the code simply fails to compile.
-// One could cast the int to the double, but at least right now that results
-// in a horrible code. So let's just provide our own signbit(). It compiles to
-// the exact same code as the std::signbit(int).
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-constexpr RAWSPEED_READNONE bool SignBit(T x) {
-  return x < 0;
-}
-
-} // namespace
 
 namespace rawspeed {
 
@@ -122,7 +108,7 @@ inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
     int upMinusNw = up - leftUp;
 
     // Check if sign is different, and they are both not zero
-    if ((SignBit(leftMinusNw) ^ SignBit(upMinusNw)) &&
+    if ((std::signbit(leftMinusNw) != std::signbit(upMinusNw)) &&
         (leftMinusNw != 0 && upMinusNw != 0)) {
       if (std::abs(leftMinusNw) > 32 || std::abs(upMinusNw) > 32)
         pred = left + upMinusNw;
@@ -152,7 +138,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
     int diff = parseCarry(bits, &carry);
     int pred = getPred(out, row, col);
 
-    out(row, col) = pred + diff;
+    out(row, col) = implicit_cast<uint16_t>(pred + diff);
   }
 }
 

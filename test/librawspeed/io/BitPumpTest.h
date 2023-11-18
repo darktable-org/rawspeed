@@ -18,15 +18,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Common.h"
-#include "io/BitStream.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <array>
 #include <cassert>
 #include <cstdint>
-#include <initializer_list>
 #include <gtest/gtest.h>
 
 using rawspeed::Buffer;
@@ -131,7 +128,9 @@ public:
 protected:
   template <typename Tag, typename TestDataType, typename L>
   void runTest(const TestDataType& data, L gen) {
-    const Buffer b(data.data(), data.size());
+    const Buffer b(
+        data.data(),
+        rawspeed::implicit_cast<rawspeed::Buffer::size_type>(data.size()));
 
     for (auto e : {Endianness::little, Endianness::big}) {
       const DataBuffer db(b, e);

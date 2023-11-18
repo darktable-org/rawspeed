@@ -22,13 +22,11 @@
 
 #include <cstddef>
 #include <memory>
-#include <new>
 #include <type_traits>
 
 namespace rawspeed {
 
-template <typename T, typename ActualAllocator = std::allocator<T>,
-          typename = std::enable_if_t<std::is_pod_v<T>>>
+template <typename T, typename ActualAllocator = std::allocator<T>>
 class DefaultInitAllocatorAdaptor {
 public:
   using allocator_traits = std::allocator_traits<ActualAllocator>;

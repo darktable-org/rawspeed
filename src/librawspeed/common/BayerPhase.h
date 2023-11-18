@@ -95,8 +95,8 @@ inline std::array<T, 4> applyPhaseShift(std::array<T, 4> srcData,
 
 inline std::array<CFAColor, 4> getAsCFAColors(BayerPhase p) {
   const BayerPhase basePhase = BayerPhase::RGGB;
-  const std::array<CFAColor, 4> basePat = {CFAColor::RED, CFAColor::GREEN,
-                                           CFAColor::GREEN, CFAColor::BLUE};
+  using enum CFAColor;
+  const std::array<CFAColor, 4> basePat = {RED, GREEN, GREEN, BLUE};
   return applyPhaseShift(basePat, basePhase, /*tgtPhase=*/p);
 }
 
@@ -114,13 +114,13 @@ inline std::array<T, 4> applyStablePhaseShift(std::array<T, 4> srcData,
   auto is_green = [](const CFAColor& c) { return c == CFAColor::GREEN; };
 
   const std::array<CFAColor, 4> tgtColors = getAsCFAColors(tgtPhase);
-  int green0Idx =
+  auto green0Idx =
       std::distance(tgtColors.begin(),
                     std::find_if(tgtColors.begin(), tgtColors.end(), is_green));
-  int green1Idx = std::distance(std::find_if(tgtColors.rbegin(),
-                                             tgtColors.rend(), is_green),
-                                tgtColors.rend()) -
-                  1;
+  auto green1Idx = std::distance(std::find_if(tgtColors.rbegin(),
+                                              tgtColors.rend(), is_green),
+                                 tgtColors.rend()) -
+                   1;
 
   std::swap(tgtData[green0Idx], tgtData[green1Idx]);
 

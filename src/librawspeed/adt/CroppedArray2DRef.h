@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
@@ -44,6 +45,17 @@ public:
 
   CroppedArray2DRef() = default;
 
+  // Can not cast away constness.
+  template <typename T2>
+    requires(std::is_const_v<T2> && !std::is_const_v<T>)
+  CroppedArray2DRef(CroppedArray2DRef<T2> RHS) = delete;
+
+  // Can not change type.
+  template <typename T2>
+    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
+             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
+  CroppedArray2DRef(CroppedArray2DRef<T2> RHS) = delete;
+
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
       : base(RHS), croppedWidth(base.width), croppedHeight(base.height) {}
@@ -52,8 +64,9 @@ public:
                     int croppedWidth_, int croppedHeight_);
 
   // Conversion from CroppedArray2DRef<T> to CroppedArray2DRef<const T>.
-  template <class T2, typename = std::enable_if_t<
-                          std::is_same_v<std::remove_const_t<T>, T2>>>
+  template <class T2>
+    requires(!std::is_const_v<T2> && std::is_const_v<T> &&
+             std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   CroppedArray2DRef( // NOLINT google-explicit-constructor
       CroppedArray2DRef<T2> RHS)
       : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),

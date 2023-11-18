@@ -21,6 +21,7 @@
 
 #include "decoders/RawDecoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -48,7 +49,7 @@ using std::vector;
 
 namespace rawspeed {
 
-RawDecoder::RawDecoder(Buffer file) : mRaw(RawImage::create()), mFile(file) {}
+RawDecoder::RawDecoder(Buffer file) : mFile(file) {}
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
@@ -118,13 +119,14 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   mRaw->createData();
 
   // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = (1UL << bitPerPixel) - 1UL;
+  mRaw->whitePoint = implicit_cast<int>((1UL << bitPerPixel) - 1UL);
 
   offY = 0;
   for (const RawSlice& slice : slices) {
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
+    bitPerPixel = implicit_cast<uint32_t>(
+        (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width));
     const auto inputPitch = width * bitPerPixel / 8;
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");
@@ -175,11 +177,12 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
   }
 
   switch (cam->supportStatus) {
-  case Camera::SupportStatus::Supported:
+    using enum Camera::SupportStatus;
+  case Supported:
     break; // Yay us!
-  case Camera::SupportStatus::Unsupported:
+  case Unsupported:
     ThrowRDE("Camera not supported (explicit). Sorry.");
-  case Camera::SupportStatus::NoSamples:
+  case NoSamples:
     noSamples = true;
     writeLog(DEBUG_PRIO::WARNING,
              "Camera support status is unknown: '%s' '%s' '%s'\n"

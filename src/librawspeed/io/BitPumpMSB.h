@@ -21,7 +21,6 @@
 #pragma once
 
 #include "io/BitStream.h"
-#include "io/Buffer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 

@@ -64,8 +64,7 @@ private:
   [[nodiscard]] int getBitPerSample() const;
   [[nodiscard]] std::string getMode() const;
   [[nodiscard]] std::string getExtendedMode(const std::string& mode) const;
-  static std::vector<uint16_t> gammaCurve(double pwr, double ts, int mode,
-                                          int imax);
+  static std::vector<uint16_t> gammaCurve(double pwr, double ts, int imax);
 
   // We use this for the D50 and D2X whacky WB "encryption"
   static const std::array<uint8_t, 256> serialmap;

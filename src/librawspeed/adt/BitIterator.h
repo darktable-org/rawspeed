@@ -22,12 +22,14 @@
 
 #include "adt/Invariant.h"
 #include "common/Common.h"
+#include <cstddef>
 #include <iterator>
-#include <utility>
+#include <type_traits>
 
 namespace rawspeed {
 
-template <typename T, typename = std::enable_if_t<std::is_unsigned_v<T>>>
+template <typename T>
+  requires std::is_unsigned_v<T>
 struct BitMSBIterator {
   T bitsPat;
   int bitIdx;
@@ -56,9 +58,6 @@ struct BitMSBIterator {
                                 const BitMSBIterator& b) {
     invariant(a.bitsPat == b.bitsPat && "Comparing unrelated iterators.");
     return a.bitIdx == b.bitIdx;
-  }
-  friend bool operator!=(const BitMSBIterator& a, const BitMSBIterator& b) {
-    return !(a == b);
   }
 };
 

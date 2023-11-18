@@ -111,7 +111,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
       PanasonicV4Decompressor p(
           mRaw,
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-          hints.has("zero_is_not_bad"), section_split_offset);
+          hints.contains("zero_is_not_bad"), section_split_offset);
       mRaw->createData();
       p.decompress();
     }
@@ -136,7 +136,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
                 raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
-      PanasonicV4Decompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
+      PanasonicV4Decompressor p(mRaw, bs, hints.contains("zero_is_not_bad"),
                                 section_split_offset);
       mRaw->createData();
       p.decompress();
@@ -193,21 +193,18 @@ void Rw2Decoder::parseCFA() const {
   }
 
   switch (auto i = CFA->getU16()) {
+    using enum CFAColor;
   case 1:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
-                     CFAColor::GREEN, CFAColor::BLUE);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), RED, GREEN, GREEN, BLUE);
     break;
   case 2:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::RED,
-                     CFAColor::BLUE, CFAColor::GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), GREEN, RED, BLUE, GREEN);
     break;
   case 3:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::BLUE,
-                     CFAColor::RED, CFAColor::GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), GREEN, BLUE, RED, GREEN);
     break;
   case 4:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::BLUE, CFAColor::GREEN,
-                     CFAColor::GREEN, CFAColor::RED);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), BLUE, GREEN, GREEN, RED);
     break;
   default:
     ThrowRDE("Unexpected CFA pattern: %u", i);
@@ -343,8 +340,8 @@ std::string Rw2Decoder::guessMode() const {
 }
 
 rawspeed::iRectangle2D Rw2Decoder::getDefaultCrop() {
-  const TiffIFD* raw = getRaw();
-  if (raw->hasEntry(TiffTag::PANASONIC_SENSORLEFTBORDER) &&
+  if (const TiffIFD* raw = getRaw();
+      raw->hasEntry(TiffTag::PANASONIC_SENSORLEFTBORDER) &&
       raw->hasEntry(TiffTag::PANASONIC_SENSORTOPBORDER) &&
       raw->hasEntry(TiffTag::PANASONIC_SENSORRIGHTBORDER) &&
       raw->hasEntry(TiffTag::PANASONIC_SENSORBOTTOMBORDER)) {

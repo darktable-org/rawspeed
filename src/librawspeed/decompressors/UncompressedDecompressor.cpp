@@ -22,6 +22,7 @@
 
 #include "decompressors/UncompressedDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -32,11 +33,13 @@
 #include "io/BitPumpMSB.h"
 #include "io/BitPumpMSB16.h"
 #include "io/BitPumpMSB32.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
 #include <algorithm>
 #include <cinttypes>
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -144,7 +147,8 @@ UncompressedDecompressor::UncompressedDecompressor(
   sanityCheck(&h, inputPitchBytes);
 
   invariant((unsigned)inputPitchBytes >= outPixelBytes);
-  skipBytes = inputPitchBytes - outPixelBytes; // Skip per line
+  skipBytes =
+      implicit_cast<uint32_t>(inputPitchBytes - outPixelBytes); // Skip per line
 
   if (oy > static_cast<uint64_t>(mRaw->dim.y))
     ThrowRDE("Invalid y offset");
@@ -177,7 +181,7 @@ void UncompressedDecompressor::decodePackedInt(int rows, int row) const {
   int cols = size.x * mRaw->getCpp();
   for (; row < rows; row++) {
     for (int x = 0; x < cols; x++) {
-      out(row, x) = bits.getBits(bitPerPixel);
+      out(row, x) = implicit_cast<uint16_t>(bits.getBits(bitPerPixel));
     }
     bits.skipBytes(skipBytes);
   }
@@ -191,30 +195,38 @@ void UncompressedDecompressor::readUncompressedRaw() {
   uint64_t oy = offset.y;
 
   uint64_t y = oy;
-  h = min(h + oy, static_cast<uint64_t>(mRaw->dim.y));
+  h = implicit_cast<uint32_t>(min(h + oy, static_cast<uint64_t>(mRaw->dim.y)));
 
   if (mRaw->getDataType() == RawImageType::F32) {
     if (bitPerPixel == 32) {
       const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
-                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
-                 w * mRaw->getBpp(), h - y);
+      copyPixels(
+          reinterpret_cast<std::byte*>(
+              &out(implicit_cast<int>(y), offset.x * cpp)),
+          outPitch,
+          reinterpret_cast<const std::byte*>(input.getData(
+              implicit_cast<Buffer::size_type>(inputPitchBytes * (h - y)))),
+          inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(
+          h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(
+          h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(h, y);
+      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(
+          h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(h, y);
+      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(
+          h, implicit_cast<int>(y));
       return;
     }
     ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
@@ -222,20 +234,24 @@ void UncompressedDecompressor::readUncompressedRaw() {
   }
 
   if (BitOrder::MSB == order) {
-    decodePackedInt<BitPumpMSB>(h, y);
+    decodePackedInt<BitPumpMSB>(h, implicit_cast<int>(y));
   } else if (BitOrder::MSB16 == order) {
-    decodePackedInt<BitPumpMSB16>(h, y);
+    decodePackedInt<BitPumpMSB16>(h, implicit_cast<int>(y));
   } else if (BitOrder::MSB32 == order) {
-    decodePackedInt<BitPumpMSB32>(h, y);
+    decodePackedInt<BitPumpMSB32>(h, implicit_cast<int>(y));
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-      copyPixels(reinterpret_cast<uint8_t*>(&out(y, offset.x * cpp)), outPitch,
-                 input.getData(inputPitchBytes * (h - y)), inputPitchBytes,
-                 w * mRaw->getBpp(), h - y);
+      copyPixels(
+          reinterpret_cast<std::byte*>(
+              &out(implicit_cast<int>(y), offset.x * cpp)),
+          outPitch,
+          reinterpret_cast<const std::byte*>(input.getData(
+              implicit_cast<Buffer::size_type>(inputPitchBytes * (h - y)))),
+          inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
-    decodePackedInt<BitPumpLSB>(h, y);
+    decodePackedInt<BitPumpLSB>(h, implicit_cast<int>(y));
   }
 }
 
@@ -251,10 +267,10 @@ void UncompressedDecompressor::decode8BitRaw() {
   uint32_t random = 0;
   for (uint32_t row = 0; row < h; row++) {
     for (uint32_t col = 0; col < w; col++) {
-      if (uncorrectedRawValues)
+      if constexpr (uncorrectedRawValues)
         out(row, col) = *in;
       else
-        mRaw->setWithLookUp(*in, reinterpret_cast<uint8_t*>(&out(row, col)),
+        mRaw->setWithLookUp(*in, reinterpret_cast<std::byte*>(&out(row, col)),
                             &random);
       in++;
     }
@@ -297,9 +313,9 @@ void UncompressedDecompressor::decode12BitRawWithControl() {
                                 uint32_t p2) {
         uint16_t pix;
         if (!(invert ^ (e == Endianness::little)))
-          pix = (p1 << pack) | (p2 >> pack);
+          pix = implicit_cast<uint16_t>((p1 << pack) | (p2 >> pack));
         else
-          pix = ((p2 & mask) << 8) | p1;
+          pix = implicit_cast<uint16_t>(((p2 & mask) << 8) | p1);
         out(row, i) = pix;
       };
 
@@ -338,10 +354,10 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned() {
       uint32_t g2 = in[1];
 
       uint16_t pix;
-      if (e == Endianness::little)
-        pix = (g2 << 8) | g1;
+      if constexpr (e == Endianness::little)
+        pix = implicit_cast<uint16_t>((g2 << 8) | g1);
       else
-        pix = (g1 << 8) | g2;
+        pix = implicit_cast<uint16_t>((g1 << 8) | g2);
       out(row, col) = pix >> 4;
     }
   }

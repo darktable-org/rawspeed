@@ -22,7 +22,6 @@
 #include "metadata/CameraMetaData.h"
 #include "common/Common.h"
 #include "metadata/Camera.h"
-#include "metadata/CameraMetadataException.h"
 #include <algorithm>
 #include <cstdint>
 #include <map>
@@ -31,10 +30,11 @@
 #include <string_view>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 #ifdef HAVE_PUGIXML
+#include "metadata/CameraMetadataException.h"
 #include <pugixml.hpp>
+#include <vector>
 
 using pugi::xml_document;
 using pugi::xml_node;
@@ -125,12 +125,12 @@ CameraMetaData::getChdkCamera(uint32_t filesize) const {
 }
 
 bool RAWSPEED_READONLY CameraMetaData::hasChdkCamera(uint32_t filesize) const {
-  return chdkCameras.end() != chdkCameras.find(filesize);
+  return chdkCameras.contains(filesize);
 }
 
 const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   auto id = getId(cam->make, cam->model, cam->mode);
-  if (cameras.end() != cameras.find(id)) {
+  if (cameras.contains(id)) {
     writeLog(
         DEBUG_PRIO::WARNING,
         "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!",

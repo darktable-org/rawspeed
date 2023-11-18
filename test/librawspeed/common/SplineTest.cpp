@@ -19,6 +19,7 @@
 */
 
 #include "common/Spline.h"
+#include "adt/Casts.h"
 #include "adt/Point.h"
 #include <algorithm>
 #include <array>
@@ -242,8 +243,8 @@ template <typename T> T lerp(T v0, T v1, T t) {
   return (1.0 - t) * v0 + t * v1;
 }
 
-template <typename T = int,
-          typename = std::enable_if_t<std::is_arithmetic<T>::value>>
+template <typename T = int>
+  requires std::is_arithmetic_v<T>
 std::vector<T> calculateSteps(int numCp) {
   std::vector<T> steps;
 
@@ -254,9 +255,10 @@ std::vector<T> calculateSteps(int numCp) {
                   [ptsTotal, &steps]() -> T {
                     const double t = double(steps.size()) / (ptsTotal - 1);
                     const double x = lerp(0.0, 65535.0, t);
-                    if (std::is_floating_point<T>::value)
+                    if constexpr (std::is_floating_point<T>::value)
                       return x;
-                    return std::lround(x);
+                    else
+                      return rawspeed::implicit_cast<T>(std::lround(x));
                   });
 
   assert(ptsTotal == steps.size());
