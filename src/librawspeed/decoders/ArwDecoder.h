@@ -47,7 +47,8 @@ private:
   void ParseA100WB() const;
 
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
-  RawImage decodeSRF(const TiffIFD* raw);
+  RawImage decodeTransitionalArw();
+  RawImage decodeSRF();
   void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
   void DecodeLJpeg(const TiffIFD* raw);
   void PostProcessLJpeg();

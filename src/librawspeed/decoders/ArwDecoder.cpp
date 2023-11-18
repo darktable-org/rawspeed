@@ -64,8 +64,8 @@ bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   return make == "SONY";
 }
 
-RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
-  raw = mRootIFD->getIFDWithTag(TiffTag::IMAGEWIDTH);
+RawImage ArwDecoder::decodeSRF() {
+  const TiffIFD* raw = mRootIFD->getIFDWithTag(TiffTag::IMAGEWIDTH);
 
   uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
   uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
@@ -114,38 +114,40 @@ RawImage ArwDecoder::decodeSRF(const TiffIFD* raw) {
   return mRaw;
 }
 
-RawImage ArwDecoder::decodeRawInternal() {
-  const TiffIFD* raw = nullptr;
-  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::STRIPOFFSETS);
+RawImage ArwDecoder::decodeTransitionalArw() {
+  if (const TiffEntry* model = mRootIFD->getEntryRecursive(TiffTag::MODEL);
+      model && model->getString() == "DSLR-A100") {
+    // We've caught the elusive A100 in the wild, a transitional format
+    // between the simple sanity of the MRW custom format and the wordly
+    // wonderfullness of the Tiff-based ARW format, let's shoot from the hip
+    const TiffIFD* raw = mRootIFD->getIFDWithTag(TiffTag::SUBIFDS);
+    uint32_t off = raw->getEntry(TiffTag::SUBIFDS)->getU32();
+    uint32_t width = 3881;
+    uint32_t height = 2608;
 
-  if (data.empty()) {
-    if (const TiffEntry* model = mRootIFD->getEntryRecursive(TiffTag::MODEL);
-        model && model->getString() == "DSLR-A100") {
-      // We've caught the elusive A100 in the wild, a transitional format
-      // between the simple sanity of the MRW custom format and the wordly
-      // wonderfullness of the Tiff-based ARW format, let's shoot from the hip
-      raw = mRootIFD->getIFDWithTag(TiffTag::SUBIFDS);
-      uint32_t off = raw->getEntry(TiffTag::SUBIFDS)->getU32();
-      uint32_t width = 3881;
-      uint32_t height = 2608;
+    mRaw->dim = iPoint2D(width, height);
 
-      mRaw->dim = iPoint2D(width, height);
+    ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
+    SonyArw1Decompressor a(mRaw);
+    mRaw->createData();
+    a.decompress(input);
 
-      ByteStream input(DataBuffer(mFile.getSubView(off), Endianness::little));
-      SonyArw1Decompressor a(mRaw);
-      mRaw->createData();
-      a.decompress(input);
-
-      return mRaw;
-    }
-
-    if (hints.contains("srf_format"))
-      return decodeSRF(raw);
-
-    ThrowRDE("No image data found");
+    return mRaw;
   }
 
-  raw = data[0];
+  if (hints.contains("srf_format"))
+    return decodeSRF();
+
+  ThrowRDE("No image data found");
+}
+
+RawImage ArwDecoder::decodeRawInternal() {
+  vector<const TiffIFD*> data = mRootIFD->getIFDsWithTag(TiffTag::STRIPOFFSETS);
+
+  if (data.empty())
+    return decodeTransitionalArw();
+
+  const TiffIFD* raw = data[0];
   int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
   if (1 == compression) {
     DecodeUncompressed(raw);
