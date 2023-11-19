@@ -19,6 +19,21 @@ static std::optional<int64_t> get_cachelinesize_from_sysconf() {
 }
 #endif
 
+#if defined(__GLIBC__)
+#include <sys/auxv.h>
+static std::optional<int64_t> get_cachelinesize_from_getauxval() {
+  unsigned long geometry = getauxval(AT_L1D_CACHEGEOMETRY);
+  if (geometry == 0 && errno == ENOENT) // On error, 0 is returned.
+    return std::nullopt;
+  geometry &= 0xFFFF; // cache line size in bytes in the bottom 16 bits.
+  return geometry;
+}
+#else
+static std::optional<int64_t> get_cachelinesize_from_getauxval() {
+  return std::nullopt;
+}
+#endif
+
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||     \
     defined(__DragonFly__) || defined(__APPLE__)
 #include <cstddef>
@@ -69,6 +84,8 @@ int main() {
   std::optional<int64_t> val;
   if (!val)
     val = get_cachelinesize_from_sysconf();
+  if (!val)
+    val = get_cachelinesize_from_getauxval();
   if (!val)
     val = get_cachelinesize_from_sysctlbyname();
   if (!val)
