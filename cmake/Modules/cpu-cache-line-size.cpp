@@ -1,59 +1,84 @@
+#include <cstdint>
 #include <iostream>
+#include <optional>
 
 #if defined(__unix__)
 #include <unistd.h>
 #endif
 
-#if defined(_SC_LEVEL1_DCACHE_LINESIZE)
-
-int main() {
+#if defined(_POSIX_C_SOURCE) && defined(_SC_LEVEL1_DCACHE_LINESIZE)
+static std::optional<int64_t> get_cachelinesize_from_sysconf() {
   long val = ::sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
-  if (val == -1)
-    return 1;
-  std::cout << val << std::endl;
-  return 0;
+  if (val == -1) // On error, -1 is returned.
+    return std::nullopt;
+  return val;
 }
+#else
+static std::optional<int64_t> get_cachelinesize_from_sysconf() {
+  return std::nullopt;
+}
+#endif
 
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||   \
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) ||     \
     defined(__DragonFly__) || defined(__APPLE__)
-
-#include <stddef.h>
+#include <cstddef>
 #include <sys/sysctl.h>
 #include <sys/types.h>
-int main() {
-  size_t val = 0;
+static std::optional<int64_t> get_cachelinesize_from_sysctlbyname() {
+  int64_t val = 0;
   size_t size = sizeof(val);
   if (sysctlbyname("hw.cachelinesize", &val, &size, NULL, 0) != 0)
-    return 1;
-  std::cout << val << std::endl;
-  return 0;
+    return std::nullopt;
+  return val;
 }
+#else
+static std::optional<int64_t> get_cachelinesize_from_sysctlbyname() {
+  return std::nullopt;
+}
+#endif
 
-#elif defined(_WIN32) || defined(_WIN64)
-
+#if defined(_WIN32) || defined(_WIN64)
+#include <cassert>
+#include <vector>
+//
 #include <Windows.h>
-int main() {
+static std::optional<int64_t>
+get_cachelinesize_from_GetLogicalProcessorInformation() {
   DWORD buffer_size = 0;
-  SYSTEM_LOGICAL_PROCESSOR_INFORMATION* buffer = nullptr;
-
   GetLogicalProcessorInformation(nullptr, &buffer_size);
-  buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION*)malloc(buffer_size);
-  GetLogicalProcessorInformation(&buffer[0], &buffer_size);
-
-  for (DWORD i = 0;
-       i != buffer_size / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION); ++i) {
-    if (buffer[i].Relationship == RelationCache && buffer[i].Cache.Level == 1 &&
-        buffer[i].Cache.Type == CacheData) {
-      std::cout << buffer[i].Cache.LineSize << std::endl;
-      free(buffer);
-      return 0;
+  assert(buffer_size % sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION) == 0);
+  std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer(
+      buffer_size / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
+  GetLogicalProcessorInformation(buffer.data(), &buffer_size);
+  for (const auto& e : buffer) {
+    if (e.Relationship == RelationCache && e.Cache.Level == 1 &&
+        e.Cache.Type == CacheData) {
+      return e.Cache.LineSize;
     }
   }
-
-  free(buffer);
-  return 1;
+  return std::nullopt;
 }
-
 #else
-#error Do not know how to query CPU L1d cache line size for this system!
+static std::optional<int64_t>
+get_cachelinesize_from_GetLogicalProcessorInformation() {
+  return std::nullopt;
+}
 #endif
+
+int main() {
+  std::optional<int64_t> val;
+  if (!val)
+    val = get_cachelinesize_from_sysconf();
+  if (!val)
+    val = get_cachelinesize_from_sysctlbyname();
+  if (!val)
+    val = get_cachelinesize_from_GetLogicalProcessorInformation();
+  if (!val) {
+    std::cerr
+        << "Do not know how to query CPU L1d cache line size for this system!"
+        << std::endl;
+    return 1;
+  }
+  std::cout << *val << std::endl;
+  return 0;
+}
