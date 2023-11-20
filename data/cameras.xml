@@ -10521,7 +10521,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-60" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10533,7 +10532,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="4:3">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-60" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10545,7 +10543,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="3:2">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10557,7 +10554,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="16:9">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-160" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10569,7 +10565,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="1:1">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-48" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
