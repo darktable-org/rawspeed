@@ -90,6 +90,13 @@ int main() {
     val = get_cachelinesize_from_sysctlbyname();
   if (!val)
     val = get_cachelinesize_from_GetLogicalProcessorInformation();
+#if defined(__riscv)
+  if (!val) {
+    // On RISC-V, at least on openSUSE TW, at least as of this commit,
+    // there is just no way to query this information.
+    val = 0; // Pretend we did detect it as zero. Will use fall back value.
+  }
+#endif
   if (!val) {
     std::cerr
         << "Do not know how to query CPU L1d cache line size for this system!"
