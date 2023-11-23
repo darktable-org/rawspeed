@@ -173,7 +173,6 @@ jobs:
       compiler-CC: ${{ matrix.msys2.CC }}
       compiler-CXX: ${{ matrix.msys2.CXX }}
       flavor: ${{ matrix.flavor }}
-      ECO: -DBUILD_BENCHMARKING=OFF
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   macOS-fast:

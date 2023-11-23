@@ -59,7 +59,7 @@ target_test()
   # but also don't really want to complicate this script,
   # so just consume the error if the target is not there.
   cmake --build "$BUILD_DIR" --target gcov-clean || true
-  ctest --label-exclude benchmark --output-on-failure || ctest --label-exclude benchmark --rerun-failed -V -VV
+  ctest --label-exclude benchmark --output-on-failure || ctest --label-exclude benchmark --output-on-failure --rerun-failed -V -VV
 }
 
 target_test_benchmarks()
