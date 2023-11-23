@@ -1,7 +1,7 @@
 codecov:
   max_report_age: off
   notify:
-    after_n_builds: 6
+    after_n_builds: 7
 coverage:
   status:
     project:
