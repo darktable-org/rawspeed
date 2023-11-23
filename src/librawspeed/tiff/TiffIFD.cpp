@@ -230,7 +230,7 @@ std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
 const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
   auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
-    ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1,
+    ThrowTPE("failed to find %u ifd with tag 0x%04x", index + 1,
              static_cast<unsigned>(tag));
   return ifds[index];
 }

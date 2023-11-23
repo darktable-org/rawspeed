@@ -115,7 +115,12 @@ RawImage NefDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  raw = mRootIFD->getIFDWithTag(static_cast<TiffTag>(0x8c));
+  auto ifds = mRootIFD->getIFDsWithTag(static_cast<TiffTag>(0x96));
+  if (ifds.empty()) {
+    raw = mRootIFD->getIFDWithTag(static_cast<TiffTag>(0x8c)); // Fall back
+  } else {
+    raw = ifds.front();
+  }
 
   const TiffEntry* meta;
   if (raw->hasEntry(static_cast<TiffTag>(0x96))) {
