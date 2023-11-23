@@ -115,18 +115,13 @@ RawImage NefDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  auto ifds = mRootIFD->getIFDsWithTag(static_cast<TiffTag>(0x96));
-  if (ifds.empty()) {
-    raw = mRootIFD->getIFDWithTag(static_cast<TiffTag>(0x8c)); // Fall back
-  } else {
-    raw = ifds.front();
-  }
-
-  const TiffEntry* meta;
-  if (raw->hasEntry(static_cast<TiffTag>(0x96))) {
-    meta = raw->getEntry(static_cast<TiffTag>(0x96));
-  } else {
-    meta = raw->getEntry(static_cast<TiffTag>(0x8c)); // Fall back
+  const TiffEntry* meta =
+      mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x96));
+  if (!meta) {
+    meta = mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x8c)); // Fall back
+    if (!meta) {
+      ThrowRDE("Missing linearization table.");
+    }
   }
 
   ByteStream rawData(
