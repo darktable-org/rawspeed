@@ -24,8 +24,6 @@ on:
         type: string
       ECO:
         type: string
-    secrets:
-      CODECOV_TOKEN:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
@@ -66,6 +64,15 @@ jobs:
             pugixml:p
             libjpeg-turbo:p
             zlib:p
+      - name: Install Additional Dependencies (Coverage)
+        if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        uses: msys2/setup-msys2@v2
+        with:
+          cache: false
+          msystem: ${{ inputs.msys2-msystem }}
+          pacboy: >-
+            zstd:p
       - name: Configure
         timeout-minutes: 3
         env:
@@ -116,23 +123,6 @@ jobs:
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
-      - name: Upload coverage to Codecov (unit tests)
-        timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: windows
-          ARCH: ${{ inputs.msys2-arch }}
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: windows,unittests
-          name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/unittests
-          fail_ci_if_error: true
       - name: Test (benchmarks)
         timeout-minutes: 1
         env:
@@ -157,23 +147,14 @@ jobs:
           $(cygpath ${SRC_DIR})/.ci/ci-script.sh
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
-      - name: Upload coverage to Codecov (benchmarks)
+      - if: inputs.flavor == 'Coverage'
         timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: windows
-          ARCH: ${{ inputs.msys2-arch }}
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        name: Cache code coverage (windows reports)
+        uses: actions/cache/save@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: windows,benchmarks
-          name: ${{ env.JOB_NAME }}.Benchmarks
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/benchmarks
-          fail_ci_if_error: true
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
+          key: coverage-${{ github.sha }}-windows
+          enableCrossOsArchive: true
       - name: Install
         timeout-minutes: 1
         env:

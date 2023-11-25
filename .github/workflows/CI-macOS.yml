@@ -24,8 +24,6 @@ on:
         type: string
       ECO:
         type: string
-    secrets:
-      CODECOV_TOKEN:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
@@ -53,6 +51,12 @@ jobs:
           brew tap Homebrew/bundle
           cd "${SRC_DIR}/.ci/"
           brew bundle --verbose
+      - name: Install Additional Dependencies (Coverage)
+        if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        run: |
+          set -xe
+          brew install zstd
       - name: Configure
         timeout-minutes: 4
         env:
@@ -110,23 +114,6 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
-      - name: Upload coverage to Codecov (unit tests)
-        timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: macOS
-          ARCH: x86_64
-          CXX: AppleXcode
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: macOS,unittests
-          name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/unittests
-          fail_ci_if_error: true
       - name: Test (benchmarks)
         timeout-minutes: 1
         env:
@@ -151,23 +138,14 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
-      - name: Upload coverage to Codecov (benchmarks)
+      - if: inputs.flavor == 'Coverage'
         timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: macOS
-          ARCH: x86_64
-          CXX: AppleXcode
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        name: Cache code coverage (macOS reports)
+        uses: actions/cache/save@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: macOS,benchmarks
-          name: ${{ env.JOB_NAME }}.Benchmarks
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/benchmarks
-          fail_ci_if_error: true
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/macOS # relative path!
+          key: coverage-${{ github.sha }}-macOS
+          enableCrossOsArchive: true
       - name: Install
         timeout-minutes: 1
         env:
