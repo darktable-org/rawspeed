@@ -424,6 +424,14 @@ jobs:
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/integration
           fail_ci_if_error: true
+      - if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        name: Cache code coverage (linux reports)
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
+          key: coverage-${{ github.sha }}-linux
+          enableCrossOsArchive: true
       - name: Install
         timeout-minutes: 1
         env:

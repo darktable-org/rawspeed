@@ -174,6 +174,14 @@ jobs:
           root_dir: ${{ github.workspace }}/rawspeed
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/benchmarks
           fail_ci_if_error: true
+      - if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        name: Cache code coverage (windows reports)
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
+          key: coverage-${{ github.sha }}-windows
+          enableCrossOsArchive: true
       - name: Install
         timeout-minutes: 1
         env:
