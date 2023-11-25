@@ -66,6 +66,15 @@ jobs:
             pugixml:p
             libjpeg-turbo:p
             zlib:p
+      - name: Install Additional Dependencies (Coverage)
+        if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        uses: msys2/setup-msys2@v2
+        with:
+          cache: false
+          msystem: ${{ inputs.msys2-msystem }}
+          pacboy: >-
+            zstd:p
       - name: Configure
         timeout-minutes: 3
         env:

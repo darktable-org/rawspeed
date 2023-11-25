@@ -137,7 +137,7 @@ jobs:
                                       libomp-${{ inputs.compiler-version }}-dev
           fi
           if [ "$FLAVOR" = "Coverage" ]; then
-            eatmydata apt-get install rsync
+            eatmydata apt-get install rsync zstd
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
             eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}

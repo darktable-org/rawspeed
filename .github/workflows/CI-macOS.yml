@@ -53,6 +53,14 @@ jobs:
           brew tap Homebrew/bundle
           cd "${SRC_DIR}/.ci/"
           brew bundle --verbose
+      - name: Install Additional Dependencies (Coverage)
+        if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+        run: |
+          set -xe
+          brew install zstd
       - name: Configure
         timeout-minutes: 4
         env:
