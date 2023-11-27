@@ -23,6 +23,7 @@ jobs:
           path: 'rawspeed'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Fetch code coverage reports (linux reports)
+        if: ${{ always() }}
         timeout-minutes: 1
         uses: actions/cache/restore@v3
         with:
@@ -31,6 +32,7 @@ jobs:
           enableCrossOsArchive: true
           fail-on-cache-miss: true
       - name: Fetch code coverage reports (macOS reports)
+        if: ${{ always() }}
         timeout-minutes: 1
         uses: actions/cache/restore@v3
         with:
@@ -39,6 +41,7 @@ jobs:
           enableCrossOsArchive: true
           fail-on-cache-miss: true
       - name: Fetch code coverage reports (windows reports)
+        if: ${{ always() }}
         timeout-minutes: 1
         uses: actions/cache/restore@v3
         with:
@@ -46,87 +49,93 @@ jobs:
           key: coverage-${{ github.sha }}-windows
           enableCrossOsArchive: true
           fail-on-cache-miss: true
-      - name: Upload coverage to Codecov (linux, unit tests)
-        timeout-minutes: 1
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: GNU
-          JOB_NAME: linux.GNU.Coverage
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: linux,unittests
-          name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/unittests
-          fail_ci_if_error: true
-      - name: Upload coverage to Codecov (linux, benchmarks)
-        timeout-minutes: 1
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: GNU
-          JOB_NAME: linux.GNU.Coverage
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: linux,benchmarks
-          name: ${{ env.JOB_NAME }}.Benchmarks
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/benchmarks
-          fail_ci_if_error: true
-      - name: Upload coverage to Codecov (linux, integration)
-        timeout-minutes: 1
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: GNU
-          JOB_NAME: linux.GNU.Coverage
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: linux,integration,rpu_u
-          name: ${{ env.JOB_NAME }}.Integration
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/integration
-          fail_ci_if_error: true
-      - name: Upload coverage to Codecov (macOS, unit tests)
-        timeout-minutes: 1
-        uses: codecov/codecov-action@v3
-        env:
-          OS: macOS
-          ARCH: x86_64
-          CXX: XCode
-          JOB_NAME: macOS.XCode.Coverage
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: macOS,unittests
-          name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/unittests
-          fail_ci_if_error: true
-      - name: Upload coverage to Codecov (macOS, benchmarks)
-        timeout-minutes: 1
-        uses: codecov/codecov-action@v3
-        env:
-          OS: macOS
-          ARCH: x86_64
-          CXX: XCode
-          JOB_NAME: macOS.XCode.Coverage
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: macOS,benchmarks
-          name: ${{ env.JOB_NAME }}.Benchmarks
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/benchmarks
-          fail_ci_if_error: true
+      # - name: Upload coverage to Codecov (linux, unit tests)
+      #   if: ${{ always() }}
+      #   timeout-minutes: 1
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     OS: linux
+      #     ARCH: x86_64
+      #     CXX: GNU
+      #     JOB_NAME: linux.GNU.Coverage
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     env_vars: OS,ARCH,CXX
+      #     flags: linux,unittests
+      #     name: ${{ env.JOB_NAME }}.Unittests
+      #     root_dir: ${{ github.workspace }}/rawspeed
+      #     directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/unittests
+      #     fail_ci_if_error: true
+      # - name: Upload coverage to Codecov (linux, benchmarks)
+      #   if: ${{ always() }}
+      #   timeout-minutes: 1
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     OS: linux
+      #     ARCH: x86_64
+      #     CXX: GNU
+      #     JOB_NAME: linux.GNU.Coverage
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     env_vars: OS,ARCH,CXX
+      #     flags: linux,benchmarks
+      #     name: ${{ env.JOB_NAME }}.Benchmarks
+      #     root_dir: ${{ github.workspace }}/rawspeed
+      #     directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/benchmarks
+      #     fail_ci_if_error: true
+      # - name: Upload coverage to Codecov (linux, integration)
+      #   if: ${{ always() }}
+      #   timeout-minutes: 1
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     OS: linux
+      #     ARCH: x86_64
+      #     CXX: GNU
+      #     JOB_NAME: linux.GNU.Coverage
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     env_vars: OS,ARCH,CXX
+      #     flags: linux,integration,rpu_u
+      #     name: ${{ env.JOB_NAME }}.Integration
+      #     root_dir: ${{ github.workspace }}/rawspeed
+      #     directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/integration
+      #     fail_ci_if_error: true
+      # - name: Upload coverage to Codecov (macOS, unit tests)
+      #   if: ${{ always() }}
+      #   timeout-minutes: 1
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     OS: macOS
+      #     ARCH: x86_64
+      #     CXX: XCode
+      #     JOB_NAME: macOS.XCode.Coverage
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     env_vars: OS,ARCH,CXX
+      #     flags: macOS,unittests
+      #     name: ${{ env.JOB_NAME }}.Unittests
+      #     root_dir: ${{ github.workspace }}/rawspeed
+      #     directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/unittests
+      #     fail_ci_if_error: true
+      # - name: Upload coverage to Codecov (macOS, benchmarks)
+      #   if: ${{ always() }}
+      #   timeout-minutes: 1
+      #   uses: codecov/codecov-action@v3
+      #   env:
+      #     OS: macOS
+      #     ARCH: x86_64
+      #     CXX: XCode
+      #     JOB_NAME: macOS.XCode.Coverage
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     env_vars: OS,ARCH,CXX
+      #     flags: macOS,benchmarks
+      #     name: ${{ env.JOB_NAME }}.Benchmarks
+      #     root_dir: ${{ github.workspace }}/rawspeed
+      #     directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS/benchmarks
+      #     fail_ci_if_error: true
       - name: Upload coverage to Codecov (windows, unit tests)
+        if: ${{ always() }}
         timeout-minutes: 1
         uses: codecov/codecov-action@v3
         env:
@@ -143,6 +152,7 @@ jobs:
           directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows/unittests
           fail_ci_if_error: true
       - name: Upload coverage to Codecov (windows, benchmarks)
+        if: ${{ always() }}
         timeout-minutes: 1
         uses: codecov/codecov-action@v3
         env:

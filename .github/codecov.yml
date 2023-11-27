@@ -1,7 +1,9 @@
 codecov:
   max_report_age: off
   notify:
-    after_n_builds: 7
+    after_n_builds: 2
+fixes:
+   -  "D:/::/"
 coverage:
   status:
     project:
