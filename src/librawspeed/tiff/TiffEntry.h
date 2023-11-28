@@ -139,7 +139,7 @@ protected:
 class TiffEntryWithData : public TiffEntry {
   const std::vector<uint8_t> data;
 
-  void anchor() const override;
+  void anchor() const final;
 
 public:
   TiffEntryWithData(TiffIFD* parent, TiffTag tag, TiffDataType type,

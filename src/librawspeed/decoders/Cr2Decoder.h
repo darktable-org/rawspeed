@@ -38,12 +38,12 @@ public:
   Cr2Decoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void checkSupportInternal(const CameraMetaData* meta) final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const override { return 9; }
+  [[nodiscard]] int getDecoderVersion() const final { return 9; }
   RawImage decodeOldFormat();
   RawImage decodeNewFormat();
   void sRawInterpolate();

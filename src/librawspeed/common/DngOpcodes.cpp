@@ -131,7 +131,7 @@ public:
     assert(integrated_subimg == getImageCropAsRectangle(ri) &&
            "Current image sub-crop does not match the expected one!");
 
-    // NOP by default. child class shall override this if needed.
+    // NOP by default. child class shall final this if needed.
   }
 
   // Will be called for actual processing.
@@ -154,7 +154,7 @@ public:
     bs.getU32(); // Bayer Phase not used
   }
 
-  void setup(const RawImage& ri) override {
+  void setup(const RawImage& ri) final {
     DngOpcodes::DngOpcode::setup(ri);
 
     // These limitations are present within the DNG SDK as well.
@@ -165,7 +165,7 @@ public:
       ThrowRDE("Only 1 component images supported");
   }
 
-  void apply(const RawImage& ri) override {
+  void apply(const RawImage& ri) final {
     MutexLocker guard(&ri->mBadPixelMutex);
     const CroppedArray2DRef<uint16_t> img(ri->getU16DataAsCroppedArray2DRef());
     iPoint2D crop = ri->getCropOffset();
@@ -237,7 +237,7 @@ public:
 
   using ROIOpcode::getRoi;
 
-  [[noreturn]] void apply(const RawImage& ri) override {
+  [[noreturn]] void apply(const RawImage& ri) final {
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
   }
@@ -302,7 +302,7 @@ public:
     }
   }
 
-  void apply(const RawImage& ri) override {
+  void apply(const RawImage& ri) final {
     MutexLocker guard(&ri->mBadPixelMutex);
     ri->mBadPixelPositions.insert(ri->mBadPixelPositions.begin(),
                                   badPixels.begin(), badPixels.end());
@@ -324,7 +324,7 @@ public:
     integrated_subimg_.dim = getRoi().dim;
   }
 
-  void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
+  void apply(const RawImage& ri) final { ri->subFrame(getRoi()); }
 };
 
 void DngOpcodes::TrimBounds::anchor() const {}
@@ -400,14 +400,14 @@ protected:
 
   using PixelOpcode::PixelOpcode;
 
-  void setup(const RawImage& ri) override {
+  void setup(const RawImage& ri) final {
     PixelOpcode::setup(ri);
 
     if (ri->getDataType() != RawImageType::UINT16)
       ThrowRDE("Only 16 bit images supported");
   }
 
-  void apply(const RawImage& ri) override {
+  void apply(const RawImage& ri) final {
     applyOP<uint16_t>(ri, [this]([[maybe_unused]] uint32_t x,
                                  [[maybe_unused]] uint32_t y,
                                  uint16_t v) { return lookup[v]; });
@@ -479,7 +479,7 @@ void DngOpcodes::PolynomialMap::anchor() const {}
 // ****************************************************************************
 
 class DngOpcodes::DeltaRowOrColBase : public PixelOpcode {
-  void anchor() const override;
+  void anchor() const final;
 
 public:
   struct SelectX {
@@ -501,7 +501,7 @@ void DngOpcodes::DeltaRowOrColBase::anchor() const {}
 template <typename S>
 class DngOpcodes::DeltaRowOrCol : public DeltaRowOrColBase {
 public:
-  void setup(const RawImage& ri) override {
+  void setup(const RawImage& ri) final {
     PixelOpcode::setup(ri);
 
     // If we are working on a float image, no need to convert to int
@@ -562,7 +562,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // by f2iScale before applying, we need to divide by f2iScale here.
   const double absLimit;
 
-  bool valueIsOk(float value) override {
+  bool valueIsOk(float value) final {
     return implicit_cast<double>(std::abs(value)) <= absLimit;
   }
 
@@ -573,7 +573,7 @@ public:
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  implicit_cast<double>(this->f2iScale)) {}
 
-  void apply(const RawImage& ri) override {
+  void apply(const RawImage& ri) final {
     if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(
           ri, [this](uint32_t x, uint32_t y, uint16_t v) {
@@ -600,7 +600,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   static constexpr int rounding = 512;
   const double maxLimit;
 
-  bool valueIsOk(float value) override {
+  bool valueIsOk(float value) final {
     return value >= minLimit && implicit_cast<double>(value) <= maxLimit;
   }
 
@@ -612,7 +612,7 @@ public:
                   double(std::numeric_limits<uint16_t>::max())) /
                  implicit_cast<double>(this->f2iScale)) {}
 
-  void apply(const RawImage& ri) override {
+  void apply(const RawImage& ri) final {
     if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(ri, [this](uint32_t x, uint32_t y,
                                                   uint16_t v) {

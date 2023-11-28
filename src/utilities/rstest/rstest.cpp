@@ -485,7 +485,7 @@ int usage(const char* progname) {
   [-h] print this help
   [-c] for each file: decode, compute hash and store it.
        If hash exists, it does not recompute it, unless option -f is set!
-  [-f] if -c is set, then it will override the existing hashes.
+  [-f] if -c is set, then it will final the existing hashes.
        If -c is not set, and the hash does not exist, then just decode,
        but do not write the hash!
   [-d] store decoded image as PPM

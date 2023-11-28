@@ -40,13 +40,13 @@ public:
   ArwDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
 
 private:
   void ParseA100WB() const;
 
-  [[nodiscard]] int getDecoderVersion() const override { return 1; }
+  [[nodiscard]] int getDecoderVersion() const final { return 1; }
   static std::vector<uint16_t> decodeCurve(const TiffIFD* raw);
   RawImage decodeTransitionalArw();
   RawImage decodeSRF();

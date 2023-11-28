@@ -45,13 +45,13 @@ class MrwDecoder final : public RawDecoder {
 
 public:
   explicit MrwDecoder(Buffer file);
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void checkSupportInternal(const CameraMetaData* meta) final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
   static int isMRW(Buffer input);
 
 private:
-  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const final { return 0; }
   void parseHeader();
 };
 

@@ -28,7 +28,7 @@
 namespace rawspeed {
 
 class IOException final : public RawspeedException {
-  void anchor() const override;
+  void anchor() const final;
 
 public:
   using RawspeedException::RawspeedException;

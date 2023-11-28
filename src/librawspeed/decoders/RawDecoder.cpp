@@ -217,7 +217,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     return;
   }
 
-  // Only override CFA with the data from cameras.xml if it actually contained
+  // Only final CFA with the data from cameras.xml if it actually contained
   // the CFA.
   if (cam->cfa.getSize().area() > 0)
     mRaw->cfa = cam->cfa;
@@ -271,13 +271,13 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   // Allow overriding individual blacklevels. Values are in CFA order
   // (the same order as the in the CFA tag)
   // A hint could be:
-  // <Hint name="override_cfa_black" value="10,20,30,20"/>
-  std::string cfa_black = hints.get("override_cfa_black", std::string());
+  // <Hint name="final_cfa_black" value="10,20,30,20"/>
+  std::string cfa_black = hints.get("final_cfa_black", std::string());
   if (!cfa_black.empty()) {
     vector<std::string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
       mRaw->setError("Expected 4 values '10,20,30,20' as values for "
-                     "override_cfa_black hint.");
+                     "final_cfa_black hint.");
     } else {
       for (int i = 0; i < 4; i++) {
         mRaw->blackLevelSeparate[i] = stoi(v[i]);

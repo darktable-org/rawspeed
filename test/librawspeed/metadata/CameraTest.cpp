@@ -139,7 +139,7 @@ TEST(BoolHintTest, HintsBoolTrue) {
 
 class BoolHintTest : public ::testing::TestWithParam<std::tuple<string>> {
 protected:
-  virtual void SetUp() override { notTrue = std::get<0>(GetParam()); }
+  virtual void SetUp() final { notTrue = std::get<0>(GetParam()); }
   string notTrue;
 };
 INSTANTIATE_TEST_SUITE_P(NotTrue, BoolHintTest,

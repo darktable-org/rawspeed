@@ -42,13 +42,13 @@ public:
   OrfDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
 
 private:
   void parseCFA() const;
 
-  [[nodiscard]] int getDecoderVersion() const override { return 3; }
+  [[nodiscard]] int getDecoderVersion() const final { return 3; }
   void decodeUncompressedInterleaved(ByteStream s, uint32_t w, uint32_t h,
                                      uint32_t size) const;
   [[nodiscard]] bool decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,

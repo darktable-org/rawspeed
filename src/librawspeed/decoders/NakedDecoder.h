@@ -46,12 +46,12 @@ class NakedDecoder final : public RawDecoder {
 
 public:
   NakedDecoder(Buffer file, const Camera* c);
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void checkSupportInternal(const CameraMetaData* meta) final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const final { return 0; }
 };
 
 } // namespace rawspeed

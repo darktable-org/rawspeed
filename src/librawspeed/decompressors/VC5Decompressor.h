@@ -165,7 +165,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       createHighpassReconstructionTask(const bool& exceptionThrown) noexcept;
       void createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept;
       void createDecodingTasks(ErrorLog& errLog,
-                               bool& exceptionThrown) noexcept override;
+                               bool& exceptionThrown) noexcept final;
     };
     struct AbstractDecodeableBand : AbstractBand {
       ByteStream bs;
@@ -179,7 +179,7 @@ class VC5Decompressor final : public AbstractDecompressor {
       uint16_t lowpassPrecision;
       LowPassBand(Wavelet& wavelet_, ByteStream bs_,
                   uint16_t lowpassPrecision_);
-      [[nodiscard]] BandData decode() const noexcept override;
+      [[nodiscard]] BandData decode() const noexcept final;
     };
     struct HighPassBand final : AbstractDecodeableBand {
       const PrefixCodeDecoder& decoder;
@@ -188,7 +188,7 @@ class VC5Decompressor final : public AbstractDecompressor {
                    const PrefixCodeDecoder& decoder_, int16_t quant_)
           : AbstractDecodeableBand(wavelet_, bs_), decoder(decoder_),
             quant(quant_) {}
-      [[nodiscard]] BandData decode() const override;
+      [[nodiscard]] BandData decode() const final;
     };
 
     static constexpr uint16_t maxBands = numLowPassBands + numHighPassBands;
