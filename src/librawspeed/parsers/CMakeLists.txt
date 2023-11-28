@@ -7,6 +7,7 @@ FILE(GLOB SOURCES
   "FiffParserException.h"
   "RawParser.cpp"
   "RawParser.h"
+  "RawParserException.cpp"
   "RawParserException.h"
   "TiffParser.cpp"
   "TiffParser.h"
