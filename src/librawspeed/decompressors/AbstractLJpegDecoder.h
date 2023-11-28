@@ -161,6 +161,8 @@ class AbstractLJpegDecoder : public AbstractDecompressor {
   std::array<const PrefixCodeDecoder<>*, 4> huff{
       {}}; // 4 pointers into the store
 
+  virtual void anchor() const;
+
 public:
   AbstractLJpegDecoder(ByteStream bs, RawImage img);
 

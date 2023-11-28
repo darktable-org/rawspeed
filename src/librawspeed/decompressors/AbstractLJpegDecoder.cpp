@@ -42,6 +42,8 @@
 
 namespace rawspeed {
 
+void AbstractLJpegDecoder::anchor() const {}
+
 AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, RawImage img)
     : input(bs), mRaw(std::move(img)) {
   input.setByteOrder(Endianness::big);
