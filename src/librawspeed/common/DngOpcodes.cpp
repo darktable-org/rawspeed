@@ -99,6 +99,8 @@ class DngOpcodes::DngOpcode {
   bool setup_was_called = false;
 #endif
 
+  virtual void anchor() const;
+
 public:
   explicit DngOpcode(const iRectangle2D& integrated_subimg_)
 #ifndef NDEBUG
@@ -136,10 +138,14 @@ public:
   virtual void apply(const RawImage& ri) = 0;
 };
 
+void DngOpcodes::DngOpcode::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
+
+  void anchor() const final;
 
 public:
   explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs,
@@ -173,10 +179,14 @@ public:
   }
 };
 
+void DngOpcodes::FixBadPixelsConstant::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::ROIOpcode : public DngOpcodes::DngOpcode {
   iRectangle2D roi;
+
+  void anchor() const override;
 
 protected:
   explicit ROIOpcode(const RawImage& ri, ByteStream& bs,
@@ -211,9 +221,13 @@ protected:
   }
 };
 
+void DngOpcodes::ROIOpcode::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
+  void anchor() const final;
+
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
                           const iRectangle2D& integrated_subimg_)
@@ -229,10 +243,14 @@ public:
   }
 };
 
+void DngOpcodes::DummyROIOpcode::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32_t> badPixels;
+
+  void anchor() const final;
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs,
@@ -291,9 +309,13 @@ public:
   }
 };
 
+void DngOpcodes::FixBadPixelsList::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
+  void anchor() const final;
+
 public:
   explicit TrimBounds(const RawImage& ri, ByteStream& bs,
                       iRectangle2D& integrated_subimg_)
@@ -305,6 +327,8 @@ public:
   void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
 
+void DngOpcodes::TrimBounds::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::PixelOpcode : public ROIOpcode {
@@ -312,6 +336,8 @@ class DngOpcodes::PixelOpcode : public ROIOpcode {
   uint32_t planes;
   uint32_t rowPitch;
   uint32_t colPitch;
+
+  void anchor() const override;
 
 protected:
   explicit PixelOpcode(const RawImage& ri, ByteStream& bs,
@@ -362,9 +388,13 @@ protected:
   }
 };
 
+void DngOpcodes::PixelOpcode::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::LookupOpcode : public PixelOpcode {
+  void anchor() const override;
+
 protected:
   vector<uint16_t> lookup = vector<uint16_t>(65536);
 
@@ -384,9 +414,13 @@ protected:
   }
 };
 
+void DngOpcodes::LookupOpcode::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::TableMap final : public LookupOpcode {
+  void anchor() const final;
+
 public:
   explicit TableMap(const RawImage& ri, ByteStream& bs,
                     const iRectangle2D& integrated_subimg_)
@@ -404,9 +438,13 @@ public:
   }
 };
 
+void DngOpcodes::TableMap::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
+  void anchor() const final;
+
 public:
   explicit PolynomialMap(const RawImage& ri, ByteStream& bs,
                          const iRectangle2D& integrated_subimg_)
@@ -436,9 +474,13 @@ public:
   }
 };
 
+void DngOpcodes::PolynomialMap::anchor() const {}
+
 // ****************************************************************************
 
 class DngOpcodes::DeltaRowOrColBase : public PixelOpcode {
+  void anchor() const override;
+
 public:
   struct SelectX {
     static inline uint32_t select(uint32_t x, uint32_t /*y*/) { return x; }
@@ -453,6 +495,8 @@ protected:
                     const iRectangle2D& integrated_subimg_)
       : PixelOpcode(ri, bs, integrated_subimg_) {}
 };
+
+void DngOpcodes::DeltaRowOrColBase::anchor() const {}
 
 template <typename S>
 class DngOpcodes::DeltaRowOrCol : public DeltaRowOrColBase {
