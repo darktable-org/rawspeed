@@ -33,6 +33,8 @@ namespace rawspeed {
 class Buffer;
 
 class SimpleTiffDecoder : public AbstractTiffDecoder {
+  void anchor() const override;
+
   virtual void checkImageDimensions() = 0;
 
 public:
