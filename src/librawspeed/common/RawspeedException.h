@@ -54,11 +54,12 @@ template <typename T>
 }
 
 class RawspeedException : public std::runtime_error {
-private:
   static void RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
   log(const char* msg) {
     writeLog(DEBUG_PRIO::EXTRA, "EXCEPTION: %s", msg);
   }
+
+  virtual void anchor() const;
 
 public:
   explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
