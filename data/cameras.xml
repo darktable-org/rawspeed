@@ -789,6 +789,7 @@
 			<Color x="0" y="1">RED</Color>
 		</CFA>
 		<Crop x="148" y="54" width="0" height="0"/>
+		<Sensor black="2048" white="13583" iso_min="0" iso_max="199"/>
 		<Sensor black="2048" white="15831"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
