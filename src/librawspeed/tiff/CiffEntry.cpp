@@ -101,9 +101,8 @@ uint32_t RAWSPEED_READONLY CiffEntry::getElementSize() const {
   case SUB1:
   case SUB2:
     return 4;
-  default:
-    return 0;
   }
+  __builtin_unreachable();
 }
 
 bool RAWSPEED_READONLY CiffEntry::isInt() const {
