@@ -48,6 +48,8 @@
 
 namespace rawspeed {
 
+void RawImageData::anchor() const {}
+
 RawImageData::RawImageData() { blackLevelSeparate.fill(-1); }
 
 RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,

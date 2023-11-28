@@ -108,6 +108,8 @@ public:
 };
 
 class RawImageData : public ErrorLog {
+  virtual void anchor() const;
+
   friend class RawImageWorker;
 
 public:
