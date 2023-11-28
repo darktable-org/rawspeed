@@ -950,4 +950,6 @@ VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits) {
   return {value, count};
 }
 
+void VC5Decompressor::Wavelet::AbstractBand::anchor() const {}
+
 } // namespace rawspeed

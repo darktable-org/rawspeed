@@ -142,6 +142,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     struct AbstractBand {
       Wavelet& wavelet;
       std::optional<BandData> data;
+      virtual void anchor() const;
       explicit AbstractBand(Wavelet& wavelet_) : wavelet(wavelet_) {}
       virtual ~AbstractBand() = default;
       virtual void createDecodingTasks(ErrorLog& errLog,
