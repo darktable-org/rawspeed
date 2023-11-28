@@ -97,6 +97,8 @@ size_t process(const std::string& filename,
                const rawspeed::CameraMetaData* metadata, const options& o);
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
+  void anchor() const final;
+
 public:
   size_t time;
 
@@ -104,6 +106,8 @@ public:
   RstestHashMismatch(const char* msg, size_t time_)
       : RawspeedException(msg), time(time_) {}
 };
+
+void RstestHashMismatch::anchor() const {}
 
 struct Timer {
   mutable std::chrono::steady_clock::time_point start =
