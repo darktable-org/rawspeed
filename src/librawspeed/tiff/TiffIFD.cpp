@@ -44,6 +44,8 @@ using std::vector;
 
 namespace rawspeed {
 
+void TiffIFD::anchor() const {}
+
 void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
   assert(ifds);
 
@@ -308,6 +310,8 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
     ThrowTPE("Entry 0x%x not found.", static_cast<unsigned>(tag));
   return i->second.get();
 }
+
+void TiffRootIFD::anchor() const {}
 
 TiffID TiffRootIFD::getID() const {
   TiffID id;
