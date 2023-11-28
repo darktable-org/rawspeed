@@ -10,6 +10,7 @@ FILE(GLOB SOURCES
   "ByteStream.h"
   "Endianness.h"
   "FileIO.h"
+  "FileIOException.cpp"
   "FileIOException.h"
   "FileReader.cpp"
   "FileReader.h"
