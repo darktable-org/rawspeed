@@ -328,13 +328,12 @@ void writeImage(const RawImage& raw, const std::string& fn) {
   switch (raw->getDataType()) {
   case RawImageType::UINT16:
     writePPM(raw, fn);
-    break;
+    return;
   case RawImageType::F32:
     writePFM(raw, fn);
-    break;
-  default:
-    __builtin_unreachable();
+    return;
   }
+  __builtin_unreachable();
 }
 
 size_t process(const std::string& filename, const CameraMetaData* metadata,
