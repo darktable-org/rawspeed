@@ -15,6 +15,7 @@ FILE(GLOB SOURCES
   "FileReader.h"
   "FileWriter.cpp"
   "FileWriter.h"
+  "IOException.cpp"
   "IOException.h"
 )
 
