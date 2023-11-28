@@ -14,13 +14,11 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "c++98-compat"
   "c++98-compat-pedantic"
   "covered-switch-default"
-  "deprecated"
   "double-promotion"
   "gnu-zero-variadic-macro-arguments"
   "old-style-cast"
   "padded"
   "switch-enum"
-  "unused-macros"
   "unused-parameter"
   "weak-vtables"
   "unsafe-buffer-usage" # FIXME: really want this. to be reenabled.
