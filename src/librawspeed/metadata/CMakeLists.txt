@@ -4,6 +4,7 @@ FILE(GLOB SOURCES
   "Camera.h"
   "CameraMetaData.cpp"
   "CameraMetaData.h"
+  "CameraMetadataException.cpp"
   "CameraMetadataException.h"
   "CameraSensorInfo.cpp"
   "CameraSensorInfo.h"

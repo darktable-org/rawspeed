@@ -1,8 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2009-2014 Klaus Post
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,22 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#pragma once
-
-// IWYU pragma: begin_exports
-#include "common/RawspeedException.h"
-// IWYU pragma: end_exports
+#include "metadata/CameraMetadataException.h"
 
 namespace rawspeed {
 
-class CameraMetadataException final : public RawspeedException {
-  void anchor() const final;
-
-public:
-  using RawspeedException::RawspeedException;
-};
-
-#define ThrowCME(...)                                                          \
-  ThrowExceptionHelper(rawspeed::CameraMetadataException, __VA_ARGS__)
+void CameraMetadataException::anchor() const {}
 
 } // namespace rawspeed
