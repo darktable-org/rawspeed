@@ -407,17 +407,15 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
 void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  int nc;
-  switch (corr) {
-  case IiqCorr::LUMA:
-    nc = 2;
-    break;
-  case IiqCorr::CHROMA:
-    nc = 4;
-    break;
-  default:
+  int nc = [corr]() {
+    switch (corr) {
+    case IiqCorr::LUMA:
+      return 2;
+    case IiqCorr::CHROMA:
+      return 4;
+    }
     ThrowRDE("Unsupported IIQ correction");
-  }
+  }();
 
   std::array<uint16_t, 8> head;
   for (int i = 0; i < 8; i++)
