@@ -13,6 +13,7 @@ FILE(GLOB SOURCES
   "RawParserException.h"
   "TiffParser.cpp"
   "TiffParser.h"
+  "TiffParserException.cpp"
   "TiffParserException.h"
 )
 
