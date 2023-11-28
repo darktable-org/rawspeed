@@ -312,9 +312,8 @@ RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
     return getU16DataAsUncroppedArray2DRef();
   case RawImageType::F32:
     return getF32DataAsUncroppedArray2DRef();
-  default:
-    __builtin_unreachable();
   }
+  __builtin_unreachable();
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
