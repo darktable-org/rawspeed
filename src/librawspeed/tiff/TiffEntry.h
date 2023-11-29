@@ -136,7 +136,7 @@ protected:
   static const std::array<uint32_t, 14> datashifts;
 };
 
-class TiffEntryWithData : public TiffEntry {
+class TiffEntryWithData final : public TiffEntry {
   const std::vector<uint8_t> data;
 
   void anchor() const final;

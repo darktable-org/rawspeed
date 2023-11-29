@@ -104,7 +104,7 @@ public:
   /* Should Fuji images be rotated? */
   bool fujiRotate{true};
 
-  struct {
+  struct final {
     /* Should Quadrant Multipliers be applied to the IIQ raws? */
     bool quadrantMultipliers = true;
 

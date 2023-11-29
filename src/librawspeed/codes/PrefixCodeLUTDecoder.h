@@ -68,7 +68,7 @@
 namespace rawspeed {
 
 template <typename CodeTag, typename BackendPrefixCodeDecoder>
-class PrefixCodeLUTDecoder final : public BackendPrefixCodeDecoder {
+class PrefixCodeLUTDecoder : public BackendPrefixCodeDecoder {
 public:
   using Tag = CodeTag;
   using Base = BackendPrefixCodeDecoder;

@@ -59,7 +59,7 @@ extern "C" int RAWSPEED_READONLY rawspeed_get_number_of_processor_cores() {
 
 namespace {
 
-struct CPUClock {
+struct CPUClock final {
   using rep = std::clock_t;
   using period = std::ratio<1, CLOCKS_PER_SEC>;
   using duration = std::chrono::duration<rep, period>;
@@ -74,7 +74,7 @@ struct CPUClock {
 
 #if defined(HAVE_STEADY_CLOCK)
 template <bool HighResIsSteady = std::chrono::high_resolution_clock::is_steady>
-struct ChooseSteadyClock {
+struct ChooseSteadyClock final {
   using type = std::chrono::high_resolution_clock;
 };
 
@@ -83,7 +83,7 @@ template <> struct ChooseSteadyClock<false> {
 };
 #endif
 
-struct ChooseClockType {
+struct ChooseClockType final {
 #if defined(HAVE_STEADY_CLOCK)
   using type = ChooseSteadyClock<>::type;
 #else
@@ -91,7 +91,8 @@ struct ChooseClockType {
 #endif
 };
 
-template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
+template <typename Clock, typename period = std::ratio<1, 1>>
+struct Timer final {
   using rep = double;
   using duration = std::chrono::duration<rep, period>;
 
@@ -106,7 +107,7 @@ template <typename Clock, typename period = std::ratio<1, 1>> struct Timer {
 
 // Lazy cache for the referenced file's content - not actually read until
 // requested the first time.
-struct Entry {
+struct Entry final {
   rawspeed::ChecksumFileEntry Name;
   std::unique_ptr<std::vector<
       uint8_t, rawspeed::DefaultInitAllocatorAdaptor<

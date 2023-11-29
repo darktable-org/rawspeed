@@ -33,7 +33,7 @@ class ByteStream;
 class RawImage;
 class iRectangle2D;
 
-class DngOpcodes {
+class DngOpcodes final {
 public:
   DngOpcodes(const RawImage& ri, ByteStream bs);
   ~DngOpcodes();

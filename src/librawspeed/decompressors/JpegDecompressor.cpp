@@ -78,7 +78,8 @@ static void jpeg_mem_src_int(j_decompress_ptr cinfo,
 
   if (cinfo->src == nullptr) { /* first time for this JPEG object? */
     cinfo->src = (struct jpeg_source_mgr*)(*cinfo->mem->alloc_small)(
-        (j_common_ptr)cinfo, JPOOL_PERMANENT, sizeof(struct jpeg_source_mgr));
+        (j_common_ptr)cinfo, JPOOL_PERMANENT,
+        sizeof(struct jpeg_source_mgr final));
   }
 
   src = (struct jpeg_source_mgr*)cinfo->src;
@@ -105,7 +106,7 @@ namespace {
 
 } // namespace
 
-struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
+struct JpegDecompressor::JpegDecompressStruct final : jpeg_decompress_struct {
   struct jpeg_error_mgr jerr;
 
   JpegDecompressStruct(const JpegDecompressStruct&) = delete;

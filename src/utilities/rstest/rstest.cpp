@@ -87,7 +87,7 @@ md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
 
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
-struct options {
+struct options final {
   bool create;
   bool force;
   bool dump;
@@ -109,7 +109,7 @@ public:
 
 void RstestHashMismatch::anchor() const {}
 
-struct Timer {
+struct Timer final {
   mutable std::chrono::steady_clock::time_point start =
       std::chrono::steady_clock::now();
   int64_t operator()() const {

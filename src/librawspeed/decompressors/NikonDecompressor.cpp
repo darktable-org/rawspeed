@@ -75,11 +75,11 @@ const std::array<uint32_t, 32> bitMask = {
      0x000000ff, 0x0000007f, 0x0000003f, 0x0000001f, 0x0000000f, 0x00000007,
      0x00000003, 0x00000001}};
 
-class NikonLASDecompressor {
+class NikonLASDecompressor final {
   bool mUseBigtable = true;
   bool mDNGCompatible = false;
 
-  struct PrefixCodeDecoder {
+  struct PrefixCodeDecoder final {
     /*
      * These two fields directly represent the contents of a JPEG DHT
      * marker

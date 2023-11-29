@@ -124,7 +124,7 @@ enum class JpegMarker { /* JPEG marker codes			*/
 /*
  * The following structure stores basic information about one component.
  */
-struct JpegComponentInfo {
+struct JpegComponentInfo final {
   /*
    * These values are fixed over the whole image.
    * They are read from the SOF marker.
@@ -140,7 +140,7 @@ struct JpegComponentInfo {
   uint32_t superV = ~0U; // Vertical Supersampling
 };
 
-class SOFInfo {
+class SOFInfo final {
 public:
   std::array<JpegComponentInfo, 4> compInfo;
   uint32_t w = 0;    // Width

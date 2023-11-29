@@ -36,7 +36,7 @@ namespace rawspeed_test {
 static const std::string camfile(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 
 TEST(CameraMetaDataTest, CompileTimeCanInherit) {
-  struct MyCameraMetaData : public CameraMetaData {};
+  struct MyCameraMetaData final : public CameraMetaData {};
 }
 
 TEST(CameraMetaDataTest, CamerasXml) {

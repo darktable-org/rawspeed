@@ -482,11 +482,11 @@ class DngOpcodes::DeltaRowOrColBase : public PixelOpcode {
   void anchor() const final;
 
 public:
-  struct SelectX {
+  struct SelectX final {
     static inline uint32_t select(uint32_t x, uint32_t /*y*/) { return x; }
   };
 
-  struct SelectY {
+  struct SelectY final {
     static inline uint32_t select(uint32_t /*x*/, uint32_t y) { return y; }
   };
 

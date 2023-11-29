@@ -65,14 +65,14 @@ namespace {
 // Definitions needed by table17.inc
 // Taken from
 // https://github.com/gopro/gpr/blob/a513701afce7b03173213a2f67dfd9dd28fa1868/source/lib/vc5_decoder/vlc.h
-struct RLV {
+struct RLV final {
   uint_fast8_t size; //!< Size of code word in bits
   uint32_t bits;     //!< Code word bits right justified
   uint16_t count;    //!< Run length
   uint16_t value;    //!< Run value (unsigned)
 };
 #define RLVTABLE(n)                                                            \
-  struct {                                                                     \
+  struct final {                                                               \
     const uint32_t length;                                                     \
     const RLV entries[n];                                                      \
   } constexpr
@@ -156,20 +156,20 @@ inline auto convolute(int row, int col, std::array<int, 4> muls,
   return total;
 }
 
-struct ConvolutionParams {
-  struct First {
+struct ConvolutionParams final {
+  struct First final {
     static constexpr std::array<int, 4> mul_even = {+1, +11, -4, +1};
     static constexpr std::array<int, 4> mul_odd = {-1, +5, +4, -1};
     static constexpr int coord_shift = 0;
   };
 
-  struct Middle {
+  struct Middle final {
     static constexpr std::array<int, 4> mul_even = {+1, +1, +8, -1};
     static constexpr std::array<int, 4> mul_odd = {-1, -1, +8, +1};
     static constexpr int coord_shift = -1;
   };
 
-  struct Last {
+  struct Last final {
     static constexpr std::array<int, 4> mul_even = {+1, -1, +4, +5};
     static constexpr std::array<int, 4> mul_odd = {-1, +1, -4, +11};
     static constexpr int coord_shift = -2;

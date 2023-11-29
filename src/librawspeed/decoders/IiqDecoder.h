@@ -37,7 +37,7 @@ class CameraMetaData;
 struct PhaseOneStrip;
 
 class IiqDecoder final : public AbstractTiffDecoder {
-  struct IiqOffset {
+  struct IiqOffset final {
     uint32_t n;
     uint32_t offset;
 

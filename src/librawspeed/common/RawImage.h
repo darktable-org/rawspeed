@@ -52,7 +52,7 @@ class RawImageData;
 
 enum class RawImageType { UINT16, F32 };
 
-class RawImageWorker {
+class RawImageWorker final {
 public:
   enum class RawImageWorkerTask {
     SCALE_VALUES = 1,
@@ -74,7 +74,7 @@ public:
                  int end_y) noexcept;
 };
 
-class ImageMetaData {
+class ImageMetaData final {
 public:
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
@@ -235,7 +235,7 @@ private:
   friend class RawImage;
 };
 
-class RawImage {
+class RawImage final {
 public:
   static RawImage create(RawImageType type = RawImageType::UINT16);
   static RawImage create(const iPoint2D& dim,

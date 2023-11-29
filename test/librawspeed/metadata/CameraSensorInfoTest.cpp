@@ -224,7 +224,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
 
 // --------------------------------------------------------
 
-struct IsoExpectationsT {
+struct IsoExpectationsT final {
   int mMinIso;
   int Iso;
   int mMaxIso;

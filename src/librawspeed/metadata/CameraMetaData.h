@@ -32,7 +32,7 @@
 namespace rawspeed {
 class Camera;
 
-struct CameraId {
+struct CameraId final {
   std::string make;
   std::string model;
   std::string mode;

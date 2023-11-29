@@ -24,7 +24,7 @@
 
 namespace rawspeed {
 
-template <typename Iter> class iterator_range {
+template <typename Iter> class iterator_range final {
   Iter begin_iterator;
   Iter end_iterator;
 

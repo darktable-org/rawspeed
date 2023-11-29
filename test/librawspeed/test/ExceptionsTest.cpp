@@ -89,7 +89,7 @@ template <> void* MetaHelper<FiffParserException>(const char* str) {
   ThrowFPE(FMT, str);
 }
 
-template <class T> class ExceptionsTest : public testing::Test {};
+template <class T> class ExceptionsTest final : public testing::Test {};
 
 using Classes =
     testing::Types<RawspeedException, CameraMetadataException,

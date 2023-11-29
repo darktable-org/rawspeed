@@ -130,7 +130,7 @@ public:
   //  }
 };
 
-struct TiffID {
+struct TiffID final {
   std::string make;
   std::string model;
 };

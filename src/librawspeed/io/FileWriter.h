@@ -26,7 +26,7 @@ namespace rawspeed {
 
 class Buffer;
 
-class FileWriter {
+class FileWriter final {
 public:
   explicit FileWriter(const char* filename);
 

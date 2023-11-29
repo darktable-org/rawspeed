@@ -29,7 +29,7 @@
 
 namespace rawspeed {
 
-template <class T> class Array2DRef {
+template <class T> class Array2DRef final {
   T* _data = nullptr;
   int _pitch = 0;
 

@@ -43,7 +43,7 @@ enum class CFAColor : uint8_t {
 
 };
 
-class ColorFilterArray {
+class ColorFilterArray final {
   std::vector<CFAColor> cfa;
   iPoint2D size;
 

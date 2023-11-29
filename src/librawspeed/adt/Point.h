@@ -32,7 +32,7 @@
 
 namespace rawspeed {
 
-class iPoint2D {
+class iPoint2D final {
 public:
   using value_type = int32_t;
   using area_type = uint64_t;
@@ -103,7 +103,7 @@ public:
 };
 
 /* Helper class for managing a rectangle in 2D space. */
-class iRectangle2D {
+class iRectangle2D final {
 public:
   constexpr iRectangle2D() = default;
   constexpr iRectangle2D(const iPoint2D& pos_, const iPoint2D& dim_)
