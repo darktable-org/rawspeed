@@ -136,7 +136,7 @@ struct TiffID final {
 };
 
 class TiffRootIFD final : public TiffIFD {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   const DataBuffer rootBuffer;

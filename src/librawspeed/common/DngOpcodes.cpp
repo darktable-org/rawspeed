@@ -148,7 +148,7 @@ void DngOpcodes::DngOpcode::anchor() const {
 class DngOpcodes::FixBadPixelsConstant final : public DngOpcodes::DngOpcode {
   uint32_t value;
 
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   explicit FixBadPixelsConstant(const RawImage& ri, ByteStream& bs,
@@ -157,7 +157,7 @@ public:
     bs.getU32(); // Bayer Phase not used
   }
 
-  void setup(const RawImage& ri) final {
+  void setup(const RawImage& ri) override {
     DngOpcodes::DngOpcode::setup(ri);
 
     // These limitations are present within the DNG SDK as well.
@@ -168,7 +168,7 @@ public:
       ThrowRDE("Only 1 component images supported");
   }
 
-  void apply(const RawImage& ri) final {
+  void apply(const RawImage& ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
     const CroppedArray2DRef<uint16_t> img(ri->getU16DataAsCroppedArray2DRef());
     iPoint2D crop = ri->getCropOffset();
@@ -235,7 +235,7 @@ void DngOpcodes::ROIOpcode::anchor() const {
 // ****************************************************************************
 
 class DngOpcodes::DummyROIOpcode final : public ROIOpcode {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   explicit DummyROIOpcode(const RawImage& ri, ByteStream& bs,
@@ -246,7 +246,7 @@ public:
 
   using ROIOpcode::getRoi;
 
-  [[noreturn]] void apply(const RawImage& ri) final {
+  [[noreturn]] void apply(const RawImage& ri) override {
     assert(false && "You should not be calling this.");
     __builtin_unreachable();
   }
@@ -262,7 +262,7 @@ void DngOpcodes::DummyROIOpcode::anchor() const {
 class DngOpcodes::FixBadPixelsList final : public DngOpcodes::DngOpcode {
   std::vector<uint32_t> badPixels;
 
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   explicit FixBadPixelsList(const RawImage& ri, ByteStream& bs,
@@ -314,7 +314,7 @@ public:
     }
   }
 
-  void apply(const RawImage& ri) final {
+  void apply(const RawImage& ri) override {
     MutexLocker guard(&ri->mBadPixelMutex);
     ri->mBadPixelPositions.insert(ri->mBadPixelPositions.begin(),
                                   badPixels.begin(), badPixels.end());
@@ -329,7 +329,7 @@ void DngOpcodes::FixBadPixelsList::anchor() const {
 // ****************************************************************************
 
 class DngOpcodes::TrimBounds final : public ROIOpcode {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   explicit TrimBounds(const RawImage& ri, ByteStream& bs,
@@ -339,7 +339,7 @@ public:
     integrated_subimg_.dim = getRoi().dim;
   }
 
-  void apply(const RawImage& ri) final { ri->subFrame(getRoi()); }
+  void apply(const RawImage& ri) override { ri->subFrame(getRoi()); }
 };
 
 void DngOpcodes::TrimBounds::anchor() const {
@@ -443,7 +443,7 @@ void DngOpcodes::LookupOpcode::anchor() const {
 // ****************************************************************************
 
 class DngOpcodes::TableMap final : public LookupOpcode {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   explicit TableMap(const RawImage& ri, ByteStream& bs,
@@ -470,7 +470,7 @@ void DngOpcodes::TableMap::anchor() const {
 // ****************************************************************************
 
 class DngOpcodes::PolynomialMap final : public LookupOpcode {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   explicit PolynomialMap(const RawImage& ri, ByteStream& bs,
@@ -595,7 +595,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   // by f2iScale before applying, we need to divide by f2iScale here.
   const double absLimit;
 
-  bool valueIsOk(float value) final {
+  bool valueIsOk(float value) override {
     return implicit_cast<double>(std::abs(value)) <= absLimit;
   }
 
@@ -606,7 +606,7 @@ public:
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
                  implicit_cast<double>(this->f2iScale)) {}
 
-  void apply(const RawImage& ri) final {
+  void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(
           ri, [this](uint32_t x, uint32_t y, uint16_t v) {
@@ -633,7 +633,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   static constexpr int rounding = 512;
   const double maxLimit;
 
-  bool valueIsOk(float value) final {
+  bool valueIsOk(float value) override {
     return value >= minLimit && implicit_cast<double>(value) <= maxLimit;
   }
 
@@ -645,7 +645,7 @@ public:
                   double(std::numeric_limits<uint16_t>::max())) /
                  implicit_cast<double>(this->f2iScale)) {}
 
-  void apply(const RawImage& ri) final {
+  void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
       this->template applyOP<uint16_t>(ri, [this](uint32_t x, uint32_t y,
                                                   uint16_t v) {

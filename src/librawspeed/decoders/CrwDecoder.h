@@ -37,13 +37,13 @@ class CrwDecoder final : public RawDecoder {
 
 public:
   CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file);
-  RawImage decodeRawInternal() final;
-  void checkSupportInternal(const CameraMetaData* meta) final;
-  void decodeMetaDataInternal(const CameraMetaData* meta) final;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
   static bool isCRW(Buffer input);
 
 private:
-  [[nodiscard]] int getDecoderVersion() const final { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   static float canonEv(int64_t in);
 };
 

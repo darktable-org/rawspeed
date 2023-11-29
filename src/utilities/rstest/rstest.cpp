@@ -97,7 +97,7 @@ size_t process(const std::string& filename,
                const rawspeed::CameraMetaData* metadata, const options& o);
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   size_t time;

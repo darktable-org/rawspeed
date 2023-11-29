@@ -29,7 +29,7 @@
 namespace rawspeed {
 
 class FileIOException final : public RawDecoderException {
-  void anchor() const final;
+  void anchor() const override;
 
 public:
   using RawDecoderException::RawDecoderException;

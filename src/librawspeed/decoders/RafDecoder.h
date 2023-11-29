@@ -41,14 +41,14 @@ public:
   RafDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() final;
+  RawImage decodeRawInternal() override;
   void applyCorrections(const Camera* cam);
-  void decodeMetaDataInternal(const CameraMetaData* meta) final;
-  void checkSupportInternal(const CameraMetaData* meta) final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
   static bool isRAF(Buffer input);
 
 protected:
-  [[nodiscard]] int getDecoderVersion() const final { return 1; }
+  [[nodiscard]] int getDecoderVersion() const override { return 1; }
 
 private:
   [[nodiscard]] int isCompressed() const;

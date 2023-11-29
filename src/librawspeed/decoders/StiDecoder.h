@@ -37,11 +37,11 @@ public:
   StiDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() final;
-  void decodeMetaDataInternal(const CameraMetaData* meta) final;
+  RawImage decodeRawInternal() override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const final { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   void DecodeUncompressed(const TiffIFD* raw) const;
 };
 

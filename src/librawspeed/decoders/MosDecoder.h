@@ -37,12 +37,12 @@ public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);
 
-  RawImage decodeRawInternal() final;
-  void checkSupportInternal(const CameraMetaData* meta) final;
-  void decodeMetaDataInternal(const CameraMetaData* meta) final;
+  RawImage decodeRawInternal() override;
+  void checkSupportInternal(const CameraMetaData* meta) override;
+  void decodeMetaDataInternal(const CameraMetaData* meta) override;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const final { return 0; }
+  [[nodiscard]] int getDecoderVersion() const override { return 0; }
   std::string make;
   std::string model;
   static std::string getXMPTag(std::string_view xmp, std::string_view tag);

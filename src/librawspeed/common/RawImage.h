@@ -202,18 +202,18 @@ public:
   RawImageDataU16();
   explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
 
-  void scaleBlackWhite() final;
-  void calculateBlackAreas() final;
-  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) final;
+  void scaleBlackWhite() override;
+  void calculateBlackAreas() override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
 #ifdef WITH_SSE2
   void scaleValues_SSE2(int start_y, int end_y);
 #endif
-  void scaleValues(int start_y, int end_y) final;
-  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) final;
-  void doLookup(int start_y, int end_y) final;
+  void scaleValues(int start_y, int end_y) override;
+  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
+  void doLookup(int start_y, int end_y) override;
 
   friend class RawImage;
 };
@@ -223,14 +223,14 @@ public:
   RawImageDataFloat();
   explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
 
-  void scaleBlackWhite() final;
-  void calculateBlackAreas() final;
-  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) final;
+  void scaleBlackWhite() override;
+  void calculateBlackAreas() override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
-  void scaleValues(int start_y, int end_y) final;
-  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) final;
-  [[noreturn]] void doLookup(int start_y, int end_y) final;
+  void scaleValues(int start_y, int end_y) override;
+  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
+  [[noreturn]] void doLookup(int start_y, int end_y) override;
 
   friend class RawImage;
 };
