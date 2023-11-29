@@ -46,7 +46,9 @@ namespace {
 
 /* Read JPEG image from a memory segment */
 
-void init_source(j_decompress_ptr cinfo) {}
+void init_source(j_decompress_ptr cinfo) {
+  // No action needed.
+}
 
 boolean fill_input_buffer(j_decompress_ptr cinfo) {
   return cinfo->src->bytes_in_buffer != 0;
@@ -64,7 +66,9 @@ void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
   }
 }
 
-void term_source(j_decompress_ptr cinfo) {}
+void term_source(j_decompress_ptr cinfo) {
+  // No action needed.
+}
 
 [[maybe_unused]] void
 jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
@@ -85,7 +89,7 @@ jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
   src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
   src->term_source = term_source;
   src->bytes_in_buffer = nbytes;
-  src->next_input_byte = static_cast<const JOCTET*>(buffer);
+  src->next_input_byte = buffer;
 }
 
 // NOLINTNEXTLINE(readability-static-definition-in-anonymous-namespace)
@@ -121,8 +125,8 @@ void JpegDecompressor::decode(uint32_t offX,
   JpegDecompressStruct dinfo;
 
 #ifdef HAVE_JPEG_MEM_SRC
-  jpeg_mem_src(&dinfo, const_cast<unsigned char*>(input.begin()), // NOLINT
-               input.getSize());
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast): why, macOS?!
+  jpeg_mem_src(&dinfo, const_cast<uint8_t*>(input.begin()), input.getSize());
 #else
   jpeg_mem_src_int(&dinfo, input.begin(), input.getSize());
 #endif
