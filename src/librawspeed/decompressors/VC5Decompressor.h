@@ -116,7 +116,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   static constexpr int numSubbands =
       numLowPassBands + numHighPassBands * numWaveletLevels;
 
-  struct final {
+  struct {
     uint16_t iChannel = 0; // 0'th channel is the default
     std::optional<uint16_t> iSubband;
     std::optional<uint16_t> lowpassPrecision;
@@ -151,7 +151,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     struct ReconstructableBand final : AbstractBand {
       bool clampUint;
       bool finalWavelet;
-      struct final {
+      struct {
         std::optional<BandData> lowpass;
         std::optional<BandData> highpass;
       } intermediates;

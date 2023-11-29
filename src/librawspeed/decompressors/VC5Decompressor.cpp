@@ -72,7 +72,7 @@ struct RLV final {
   uint16_t value;    //!< Run value (unsigned)
 };
 #define RLVTABLE(n)                                                            \
-  struct final {                                                               \
+  struct {                                                                     \
     const uint32_t length;                                                     \
     const RLV entries[n];                                                      \
   } constexpr
