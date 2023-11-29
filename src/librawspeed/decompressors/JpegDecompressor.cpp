@@ -85,7 +85,7 @@ jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
   src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
   src->term_source = term_source;
   src->bytes_in_buffer = nbytes;
-  src->next_input_byte = static_cast<const JOCTET*>(buffer);
+  src->next_input_byte = buffer;
 }
 
 // NOLINTNEXTLINE(readability-static-definition-in-anonymous-namespace)
