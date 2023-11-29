@@ -434,8 +434,8 @@ int RAWSPEED_READNONE fuji_compressed_block::bitDiff(int value1, int value2) {
   invariant(value1 >= 0);
   invariant(value2 > 0);
 
-  int lz1 = countl_zero((unsigned)value1);
-  int lz2 = countl_zero((unsigned)value2);
+  int lz1 = countl_zero(static_cast<unsigned>(value1));
+  int lz2 = countl_zero(static_cast<unsigned>(value2));
   int decBits = std::max(lz2 - lz1, 0);
   if ((value2 << decBits) < value1)
     ++decBits;
