@@ -114,7 +114,9 @@ void LJpegDecoder::decodeScan() {
                   });
 
   LJpegDecompressor d(
-      mRaw, iRectangle2D({(int)offX, (int)offY}, {(int)w, (int)h}),
+      mRaw,
+      iRectangle2D({static_cast<int>(offX), static_cast<int>(offY)},
+                   {static_cast<int>(w), static_cast<int>(h)}),
       LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, rec, input);
   d.decode();
 }
