@@ -118,7 +118,7 @@ struct JpegDecompressor::JpegDecompressStruct final : jpeg_decompress_struct {
 
 void JpegDecompressor::decode(uint32_t offX,
                               uint32_t offY) { /* Each slice is a JPEG image */
-  struct JpegDecompressStruct dinfo;
+  JpegDecompressStruct dinfo;
 
 #ifdef HAVE_JPEG_MEM_SRC
   jpeg_mem_src(&dinfo, const_cast<unsigned char*>(input.begin()), // NOLINT
