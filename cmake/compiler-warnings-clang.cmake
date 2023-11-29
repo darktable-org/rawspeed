@@ -14,7 +14,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "c++98-compat"
   "c++98-compat-pedantic"
   "gnu-zero-variadic-macro-arguments"
-  "old-style-cast"
   "padded"
   "switch-enum"
   "unused-parameter"
