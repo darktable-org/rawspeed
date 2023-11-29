@@ -92,7 +92,7 @@ jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
 [[noreturn]] METHODDEF(void) my_error_throw(j_common_ptr cinfo) {
   std::array<char, JMSG_LENGTH_MAX> buf;
   buf.fill(0);
-  (*cinfo->err->format_message)(cinfo, buf.data());
+  cinfo->err->format_message(cinfo, buf.data());
   ThrowRDE("JPEG decoder error: %s", buf.data());
 }
 
