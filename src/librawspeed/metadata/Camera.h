@@ -113,7 +113,6 @@ public:
   */
   bool cropAvailable = false;
 
-protected:
 #ifdef HAVE_PUGIXML
   void parseCFA(const pugi::xml_node& node);
   void parseCrop(const pugi::xml_node& node);
