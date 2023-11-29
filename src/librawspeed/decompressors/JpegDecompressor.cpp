@@ -46,7 +46,9 @@ namespace {
 
 /* Read JPEG image from a memory segment */
 
-void init_source(j_decompress_ptr cinfo) {}
+void init_source(j_decompress_ptr cinfo) {
+  // No action needed.
+}
 
 boolean fill_input_buffer(j_decompress_ptr cinfo) {
   return cinfo->src->bytes_in_buffer != 0;
@@ -64,7 +66,9 @@ void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
   }
 }
 
-void term_source(j_decompress_ptr cinfo) {}
+void term_source(j_decompress_ptr cinfo) {
+  // No action needed.
+}
 
 [[maybe_unused]] void
 jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
