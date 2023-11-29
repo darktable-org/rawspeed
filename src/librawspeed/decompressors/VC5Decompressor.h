@@ -208,7 +208,6 @@ class VC5Decompressor final : public AbstractDecompressor {
                                        bool clampUint /*= false*/,
                                        bool finalWavelet /*= false*/) noexcept;
 
-  protected:
     uint32_t mDecodedBandMask = 0;
   };
 
