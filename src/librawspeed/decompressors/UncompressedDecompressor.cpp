@@ -348,8 +348,8 @@ void UncompressedDecompressor::decode12BitRawUnpackedLeftAligned() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   const uint8_t* in = input.getData(w * h * 2);
 
-  for (int row = 0; row < (int)h; row++) {
-    for (int col = 0; col < (int)w; col += 1, in += 2) {
+  for (int row = 0; row < static_cast<int>(h); row++) {
+    for (int col = 0; col < static_cast<int>(w); col += 1, in += 2) {
       uint32_t g1 = in[0];
       uint32_t g2 = in[1];
 
