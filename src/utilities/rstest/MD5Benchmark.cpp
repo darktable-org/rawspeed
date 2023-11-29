@@ -26,12 +26,11 @@
 
 static inline void BM_MD5(benchmark::State& state) {
   // Create a zero-initialized data. Content does not matter for our purpose.
-  std::vector<char> buf(state.range(0), char(0));
+  std::vector<uint8_t> buf(state.range(0), uint8_t(0));
 
   for (auto _ : state) {
     rawspeed::md5::md5_state hash;
-    rawspeed::md5::md5_hash(reinterpret_cast<uint8_t*>(buf.data()), buf.size(),
-                            &hash);
+    rawspeed::md5::md5_hash(buf.data(), buf.size(), &hash);
   }
 
   state.SetComplexityN(state.range(0));
