@@ -69,9 +69,11 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
   const uint8_t* v =
       mRootIFD->getEntryRecursive(TiffTag::DNGVERSION)->getData().getData(4);
 
-  if (v[0] != 1)
-    ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u", (int)v[0],
-             (int)v[1], (int)v[2], (int)v[3]);
+  if (v[0] != 1) {
+    ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",
+             static_cast<int>(v[0]), static_cast<int>(v[1]),
+             static_cast<int>(v[2]), static_cast<int>(v[3]));
+  }
   //  if (v[1] > 4)
   //    ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u", (int)v[0],
   //    (int)v[1], (int)v[2], (int)v[3]);
