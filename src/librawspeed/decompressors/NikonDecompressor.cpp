@@ -108,7 +108,7 @@ class NikonLASDecompressor final {
     int l;
     int lastp;
     int si;
-    std::array<char, 257> huffsize;
+    std::array<int8_t, 257> huffsize;
     std::array<uint16_t, 257> huffcode;
     uint16_t code;
     int size;
@@ -123,7 +123,7 @@ class NikonLASDecompressor final {
     p = 0;
     for (l = 1; l <= 16; l++) {
       for (i = 1; i <= static_cast<int>(dctbl1.bits[l]); i++) {
-        huffsize[p] = static_cast<char>(l);
+        huffsize[p] = static_cast<int8_t>(l);
         ++p;
         if (p > 256)
           ThrowRDE("LJpegDecoder::createPrefixCodeDecoder: Code length too "
