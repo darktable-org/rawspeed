@@ -121,8 +121,8 @@ void JpegDecompressor::decode(uint32_t offX,
   JpegDecompressStruct dinfo;
 
 #ifdef HAVE_JPEG_MEM_SRC
-  jpeg_mem_src(&dinfo, const_cast<unsigned char*>(input.begin()), // NOLINT
-               input.getSize());
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast): why, macOS?!
+  jpeg_mem_src(&dinfo, const_cast<uint8_t*>(input.begin()), input.getSize());
 #else
   jpeg_mem_src_int(&dinfo, input.begin(), input.getSize());
 #endif
