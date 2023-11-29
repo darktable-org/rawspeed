@@ -28,73 +28,65 @@
 #include "adt/Point.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/JpegDecompressor.h"
+#include "io/IOException.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <jpeglib.h>
 #include <memory>
 #include <vector>
-
-#ifndef HAVE_JPEG_MEM_SRC
-#include "io/IOException.h"
-#endif
 
 using std::min;
 using std::unique_ptr;
 
 namespace rawspeed {
 
-#ifdef HAVE_JPEG_MEM_SRC
+namespace {
 
-// FIXME: some libjpeg versions discard const qual for the input data pointer
-// should this be a cmake check?
-#define JPEG_MEMSRC(A, B, C)                                                   \
-  jpeg_mem_src(A, const_cast<unsigned char*>(B), C) // NOLINT
-
-#else
-
-#define JPEG_MEMSRC(A, B, C) jpeg_mem_src_int(A, B, C)
 /* Read JPEG image from a memory segment */
 
-static void init_source(j_decompress_ptr cinfo) {}
-static boolean fill_input_buffer(j_decompress_ptr cinfo) {
-  auto* src = (struct jpeg_source_mgr*)cinfo->src;
-  return (boolean) !!src->bytes_in_buffer;
-}
-static void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
-  auto* src = (struct jpeg_source_mgr*)cinfo->src;
+void init_source(j_decompress_ptr cinfo) {}
 
-  if (num_bytes > (int)src->bytes_in_buffer)
+boolean fill_input_buffer(j_decompress_ptr cinfo) {
+  return cinfo->src->bytes_in_buffer != 0;
+}
+
+// NOLINTNEXTLINE(google-runtime-int)
+void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
+  auto* src = cinfo->src;
+
+  if (num_bytes > static_cast<int>(src->bytes_in_buffer))
     ThrowIOE("read out of buffer");
   if (num_bytes > 0) {
-    src->next_input_byte += (size_t)num_bytes;
-    src->bytes_in_buffer -= (size_t)num_bytes;
+    src->next_input_byte += static_cast<size_t>(num_bytes);
+    src->bytes_in_buffer -= static_cast<size_t>(num_bytes);
   }
 }
-static void term_source(j_decompress_ptr cinfo) {}
-static void jpeg_mem_src_int(j_decompress_ptr cinfo,
-                             const unsigned char* buffer, long nbytes) {
-  struct jpeg_source_mgr* src;
+
+void term_source(j_decompress_ptr cinfo) {}
+
+[[maybe_unused]] void
+jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
+                 long nbytes) { // NOLINT(google-runtime-int)
+  jpeg_source_mgr* src;
 
   if (cinfo->src == nullptr) { /* first time for this JPEG object? */
-    cinfo->src = (struct jpeg_source_mgr*)(*cinfo->mem->alloc_small)(
-        (j_common_ptr)cinfo, JPOOL_PERMANENT,
-        sizeof(struct jpeg_source_mgr final));
+    void* buf =
+        (*cinfo->mem->alloc_small)(reinterpret_cast<j_common_ptr>(cinfo),
+                                   JPOOL_PERMANENT, sizeof(jpeg_source_mgr));
+    cinfo->src = static_cast<jpeg_source_mgr*>(buf);
   }
 
-  src = (struct jpeg_source_mgr*)cinfo->src;
+  src = cinfo->src;
   src->init_source = init_source;
   src->fill_input_buffer = fill_input_buffer;
   src->skip_input_data = skip_input_data;
   src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
   src->term_source = term_source;
   src->bytes_in_buffer = nbytes;
-  src->next_input_byte = (const JOCTET*)buffer;
+  src->next_input_byte = static_cast<const JOCTET*>(buffer);
 }
-
-#endif
-
-namespace {
 
 // NOLINTNEXTLINE(readability-static-definition-in-anonymous-namespace)
 [[noreturn]] METHODDEF(void) my_error_throw(j_common_ptr cinfo) {
@@ -128,7 +120,12 @@ void JpegDecompressor::decode(uint32_t offX,
                               uint32_t offY) { /* Each slice is a JPEG image */
   struct JpegDecompressStruct dinfo;
 
-  JPEG_MEMSRC(&dinfo, input.begin(), input.getSize());
+#ifdef HAVE_JPEG_MEM_SRC
+  jpeg_mem_src(&dinfo, const_cast<unsigned char*>(input.begin()), // NOLINT
+               input.getSize());
+#else
+  jpeg_mem_src_int(&dinfo, input.begin(), input.getSize());
+#endif
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
     ThrowRDE("Unable to read JPEG header");
