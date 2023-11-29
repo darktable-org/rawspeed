@@ -22,6 +22,9 @@
 
 namespace rawspeed {
 
-void FileIOException::anchor() const {}
+void FileIOException::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 } // namespace rawspeed

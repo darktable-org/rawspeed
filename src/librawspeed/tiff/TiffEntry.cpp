@@ -44,9 +44,15 @@ const std::array<uint32_t, 14> TiffEntry::datashifts = {0, 0, 0, 1, 2, 3, 0,
                                                         0, 1, 2, 3, 2, 3, 2};
 //                                  0-1-2-3-4-5-6-7-8-9-10-11-12-13
 
-void TiffEntry::anchor() const {}
+void TiffEntry::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
-void TiffEntryWithData::anchor() const {}
+void TiffEntryWithData::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
     : parent(parent_), tag(static_cast<TiffTag>(bs.getU16())) {

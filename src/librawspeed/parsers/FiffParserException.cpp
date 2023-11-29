@@ -22,6 +22,9 @@
 
 namespace rawspeed {
 
-void FiffParserException::anchor() const {}
+void FiffParserException::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 } // namespace rawspeed

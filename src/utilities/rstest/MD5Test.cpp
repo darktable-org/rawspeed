@@ -48,7 +48,10 @@ public:
   const uint8_t* message = nullptr;
 };
 
-void MD5Test::anchor() const {}
+void MD5Test::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 #define TESTCASE(a, b, c, d, msg)                                              \
   (MD5Testcase) {                                                              \

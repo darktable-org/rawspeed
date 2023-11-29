@@ -107,7 +107,10 @@ public:
       : RawspeedException(msg), time(time_) {}
 };
 
-void RstestHashMismatch::anchor() const {}
+void RstestHashMismatch::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 struct Timer final {
   mutable std::chrono::steady_clock::time_point start =

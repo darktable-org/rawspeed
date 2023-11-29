@@ -44,7 +44,10 @@ using std::vector;
 
 namespace rawspeed {
 
-void TiffIFD::anchor() const {}
+void TiffIFD::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
   assert(ifds);
@@ -311,7 +314,10 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   return i->second.get();
 }
 
-void TiffRootIFD::anchor() const {}
+void TiffRootIFD::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 TiffID TiffRootIFD::getID() const {
   TiffID id;

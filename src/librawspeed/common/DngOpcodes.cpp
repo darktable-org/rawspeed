@@ -138,7 +138,10 @@ public:
   virtual void apply(const RawImage& ri) = 0;
 };
 
-void DngOpcodes::DngOpcode::anchor() const {}
+void DngOpcodes::DngOpcode::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -179,7 +182,10 @@ public:
   }
 };
 
-void DngOpcodes::FixBadPixelsConstant::anchor() const {}
+void DngOpcodes::FixBadPixelsConstant::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -221,7 +227,10 @@ protected:
   }
 };
 
-void DngOpcodes::ROIOpcode::anchor() const {}
+void DngOpcodes::ROIOpcode::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -243,7 +252,10 @@ public:
   }
 };
 
-void DngOpcodes::DummyROIOpcode::anchor() const {}
+void DngOpcodes::DummyROIOpcode::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -309,7 +321,10 @@ public:
   }
 };
 
-void DngOpcodes::FixBadPixelsList::anchor() const {}
+void DngOpcodes::FixBadPixelsList::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -327,7 +342,10 @@ public:
   void apply(const RawImage& ri) final { ri->subFrame(getRoi()); }
 };
 
-void DngOpcodes::TrimBounds::anchor() const {}
+void DngOpcodes::TrimBounds::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -388,7 +406,10 @@ protected:
   }
 };
 
-void DngOpcodes::PixelOpcode::anchor() const {}
+void DngOpcodes::PixelOpcode::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -414,7 +435,10 @@ protected:
   }
 };
 
-void DngOpcodes::LookupOpcode::anchor() const {}
+void DngOpcodes::LookupOpcode::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -438,7 +462,10 @@ public:
   }
 };
 
-void DngOpcodes::TableMap::anchor() const {}
+void DngOpcodes::TableMap::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -474,7 +501,10 @@ public:
   }
 };
 
-void DngOpcodes::PolynomialMap::anchor() const {}
+void DngOpcodes::PolynomialMap::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 // ****************************************************************************
 
@@ -496,7 +526,10 @@ protected:
       : PixelOpcode(ri, bs, integrated_subimg_) {}
 };
 
-void DngOpcodes::DeltaRowOrColBase::anchor() const {}
+void DngOpcodes::DeltaRowOrColBase::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 template <typename S>
 class DngOpcodes::DeltaRowOrCol : public DeltaRowOrColBase {

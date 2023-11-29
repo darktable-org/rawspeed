@@ -48,7 +48,10 @@
 
 namespace rawspeed {
 
-void RawImageData::anchor() const {}
+void RawImageData::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 RawImageData::RawImageData() { blackLevelSeparate.fill(-1); }
 
