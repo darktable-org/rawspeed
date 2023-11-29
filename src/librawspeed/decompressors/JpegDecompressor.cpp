@@ -73,8 +73,8 @@ jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
 
   if (cinfo->src == nullptr) { /* first time for this JPEG object? */
     void* buf =
-        (*cinfo->mem->alloc_small)(reinterpret_cast<j_common_ptr>(cinfo),
-                                   JPOOL_PERMANENT, sizeof(jpeg_source_mgr));
+        cinfo->mem->alloc_small(reinterpret_cast<j_common_ptr>(cinfo),
+                                JPOOL_PERMANENT, sizeof(jpeg_source_mgr));
     cinfo->src = static_cast<jpeg_source_mgr*>(buf);
   }
 
