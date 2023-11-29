@@ -50,7 +50,7 @@ public:
   // These are the constant factors for each segment of the curve.
   // Each segment i will have the formula:
   // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
-  struct Segment {
+  struct Segment final {
     double a;
     double b;
     double c;

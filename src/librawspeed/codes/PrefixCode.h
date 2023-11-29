@@ -30,7 +30,7 @@
 namespace rawspeed {
 
 template <typename CodeTag>
-class PrefixCode : public AbstractPrefixCode<CodeTag> {
+class PrefixCode final : public AbstractPrefixCode<CodeTag> {
 public:
   using Base = AbstractPrefixCode<CodeTag>;
   using Traits = typename Base::Traits;

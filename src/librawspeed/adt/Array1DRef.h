@@ -28,7 +28,7 @@ namespace rawspeed {
 
 template <class T> class CroppedArray1DRef;
 
-template <class T> class Array1DRef {
+template <class T> class Array1DRef final {
   T* data = nullptr;
   int numElts = 0;
 

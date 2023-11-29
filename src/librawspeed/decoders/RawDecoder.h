@@ -104,7 +104,7 @@ public:
   /* Should Fuji images be rotated? */
   bool fujiRotate{true};
 
-  struct {
+  struct final {
     /* Should Quadrant Multipliers be applied to the IIQ raws? */
     bool quadrantMultipliers = true;
 
@@ -144,7 +144,7 @@ protected:
                            int iso_speed = 0);
 
   /* Shall return a crop area if none is specified in the camera database
-   * entry. Override this to apply camera vendor defaults (where available). */
+   * entry. final this to apply camera vendor defaults (where available). */
   virtual iRectangle2D getDefaultCrop();
 
   /* Generic decompressor for uncompressed images */

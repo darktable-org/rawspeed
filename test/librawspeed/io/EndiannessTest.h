@@ -25,7 +25,7 @@
 
 namespace rawspeed_test {
 
-template <typename T> struct intPair {
+template <typename T> struct intPair final {
   T first;
   T second;
 };

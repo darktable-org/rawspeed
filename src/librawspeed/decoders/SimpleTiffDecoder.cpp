@@ -31,6 +31,8 @@
 
 namespace rawspeed {
 
+void SimpleTiffDecoder::anchor() const {}
+
 void SimpleTiffDecoder::prepareForRawDecoding() {
   raw = getIFDWithLargestImage();
   width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();

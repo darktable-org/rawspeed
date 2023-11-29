@@ -52,7 +52,7 @@ class RawImageData;
 
 enum class RawImageType { UINT16, F32 };
 
-class RawImageWorker {
+class RawImageWorker final {
 public:
   enum class RawImageWorkerTask {
     SCALE_VALUES = 1,
@@ -74,7 +74,7 @@ public:
                  int end_y) noexcept;
 };
 
-class ImageMetaData {
+class ImageMetaData final {
 public:
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
@@ -108,6 +108,8 @@ public:
 };
 
 class RawImageData : public ErrorLog {
+  virtual void anchor() const;
+
   friend class RawImageWorker;
 
 public:
@@ -200,18 +202,18 @@ public:
   RawImageDataU16();
   explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
 
-  void scaleBlackWhite() override;
-  void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
+  void scaleBlackWhite() final;
+  void calculateBlackAreas() final;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) final;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
 #ifdef WITH_SSE2
   void scaleValues_SSE2(int start_y, int end_y);
 #endif
-  void scaleValues(int start_y, int end_y) override;
-  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
-  void doLookup(int start_y, int end_y) override;
+  void scaleValues(int start_y, int end_y) final;
+  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) final;
+  void doLookup(int start_y, int end_y) final;
 
   friend class RawImage;
 };
@@ -221,19 +223,19 @@ public:
   RawImageDataFloat();
   explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
 
-  void scaleBlackWhite() override;
-  void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
+  void scaleBlackWhite() final;
+  void calculateBlackAreas() final;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) final;
 
 private:
-  void scaleValues(int start_y, int end_y) override;
-  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
-  [[noreturn]] void doLookup(int start_y, int end_y) override;
+  void scaleValues(int start_y, int end_y) final;
+  void fixBadPixel(uint32_t x, uint32_t y, int component = 0) final;
+  [[noreturn]] void doLookup(int start_y, int end_y) final;
 
   friend class RawImage;
 };
 
-class RawImage {
+class RawImage final {
 public:
   static RawImage create(RawImageType type = RawImageType::UINT16);
   static RawImage create(const iPoint2D& dim,
@@ -257,10 +259,9 @@ inline RawImage RawImage::create(RawImageType type) {
     return RawImage(std::make_shared<RawImageDataU16>());
   case RawImageType::F32:
     return RawImage(std::make_shared<RawImageDataFloat>());
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
   }
+  writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
+  __builtin_unreachable();
 }
 
 inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
@@ -271,10 +272,9 @@ inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
   case RawImageType::F32:
     return RawImage(
         std::make_shared<RawImageDataFloat>(dim, componentsPerPixel));
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
   }
+  writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
+  __builtin_unreachable();
 }
 
 inline Array2DRef<uint16_t>
@@ -314,9 +314,8 @@ RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
     return getU16DataAsUncroppedArray2DRef();
   case RawImageType::F32:
     return getF32DataAsUncroppedArray2DRef();
-  default:
-    __builtin_unreachable();
   }
+  __builtin_unreachable();
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,

@@ -29,7 +29,7 @@ class ByteStream;
 class RawImage;
 
 class HasselbladLJpegDecoder final : public AbstractLJpegDecoder {
-  void decodeScan() override;
+  void decodeScan() final;
 
 public:
   HasselbladLJpegDecoder(ByteStream bs, const RawImage& img);

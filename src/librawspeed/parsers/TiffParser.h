@@ -39,7 +39,7 @@ public:
   explicit TiffParser(Buffer file);
 
   std::unique_ptr<RawDecoder>
-  getDecoder(const CameraMetaData* meta = nullptr) override;
+  getDecoder(const CameraMetaData* meta = nullptr) final;
 
   // TiffRootIFDOwner contains pointers into 'data' but if is is non-owning, it
   // may be deleted immediately

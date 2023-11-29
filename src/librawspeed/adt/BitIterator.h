@@ -30,7 +30,7 @@ namespace rawspeed {
 
 template <typename T>
   requires std::is_unsigned_v<T>
-struct BitMSBIterator {
+struct BitMSBIterator final {
   T bitsPat;
   int bitIdx;
 

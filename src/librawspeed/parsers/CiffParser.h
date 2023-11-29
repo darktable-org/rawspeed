@@ -40,7 +40,7 @@ public:
   void parseData();
 
   std::unique_ptr<RawDecoder>
-  getDecoder(const CameraMetaData* meta = nullptr) override;
+  getDecoder(const CameraMetaData* meta = nullptr) final;
 };
 
 } // namespace rawspeed

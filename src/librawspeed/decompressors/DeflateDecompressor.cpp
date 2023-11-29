@@ -79,7 +79,7 @@ inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
 
 } // namespace
 
-template <typename T> struct StorageType {};
+template <typename T> struct StorageType final {};
 template <> struct StorageType<ieee_754_2008::Binary16> {
   using type = uint16_t;
   static constexpr int padding_bytes = 0;

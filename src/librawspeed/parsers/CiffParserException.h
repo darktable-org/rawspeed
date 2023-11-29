@@ -30,6 +30,8 @@
 namespace rawspeed {
 
 class CiffParserException final : public RawParserException {
+  void anchor() const final;
+
 public:
   using RawParserException::RawParserException;
 };

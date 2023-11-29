@@ -71,7 +71,7 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
 
   size_t numBlocks;
 
-  struct Block {
+  struct Block final {
     ByteStream bs;
     iPoint2D beginCoord;
     // The rectangle is an incorrect representation. All the rows

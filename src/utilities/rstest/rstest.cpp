@@ -87,7 +87,7 @@ md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
 
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
-struct options {
+struct options final {
   bool create;
   bool force;
   bool dump;
@@ -97,6 +97,8 @@ size_t process(const std::string& filename,
                const rawspeed::CameraMetaData* metadata, const options& o);
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
+  void anchor() const final;
+
 public:
   size_t time;
 
@@ -105,7 +107,9 @@ public:
       : RawspeedException(msg), time(time_) {}
 };
 
-struct Timer {
+void RstestHashMismatch::anchor() const {}
+
+struct Timer final {
   mutable std::chrono::steady_clock::time_point start =
       std::chrono::steady_clock::now();
   int64_t operator()() const {
@@ -328,13 +332,12 @@ void writeImage(const RawImage& raw, const std::string& fn) {
   switch (raw->getDataType()) {
   case RawImageType::UINT16:
     writePPM(raw, fn);
-    break;
+    return;
   case RawImageType::F32:
     writePFM(raw, fn);
-    break;
-  default:
-    __builtin_unreachable();
+    return;
   }
+  __builtin_unreachable();
 }
 
 size_t process(const std::string& filename, const CameraMetaData* metadata,
@@ -482,7 +485,7 @@ int usage(const char* progname) {
   [-h] print this help
   [-c] for each file: decode, compute hash and store it.
        If hash exists, it does not recompute it, unless option -f is set!
-  [-f] if -c is set, then it will override the existing hashes.
+  [-f] if -c is set, then it will final the existing hashes.
        If -c is not set, and the hash does not exist, then just decode,
        but do not write the hash!
   [-d] store decoded image as PPM

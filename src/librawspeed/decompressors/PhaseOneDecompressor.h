@@ -29,7 +29,7 @@
 
 namespace rawspeed {
 
-struct PhaseOneStrip {
+struct PhaseOneStrip final {
   int n;
   ByteStream bs;
 

@@ -29,6 +29,8 @@
 namespace rawspeed {
 
 class FileIOException final : public RawDecoderException {
+  void anchor() const final;
+
 public:
   using RawDecoderException::RawDecoderException;
 };

@@ -16,6 +16,7 @@ FILE(GLOB SOURCES
   "RawImage.h"
   "RawImageDataFloat.cpp"
   "RawImageDataU16.cpp"
+  "RawspeedException.cpp"
   "RawspeedException.h"
   "SimpleLUT.h"
   "Spline.h"

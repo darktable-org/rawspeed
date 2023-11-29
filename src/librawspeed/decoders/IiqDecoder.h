@@ -37,7 +37,7 @@ class CameraMetaData;
 struct PhaseOneStrip;
 
 class IiqDecoder final : public AbstractTiffDecoder {
-  struct IiqOffset {
+  struct IiqOffset final {
     uint32_t n;
     uint32_t offset;
 
@@ -56,12 +56,12 @@ public:
   IiqDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
       : AbstractTiffDecoder(std::move(rootIFD), file) {}
 
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void checkSupportInternal(const CameraMetaData* meta) final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const final { return 0; }
   uint32_t black_level = 0;
   void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
                         uint32_t split_col) const;

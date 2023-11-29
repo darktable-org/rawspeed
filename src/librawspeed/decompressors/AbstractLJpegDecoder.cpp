@@ -42,6 +42,8 @@
 
 namespace rawspeed {
 
+void AbstractLJpegDecoder::anchor() const {}
+
 AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, RawImage img)
     : input(bs), mRaw(std::move(img)) {
   input.setByteOrder(Endianness::big);
@@ -62,7 +64,7 @@ void AbstractLJpegDecoder::decodeSOI() {
   if (getNextMarker(false) != JpegMarker::SOI)
     ThrowRDE("Image did not start with SOI. Probably not an LJPEG");
 
-  struct {
+  struct final {
     bool DRI = false;
     bool DHT = false;
     bool SOF = false;

@@ -28,7 +28,7 @@
 
 namespace rawspeed {
 
-template <class T> class CroppedArray2DRef {
+template <class T> class CroppedArray2DRef final {
   const Array2DRef<T> base;
 
   // We need to be able to convert to const version.

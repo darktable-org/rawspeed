@@ -33,18 +33,18 @@ class Buffer;
 class CameraMetaData;
 
 class DcrDecoder final : public SimpleTiffDecoder {
-  void checkImageDimensions() override;
+  void checkImageDimensions() final;
 
 public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   DcrDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const final { return 0; }
 };
 
 } // namespace rawspeed

@@ -240,7 +240,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() const {
 // NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
 namespace {
 
-struct Dsc {
+struct Dsc final {
   const int N_COMP;
   const int X_S_F;
   const int Y_S_F;

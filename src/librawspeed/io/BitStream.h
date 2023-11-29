@@ -56,7 +56,7 @@ struct BitStreamCacheBase {
   static constexpr unsigned MaxGetBits = bitwidth<uint32_t>();
 };
 
-struct BitStreamCacheLeftInRightOut : BitStreamCacheBase {
+struct BitStreamCacheLeftInRightOut final : BitStreamCacheBase {
   inline void push(uint64_t bits, uint32_t count) noexcept {
     invariant(count + fillLevel <= bitwidth(cache));
     cache |= bits << fillLevel;
@@ -73,7 +73,7 @@ struct BitStreamCacheLeftInRightOut : BitStreamCacheBase {
   }
 };
 
-struct BitStreamCacheRightInLeftOut : BitStreamCacheBase {
+struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
   inline void push(uint64_t bits, uint32_t count) noexcept {
     invariant(count + fillLevel <= Size);
     invariant(count != 0);

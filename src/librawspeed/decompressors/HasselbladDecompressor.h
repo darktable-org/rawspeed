@@ -33,7 +33,7 @@ namespace rawspeed {
 
 class HasselbladDecompressor final {
 public:
-  struct PerComponentRecipe {
+  struct PerComponentRecipe final {
     const PrefixCodeDecoder<>& ht;
     const uint16_t initPred;
   };

@@ -28,6 +28,8 @@
 namespace rawspeed {
 
 class RawDecoderException : public RawspeedException {
+  void anchor() const override;
+
 public:
   using RawspeedException::RawspeedException;
 };

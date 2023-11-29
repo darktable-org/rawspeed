@@ -24,7 +24,7 @@
 
 namespace rawspeed {
 
-template <class T> struct NotARational {
+template <class T> struct NotARational final {
 public:
   using value_type = T;
 

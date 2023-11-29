@@ -39,12 +39,12 @@ public:
   static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
   DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);
 
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
+  void checkSupportInternal(const CameraMetaData* meta) final;
 
 private:
-  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+  [[nodiscard]] int getDecoderVersion() const final { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
   std::optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;

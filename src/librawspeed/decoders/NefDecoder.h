@@ -44,14 +44,14 @@ public:
   NefDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
-  RawImage decodeRawInternal() override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
+  RawImage decodeRawInternal() final;
+  void decodeMetaDataInternal(const CameraMetaData* meta) final;
+  void checkSupportInternal(const CameraMetaData* meta) final;
 
 private:
   struct NefSlice final : RawSlice {};
 
-  [[nodiscard]] int getDecoderVersion() const override { return 5; }
+  [[nodiscard]] int getDecoderVersion() const final { return 5; }
   [[nodiscard]] bool D100IsCompressed(uint32_t offset) const;
   static bool NEFIsUncompressed(const TiffIFD* raw);
   static bool NEFIsUncompressedRGB(const TiffIFD* raw);

@@ -54,7 +54,7 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32_t section_split_offset;
 
-  struct Block {
+  struct Block final {
     ByteStream bs;
     iPoint2D beginCoord;
     // The rectangle is an incorrect representation. All the rows

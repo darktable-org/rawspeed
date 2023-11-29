@@ -44,7 +44,7 @@ class xml_node;
 
 namespace rawspeed {
 
-class Hints {
+class Hints final {
   std::map<std::string, std::string, std::less<>> data;
 
 public:
@@ -74,7 +74,7 @@ public:
   }
 };
 
-class Camera {
+class Camera final {
 public:
   enum class SupportStatus {
     Unsupported,

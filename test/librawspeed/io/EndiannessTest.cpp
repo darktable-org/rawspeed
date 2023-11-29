@@ -84,7 +84,7 @@ template <typename T>
 }
 
 // no polymorphic lambda till c++14
-struct HexEquals {
+struct HexEquals final {
   template <typename T>
   ::testing::AssertionResult operator()(const char* darg1, const char* darg2,
                                         const T& arg1, const T& arg2) {
