@@ -87,7 +87,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (frame.cps < 1 || frame.cps > 4)
     ThrowRDE("Unsupported number of components: %u", frame.cps);
 
-  if (rec.size() != (unsigned)frame.cps)
+  if (rec.size() != static_cast<unsigned>(frame.cps))
     ThrowRDE("Must have exactly one recepie per component");
 
   for (const auto& recip : rec) {
@@ -95,25 +95,28 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if ((unsigned)frame.cps < mRaw->getCpp())
+  if (static_cast<unsigned>(frame.cps) < mRaw->getCpp())
     ThrowRDE("Unexpected number of components");
 
-  if ((int64_t)frame.cps * frame.dim.x > std::numeric_limits<int>::max())
+  if (static_cast<int64_t>(frame.cps) * frame.dim.x >
+      std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
 
   invariant(mRaw->dim.x > imgFrame.pos.x);
-  if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
+  if ((static_cast<int>(mRaw->getCpp()) * (mRaw->dim.x - imgFrame.pos.x)) <
+      frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
+  const int tileRequiredWidth =
+      static_cast<int>(mRaw->getCpp()) * imgFrame.dim.x;
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
           implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.cps));
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
-      (int64_t)frame.cps * frame.dim.x <
-          (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
+      static_cast<int64_t>(frame.cps) * frame.dim.x <
+          static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
              imgFrame.dim.y);
