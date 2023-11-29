@@ -139,7 +139,8 @@ inline std::optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
     }
   }
 
-  for (auto i = (int)BayerPhase::RGGB; i <= (int)BayerPhase::BGGR; ++i) {
+  for (auto i = static_cast<int>(BayerPhase::RGGB);
+       i <= static_cast<int>(BayerPhase::BGGR); ++i) {
     if (auto p = static_cast<BayerPhase>(i); getAsCFAColors(p) == patData)
       return p;
   }

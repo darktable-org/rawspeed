@@ -444,7 +444,8 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
             out(row, dsc.groupSize * col + p) = pred[c] +=
-                ((const PrefixCodeDecoder&)(ht[c])).decodeDifference(bs);
+                (static_cast<const PrefixCodeDecoder&>(ht[c]))
+                    .decodeDifference(bs);
           }
         }
       }

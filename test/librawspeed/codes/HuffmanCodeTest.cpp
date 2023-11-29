@@ -421,7 +421,8 @@ TEST(HuffmanCodeDeathTest, setCodeValuesRequiresCount) {
           rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
       if (cnt != count) {
         ASSERT_DEATH({ ht.setCodeValues(bv); },
-                     "\\(unsigned\\)data.size\\(\\) == maxCodesCount\\(\\)");
+                     "static_cast<unsigned>\\(data.size\\(\\)"
+                     "\\) == maxCodesCount\\(\\)");
       } else {
         ASSERT_EXIT(
             {

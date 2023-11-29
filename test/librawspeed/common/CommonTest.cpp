@@ -372,8 +372,8 @@ protected:
     assert(srcPitch * height < numeric_limits<uint8_t>::max());
     assert(dstPitch * height < numeric_limits<uint8_t>::max());
 
-    src.resize((size_t)srcPitch * height);
-    dst.resize((size_t)dstPitch * height);
+    src.resize(static_cast<size_t>(srcPitch) * height);
+    dst.resize(static_cast<size_t>(dstPitch) * height);
 
     fill(src.begin(), src.end(), 0);
     fill(dst.begin(), dst.end(), static_cast<decltype(dst)::value_type>(-1));

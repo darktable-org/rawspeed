@@ -50,10 +50,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     int bitPerPixel = bs.getI32();
     rawspeed::BitOrder order = [&bs]() {
       switch (int val = bs.getI32()) {
-      case (int)rawspeed::BitOrder::LSB:
-      case (int)rawspeed::BitOrder::MSB:
-      case (int)rawspeed::BitOrder::MSB16:
-      case (int)rawspeed::BitOrder::MSB32:
+      case static_cast<int>(rawspeed::BitOrder::LSB):
+      case static_cast<int>(rawspeed::BitOrder::MSB):
+      case static_cast<int>(rawspeed::BitOrder::MSB16):
+      case static_cast<int>(rawspeed::BitOrder::MSB32):
         return rawspeed::BitOrder(val);
       default:
         ThrowRSE("Unknown bit order: %u", val);

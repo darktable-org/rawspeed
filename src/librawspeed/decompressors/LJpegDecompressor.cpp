@@ -87,7 +87,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (frame.cps < 1 || frame.cps > 4)
     ThrowRDE("Unsupported number of components: %u", frame.cps);
 
-  if (rec.size() != (unsigned)frame.cps)
+  if (rec.size() != static_cast<unsigned>(frame.cps))
     ThrowRDE("Must have exactly one recepie per component");
 
   for (const auto& recip : rec) {
@@ -95,25 +95,28 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if ((unsigned)frame.cps < mRaw->getCpp())
+  if (static_cast<unsigned>(frame.cps) < mRaw->getCpp())
     ThrowRDE("Unexpected number of components");
 
-  if ((int64_t)frame.cps * frame.dim.x > std::numeric_limits<int>::max())
+  if (static_cast<int64_t>(frame.cps) * frame.dim.x >
+      std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
 
   invariant(mRaw->dim.x > imgFrame.pos.x);
-  if (((int)mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) < frame.cps)
+  if ((static_cast<int>(mRaw->getCpp()) * (mRaw->dim.x - imgFrame.pos.x)) <
+      frame.cps)
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
-  const int tileRequiredWidth = (int)mRaw->getCpp() * imgFrame.dim.x;
+  const int tileRequiredWidth =
+      static_cast<int>(mRaw->getCpp()) * imgFrame.dim.x;
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
           implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.cps));
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
-      (int64_t)frame.cps * frame.dim.x <
-          (int64_t)mRaw->getCpp() * imgFrame.dim.x) {
+      static_cast<int64_t>(frame.cps) * frame.dim.x <
+          static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
              frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
              imgFrame.dim.y);
@@ -174,8 +177,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   // the raw image buffer. The excessive content has to be ignored.
 
   invariant(frame.dim.y >= imgFrame.dim.y);
-  invariant((int64_t)frame.cps * frame.dim.x >=
-            (int64_t)mRaw->getCpp() * imgFrame.dim.x);
+  invariant(static_cast<int64_t>(frame.cps) * frame.dim.x >=
+            static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x);
 
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
@@ -194,9 +197,9 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // For x, we first process all full pixel blocks within the image buffer ...
     for (; col < N_COMP * fullBlocks; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i) {
-        pred[i] = uint16_t(
-            pred[i] +
-            ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream));
+        pred[i] =
+            uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
+                                   .decodeDifference(bitStream));
         img(row, col + i) = pred[i];
       }
     }
@@ -212,15 +215,16 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       invariant(trailingPixels < N_COMP);
       int c = 0;
       for (; c < trailingPixels; ++c) {
-        pred[c] = uint16_t(
-            pred[c] +
-            ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream));
+        pred[c] =
+            uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                                   .decodeDifference(bitStream));
         img(row, col + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
       for (; c < N_COMP; ++c) {
-        ((const PrefixCodeDecoder<>&)(ht[c])).decodeDifference(bitStream);
+        (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+            .decodeDifference(bitStream);
       }
       col += N_COMP; // We did just process one more block.
     }
@@ -228,7 +232,8 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     // ... and discard the rest.
     for (; col < N_COMP * frame.dim.x; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i)
-        ((const PrefixCodeDecoder<>&)(ht[i])).decodeDifference(bitStream);
+        (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
+            .decodeDifference(bitStream);
     }
   }
 }

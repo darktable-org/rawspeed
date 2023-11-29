@@ -82,11 +82,13 @@ public:
 #ifndef DEBUG
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
   rawspeed::ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,          \
-                                  __PRETTY_FUNCTION__, ##__VA_ARGS__)
+                                  __PRETTY_FUNCTION__ __VA_OPT__(, )           \
+                                      __VA_ARGS__)
 #else
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
   rawspeed::ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,     \
-                                  __PRETTY_FUNCTION__, ##__VA_ARGS__)
+                                  __PRETTY_FUNCTION__ __VA_OPT__(, )           \
+                                      __VA_ARGS__)
 #endif
 
 #define ThrowRSE(...)                                                          \

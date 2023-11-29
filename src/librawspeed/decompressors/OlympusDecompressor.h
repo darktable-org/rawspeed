@@ -39,7 +39,7 @@ class OlympusDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
 
   // A table to quickly look up "high" value
-  const SimpleLUT<char, 12> bittable{
+  const SimpleLUT<int8_t, 12> bittable{
       [](size_t i, [[maybe_unused]] unsigned tableSize) {
         int high;
         for (high = 0; high < 12; high++)

@@ -30,6 +30,8 @@
 #include <exception>
 #include <memory>
 #include <stdexcept>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using rawspeed::CameraMetadataException;
 using rawspeed::CiffParserException;
@@ -89,7 +91,7 @@ template <> void* MetaHelper<FiffParserException>(const char* str) {
   ThrowFPE(FMT, str);
 }
 
-template <class T> class ExceptionsTest final : public testing::Test {};
+template <class T> class ExceptionsTest : public testing::Test {};
 
 using Classes =
     testing::Types<RawspeedException, CameraMetadataException,

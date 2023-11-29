@@ -30,7 +30,8 @@ static inline void BM_MD5(benchmark::State& state) {
 
   for (auto _ : state) {
     rawspeed::md5::md5_state hash;
-    rawspeed::md5::md5_hash((uint8_t*)buf.data(), buf.size(), &hash);
+    rawspeed::md5::md5_hash(reinterpret_cast<uint8_t*>(buf.data()), buf.size(),
+                            &hash);
   }
 
   state.SetComplexityN(state.range(0));
