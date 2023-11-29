@@ -44,7 +44,6 @@ private:
 
   std::vector<std::unique_ptr<DngOpcode>> opcodes;
 
-protected:
   class DeltaRowOrColBase;
   class DummyROIOpcode;
   class FixBadPixelsConstant;
