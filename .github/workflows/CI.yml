@@ -21,7 +21,7 @@ jobs:
         os: [ linux ]
         compiler:
           - { distro: "debian:trixie-slim", family: GNU,  version: 13, CC: gcc-13,   CXX: g++-13 }
-          - { distro: "debian:unstable-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+          - { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
         flavor: [ RelWithDebInfo, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -62,13 +62,13 @@ jobs:
       matrix:
         include:
           - os: linux
-            compiler: { distro: "debian:unstable-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17, CLANG_TIDY: clang-tidy-17 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17, CLANG_TIDY: clang-tidy-17 }
             flavor: ClangTidy
           - os: linux
-            compiler: { distro: "debian:unstable-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
             flavor: ClangStaticAnalysis
           - os: linux
-            compiler: { distro: "debian:unstable-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
             flavor: CodeQLAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -107,7 +107,7 @@ jobs:
       matrix:
         include:
           - os: linux
-            compiler: { distro: "debian:unstable-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
             flavor: SonarCloudStaticAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:
