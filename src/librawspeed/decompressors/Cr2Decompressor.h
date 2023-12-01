@@ -46,7 +46,7 @@ struct Cr2SliceIterator;
 struct Cr2OutputTileIterator;
 class Cr2VerticalOutputStripIterator;
 
-class Cr2SliceWidths {
+class Cr2SliceWidths final {
   int numSlices = 0;
   int sliceWidth = 0;
   int lastSliceWidth = 0;
@@ -124,7 +124,7 @@ inline Cr2SliceWidthIterator Cr2SliceWidths::end() const {
 
 template <typename PrefixCodeDecoder> class Cr2Decompressor final {
 public:
-  struct PerComponentRecipe {
+  struct PerComponentRecipe final {
     const PrefixCodeDecoder& ht;
     const uint16_t initPred;
   };

@@ -31,6 +31,11 @@
 
 namespace rawspeed {
 
+void SimpleTiffDecoder::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
 void SimpleTiffDecoder::prepareForRawDecoding() {
   raw = getIFDWithLargestImage();
   width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();

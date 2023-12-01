@@ -28,6 +28,8 @@
 namespace rawspeed {
 
 class CameraMetadataException final : public RawspeedException {
+  void anchor() const override;
+
 public:
   using RawspeedException::RawspeedException;
 };

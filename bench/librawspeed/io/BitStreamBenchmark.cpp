@@ -58,7 +58,7 @@ template <typename Pump>
 inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
                          unsigned int Step) {
   assert(state.range(0) > 0);
-  assert((size_t)state.range(0) <=
+  assert(static_cast<size_t>(state.range(0)) <=
          std::numeric_limits<rawspeed::Buffer::size_type>::max());
 
   assert(fillSize > 0);
@@ -77,7 +77,7 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
       storage.data(),
       rawspeed::implicit_cast<rawspeed::Buffer::size_type>(state.range(0)));
   assert(b.getSize() > 0);
-  assert(b.getSize() == (size_t)state.range(0));
+  assert(b.getSize() == static_cast<size_t>(state.range(0)));
 
   const rawspeed::DataBuffer db(b, Endianness::unknown);
   const rawspeed::ByteStream bs(db);

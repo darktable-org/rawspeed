@@ -33,7 +33,7 @@ using rawspeed::Endianness;
 
 namespace rawspeed_test {
 
-template <typename T, typename Tag> struct BitPumpPatternTest {};
+template <typename T, typename Tag> struct BitPumpPatternTest final {};
 
 struct TestGetBitsTag;
 
@@ -173,7 +173,7 @@ REGISTER_TYPED_TEST_SUITE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
                             PeekNoFillTest, IncreasingPeekLengthTest,
                             IncreasingPeekLengthNoFillTest);
 
-template <typename Pump, typename PatternTag> struct Pattern {};
+template <typename Pump, typename PatternTag> struct Pattern final {};
 
 struct ZerosTag;
 
@@ -247,7 +247,7 @@ auto GenOnesBE = [](int zerosToOutput,
   return v;
 };
 
-template <typename Pump, typename Pattern> struct PumpAndPattern {
+template <typename Pump, typename Pattern> struct PumpAndPattern final {
   using PumpT = Pump;
   using PatternT = Pattern;
 };

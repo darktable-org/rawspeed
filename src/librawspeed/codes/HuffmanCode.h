@@ -150,7 +150,7 @@ public:
 
   void setCodeValues(Array1DRef<const typename Traits::CodeValueTy> data) {
     invariant(data.size() <= Traits::MaxNumCodeValues);
-    invariant((unsigned)data.size() == maxCodesCount());
+    invariant(static_cast<unsigned>(data.size()) == maxCodesCount());
 
     this->codeValues.clear();
     this->codeValues.reserve(maxCodesCount());

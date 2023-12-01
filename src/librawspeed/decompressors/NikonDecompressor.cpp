@@ -75,11 +75,11 @@ const std::array<uint32_t, 32> bitMask = {
      0x000000ff, 0x0000007f, 0x0000003f, 0x0000001f, 0x0000000f, 0x00000007,
      0x00000003, 0x00000001}};
 
-class NikonLASDecompressor {
+class NikonLASDecompressor final {
   bool mUseBigtable = true;
   bool mDNGCompatible = false;
 
-  struct PrefixCodeDecoder {
+  struct PrefixCodeDecoder final {
     /*
      * These two fields directly represent the contents of a JPEG DHT
      * marker
@@ -108,7 +108,7 @@ class NikonLASDecompressor {
     int l;
     int lastp;
     int si;
-    std::array<char, 257> huffsize;
+    std::array<int8_t, 257> huffsize;
     std::array<uint16_t, 257> huffcode;
     uint16_t code;
     int size;
@@ -123,7 +123,7 @@ class NikonLASDecompressor {
     p = 0;
     for (l = 1; l <= 16; l++) {
       for (i = 1; i <= static_cast<int>(dctbl1.bits[l]); i++) {
-        huffsize[p] = static_cast<char>(l);
+        huffsize[p] = static_cast<int8_t>(l);
         ++p;
         if (p > 256)
           ThrowRDE("LJpegDecoder::createPrefixCodeDecoder: Code length too "

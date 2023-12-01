@@ -32,6 +32,7 @@ template <typename Ttgt, typename Tsrc>
 constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
   return value;
 #pragma GCC diagnostic pop
 }

@@ -35,7 +35,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 namespace {
 
 class DummyLJpegDecoder final : public rawspeed::AbstractLJpegDecoder {
-  void decodeScan() override {}
+  void decodeScan() final {}
 
 public:
   DummyLJpegDecoder(const rawspeed::ByteStream& bs,

@@ -42,6 +42,11 @@
 
 namespace rawspeed {
 
+void AbstractLJpegDecoder::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
 AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, RawImage img)
     : input(bs), mRaw(std::move(img)) {
   input.setByteOrder(Endianness::big);

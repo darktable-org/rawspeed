@@ -58,6 +58,8 @@ class TiffIFD {
 
   std::map<TiffTag, TiffEntryOwner> entries;
 
+  virtual void anchor() const;
+
   friend class TiffEntry;
   friend class FiffParser;
   friend class TiffParser;
@@ -128,12 +130,14 @@ public:
   //  }
 };
 
-struct TiffID {
+struct TiffID final {
   std::string make;
   std::string model;
 };
 
 class TiffRootIFD final : public TiffIFD {
+  void anchor() const override;
+
 public:
   const DataBuffer rootBuffer;
 

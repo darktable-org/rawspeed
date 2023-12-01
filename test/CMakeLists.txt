@@ -6,6 +6,7 @@ set (DISABLED_WARNING_FLAGS
   "used-but-marked-unused"
   "global-constructors"
   "exit-time-destructors"
+  "weak-vtables"
 )
 
 foreach(warning ${DISABLED_WARNING_FLAGS})

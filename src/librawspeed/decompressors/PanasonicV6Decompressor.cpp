@@ -68,7 +68,7 @@ constexpr PanasonicV6Decompressor::BlockDsc
         PanasonicV6Decompressor::BlockDsc(/*bps=*/14);
 
 namespace {
-template <int B> struct pana_cs6_page_decoder {
+template <int B> struct pana_cs6_page_decoder final {
   static_assert((B == 14 || B == 12), "only 12/14 bits are valid!");
   static constexpr int BufferSize = B == 14 ? 14 : 18;
   std::array<uint16_t, BufferSize> pixelbuffer;

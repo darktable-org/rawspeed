@@ -240,7 +240,7 @@ Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() const {
 // NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
 namespace {
 
-struct Dsc {
+struct Dsc final {
   const int N_COMP;
   const int X_S_F;
   const int Y_S_F;
@@ -444,7 +444,8 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
           for (int p = 0; p < dsc.groupSize; ++p) {
             int c = p < dsc.pixelsPerGroup ? 0 : p - dsc.pixelsPerGroup + 1;
             out(row, dsc.groupSize * col + p) = pred[c] +=
-                ((const PrefixCodeDecoder&)(ht[c])).decodeDifference(bs);
+                (static_cast<const PrefixCodeDecoder&>(ht[c]))
+                    .decodeDifference(bs);
           }
         }
       }

@@ -38,6 +38,8 @@
 
 using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
+  virtual void anchor() const;
+
 public:
   MD5Test() = default;
   void SetUp() final { std::tie(answer, message) = GetParam(); }
@@ -46,10 +48,15 @@ public:
   const uint8_t* message = nullptr;
 };
 
+void MD5Test::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
 #define TESTCASE(a, b, c, d, msg)                                              \
   (MD5Testcase) {                                                              \
     {UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)},                      \
-        (const uint8_t*)(msg)                                                  \
+        reinterpret_cast<const uint8_t*>(msg)                                  \
   }
 
 // Note: The MD5 standard specifies that uint32_t are serialized to/from bytes
@@ -72,7 +79,8 @@ INSTANTIATE_TEST_SUITE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
 TEST_P(MD5Test, CheckTestCaseSet) {
   ASSERT_NO_THROW({
     rawspeed::md5::md5_state hash;
-    rawspeed::md5::md5_hash(message, strlen((const char*)message), &hash);
+    rawspeed::md5::md5_hash(
+        message, strlen(reinterpret_cast<const char*>(message)), &hash);
 
     ASSERT_EQ(hash, answer);
   });

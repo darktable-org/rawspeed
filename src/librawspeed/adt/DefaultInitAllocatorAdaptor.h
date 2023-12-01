@@ -35,7 +35,7 @@ public:
 
   static_assert(std::is_same_v<T, value_type>);
 
-  template <class To> struct rebind {
+  template <class To> struct rebind final {
     using other = DefaultInitAllocatorAdaptor<
         To, typename allocator_traits::template rebind_alloc<To>>;
   };

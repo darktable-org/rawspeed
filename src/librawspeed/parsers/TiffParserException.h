@@ -29,6 +29,8 @@
 namespace rawspeed {
 
 class TiffParserException final : public RawParserException {
+  void anchor() const override;
+
 public:
   using RawParserException::RawParserException;
 };

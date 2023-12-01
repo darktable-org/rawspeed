@@ -34,6 +34,8 @@ class Buffer;
 class CameraMetaData;
 
 class AbstractTiffDecoder : public RawDecoder {
+  virtual void anchor() const;
+
 protected:
   TiffRootIFDOwner mRootIFD;
 

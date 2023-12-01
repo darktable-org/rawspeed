@@ -29,7 +29,6 @@ on:
       ECO:
         type: string
     secrets:
-      CODECOV_TOKEN:
       SONAR_TOKEN:
       SONAR_PROJECT_KEY:
       SONAR_ORGANIZATION:
@@ -76,11 +75,7 @@ jobs:
           APT::Get::Fix-Missing "true";
           EOT
           rm -rf /etc/apt/sources.list*
-          if [ "${{ inputs.distro }}" = "debian:unstable-slim" ]; then
-          tee /etc/apt/sources.list > /dev/null <<EOT
-          deb http://debian-archive.trafficmanager.net/debian unstable main
-          EOT
-          elif [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
+          if [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
           tee /etc/apt/sources.list > /dev/null <<EOT
           deb http://debian-archive.trafficmanager.net/debian trixie main
           deb http://debian-archive.trafficmanager.net/debian trixie-updates main
@@ -137,7 +132,7 @@ jobs:
                                       libomp-${{ inputs.compiler-version }}-dev
           fi
           if [ "$FLAVOR" = "Coverage" ]; then
-            eatmydata apt-get install rsync
+            eatmydata apt-get install rsync zstd
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
             eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
@@ -323,23 +318,6 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
-      - name: Upload coverage to Codecov (unit tests)
-        timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: linux,unittests
-          name: ${{ env.JOB_NAME }}.Unittests
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/unittests
-          fail_ci_if_error: true
       - name: Test (benchmarks)
         timeout-minutes: 1
         env:
@@ -364,23 +342,6 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
-      - name: Upload coverage to Codecov (benchmarks)
-        timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: linux,benchmarks
-          name: ${{ env.JOB_NAME }}.Benchmarks
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/benchmarks
-          fail_ci_if_error: true
       - name: Test (integration)
         timeout-minutes: ${{ inputs.flavor != 'Coverage' && 1 || 31 }}
         if: inputs.flavor == 'Coverage'
@@ -407,23 +368,14 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-rsa" "${COVERAGE_REPORT_PREFIX}/integration"
-      - name: Upload coverage to Codecov (integration)
+      - if: inputs.flavor == 'Coverage'
         timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        uses: codecov/codecov-action@v3
-        env:
-          OS: linux
-          ARCH: x86_64
-          CXX: ${{ inputs.compiler-family }}
-          JOB_NAME: ${{ inputs.os }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+        name: Cache code coverage (linux reports)
+        uses: actions/cache/save@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,ARCH,CXX
-          flags: linux,integration,rpu_u
-          name: ${{ env.JOB_NAME }}.Integration
-          root_dir: ${{ github.workspace }}/rawspeed
-          directory: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux/integration
-          fail_ci_if_error: true
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
+          key: coverage-${{ github.sha }}-linux
+          enableCrossOsArchive: true
       - name: Install
         timeout-minutes: 1
         env:

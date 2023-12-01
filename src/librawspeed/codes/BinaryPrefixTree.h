@@ -59,7 +59,7 @@ public:
   };
 
   struct Branch final : public Node {
-    explicit operator typename Node::Type() const override {
+    explicit operator typename Node::Type() const final {
       return Node::Type::Branch;
     }
 
@@ -67,7 +67,7 @@ public:
   };
 
   struct Leaf final : public Node {
-    explicit operator typename Node::Type() const override {
+    explicit operator typename Node::Type() const final {
       return Node::Type::Leaf;
     }
 

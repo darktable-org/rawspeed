@@ -789,7 +789,8 @@
 			<Color x="0" y="1">RED</Color>
 		</CFA>
 		<Crop x="148" y="54" width="0" height="0"/>
-		<Sensor black="2048" white="15831"/>
+		<Sensor black="2054" white="15000"/>
+		<Sensor black="2048" white="13926" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -10521,7 +10522,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-60" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10533,7 +10533,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="4:3">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-60" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10545,7 +10544,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="3:2">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10557,7 +10555,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="16:9">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-160" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10569,7 +10566,6 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LX7" mode="1:1">
 		<ID make="Panasonic" model="DMC-LX7">Panasonic DMC-LX7</ID>
-		<Crop x="0" y="0" width="-48" height="0"/>
 		<Sensor black="150" white="3971"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -13954,6 +13950,24 @@
 				<ColorMatrixRow plane="0">7460 -2365 -588</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-5687 13442 2474</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-624 1156 6584</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="SONY" model="ILCE-7CR">
+		<ID make="Sony" model="ILCE-7CR">Sony ILCE-7CR</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8200 -2976 -719</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4296 12053 2532</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-429 1282 5774</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -17721,6 +17735,13 @@
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR IIIx" mode="dng">
 		<ID make="Ricoh" model="GR IIIx">Ricoh GR IIIx</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon IXY 220F" mode="dng">
+		<ID make="Canon" model="IXY 220F">Canon IXY 220F</ID>
+		<Aliases>
+			<Alias id="PowerShot ELPH 110 HS">Canon PowerShot ELPH 110 HS</Alias>
+			<Alias id="IXUS 125 HS">Canon IXUS 125 HS</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot A720 IS" mode="dng">
 		<ID make="Canon" model="PowerShot A720 IS">Canon PowerShot A720 IS</ID>
 		<ColorMatrices>
@@ -18001,6 +18022,26 @@
 			<Hint name="full_height" value="1036"/>
 			<Hint name="offset" value="1078"/>
 		</Hints>
+	</Camera>
+	<Camera make="Canon" model="IXY 220F" mode="chdk">
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">RG</ColorRow>
+			<ColorRow y="1">GB</ColorRow>
+		</CFA2>
+		<Crop x="100" y="22" width="-8" height="-1"/>
+		<Sensor black="127" white="4095"/>
+		<Hints>
+			<Hint name="filesize" value="25230816"/>
+			<Hint name="full_width" value="4784"/>
+			<Hint name="full_height" value="3516"/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">5307 -1727 -741</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-846 4464 142</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-22 786 1405</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="PowerShot SD300" mode="chdk" supported="no-samples">
 		<CFA2 width="2" height="2">

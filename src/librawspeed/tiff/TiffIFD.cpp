@@ -44,6 +44,11 @@ using std::vector;
 
 namespace rawspeed {
 
+void TiffIFD::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
 void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
   assert(ifds);
 
@@ -230,7 +235,7 @@ std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
 const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
   auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
-    ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1,
+    ThrowTPE("failed to find %u ifd with tag 0x%04x", index + 1,
              static_cast<unsigned>(tag));
   return ifds[index];
 }
@@ -307,6 +312,11 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   if (i == entries.end())
     ThrowTPE("Entry 0x%x not found.", static_cast<unsigned>(tag));
   return i->second.get();
+}
+
+void TiffRootIFD::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
 }
 
 TiffID TiffRootIFD::getID() const {

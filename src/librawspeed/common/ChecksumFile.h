@@ -25,7 +25,7 @@
 
 namespace rawspeed {
 
-struct ChecksumFileEntry {
+struct ChecksumFileEntry final {
   std::string FullFileName;
   std::string RelFileName;
 };

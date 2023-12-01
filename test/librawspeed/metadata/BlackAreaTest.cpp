@@ -34,7 +34,7 @@ class BlackAreaTest
     : public ::testing::TestWithParam<std::tuple<int, int, bool>> {
 protected:
   BlackAreaTest() = default;
-  virtual void SetUp() override {
+  virtual void SetUp() final {
     offset = std::get<0>(GetParam());
     size = std::get<1>(GetParam());
     isVertical = std::get<2>(GetParam());

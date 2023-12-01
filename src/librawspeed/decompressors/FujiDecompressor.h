@@ -39,7 +39,7 @@ public:
 
   void decompress() const;
 
-  struct FujiHeader {
+  struct FujiHeader final {
     FujiHeader() = default;
 
     explicit FujiHeader(ByteStream& input_);

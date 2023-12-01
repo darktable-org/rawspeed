@@ -63,6 +63,8 @@ class TiffEntry {
   TiffIFD* parent;
   ByteStream data;
 
+  virtual void anchor() const;
+
   friend class TiffIFD;
 
   template <typename T, T (TiffEntry::*getter)(uint32_t index) const>
@@ -134,8 +136,10 @@ protected:
   static const std::array<uint32_t, 14> datashifts;
 };
 
-class TiffEntryWithData : public TiffEntry {
+class TiffEntryWithData final : public TiffEntry {
   const std::vector<uint8_t> data;
+
+  void anchor() const override;
 
 public:
   TiffEntryWithData(TiffIFD* parent, TiffTag tag, TiffDataType type,

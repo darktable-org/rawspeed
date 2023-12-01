@@ -26,7 +26,7 @@
 
 namespace rawspeed {
 
-class TableLookUp {
+class TableLookUp final {
 public:
   TableLookUp(int ntables, bool dither);
 

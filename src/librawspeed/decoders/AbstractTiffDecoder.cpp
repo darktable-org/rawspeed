@@ -28,6 +28,11 @@
 
 namespace rawspeed {
 
+void AbstractTiffDecoder::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
 const TiffIFD*
 AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const {
   std::vector<const TiffIFD*> ifds = mRootIFD->getIFDsWithTag(filter);

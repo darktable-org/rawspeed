@@ -40,7 +40,7 @@ template <class T, int alignment> class AlignedAllocator {
 public:
   using value_type = T;
 
-  template <class U> struct rebind {
+  template <class U> struct rebind final {
     using other = AlignedAllocator<U, alignment>;
   };
 

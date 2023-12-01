@@ -128,12 +128,12 @@ class VC5Decompressor final : public AbstractDecompressor {
     const uint16_t cps = 1;
   } mVC5;
 
-  struct BandData {
+  struct BandData final {
     std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> storage;
     Array2DRef<int16_t> description;
   };
 
-  class Wavelet {
+  class Wavelet final {
   public:
     int width;
     int height;
@@ -142,6 +142,7 @@ class VC5Decompressor final : public AbstractDecompressor {
     struct AbstractBand {
       Wavelet& wavelet;
       std::optional<BandData> data;
+      virtual void anchor() const;
       explicit AbstractBand(Wavelet& wavelet_) : wavelet(wavelet_) {}
       virtual ~AbstractBand() = default;
       virtual void createDecodingTasks(ErrorLog& errLog,
@@ -207,11 +208,10 @@ class VC5Decompressor final : public AbstractDecompressor {
                                        bool clampUint /*= false*/,
                                        bool finalWavelet /*= false*/) noexcept;
 
-  protected:
     uint32_t mDecodedBandMask = 0;
   };
 
-  struct Channel {
+  struct Channel final {
     std::array<Wavelet, numWaveletLevels + 1> wavelets;
   };
 

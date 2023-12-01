@@ -64,7 +64,7 @@ template <> constexpr iPoint2D MCU<BayerTag> = {2, 2};
 
 template <> constexpr iPoint2D MCU<XTransTag> = {6, 6};
 
-struct int_pair {
+struct int_pair final {
   int value1;
   int value2;
 };
@@ -91,7 +91,7 @@ enum xt_lines {
   ltotal
 };
 
-struct fuji_compressed_params {
+struct fuji_compressed_params final {
   explicit fuji_compressed_params(const FujiDecompressor::FujiHeader& h);
 
   [[nodiscard]] int8_t qTableLookup(int cur_val) const;
@@ -106,7 +106,7 @@ struct fuji_compressed_params {
   uint16_t line_width;
 };
 
-struct FujiStrip {
+struct FujiStrip final {
   // part of which 'image' this block is
   const FujiDecompressor::FujiHeader& h;
 
@@ -238,7 +238,7 @@ int8_t fuji_compressed_params::qTableLookup(int cur_val) const {
   return q_table[cur_val];
 }
 
-struct fuji_compressed_block {
+struct fuji_compressed_block final {
   const Array2DRef<uint16_t> img;
   const FujiDecompressor::FujiHeader& header;
   const fuji_compressed_params& common_info;
@@ -434,8 +434,8 @@ int RAWSPEED_READNONE fuji_compressed_block::bitDiff(int value1, int value2) {
   invariant(value1 >= 0);
   invariant(value2 > 0);
 
-  int lz1 = countl_zero((unsigned)value1);
-  int lz2 = countl_zero((unsigned)value2);
+  int lz1 = countl_zero(static_cast<unsigned>(value1));
+  int lz2 = countl_zero(static_cast<unsigned>(value2));
   int decBits = std::max(lz2 - lz1, 0);
   if ((value2 << decBits) < value1)
     ++decBits;
@@ -614,7 +614,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
                                              int row) {
     int grad = row % 3;
 
-    struct ColorPos {
+    struct ColorPos final {
       int even = 0;
       int odd = 0;
     };
@@ -735,7 +735,7 @@ void fuji_compressed_block::fuji_bayer_decode_block(int cur_line) {
 void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
   const unsigned line_size = sizeof(uint16_t) * (common_info.line_width + 2);
 
-  struct i_pair {
+  struct i_pair final {
     int a;
     int b;
   };
@@ -779,7 +779,7 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
   }
 }
 
-class FujiDecompressorImpl {
+class FujiDecompressorImpl final {
   RawImage mRaw;
   const Array1DRef<const ByteStream> strips;
 
