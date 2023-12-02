@@ -261,9 +261,6 @@
 			<Vertical x="0" width="72"/>
 			<Horizontal y="2" height="8"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="50"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6599 -537 -891</ColorMatrixRow>
@@ -314,9 +311,6 @@
 			<Alias id="EOS 350D">Canon EOS 350D</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D Digital</Alias>
 		</Aliases>
-		<Hints>
-			<Hint name="wb_offset" value="50"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6018 -617 -965</ColorMatrixRow>
@@ -1643,9 +1637,6 @@
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6362 -823 -847</ColorMatrixRow>
@@ -1671,9 +1662,6 @@
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -1699,9 +1687,6 @@
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -1724,9 +1709,6 @@
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="40"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6400 -480 -888</ColorMatrixRow>
@@ -1752,9 +1734,6 @@
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -1839,9 +1818,6 @@
 			<Vertical x="0" width="72"/>
 			<Horizontal y="2" height="8"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="68"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6264 -582 -724</ColorMatrixRow>
@@ -1978,9 +1954,6 @@
 			<Vertical x="0" width="96"/>
 			<Horizontal y="2" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="68"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6517 -602 -867</ColorMatrixRow>
@@ -2271,9 +2244,6 @@
 			<Vertical x="0" width="90"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9701 -3857 -921</ColorMatrixRow>
@@ -2314,9 +2284,6 @@
 		</CFA>
 		<Crop x="96" y="17" width="0" height="0"/>
 		<Sensor black="2047" white="16000"/>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2361,9 +2328,6 @@
 		</CFA>
 		<Crop x="96" y="18" width="0" height="0"/>
 		<Sensor black="511" white="4000"/>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2390,9 +2354,6 @@
 			<Vertical x="0" width="76"/>
 			<Horizontal y="0" height="14"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2415,9 +2376,6 @@
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7378 -1255 -1043</ColorMatrixRow>
@@ -2440,9 +2398,6 @@
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7378 -1255 -1043</ColorMatrixRow>
@@ -2464,9 +2419,6 @@
 		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
 		<Sensor black="512" white="13200" iso_list="160"/>
 		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -2489,9 +2441,6 @@
 			<Vertical x="0" width="50"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13244 -5501 -1248</ColorMatrixRow>
@@ -2516,9 +2465,6 @@
 			<Horizontal y="0" height="14"/>
 			<Horizontal y="2778" height="6"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12177 -4817 -1069</ColorMatrixRow>
@@ -2541,9 +2487,6 @@
 			<Vertical x="0" width="10"/>
 			<Horizontal y="0" height="8"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">11093 -3906 -1028</ColorMatrixRow>
@@ -2588,9 +2531,6 @@
 			<Vertical x="0" width="70"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2613,9 +2553,6 @@
 			<Vertical x="0" width="76"/>
 			<Horizontal y="0" height="14"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10056 -4131 -944</ColorMatrixRow>
@@ -2639,9 +2576,6 @@
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7474 -2301 -567</ColorMatrixRow>
@@ -2664,9 +2598,6 @@
 			<Vertical x="0" width="80"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8020 -2687 -682</ColorMatrixRow>
@@ -2689,9 +2620,6 @@
 			<Vertical x="0" width="188"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6578 -259 -502</ColorMatrixRow>
@@ -2858,9 +2786,6 @@
 			<Vertical x="0" width="6"/>
 			<Horizontal y="0" height="14"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12374 -5016 -1049</ColorMatrixRow>
@@ -2885,9 +2810,6 @@
 			<Horizontal y="0" height="10"/>
 			<Horizontal y="2774" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13440 -5896 -1279</ColorMatrixRow>
@@ -2911,9 +2833,6 @@
 			<Horizontal y="0" height="10"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7968 -2565 -636</ColorMatrixRow>
@@ -2937,9 +2856,6 @@
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8039 -2643 -654</ColorMatrixRow>
@@ -2962,9 +2878,6 @@
 			<Vertical x="0" width="74"/>
 			<Horizontal y="0" height="12"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6961 -1685 -695</ColorMatrixRow>
@@ -2987,9 +2900,6 @@
 			<Vertical x="6" width="70"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12432 -4753 -1247</ColorMatrixRow>
@@ -3012,9 +2922,6 @@
 			<Vertical x="0" width="70"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13161 -5451 -1344</ColorMatrixRow>

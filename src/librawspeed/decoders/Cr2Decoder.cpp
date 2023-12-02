@@ -43,6 +43,7 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -219,6 +220,111 @@ void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, id, "");
 }
 
+namespace {
+
+enum class ColorDataFormat {
+  ColorData1,
+  ColorData2,
+  ColorData3,
+  ColorData4,
+  ColorData5,
+  ColorData6,
+  ColorData7,
+  ColorData8,
+  ColorData9,
+  ColorData10,
+};
+
+[[nodiscard]] std::optional<ColorDataFormat>
+deduceColorDataFormat(const TiffEntry* ccd) {
+  // The original ColorData, detect by it's fixed size.
+  if (ccd->count == 582)
+    return ColorDataFormat::ColorData1;
+  // Second incarnation of ColorData, still size-only detection.
+  if (ccd->count == 653)
+    return ColorDataFormat::ColorData2;
+  // From now onwards, Canon has finally added a `version` field, use it.
+  switch (int colorDataVersion = static_cast<int16_t>(ccd->getU16(0));
+          colorDataVersion) {
+  case 1:
+    return ColorDataFormat::ColorData3;
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case 7:
+  case 9:
+    return ColorDataFormat::ColorData4;
+  case -4:
+  case -3:
+    return ColorDataFormat::ColorData5;
+  case 10:
+    return ColorDataFormat::ColorData6;
+  case 11:
+    return ColorDataFormat::ColorData7;
+  case 12:
+  case 13:
+  case 14:
+  case 15:
+    return ColorDataFormat::ColorData8;
+  case 16:
+  case 17:
+  case 18:
+  case 19:
+    return ColorDataFormat::ColorData9;
+  case 32:
+  case 33:
+    return ColorDataFormat::ColorData10;
+  default:
+    break;
+  }
+  return std::nullopt;
+}
+
+[[nodiscard]] int getWhiteBalanceOffsetInColorData(ColorDataFormat f) {
+  switch (f) {
+    using enum ColorDataFormat;
+  case ColorData1:
+    return 50;
+  case ColorData2:
+    return 68;
+  case ColorData3:
+  case ColorData4:
+  case ColorData6:
+  case ColorData7:
+  case ColorData8:
+    return 126;
+  case ColorData5:
+  case ColorData9:
+    return 142;
+  case ColorData10:
+    return 170;
+  }
+  __builtin_unreachable();
+}
+
+} // namespace
+
+bool Cr2Decoder::decodeCanonColorData() const {
+  const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
+  if (!wb)
+    return false;
+
+  auto f = deduceColorDataFormat(wb);
+  if (!f)
+    return false;
+
+  int offset = getWhiteBalanceOffsetInColorData(*f);
+
+  offset /= 2;
+  mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
+  mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
+  mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
+
+  return true;
+}
+
 void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
@@ -244,18 +350,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Fetch the white balance
   try {
-    if (mRootIFD->hasEntryRecursive(TiffTag::CANONCOLORDATA)) {
-      const TiffEntry* wb =
-          mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
-      // this entry is a big table, and different cameras store used WB in
-      // different parts, so find the offset, default is the most common one
-      int offset = hints.get("wb_offset", 126);
-
-      offset /= 2;
-      mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
-      mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
-      mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
-    } else {
+    if (!decodeCanonColorData()) {
       if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
           mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
         const TiffEntry* shot_info =
