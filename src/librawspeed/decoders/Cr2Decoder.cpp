@@ -46,6 +46,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace rawspeed {
@@ -234,19 +235,19 @@ enum class ColorDataFormat {
   ColorData8,
 };
 
-[[nodiscard]] std::optional<ColorDataFormat>
+[[nodiscard]] std::optional<std::pair<ColorDataFormat, std::optional<int>>>
 deduceColorDataFormat(const TiffEntry* ccd) {
   // The original ColorData, detect by it's fixed size.
   if (ccd->count == 582)
-    return ColorDataFormat::ColorData1;
+    return {{ColorDataFormat::ColorData1, {}}};
   // Second incarnation of ColorData, still size-only detection.
   if (ccd->count == 653)
-    return ColorDataFormat::ColorData2;
+    return {{ColorDataFormat::ColorData2, {}}};
   // From now onwards, Canon has finally added a `version` field, use it.
   switch (int colorDataVersion = static_cast<int16_t>(ccd->getU16(0));
           colorDataVersion) {
   case 1:
-    return ColorDataFormat::ColorData3;
+    return {{ColorDataFormat::ColorData3, colorDataVersion}};
   case 2:
   case 3:
   case 4:
@@ -254,19 +255,19 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   case 6:
   case 7:
   case 9:
-    return ColorDataFormat::ColorData4;
+    return {{ColorDataFormat::ColorData4, colorDataVersion}};
   case -4:
   case -3:
-    return ColorDataFormat::ColorData5;
+    return {{ColorDataFormat::ColorData5, colorDataVersion}};
   case 10:
-    return ColorDataFormat::ColorData6;
+    return {{ColorDataFormat::ColorData6, colorDataVersion}};
   case 11:
-    return ColorDataFormat::ColorData7;
+    return {{ColorDataFormat::ColorData7, colorDataVersion}};
   case 12:
   case 13:
   case 14:
   case 15:
-    return ColorDataFormat::ColorData8;
+    return {{ColorDataFormat::ColorData8, colorDataVersion}};
   default:
     break;
   }
@@ -299,11 +300,13 @@ bool Cr2Decoder::decodeCanonColorData() const {
   if (!wb)
     return false;
 
-  auto f = deduceColorDataFormat(wb);
-  if (!f)
+  auto dsc = deduceColorDataFormat(wb);
+  if (!dsc)
     return false;
 
-  int offset = getWhiteBalanceOffsetInColorData(*f);
+  auto [f, ver] = *dsc;
+
+  int offset = getWhiteBalanceOffsetInColorData(f);
 
   offset /= 2;
   mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
