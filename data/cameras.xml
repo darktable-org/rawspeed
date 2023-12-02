@@ -380,7 +380,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="22" y="18" width="4290" height="2856"/>
-		<Sensor black="1020" white="14500"/>
 		<Aliases>
 			<Alias id="Digital Rebel XSi">Canon EOS DIGITAL REBEL XSi</Alias>
 			<Alias id="Kiss Digital X2">Canon EOS Kiss Digital X2</Alias>
@@ -1395,8 +1394,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="42" y="18" width="3906" height="2602"/>
-		<Sensor black="255" white="3650" iso_min="0" iso_max="199"/>
-		<Sensor black="255" white="4036"/>
 		<BlackAreas>
 			<Vertical x="0" width="41"/>
 			<Horizontal y="2" height="14"/>

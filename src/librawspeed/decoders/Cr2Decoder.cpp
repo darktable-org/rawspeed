@@ -309,6 +309,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     case 3:
       return std::nullopt; // Still no `SpecularWhiteLevel`.
     case 4:
+    case 5:
       return {{692, 697}};
     default:
       return std::nullopt; // FIXME
