@@ -219,6 +219,23 @@ void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, id, "");
 }
 
+bool Cr2Decoder::decodeCanonColorData() const {
+  const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
+  if (!wb)
+    return false;
+
+  // this entry is a big table, and different cameras store used WB in
+  // different parts, so find the offset, default is the most common one
+  int offset = hints.get("wb_offset", 126);
+
+  offset /= 2;
+  mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
+  mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
+  mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
+
+  return true;
+}
+
 void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
@@ -244,18 +261,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Fetch the white balance
   try {
-    if (mRootIFD->hasEntryRecursive(TiffTag::CANONCOLORDATA)) {
-      const TiffEntry* wb =
-          mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
-      // this entry is a big table, and different cameras store used WB in
-      // different parts, so find the offset, default is the most common one
-      int offset = hints.get("wb_offset", 126);
-
-      offset /= 2;
-      mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
-      mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
-      mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
-    } else {
+    if (!decodeCanonColorData()) {
       if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
           mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
         const TiffEntry* shot_info =
