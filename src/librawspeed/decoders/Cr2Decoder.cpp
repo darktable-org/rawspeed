@@ -225,6 +225,7 @@ namespace {
 enum class ColorDataFormat {
   ColorData1,
   ColorData2,
+  ColorData3,
 };
 
 [[nodiscard]] std::optional<ColorDataFormat>
@@ -235,6 +236,14 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   // Second incarnation of ColorData, still size-only detection.
   if (ccd->count == 653)
     return ColorDataFormat::ColorData2;
+  // From now onwards, Canon has finally added a `version` field, use it.
+  switch (int colorDataVersion = static_cast<int16_t>(ccd->getU16(0));
+          colorDataVersion) {
+  case 1:
+    return ColorDataFormat::ColorData3;
+  default:
+    break;
+  }
   return std::nullopt;
 }
 
@@ -245,6 +254,8 @@ deduceColorDataFormat(const TiffEntry* ccd) {
     return 50;
   case ColorData2:
     return 68;
+  case ColorData3:
+    return 126;
   }
   __builtin_unreachable();
 }
