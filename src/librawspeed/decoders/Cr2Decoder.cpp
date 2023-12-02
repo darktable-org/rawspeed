@@ -293,6 +293,32 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   __builtin_unreachable();
 }
 
+[[nodiscard]] std::optional<std::pair<int, int>>
+getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
+                                        int colorDataVersion) {
+  switch (f) {
+    using enum ColorDataFormat;
+  case ColorData1:
+  case ColorData2:
+  case ColorData3:
+    // These seemingly did not contain `SpecularWhiteLevel` yet.
+    return std::nullopt;
+  case ColorData4:
+    switch (colorDataVersion) {
+    case 2:
+    case 3:
+      return std::nullopt; // Still no `SpecularWhiteLevel`.
+    case 4:
+      return {{692, 697}};
+    default:
+      return std::nullopt; // FIXME
+    }
+  default: // FIXME
+    return std::nullopt;
+  }
+  __builtin_unreachable();
+}
+
 } // namespace
 
 bool Cr2Decoder::decodeCanonColorData() const {
@@ -312,6 +338,14 @@ bool Cr2Decoder::decodeCanonColorData() const {
   mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
   mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
   mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
+
+  auto levelOffsets = getBlackAndWhiteLevelOffsetsInColorData(f, *ver);
+  if (!levelOffsets)
+    return false;
+
+  mRaw->whitePoint = wb->getU16(levelOffsets->second);
+  for (int c = 0; c != 4; ++c)
+    mRaw->blackLevelSeparate[c] = wb->getU16(c + levelOffsets->first);
 
   return true;
 }

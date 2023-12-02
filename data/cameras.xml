@@ -1971,7 +1971,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="62" y="20" width="5640" height="3752"/>
-		<Sensor black="1021" white="15100"/>
 		<BlackAreas>
 			<Vertical x="0" width="60"/>
 			<Horizontal y="4" height="14"/>
