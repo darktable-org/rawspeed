@@ -250,20 +250,21 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     }
   }
 
-  const CameraSensorInfo* sensor = cam->getSensorInfo(iso_speed);
-  mRaw->blackLevel = sensor->mBlackLevel;
-  mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
-  if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
-    auto cfaArea = mRaw->cfa.getSize().area();
-    if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
-      for (auto i = 0UL; i < cfaArea; i++) {
-        mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
-      }
-    } else if (!mRaw->isCFA &&
-               mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
-      for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
-        mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+  if (const CameraSensorInfo* sensor = cam->getSensorInfo(iso_speed)) {
+    mRaw->blackLevel = sensor->mBlackLevel;
+    mRaw->whitePoint = sensor->mWhiteLevel;
+    if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
+      auto cfaArea = mRaw->cfa.getSize().area();
+      if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
+        for (auto i = 0UL; i < cfaArea; i++) {
+          mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+        }
+      } else if (!mRaw->isCFA &&
+                 mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
+        for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
+          mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+        }
       }
     }
   }

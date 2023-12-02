@@ -24,6 +24,7 @@
 #include "metadata/CameraMetadataException.h"
 #include "metadata/CameraSensorInfo.h"
 #include "metadata/ColorFilterArray.h"
+#include <cassert>
 #include <cstdint>
 #include <map>
 #include <string>
