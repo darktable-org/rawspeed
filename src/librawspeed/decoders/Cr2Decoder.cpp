@@ -224,6 +224,7 @@ namespace {
 
 enum class ColorDataFormat {
   ColorData1,
+  ColorData2,
 };
 
 [[nodiscard]] std::optional<ColorDataFormat>
@@ -231,6 +232,9 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   // The original ColorData, detect by it's fixed size.
   if (ccd->count == 582)
     return ColorDataFormat::ColorData1;
+  // Second incarnation of ColorData, still size-only detection.
+  if (ccd->count == 653)
+    return ColorDataFormat::ColorData2;
   return std::nullopt;
 }
 
@@ -239,6 +243,8 @@ deduceColorDataFormat(const TiffEntry* ccd) {
     using enum ColorDataFormat;
   case ColorData1:
     return 50;
+  case ColorData2:
+    return 68;
   }
   __builtin_unreachable();
 }
