@@ -311,14 +311,11 @@ bool Cr2Decoder::decodeCanonColorData() const {
   if (!wb)
     return false;
 
-  int offset;
-  if (auto f = deduceColorDataFormat(wb))
-    offset = getWhiteBalanceOffsetInColorData(*f);
-  else {
-    // this entry is a big table, and different cameras store used WB in
-    // different parts, so find the offset, default is the most common one
-    offset = hints.get("wb_offset", 126);
-  }
+  auto f = deduceColorDataFormat(wb);
+  if (!f)
+    return false;
+
+  int offset = getWhiteBalanceOffsetInColorData(*f);
 
   offset /= 2;
   mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
