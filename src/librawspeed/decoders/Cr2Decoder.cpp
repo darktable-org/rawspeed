@@ -231,7 +231,6 @@ enum class ColorDataFormat {
   ColorData6,
   ColorData7,
   ColorData8,
-  ColorData9,
 };
 
 [[nodiscard]] std::optional<ColorDataFormat>
@@ -267,11 +266,6 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   case 14:
   case 15:
     return ColorDataFormat::ColorData8;
-  case 16:
-  case 17:
-  case 18:
-  case 19:
-    return ColorDataFormat::ColorData9;
   default:
     break;
   }
@@ -292,7 +286,6 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   case ColorData8:
     return 126;
   case ColorData5:
-  case ColorData9:
     return 142;
   }
   __builtin_unreachable();
