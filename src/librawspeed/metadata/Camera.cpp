@@ -398,10 +398,8 @@ void Camera::parseCameraChild(const xml_node& cur) {
 #endif
 
 const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
-  if (sensorInfo.empty()) {
-    ThrowCME("Camera '%s' '%s', mode '%s' has no <Sensor> entries.",
-             make.c_str(), model.c_str(), mode.c_str());
-  }
+  if (sensorInfo.empty())
+    return nullptr;
 
   // If only one, just return that
   if (sensorInfo.size() == 1)
@@ -412,6 +410,7 @@ const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
     if (i.isIsoWithin(iso))
       candidates.push_back(&i);
   }
+  assert(!candidates.empty());
 
   if (candidates.size() == 1)
     return candidates.front();
