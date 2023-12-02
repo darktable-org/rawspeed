@@ -43,6 +43,7 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -219,14 +220,44 @@ void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
   checkCameraSupported(meta, id, "");
 }
 
+namespace {
+
+enum class ColorDataFormat {
+  ColorData1,
+};
+
+[[nodiscard]] std::optional<ColorDataFormat>
+deduceColorDataFormat(const TiffEntry* ccd) {
+  // The original ColorData, detect by it's fixed size.
+  if (ccd->count == 582)
+    return ColorDataFormat::ColorData1;
+  return std::nullopt;
+}
+
+[[nodiscard]] int getWhiteBalanceOffsetInColorData(ColorDataFormat f) {
+  switch (f) {
+    using enum ColorDataFormat;
+  case ColorData1:
+    return 50;
+  }
+  __builtin_unreachable();
+}
+
+} // namespace
+
 bool Cr2Decoder::decodeCanonColorData() const {
   const TiffEntry* wb = mRootIFD->getEntryRecursive(TiffTag::CANONCOLORDATA);
   if (!wb)
     return false;
 
-  // this entry is a big table, and different cameras store used WB in
-  // different parts, so find the offset, default is the most common one
-  int offset = hints.get("wb_offset", 126);
+  int offset;
+  if (auto f = deduceColorDataFormat(wb))
+    offset = getWhiteBalanceOffsetInColorData(*f);
+  else {
+    // this entry is a big table, and different cameras store used WB in
+    // different parts, so find the offset, default is the most common one
+    offset = hints.get("wb_offset", 126);
+  }
 
   offset /= 2;
   mRaw->metadata.wbCoeffs[0] = static_cast<float>(wb->getU16(offset + 0));
