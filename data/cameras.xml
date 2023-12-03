@@ -631,8 +631,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="34" width="0" height="0"/>
-		<Sensor black="2047" white="11765" iso_min="0" iso_max="199"/>
-		<Sensor black="2047" white="14580"/>
 		<Aliases>
 			<Alias id="EOS Rebel T6i">Canon EOS Rebel T6i</Alias>
 			<Alias id="EOS Kiss X8i">Canon EOS Kiss X8i</Alias>
@@ -683,8 +681,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="34" width="0" height="0"/>
-		<Sensor black="2047" white="11765" iso_min="0" iso_max="199"/>
-		<Sensor black="2047" white="14580"/>
 		<Aliases>
 			<Alias id="EOS Rebel T6s">Canon EOS Rebel T6s</Alias>
 			<Alias id="EOS 8000D">Canon EOS 8000D</Alias>
@@ -1276,11 +1272,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="38" width="0" height="0"/>
-		<Sensor black="2048" white="15100"/>
-		<Sensor black="2047" white="13400" iso_list="100 125"/>
-		<Sensor black="2048" white="12400" iso_list="160 320 640 1250 2500 5000"/>
-		<Sensor black="2047" white="15300" iso_list="10000 12800 16000 25600"/>
-		<Sensor black="2040" white="16000" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="4" width="64"/>
 			<Horizontal y="24" height="8"/>
@@ -1296,7 +1287,6 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="7500"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1312,7 +1302,6 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="7500"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
