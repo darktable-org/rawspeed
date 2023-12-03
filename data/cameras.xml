@@ -1630,10 +1630,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="38" width="0" height="0"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
@@ -1655,10 +1651,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
@@ -1702,10 +1694,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
@@ -2317,11 +2305,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="22" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
-		<Sensor black="2046" white="16000" iso_list="1600 2000 2500"/>
-		<Sensor black="2048" white="16000" iso_list="3200 4000"/>
-		<Sensor black="2049" white="16000" iso_list="5000 6400 8000"/>
-		<Sensor black="2050" white="16000" iso_list="10000 12800"/>
 		<BlackAreas>
 			<Vertical x="0" width="76"/>
 			<Horizontal y="0" height="14"/>
@@ -2387,10 +2370,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -2520,7 +2499,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="104" y="22" width="-6" height="-6"/>
-		<Sensor black="2048" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="76"/>
 			<Horizontal y="0" height="14"/>
