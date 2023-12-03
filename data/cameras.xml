@@ -402,7 +402,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="64" y="52" width="4752" height="3158"/>
-		<Sensor black="1020" white="13653"/>
 		<BlackAreas>
 			<Vertical x="0" width="60"/>
 			<Horizontal y="2" height="46"/>
@@ -418,7 +417,6 @@
 	<Camera make="Canon" model="Canon EOS 50D" mode="sRaw1">
 		<ID make="Canon" model="EOS 50D">Canon EOS 50D</ID>
 		<Crop x="0" y="0" width="3272" height="2178"/>
-		<Sensor black="0" white="13250"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4920 616 -593</ColorMatrixRow>
@@ -430,7 +428,6 @@
 	<Camera make="Canon" model="Canon EOS 50D" mode="sRaw2">
 		<ID make="Canon" model="EOS 50D">Canon EOS 50D</ID>
 		<Crop x="0" y="0" width="2376" height="1584"/>
-		<Sensor black="0" white="13250"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4920 616 -593</ColorMatrixRow>
@@ -885,8 +882,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="158" y="51" width="5634" height="3753"/>
-		<Sensor black="1024" white="12995" iso_list="160 320 640 1250"/>
-		<Sensor black="1024" white="15950"/>
 		<BlackAreas>
 			<Vertical x="0" width="156"/>
 			<Horizontal y="2" height="48"/>
@@ -902,8 +897,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark II">Canon EOS 5D Mark II</ID>
 		<Crop x="0" y="0" width="3872" height="2574"/>
-		<Sensor black="0" white="14300" iso_list="160 320 640 1250"/>
-		<Sensor black="0" white="16237"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4716 603 -830</ColorMatrixRow>
@@ -915,8 +908,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark II">Canon EOS 5D Mark II</ID>
 		<Crop x="0" y="0" width="2808" height="1872"/>
-		<Sensor black="0" white="14300" iso_list="160 320 640 1250"/>
-		<Sensor black="0" white="16237"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4716 603 -830</ColorMatrixRow>
