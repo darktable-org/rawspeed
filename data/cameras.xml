@@ -344,7 +344,7 @@
 	<Camera make="Canon" model="Canon EOS 40D" mode="sRaw1">
 		<ID make="Canon" model="EOS 40D">Canon EOS 40D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
@@ -359,7 +359,7 @@
 	<Camera make="Canon" model="Canon EOS 40D" mode="sRaw2">
 		<ID make="Canon" model="EOS 40D">Canon EOS 40D</ID>
 		<Crop x="0" y="0" width="1944" height="1296"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
@@ -419,7 +419,7 @@
 	<Camera make="Canon" model="Canon EOS 50D" mode="sRaw1">
 		<ID make="Canon" model="EOS 50D">Canon EOS 50D</ID>
 		<Crop x="0" y="0" width="3272" height="2178"/>
-		<Sensor black="0" white="53000"/>
+		<Sensor black="0" white="13250"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4920 616 -593</ColorMatrixRow>
@@ -431,7 +431,7 @@
 	<Camera make="Canon" model="Canon EOS 50D" mode="sRaw2">
 		<ID make="Canon" model="EOS 50D">Canon EOS 50D</ID>
 		<Crop x="0" y="0" width="2376" height="1584"/>
-		<Sensor black="0" white="53000"/>
+		<Sensor black="0" white="13250"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4920 616 -593</ColorMatrixRow>
@@ -465,7 +465,7 @@
 	<Camera make="Canon" model="Canon EOS 60D" mode="sRaw1">
 		<ID make="Canon" model="EOS 60D">Canon EOS 60D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6719 -994 -925</ColorMatrixRow>
@@ -477,7 +477,7 @@
 	<Camera make="Canon" model="Canon EOS 60D" mode="sRaw2">
 		<ID make="Canon" model="EOS 60D">Canon EOS 60D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6719 -994 -925</ColorMatrixRow>
@@ -513,7 +513,7 @@
 	<Camera make="Canon" model="Canon EOS 70D" mode="sRaw1">
 		<ID make="Canon" model="EOS 70D">Canon EOS 70D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="53000"/>
+		<Sensor black="0" white="13250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -529,7 +529,7 @@
 	<Camera make="Canon" model="Canon EOS 70D" mode="sRaw2">
 		<ID make="Canon" model="EOS 70D">Canon EOS 70D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="53000"/>
+		<Sensor black="0" white="13250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -574,11 +574,11 @@
 	<Camera make="Canon" model="Canon EOS 80D" mode="sRaw1" decoder_version="8">
 		<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 		<Crop x="28" y="10" width="0" height="0"/>
-		<Sensor black="0" white="48816" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="0" white="51936" iso_list="160"/>
-		<Sensor black="0" white="55680" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
-		<Sensor black="0" white="55688" iso_list="8000 10000"/>
-		<Sensor black="0" white="58832" iso_list="100 125 200 250"/>
+		<Sensor black="0" white="12204" iso_list="320 640 1250 2500 5000"/>
+		<Sensor black="0" white="12984" iso_list="160"/>
+		<Sensor black="0" white="13920" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
+		<Sensor black="0" white="13922" iso_list="8000 10000"/>
+		<Sensor black="0" white="14708" iso_list="100 125 200 250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -594,15 +594,15 @@
 	<Camera make="Canon" model="Canon EOS 80D" mode="sRaw2" decoder_version="7">
 		<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="48468" iso_list="2500"/>
-		<Sensor black="0" white="48488" iso_list="1250"/>
-		<Sensor black="0" white="48492" iso_list="320"/>
-		<Sensor black="0" white="48496" iso_list="640"/>
-		<Sensor black="0" white="48588" iso_list="5000"/>
-		<Sensor black="0" white="51932" iso_list="160"/>
-		<Sensor black="0" white="55680" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
-		<Sensor black="0" white="55688" iso_list="8000 10000"/>
-		<Sensor black="0" white="58832" iso_list="100 125 200 250"/>
+		<Sensor black="0" white="12117" iso_list="2500"/>
+		<Sensor black="0" white="12122" iso_list="1250"/>
+		<Sensor black="0" white="12123" iso_list="320"/>
+		<Sensor black="0" white="12124" iso_list="640"/>
+		<Sensor black="0" white="12147" iso_list="5000"/>
+		<Sensor black="0" white="12983" iso_list="160"/>
+		<Sensor black="0" white="13920" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
+		<Sensor black="0" white="13922" iso_list="8000 10000"/>
+		<Sensor black="0" white="14708" iso_list="100 125 200 250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -903,8 +903,8 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark II">Canon EOS 5D Mark II</ID>
 		<Crop x="0" y="0" width="3872" height="2574"/>
-		<Sensor black="0" white="57200" iso_list="160 320 640 1250"/>
-		<Sensor black="0" white="64948"/>
+		<Sensor black="0" white="14300" iso_list="160 320 640 1250"/>
+		<Sensor black="0" white="16237"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4716 603 -830</ColorMatrixRow>
@@ -916,8 +916,8 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark II">Canon EOS 5D Mark II</ID>
 		<Crop x="0" y="0" width="2808" height="1872"/>
-		<Sensor black="0" white="57200" iso_list="160 320 640 1250"/>
-		<Sensor black="0" white="64948"/>
+		<Sensor black="0" white="14300" iso_list="160 320 640 1250"/>
+		<Sensor black="0" white="16237"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4716 603 -830</ColorMatrixRow>
@@ -956,10 +956,10 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark III" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark III">Canon EOS 5D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
-		<Sensor black="0" white="50300" iso_list="100 20000"/>
-		<Sensor black="0" white="55128" iso_list="25600 51200 102400"/>
-		<Sensor black="0" white="53220"/>
+		<Sensor black="0" white="11028" iso_list="160 320 640 1250 2500 5000 10000"/>
+		<Sensor black="0" white="12575" iso_list="100 20000"/>
+		<Sensor black="0" white="13782" iso_list="25600 51200 102400"/>
+		<Sensor black="0" white="13305"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -975,10 +975,10 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark III" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark III">Canon EOS 5D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
-		<Sensor black="0" white="51300" iso_list="250"/>
-		<Sensor black="0" white="55028" iso_list="25600 51200 102400"/>
-		<Sensor black="0" white="53000"/>
+		<Sensor black="0" white="11028" iso_list="160 320 640 1250 2500 5000 10000"/>
+		<Sensor black="0" white="12825" iso_list="250"/>
+		<Sensor black="0" white="13757" iso_list="25600 51200 102400"/>
+		<Sensor black="0" white="13250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1021,7 +1021,7 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="56032"/>
+		<Sensor black="0" white="14008"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1037,7 +1037,7 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="56032"/>
+		<Sensor black="0" white="14008"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1076,8 +1076,8 @@
 	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw1" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
+		<Sensor black="0" white="13000"/>
+		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1093,8 +1093,8 @@
 	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw2" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
+		<Sensor black="0" white="13000"/>
+		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1133,8 +1133,8 @@
 	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw1" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
+		<Sensor black="0" white="13000"/>
+		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1150,8 +1150,8 @@
 	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw2" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
+		<Sensor black="0" white="13000"/>
+		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1194,7 +1194,7 @@
 	<Camera make="Canon" model="Canon EOS 6D" mode="sRaw1" decoder_version="3">
 		<ID make="Canon" model="EOS 6D">Canon EOS 6D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="48664"/>
+		<Sensor black="0" white="12166"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1210,7 +1210,7 @@
 	<Camera make="Canon" model="Canon EOS 6D" mode="sRaw2">
 		<ID make="Canon" model="EOS 6D">Canon EOS 6D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="48664"/>
+		<Sensor black="0" white="12166"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1251,7 +1251,7 @@
 	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw1" decoder_version="9">
 		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
+		<Sensor black="0" white="4095"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1267,7 +1267,7 @@
 	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw2" decoder_version="9">
 		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
+		<Sensor black="0" white="4095"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1307,7 +1307,7 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
+		<Sensor black="0" white="7500"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6844 -996 -856</ColorMatrixRow>
@@ -1319,7 +1319,7 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
+		<Sensor black="0" white="7500"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6844 -996 -856</ColorMatrixRow>
@@ -1357,7 +1357,7 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
+		<Sensor black="0" white="7500"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1373,7 +1373,7 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
+		<Sensor black="0" white="7500"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1873,7 +1873,7 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark III" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D Mark III">Canon EOS-1D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6291 -540 -976</ColorMatrixRow>
@@ -1885,7 +1885,7 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark III" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D Mark III">Canon EOS-1D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6291 -540 -976</ColorMatrixRow>
@@ -1919,7 +1919,7 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D Mark IV">Canon EOS-1D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6014 -220 -795</ColorMatrixRow>
@@ -1931,7 +1931,7 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D Mark IV">Canon EOS-1D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6014 -220 -795</ColorMatrixRow>
@@ -1987,7 +1987,7 @@
 	<Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw1">
 		<ID make="Canon" model="EOS-1Ds Mark III">Canon EOS-1Ds Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5859 -211 -930</ColorMatrixRow>
@@ -1999,7 +1999,7 @@
 	<Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw2">
 		<ID make="Canon" model="EOS-1Ds Mark III">Canon EOS-1Ds Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5859 -211 -930</ColorMatrixRow>
@@ -2033,7 +2033,7 @@
 	<Camera make="Canon" model="Canon EOS-1D X" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D X">Canon EOS-1D X</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2049,7 +2049,7 @@
 	<Camera make="Canon" model="Canon EOS-1D X" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D X">Canon EOS-1D X</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2093,7 +2093,7 @@
 	<Camera make="Canon" model="Canon EOS-1D X Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D X Mark II">Canon EOS-1D X Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2109,7 +2109,7 @@
 	<Camera make="Canon" model="Canon EOS-1D X Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D X Mark II">Canon EOS-1D X Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>

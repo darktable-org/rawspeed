@@ -387,6 +387,12 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     // We caught an exception reading WB, just ignore it
   }
   setMetaData(meta, mode, iso);
+  assert(mShiftUpScaleForExif == 0 || mShiftUpScaleForExif == 2);
+  mRaw->blackLevel <<= mShiftUpScaleForExif;
+  if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
+    mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
+  else
+    mRaw->whitePoint <<= mShiftUpScaleForExif;
 }
 
 bool Cr2Decoder::isSubSampled() const {
@@ -497,6 +503,8 @@ void Cr2Decoder::sRawInterpolate() {
   }
 
   i.interpolate(version);
+
+  mShiftUpScaleForExif = 2;
 }
 
 } // namespace rawspeed
