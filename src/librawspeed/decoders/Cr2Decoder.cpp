@@ -340,6 +340,14 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     default:
       __builtin_unreachable();
     }
+  case ColorData6:
+    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
+    switch (colorDataVersion) {
+    case 10:
+      return {{479, 484}};
+    default:
+      __builtin_unreachable();
+    }
   default: // FIXME
     return std::nullopt;
   }
