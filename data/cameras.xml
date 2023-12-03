@@ -753,7 +753,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="62" y="30" width="4722" height="3142"/>
-		<Sensor black="1020" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="56"/>
 			<Horizontal y="2" height="22"/>
@@ -779,8 +778,6 @@
 			<Color x="0" y="1">RED</Color>
 		</CFA>
 		<Crop x="148" y="54" width="0" height="0"/>
-		<Sensor black="2054" white="15000"/>
-		<Sensor black="2048" white="13926" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -1279,9 +1276,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="158" y="52" width="5202" height="3464"/>
-		<Sensor black="2049" white="15400"/>
-		<Sensor black="2048" white="13600" iso_list="100 125"/>
-		<Sensor black="2048" white="12600" iso_list="160 320 640 1250 2500"/>
 		<BlackAreas>
 			<Vertical x="8" width="156"/>
 			<Horizontal y="32" height="18"/>
@@ -1297,7 +1291,6 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="7500"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6844 -996 -856</ColorMatrixRow>
@@ -1309,7 +1302,6 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="7500"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6844 -996 -856</ColorMatrixRow>
@@ -1891,7 +1883,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="144" y="46" width="-64" height="-2"/>
-		<Sensor black="2000" white="13000"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="26" height="16"/>
@@ -1907,7 +1898,6 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D Mark IV">Canon EOS-1D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6014 -220 -795</ColorMatrixRow>
@@ -1919,7 +1909,6 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D Mark IV">Canon EOS-1D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6014 -220 -795</ColorMatrixRow>

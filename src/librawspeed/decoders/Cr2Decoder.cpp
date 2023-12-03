@@ -314,6 +314,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     case 5:
       return {{692, 697}};
     case 6:
+    case 7:
       return {{715, 720}};
     default:
       return std::nullopt; // FIXME
