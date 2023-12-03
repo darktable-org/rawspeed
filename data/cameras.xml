@@ -445,7 +445,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="54" width="0" height="0"/>
-		<Sensor black="2026" white="14200"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="46"/>
@@ -461,7 +460,6 @@
 	<Camera make="Canon" model="Canon EOS 60D" mode="sRaw1">
 		<ID make="Canon" model="EOS 60D">Canon EOS 60D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6719 -994 -925</ColorMatrixRow>
@@ -473,7 +471,6 @@
 	<Camera make="Canon" model="Canon EOS 60D" mode="sRaw2">
 		<ID make="Canon" model="EOS 60D">Canon EOS 60D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6719 -994 -925</ColorMatrixRow>
@@ -1403,7 +1400,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="64" y="20" width="0" height="0"/>
-		<Sensor black="2036" white="15500"/>
 		<BlackAreas>
 			<Vertical x="0" width="58"/>
 			<Horizontal y="4" height="12"/>
