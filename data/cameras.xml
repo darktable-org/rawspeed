@@ -1608,7 +1608,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="34" width="0" height="0"/>
-		<Sensor black="2048" white="16000"/>
 		<BlackAreas>
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="30"/>
@@ -1672,7 +1671,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="52" width="0" height="-2"/>
-		<Sensor black="2048" white="16000"/>
 		<BlackAreas>
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="40"/>
@@ -2199,7 +2197,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="17" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="90"/>
 			<Horizontal y="0" height="16"/>
@@ -2243,7 +2240,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="17" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2287,7 +2283,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="18" width="0" height="0"/>
-		<Sensor black="511" white="4000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2326,7 +2321,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="82" y="52" width="-14" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
@@ -2348,7 +2342,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="82" y="52" width="-14" height="0"/>
-		<Sensor black="0" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
@@ -2387,7 +2380,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="54" y="14" width="-12" height="-18"/>
-		<Sensor black="120" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="50"/>
 			<Horizontal y="0" height="10"/>
@@ -2409,7 +2401,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="10" y="18" width="-56" height="-14"/>
-		<Sensor black="120" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="10"/>
 			<Vertical x="3696" width="48"/>
@@ -2433,7 +2424,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="12" y="13" width="4432" height="3323"/>
-		<Sensor black="128" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="10"/>
 			<Horizontal y="0" height="8"/>
@@ -2477,7 +2467,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="18" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="0" height="10"/>
@@ -2520,8 +2509,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="106" y="12" width="-10" height="-66"/>
-		<Sensor black="500" white="2800" iso_min="12800" iso_max="12800"/>
-		<Sensor black="128" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
@@ -2543,7 +2530,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="18" width="-24" height="0"/>
-		<Sensor black="0" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="80"/>
 			<Horizontal y="0" height="16"/>
@@ -2565,7 +2551,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="192" y="12" width="3958" height="2760"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="188"/>
 			<Horizontal y="0" height="10"/>
@@ -2731,7 +2716,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="10" y="18" width="-54" height="-10"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="6"/>
 			<Horizontal y="0" height="14"/>
@@ -2753,7 +2737,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="66" y="24" width="-20" height="-24"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="50"/>
 			<Vertical x="3738" width="6"/>
@@ -2777,7 +2760,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="104" y="12" width="-10" height="-66"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="100"/>
 			<Horizontal y="0" height="10"/>
@@ -2800,8 +2782,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="106" y="12" width="-10" height="-66"/>
-		<Sensor black="500" white="3072" iso_min="12800" iso_max="12800"/>
-		<Sensor black="128" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
@@ -2823,7 +2803,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="121" y="30" width="-47" height="-14"/>
-		<Sensor black="0" white="4000"/>
 		<BlackAreas>
 			<Vertical x="0" width="74"/>
 			<Horizontal y="0" height="12"/>
@@ -2845,7 +2824,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="100" y="20" width="-10" height="0"/>
-		<Sensor black="127" white="4095"/>
 		<BlackAreas>
 			<Vertical x="6" width="70"/>
 			<Horizontal y="0" height="16"/>
@@ -2867,7 +2845,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="112" y="26" width="-24" height="-10"/>
-		<Sensor black="128" white="4000"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="0" height="16"/>

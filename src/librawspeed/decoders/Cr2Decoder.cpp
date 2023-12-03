@@ -326,7 +326,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     case -4:
       return {{333, 1386}};
     case -3:
-      return std::nullopt; // FIXME
+      return {{264, 662}};
     default:
       __builtin_unreachable();
     }
@@ -334,6 +334,11 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     return std::nullopt;
   }
   __builtin_unreachable();
+}
+
+[[nodiscard]] bool shouldRescaleBlackLevels(ColorDataFormat f,
+                                            int colorDataVersion) {
+  return f != ColorDataFormat::ColorData5 || colorDataVersion != -3;
 }
 
 } // namespace
@@ -370,8 +375,10 @@ bool Cr2Decoder::decodeCanonColorData() const {
   if (makernotesPrecision > ljpegSamplePrecision) {
     int bitDepthDiff = makernotesPrecision - ljpegSamplePrecision;
     assert(bitDepthDiff >= 1 && bitDepthDiff <= 12);
-    for (int c = 0; c != 4; ++c)
-      mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
+    if (shouldRescaleBlackLevels(f, *ver)) {
+      for (int c = 0; c != 4; ++c)
+        mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
+    }
     mRaw->whitePoint >>= bitDepthDiff;
   }
 
