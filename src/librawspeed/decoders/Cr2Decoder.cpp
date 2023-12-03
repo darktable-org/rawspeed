@@ -261,8 +261,18 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   case -4:
   case -3:
     return {{ColorDataFormat::ColorData5, colorDataVersion}};
-  case 10:
-    return {{ColorDataFormat::ColorData6, colorDataVersion}};
+  case 10: {
+    ColorDataFormat f = [count = ccd->count]() {
+      switch (count) {
+      case 1273:
+      case 1275:
+        return ColorDataFormat::ColorData6;
+      default:
+        return ColorDataFormat::ColorData7;
+      }
+    }();
+    return {{f, colorDataVersion}};
+  }
   case 11:
     return {{ColorDataFormat::ColorData7, colorDataVersion}};
   case 12:
