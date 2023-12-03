@@ -101,6 +101,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
   Cr2SliceWidths slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
                          /*lastSliceWidth=*/implicit_cast<uint16_t>(width));
   l.decode(slicing);
+  ljpegSamplePrecision = l.getSamplePrecision();
 
   // deal with D2000 GrayResponseCurve
   if (const TiffEntry* curve =
@@ -195,6 +196,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
   Cr2LJpegDecoder d(bs, mRaw);
   mRaw->createData();
   d.decode(slicing);
+  ljpegSamplePrecision = d.getSamplePrecision();
 
   assert(getSubSampling() == mRaw->metadata.subsampling);
 
@@ -347,6 +349,17 @@ bool Cr2Decoder::decodeCanonColorData() const {
   mRaw->whitePoint = wb->getU16(levelOffsets->second);
   for (int c = 0; c != 4; ++c)
     mRaw->blackLevelSeparate[c] = wb->getU16(c + levelOffsets->first);
+
+  // In Canon MakerNotes, the levels are always unscaled, and are 14-bit,
+  // and so if the LJpeg precision was lower, we need to adjust.
+  constexpr int makernotesPrecision = 14;
+  if (makernotesPrecision > ljpegSamplePrecision) {
+    int bitDepthDiff = makernotesPrecision - ljpegSamplePrecision;
+    assert(bitDepthDiff >= 1 && bitDepthDiff <= 12);
+    for (int c = 0; c != 4; ++c)
+      mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
+    mRaw->whitePoint >>= bitDepthDiff;
+  }
 
   return true;
 }
