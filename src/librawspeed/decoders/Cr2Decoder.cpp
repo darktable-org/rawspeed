@@ -429,7 +429,11 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
   setMetaData(meta, mode, iso);
   assert(mShiftUpScaleForExif == 0 || mShiftUpScaleForExif == 2);
-  mRaw->blackLevel <<= mShiftUpScaleForExif;
+  if (mShiftUpScaleForExif) {
+    mRaw->blackLevel = 0;
+    for (int c = 0; c != 4; ++c)
+      mRaw->blackLevelSeparate[c] = -1;
+  }
   if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
     mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
   else
