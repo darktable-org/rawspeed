@@ -218,6 +218,8 @@ void AbstractLJpegDecoder::parseSOS(ByteStream sos) {
   Pt = sos.getByte(); // Point Transform
   if (Pt > 15)
     ThrowRDE("Invalid Point transform.");
+  if (Pt != 0)
+    ThrowRDE("Point transform not supported.");
 
   decodeScan();
 }
