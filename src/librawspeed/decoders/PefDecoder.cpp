@@ -65,6 +65,17 @@ RawImage PefDecoder::decodeRawInternal() {
   if (65535 != compression)
     ThrowRDE("Unsupported compression");
 
+  if (raw->hasEntry(TiffTag::PHOTOMETRICINTERPRETATION)) {
+    mRaw->isCFA =
+        (raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU16() != 34892);
+  }
+
+  if (mRaw->isCFA)
+    writeLog(DEBUG_PRIO::EXTRA, "This is a CFA image");
+  else {
+    writeLog(DEBUG_PRIO::EXTRA, "This is NOT a CFA image");
+  }
+
   const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
   const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
