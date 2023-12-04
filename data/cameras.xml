@@ -12064,6 +12064,11 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-3 Mark III Monochrome">
+		<ID make="Pentax" model="K-3 Mark III Monochrome">PENTAX K-3 Mark III Monochrome</ID>
+		<Crop x="26" y="34" width="-28" height="-14"/>
+		<Sensor black="64" white="16315"/>
+	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-5" decoder_version="2">
 		<ID make="Pentax" model="K-5">PENTAX K-5</ID>
 		<CFA width="2" height="2">
