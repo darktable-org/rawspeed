@@ -1007,8 +1007,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="164" y="72" width="-6" height="-8"/>
-		<Sensor black="2048" white="15181"/>
-		<Sensor black="2048" white="14466" iso_list="50 100"/>
 		<BlackAreas>
 			<Vertical x="0" width="150"/>
 			<Horizontal y="40" height="60"/>
@@ -1024,8 +1022,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw1" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="13000"/>
-		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1041,8 +1037,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw2" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="13000"/>
-		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1064,8 +1058,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="164" y="72" width="-6" height="-8"/>
-		<Sensor black="2048" white="15181"/>
-		<Sensor black="2048" white="14466" iso_list="50 100"/>
 		<BlackAreas>
 			<Vertical x="0" width="150"/>
 			<Horizontal y="40" height="60"/>
@@ -1081,8 +1073,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw1" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="13000"/>
-		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1098,8 +1088,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw2" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="13000"/>
-		<Sensor black="0" white="11500" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
