@@ -318,8 +318,9 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
   case ColorData4:
     switch (colorDataVersion) {
     case 2:
-    case 3:
       return std::nullopt; // Still no `SpecularWhiteLevel`.
+    case 3:
+      return {{231, 617}};
     case 4:
     case 5:
       return {{692, 697}};

@@ -318,7 +318,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="30" y="18" width="3908" height="2602"/>
-		<Sensor black="1021" white="13600"/>
 		<BlackAreas>
 			<Vertical x="0" width="28"/>
 			<Horizontal y="4" height="12"/>
@@ -334,7 +333,6 @@
 	<Camera make="Canon" model="Canon EOS 40D" mode="sRaw1">
 		<ID make="Canon" model="EOS 40D">Canon EOS 40D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
@@ -349,7 +347,6 @@
 	<Camera make="Canon" model="Canon EOS 40D" mode="sRaw2">
 		<ID make="Canon" model="EOS 40D">Canon EOS 40D</ID>
 		<Crop x="0" y="0" width="1944" height="1296"/>
-		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
