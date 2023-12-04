@@ -533,14 +533,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-8" height="-4"/>
-		<Sensor black="512" white="11892" iso_list="100 125"/>
-		<Sensor black="512" white="10749" iso_list="160"/>
-		<Sensor black="511" white="14338" iso_list="200 250"/>
-		<Sensor black="2048" white="10749" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="2048" white="14338" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 16000"/>
-		<Sensor black="2046" white="14338" iso_list="8000 25600"/>
-		<Sensor black="2045" white="14338" iso_list="10000"/>
-		<Sensor black="2049" white="14338" iso_list="12800"/>
 		<BlackAreas>
 			<Vertical x="0" width="263"/>
 			<Horizontal y="0" height="33"/>
@@ -556,11 +548,6 @@
 	<Camera make="Canon" model="Canon EOS 80D" mode="sRaw1" decoder_version="8">
 		<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 		<Crop x="28" y="10" width="0" height="0"/>
-		<Sensor black="0" white="12204" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="0" white="12984" iso_list="160"/>
-		<Sensor black="0" white="13920" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
-		<Sensor black="0" white="13922" iso_list="8000 10000"/>
-		<Sensor black="0" white="14708" iso_list="100 125 200 250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -576,15 +563,6 @@
 	<Camera make="Canon" model="Canon EOS 80D" mode="sRaw2" decoder_version="7">
 		<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="12117" iso_list="2500"/>
-		<Sensor black="0" white="12122" iso_list="1250"/>
-		<Sensor black="0" white="12123" iso_list="320"/>
-		<Sensor black="0" white="12124" iso_list="640"/>
-		<Sensor black="0" white="12147" iso_list="5000"/>
-		<Sensor black="0" white="12983" iso_list="160"/>
-		<Sensor black="0" white="13920" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
-		<Sensor black="0" white="13922" iso_list="8000 10000"/>
-		<Sensor black="0" white="14708" iso_list="100 125 200 250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -948,12 +926,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="136" y="44" width="0" height="0"/>
-		<Sensor black="2049" white="14448"/>
-		<Sensor black="513" white="14008" iso_list="50 100 125"/>
-		<Sensor black="512" white="10838" iso_list="160"/>
-		<Sensor black="512" white="14448" iso_list="200 250"/>
-		<Sensor black="2048" white="10838" iso_list="320 640 1250 2500 5000 10000 20000"/>
-		<Sensor black="2049" white="13533" iso_list="102400"/>
 		<BlackAreas>
 			<Vertical x="0" width="134"/>
 			<Horizontal y="0" height="40"/>
@@ -969,7 +941,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="14008"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -985,7 +956,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="14008"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1957,13 +1927,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="74" y="40" width="-2" height="0"/>
-		<Sensor black="2048" white="14888"/>
-		<Sensor black="512" white="13898" iso_list="50 100"/>
-		<Sensor black="512" white="14888" iso_list="125 160 200 250"/>
-		<Sensor black="2049" white="14888" iso_list="1600 2500 51200"/>
-		<Sensor black="2050" white="13533" iso_list="102400"/>
-		<Sensor black="2048" white="13533" iso_list="204800"/>
-		<Sensor black="2049" white="13533" iso_list="409600"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="36"/>
@@ -1979,7 +1942,6 @@
 	<Camera make="Canon" model="Canon EOS-1D X Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D X Mark II">Canon EOS-1D X Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1995,7 +1957,6 @@
 	<Camera make="Canon" model="Canon EOS-1D X Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D X Mark II">Canon EOS-1D X Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>

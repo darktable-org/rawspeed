@@ -360,8 +360,8 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
   case ColorData8:
     switch (colorDataVersion) {
     case 12:
-      return {{778, 783}};
     case 13:
+      return {{778, 783}};
     case 14:
     case 15:
       return std::nullopt;
