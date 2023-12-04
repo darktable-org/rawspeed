@@ -128,10 +128,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2049" white="14338"/>
-		<Sensor black="511" white="11892" iso_list="100"/>
-		<Sensor black="511" white="14338" iso_list="200"/>
-		<Sensor black="2041" white="14338" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="0" width="260"/>
 			<Horizontal y="0" height="38"/>
@@ -630,9 +626,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2049" white="14338"/>
-		<Sensor black="511" white="11892" iso_list="100"/>
-		<Sensor black="511" white="14338" iso_list="200"/>
 		<BlackAreas>
 			<Vertical x="0" width="260"/>
 			<Horizontal y="2" height="36"/>
@@ -680,12 +673,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2049" white="14338"/>
-		<Sensor black="511" white="11892" iso_list="100 125"/>
-		<Sensor black="511" white="10755" iso_list="160"/>
-		<Sensor black="511" white="14338" iso_list="200 250"/>
-		<Sensor black="2048" white="10755" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="2041" white="14338" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="0" width="260"/>
 			<Horizontal y="2" height="32"/>
@@ -1130,10 +1117,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="128" y="52" width="-4" height="-4"/>
-		<Sensor black="2049" white="14558"/>
-		<Sensor black="513" white="14558" iso_list="50 100 125 200 250"/>
-		<Sensor black="513" white="11301" iso_list="160"/>
-		<Sensor black="2049" white="11301" iso_list="320 640 1250 2500 5000 10000"/>
 		<BlackAreas>
 			<Vertical x="2" width="116"/>
 			<Horizontal y="8" height="32"/>
@@ -1149,7 +1132,6 @@
 	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw1" decoder_version="9">
 		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="4095"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1165,7 +1147,6 @@
 	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw2" decoder_version="9">
 		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="4095"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1357,10 +1338,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="54" width="0" height="0"/>
-		<Sensor black="2048" white="15000"/>
-		<Sensor black="2046" white="12279" iso_list="100"/>
-		<Sensor black="2046" white="15000" iso_list="200"/>
-		<Sensor black="2047" white="15000" iso_list="3200"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -1386,8 +1363,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="78" y="42" width="-4" height="-6"/>
-		<Sensor black="2048" white="15092"/>
-		<Sensor black="2048" white="12277" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="4" height="30"/>
@@ -1414,8 +1389,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="56" width="0" height="0"/>
-		<Sensor black="2051" white="15000"/>
-		<Sensor black="2046" white="12279" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="130"/>
 			<Horizontal y="4" height="40"/>

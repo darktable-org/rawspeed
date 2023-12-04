@@ -361,10 +361,10 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     switch (colorDataVersion) {
     case 12:
     case 13:
+    case 15:
       return {{778, 783}};
     case 14:
-    case 15:
-      return std::nullopt;
+      return {{556, 561}};
     default:
       __builtin_unreachable();
     }
