@@ -107,6 +107,8 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
       height(height_) {
   invariant(width >= 0);
   invariant(height >= 0);
+  invariant(_pitch >= 0);
+  invariant(_pitch >= width);
 }
 
 template <class T>
@@ -114,6 +116,7 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
   invariant(_data);
   invariant(row >= 0);
   invariant(row < height);
+  invariant(_pitch >= width);
   return Array1DRef<T>(&_data[row * _pitch], width);
 }
 
