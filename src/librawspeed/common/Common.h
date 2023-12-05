@@ -51,6 +51,12 @@ void writeLog(DEBUG_PRIO priority, const char* format, ...)
 
 inline void copyPixels(std::byte* dest, int dstPitch, const std::byte* src,
                        int srcPitch, int rowSize, int height) {
+  invariant(dest);
+  invariant(dstPitch > 0);
+  invariant(src);
+  invariant(srcPitch > 0);
+  invariant(rowSize > 0);
+  invariant(height > 0);
   invariant(rowSize <= srcPitch);
   invariant(rowSize <= dstPitch);
   if (dstPitch == srcPitch && srcPitch == rowSize)

@@ -379,9 +379,6 @@ protected:
     fill(dst.begin(), dst.end(), origVal);
   }
   void copy() {
-    if (src.empty() || dst.empty())
-      return;
-
     copyPixels(reinterpret_cast<std::byte*>(&(dst[0])), dstPitch,
                reinterpret_cast<const std::byte*>(&(src[0])), srcPitch, rowSize,
                height);
@@ -405,10 +402,10 @@ protected:
   int height;
 };
 INSTANTIATE_TEST_SUITE_P(CopyPixelsTest, CopyPixelsTest,
-                         testing::Combine(testing::Range(0, 4, 1),
-                                          testing::Range(0, 4, 1),
-                                          testing::Range(0, 4, 1),
-                                          testing::Range(0, 4, 1)));
+                         testing::Combine(testing::Range(1, 4, 1),
+                                          testing::Range(1, 4, 1),
+                                          testing::Range(1, 4, 1),
+                                          testing::Range(1, 4, 1)));
 TEST_P(CopyPixelsTest, CopyPixelsTest) {
   copy();
   compare();
