@@ -14681,6 +14681,25 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix SL1000">
+		<ID make="Fujifilm" model="FinePix SL1000">Fujifilm FinePix SL1000</ID>
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">RG</ColorRow>
+			<ColorRow y="1">GB</ColorRow>
+		</CFA2>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="200" white="4095"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11705 -4262 -1107</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2282 10791 1709</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-555 1713 4945</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix HS10 HS11">
 		<ID make="Fujifilm" model="FinePix HS10 HS11">Fujifilm FinePix HS10 HS11</ID>
 		<CFA width="2" height="2">
