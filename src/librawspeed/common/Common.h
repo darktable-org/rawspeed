@@ -33,6 +33,7 @@
 #include <initializer_list>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 
@@ -64,6 +65,12 @@ inline void copyPixelsImpl(Array2DRef<std::byte> dest,
   invariant(dest.height > 0);
   invariant(src.height == dest.height);
   invariant(src.width == dest.width);
+  if (auto [destAsStrip, srcAsStrip] =
+          std::make_tuple(dest.getAsArray1DRef(), src.getAsArray1DRef());
+      destAsStrip && srcAsStrip) {
+    copyPixelsImpl(*destAsStrip, *srcAsStrip);
+    return;
+  }
   for (int row = 0; row != src.height; ++row)
     copyPixelsImpl(dest[row], src[row]);
 }
@@ -79,10 +86,6 @@ inline void copyPixels(std::byte* destPtr, int dstPitch,
   invariant(height > 0);
   invariant(rowSize <= srcPitch);
   invariant(rowSize <= dstPitch);
-  if (height == 1) {
-    dstPitch = std::min(dstPitch, rowSize);
-    srcPitch = std::min(srcPitch, rowSize);
-  }
   auto dest = Array2DRef(destPtr, rowSize, height, dstPitch);
   auto src = Array2DRef(srcPtr, rowSize, height, srcPitch);
   copyPixelsImpl(dest, src);
