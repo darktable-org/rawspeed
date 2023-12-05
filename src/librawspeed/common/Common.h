@@ -21,6 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include <algorithm>
@@ -49,25 +50,43 @@ enum class DEBUG_PRIO {
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
     __attribute__((format(printf, 2, 3)));
 
-inline void copyPixels(std::byte* dest, int dstPitch, const std::byte* src,
-                       int srcPitch, int rowSize, int height) {
-  invariant(dest);
+inline void copyPixelsImpl(Array1DRef<std::byte> dest,
+                           Array1DRef<const std::byte> src) {
+  invariant(src.size() == dest.size());
+  for (int col = 0; col != src.size(); ++col)
+    dest(col) = src(col);
+}
+
+inline void copyPixelsImpl(Array2DRef<std::byte> dest,
+                           Array2DRef<const std::byte> src) {
+  invariant(src.width > 0);
+  invariant(src.height > 0);
+  invariant(dest.width > 0);
+  invariant(dest.height > 0);
+  invariant(src.height == dest.height);
+  invariant(src.width == dest.width);
+  for (int row = 0; row != src.height; ++row)
+    copyPixelsImpl(dest[row], src[row]);
+}
+
+inline void copyPixels(std::byte* destPtr, int dstPitch,
+                       const std::byte* srcPtr, int srcPitch, int rowSize,
+                       int height) {
+  invariant(destPtr);
   invariant(dstPitch > 0);
-  invariant(src);
+  invariant(srcPtr);
   invariant(srcPitch > 0);
   invariant(rowSize > 0);
   invariant(height > 0);
   invariant(rowSize <= srcPitch);
   invariant(rowSize <= dstPitch);
-  if (dstPitch == srcPitch && srcPitch == rowSize)
-    memcpy(dest, src, static_cast<size_t>(rowSize) * height);
-  else {
-    for (int y = height; y > 0; --y) {
-      memcpy(dest, src, rowSize);
-      dest += dstPitch;
-      src += srcPitch;
-    }
+  if (height == 1) {
+    dstPitch = std::min(dstPitch, rowSize);
+    srcPitch = std::min(srcPitch, rowSize);
   }
+  auto dest = Array2DRef(destPtr, rowSize, height, dstPitch);
+  auto src = Array2DRef(srcPtr, rowSize, height, srcPitch);
+  copyPixelsImpl(dest, src);
 }
 
 template <typename T_TO, typename T_FROM>
