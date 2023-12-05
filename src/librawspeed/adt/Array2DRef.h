@@ -95,6 +95,11 @@ public:
   T& operator()(int row, int col) const;
 };
 
+// CTAD deduction guide
+template <typename T>
+explicit Array2DRef(T* data, int width, int height, int pitch = 0)
+    -> Array2DRef<T>;
+
 template <class T>
 Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
                           const int pitch_ /* = 0 */)
