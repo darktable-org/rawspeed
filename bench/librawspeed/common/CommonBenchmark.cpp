@@ -19,7 +19,6 @@
 */
 
 #include "bench/Common.h"
-#include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include <cstddef>
@@ -32,12 +31,8 @@ using rawspeed::iPoint2D;
 
 namespace {
 
-void BM_CopyPixels(benchmark::State& state, bool singleRow, bool padddedRows) {
-  iPoint2D dims;
-  if (singleRow)
-    dims = iPoint2D(rawspeed::implicit_cast<int>(state.range(0)), 1);
-  else
-    dims = areaToRectangle(state.range(0), {3, 2});
+void BM_CopyPixels(benchmark::State& state, bool padddedRows) {
+  iPoint2D dims = areaToRectangle(state.range(0), {3, 2});
 
   const int width = dims.x;
   const int height = dims.y;
@@ -67,16 +62,12 @@ void BM_CopyPixels(benchmark::State& state, bool singleRow, bool padddedRows) {
                            benchmark::Counter::kIs1024)}});
 }
 
-void BM_CopyPixels1D(benchmark::State& state) {
-  BM_CopyPixels(state, /*singleRow=*/true, /*padddedRows=*/false);
-}
-
 void BM_CopyPixels2DContiguous(benchmark::State& state) {
-  BM_CopyPixels(state, /*singleRow=*/false, /*padddedRows=*/false);
+  BM_CopyPixels(state, /*padddedRows=*/false);
 }
 
 void BM_CopyPixels2DStrided(benchmark::State& state) {
-  BM_CopyPixels(state, /*singleRow=*/false, /*padddedRows=*/true);
+  BM_CopyPixels(state, /*padddedRows=*/true);
 }
 
 inline void CustomArguments(benchmark::internal::Benchmark* b) {
@@ -102,7 +93,6 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
-BENCHMARK(BM_CopyPixels1D)->Apply(CustomArguments);
 BENCHMARK(BM_CopyPixels2DContiguous)->Apply(CustomArguments);
 BENCHMARK(BM_CopyPixels2DStrided)->Apply(CustomArguments);
 

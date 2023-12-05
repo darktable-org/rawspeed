@@ -53,7 +53,7 @@ inline void copyPixels(std::byte* dest, int dstPitch, const std::byte* src,
                        int srcPitch, int rowSize, int height) {
   invariant(rowSize <= srcPitch);
   invariant(rowSize <= dstPitch);
-  if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
+  if (dstPitch == srcPitch && srcPitch == rowSize)
     memcpy(dest, src, static_cast<size_t>(rowSize) * height);
   else {
     for (int y = height; y > 0; --y) {
