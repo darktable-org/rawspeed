@@ -74,7 +74,7 @@ TEST_P(PowerOfTwoTest, PowerOfTwoTest) {
   ASSERT_EQ(isPowerOfTwo(in), expected);
 }
 
-using RoundDownType = std::tuple<size_t, size_t, size_t>;
+using RoundDownType = std::tuple<uint64_t, uint64_t, uint64_t>;
 class RoundDownTest : public ::testing::TestWithParam<RoundDownType> {
 protected:
   RoundDownTest() = default;
@@ -84,9 +84,9 @@ protected:
     expected = std::get<2>(GetParam());
   }
 
-  size_t in; // input
-  size_t multiple;
-  size_t expected; // expected output
+  uint64_t in; // input
+  uint64_t multiple;
+  uint64_t expected; // expected output
 };
 static const RoundDownType RoundDownValues[] = {
     make_tuple(0, 0, 0),    make_tuple(0, 10, 0),  make_tuple(10, 0, 10),
@@ -102,7 +102,7 @@ TEST_P(RoundDownTest, RoundDownTest) {
   ASSERT_EQ(roundDown(in, multiple), expected);
 }
 
-using RoundUpType = std::tuple<size_t, size_t, size_t>;
+using RoundUpType = std::tuple<uint64_t, uint64_t, uint64_t>;
 class RoundUpTest : public ::testing::TestWithParam<RoundUpType> {
 protected:
   RoundUpTest() = default;
@@ -112,9 +112,9 @@ protected:
     expected = std::get<2>(GetParam());
   }
 
-  size_t in; // input
-  size_t multiple;
-  size_t expected; // expected output
+  uint64_t in; // input
+  uint64_t multiple;
+  uint64_t expected; // expected output
 };
 static const RoundUpType RoundUpValues[] = {
     make_tuple(0, 0, 0),    make_tuple(0, 10, 0),   make_tuple(10, 0, 10),
