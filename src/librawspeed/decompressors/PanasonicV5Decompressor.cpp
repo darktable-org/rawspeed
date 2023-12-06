@@ -35,10 +35,15 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <utility>
 #include <vector>
+
+#ifndef NDEBUG
+#include <limits>
+#endif
 
 namespace rawspeed {
 
@@ -114,7 +119,9 @@ void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
   };
 
   invariant(numBlocks * BlockSize == input.getRemainSize());
-  blocks.reserve(numBlocks);
+  assert(numBlocks <= std::numeric_limits<uint32_t>::max());
+  assert(numBlocks <= std::numeric_limits<size_t>::max());
+  blocks.reserve(implicit_cast<size_t>(numBlocks));
 
   const auto pixelsPerBlock = dsc.pixelsPerPacket * PacketsPerBlock;
   invariant((numBlocks - 1U) * pixelsPerBlock < mRaw->dim.area());
