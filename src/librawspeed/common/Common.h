@@ -53,8 +53,7 @@ void writeLog(DEBUG_PRIO priority, const char* format, ...)
 inline void copyPixelsImpl(Array1DRef<std::byte> dest,
                            Array1DRef<const std::byte> src) {
   invariant(src.size() == dest.size());
-  for (int col = 0; col != src.size(); ++col)
-    dest(col) = src(col);
+  std::copy(src.begin(), src.end(), dest.begin());
 }
 
 inline void copyPixelsImpl(Array2DRef<std::byte> dest,
