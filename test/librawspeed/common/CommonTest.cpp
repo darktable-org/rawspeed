@@ -375,34 +375,25 @@ protected:
     src.resize(static_cast<size_t>(srcPitch) * height);
     dst.resize(static_cast<size_t>(dstPitch) * height);
 
-    fill(src.begin(), src.end(), 0);
-    fill(dst.begin(), dst.end(), static_cast<decltype(dst)::value_type>(-1));
-  }
-  void generate() {
-    uint8_t v = 0;
-
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < rowSize; x++, v++) {
-        src[y * srcPitch + x] = v;
-      }
-    }
+    fill(src.begin(), src.end(), newVal);
+    fill(dst.begin(), dst.end(), origVal);
   }
   void copy() {
-    if (src.empty() || dst.empty())
-      return;
-
     copyPixels(reinterpret_cast<std::byte*>(&(dst[0])), dstPitch,
                reinterpret_cast<const std::byte*>(&(src[0])), srcPitch, rowSize,
                height);
   }
   void compare() {
     for (int y = 0; y < height; y++) {
-      for (int x = 0; x < rowSize; x++) {
-        ASSERT_EQ(dst[y * dstPitch + x], src[y * srcPitch + x]);
-      }
+      for (int x = 0; x < srcPitch; x++)
+        ASSERT_EQ(src[y * srcPitch + x], newVal);
+      for (int x = 0; x < dstPitch; x++)
+        ASSERT_EQ(dst[y * dstPitch + x], x < rowSize ? newVal : origVal);
     }
   }
 
+  static constexpr uint8_t newVal = 0;
+  static constexpr uint8_t origVal = -1;
   vector<uint8_t> src;
   vector<uint8_t> dst;
   int dstPitch;
@@ -411,12 +402,11 @@ protected:
   int height;
 };
 INSTANTIATE_TEST_SUITE_P(CopyPixelsTest, CopyPixelsTest,
-                         testing::Combine(testing::Range(0, 4, 1),
-                                          testing::Range(0, 4, 1),
-                                          testing::Range(0, 4, 1),
-                                          testing::Range(0, 4, 1)));
+                         testing::Combine(testing::Range(1, 4, 1),
+                                          testing::Range(1, 4, 1),
+                                          testing::Range(1, 4, 1),
+                                          testing::Range(1, 4, 1)));
 TEST_P(CopyPixelsTest, CopyPixelsTest) {
-  generate();
   copy();
   compare();
 }
