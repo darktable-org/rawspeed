@@ -34,6 +34,7 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <cassert>
+#include <cinttypes>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -571,7 +572,7 @@ protected:
             S::select(getRoi().getWidth(), getRoi().getHeight()),
             S::select(getPitch().x, getPitch().y));
         expectedSize != deltaF_count) {
-      ThrowRDE("Got unexpected number of elements (%zu), expected %u.",
+      ThrowRDE("Got unexpected number of elements (%" PRIu64 "), expected %u.",
                expectedSize, deltaF_count);
     }
 
