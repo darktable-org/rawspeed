@@ -32,13 +32,15 @@ using Type = std::byte;
 namespace {
 
 template <typename Allocator> void construct(benchmark::State& state) {
-  std::vector<Type, Allocator> vec(state.range(0));
+  std::vector<Type, Allocator> vec(
+      rawspeed::implicit_cast<size_t>(state.range(0)));
   benchmark::DoNotOptimize(vec);
 }
 
 template <typename Allocator>
 void construct_with_zeroinit(benchmark::State& state) {
-  std::vector<Type, Allocator> vec(state.range(0), Type(0));
+  std::vector<Type, Allocator> vec(
+      rawspeed::implicit_cast<size_t>(state.range(0)), Type(0));
   benchmark::DoNotOptimize(vec);
 }
 
