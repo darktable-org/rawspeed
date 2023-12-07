@@ -20,12 +20,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "sign-conversion" # FIXME: should enable this.
 )
 
-if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-  list (APPEND CLANG_DISABLED_WARNING_FLAGS
-    "shorten-64-to-32"
-  )
-endif()
-
 # Yes, these have to be *re-enabled* after CLANG_DISABLED_WARNING_FLAGS.
 set (CLANG_REENABLED_WARNING_FLAGS
   "extra-semi"

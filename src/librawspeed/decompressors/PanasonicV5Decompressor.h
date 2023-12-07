@@ -69,7 +69,7 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
 
   const uint32_t bps;
 
-  size_t numBlocks;
+  uint64_t numBlocks;
 
   struct Block final {
     ByteStream bs;

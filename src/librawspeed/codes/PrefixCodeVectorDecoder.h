@@ -44,7 +44,7 @@ public:
 
 private:
   // Given this code len, which code id is the minimal?
-  std::vector<unsigned int> extrCodeIdForLen; // index is length of code
+  std::vector<uint32_t> extrCodeIdForLen; // index is length of code
 
 protected:
   template <typename BIT_STREAM>
@@ -65,7 +65,7 @@ protected:
       partial.code_len++;
 
       // Given global ordering and the code length, we know the code id range.
-      for (uint64_t codeId = extrCodeIdForLen[partial.code_len];
+      for (auto codeId = extrCodeIdForLen[partial.code_len];
            codeId < extrCodeIdForLen[1U + partial.code_len]; codeId++) {
         const typename Base::CodeSymbol& symbol = Base::code.symbols[codeId];
         invariant(partial.code_len == symbol.code_len);

@@ -25,6 +25,7 @@
 #include "common/Common.h"
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 
 using rawspeed::iPoint2D;
@@ -38,7 +39,7 @@ benchmarkDryRun() {
 }
 
 iPoint2D RAWSPEED_READNONE __attribute__((visibility("default")))
-areaToRectangle(size_t area, iPoint2D aspect) {
+areaToRectangle(uint64_t area, iPoint2D aspect) {
   double sqSide = sqrt(area);
   double sqARatio =
       sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));

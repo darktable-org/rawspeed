@@ -114,8 +114,8 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
 
 template <typename T>
   requires std::is_pointer_v<T>
-constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
-                                                         size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                           uint64_t multiple) {
   if (multiple == 0)
     return 0;
   static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
@@ -125,17 +125,17 @@ constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
 
 template <typename T>
   requires std::is_integral_v<T>
-constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
-                                                         size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                           uint64_t multiple) {
   if (multiple == 0)
     return 0;
   return value % multiple;
 }
 
 template <typename T>
-constexpr T RAWSPEED_READNONE roundToMultiple(T value, size_t multiple,
+constexpr T RAWSPEED_READNONE roundToMultiple(T value, uint64_t multiple,
                                               bool roundDown) {
-  size_t offset = getMisalignmentOffset(value, multiple);
+  uint64_t offset = getMisalignmentOffset(value, multiple);
   if (offset == 0)
     return value;
   // Drop remainder.
@@ -146,15 +146,18 @@ constexpr T RAWSPEED_READNONE roundToMultiple(T value, size_t multiple,
   return roundedDown + multiple;
 }
 
-constexpr size_t RAWSPEED_READNONE roundDown(size_t value, size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE roundDown(uint64_t value,
+                                               uint64_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/true);
 }
 
-constexpr size_t RAWSPEED_READNONE roundUp(size_t value, size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE roundUp(uint64_t value,
+                                             uint64_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/false);
 }
 
-constexpr size_t RAWSPEED_READNONE roundUpDivision(size_t value, size_t div) {
+constexpr uint64_t RAWSPEED_READNONE roundUpDivision(uint64_t value,
+                                                     uint64_t div) {
   return (value != 0) ? (1 + ((value - 1) / div)) : 0;
 }
 

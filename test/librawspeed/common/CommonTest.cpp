@@ -74,7 +74,7 @@ TEST_P(PowerOfTwoTest, PowerOfTwoTest) {
   ASSERT_EQ(isPowerOfTwo(in), expected);
 }
 
-using RoundDownType = std::tuple<size_t, size_t, size_t>;
+using RoundDownType = std::tuple<uint64_t, uint64_t, uint64_t>;
 class RoundDownTest : public ::testing::TestWithParam<RoundDownType> {
 protected:
   RoundDownTest() = default;
@@ -84,9 +84,9 @@ protected:
     expected = std::get<2>(GetParam());
   }
 
-  size_t in; // input
-  size_t multiple;
-  size_t expected; // expected output
+  uint64_t in; // input
+  uint64_t multiple;
+  uint64_t expected; // expected output
 };
 static const RoundDownType RoundDownValues[] = {
     make_tuple(0, 0, 0),    make_tuple(0, 10, 0),  make_tuple(10, 0, 10),
@@ -102,7 +102,7 @@ TEST_P(RoundDownTest, RoundDownTest) {
   ASSERT_EQ(roundDown(in, multiple), expected);
 }
 
-using RoundUpType = std::tuple<size_t, size_t, size_t>;
+using RoundUpType = std::tuple<uint64_t, uint64_t, uint64_t>;
 class RoundUpTest : public ::testing::TestWithParam<RoundUpType> {
 protected:
   RoundUpTest() = default;
@@ -112,9 +112,9 @@ protected:
     expected = std::get<2>(GetParam());
   }
 
-  size_t in; // input
-  size_t multiple;
-  size_t expected; // expected output
+  uint64_t in; // input
+  uint64_t multiple;
+  uint64_t expected; // expected output
 };
 static const RoundUpType RoundUpValues[] = {
     make_tuple(0, 0, 0),    make_tuple(0, 10, 0),   make_tuple(10, 0, 10),
@@ -128,7 +128,7 @@ INSTANTIATE_TEST_SUITE_P(RoundUpTest, RoundUpTest,
                          ::testing::ValuesIn(RoundUpValues));
 TEST_P(RoundUpTest, RoundUpTest) { ASSERT_EQ(roundUp(in, multiple), expected); }
 
-using RoundUpDivisionType = std::tuple<size_t, size_t, size_t>;
+using RoundUpDivisionType = std::tuple<uint64_t, uint64_t, uint64_t>;
 class RoundUpDivisionTest
     : public ::testing::TestWithParam<RoundUpDivisionType> {
 protected:
@@ -139,9 +139,9 @@ protected:
     expected = std::get<2>(GetParam());
   }
 
-  size_t in; // input
-  size_t divider;
-  size_t expected; // expected output
+  uint64_t in; // input
+  uint64_t divider;
+  uint64_t expected; // expected output
 };
 static const RoundUpDivisionType RoundUpDivisionValues[] = {
     make_tuple(0, 10, 0),
@@ -157,20 +157,22 @@ static const RoundUpDivisionType RoundUpDivisionValues[] = {
     make_tuple(10, 9, 2),
     make_tuple(0, 1, 0),
     make_tuple(1, 1, 1),
-    make_tuple(numeric_limits<size_t>::max() - 1, 1,
-               numeric_limits<size_t>::max() - 1),
-    make_tuple(numeric_limits<size_t>::max(), 1, numeric_limits<size_t>::max()),
-    make_tuple(0, numeric_limits<size_t>::max() - 1, 0),
-    make_tuple(1, numeric_limits<size_t>::max() - 1, 1),
-    make_tuple(numeric_limits<size_t>::max() - 1,
-               numeric_limits<size_t>::max() - 1, 1),
-    make_tuple(numeric_limits<size_t>::max(), numeric_limits<size_t>::max() - 1,
-               2),
-    make_tuple(0, numeric_limits<size_t>::max(), 0),
-    make_tuple(1, numeric_limits<size_t>::max(), 1),
-    make_tuple(numeric_limits<size_t>::max() - 1, numeric_limits<size_t>::max(),
+    make_tuple(numeric_limits<uint64_t>::max() - 1, 1,
+               numeric_limits<uint64_t>::max() - 1),
+    make_tuple(numeric_limits<uint64_t>::max(), 1,
+               numeric_limits<uint64_t>::max()),
+    make_tuple(0, numeric_limits<uint64_t>::max() - 1, 0),
+    make_tuple(1, numeric_limits<uint64_t>::max() - 1, 1),
+    make_tuple(numeric_limits<uint64_t>::max() - 1,
+               numeric_limits<uint64_t>::max() - 1, 1),
+    make_tuple(numeric_limits<uint64_t>::max(),
+               numeric_limits<uint64_t>::max() - 1, 2),
+    make_tuple(0, numeric_limits<uint64_t>::max(), 0),
+    make_tuple(1, numeric_limits<uint64_t>::max(), 1),
+    make_tuple(numeric_limits<uint64_t>::max() - 1,
+               numeric_limits<uint64_t>::max(), 1),
+    make_tuple(numeric_limits<uint64_t>::max(), numeric_limits<uint64_t>::max(),
                1),
-    make_tuple(numeric_limits<size_t>::max(), numeric_limits<size_t>::max(), 1),
 
 };
 INSTANTIATE_TEST_SUITE_P(RoundUpDivisionTest, RoundUpDivisionTest,
