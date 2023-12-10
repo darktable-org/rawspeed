@@ -32,7 +32,7 @@ env:
 jobs:
   macOS:
     name: ${{ inputs.compiler-family }}.${{ inputs.compiler-version }}.targeting.OSX.${{ inputs.os-deployment_target }}.${{ inputs.flavor }}
-    timeout-minutes: 8
+    timeout-minutes: 9
     runs-on: ${{ inputs.os }}
     steps:
       - name: Fetch/Checkout RawSpeed git repo
@@ -42,7 +42,7 @@ jobs:
           path: 'rawspeed'
           fetch-depth: 1
       - name: Install Base Dependencies
-        timeout-minutes: 1
+        timeout-minutes: 2
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
         run: |
