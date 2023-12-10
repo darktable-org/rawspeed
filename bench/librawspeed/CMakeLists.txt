@@ -33,6 +33,7 @@ endfunction()
 
 add_subdirectory(adt)
 add_subdirectory(bench)
+add_subdirectory(common)
 add_subdirectory(decompressors)
 add_subdirectory(interpolators)
 add_subdirectory(io)

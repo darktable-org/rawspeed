@@ -24,6 +24,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include <cstddef>
+#include <optional>
 #include <type_traits>
 #include <vector>
 
@@ -90,10 +91,17 @@ public:
     return {storage.data(), width, height};
   }
 
+  [[nodiscard]] std::optional<Array1DRef<T>> getAsArray1DRef() const;
+
   Array1DRef<T> operator[](int row) const;
 
   T& operator()(int row, int col) const;
 };
+
+// CTAD deduction guide
+template <typename T>
+explicit Array2DRef(T* data, int width, int height, int pitch = 0)
+    -> Array2DRef<T>;
 
 template <class T>
 Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
@@ -102,6 +110,16 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
       height(height_) {
   invariant(width >= 0);
   invariant(height >= 0);
+  invariant(_pitch >= 0);
+  invariant(_pitch >= width);
+}
+
+template <class T>
+[[nodiscard]] inline std::optional<Array1DRef<T>>
+Array2DRef<T>::getAsArray1DRef() const {
+  if (height == 1 || _pitch == width)
+    return {{_data, width * height}};
+  return std::nullopt;
 }
 
 template <class T>
@@ -109,6 +127,7 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
   invariant(_data);
   invariant(row >= 0);
   invariant(row < height);
+  invariant(_pitch >= width);
   return Array1DRef<T>(&_data[row * _pitch], width);
 }
 

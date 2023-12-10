@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -91,7 +92,9 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
   const auto blocksTotal = roundUpDivision(input.getRemainSize(), BlockSize);
   invariant(blocksTotal > 0);
   invariant(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
-  blocks.reserve(blocksTotal);
+  assert(blocksTotal <= std::numeric_limits<uint32_t>::max());
+  assert(blocksTotal <= std::numeric_limits<size_t>::max());
+  blocks.reserve(implicit_cast<size_t>(blocksTotal));
 
   unsigned currPixel = 0;
   std::generate_n(

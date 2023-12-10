@@ -103,12 +103,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="52" width="0" height="0"/>
-		<Sensor black="2048" white="15000"/>
-		<Sensor black="2047" white="12277" iso_list="100"/>
-		<Sensor black="2047" white="15000" iso_list="200 6400"/>
-		<Sensor black="2048" white="15000" iso_list="800 3200"/>
-		<Sensor black="2049" white="15000" iso_list="1600"/>
-		<Sensor black="2046" white="15000" iso_list="25600"/>
 		<BlackAreas>
 			<Vertical x="0" width="72"/>
 			<Horizontal y="8" height="44"/>
@@ -134,10 +128,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2049" white="14338"/>
-		<Sensor black="511" white="11892" iso_list="100"/>
-		<Sensor black="511" white="14338" iso_list="200"/>
-		<Sensor black="2041" white="14338" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="0" width="260"/>
 			<Horizontal y="0" height="38"/>
@@ -261,9 +251,6 @@
 			<Vertical x="0" width="72"/>
 			<Horizontal y="2" height="8"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="50"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6599 -537 -891</ColorMatrixRow>
@@ -314,9 +301,6 @@
 			<Alias id="EOS 350D">Canon EOS 350D</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D Digital</Alias>
 		</Aliases>
-		<Hints>
-			<Hint name="wb_offset" value="50"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6018 -617 -965</ColorMatrixRow>
@@ -350,7 +334,7 @@
 	<Camera make="Canon" model="Canon EOS 40D" mode="sRaw1">
 		<ID make="Canon" model="EOS 40D">Canon EOS 40D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
@@ -365,7 +349,7 @@
 	<Camera make="Canon" model="Canon EOS 40D" mode="sRaw2">
 		<ID make="Canon" model="EOS 40D">Canon EOS 40D</ID>
 		<Crop x="0" y="0" width="1944" height="1296"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_40d" value=""/>
 		</Hints>
@@ -386,7 +370,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="22" y="18" width="4290" height="2856"/>
-		<Sensor black="1020" white="14500"/>
 		<Aliases>
 			<Alias id="Digital Rebel XSi">Canon EOS DIGITAL REBEL XSi</Alias>
 			<Alias id="Kiss Digital X2">Canon EOS Kiss Digital X2</Alias>
@@ -409,7 +392,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="64" y="52" width="4752" height="3158"/>
-		<Sensor black="1020" white="13653"/>
 		<BlackAreas>
 			<Vertical x="0" width="60"/>
 			<Horizontal y="2" height="46"/>
@@ -425,7 +407,6 @@
 	<Camera make="Canon" model="Canon EOS 50D" mode="sRaw1">
 		<ID make="Canon" model="EOS 50D">Canon EOS 50D</ID>
 		<Crop x="0" y="0" width="3272" height="2178"/>
-		<Sensor black="0" white="53000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4920 616 -593</ColorMatrixRow>
@@ -437,7 +418,6 @@
 	<Camera make="Canon" model="Canon EOS 50D" mode="sRaw2">
 		<ID make="Canon" model="EOS 50D">Canon EOS 50D</ID>
 		<Crop x="0" y="0" width="2376" height="1584"/>
-		<Sensor black="0" white="53000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4920 616 -593</ColorMatrixRow>
@@ -455,7 +435,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="54" width="0" height="0"/>
-		<Sensor black="2026" white="14200"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="46"/>
@@ -471,7 +450,6 @@
 	<Camera make="Canon" model="Canon EOS 60D" mode="sRaw1">
 		<ID make="Canon" model="EOS 60D">Canon EOS 60D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6719 -994 -925</ColorMatrixRow>
@@ -483,7 +461,6 @@
 	<Camera make="Canon" model="Canon EOS 60D" mode="sRaw2">
 		<ID make="Canon" model="EOS 60D">Canon EOS 60D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6719 -994 -925</ColorMatrixRow>
@@ -501,9 +478,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="38" width="0" height="0"/>
-		<Sensor black="2026" white="13653" iso_min="0" iso_max="199"/>
-		<Sensor black="2026" white="16383" iso_min="6400" iso_max="25600"/>
-		<Sensor black="2026" white="15387"/>
 		<BlackAreas>
 			<Vertical x="0" width="72"/>
 			<Horizontal y="0" height="38"/>
@@ -519,7 +493,6 @@
 	<Camera make="Canon" model="Canon EOS 70D" mode="sRaw1">
 		<ID make="Canon" model="EOS 70D">Canon EOS 70D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="53000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -535,7 +508,6 @@
 	<Camera make="Canon" model="Canon EOS 70D" mode="sRaw2">
 		<ID make="Canon" model="EOS 70D">Canon EOS 70D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="53000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -557,14 +529,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-8" height="-4"/>
-		<Sensor black="512" white="11892" iso_list="100 125"/>
-		<Sensor black="512" white="10749" iso_list="160"/>
-		<Sensor black="511" white="14338" iso_list="200 250"/>
-		<Sensor black="2048" white="10749" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="2048" white="14338" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 16000"/>
-		<Sensor black="2046" white="14338" iso_list="8000 25600"/>
-		<Sensor black="2045" white="14338" iso_list="10000"/>
-		<Sensor black="2049" white="14338" iso_list="12800"/>
 		<BlackAreas>
 			<Vertical x="0" width="263"/>
 			<Horizontal y="0" height="33"/>
@@ -580,11 +544,6 @@
 	<Camera make="Canon" model="Canon EOS 80D" mode="sRaw1" decoder_version="8">
 		<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 		<Crop x="28" y="10" width="0" height="0"/>
-		<Sensor black="0" white="48816" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="0" white="51936" iso_list="160"/>
-		<Sensor black="0" white="55680" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
-		<Sensor black="0" white="55688" iso_list="8000 10000"/>
-		<Sensor black="0" white="58832" iso_list="100 125 200 250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -600,15 +559,6 @@
 	<Camera make="Canon" model="Canon EOS 80D" mode="sRaw2" decoder_version="7">
 		<ID make="Canon" model="EOS 80D">Canon EOS 80D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="48468" iso_list="2500"/>
-		<Sensor black="0" white="48488" iso_list="1250"/>
-		<Sensor black="0" white="48492" iso_list="320"/>
-		<Sensor black="0" white="48496" iso_list="640"/>
-		<Sensor black="0" white="48588" iso_list="5000"/>
-		<Sensor black="0" white="51932" iso_list="160"/>
-		<Sensor black="0" white="55680" iso_list="400 500 800 1000 1600 2000 3200 4000 6400 12800 16000 25600"/>
-		<Sensor black="0" white="55688" iso_list="8000 10000"/>
-		<Sensor black="0" white="58832" iso_list="100 125 200 250"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -630,9 +580,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="76" y="60" width="-6" height="-6"/>
-		<Sensor black="2052" white="15000"/>
-		<Sensor black="2048" white="12277" iso_list="100"/>
-		<Sensor black="2048" white="11222" iso_list="160 320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="4" height="50"/>
@@ -658,8 +605,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="34" width="0" height="0"/>
-		<Sensor black="2047" white="11765" iso_min="0" iso_max="199"/>
-		<Sensor black="2047" white="14580"/>
 		<Aliases>
 			<Alias id="EOS Rebel T6i">Canon EOS Rebel T6i</Alias>
 			<Alias id="EOS Kiss X8i">Canon EOS Kiss X8i</Alias>
@@ -681,9 +626,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2049" white="14338"/>
-		<Sensor black="511" white="11892" iso_list="100"/>
-		<Sensor black="511" white="14338" iso_list="200"/>
 		<BlackAreas>
 			<Vertical x="0" width="260"/>
 			<Horizontal y="2" height="36"/>
@@ -710,8 +652,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="34" width="0" height="0"/>
-		<Sensor black="2047" white="11765" iso_min="0" iso_max="199"/>
-		<Sensor black="2047" white="14580"/>
 		<Aliases>
 			<Alias id="EOS Rebel T6s">Canon EOS Rebel T6s</Alias>
 			<Alias id="EOS 8000D">Canon EOS 8000D</Alias>
@@ -733,12 +673,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2049" white="14338"/>
-		<Sensor black="511" white="11892" iso_list="100 125"/>
-		<Sensor black="511" white="10755" iso_list="160"/>
-		<Sensor black="511" white="14338" iso_list="200 250"/>
-		<Sensor black="2048" white="10755" iso_list="320 640 1250 2500 5000"/>
-		<Sensor black="2041" white="14338" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="0" width="260"/>
 			<Horizontal y="2" height="32"/>
@@ -763,7 +697,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="62" y="30" width="4722" height="3142"/>
-		<Sensor black="1020" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="56"/>
 			<Horizontal y="2" height="22"/>
@@ -789,8 +722,6 @@
 			<Color x="0" y="1">RED</Color>
 		</CFA>
 		<Crop x="148" y="54" width="0" height="0"/>
-		<Sensor black="2054" white="15000"/>
-		<Sensor black="2048" white="13926" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -816,8 +747,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="54" width="0" height="0"/>
-		<Sensor black="2026" white="13584" iso_min="0" iso_max="199"/>
-		<Sensor black="2026" white="15304"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -843,8 +772,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="76" y="56" width="0" height="0"/>
-		<Sensor black="2026" white="13584" iso_min="0" iso_max="199"/>
-		<Sensor black="2026" white="15304"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="4" height="44"/>
@@ -892,8 +819,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="158" y="51" width="5634" height="3753"/>
-		<Sensor black="1024" white="12995" iso_list="160 320 640 1250"/>
-		<Sensor black="1024" white="15950"/>
 		<BlackAreas>
 			<Vertical x="0" width="156"/>
 			<Horizontal y="2" height="48"/>
@@ -909,8 +834,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark II">Canon EOS 5D Mark II</ID>
 		<Crop x="0" y="0" width="3872" height="2574"/>
-		<Sensor black="0" white="57200" iso_list="160 320 640 1250"/>
-		<Sensor black="0" white="64948"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4716 603 -830</ColorMatrixRow>
@@ -922,8 +845,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark II">Canon EOS 5D Mark II</ID>
 		<Crop x="0" y="0" width="2808" height="1872"/>
-		<Sensor black="0" white="57200" iso_list="160 320 640 1250"/>
-		<Sensor black="0" white="64948"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4716 603 -830</ColorMatrixRow>
@@ -941,12 +862,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="124" y="82" width="-2" height="0"/>
-		<Sensor black="2060" white="16383"/>
-		<Sensor black="2060" white="15700" iso_list="400 500 1600"/>
-		<Sensor black="2060" white="15200" iso_list="100 125 200 250 800 2000"/>
-		<Sensor black="2060" white="15100" iso_list="2500 10000"/>
-		<Sensor black="2060" white="13700" iso_list="160 320 1250"/>
-		<Sensor black="2060" white="14200" iso_list="640 5000"/>
 		<BlackAreas>
 			<Vertical x="0" width="120"/>
 			<Horizontal y="2" height="78"/>
@@ -962,10 +877,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark III" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark III">Canon EOS 5D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
-		<Sensor black="0" white="50300" iso_list="100 20000"/>
-		<Sensor black="0" white="55128" iso_list="25600 51200 102400"/>
-		<Sensor black="0" white="53220"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -981,10 +892,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark III" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark III">Canon EOS 5D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="44112" iso_list="160 320 640 1250 2500 5000 10000"/>
-		<Sensor black="0" white="51300" iso_list="250"/>
-		<Sensor black="0" white="55028" iso_list="25600 51200 102400"/>
-		<Sensor black="0" white="53000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1006,12 +913,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="136" y="44" width="0" height="0"/>
-		<Sensor black="2049" white="14448"/>
-		<Sensor black="513" white="14008" iso_list="50 100 125"/>
-		<Sensor black="512" white="10838" iso_list="160"/>
-		<Sensor black="512" white="14448" iso_list="200 250"/>
-		<Sensor black="2048" white="10838" iso_list="320 640 1250 2500 5000 10000 20000"/>
-		<Sensor black="2049" white="13533" iso_list="102400"/>
 		<BlackAreas>
 			<Vertical x="0" width="134"/>
 			<Horizontal y="0" height="40"/>
@@ -1027,7 +928,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw1">
 		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="56032"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1043,7 +943,6 @@
 	<Camera make="Canon" model="Canon EOS 5D Mark IV" mode="sRaw2">
 		<ID make="Canon" model="EOS 5D Mark IV">Canon EOS 5D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="56032"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1065,8 +964,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="164" y="72" width="-6" height="-8"/>
-		<Sensor black="2048" white="15181"/>
-		<Sensor black="2048" white="14466" iso_list="50 100"/>
 		<BlackAreas>
 			<Vertical x="0" width="150"/>
 			<Horizontal y="40" height="60"/>
@@ -1082,8 +979,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw1" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1099,8 +994,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS" mode="sRaw2" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS">Canon EOS 5DS</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1122,8 +1015,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="164" y="72" width="-6" height="-8"/>
-		<Sensor black="2048" white="15181"/>
-		<Sensor black="2048" white="14466" iso_list="50 100"/>
 		<BlackAreas>
 			<Vertical x="0" width="150"/>
 			<Horizontal y="40" height="60"/>
@@ -1139,8 +1030,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw1" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1156,8 +1045,6 @@
 	<Camera make="Canon" model="Canon EOS 5DS R" mode="sRaw2" decoder_version="6">
 		<ID make="Canon" model="EOS 5DS R">Canon EOS 5DS R</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="52000"/>
-		<Sensor black="0" white="46000" iso_list="50"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1179,12 +1066,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="74" y="40" width="0" height="-2"/>
-		<Sensor black="2048" white="15000"/>
-		<Sensor black="2047" white="15000" iso_list="50 100 125 200 250 16000"/>
-		<Sensor black="2047" white="13100" iso_list="160"/>
-		<Sensor black="2047" white="13000" iso_list="320"/>
-		<Sensor black="2048" white="13000" iso_list="640 1250 2500 5000 10000 20000"/>
-		<Sensor black="2048" white="16000" iso_list="51200 102400"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="2" height="36"/>
@@ -1200,7 +1081,6 @@
 	<Camera make="Canon" model="Canon EOS 6D" mode="sRaw1" decoder_version="3">
 		<ID make="Canon" model="EOS 6D">Canon EOS 6D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="48664"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1216,7 +1096,6 @@
 	<Camera make="Canon" model="Canon EOS 6D" mode="sRaw2">
 		<ID make="Canon" model="EOS 6D">Canon EOS 6D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="48664"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1238,10 +1117,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="128" y="52" width="-4" height="-4"/>
-		<Sensor black="2049" white="14558"/>
-		<Sensor black="513" white="14558" iso_list="50 100 125 200 250"/>
-		<Sensor black="513" white="11301" iso_list="160"/>
-		<Sensor black="2049" white="11301" iso_list="320 640 1250 2500 5000 10000"/>
 		<BlackAreas>
 			<Vertical x="2" width="116"/>
 			<Horizontal y="8" height="32"/>
@@ -1257,7 +1132,6 @@
 	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw1" decoder_version="9">
 		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1273,7 +1147,6 @@
 	<Camera make="Canon" model="Canon EOS 6D Mark II" mode="sRaw2" decoder_version="9">
 		<ID make="Canon" model="EOS 6D Mark II">Canon EOS 6D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1295,9 +1168,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="158" y="52" width="5202" height="3464"/>
-		<Sensor black="2049" white="15400"/>
-		<Sensor black="2048" white="13600" iso_list="100 125"/>
-		<Sensor black="2048" white="12600" iso_list="160 320 640 1250 2500"/>
 		<BlackAreas>
 			<Vertical x="8" width="156"/>
 			<Horizontal y="32" height="18"/>
@@ -1313,7 +1183,6 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6844 -996 -856</ColorMatrixRow>
@@ -1325,7 +1194,6 @@
 	<Camera make="Canon" model="Canon EOS 7D" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D">Canon EOS 7D</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6844 -996 -856</ColorMatrixRow>
@@ -1343,11 +1211,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="38" width="0" height="0"/>
-		<Sensor black="2048" white="15100"/>
-		<Sensor black="2047" white="13400" iso_list="100 125"/>
-		<Sensor black="2048" white="12400" iso_list="160 320 640 1250 2500 5000"/>
-		<Sensor black="2047" white="15300" iso_list="10000 12800 16000 25600"/>
-		<Sensor black="2040" white="16000" iso_list="51200"/>
 		<BlackAreas>
 			<Vertical x="4" width="64"/>
 			<Horizontal y="24" height="8"/>
@@ -1363,7 +1226,6 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1379,7 +1241,6 @@
 	<Camera make="Canon" model="Canon EOS 7D Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS 7D Mark II">Canon EOS 7D Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="30000"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -1401,8 +1262,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="42" y="18" width="3906" height="2602"/>
-		<Sensor black="255" white="3650" iso_min="0" iso_max="199"/>
-		<Sensor black="255" white="4036"/>
 		<BlackAreas>
 			<Vertical x="0" width="41"/>
 			<Horizontal y="2" height="14"/>
@@ -1429,7 +1288,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="64" y="20" width="0" height="0"/>
-		<Sensor black="2036" white="15500"/>
 		<BlackAreas>
 			<Vertical x="0" width="58"/>
 			<Horizontal y="4" height="12"/>
@@ -1455,8 +1313,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="54" width="0" height="0"/>
-		<Sensor black="2046" white="12279" iso_min="0" iso_max="199"/>
-		<Sensor black="2046" white="15000"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -1482,10 +1338,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="54" width="0" height="0"/>
-		<Sensor black="2048" white="15000"/>
-		<Sensor black="2046" white="12279" iso_list="100"/>
-		<Sensor black="2046" white="15000" iso_list="200"/>
-		<Sensor black="2047" white="15000" iso_list="3200"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="4" height="44"/>
@@ -1511,8 +1363,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="78" y="42" width="-4" height="-6"/>
-		<Sensor black="2048" white="15092"/>
-		<Sensor black="2048" white="12277" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="4" height="30"/>
@@ -1539,8 +1389,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="146" y="56" width="0" height="0"/>
-		<Sensor black="2051" white="15000"/>
-		<Sensor black="2046" white="12279" iso_list="100"/>
 		<BlackAreas>
 			<Vertical x="0" width="130"/>
 			<Horizontal y="4" height="40"/>
@@ -1592,8 +1440,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="76" y="56" width="0" height="0"/>
-		<Sensor black="2026" white="13584" iso_min="0" iso_max="199"/>
-		<Sensor black="2026" white="15304"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="4" height="44"/>
@@ -1615,8 +1461,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="52" width="0" height="0"/>
-		<Sensor black="2026" white="13584" iso_min="0" iso_max="199"/>
-		<Sensor black="2026" white="15304"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="4" height="44"/>
@@ -1638,14 +1482,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="34" width="0" height="0"/>
-		<Sensor black="2048" white="16000"/>
 		<BlackAreas>
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6362 -823 -847</ColorMatrixRow>
@@ -1663,17 +1503,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="38" width="0" height="0"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -1691,17 +1524,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -1719,14 +1545,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="72" y="52" width="0" height="-2"/>
-		<Sensor black="2048" white="16000"/>
 		<BlackAreas>
 			<Vertical x="2" width="68"/>
 			<Horizontal y="2" height="40"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6400 -480 -888</ColorMatrixRow>
@@ -1744,17 +1566,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
 		<BlackAreas>
 			<Vertical x="4" width="260"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -1839,9 +1654,6 @@
 			<Vertical x="0" width="72"/>
 			<Horizontal y="2" height="8"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="68"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6264 -582 -724</ColorMatrixRow>
@@ -1897,7 +1709,7 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark III" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D Mark III">Canon EOS-1D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6291 -540 -976</ColorMatrixRow>
@@ -1909,7 +1721,7 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark III" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D Mark III">Canon EOS-1D Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6291 -540 -976</ColorMatrixRow>
@@ -1927,7 +1739,6 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="144" y="46" width="-64" height="-2"/>
-		<Sensor black="2000" white="13000"/>
 		<BlackAreas>
 			<Vertical x="0" width="140"/>
 			<Horizontal y="26" height="16"/>
@@ -1943,7 +1754,6 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D Mark IV">Canon EOS-1D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6014 -220 -795</ColorMatrixRow>
@@ -1955,7 +1765,6 @@
 	<Camera make="Canon" model="Canon EOS-1D Mark IV" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D Mark IV">Canon EOS-1D Mark IV</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6014 -220 -795</ColorMatrixRow>
@@ -1978,9 +1787,6 @@
 			<Vertical x="0" width="96"/>
 			<Horizontal y="2" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="68"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6517 -602 -867</ColorMatrixRow>
@@ -1998,7 +1804,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="62" y="20" width="5640" height="3752"/>
-		<Sensor black="1021" white="15100"/>
 		<BlackAreas>
 			<Vertical x="0" width="60"/>
 			<Horizontal y="4" height="14"/>
@@ -2014,7 +1819,7 @@
 	<Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw1">
 		<ID make="Canon" model="EOS-1Ds Mark III">Canon EOS-1Ds Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5859 -211 -930</ColorMatrixRow>
@@ -2026,7 +1831,7 @@
 	<Camera make="Canon" model="Canon EOS-1Ds Mark III" mode="sRaw2">
 		<ID make="Canon" model="EOS-1Ds Mark III">Canon EOS-1Ds Mark III</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5859 -211 -930</ColorMatrixRow>
@@ -2044,7 +1849,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="128" y="102" width="0" height="-2"/>
-		<Sensor black="2050" white="15100"/>
 		<BlackAreas>
 			<Vertical x="0" width="120"/>
 			<Horizontal y="0" height="98"/>
@@ -2060,7 +1864,6 @@
 	<Camera make="Canon" model="Canon EOS-1D X" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D X">Canon EOS-1D X</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2076,7 +1879,6 @@
 	<Camera make="Canon" model="Canon EOS-1D X" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D X">Canon EOS-1D X</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2098,13 +1900,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="74" y="40" width="-2" height="0"/>
-		<Sensor black="2048" white="14888"/>
-		<Sensor black="512" white="13898" iso_list="50 100"/>
-		<Sensor black="512" white="14888" iso_list="125 160 200 250"/>
-		<Sensor black="2049" white="14888" iso_list="1600 2500 51200"/>
-		<Sensor black="2050" white="13533" iso_list="102400"/>
-		<Sensor black="2048" white="13533" iso_list="204800"/>
-		<Sensor black="2049" white="13533" iso_list="409600"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="36"/>
@@ -2120,7 +1915,6 @@
 	<Camera make="Canon" model="Canon EOS-1D X Mark II" mode="sRaw1">
 		<ID make="Canon" model="EOS-1D X Mark II">Canon EOS-1D X Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2136,7 +1930,6 @@
 	<Camera make="Canon" model="Canon EOS-1D X Mark II" mode="sRaw2">
 		<ID make="Canon" model="EOS-1D X Mark II">Canon EOS-1D X Mark II</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
-		<Sensor black="0" white="65535"/>
 		<Hints>
 			<Hint name="sraw_new" value=""/>
 			<Hint name="invert_sraw_wb" value=""/>
@@ -2266,14 +2059,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="17" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="90"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9701 -3857 -921</ColorMatrixRow>
@@ -2313,10 +2102,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="17" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2360,10 +2145,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="18" width="0" height="0"/>
-		<Sensor black="511" white="4000"/>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2381,18 +2162,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="22" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
-		<Sensor black="2046" white="16000" iso_list="1600 2000 2500"/>
-		<Sensor black="2048" white="16000" iso_list="3200 4000"/>
-		<Sensor black="2049" white="16000" iso_list="5000 6400 8000"/>
-		<Sensor black="2050" white="16000" iso_list="10000 12800"/>
 		<BlackAreas>
 			<Vertical x="0" width="76"/>
 			<Horizontal y="0" height="14"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2410,14 +2183,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="82" y="52" width="-14" height="0"/>
-		<Sensor black="0" white="16383"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7378 -1255 -1043</ColorMatrixRow>
@@ -2435,14 +2204,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="82" y="52" width="-14" height="0"/>
-		<Sensor black="0" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="68"/>
 			<Horizontal y="0" height="46"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7378 -1255 -1043</ColorMatrixRow>
@@ -2460,13 +2225,6 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="266" y="42" width="-6" height="-4"/>
-		<Sensor black="2048" white="16000"/>
-		<Sensor black="512" white="16000" iso_list="100 125 200 250"/>
-		<Sensor black="512" white="13200" iso_list="160"/>
-		<Sensor black="2048" white="13200" iso_list="320 640 1250 2500 5000"/>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8532 -701 -1167</ColorMatrixRow>
@@ -2484,14 +2242,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="54" y="14" width="-12" height="-18"/>
-		<Sensor black="120" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="50"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13244 -5501 -1248</ColorMatrixRow>
@@ -2509,16 +2263,12 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="10" y="18" width="-56" height="-14"/>
-		<Sensor black="120" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="10"/>
 			<Vertical x="3696" width="48"/>
 			<Horizontal y="0" height="14"/>
 			<Horizontal y="2778" height="6"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12177 -4817 -1069</ColorMatrixRow>
@@ -2536,14 +2286,10 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="12" y="13" width="4432" height="3323"/>
-		<Sensor black="128" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="10"/>
 			<Horizontal y="0" height="8"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">11093 -3906 -1028</ColorMatrixRow>
@@ -2583,14 +2329,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="18" width="0" height="0"/>
-		<Sensor black="2047" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">9602 -3823 -937</ColorMatrixRow>
@@ -2608,14 +2350,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="104" y="22" width="-6" height="-6"/>
-		<Sensor black="2048" white="16000"/>
 		<BlackAreas>
 			<Vertical x="0" width="76"/>
 			<Horizontal y="0" height="14"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">10056 -4131 -944</ColorMatrixRow>
@@ -2633,15 +2371,10 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="106" y="12" width="-10" height="-66"/>
-		<Sensor black="500" white="2800" iso_min="12800" iso_max="12800"/>
-		<Sensor black="128" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7474 -2301 -567</ColorMatrixRow>
@@ -2659,14 +2392,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="96" y="18" width="-24" height="0"/>
-		<Sensor black="0" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="80"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8020 -2687 -682</ColorMatrixRow>
@@ -2684,14 +2413,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="192" y="12" width="3958" height="2760"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="188"/>
 			<Horizontal y="0" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6578 -259 -502</ColorMatrixRow>
@@ -2853,14 +2578,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="10" y="18" width="-54" height="-10"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="6"/>
 			<Horizontal y="0" height="14"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12374 -5016 -1049</ColorMatrixRow>
@@ -2878,16 +2599,12 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="66" y="24" width="-20" height="-24"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="50"/>
 			<Vertical x="3738" width="6"/>
 			<Horizontal y="0" height="10"/>
 			<Horizontal y="2774" height="10"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13440 -5896 -1279</ColorMatrixRow>
@@ -2905,15 +2622,11 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="104" y="12" width="-10" height="-66"/>
-		<Sensor black="125" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="100"/>
 			<Horizontal y="0" height="10"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">7968 -2565 -636</ColorMatrixRow>
@@ -2931,15 +2644,10 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="106" y="12" width="-10" height="-66"/>
-		<Sensor black="500" white="3072" iso_min="12800" iso_max="12800"/>
-		<Sensor black="128" white="4095"/>
 		<BlackAreas>
 			<Vertical x="0" width="100"/>
 			<Horizontal y="3062" height="60"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8039 -2643 -654</ColorMatrixRow>
@@ -2957,14 +2665,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="121" y="30" width="-47" height="-14"/>
-		<Sensor black="0" white="4000"/>
 		<BlackAreas>
 			<Vertical x="0" width="74"/>
 			<Horizontal y="0" height="12"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">6961 -1685 -695</ColorMatrixRow>
@@ -2982,14 +2686,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="100" y="20" width="-10" height="0"/>
-		<Sensor black="127" white="4095"/>
 		<BlackAreas>
 			<Vertical x="6" width="70"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12432 -4753 -1247</ColorMatrixRow>
@@ -3007,14 +2707,10 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="112" y="26" width="-24" height="-10"/>
-		<Sensor black="128" white="4000"/>
 		<BlackAreas>
 			<Vertical x="0" width="70"/>
 			<Horizontal y="0" height="16"/>
 		</BlackAreas>
-		<Hints>
-			<Hint name="wb_offset" value="142"/>
-		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13161 -5451 -1344</ColorMatrixRow>
@@ -12157,6 +11853,11 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-3 Mark III Monochrome">
+		<ID make="Pentax" model="K-3 Mark III Monochrome">PENTAX K-3 Mark III Monochrome</ID>
+		<Crop x="26" y="34" width="-28" height="-14"/>
+		<Sensor black="64" white="16315"/>
+	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-5" decoder_version="2">
 		<ID make="Pentax" model="K-5">PENTAX K-5</ID>
 		<CFA width="2" height="2">
@@ -14980,6 +14681,25 @@
 				<ColorMatrixRow plane="0">12343 -4515 -1285</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-7165 14899 2435</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-1895 2496 8800</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix SL1000">
+		<ID make="Fujifilm" model="FinePix SL1000">Fujifilm FinePix SL1000</ID>
+		<CFA2 width="2" height="2">
+			<ColorRow y="0">RG</ColorRow>
+			<ColorRow y="1">GB</ColorRow>
+		</CFA2>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="200" white="4095"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11705 -4262 -1107</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2282 10791 1709</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-555 1713 4945</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -18320,18 +18040,25 @@
 			<Hint name="full_height" value="3048"/>
 		</Hints>
 	</Camera>
-	<Camera make="Canon" model="PowerShot SX220 HS" supported="no" mode="chdk">
+	<Camera make="Canon" model="PowerShot SX220 HS" mode="chdk">
 		<CFA2 width="2" height="2">
 			<ColorRow y="0">RG</ColorRow>
 			<ColorRow y="1">GB</ColorRow>
 		</CFA2>
-		<Crop x="92" y="16" width="-4" height="-1"/>
-		<Sensor black="0" white="4095"/>
+		<Crop x="120" y="36" width="-34" height="-20"/>
+		<Sensor black="127" white="4095"/>
 		<Hints>
 			<Hint name="filesize" value="19131120"/>
 			<Hint name="full_width" value="4168"/>
 			<Hint name="full_height" value="3060"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">4668 -1707 -223</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1581 5193 389</ColorMatrixRow>
+				<ColorMatrixRow plane="2">351 1552 3717</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="PowerShot SX30 IS" supported="no" mode="chdk">
 		<CFA2 width="2" height="2">

@@ -22,9 +22,9 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Point.h"
-#include <cstddef>
+#include <cstdint>
 
 bool RAWSPEED_READNONE benchmarkDryRun();
 
 rawspeed::iPoint2D RAWSPEED_READNONE
-areaToRectangle(size_t area, rawspeed::iPoint2D aspect = {2, 2});
+areaToRectangle(uint64_t area, rawspeed::iPoint2D aspect = {2, 2});

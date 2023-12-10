@@ -72,7 +72,8 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   assert((Step == 1) || rawspeed::isAligned(Step, 2));
   assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
 
-  const std::vector<uint8_t> storage(state.range(0));
+  const std::vector<uint8_t> storage(
+      rawspeed::implicit_cast<size_t>(state.range(0)));
   const rawspeed::Buffer b(
       storage.data(),
       rawspeed::implicit_cast<rawspeed::Buffer::size_type>(state.range(0)));

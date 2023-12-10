@@ -165,6 +165,7 @@ class AbstractLJpegDecoder : public AbstractDecompressor {
 
 public:
   AbstractLJpegDecoder(ByteStream bs, RawImage img);
+  [[nodiscard]] int getSamplePrecision() const { return frame.prec; }
 
   virtual ~AbstractLJpegDecoder() = default;
 

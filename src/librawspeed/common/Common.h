@@ -21,6 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include <algorithm>
@@ -32,6 +33,7 @@
 #include <initializer_list>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 
@@ -49,17 +51,44 @@ enum class DEBUG_PRIO {
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
     __attribute__((format(printf, 2, 3)));
 
-inline void copyPixels(std::byte* dest, int dstPitch, const std::byte* src,
-                       int srcPitch, int rowSize, int height) {
-  if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
-    memcpy(dest, src, static_cast<size_t>(rowSize) * height);
-  else {
-    for (int y = height; y > 0; --y) {
-      memcpy(dest, src, rowSize);
-      dest += dstPitch;
-      src += srcPitch;
-    }
+inline void copyPixelsImpl(Array1DRef<std::byte> dest,
+                           Array1DRef<const std::byte> src) {
+  invariant(src.size() == dest.size());
+  std::copy(src.begin(), src.end(), dest.begin());
+}
+
+inline void copyPixelsImpl(Array2DRef<std::byte> dest,
+                           Array2DRef<const std::byte> src) {
+  invariant(src.width > 0);
+  invariant(src.height > 0);
+  invariant(dest.width > 0);
+  invariant(dest.height > 0);
+  invariant(src.height == dest.height);
+  invariant(src.width == dest.width);
+  if (auto [destAsStrip, srcAsStrip] =
+          std::make_tuple(dest.getAsArray1DRef(), src.getAsArray1DRef());
+      destAsStrip && srcAsStrip) {
+    copyPixelsImpl(*destAsStrip, *srcAsStrip);
+    return;
   }
+  for (int row = 0; row != src.height; ++row)
+    copyPixelsImpl(dest[row], src[row]);
+}
+
+inline void copyPixels(std::byte* destPtr, int dstPitch,
+                       const std::byte* srcPtr, int srcPitch, int rowSize,
+                       int height) {
+  invariant(destPtr);
+  invariant(dstPitch > 0);
+  invariant(srcPtr);
+  invariant(srcPitch > 0);
+  invariant(rowSize > 0);
+  invariant(height > 0);
+  invariant(rowSize <= srcPitch);
+  invariant(rowSize <= dstPitch);
+  auto dest = Array2DRef(destPtr, rowSize, height, dstPitch);
+  auto src = Array2DRef(srcPtr, rowSize, height, srcPitch);
+  copyPixelsImpl(dest, src);
 }
 
 template <typename T_TO, typename T_FROM>
@@ -85,8 +114,8 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
 
 template <typename T>
   requires std::is_pointer_v<T>
-constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
-                                                         size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                           uint64_t multiple) {
   if (multiple == 0)
     return 0;
   static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
@@ -96,17 +125,17 @@ constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
 
 template <typename T>
   requires std::is_integral_v<T>
-constexpr size_t RAWSPEED_READNONE getMisalignmentOffset(T value,
-                                                         size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                           uint64_t multiple) {
   if (multiple == 0)
     return 0;
   return value % multiple;
 }
 
 template <typename T>
-constexpr T RAWSPEED_READNONE roundToMultiple(T value, size_t multiple,
+constexpr T RAWSPEED_READNONE roundToMultiple(T value, uint64_t multiple,
                                               bool roundDown) {
-  size_t offset = getMisalignmentOffset(value, multiple);
+  uint64_t offset = getMisalignmentOffset(value, multiple);
   if (offset == 0)
     return value;
   // Drop remainder.
@@ -117,15 +146,18 @@ constexpr T RAWSPEED_READNONE roundToMultiple(T value, size_t multiple,
   return roundedDown + multiple;
 }
 
-constexpr size_t RAWSPEED_READNONE roundDown(size_t value, size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE roundDown(uint64_t value,
+                                               uint64_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/true);
 }
 
-constexpr size_t RAWSPEED_READNONE roundUp(size_t value, size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE roundUp(uint64_t value,
+                                             uint64_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/false);
 }
 
-constexpr size_t RAWSPEED_READNONE roundUpDivision(size_t value, size_t div) {
+constexpr uint64_t RAWSPEED_READNONE roundUpDivision(uint64_t value,
+                                                     uint64_t div) {
   return (value != 0) ? (1 + ((value - 1) / div)) : 0;
 }
 

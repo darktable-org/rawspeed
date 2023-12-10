@@ -50,7 +50,7 @@ jobs:
         with:
           cache: false
           msystem: ${{ inputs.msys2-msystem }}
-          update: true
+          update: false
           install: >-
             git
             base-devel

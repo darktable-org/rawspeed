@@ -93,17 +93,17 @@ struct options final {
   bool dump;
 };
 
-size_t process(const std::string& filename,
-               const rawspeed::CameraMetaData* metadata, const options& o);
+int64_t process(const std::string& filename,
+                const rawspeed::CameraMetaData* metadata, const options& o);
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
   void anchor() const override;
 
 public:
-  size_t time;
+  int64_t time;
 
   explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  RstestHashMismatch(const char* msg, size_t time_)
+  RstestHashMismatch(const char* msg, int64_t time_)
       : RawspeedException(msg), time(time_) {}
 };
 
@@ -343,8 +343,8 @@ void writeImage(const RawImage& raw, const std::string& fn) {
   __builtin_unreachable();
 }
 
-size_t process(const std::string& filename, const CameraMetaData* metadata,
-               const options& o) {
+int64_t process(const std::string& filename, const CameraMetaData* metadata,
+                const options& o) {
 
   const std::string hashfile(filename + ".hash");
 
@@ -547,7 +547,7 @@ int main(int argc, char **argv) {
   const CameraMetaData metadata{};
 #endif
 
-  size_t time = 0;
+  int64_t time = 0;
   map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none) firstprivate(argc, argv, o)             \
