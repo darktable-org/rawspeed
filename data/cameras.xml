@@ -18040,18 +18040,25 @@
 			<Hint name="full_height" value="3048"/>
 		</Hints>
 	</Camera>
-	<Camera make="Canon" model="PowerShot SX220 HS" supported="no" mode="chdk">
+	<Camera make="Canon" model="PowerShot SX220 HS" mode="chdk">
 		<CFA2 width="2" height="2">
 			<ColorRow y="0">RG</ColorRow>
 			<ColorRow y="1">GB</ColorRow>
 		</CFA2>
-		<Crop x="92" y="16" width="-4" height="-1"/>
-		<Sensor black="0" white="4095"/>
+		<Crop x="120" y="36" width="-34" height="-20"/>
+		<Sensor black="127" white="4095"/>
 		<Hints>
 			<Hint name="filesize" value="19131120"/>
 			<Hint name="full_width" value="4168"/>
 			<Hint name="full_height" value="3060"/>
 		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">4668 -1707 -223</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1581 5193 389</ColorMatrixRow>
+				<ColorMatrixRow plane="2">351 1552 3717</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Canon" model="PowerShot SX30 IS" supported="no" mode="chdk">
 		<CFA2 width="2" height="2">
