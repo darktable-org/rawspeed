@@ -31,7 +31,7 @@ static inline void BM_MD5(benchmark::State& state) {
                            uint8_t(0));
 
   for (auto _ : state) {
-    rawspeed::md5::md5_state hash;
+    rawspeed::md5::MD5Hasher::state_type hash;
     rawspeed::md5::md5_hash(buf.data(), buf.size(), &hash);
   }
 

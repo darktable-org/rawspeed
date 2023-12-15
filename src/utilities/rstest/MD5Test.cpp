@@ -28,15 +28,15 @@
  */
 
 #include "md5.h"
-#include <array>
+#include "adt/Casts.h"
 #include <cstdint>
 #include <cstring>
-#include <string>
 #include <tuple>
 #include <utility>
 #include <gtest/gtest.h>
 
-using MD5Testcase = std::pair<rawspeed::md5::md5_state, const uint8_t*>;
+using MD5Testcase =
+    std::pair<rawspeed::md5::MD5Hasher::state_type, const uint8_t*>;
 class MD5Test : public ::testing::TestWithParam<MD5Testcase> {
   virtual void anchor() const;
 
@@ -44,7 +44,7 @@ public:
   MD5Test() = default;
   void SetUp() final { std::tie(answer, message) = GetParam(); }
 
-  rawspeed::md5::md5_state answer;
+  rawspeed::md5::MD5Hasher::state_type answer;
   const uint8_t* message = nullptr;
 };
 
@@ -383,12 +383,32 @@ static const std::array<MD5Testcase, 136> testCases = {
 };
 
 INSTANTIATE_TEST_SUITE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
+
 TEST_P(MD5Test, CheckTestCaseSet) {
   ASSERT_NO_THROW({
-    rawspeed::md5::md5_state hash;
+    rawspeed::md5::MD5Hasher::state_type hash;
     rawspeed::md5::md5_hash(
         message, strlen(reinterpret_cast<const char*>(message)), &hash);
 
     ASSERT_EQ(hash, answer);
+  });
+}
+
+TEST_P(MD5Test, CheckTestCaseSetInParts) {
+  ASSERT_NO_THROW({
+    const int len_total = rawspeed::implicit_cast<int>(
+        strlen(reinterpret_cast<const char*>(message)));
+    for (int len_0 = 0; len_0 <= len_total; ++len_0) {
+      for (int len_1 = 0; len_0 + len_1 <= len_total; ++len_1) {
+        int len_rem = rawspeed::implicit_cast<int>(len_total) - len_1 - len_0;
+        assert(len_rem >= 0);
+        rawspeed::md5::MD5 hasher;
+        hasher.take(message + 0, len_0);
+        hasher.take(message + len_0, len_1);
+        hasher.take(message + len_0 + len_1, len_rem);
+        rawspeed::md5::MD5Hasher::state_type hash = hasher.flush();
+        ASSERT_EQ(hash, answer);
+      }
+    }
   });
 }
