@@ -386,9 +386,8 @@ INSTANTIATE_TEST_SUITE_P(MD5Test, MD5Test, ::testing::ValuesIn(testCases));
 
 TEST_P(MD5Test, CheckTestCaseSet) {
   ASSERT_NO_THROW({
-    rawspeed::md5::MD5Hasher::state_type hash;
-    rawspeed::md5::md5_hash(
-        message, strlen(reinterpret_cast<const char*>(message)), &hash);
+    auto hash = rawspeed::md5::md5_hash(
+        message, strlen(reinterpret_cast<const char*>(message)));
 
     ASSERT_EQ(hash, answer);
   });

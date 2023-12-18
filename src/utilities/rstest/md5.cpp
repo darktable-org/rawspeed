@@ -159,13 +159,12 @@ MD5Hasher::compress(state_type state, const block_type& block) noexcept {
 }
 
 /* Full message hasher */
-void md5_hash(const uint8_t* message, size_t len,
-              MD5Hasher::state_type* hash) noexcept {
+MD5Hasher::state_type md5_hash(const uint8_t* message, size_t len) noexcept {
   MD5 hasher;
 
   hasher.take(message, len);
 
-  *hash = hasher.flush();
+  return hasher.flush();
 }
 
 std::string hash_to_string(const MD5Hasher::state_type& hash) noexcept {
@@ -175,12 +174,6 @@ std::string hash_to_string(const MD5Hasher::state_type& hash) noexcept {
     snprintf(&res[2 * i], 3, "%02x", h[i]);
   res[32] = 0;
   return res.data();
-}
-
-std::string md5_hash(const uint8_t* message, size_t len) noexcept {
-  MD5Hasher::state_type hash;
-  md5_hash(message, len, &hash);
-  return hash_to_string(hash);
 }
 
 } // namespace rawspeed::md5

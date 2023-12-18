@@ -246,13 +246,11 @@ MD5::flush() noexcept {
 }
 
 // computes hash of the buffer message with length len
-void md5_hash(const uint8_t* message, size_t len,
-              MD5Hasher::state_type* hash) noexcept;
+[[nodiscard]] MD5Hasher::state_type md5_hash(const uint8_t* message,
+                                             size_t len) noexcept;
 
 // returns hash as string
-std::string hash_to_string(const MD5Hasher::state_type& hash) noexcept;
-
-// computes hash of the buffer message with length len and returns it as string
-std::string md5_hash(const uint8_t* message, size_t len) noexcept;
+[[nodiscard]] std::string
+hash_to_string(const MD5Hasher::state_type& hash) noexcept;
 
 } // namespace rawspeed::md5

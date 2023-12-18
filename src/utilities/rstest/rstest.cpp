@@ -133,13 +133,12 @@ md5::MD5Hasher::state_type imgDataHash(const RawImage& raw) {
   vector<md5::MD5Hasher::state_type> line_hashes(img.height);
 
   for (int j = 0; j < img.height; j++) {
-    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
-                  &line_hashes[j]);
+    line_hashes[j] =
+        md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width);
   }
 
-  md5::MD5Hasher::state_type ret;
-  md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
-                sizeof(line_hashes[0]) * line_hashes.size(), &ret);
+  auto ret = md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
+                           sizeof(line_hashes[0]) * line_hashes.size());
 
   return ret;
 }
