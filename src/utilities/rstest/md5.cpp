@@ -37,7 +37,7 @@
 namespace rawspeed::md5 {
 
 __attribute__((noinline)) MD5Hasher::state_type
-MD5Hasher::compress(state_type state, const block_type& block) noexcept {
+MD5Hasher::compress(state_type state, const uint8_t* block) noexcept {
   std::array<uint32_t, 16> schedule = {{}};
 
   auto LOADSCHEDULE = [block, &schedule](int i) {
