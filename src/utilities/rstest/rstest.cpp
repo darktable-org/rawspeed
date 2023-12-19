@@ -71,9 +71,9 @@ using std::ostringstream;
 using std::vector;
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-using std::setw;
-using std::left;
 using std::internal;
+using std::left;
+using std::setw;
 #endif
 
 namespace rawspeed::rstest {
@@ -83,7 +83,7 @@ std::string img_hash(const rawspeed::RawImage& r);
 void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
 void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
 
-md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
+md5::MD5Hasher::state_type imgDataHash(const rawspeed::RawImage& raw);
 
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
@@ -126,22 +126,19 @@ struct Timer final {
 
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
-md5::md5_state imgDataHash(const RawImage& raw) {
+md5::MD5Hasher::state_type imgDataHash(const RawImage& raw) {
   const rawspeed::Array2DRef<std::byte> img =
       raw->getByteDataAsUncroppedArray2DRef();
 
-  md5::md5_state ret = md5::md5_init;
-
-  vector<md5::md5_state> line_hashes;
-  line_hashes.resize(img.height, md5::md5_init);
+  vector<md5::MD5Hasher::state_type> line_hashes(img.height);
 
   for (int j = 0; j < img.height; j++) {
-    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
-                  &line_hashes[j]);
+    line_hashes[j] =
+        md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width);
   }
 
-  md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
-                sizeof(line_hashes[0]) * line_hashes.size(), &ret);
+  auto ret = md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
+                           sizeof(line_hashes[0]) * line_hashes.size());
 
   return ret;
 }
@@ -242,7 +239,7 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "\n");
 
-  rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(r);
+  rawspeed::md5::MD5Hasher::state_type hash_of_line_hashes = imgDataHash(r);
   APPEND(&oss, "md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
@@ -513,12 +510,12 @@ int usage(const char* progname) {
 
 } // namespace rawspeed::rstest
 
-using rawspeed::rstest::usage;
 using rawspeed::rstest::options;
 using rawspeed::rstest::process;
 using rawspeed::rstest::results;
+using rawspeed::rstest::usage;
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   int remaining_argc = argc;
 
   auto hasFlag = [argc, &remaining_argc, argv](std::string_view flag) {
