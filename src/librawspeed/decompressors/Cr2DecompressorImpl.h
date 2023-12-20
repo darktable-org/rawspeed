@@ -404,7 +404,9 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
 
   auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
-  auto predNext = out[/*row=*/0].getCrop(/*offset=*/0, /*size=*/dsc.groupSize);
+  auto predNext = out[/*row=*/0]
+                      .getCrop(/*offset=*/0, /*size=*/dsc.groupSize)
+                      .getAsArray1DRef();
 
   BitPumpJPEG bs(input);
 
@@ -431,8 +433,10 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
           // Canon.
           for (int c = 0; c < N_COMP; ++c)
             pred[c] = predNext(c == 0 ? c : dsc.groupSize - (N_COMP - c));
-          predNext = out[row].getCrop(/*offset=*/dsc.groupSize * col,
-                                      /*size=*/dsc.groupSize);
+          predNext = out[row]
+                         .getCrop(/*offset=*/dsc.groupSize * col,
+                                  /*size=*/dsc.groupSize)
+                         .getAsArray1DRef();
           ++globalFrameRow;
           globalFrameCol = 0;
           invariant(globalFrameRow < frame.y && "Run out of frame");

@@ -65,6 +65,10 @@ public:
       CroppedArray1DRef<T2> RHS)
       : base(RHS.base), numElts(RHS.numElts) {}
 
+  [[nodiscard]] Array1DRef<T> getAsArray1DRef() const {
+    return {begin(), size()};
+  }
+
   [[nodiscard]] T* begin() const;
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
