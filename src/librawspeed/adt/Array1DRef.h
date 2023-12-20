@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
+#include <cstddef>
 #include <type_traits>
 
 namespace rawspeed {
@@ -33,6 +34,10 @@ template <class T> class Array1DRef final {
   int numElts = 0;
 
   friend Array1DRef<const T>; // We need to be able to convert to const version.
+
+  // We need to be able to convert to std::byte.
+  friend Array1DRef<std::byte>;
+  friend Array1DRef<const std::byte>;
 
 public:
   using value_type = T;
@@ -47,10 +52,11 @@ public:
     requires(std::is_const_v<T2> && !std::is_const_v<T>)
   Array1DRef(Array1DRef<T2> RHS) = delete;
 
-  // Can not change type.
+  // Can not change type to non-byte.
   template <typename T2>
     requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
-             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
+             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>> &&
+             !std::is_same_v<std::remove_const_t<T>, std::byte>)
   Array1DRef(Array1DRef<T2> RHS) = delete;
 
   // Conversion from Array1DRef<T> to Array1DRef<const T>.
@@ -59,6 +65,16 @@ public:
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : data(RHS.data), numElts(RHS.numElts) {}
+
+  // Const-preserving conversion from Array1DRef<T> to Array1DRef<std::byte>.
+  template <typename T2>
+    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
+             !(std::is_same_v<std::remove_const_t<T>,
+                              std::remove_const_t<T2>>) &&
+             std::is_same_v<std::remove_const_t<T>, std::byte>)
+  Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
+      : data(reinterpret_cast<T*>(RHS.data)),
+        numElts(sizeof(T2) * RHS.numElts) {}
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
 
