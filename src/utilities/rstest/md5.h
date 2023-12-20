@@ -30,6 +30,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "common/Common.h"
 #include <array>
@@ -57,7 +58,8 @@ public:
   MD5Hasher& operator=(const MD5Hasher&) = delete;
   MD5Hasher& operator=(MD5Hasher&&) noexcept = delete;
 
-  static state_type compress(state_type state, const uint8_t* block) noexcept;
+  static state_type compress(state_type state,
+                             Array1DRef<const uint8_t> block) noexcept;
 };
 
 template <class> inline constexpr bool always_false_v = false;
@@ -237,7 +239,8 @@ __attribute__((always_inline)) inline void MD5::compressFullBlock() noexcept {
   invariant(blockIsFull() && "Bad block size.");
 
   const auto fullBlock = buffer.getAsFullBufferRef();
-  state = MD5Hasher::compress(state, fullBlock.block);
+  state = MD5Hasher::compress(
+      state, {fullBlock.block, decltype(fullBlock)::block_length});
   buffer.reset();
 }
 

@@ -30,6 +30,7 @@
 #include "md5.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/Invariant.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -40,12 +41,15 @@
 namespace rawspeed::md5 {
 
 __attribute__((noinline)) MD5Hasher::state_type
-MD5Hasher::compress(state_type state, const uint8_t* block) noexcept {
+MD5Hasher::compress(state_type state,
+                    Array1DRef<const uint8_t> block) noexcept {
+  invariant(block.size() == MD5Hasher::block_size);
+
   std::array<uint32_t, 16> schedule = {{}};
 
   auto LOADSCHEDULE = [block, &schedule](int i) {
     for (int k = 3; k >= 0; k--)
-      schedule[i] |= uint32_t(block[4 * i + k]) << (8 * k);
+      schedule[i] |= uint32_t(block(4 * i + k)) << (8 * k);
   };
 
   for (int i = 0; i < 16; i++)
