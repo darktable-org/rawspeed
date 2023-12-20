@@ -307,7 +307,7 @@ deduceColorDataFormat(const TiffEntry* ccd) {
 
 [[nodiscard]] std::optional<std::pair<int, int>>
 getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
-                                        int colorDataVersion) {
+                                        std::optional<int> colorDataVersion) {
   switch (f) {
     using enum ColorDataFormat;
   case ColorData1:
@@ -316,7 +316,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     // These seemingly did not contain `SpecularWhiteLevel` yet.
     return std::nullopt;
   case ColorData4:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 2:
     case 3:
       return std::nullopt; // Still no `SpecularWhiteLevel`.
@@ -332,7 +332,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
       __builtin_unreachable();
     }
   case ColorData5:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case -4:
       return {{333, 1386}};
     case -3:
@@ -342,14 +342,14 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     }
   case ColorData6:
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 10:
       return {{479, 484}};
     default:
       __builtin_unreachable();
     }
   case ColorData7:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 10:
       return {{504, 509}};
     case 11:
@@ -358,7 +358,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
       __builtin_unreachable();
     }
   case ColorData8:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 12:
     case 13:
     case 15:
@@ -372,8 +372,9 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
   __builtin_unreachable();
 }
 
-[[nodiscard]] bool shouldRescaleBlackLevels(ColorDataFormat f,
-                                            int colorDataVersion) {
+[[nodiscard]] bool
+shouldRescaleBlackLevels(ColorDataFormat f,
+                         std::optional<int> colorDataVersion) {
   return f != ColorDataFormat::ColorData5 || colorDataVersion != -3;
 }
 
@@ -397,7 +398,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
   mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
   mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
 
-  auto levelOffsets = getBlackAndWhiteLevelOffsetsInColorData(f, *ver);
+  auto levelOffsets = getBlackAndWhiteLevelOffsetsInColorData(f, ver);
   if (!levelOffsets)
     return false;
 
@@ -411,7 +412,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
   if (makernotesPrecision > ljpegSamplePrecision) {
     int bitDepthDiff = makernotesPrecision - ljpegSamplePrecision;
     assert(bitDepthDiff >= 1 && bitDepthDiff <= 12);
-    if (shouldRescaleBlackLevels(f, *ver)) {
+    if (shouldRescaleBlackLevels(f, ver)) {
       for (int c = 0; c != 4; ++c)
         mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
     }
