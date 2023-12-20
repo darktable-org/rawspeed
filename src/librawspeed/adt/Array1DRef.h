@@ -80,6 +80,7 @@ public:
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
+  [[nodiscard]] T* addressOf(int eltIdx) const;
   [[nodiscard]] T& operator()(int eltIdx) const;
 
   [[nodiscard]] T* begin() const;
@@ -105,30 +106,32 @@ template <class T>
   return {*this, offset, size};
 }
 
-template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
+template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
   invariant(data);
   invariant(eltIdx >= 0);
-  invariant(eltIdx < numElts);
+  invariant(eltIdx <= numElts);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-  return data[eltIdx];
+  return data + eltIdx;
 #pragma GCC diagnostic pop
+}
+
+template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
+  invariant(data);
+  invariant(eltIdx >= 0);
+  invariant(eltIdx < numElts);
+  return *addressOf(eltIdx);
 }
 
 template <class T> inline int Array1DRef<T>::size() const { return numElts; }
 
 template <class T> inline T* Array1DRef<T>::begin() const {
-  return &operator()(0);
+  return addressOf(/*eltIdx=*/0);
 }
 template <class T> inline T* Array1DRef<T>::end() const {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-  return &operator()(size() - 1) + 1;
-#pragma GCC diagnostic pop
+  return addressOf(/*eltIdx=*/numElts);
 }
 
 } // namespace rawspeed
