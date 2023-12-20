@@ -65,7 +65,7 @@ public:
       CroppedArray1DRef<T2> RHS)
       : base(RHS.base), numElts(RHS.numElts) {}
 
-  [[nodiscard]] const T* begin() const;
+  [[nodiscard]] T* begin() const;
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
@@ -86,7 +86,7 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
   invariant(offset + numElts <= base.size());
 }
 
-template <class T> inline const T* CroppedArray1DRef<T>::begin() const {
+template <class T> inline T* CroppedArray1DRef<T>::begin() const {
   return &operator()(/*eltIdx=*/0);
 }
 
