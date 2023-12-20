@@ -28,7 +28,7 @@
 namespace rawspeed {
 
 template <class T> class CroppedArray1DRef final {
-  const Array1DRef<T> base;
+  Array1DRef<T> base;
   int offset = 0;
   int numElts = 0;
 
