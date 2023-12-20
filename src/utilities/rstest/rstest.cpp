@@ -20,6 +20,7 @@
 
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
@@ -515,23 +516,25 @@ using rawspeed::rstest::process;
 using rawspeed::rstest::results;
 using rawspeed::rstest::usage;
 
-int main(int argc, char** argv) {
-  int remaining_argc = argc;
+int main(int argc_, char** argv_) {
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
 
-  auto hasFlag = [argc, &remaining_argc, argv](std::string_view flag) {
+  int remaining_argc = argv.size();
+
+  auto hasFlag = [&remaining_argc, argv](std::string_view flag) {
     bool found = false;
-    for (int i = 1; i < argc; ++i) {
-      if (!argv[i] || argv[i] != flag)
+    for (int i = 1; i < argv.size(); ++i) {
+      if (!argv(i) || argv(i) != flag)
         continue;
       found = true;
-      argv[i] = nullptr;
+      argv(i) = nullptr;
       remaining_argc--;
     }
     return found;
   };
 
-  if (1 == argc || hasFlag("-h"))
-    return usage(argv[0]);
+  if (1 == argv.size() || hasFlag("-h"))
+    return usage(argv(0));
 
   options o;
   o.create = hasFlag("-c");
@@ -547,17 +550,17 @@ int main(int argc, char** argv) {
   int64_t time = 0;
   map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(argc, argv, o)             \
-    shared(metadata) shared(cerr, failedTests) schedule(dynamic, 1)            \
+#pragma omp parallel for default(none) firstprivate(argv, o) shared(metadata)  \
+    shared(cerr, failedTests) schedule(dynamic, 1)                             \
     reduction(+ : time) if (remaining_argc > 2)
 #endif
-  for (int i = 1; i < argc; ++i) {
-    if (!argv[i])
+  for (int i = 1; i < argv.size(); ++i) {
+    if (!argv(i))
       continue;
 
     try {
       try {
-        time += process(argv[i], &metadata, o);
+        time += process(argv(i), &metadata, o);
       } catch (const rawspeed::rstest::RstestHashMismatch& e) {
         time += e.time;
         throw;
@@ -567,11 +570,11 @@ int main(int argc, char** argv) {
 #pragma omp critical(io)
 #endif
       {
-        std::string msg = std::string(argv[i]) + " failed: " + e.what();
+        std::string msg = std::string(argv(i)) + " failed: " + e.what();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
         cerr << msg << '\n';
 #endif
-        failedTests.try_emplace(argv[i], msg);
+        failedTests.try_emplace(argv(i), msg);
       }
     }
   }
