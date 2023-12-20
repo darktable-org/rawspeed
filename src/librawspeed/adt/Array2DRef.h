@@ -128,7 +128,12 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
   invariant(row >= 0);
   invariant(row < height);
   invariant(_pitch >= width);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
   return Array1DRef<T>(&_data[row * _pitch], width);
+#pragma GCC diagnostic pop
 }
 
 template <class T>
