@@ -28,6 +28,7 @@
 #include "tiff/TiffIFD.h"
 #include <cstdint>
 #include <utility>
+#include <vector>
 
 namespace rawspeed {
 

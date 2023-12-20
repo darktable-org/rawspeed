@@ -21,6 +21,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -28,6 +29,7 @@
 #include <array>
 #include <cassert>
 #include <climits>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>

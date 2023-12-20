@@ -26,7 +26,6 @@
 #include "decompressors/AbstractDecompressor.h"
 #include "io/BitPumpLSB.h"
 #include "io/ByteStream.h"
-#include <cstddef>
 #include <cstdint>
 #include <vector>
 
