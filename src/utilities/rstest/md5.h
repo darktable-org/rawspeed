@@ -31,6 +31,7 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
+#include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
 #include "common/Common.h"
 #include <array>
@@ -70,8 +71,8 @@ template <int N> class BufferCoalescer {
   };
   struct FullBufferRef {
     // NOLINTNEXTLINE(google-explicit-constructor)
-    FullBufferRef(const uint8_t* block_) : block(block_) {
-      invariant(block != nullptr);
+    FullBufferRef(Array1DRef<const uint8_t> block_) : block(block_.begin()) {
+      invariant(block_.size() == block_length);
     }
     const uint8_t* block;
     static constexpr int block_length = N;
@@ -85,40 +86,40 @@ template <int N> class BufferCoalescer {
 
 public:
   template <typename ArgTy>
-  inline void take_block_impl(ArgTy& arg, const uint8_t* message,
-                              size_t len) = delete;
+  inline void take_block_impl(ArgTy& arg,
+                              Array1DRef<const uint8_t> message) = delete;
 
 private:
   template <typename ArgTy>
     requires std::same_as<ArgTy, NoBuffer>
-  inline void take_block_impl(NoBuffer& arg, const uint8_t* message,
-                              size_t len) {
-    invariant(message != nullptr);
-    invariant(len != 0);
-    invariant(len <= N);
+  inline void take_block_impl(NoBuffer& arg,
+                              Array1DRef<const uint8_t> message) {
+    invariant(message.size() != 0);
 
-    if (len == N) {
+    if (message.size() == N) {
       state = FullBufferRef(message);
       return;
     }
 
     CoalescingBuffer buf;
-    take_block_impl<CoalescingBuffer>(buf, message, len);
+    take_block_impl<CoalescingBuffer>(buf, message);
     state = buf;
   }
 
   template <typename ArgTy>
     requires std::same_as<ArgTy, CoalescingBuffer>
-  inline void take_block_impl(CoalescingBuffer& arg, const uint8_t* message,
-                              size_t len) {
-    invariant(message != nullptr);
-    invariant(len != 0);
-    invariant(len <= N);
+  inline void take_block_impl(CoalescingBuffer& arg,
+                              Array1DRef<const uint8_t> message) {
+    invariant(message.size() != 0);
+    invariant(message.size() <= N);
 
-    invariant(arg.block_length + len <= N);
+    invariant(arg.block_length + message.size() <= N);
 
-    std::copy(message, message + len, arg.block.data() + arg.block_length);
-    arg.block_length += len;
+    auto out =
+        Array1DRef(arg.block.data(), implicit_cast<int>(arg.block.size()))
+            .getCrop(/*offset=*/arg.block_length, /*size=*/message.size());
+    std::copy(message.begin(), message.end(), out.begin());
+    arg.block_length += message.size();
   }
 
   [[nodiscard]] __attribute__((always_inline)) inline int
@@ -142,19 +143,18 @@ public:
 
   void reset() noexcept { state = NoBuffer(); }
 
-  __attribute__((always_inline)) inline void take_block(const uint8_t* message,
-                                                        size_t len) noexcept {
-    invariant(message != nullptr);
-    invariant(len != 0);
-    invariant(len <= N);
+  __attribute__((always_inline)) inline void
+  take_block(Array1DRef<const uint8_t> message) noexcept {
+    invariant(message.size() != 0);
+    invariant(message.size() <= N);
 
     std::visit(
-        [this, len, message](auto& arg) {
+        [this, message](auto& arg) {
           using T = std::decay_t<decltype(arg)>;
           if constexpr (std::is_same_v<T, FullBufferRef>)
             __builtin_unreachable();
           else
-            this->take_block_impl<T>(arg, message, len);
+            this->take_block_impl<T>(arg, message);
         },
         state);
   }
@@ -167,7 +167,7 @@ public:
             return arg;
           else if constexpr (std::is_same_v<T, CoalescingBuffer>) {
             invariant(arg.block_length == N);
-            return {arg.block.data()};
+            return {{arg.block.data(), arg.block_length}};
           } else if constexpr (std::is_same_v<T, NoBuffer>)
             __builtin_unreachable();
           else
@@ -213,11 +213,11 @@ class MD5 final {
 
   template <typename T>
     requires std::is_same_v<T, uint8_t>
-  MD5& take_full_block(const T* message, size_t len) noexcept;
+  MD5& take_full_block(Array1DRef<const T> message) noexcept;
 
   template <typename T>
     requires std::is_same_v<T, uint8_t>
-  MD5& take_block(const T* message, size_t len) noexcept;
+  MD5& take_block(Array1DRef<const T> message) noexcept;
 
 public:
   MD5() noexcept { reset(); }
@@ -247,15 +247,14 @@ __attribute__((always_inline)) inline void MD5::compressFullBlock() noexcept {
 template <typename T>
   requires std::is_same_v<T, uint8_t>
 __attribute__((always_inline)) inline MD5&
-MD5::take_block(const T* message, size_t len) noexcept {
+MD5::take_block(Array1DRef<const T> message) noexcept {
   invariant(!blockIsFull());
-  invariant(message != nullptr);
-  invariant(len != 0);
-  invariant(len <= MD5Hasher::block_size);
-  invariant(static_cast<int>(len) <= bytesAvaliableInBlock());
+  invariant(message.size() != 0);
+  invariant(message.size() <= MD5Hasher::block_size);
+  invariant(message.size() <= bytesAvaliableInBlock());
 
-  buffer.take_block(message, len);
-  bytes_total += len;
+  buffer.take_block(message);
+  bytes_total += message.size();
 
   return *this;
 }
@@ -263,13 +262,12 @@ MD5::take_block(const T* message, size_t len) noexcept {
 template <typename T>
   requires std::is_same_v<T, uint8_t>
 __attribute__((always_inline)) inline MD5&
-MD5::take_full_block(const T* message, size_t len) noexcept {
+MD5::take_full_block(Array1DRef<const T> message) noexcept {
   invariant(blockIsEmpty());
 
-  invariant(message != nullptr);
-  invariant(len == MD5Hasher::block_size);
+  invariant(message.size() == MD5Hasher::block_size);
 
-  take_block(message, len);
+  take_block(message);
   invariant(blockIsFull());
 
   return *this;
@@ -285,30 +283,38 @@ __attribute__((always_inline)) inline MD5& MD5::take(const T* message,
   if (len == 0)
     return *this;
 
+  auto msg = Array1DRef(message, implicit_cast<int>(len));
+
   if (!blockIsEmpty()) {
-    size_t prefix_size = std::min<size_t>(len, bytesAvaliableInBlock());
-    take_block(message, prefix_size);
-    message += prefix_size;
-    len -= prefix_size;
+    auto prefix_size = implicit_cast<int>(
+        std::min<size_t>(msg.size(), bytesAvaliableInBlock()));
+    auto prefixMsg =
+        msg.getCrop(/*offset=*/0, /*size=*/prefix_size).getAsArray1DRef();
+    msg = msg.getCrop(prefixMsg.size(), /*size=*/msg.size() - prefixMsg.size())
+              .getAsArray1DRef();
+    take_block(prefixMsg);
     if (blockIsFull())
       compressFullBlock();
   }
 
-  if (len == 0)
+  if (msg.size() == 0)
     return *this;
 
-  const auto numFullBlocks =
-      len / MD5Hasher::block_size; // Truncating division!
-  for (uint64_t blockIdx = 0; blockIdx != numFullBlocks; ++blockIdx) {
-    uint64_t blockBegin = MD5Hasher::block_size * blockIdx;
-    take_full_block(message + blockBegin, MD5Hasher::block_size);
+  const auto numFullBlocks = implicit_cast<int>(
+      msg.size() / MD5Hasher::block_size); // Truncating division!
+  for (int blockIdx = 0; blockIdx != numFullBlocks; ++blockIdx) {
+    auto innerMsg = msg.getCrop(/*offset=*/0, /*size=*/MD5Hasher::block_size)
+                        .getAsArray1DRef();
+    msg = msg.getCrop(innerMsg.size(), /*size=*/msg.size() - innerMsg.size())
+              .getAsArray1DRef();
+    take_full_block(innerMsg);
     compressFullBlock();
   }
 
-  if (size_t lenRemainder = len % MD5Hasher::block_size) {
+  if (msg.size() > 0) {
     invariant(blockIsEmpty());
-    invariant(lenRemainder < MD5Hasher::block_size);
-    take_block(message + (len - lenRemainder), lenRemainder);
+    invariant(msg.size() < MD5Hasher::block_size);
+    take_block(msg);
     invariant(!blockIsFull());
   }
 
@@ -320,17 +326,17 @@ MD5::flush() noexcept {
   invariant(!blockIsFull());
 
   static constexpr std::array<uint8_t, 1> magic0 = {0x80};
-  buffer.take_block(magic0.data(), magic0.size());
+  buffer.take_block({magic0.data(), magic0.size()});
 
   static constexpr std::array<uint8_t, MD5Hasher::block_size> zeropadding = {};
   if (bytesAvaliableInBlock() < 8) {
     if (bytesAvaliableInBlock() > 0)
-      buffer.take_block(zeropadding.data(), bytesAvaliableInBlock());
+      buffer.take_block({zeropadding.data(), bytesAvaliableInBlock()});
     compressFullBlock();
   }
 
   if (bytesAvaliableInBlock() > 8)
-    buffer.take_block(zeropadding.data(), bytesAvaliableInBlock() - 8);
+    buffer.take_block({zeropadding.data(), bytesAvaliableInBlock() - 8});
 
   std::array<uint8_t, 8> magic1;
   magic1[0] = static_cast<uint8_t>((bytes_total & 0x1FU) << 3);
@@ -339,7 +345,7 @@ MD5::flush() noexcept {
     magic1[i] = static_cast<uint8_t>(bytes_total);
     bytes_total >>= 8;
   }
-  buffer.take_block(magic1.data(), magic1.size());
+  buffer.take_block({magic1.data(), magic1.size()});
   compressFullBlock();
 
   MD5Hasher::state_type tmp = state;
