@@ -399,12 +399,19 @@ TEST_P(MD5Test, CheckTestCaseSetInParts) {
         strlen(reinterpret_cast<const char*>(message)));
     for (int len_0 = 0; len_0 <= len_total; ++len_0) {
       for (int len_1 = 0; len_0 + len_1 <= len_total; ++len_1) {
-        int len_rem = rawspeed::implicit_cast<int>(len_total) - len_1 - len_0;
-        assert(len_rem >= 0);
+        auto str = std::string_view(reinterpret_cast<const char*>(message));
         rawspeed::md5::MD5 hasher;
-        hasher.take(message + 0, len_0);
-        hasher.take(message + len_0, len_1);
-        hasher.take(message + len_0 + len_1, len_rem);
+        const auto substr0 = str.substr(/*pos=*/0, /*n=*/len_0);
+        str.remove_prefix(substr0.size());
+        const auto substr1 = str.substr(/*pos=*/0, /*n=*/len_1);
+        str.remove_prefix(substr1.size());
+        const auto substr2 = str;
+        hasher.take(reinterpret_cast<const uint8_t*>(substr0.data()),
+                    substr0.size());
+        hasher.take(reinterpret_cast<const uint8_t*>(substr1.data()),
+                    substr1.size());
+        hasher.take(reinterpret_cast<const uint8_t*>(substr2.data()),
+                    substr2.size());
         rawspeed::md5::MD5Hasher::state_type hash = hasher.flush();
         ASSERT_EQ(hash, answer);
       }
