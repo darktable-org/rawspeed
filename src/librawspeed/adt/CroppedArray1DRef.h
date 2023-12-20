@@ -73,6 +73,7 @@ public:
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
+  [[nodiscard]] T* addressOf(int eltIdx) const;
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
 
@@ -91,7 +92,7 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
 }
 
 template <class T> inline T* CroppedArray1DRef<T>::begin() const {
-  return &operator()(/*eltIdx=*/0);
+  return addressOf(/*eltIdx=*/0);
 }
 
 template <class T> inline int CroppedArray1DRef<T>::size() const {
@@ -99,10 +100,17 @@ template <class T> inline int CroppedArray1DRef<T>::size() const {
 }
 
 template <class T>
+inline T* CroppedArray1DRef<T>::addressOf(const int eltIdx) const {
+  invariant(eltIdx >= 0);
+  invariant(eltIdx <= numElts);
+  return base.addressOf(offset + eltIdx);
+}
+
+template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
-  return base(offset + eltIdx);
+  return *addressOf(eltIdx);
 }
 
 } // namespace rawspeed
