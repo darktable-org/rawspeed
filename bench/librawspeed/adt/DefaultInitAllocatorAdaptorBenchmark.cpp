@@ -22,7 +22,6 @@
 #include "adt/Casts.h"
 #include "bench/Common.h"
 #include <cstddef>
-#include <map>
 #include <memory>
 #include <vector>
 #include <benchmark/benchmark.h>

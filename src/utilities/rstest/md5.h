@@ -31,15 +31,16 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <type_traits>
 #include <variant>
 
 namespace rawspeed::md5 {

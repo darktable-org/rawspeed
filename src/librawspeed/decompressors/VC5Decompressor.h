@@ -182,10 +182,11 @@ class VC5Decompressor final : public AbstractDecompressor {
       [[nodiscard]] BandData decode() const noexcept override;
     };
     struct HighPassBand final : AbstractDecodeableBand {
-      const PrefixCodeDecoder& decoder;
+      const std::optional<PrefixCodeDecoder>& decoder;
       int16_t quant;
       HighPassBand(Wavelet& wavelet_, ByteStream bs_,
-                   const PrefixCodeDecoder& decoder_, int16_t quant_)
+                   const std::optional<PrefixCodeDecoder>& decoder_,
+                   int16_t quant_)
           : AbstractDecodeableBand(wavelet_, bs_), decoder(decoder_),
             quant(quant_) {}
       [[nodiscard]] BandData decode() const override;

@@ -724,7 +724,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   };
 
   // decode highpass band
-  DeRLVer d(decoder, bs, quant);
+  DeRLVer d(*decoder, bs, quant);
   BandData highpass;
   auto& band = highpass.description;
   band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
@@ -790,7 +790,7 @@ void VC5Decompressor::parseLargeCodeblock(ByteStream bs) {
   } else {
     if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs, *codeDecoder,
+    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs, codeDecoder,
                                                       *mVC5.quantization);
     mVC5.quantization.reset();
   }
