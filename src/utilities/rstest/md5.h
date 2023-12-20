@@ -65,11 +65,11 @@ public:
 
 template <class> inline constexpr bool always_false_v = false;
 
-template <int N> class BufferCoalescer {
-  struct NoBuffer {
+template <int N> class BufferCoalescer final {
+  struct NoBuffer final {
     static constexpr int block_length = 0;
   };
-  struct FullBufferRef {
+  struct FullBufferRef final {
     // NOLINTNEXTLINE(google-explicit-constructor)
     FullBufferRef(Array1DRef<const uint8_t> block_) : block(block_.begin()) {
       invariant(block_.size() == block_length);
@@ -77,7 +77,7 @@ template <int N> class BufferCoalescer {
     const uint8_t* block;
     static constexpr int block_length = N;
   };
-  struct CoalescingBuffer {
+  struct CoalescingBuffer final {
     MD5Hasher::block_type block;
     int block_length = 0;
   };
