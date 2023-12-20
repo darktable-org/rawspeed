@@ -93,7 +93,12 @@ template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
   invariant(data);
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
   return data[eltIdx];
+#pragma GCC diagnostic pop
 }
 
 template <class T> inline int Array1DRef<T>::size() const { return numElts; }
@@ -102,7 +107,12 @@ template <class T> inline T* Array1DRef<T>::begin() const {
   return &operator()(0);
 }
 template <class T> inline T* Array1DRef<T>::end() const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
   return &operator()(size() - 1) + 1;
+#pragma GCC diagnostic pop
 }
 
 } // namespace rawspeed
