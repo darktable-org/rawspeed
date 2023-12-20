@@ -111,7 +111,7 @@ private:
   inline void take_block_impl(CoalescingBuffer& arg,
                               Array1DRef<const uint8_t> message) {
     invariant(message.size() != 0);
-    invariant(message.size() <= N);
+    invariant(message.size() < N);
 
     invariant(arg.block_length + message.size() <= N);
 
