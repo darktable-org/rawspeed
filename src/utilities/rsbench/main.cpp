@@ -20,6 +20,7 @@
 
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "common/ChecksumFile.h"
@@ -195,16 +196,18 @@ void addBench(Entry* entry, std::string tName, int threads) {
 
 } // namespace
 
-int main(int argc, char** argv) {
-  benchmark::Initialize(&argc, argv);
+int main(int argc_, char** argv_) {
+  benchmark::Initialize(&argc_, argv_);
 
-  auto hasFlag = [argc, argv](std::string_view flag) {
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
+
+  auto hasFlag = [argv](std::string_view flag) {
     int found = 0;
-    for (int i = 1; i < argc; ++i) {
-      if (!argv[i] || argv[i] != flag)
+    for (int i = 1; i < argv.size(); ++i) {
+      if (!argv(i) || argv(i) != flag)
         continue;
       found = i;
-      argv[i] = nullptr;
+      argv(i) = nullptr;
     }
     return found;
   };
@@ -222,8 +225,8 @@ int main(int argc, char** argv) {
   // Were we told to use the repo (i.e. filelist.sha1 in that directory)?
   int useChecksumFile = hasFlag("-r");
   std::vector<Entry> Worklist;
-  if (useChecksumFile && useChecksumFile + 1 < argc) {
-    char*& checksumFileRepo = argv[useChecksumFile + 1];
+  if (useChecksumFile && useChecksumFile + 1 < argv.size()) {
+    char*& checksumFileRepo = argv(useChecksumFile + 1);
     if (checksumFileRepo) {
       const auto readEntries = rawspeed::ReadChecksumFile(checksumFileRepo);
       Worklist.reserve(readEntries.size());
@@ -237,12 +240,12 @@ int main(int argc, char** argv) {
   }
 
   // If there are normal filenames, append them.
-  for (int i = 1; i < argc; i++) {
-    if (!argv[i])
+  for (int i = 1; i < argv.size(); i++) {
+    if (!argv(i))
       continue;
 
     Entry Entry;
-    const char* fName = argv[i];
+    const char* fName = argv(i);
     // These are supposed to be either absolute paths, or relative the run dir.
     // We don't do any beautification.
     Entry.Name.FullFileName = fName;
