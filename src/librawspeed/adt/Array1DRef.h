@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
+#include <cstddef>
 #include <type_traits>
 
 namespace rawspeed {
@@ -33,6 +34,10 @@ template <class T> class Array1DRef final {
   int numElts = 0;
 
   friend Array1DRef<const T>; // We need to be able to convert to const version.
+
+  // We need to be able to convert to std::byte.
+  friend Array1DRef<std::byte>;
+  friend Array1DRef<const std::byte>;
 
 public:
   using value_type = T;
@@ -47,10 +52,11 @@ public:
     requires(std::is_const_v<T2> && !std::is_const_v<T>)
   Array1DRef(Array1DRef<T2> RHS) = delete;
 
-  // Can not change type.
+  // Can not change type to non-byte.
   template <typename T2>
     requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
-             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
+             !std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>> &&
+             !std::is_same_v<std::remove_const_t<T>, std::byte>)
   Array1DRef(Array1DRef<T2> RHS) = delete;
 
   // Conversion from Array1DRef<T> to Array1DRef<const T>.
@@ -60,10 +66,21 @@ public:
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : data(RHS.data), numElts(RHS.numElts) {}
 
+  // Const-preserving conversion from Array1DRef<T> to Array1DRef<std::byte>.
+  template <typename T2>
+    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
+             !(std::is_same_v<std::remove_const_t<T>,
+                              std::remove_const_t<T2>>) &&
+             std::is_same_v<std::remove_const_t<T>, std::byte>)
+  Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
+      : data(reinterpret_cast<T*>(RHS.data)),
+        numElts(sizeof(T2) * RHS.numElts) {}
+
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
+  [[nodiscard]] T* addressOf(int eltIdx) const;
   [[nodiscard]] T& operator()(int eltIdx) const;
 
   [[nodiscard]] T* begin() const;
@@ -89,20 +106,32 @@ template <class T>
   return {*this, offset, size};
 }
 
+template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
+  invariant(data);
+  invariant(eltIdx >= 0);
+  invariant(eltIdx <= numElts);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
+  return data + eltIdx;
+#pragma GCC diagnostic pop
+}
+
 template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
   invariant(data);
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
-  return data[eltIdx];
+  return *addressOf(eltIdx);
 }
 
 template <class T> inline int Array1DRef<T>::size() const { return numElts; }
 
 template <class T> inline T* Array1DRef<T>::begin() const {
-  return &operator()(0);
+  return addressOf(/*eltIdx=*/0);
 }
 template <class T> inline T* Array1DRef<T>::end() const {
-  return &operator()(size() - 1) + 1;
+  return addressOf(/*eltIdx=*/numElts);
 }
 
 } // namespace rawspeed

@@ -28,7 +28,7 @@
 namespace rawspeed {
 
 template <class T> class CroppedArray1DRef final {
-  const Array1DRef<T> base;
+  Array1DRef<T> base;
   int offset = 0;
   int numElts = 0;
 
@@ -65,10 +65,15 @@ public:
       CroppedArray1DRef<T2> RHS)
       : base(RHS.base), numElts(RHS.numElts) {}
 
-  [[nodiscard]] const T* begin() const;
+  [[nodiscard]] Array1DRef<T> getAsArray1DRef() const {
+    return {begin(), size()};
+  }
+
+  [[nodiscard]] T* begin() const;
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
+  [[nodiscard]] T* addressOf(int eltIdx) const;
   [[nodiscard]] T& operator()(int eltIdx) const;
 };
 
@@ -86,8 +91,8 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
   invariant(offset + numElts <= base.size());
 }
 
-template <class T> inline const T* CroppedArray1DRef<T>::begin() const {
-  return &operator()(/*eltIdx=*/0);
+template <class T> inline T* CroppedArray1DRef<T>::begin() const {
+  return addressOf(/*eltIdx=*/0);
 }
 
 template <class T> inline int CroppedArray1DRef<T>::size() const {
@@ -95,10 +100,17 @@ template <class T> inline int CroppedArray1DRef<T>::size() const {
 }
 
 template <class T>
+inline T* CroppedArray1DRef<T>::addressOf(const int eltIdx) const {
+  invariant(eltIdx >= 0);
+  invariant(eltIdx <= numElts);
+  return base.addressOf(offset + eltIdx);
+}
+
+template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
-  return base(offset + eltIdx);
+  return *addressOf(eltIdx);
 }
 
 } // namespace rawspeed

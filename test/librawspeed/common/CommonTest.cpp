@@ -336,10 +336,14 @@ protected:
   vector<string> out; // expected output
 };
 static const splitStringType splitStringValues[] = {
+    make_tuple("", ' ', vector<string>({})),
+    make_tuple(" ", ' ', vector<string>({})),
     make_tuple(" ini mi,ni  moe ", ' ',
                vector<string>({"ini", "mi,ni", "moe"})),
     make_tuple(" 412, 542,732 , ", ',',
                vector<string>({" 412", " 542", "732 ", " "})),
+    make_tuple("\0 412, 542,732 , ", ',', vector<string>({})),
+    make_tuple(" 412, 542\0,732 , ", ',', vector<string>({" 412", " 542"})),
 
 };
 INSTANTIATE_TEST_SUITE_P(SplitStringTest, SplitStringTest,

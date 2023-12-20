@@ -18,6 +18,7 @@
 */
 
 #include "RawSpeed-API.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include <array>
 #include <cstddef>
@@ -109,14 +110,15 @@ using rawspeed::RawParser;
 using rawspeed::RawspeedException;
 using rawspeed::identify::find_cameras_xml;
 
-int main(int argc, char* argv[]) { // NOLINT
+int main(int argc_, char* argv_[]) { // NOLINT
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
 
-  if (argc != 2) {
+  if (argv.size() != 2) {
     fprintf(stderr, "Usage: darktable-rs-identify <file>\n");
     return 0;
   }
 
-  const std::string camfile = find_cameras_xml(argv[0]);
+  const std::string camfile = find_cameras_xml(argv(0));
   if (camfile.empty()) {
     // fprintf(stderr, "ERROR: Couldn't find cameras.xml\n");
     return 2;
@@ -137,9 +139,9 @@ int main(int argc, char* argv[]) { // NOLINT
       return 2;
     }
 
-    fprintf(stderr, "Loading file: \"%s\"\n", argv[1]);
+    fprintf(stderr, "Loading file: \"%s\"\n", argv(1));
 
-    FileReader f(argv[1]);
+    FileReader f(argv(1));
 
     auto [storage, buf] = f.readFile();
 

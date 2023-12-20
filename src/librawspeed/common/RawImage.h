@@ -331,10 +331,8 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, std::byte* dst,
     return;
   }
   if (table->dither) {
-    const auto* t = reinterpret_cast<const uint32_t*>(table->tables.data());
-    uint32_t lookup = t[value];
-    uint32_t base = lookup & 0xffff;
-    uint32_t delta = lookup >> 16;
+    uint32_t base = table->tables[2 * value + 0];
+    uint32_t delta = table->tables[2 * value + 1];
     uint32_t r = *random;
 
     uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);

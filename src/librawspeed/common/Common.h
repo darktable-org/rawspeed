@@ -243,22 +243,20 @@ inline std::string trimSpaces(std::string_view str) {
 inline std::vector<std::string> splitString(const std::string& input,
                                             char c = ' ') {
   std::vector<std::string> result;
-  const char* str = input.c_str();
 
-  while (true) {
-    const char* begin = str;
+  std::string_view str = input;
+  while (!str.empty()) {
+    std::string_view::size_type pos = str.find_first_of(c);
 
-    while (*str != c && *str != '\0')
-      str++;
+    if (pos == std::string_view::npos)
+      pos = str.size();
 
-    if (begin != str)
-      result.emplace_back(begin, str);
+    auto substr = str.substr(/*pos=*/0, /*n=*/pos);
 
-    const bool isNullTerminator = (*str == '\0');
-    str++;
+    if (!substr.empty())
+      result.emplace_back(substr);
 
-    if (isNullTerminator)
-      break;
+    str.remove_prefix(std::min(str.size(), 1 + substr.size()));
   }
 
   return result;
