@@ -141,7 +141,7 @@ are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
 bool NefDecoder::D100IsCompressed(uint32_t offset) const {
-  const uint8_t* test = mFile.getData(offset, 256);
+  const auto test = mFile.getSubView(offset, 256);
   for (int i = 15; i < 256; i += 16)
     if (test[i])
       return true;
