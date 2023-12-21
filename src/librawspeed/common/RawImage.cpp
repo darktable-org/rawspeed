@@ -303,18 +303,22 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
 void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   int gw = (uncropped_dim.x + 15) / 32;
 
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
+
   for (int y = start_y; y < end_y; y++) {
-    const auto* bad_map =
-        reinterpret_cast<const uint32_t*>(&mBadPixelMap[y * mBadPixelMapPitch]);
     for (int x = 0; x < gw; x++) {
+      const auto block = bad[y].getCrop((32 * x) / 8, 4);
+
       // Test if there is a bad pixel within these 32 pixels
-      if (bad_map[x] == 0)
+      if (std::all_of(block.begin(), block.end(),
+                      [](const auto& val) { return val == 0; }))
         continue;
-      const auto* bad = reinterpret_cast<const uint8_t*>(&bad_map[x]);
+
       // Go through each pixel
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 8; j++) {
-          if (1 != ((bad[i] >> j) & 1))
+          if (1 != ((block(i) >> j) & 1))
             continue;
 
           fixBadPixel(x * 32 + i * 8 + j, y, 0);
