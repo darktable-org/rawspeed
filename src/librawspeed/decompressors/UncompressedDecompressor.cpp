@@ -263,16 +263,17 @@ void UncompressedDecompressor::decode8BitRaw() {
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  const uint8_t* in = input.getData(w * h);
+  const auto in = Array2DRef(input.getData(w * h), w, h);
   uint32_t random = 0;
   for (uint32_t row = 0; row < h; row++) {
     for (uint32_t col = 0; col < w; col++) {
       if constexpr (uncorrectedRawValues)
-        out(row, col) = *in;
-      else
-        mRaw->setWithLookUp(*in, reinterpret_cast<std::byte*>(&out(row, col)),
+        out(row, col) = in(row, col);
+      else {
+        mRaw->setWithLookUp(in(row, col),
+                            reinterpret_cast<std::byte*>(&out(row, col)),
                             &random);
-      in++;
+      }
     }
   }
 }
