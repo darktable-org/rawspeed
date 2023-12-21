@@ -360,8 +360,6 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   }
   for (int y = start_y; y < end_y; y++) {
     int v = dim.x + y * 36969;
-    const int* mul_local = &mul[2 * (y & 1)];
-    const int* sub_local = &sub[2 * (y & 1)];
     for (int x = 0; x < gw; x++) {
       int rand;
       if (mDitherScale) {
@@ -371,9 +369,11 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
         rand = 0;
       }
       uint16_t& pixel = img(y, x);
-      pixel = clampBits(
-          ((pixel - sub_local[x & 1]) * mul_local[x & 1] + 8192 + rand) >> 14,
-          16);
+      pixel = clampBits(((pixel - sub[(2 * (y & 1)) + (x & 1)]) *
+                             mul[(2 * (y & 1)) + (x & 1)] +
+                         8192 + rand) >>
+                            14,
+                        16);
     }
   }
 }
