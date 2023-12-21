@@ -472,14 +472,13 @@ void RawImageDataU16::doLookup(int start_y, int end_y) {
   if (table->ntables == 1) {
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
-      const auto* t = reinterpret_cast<uint32_t*>(table->getTable(0));
+      const auto t = table->getTable(0);
       for (int y = start_y; y < end_y; y++) {
         uint32_t v = (uncropped_dim.x + y * 13) ^ 0x45694584;
         for (int x = 0; x < gw; x++) {
           uint16_t p = img(y, x);
-          uint32_t lookup = t[p];
-          uint32_t base = lookup & 0xffff;
-          uint32_t delta = lookup >> 16;
+          uint32_t base = t(2 * p + 0);
+          uint32_t delta = t(2 * p + 1);
           v = 15700 * (v & 65535) + (v >> 16);
           uint32_t pix = base + ((delta * (v & 2047) + 1024) >> 12);
           img(y, x) = clampBits(pix, 16);
@@ -489,10 +488,10 @@ void RawImageDataU16::doLookup(int start_y, int end_y) {
     }
 
     int gw = uncropped_dim.x * cpp;
-    const uint16_t* t = table->getTable(0);
+    const auto t = table->getTable(0);
     for (int y = start_y; y < end_y; y++) {
       for (int x = 0; x < gw; x++) {
-        img(y, x) = t[img(y, x)];
+        img(y, x) = t(img(y, x));
       }
     }
     return;

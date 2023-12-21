@@ -20,6 +20,7 @@
 */
 
 #include "common/TableLookUp.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -83,11 +84,11 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   }
 }
 
-uint16_t* TableLookUp::getTable(int n) {
+Array1DRef<uint16_t> TableLookUp::getTable(int n) {
   if (n > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
-  return &tables[n * TABLE_SIZE];
+  return Array2DRef(tables.data(), TABLE_SIZE, ntables)[n];
 }
 
 } // namespace rawspeed

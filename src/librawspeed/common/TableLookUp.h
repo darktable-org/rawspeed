@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include <cstdint>
 #include <vector>
 
@@ -31,7 +32,7 @@ public:
   TableLookUp(int ntables, bool dither);
 
   void setTable(int ntable, const std::vector<uint16_t>& table);
-  uint16_t* getTable(int n);
+  Array1DRef<uint16_t> getTable(int n);
   const int ntables;
   std::vector<uint16_t> tables;
   const bool dither;
