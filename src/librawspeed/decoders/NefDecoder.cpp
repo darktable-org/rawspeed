@@ -547,7 +547,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // Get the decryption key
         const TiffEntry* key =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x00a7));
-        const uint8_t* keydata = key->getData().getData(4);
+        const auto keydata = key->getData().getBuffer(4);
         uint32_t keyno = keydata[0] ^ keydata[1] ^ keydata[2] ^ keydata[3];
 
         // "Decrypt" the block using the serial and key
@@ -568,11 +568,11 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // Finally set the WB coeffs
         uint32_t off = (version == 0x204) ? 6 : 14;
         mRaw->metadata.wbCoeffs[0] =
-            static_cast<float>(getU16BE(buf.data() + off + 0));
+            static_cast<float>(getU16BE(&buf[off + 0]));
         mRaw->metadata.wbCoeffs[1] =
-            static_cast<float>(getU16BE(buf.data() + off + 2));
+            static_cast<float>(getU16BE(&buf[off + 2]));
         mRaw->metadata.wbCoeffs[2] =
-            static_cast<float>(getU16BE(buf.data() + off + 6));
+            static_cast<float>(getU16BE(&buf[off + 6]));
       }
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
