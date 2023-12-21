@@ -17,7 +17,6 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "padded"
   "switch-enum"
   "unused-parameter"
-  "unsafe-buffer-usage" # FIXME: really want this. to be reenabled.
   "sign-conversion" # FIXME: should enable this.
 )
 
