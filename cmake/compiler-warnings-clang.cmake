@@ -32,6 +32,12 @@ if(NOT (UNIX OR APPLE))
   list(APPEND CLANG_DISABLED_WARNING_FLAGS "nonportable-system-include-path")
 endif()
 
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
+  # Clang 16 used to point at the variable declaration in the diagnostics,
+  # and not at the pointer arithmetic itself.
+  list(APPEND CLANG_DISABLED_WARNING_FLAGS "unsafe-buffer-usage")
+endif()
+
 foreach(warning ${CLANG_WARNING_FLAGS})
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-W${warning})
 endforeach()
