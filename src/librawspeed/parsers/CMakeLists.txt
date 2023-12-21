@@ -1,3 +1,6 @@
+rawspeed_add_library(rawspeed_parsers OBJECT)
+set_target_properties(rawspeed_parsers PROPERTIES LINKER_LANGUAGE CXX)
+
 FILE(GLOB SOURCES
   "CiffParser.cpp"
   "CiffParser.h"
@@ -17,6 +20,12 @@ FILE(GLOB SOURCES
   "TiffParserException.h"
 )
 
-target_sources(rawspeed PRIVATE
+target_sources(rawspeed_parsers PRIVATE
   ${SOURCES}
 )
+
+target_include_directories(rawspeed_parsers PUBLIC "${RAWSPEED_BINARY_DIR}/src")
+target_include_directories(rawspeed_parsers SYSTEM PUBLIC "${RAWSPEED_SOURCE_DIR}/src/external")
+target_include_directories(rawspeed_parsers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+target_link_libraries(rawspeed PRIVATE rawspeed_parsers)
