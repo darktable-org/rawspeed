@@ -1,3 +1,6 @@
+rawspeed_add_library(rawspeed_decoders OBJECT)
+set_target_properties(rawspeed_decoders PROPERTIES LINKER_LANGUAGE CXX)
+
 FILE(GLOB SOURCES
   "AbstractTiffDecoder.cpp"
   "AbstractTiffDecoder.h"
@@ -51,6 +54,16 @@ FILE(GLOB SOURCES
   "ThreefrDecoder.h"
 )
 
-target_sources(rawspeed PRIVATE
+target_sources(rawspeed_decoders PRIVATE
   ${SOURCES}
 )
+
+target_include_directories(rawspeed_decoders PUBLIC "${RAWSPEED_BINARY_DIR}/src")
+target_include_directories(rawspeed_decoders SYSTEM PUBLIC "${RAWSPEED_SOURCE_DIR}/src/external")
+target_include_directories(rawspeed_decoders PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+if(TARGET RawSpeed::OpenMP_CXX)
+  target_link_libraries(rawspeed_decoders PUBLIC RawSpeed::OpenMP_CXX)
+endif()
+
+target_link_libraries(rawspeed PRIVATE rawspeed_decoders)
