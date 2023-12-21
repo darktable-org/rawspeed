@@ -57,8 +57,14 @@ RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
 void RawImageDataU16::calculateBlackAreas() {
   const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
 
-  vector<unsigned int> histogram(4 * 65536);
-  fill(histogram.begin(), histogram.end(), 0);
+  std::vector<uint16_t> histogramStorage;
+  auto histogram = Array2DRef<uint16_t>::create(histogramStorage, 65536, 4);
+
+  for (int row = 0; row != histogram.height; ++row) {
+    for (int col = 0; col != histogram.width; ++col) {
+      histogram(row, col) = 0;
+    }
+  }
 
   int totalpixels = 0;
 
@@ -73,11 +79,11 @@ void RawImageDataU16::calculateBlackAreas() {
           uncropped_dim.y)
         ThrowRDE("Offset + size is larger than height of image");
       for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-        auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
           // FIXME: this only samples a single row, not an area.
-          const auto hBin = ((x & 1) << 16) + img(y, mOffset.x);
-          localhist[hBin]++;
+          const auto localhist = histogram[(2 * (y & 1)) + (x & 1)];
+          const auto hBin = img(y, mOffset.x);
+          localhist(hBin)++;
         }
       }
       totalpixels += area.size * dim.x;
@@ -89,11 +95,11 @@ void RawImageDataU16::calculateBlackAreas() {
           uncropped_dim.x)
         ThrowRDE("Offset + size is larger than width of image");
       for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
-        auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
           // FIXME: this only samples a single row, not an area.
-          const auto hBin = ((x & 1) << 16) + img(y, area.offset);
-          localhist[hBin]++;
+          const auto localhist = histogram[(2 * (y & 1)) + (x & 1)];
+          const auto hBin = img(y, area.offset);
+          localhist(hBin)++;
         }
       }
       totalpixels += area.size * dim.y;
@@ -112,12 +118,12 @@ void RawImageDataU16::calculateBlackAreas() {
   totalpixels /= 4 * 2;
 
   for (int i = 0; i < 4; i++) {
-    const auto* localhist = &histogram[i * 65536UL];
-    int acc_pixels = localhist[0];
+    const auto localhist = histogram[i];
+    int acc_pixels = localhist(0);
     int pixel_value = 0;
     while (acc_pixels <= totalpixels && pixel_value < 65535) {
       pixel_value++;
-      acc_pixels += localhist[pixel_value];
+      acc_pixels += localhist(pixel_value);
     }
     blackLevelSeparate[i] = pixel_value;
   }
@@ -354,8 +360,6 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   }
   for (int y = start_y; y < end_y; y++) {
     int v = dim.x + y * 36969;
-    const int* mul_local = &mul[2 * (y & 1)];
-    const int* sub_local = &sub[2 * (y & 1)];
     for (int x = 0; x < gw; x++) {
       int rand;
       if (mDitherScale) {
@@ -365,9 +369,11 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
         rand = 0;
       }
       uint16_t& pixel = img(y, x);
-      pixel = clampBits(
-          ((pixel - sub_local[x & 1]) * mul_local[x & 1] + 8192 + rand) >> 14,
-          16);
+      pixel = clampBits(((pixel - sub[(2 * (y & 1)) + (x & 1)]) *
+                             mul[(2 * (y & 1)) + (x & 1)] +
+                         8192 + rand) >>
+                            14,
+                        16);
     }
   }
 }
@@ -388,14 +394,15 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   dist.fill(0);
   weight.fill(0);
 
-  const uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
   int step = isCFA ? 2 : 1;
 
   // Find pixel to the left
   int x_find = static_cast<int>(x) - step;
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[x_find >> 3] >> (x_find & 7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<int>(x) - x_find;
     }
@@ -405,19 +412,18 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   x_find = static_cast<int>(x) + step;
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
-    if (0 == ((bad_line[x_find >> 3] >> (x_find & 7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = x_find - static_cast<int>(x);
     }
     x_find += step;
   }
 
-  bad_line = &mBadPixelMap[x >> 3];
   // Find pixel upwards
   int y_find = static_cast<int>(y) - step;
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[y_find * mBadPixelMapPitch] >> (x & 7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<int>(y) - y_find;
     }
@@ -427,7 +433,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   y_find = static_cast<int>(y) + step;
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
-    if (0 == ((bad_line[y_find * mBadPixelMapPitch] >> (x & 7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = y_find - static_cast<int>(y);
     }
@@ -472,14 +478,13 @@ void RawImageDataU16::doLookup(int start_y, int end_y) {
   if (table->ntables == 1) {
     if (table->dither) {
       int gw = uncropped_dim.x * cpp;
-      const auto* t = reinterpret_cast<uint32_t*>(table->getTable(0));
+      const auto t = table->getTable(0);
       for (int y = start_y; y < end_y; y++) {
         uint32_t v = (uncropped_dim.x + y * 13) ^ 0x45694584;
         for (int x = 0; x < gw; x++) {
           uint16_t p = img(y, x);
-          uint32_t lookup = t[p];
-          uint32_t base = lookup & 0xffff;
-          uint32_t delta = lookup >> 16;
+          uint32_t base = t(2 * p + 0);
+          uint32_t delta = t(2 * p + 1);
           v = 15700 * (v & 65535) + (v >> 16);
           uint32_t pix = base + ((delta * (v & 2047) + 1024) >> 12);
           img(y, x) = clampBits(pix, 16);
@@ -489,10 +494,10 @@ void RawImageDataU16::doLookup(int start_y, int end_y) {
     }
 
     int gw = uncropped_dim.x * cpp;
-    const uint16_t* t = table->getTable(0);
+    const auto t = table->getTable(0);
     for (int y = start_y; y < end_y; y++) {
       for (int x = 0; x < gw; x++) {
-        img(y, x) = t[img(y, x)];
+        img(y, x) = t(img(y, x));
       }
     }
     return;

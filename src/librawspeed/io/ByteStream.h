@@ -63,7 +63,12 @@ public:
   [[nodiscard]] inline size_type check(size_type bytes) const {
     if (static_cast<uint64_t>(pos) + bytes > getSize())
       ThrowIOE("Out of bounds access in ByteStream");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     assert(!ASan::RegionIsPoisoned(data + pos, bytes));
+#pragma GCC diagnostic pop
     return bytes;
   }
 
@@ -126,7 +131,12 @@ public:
   [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
     invariant(data);
     (void)check(i + 1);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     return data[pos + i];
+#pragma GCC diagnostic pop
   }
 
   inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
@@ -139,7 +149,12 @@ public:
     invariant(data);
     if (!isValid(pos + relPos, size_))
       return false;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     return memcmp(&data[pos + relPos], pattern, size_) == 0;
+#pragma GCC diagnostic pop
   }
 
   inline bool hasPrefix(const char* prefix, size_type size_) const {
@@ -156,7 +171,12 @@ public:
   inline uint8_t getByte() {
     invariant(data);
     (void)check(1);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     return data[pos++];
+#pragma GCC diagnostic pop
   }
 
   template <typename T> [[nodiscard]] inline T peek(size_type i = 0) const {

@@ -21,6 +21,7 @@
 
 #include "decoders/ArwDecoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -88,16 +89,16 @@ RawImage ArwDecoder::decodeSRF() {
   static const size_t head_size = 40;
   const uint8_t* head_orig = mFile.getData(head_off, head_size);
   vector<uint8_t> head(head_size);
-  SonyDecrypt(reinterpret_cast<const uint32_t*>(head_orig),
-              reinterpret_cast<uint32_t*>(&head[0]), 10, key);
+  SonyDecrypt({head_orig, head_size}, {head.data(), head_size}, head_size / 4,
+              key);
   for (int i = 26; i > 22; i--)
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
   const auto* image_data = mFile.getData(off, len);
   std::vector<uint8_t> image_decoded(len);
-  SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
-              reinterpret_cast<uint32_t*>(image_decoded.data()), len / 4, key);
+  SonyDecrypt({image_data, implicit_cast<int>(len)},
+              {image_decoded.data(), implicit_cast<int>(len)}, len / 4, key);
 
   Buffer di(image_decoded.data(), len);
 
@@ -520,8 +521,12 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
-                             uint32_t key) {
+void ArwDecoder::SonyDecrypt(Array1DRef<const uint8_t> ibuf,
+                             Array1DRef<uint8_t> obuf, int len, uint32_t key) {
+  invariant(ibuf.size() == obuf.size());
+  invariant(ibuf.size() == 4 * len);
+  invariant(obuf.size() == 4 * len);
+
   if (0 == len)
     return;
 
@@ -538,21 +543,18 @@ void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
 
   int p = 127;
   // Decrypt the buffer in place using the pad
-  for (; len > 0; len--) {
+  for (int i = 0; i != len; ++i) {
     pad[p & 127] = pad[(p + 1) & 127] ^ pad[(p + 1 + 64) & 127];
 
-    uint32_t pv;
-    memcpy(&pv, &(pad[p & 127]), sizeof(uint32_t));
+    uint32_t pv = pad[p & 127];
 
     uint32_t bv;
-    memcpy(&bv, ibuf, sizeof(uint32_t));
+    memcpy(&bv, ibuf.getCrop(4 * i, 4).begin(), sizeof(uint32_t));
 
     bv ^= pv;
 
-    memcpy(obuf, &bv, sizeof(uint32_t));
+    memcpy(obuf.getCrop(4 * i, 4).begin(), &bv, sizeof(uint32_t));
 
-    ibuf++;
-    obuf++;
     p++;
   }
 }
@@ -595,9 +597,8 @@ void ArwDecoder::GetWB() const {
     const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
-    SonyDecrypt(reinterpret_cast<const uint32_t*>(EncryptedBuffer.begin()),
-                reinterpret_cast<uint32_t*>(DecryptedBuffer.data() + off),
-                len / 4, key);
+    SonyDecrypt({EncryptedBuffer.begin(), implicit_cast<int>(len)},
+                {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
     Buffer decIFD(DecryptedBuffer.data(), DecryptedBufferSize);

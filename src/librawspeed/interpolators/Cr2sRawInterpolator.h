@@ -21,6 +21,7 @@
 #pragma once
 
 #include "adt/Array2DRef.h"
+#include "adt/CroppedArray1DRef.h"
 #include <array>
 #include <cstdint>
 
@@ -45,9 +46,11 @@ public:
   void interpolate(int version);
 
 private:
-  template <int version> inline void YUV_TO_RGB(const YCbCr& p, uint16_t* X);
+  template <int version>
+  inline void YUV_TO_RGB(const YCbCr& p, CroppedArray1DRef<uint16_t> out);
 
-  static inline void STORE_RGB(uint16_t* X, int r, int g, int b);
+  static inline void STORE_RGB(CroppedArray1DRef<uint16_t> out, int r, int g,
+                               int b);
 
   template <int version> void interpolate_422_row(int row);
   template <int version> void interpolate_422();

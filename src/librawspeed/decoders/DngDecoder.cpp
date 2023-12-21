@@ -66,8 +66,8 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
   if (!mRootIFD->hasEntryRecursive(TiffTag::DNGVERSION))
     ThrowRDE("DNG, but version tag is missing. Will not guess.");
 
-  const uint8_t* v =
-      mRootIFD->getEntryRecursive(TiffTag::DNGVERSION)->getData().getData(4);
+  const auto v =
+      mRootIFD->getEntryRecursive(TiffTag::DNGVERSION)->getData().getBuffer(4);
 
   if (v[0] != 1) {
     ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",

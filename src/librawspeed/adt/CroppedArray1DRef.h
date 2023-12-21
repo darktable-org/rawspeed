@@ -70,6 +70,7 @@ public:
   }
 
   [[nodiscard]] T* begin() const;
+  [[nodiscard]] T* end() const;
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
@@ -93,6 +94,9 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
 
 template <class T> inline T* CroppedArray1DRef<T>::begin() const {
   return addressOf(/*eltIdx=*/0);
+}
+template <class T> inline T* CroppedArray1DRef<T>::end() const {
+  return addressOf(/*eltIdx=*/numElts);
 }
 
 template <class T> inline int CroppedArray1DRef<T>::size() const {

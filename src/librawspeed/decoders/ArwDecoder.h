@@ -55,8 +55,8 @@ private:
   void DecodeLJpeg(const TiffIFD* raw);
   void PostProcessLJpeg();
   void DecodeUncompressed(const TiffIFD* raw) const;
-  static void SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
-                          uint32_t key);
+  static void SonyDecrypt(Array1DRef<const uint8_t> ibuf,
+                          Array1DRef<uint8_t> obuf, int len, uint32_t key);
   void GetWB() const;
   int mShiftDownScale = 0;
   int mShiftDownScaleForExif = 0;
