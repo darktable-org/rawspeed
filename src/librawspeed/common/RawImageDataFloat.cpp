@@ -158,10 +158,9 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
     sub[i] = static_cast<float>(blackLevelSeparate[v]);
   }
   for (int y = start_y; y < end_y; y++) {
-    const float* mul_local = &mul[2 * (y & 1)];
-    const float* sub_local = &sub[2 * (y & 1)];
     for (int x = 0; x < gw; x++)
-      img(y, x) = (img(y, x) - sub_local[x & 1]) * mul_local[x & 1];
+      img(y, x) = (img(y, x) - sub[(2 * (y & 1)) + (x & 1)]) *
+                  mul[(2 * (y & 1)) + (x & 1)];
   }
 }
 
