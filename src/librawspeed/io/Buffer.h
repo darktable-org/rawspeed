@@ -86,7 +86,12 @@ public:
 
     invariant(data);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     return data + offset;
+#pragma GCC diagnostic pop
   }
 
   // convenience getter for single bytes
@@ -99,7 +104,12 @@ public:
   }
   [[nodiscard]] const uint8_t* end() const {
     invariant(data);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     return data + size;
+#pragma GCC diagnostic pop
   }
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
