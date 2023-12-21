@@ -304,11 +304,12 @@ void UncompressedDecompressor::decode12BitRawWithControl() {
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  const uint8_t* in = input.peekData(perline * h);
+  const auto in = Array2DRef(input.getData(perline * h), perline, h);
   for (uint32_t row = 0; row < h; row++) {
+    uint32_t col = 0;
     for (uint32_t x = 0; x < w; x += 2) {
-      uint32_t g1 = in[0];
-      uint32_t g2 = in[1];
+      uint32_t g1 = in(row, col + 0);
+      uint32_t g2 = in(row, col + 1);
 
       auto process = [out, row](uint32_t i, bool invert, uint32_t p1,
                                 uint32_t p2) {
@@ -322,14 +323,14 @@ void UncompressedDecompressor::decode12BitRawWithControl() {
 
       process(x, false, g1, g2);
 
-      g1 = in[2];
+      g1 = in(row, col + 2);
 
       process(x + 1, true, g1, g2);
 
-      in += 3;
+      col += 3;
 
       if ((x % 10) == 8)
-        in++;
+        col++;
     }
   }
   input.skipBytes(input.getRemainSize());
