@@ -46,6 +46,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -457,7 +458,9 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
         uint16_t wb_index = shot_info->getU16(7);
         int wb_offset =
-            (wb_index < 18) ? "012347800000005896"[wb_index] - '0' : 0;
+            (wb_index < 18)
+                ? std::string_view("012347800000005896")[wb_index] - '0'
+                : 0;
         wb_offset = wb_offset * 8 + 2;
 
         mRaw->metadata.wbCoeffs[0] =
