@@ -57,8 +57,14 @@ RawImageDataU16::RawImageDataU16(const iPoint2D& _dim, uint32_t _cpp)
 void RawImageDataU16::calculateBlackAreas() {
   const Array2DRef<uint16_t> img = getU16DataAsUncroppedArray2DRef();
 
-  vector<unsigned int> histogram(4 * 65536);
-  fill(histogram.begin(), histogram.end(), 0);
+  std::vector<uint16_t> histogramStorage;
+  auto histogram = Array2DRef<uint16_t>::create(histogramStorage, 65536, 4);
+
+  for (int row = 0; row != histogram.height; ++row) {
+    for (int col = 0; col != histogram.width; ++col) {
+      histogram(row, col) = 0;
+    }
+  }
 
   int totalpixels = 0;
 
@@ -73,11 +79,11 @@ void RawImageDataU16::calculateBlackAreas() {
           uncropped_dim.y)
         ThrowRDE("Offset + size is larger than height of image");
       for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-        auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
           // FIXME: this only samples a single row, not an area.
-          const auto hBin = ((x & 1) << 16) + img(y, mOffset.x);
-          localhist[hBin]++;
+          const auto localhist = histogram[(2 * (y & 1)) + (x & 1)];
+          const auto hBin = img(y, mOffset.x);
+          localhist(hBin)++;
         }
       }
       totalpixels += area.size * dim.x;
@@ -89,11 +95,11 @@ void RawImageDataU16::calculateBlackAreas() {
           uncropped_dim.x)
         ThrowRDE("Offset + size is larger than width of image");
       for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
-        auto* localhist = &histogram[(y & 1) * (65536UL * 2UL)];
         for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
           // FIXME: this only samples a single row, not an area.
-          const auto hBin = ((x & 1) << 16) + img(y, area.offset);
-          localhist[hBin]++;
+          const auto localhist = histogram[(2 * (y & 1)) + (x & 1)];
+          const auto hBin = img(y, area.offset);
+          localhist(hBin)++;
         }
       }
       totalpixels += area.size * dim.y;
@@ -112,12 +118,12 @@ void RawImageDataU16::calculateBlackAreas() {
   totalpixels /= 4 * 2;
 
   for (int i = 0; i < 4; i++) {
-    const auto* localhist = &histogram[i * 65536UL];
-    int acc_pixels = localhist[0];
+    const auto localhist = histogram[i];
+    int acc_pixels = localhist(0);
     int pixel_value = 0;
     while (acc_pixels <= totalpixels && pixel_value < 65535) {
       pixel_value++;
-      acc_pixels += localhist[pixel_value];
+      acc_pixels += localhist(pixel_value);
     }
     blackLevelSeparate[i] = pixel_value;
   }
