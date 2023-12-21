@@ -692,19 +692,19 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   auto* tmpch = reinterpret_cast<std::byte*>(&tmp);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  const uint8_t* in = input.peekData(out.width * out.height);
+  const auto in =
+      Array2DRef(input.peekData(out.width * out.height), out.width, out.height);
 
   for (int row = 0; row < out.height; row++) {
-    uint32_t random = in[0] + (in[1] << 8) + (in[2] << 16);
+    uint32_t random = in(row, 0) + (in(row, 1) << 8) + (in(row, 2) << 16);
     for (int col = 0; col < out.width; col += 6) {
-      uint32_t g1 = in[0];
-      uint32_t g2 = in[1];
-      uint32_t g3 = in[2];
-      uint32_t g4 = in[3];
-      uint32_t g5 = in[4];
-      uint32_t g6 = in[5];
+      uint32_t g1 = in(row, col + 0);
+      uint32_t g2 = in(row, col + 1);
+      uint32_t g3 = in(row, col + 2);
+      uint32_t g4 = in(row, col + 3);
+      uint32_t g5 = in(row, col + 4);
+      uint32_t g6 = in(row, col + 5);
 
-      in += 6;
       auto y1 = static_cast<float>(g1 | ((g2 & 0x0f) << 8));
       auto y2 = static_cast<float>((g2 >> 4) | (g3 << 4));
       auto cb = static_cast<float>(g4 | ((g5 & 0x0f) << 8));
@@ -715,9 +715,9 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       // Interpolate right pixel. We assume the sample is aligned with left
       // pixel.
       if ((col + 6) < out.width) {
-        g4 = in[3];
-        g5 = in[4];
-        g6 = in[5];
+        g4 = in(row, col + 6 + 3);
+        g5 = in(row, col + 6 + 4);
+        g6 = in(row, col + 6 + 5);
         cb2 = (static_cast<float>((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5F;
         cr2 = (static_cast<float>(((g5 >> 4) | (g6 << 4))) + cr) * 0.5F;
       }
