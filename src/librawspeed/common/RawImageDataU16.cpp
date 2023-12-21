@@ -388,14 +388,15 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   dist.fill(0);
   weight.fill(0);
 
-  const uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
   int step = isCFA ? 2 : 1;
 
   // Find pixel to the left
   int x_find = static_cast<int>(x) - step;
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[x_find >> 3] >> (x_find & 7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<int>(x) - x_find;
     }
@@ -405,19 +406,18 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   x_find = static_cast<int>(x) + step;
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
-    if (0 == ((bad_line[x_find >> 3] >> (x_find & 7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = x_find - static_cast<int>(x);
     }
     x_find += step;
   }
 
-  bad_line = &mBadPixelMap[x >> 3];
   // Find pixel upwards
   int y_find = static_cast<int>(y) - step;
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[y_find * mBadPixelMapPitch] >> (x & 7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<int>(y) - y_find;
     }
@@ -427,7 +427,7 @@ void RawImageDataU16::fixBadPixel(uint32_t x, uint32_t y, int component) {
   y_find = static_cast<int>(y) + step;
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
-    if (0 == ((bad_line[y_find * mBadPixelMapPitch] >> (x & 7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = y_find - static_cast<int>(y);
     }
