@@ -146,8 +146,14 @@ struct BitStreamForwardSequentialReplenisher final
 #if !defined(DEBUG)
     // Do we have BitStreamTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
-    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <= Base::size)
+    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <= Base::size) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
       return Base::data + Base::pos;
+#pragma GCC diagnostic pop
+    }
 #endif
 
     // We have to use intermediate buffer, either because the input is running
@@ -168,7 +174,13 @@ struct BitStreamForwardSequentialReplenisher final
     bytesRemaining = std::min<typename Base::size_type>(
         BitStreamTraits<Tag>::MaxProcessBytes, bytesRemaining);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     memcpy(Base::tmp.data(), Base::data + Base::pos, bytesRemaining);
+#pragma GCC diagnostic pop
+
     return Base::tmp.data();
   }
 };
