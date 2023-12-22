@@ -45,6 +45,7 @@
 #include "tiff/TiffTag.h"
 #include <array>
 #include <cassert>
+#include <cinttypes>
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -318,11 +319,11 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
 
   mRaw->dim = iPoint2D(2 * width, height / 2);
 
-  uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
+  auto tilew = uint64_t(raw->getEntry(TiffTag::TILEWIDTH)->getU32());
   uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
 
   if (tilew <= 0 || tileh <= 0 || tileh % 2 != 0)
-    ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
+    ThrowRDE("Invalid tile size: (%" PRIu64 ", %u)", tilew, tileh);
 
   tileh /= 2;
   tilew *= 2;
@@ -338,6 +339,12 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
       implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
   if (!tilesY)
     ThrowRDE("Zero tiles vertically");
+
+  // Math thoughs: if we know that the total size is 100, while tile size is 11,
+  // we end up with 9 full tiles, and 1 partial tile (10 total).
+  //
+  // BUT! If we know that the total size is 100, and we have same 10 tiles,
+  // we'd naively guess that each tile's size is 10, and not 11...
 
   const TiffEntry* offsets = raw->getEntry(TiffTag::TILEOFFSETS);
   const TiffEntry* counts = raw->getEntry(TiffTag::TILEBYTECOUNTS);
@@ -367,7 +374,8 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
     LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
                                                Endianness::little)),
                          mRaw);
-    decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
+    decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
+                   implicit_cast<uint32_t>(tilew), tileh, false);
   }
 
   PostProcessLJpeg();
