@@ -160,7 +160,7 @@ MD5Hasher::compress(state_type state,
   ROUND3(b, c, d, a, 9, 21, 0xEB86D391);
 
   for (int i = 0; i != 4; ++i)
-    state[i] += tmp[i];
+    state[i] = uint32_t(uint64_t(0) + state[i] + tmp[i]);
 
   return state;
 }
