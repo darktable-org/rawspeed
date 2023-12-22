@@ -114,6 +114,8 @@ public:
   bool cropAvailable = false;
 
 #ifdef HAVE_PUGIXML
+  void parseColorRow(const pugi::xml_node& node);
+  void parseColor(const pugi::xml_node& node);
   void parseCFA(const pugi::xml_node& node);
   void parseCrop(const pugi::xml_node& node);
   void parseBlackAreas(const pugi::xml_node& node);

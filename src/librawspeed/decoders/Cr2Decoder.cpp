@@ -423,6 +423,43 @@ bool Cr2Decoder::decodeCanonColorData() const {
   return true;
 }
 
+void Cr2Decoder::parseWhiteBalance() const {
+  if (decodeCanonColorData())
+    return;
+
+  if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
+      mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
+    const TiffEntry* shot_info =
+        mRootIFD->getEntryRecursive(TiffTag::CANONSHOTINFO);
+    const TiffEntry* g9_wb =
+        mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
+
+    uint16_t wb_index = shot_info->getU16(7);
+    int wb_offset = (wb_index < 18)
+                        ? std::string_view("012347800000005896")[wb_index] - '0'
+                        : 0;
+    wb_offset = wb_offset * 8 + 2;
+
+    mRaw->metadata.wbCoeffs[0] =
+        static_cast<float>(g9_wb->getU32(wb_offset + 1));
+    mRaw->metadata.wbCoeffs[1] =
+        (static_cast<float>(g9_wb->getU32(wb_offset + 0)) +
+         static_cast<float>(g9_wb->getU32(wb_offset + 3))) /
+        2.0F;
+    mRaw->metadata.wbCoeffs[2] =
+        static_cast<float>(g9_wb->getU32(wb_offset + 2));
+  } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
+    // WB for the old 1D and 1DS
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
+    if (wb->count >= 3) {
+      mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
+      mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
+      mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
+    }
+  }
+}
+
 void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   int iso = 0;
   mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
@@ -448,40 +485,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Fetch the white balance
   try {
-    if (!decodeCanonColorData()) {
-      if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
-          mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
-        const TiffEntry* shot_info =
-            mRootIFD->getEntryRecursive(TiffTag::CANONSHOTINFO);
-        const TiffEntry* g9_wb =
-            mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
-
-        uint16_t wb_index = shot_info->getU16(7);
-        int wb_offset =
-            (wb_index < 18)
-                ? std::string_view("012347800000005896")[wb_index] - '0'
-                : 0;
-        wb_offset = wb_offset * 8 + 2;
-
-        mRaw->metadata.wbCoeffs[0] =
-            static_cast<float>(g9_wb->getU32(wb_offset + 1));
-        mRaw->metadata.wbCoeffs[1] =
-            (static_cast<float>(g9_wb->getU32(wb_offset + 0)) +
-             static_cast<float>(g9_wb->getU32(wb_offset + 3))) /
-            2.0F;
-        mRaw->metadata.wbCoeffs[2] =
-            static_cast<float>(g9_wb->getU32(wb_offset + 2));
-      } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
-        // WB for the old 1D and 1DS
-        const TiffEntry* wb =
-            mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
-        if (wb->count >= 3) {
-          mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
-          mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
-          mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
-        }
-      }
-    }
+    parseWhiteBalance();
   } catch (const RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
