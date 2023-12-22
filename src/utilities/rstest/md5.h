@@ -88,7 +88,7 @@ template <int N> class BufferCoalescer final {
 public:
   template <typename ArgTy>
   inline void take_block_impl(ArgTy& arg,
-                              Array1DRef<const uint8_t> message) = delete;
+                              Array1DRef<const uint8_t> message) const = delete;
 
 private:
   template <typename ArgTy>
@@ -110,7 +110,7 @@ private:
   template <typename ArgTy>
     requires std::same_as<ArgTy, CoalescingBuffer>
   inline void take_block_impl(CoalescingBuffer& arg,
-                              Array1DRef<const uint8_t> message) {
+                              Array1DRef<const uint8_t> message) const {
     invariant(message.size() != 0);
     invariant(message.size() < N);
 
