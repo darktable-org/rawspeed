@@ -360,6 +360,14 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
              tilesX, tilesY);
   }
 
+  NORangesSet<Buffer> tilesLegality;
+  for (int tile = 0U; tile < implicit_cast<int>(offsets->count); tile++) {
+    const uint32_t offset = offsets->getU32(tile);
+    const uint32_t length = counts->getU32(tile);
+    if (!tilesLegality.insert(mFile.getSubView(offset, length)))
+      ThrowRDE("Two tiles overlap. Raw corrupt!");
+  }
+
   mRaw->createData();
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) default(none)                        \
