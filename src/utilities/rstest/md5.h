@@ -150,8 +150,7 @@ public:
     invariant(message.size() <= N);
 
     std::visit(
-        [this, message](auto& arg) {
-          using T = std::decay_t<decltype(arg)>;
+        [this, message]<typename T>(T& arg) {
           if constexpr (std::is_same_v<T, FullBufferRef>)
             __builtin_unreachable();
           else
@@ -162,8 +161,7 @@ public:
 
   [[nodiscard]] FullBufferRef getAsFullBufferRef() const {
     return std::visit(
-        [](const auto& arg) -> FullBufferRef {
-          using T = std::decay_t<decltype(arg)>;
+        []<typename T>(const T& arg) -> FullBufferRef {
           if constexpr (std::is_same_v<T, FullBufferRef>)
             return arg;
           else if constexpr (std::is_same_v<T, CoalescingBuffer>) {
