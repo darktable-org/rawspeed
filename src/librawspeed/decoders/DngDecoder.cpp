@@ -279,6 +279,10 @@ void DngDecoder::parseColorMatrix() const {
   if (!mat)
     return;
 
+  // Color matrix size *MUST* be a multiple of 3 (number of channels in XYZ).
+  if (mat->count % 3 != 0)
+    return;
+
   const auto srat_vals = mat->getSRationalArray(mat->count);
   bool Success = true;
   mRaw->metadata.colorMatrix.reserve(mat->count);
