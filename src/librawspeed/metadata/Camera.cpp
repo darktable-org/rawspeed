@@ -143,6 +143,33 @@ std::optional<CFAColor> getAsCFAColor(std::string_view c) {
 
 } // namespace
 
+void Camera::parseColorRow(const xml_node& c) {
+  if (name(c) != "ColorRow")
+    ThrowCME("Not an ColorRow node!");
+
+  int y = c.attribute("y").as_int(-1);
+  if (y < 0 || y >= cfa.getSize().y) {
+    ThrowCME("Invalid y coordinate in CFA array of camera %s %s", make.c_str(),
+             model.c_str());
+  }
+  std::string key = c.child_value();
+  if (static_cast<int>(key.size()) != cfa.getSize().x) {
+    ThrowCME("Invalid number of colors in definition for row %d in "
+             "camera %s %s. Expected %d, found %zu.",
+             y, make.c_str(), model.c_str(), cfa.getSize().x, key.size());
+  }
+  for (size_t x = 0; x < key.size(); ++x) {
+    auto c1 = key[x];
+
+    auto c2 = getAsCFAColor(static_cast<char>(tolower(c1)));
+    if (!c2)
+      ThrowCME("Invalid color in CFA array of camera %s %s: %c", make.c_str(),
+               model.c_str(), c1);
+
+    cfa.setColorAt(iPoint2D(static_cast<int>(x), y), *c2);
+  }
+}
+
 void Camera::parseCFA(const xml_node& cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
     ThrowCME("Not an CFA/CFA2 node!");
@@ -151,27 +178,7 @@ void Camera::parseCFA(const xml_node& cur) {
                        cur.attribute("height").as_int(0)));
   for (xml_node c : cur.children()) {
     if (name(c) == "ColorRow") {
-      int y = c.attribute("y").as_int(-1);
-      if (y < 0 || y >= cfa.getSize().y) {
-        ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
-                 make.c_str(), model.c_str());
-      }
-      std::string key = c.child_value();
-      if (static_cast<int>(key.size()) != cfa.getSize().x) {
-        ThrowCME("Invalid number of colors in definition for row %d in "
-                 "camera %s %s. Expected %d, found %zu.",
-                 y, make.c_str(), model.c_str(), cfa.getSize().x, key.size());
-      }
-      for (size_t x = 0; x < key.size(); ++x) {
-        auto c1 = key[x];
-
-        auto c2 = getAsCFAColor(static_cast<char>(tolower(c1)));
-        if (!c2)
-          ThrowCME("Invalid color in CFA array of camera %s %s: %c",
-                   make.c_str(), model.c_str(), c1);
-
-        cfa.setColorAt(iPoint2D(static_cast<int>(x), y), *c2);
-      }
+      parseColorRow(c);
     } else if (name(c) == "Color") {
       int x = c.attribute("x").as_int(-1);
       if (x < 0 || x >= cfa.getSize().x) {
