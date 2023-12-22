@@ -170,6 +170,32 @@ void Camera::parseColorRow(const xml_node& c) {
   }
 }
 
+void Camera::parseColor(const xml_node& c) {
+  if (name(c) != "Color")
+    ThrowCME("Not an Color node!");
+
+  int x = c.attribute("x").as_int(-1);
+  if (x < 0 || x >= cfa.getSize().x) {
+    ThrowCME("Invalid x coordinate in CFA array of camera %s %s", make.c_str(),
+             model.c_str());
+  }
+
+  int y = c.attribute("y").as_int(-1);
+  if (y < 0 || y >= cfa.getSize().y) {
+    ThrowCME("Invalid y coordinate in CFA array of camera %s %s", make.c_str(),
+             model.c_str());
+  }
+
+  const auto* c1 = c.child_value();
+
+  auto c2 = getAsCFAColor(c1);
+  if (!c2)
+    ThrowCME("Invalid color in CFA array of camera %s %s: %s", make.c_str(),
+             model.c_str(), c1);
+
+  cfa.setColorAt(iPoint2D(x, y), *c2);
+}
+
 void Camera::parseCFA(const xml_node& cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
     ThrowCME("Not an CFA/CFA2 node!");
@@ -180,26 +206,7 @@ void Camera::parseCFA(const xml_node& cur) {
     if (name(c) == "ColorRow") {
       parseColorRow(c);
     } else if (name(c) == "Color") {
-      int x = c.attribute("x").as_int(-1);
-      if (x < 0 || x >= cfa.getSize().x) {
-        ThrowCME("Invalid x coordinate in CFA array of camera %s %s",
-                 make.c_str(), model.c_str());
-      }
-
-      int y = c.attribute("y").as_int(-1);
-      if (y < 0 || y >= cfa.getSize().y) {
-        ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
-                 make.c_str(), model.c_str());
-      }
-
-      const auto* c1 = c.child_value();
-
-      auto c2 = getAsCFAColor(c1);
-      if (!c2)
-        ThrowCME("Invalid color in CFA array of camera %s %s: %s", make.c_str(),
-                 model.c_str(), c1);
-
-      cfa.setColorAt(iPoint2D(x, y), *c2);
+      parseColor(c);
     }
   }
 }
