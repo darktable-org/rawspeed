@@ -76,7 +76,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
   // We are to produce only bsize pixels.
   __sanitizer_annotate_contiguous_container(out.begin(), out.end(), out.end(),
-                                            out.begin() + bsize);
+                                            &out[bsize]);
 #endif
 
   std::array<uint8_t, 2 * segment_size> blen;
