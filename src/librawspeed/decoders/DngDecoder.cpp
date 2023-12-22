@@ -654,7 +654,9 @@ void DngDecoder::parseWhiteBalance() const {
       mRootIFD->hasEntryRecursive(TiffTag::ASSHOTWHITEXY)) {
     const TiffEntry* as_shot_white_xy =
         mRootIFD->getEntryRecursive(TiffTag::ASSHOTWHITEXY);
-    if (as_shot_white_xy->count == 2) {
+    assert(mRaw->metadata.colorMatrix.size() % 3 == 0);
+    const auto numColorPlanes = mRaw->metadata.colorMatrix.size() / 3;
+    if (numColorPlanes == 3 && as_shot_white_xy->count == 2) {
       // See http://www.brucelindbloom.com/index.html?Eqn_xyY_to_XYZ.html
       const float x = as_shot_white_xy->getFloat(0);
       const float y = as_shot_white_xy->getFloat(1);
