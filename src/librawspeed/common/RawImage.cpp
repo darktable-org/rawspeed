@@ -123,7 +123,7 @@ void RawImageData::poisonPadding() {
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
     // and now poison the padding.
-    ASan::PoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
+    ASan::PoisonMemoryRegion(img[j].end(), padding);
   }
 }
 #else
@@ -142,7 +142,7 @@ void RawImageData::unpoisonPadding() {
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
     // and now unpoison the padding.
-    ASan::UnPoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
+    ASan::UnPoisonMemoryRegion(img[j].end(), padding);
   }
 }
 #else
