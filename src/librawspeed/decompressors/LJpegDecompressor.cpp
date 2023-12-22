@@ -99,9 +99,6 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if (static_cast<unsigned>(frame.cps) < mRaw->getCpp())
-    ThrowRDE("Unexpected number of components");
-
   if (static_cast<int64_t>(frame.cps) * frame.dim.x >
       std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
@@ -160,8 +157,6 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
-  invariant(N_COMP >= mRaw->getCpp());
-  invariant((N_COMP / mRaw->getCpp()) > 0);
 
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
