@@ -49,6 +49,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      ByteStream bs)
     : mRaw(std::move(img)), input(bs), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)) {
+
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -60,6 +61,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
 
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Image has zero size");
+
+  if (!imgFrame.hasPositiveArea())
+    ThrowRDE("Tile has zero size");
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
