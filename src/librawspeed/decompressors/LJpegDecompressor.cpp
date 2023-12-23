@@ -32,6 +32,7 @@
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -122,9 +123,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
       static_cast<int64_t>(frame.cps) * frame.dim.x <
           static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
-    ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
-             imgFrame.dim.y);
+    ThrowRDE("LJpeg frame (%" PRIu64 ", %u) is smaller than expected (%u, %u)",
+             static_cast<int64_t>(frame.cps) * frame.dim.x, frame.dim.y,
+             tileRequiredWidth, imgFrame.dim.y);
   }
 
   // How many full pixel blocks will we produce?
