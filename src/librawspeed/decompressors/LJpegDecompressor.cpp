@@ -32,6 +32,7 @@
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -49,6 +50,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      ByteStream bs)
     : mRaw(std::move(img)), input(bs), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)) {
+
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -60,6 +62,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
 
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Image has zero size");
+
+  if (!imgFrame.hasPositiveArea())
+    ThrowRDE("Tile has zero size");
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
@@ -95,8 +100,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if (static_cast<unsigned>(frame.cps) < mRaw->getCpp())
-    ThrowRDE("Unexpected number of components");
+  // We assume that the tile width requires at least one frame column.
+  if (imgFrame.dim.x < frame.cps)
+    ThrowRDE("Tile width is smaller than the frame cps");
 
   if (static_cast<int64_t>(frame.cps) * frame.dim.x >
       std::numeric_limits<int>::max())
@@ -117,9 +123,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
       static_cast<int64_t>(frame.cps) * frame.dim.x <
           static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
-    ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
-             imgFrame.dim.y);
+    ThrowRDE("LJpeg frame (%" PRIu64 ", %u) is smaller than expected (%u, %u)",
+             static_cast<int64_t>(frame.cps) * frame.dim.x, frame.dim.y,
+             tileRequiredWidth, imgFrame.dim.y);
   }
 
   // How many full pixel blocks will we produce?
@@ -156,8 +162,6 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
-  invariant(N_COMP >= mRaw->getCpp());
-  invariant((N_COMP / mRaw->getCpp()) > 0);
 
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
