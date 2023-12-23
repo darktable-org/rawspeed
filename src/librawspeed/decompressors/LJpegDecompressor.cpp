@@ -99,6 +99,10 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
+  // We assume that the tile width requires at least one frame column.
+  if (imgFrame.dim.x < frame.cps)
+    ThrowRDE("Tile width is smaller than the frame cps");
+
   if (static_cast<int64_t>(frame.cps) * frame.dim.x >
       std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
