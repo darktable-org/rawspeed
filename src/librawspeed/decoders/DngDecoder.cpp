@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h"
 #include "decoders/DngDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/NORangesSet.h"
 #include "adt/NotARational.h"
@@ -630,8 +631,11 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     }
     mRaw->blackAreas.clear();
     mRaw->blackLevel = 0;
-    mRaw->blackLevelSeparate(0) = mRaw->blackLevelSeparate(1) =
-        mRaw->blackLevelSeparate(2) = mRaw->blackLevelSeparate(3) = 0;
+    mRaw->blackLevelSeparate =
+        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
+    std::fill(mRaw->blackLevelSeparate.begin(), mRaw->blackLevelSeparate.end(),
+              0);
+    // FIXME: why do we provide both the `blackLevel` and `blackLevelSeparate`?
     mRaw->whitePoint = 65535;
   }
 }
@@ -825,11 +829,15 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
         static_cast<double>(value) > std::numeric_limits<BlackType>::max())
       ThrowRDE("Error decoding black level");
 
+    mRaw->blackLevelSeparate =
+        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
         mRaw->blackLevelSeparate(y * 2 + x) = implicit_cast<int>(value);
     }
   } else {
+    mRaw->blackLevelSeparate =
+        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++) {
         float value = black_entry->getFloat(y * blackdim.x + x);
@@ -899,6 +907,9 @@ void DngDecoder::setBlack(const TiffIFD* raw) const {
     return;
 
   // Black defaults to 0
+  // FIXME: is this the right thing to do?
+  mRaw->blackLevelSeparate =
+      Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
   std::fill(mRaw->blackLevelSeparate.begin(), mRaw->blackLevelSeparate.end(),
             0);
 

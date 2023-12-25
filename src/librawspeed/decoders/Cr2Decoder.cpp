@@ -22,6 +22,7 @@
 
 #include "decoders/Cr2Decoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
@@ -404,6 +405,9 @@ bool Cr2Decoder::decodeCanonColorData() const {
     return false;
 
   mRaw->whitePoint = wb->getU16(levelOffsets->second);
+
+  mRaw->blackLevelSeparate =
+      Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
   for (int c = 0; c != 4; ++c)
     mRaw->blackLevelSeparate(c) = wb->getU16(c + levelOffsets->first);
 
@@ -494,8 +498,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(mShiftUpScaleForExif == 0 || mShiftUpScaleForExif == 2);
   if (mShiftUpScaleForExif) {
     mRaw->blackLevel = 0;
-    for (int c = 0; c != 4; ++c)
-      mRaw->blackLevelSeparate(c) = -1;
+    mRaw->blackLevelSeparate = {};
   }
   if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
     mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;

@@ -20,6 +20,7 @@
 */
 
 #include "decoders/PefDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -129,6 +130,8 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* black =
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
     if (black->count == 4) {
+      mRaw->blackLevelSeparate =
+          Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
       for (int i = 0; i < 4; i++)
         mRaw->blackLevelSeparate(i) = black->getU32(i);
     }

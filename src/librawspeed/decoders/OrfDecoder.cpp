@@ -21,6 +21,7 @@
 */
 
 #include "decoders/OrfDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/NORangesSet.h"
@@ -315,6 +316,8 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           image_processing.getEntry(static_cast<TiffTag>(0x0600));
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
+        mRaw->blackLevelSeparate =
+            Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
         for (int i = 0; i < 4; i++) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;

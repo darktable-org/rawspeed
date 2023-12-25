@@ -20,6 +20,7 @@
 */
 
 #include "decoders/Rw2Decoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -265,6 +266,8 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
     const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
 
+    mRaw->blackLevelSeparate =
+        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         const int k = i + 2 * j;

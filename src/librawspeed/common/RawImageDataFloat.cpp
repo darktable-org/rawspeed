@@ -19,6 +19,7 @@
 */
 
 #include "common/RawImage.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
@@ -28,6 +29,7 @@
 #include "metadata/BlackArea.h"
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -86,6 +88,7 @@ void RawImageDataFloat::calculateBlackAreas() {
   }
 
   if (!totalpixels) {
+    blackLevelSeparate = Array1DRef(blackLevelSeparateStorage.data(), 4);
     for (int& i : blackLevelSeparate)
       i = blackLevel;
     return;
@@ -96,6 +99,7 @@ void RawImageDataFloat::calculateBlackAreas() {
    * histogram */
   totalpixels /= 4;
 
+  blackLevelSeparate = Array1DRef(blackLevelSeparateStorage.data(), 4);
   for (int i = 0; i < 4; i++) {
     blackLevelSeparate(i) = static_cast<int>(65535.0F * accPixels[i] /
                                              implicit_cast<float>(totalpixels));
@@ -117,7 +121,8 @@ void RawImageDataFloat::scaleBlackWhite() {
 
   const int skipBorder = 150;
   int gw = (dim.x - skipBorder) * cpp;
-  if ((blackAreas.empty() && blackLevelSeparate(0) < 0 && blackLevel < 0) ||
+  if ((blackAreas.empty() && blackLevelSeparate.size() == 0 &&
+       blackLevel < 0) ||
       whitePoint == 65536) { // Estimate
     float b = 100000000;
     float m = -10000000;
@@ -137,7 +142,7 @@ void RawImageDataFloat::scaleBlackWhite() {
   }
 
   /* If filter has not set separate blacklevel, compute or fetch it */
-  if (blackLevelSeparate(0) < 0)
+  if (blackLevelSeparate.size() == 0)
     calculateBlackAreas();
 
   startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
@@ -148,6 +153,7 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
   int gw = dim.x * cpp;
   std::array<float, 4> mul;
   std::array<float, 4> sub;
+  assert(blackLevelSeparate.size() == 4);
   for (int i = 0; i < 4; i++) {
     int v = i;
     if ((mOffset.x & 1) != 0)

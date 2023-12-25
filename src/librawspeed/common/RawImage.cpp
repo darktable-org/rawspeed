@@ -53,10 +53,6 @@ void RawImageData::anchor() const {
   // the class's vtable to this Translational Unit.
 }
 
-RawImageData::RawImageData() {
-  std::fill(blackLevelSeparate.begin(), blackLevelSeparate.end(), -1);
-}
-
 RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
                            int _cpp)
     : dim(_dim), isCFA(_cpp == 1), dataType(type), cpp(_cpp) {
@@ -66,7 +62,6 @@ RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
     ThrowRDE("Components-per-pixel is too large.");
 
   bpp = _bpc * _cpp;
-  std::fill(blackLevelSeparate.begin(), blackLevelSeparate.end(), -1);
   createData();
 }
 

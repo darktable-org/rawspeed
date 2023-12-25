@@ -20,6 +20,7 @@
 */
 
 #include "decoders/NefDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
@@ -626,6 +627,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (bitPerPixel != 12 && bitPerPixel != 14)
       ThrowRDE("Bad bit per pixel: %i", bitPerPixel);
     const int sh = 14 - bitPerPixel;
+    mRaw->blackLevelSeparate =
+        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
     mRaw->blackLevelSeparate(0) = bl->getU16(0) >> sh;
     mRaw->blackLevelSeparate(1) = bl->getU16(1) >> sh;
     mRaw->blackLevelSeparate(2) = bl->getU16(2) >> sh;

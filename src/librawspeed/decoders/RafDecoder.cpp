@@ -20,6 +20,7 @@
 */
 
 #include "decoders/RafDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
@@ -298,9 +299,13 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* sep_black =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
     if (sep_black->count == 4) {
+      mRaw->blackLevelSeparate =
+          Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
       for (int k = 0; k < 4; k++)
         mRaw->blackLevelSeparate(k) = sep_black->getU32(k);
     } else if (sep_black->count == 36) {
+      mRaw->blackLevelSeparate =
+          Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
       for (int& k : mRaw->blackLevelSeparate)
         k = 0;
 

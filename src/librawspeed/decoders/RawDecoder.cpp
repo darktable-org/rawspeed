@@ -21,6 +21,7 @@
 
 #include "decoders/RawDecoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -257,11 +258,15 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       auto cfaArea = implicit_cast<int>(mRaw->cfa.getSize().area());
       if (mRaw->isCFA &&
           cfaArea <= implicit_cast<int>(sensor->mBlackLevelSeparate.size())) {
+        mRaw->blackLevelSeparate =
+            Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
         for (int i = 0; i < cfaArea; i++) {
           mRaw->blackLevelSeparate(i) = sensor->mBlackLevelSeparate[i];
         }
       } else if (!mRaw->isCFA &&
                  mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
+        mRaw->blackLevelSeparate =
+            Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
         for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
           mRaw->blackLevelSeparate(i) = sensor->mBlackLevelSeparate[i];
         }
