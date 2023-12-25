@@ -20,14 +20,11 @@
 
 #include "io/BitPumpJPEG.h"
 #include "io/BitPumpTest.h"
-#include "io/BitStream.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <array>
 #include <cstdint>
-#include <initializer_list>
-#include <memory>
 #include <gtest/gtest.h>
 
 using rawspeed::BitPumpJPEG;

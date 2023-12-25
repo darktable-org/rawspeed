@@ -21,7 +21,6 @@
 
 #include "metadata/BlackArea.h"
 #include <memory>
-#include <string>
 #include <tuple>
 #include <gtest/gtest.h>
 
