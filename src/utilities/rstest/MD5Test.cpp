@@ -29,8 +29,10 @@
 
 #include "md5.h"
 #include "adt/Casts.h"
+#include <array>
 #include <cstdint>
 #include <cstring>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <gtest/gtest.h>
@@ -53,11 +55,10 @@ void MD5Test::anchor() const {
   // the class's vtable to this Translational Unit.
 }
 
-#define TESTCASE(a, b, c, d, msg)                                              \
-  (MD5Testcase) {                                                              \
-    {UINT32_C(a), UINT32_C(b), UINT32_C(c), UINT32_C(d)},                      \
-        reinterpret_cast<const uint8_t*>(msg)                                  \
-  }
+constexpr auto TESTCASE = [](uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+                             const char* msg) -> MD5Testcase {
+  return {{a, b, c, d}, reinterpret_cast<const uint8_t*>(msg)};
+};
 
 // Note: The MD5 standard specifies that uint32_t are serialized to/from bytes
 // in little endian
@@ -395,7 +396,7 @@ TEST_P(MD5Test, CheckTestCaseSet) {
 
 TEST_P(MD5Test, CheckTestCaseSetInParts) {
   ASSERT_NO_THROW({
-    const int len_total = rawspeed::implicit_cast<int>(
+    const auto len_total = rawspeed::implicit_cast<int>(
         strlen(reinterpret_cast<const char*>(message)));
     for (int len_0 = 0; len_0 <= len_total; ++len_0) {
       for (int len_1 = 0; len_0 + len_1 <= len_total; ++len_1) {
