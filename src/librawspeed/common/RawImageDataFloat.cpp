@@ -87,9 +87,11 @@ void RawImageDataFloat::calculateBlackAreas() {
     }
   }
 
+  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 4, 1);
+  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+
   if (!totalpixels) {
-    blackLevelSeparate = Array1DRef(blackLevelSeparateStorage.data(), 4);
-    for (int& i : blackLevelSeparate)
+    for (int& i : blackLevelSeparate1D)
       i = blackLevel;
     return;
   }
@@ -99,19 +101,18 @@ void RawImageDataFloat::calculateBlackAreas() {
    * histogram */
   totalpixels /= 4;
 
-  blackLevelSeparate = Array1DRef(blackLevelSeparateStorage.data(), 4);
   for (int i = 0; i < 4; i++) {
-    blackLevelSeparate(i) = static_cast<int>(65535.0F * accPixels[i] /
-                                             implicit_cast<float>(totalpixels));
+    blackLevelSeparate1D(i) = static_cast<int>(
+        65535.0F * accPixels[i] / implicit_cast<float>(totalpixels));
   }
 
   /* If this is not a CFA image, we do not use separate blacklevels, use average
    */
   if (!isCFA) {
     int total = 0;
-    for (int i : blackLevelSeparate)
+    for (int i : blackLevelSeparate1D)
       total += i;
-    for (int& i : blackLevelSeparate)
+    for (int& i : blackLevelSeparate1D)
       i = (total + 2) >> 2;
   }
 }
@@ -121,8 +122,8 @@ void RawImageDataFloat::scaleBlackWhite() {
 
   const int skipBorder = 150;
   int gw = (dim.x - skipBorder) * cpp;
-  if ((blackAreas.empty() && blackLevelSeparate.size() == 0 &&
-       blackLevel < 0) ||
+  if ((blackAreas.empty() && blackLevelSeparate.width == 0 &&
+       blackLevelSeparate.height == 0 && blackLevel < 0) ||
       whitePoint == 65536) { // Estimate
     float b = 100000000;
     float m = -10000000;
@@ -142,7 +143,7 @@ void RawImageDataFloat::scaleBlackWhite() {
   }
 
   /* If filter has not set separate blacklevel, compute or fetch it */
-  if (blackLevelSeparate.size() == 0)
+  if (blackLevelSeparate.width == 0 && blackLevelSeparate.height == 0)
     calculateBlackAreas();
 
   startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
@@ -153,15 +154,17 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
   int gw = dim.x * cpp;
   std::array<float, 4> mul;
   std::array<float, 4> sub;
-  assert(blackLevelSeparate.size() == 4);
+  assert(blackLevelSeparate.width == 4 && blackLevelSeparate.height == 1);
+  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
   for (int i = 0; i < 4; i++) {
     int v = i;
     if ((mOffset.x & 1) != 0)
       v ^= 1;
     if ((mOffset.y & 1) != 0)
       v ^= 2;
-    mul[i] = 65535.0F / static_cast<float>(whitePoint - blackLevelSeparate(v));
-    sub[i] = static_cast<float>(blackLevelSeparate(v));
+    mul[i] =
+        65535.0F / static_cast<float>(whitePoint - blackLevelSeparate1D(v));
+    sub[i] = static_cast<float>(blackLevelSeparate1D(v));
   }
   for (int y = start_y; y < end_y; y++) {
     for (int x = 0; x < gw; x++)

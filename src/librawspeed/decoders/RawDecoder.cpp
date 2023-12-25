@@ -22,6 +22,7 @@
 #include "decoders/RawDecoder.h"
 #include "MemorySanitizer.h"
 #include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -259,16 +260,18 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       if (mRaw->isCFA &&
           cfaArea <= implicit_cast<int>(sensor->mBlackLevelSeparate.size())) {
         mRaw->blackLevelSeparate =
-            Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+        auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (int i = 0; i < cfaArea; i++) {
-          mRaw->blackLevelSeparate(i) = sensor->mBlackLevelSeparate[i];
+          blackLevelSeparate1D(i) = sensor->mBlackLevelSeparate[i];
         }
       } else if (!mRaw->isCFA &&
                  mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
         mRaw->blackLevelSeparate =
-            Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+        auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
-          mRaw->blackLevelSeparate(i) = sensor->mBlackLevelSeparate[i];
+          blackLevelSeparate1D(i) = sensor->mBlackLevelSeparate[i];
         }
       }
     }
@@ -285,8 +288,9 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       mRaw->setError("Expected 4 values '10,20,30,20' as values for "
                      "final_cfa_black hint.");
     } else {
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
       for (int i = 0; i < 4; i++) {
-        mRaw->blackLevelSeparate(i) = stoi(v[i]);
+        blackLevelSeparate1D(i) = stoi(v[i]);
       }
     }
   }

@@ -317,7 +317,8 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
         mRaw->blackLevelSeparate =
-            Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+        auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (int i = 0; i < 4; i++) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
@@ -336,11 +337,11 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
-          mRaw->blackLevelSeparate(i) = blackEntry->getU16(j);
+          blackLevelSeparate1D(i) = blackEntry->getU16(j);
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate(0));
+        mRaw->whitePoint -= (mRaw->blackLevel - blackLevelSeparate1D(0));
       }
     }
   }

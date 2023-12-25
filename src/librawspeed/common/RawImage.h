@@ -161,7 +161,7 @@ public:
   ColorFilterArray cfa;
   int blackLevel = -1;
   std::array<int, 4> blackLevelSeparateStorage;
-  Array1DRef<int> blackLevelSeparate;
+  Array2DRef<int> blackLevelSeparate;
   int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
 

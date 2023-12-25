@@ -108,9 +108,11 @@ void RawImageDataU16::calculateBlackAreas() {
     }
   }
 
+  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 4, 1);
+  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+
   if (!totalpixels) {
-    blackLevelSeparate = Array1DRef(blackLevelSeparateStorage.data(), 4);
-    for (int& i : blackLevelSeparate)
+    for (int& i : blackLevelSeparate1D)
       i = blackLevel;
     return;
   }
@@ -120,7 +122,6 @@ void RawImageDataU16::calculateBlackAreas() {
    * histogram */
   totalpixels /= 4 * 2;
 
-  blackLevelSeparate = Array1DRef(blackLevelSeparateStorage.data(), 4);
   for (int i = 0; i < 4; i++) {
     const auto localhist = histogram[i];
     int acc_pixels = localhist(0);
@@ -129,16 +130,16 @@ void RawImageDataU16::calculateBlackAreas() {
       pixel_value++;
       acc_pixels += localhist(pixel_value);
     }
-    blackLevelSeparate(i) = pixel_value;
+    blackLevelSeparate1D(i) = pixel_value;
   }
 
   /* If this is not a CFA image, we do not use separate blacklevels, use average
    */
   if (!isCFA) {
     int total = 0;
-    for (int i : blackLevelSeparate)
+    for (int i : blackLevelSeparate1D)
       total += i;
-    for (int& i : blackLevelSeparate)
+    for (int& i : blackLevelSeparate1D)
       i = (total + 2) >> 2;
   }
 }
@@ -146,8 +147,8 @@ void RawImageDataU16::calculateBlackAreas() {
 void RawImageDataU16::scaleBlackWhite() {
   const int skipBorder = 250;
   int gw = (dim.x - skipBorder) * cpp;
-  if ((blackAreas.empty() && blackLevelSeparate.size() == 0 &&
-       blackLevel < 0) ||
+  if ((blackAreas.empty() && blackLevelSeparate.width == 0 &&
+       blackLevelSeparate.height == 0 && blackLevel < 0) ||
       whitePoint >= 65536) { // Estimate
     int b = 65536;
     int m = 0;
@@ -170,12 +171,12 @@ void RawImageDataU16::scaleBlackWhite() {
 
   /* Skip, if not needed */
   if ((blackAreas.empty() && blackLevel == 0 && whitePoint == 65535 &&
-       blackLevelSeparate.size() == 0) ||
+       blackLevelSeparate.width == 0 && blackLevelSeparate.height == 0) ||
       dim.area() <= 0)
     return;
 
   /* If filter has not set separate blacklevel, compute or fetch it */
-  if (blackLevelSeparate.size() == 0)
+  if (blackLevelSeparate.width == 0 && blackLevelSeparate.height == 0)
     calculateBlackAreas();
 
   startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
@@ -188,7 +189,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #else
 
-  int depth_values = whitePoint - blackLevelSeparate(0);
+  int depth_values = whitePoint - blackLevelSeparate(0, 0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Check SSE2
@@ -203,8 +204,10 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #ifdef WITH_SSE2
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
-  assert(blackLevelSeparate.size() == 4);
-  int depth_values = whitePoint - blackLevelSeparate(0);
+  assert(blackLevelSeparate.width == 4 && blackLevelSeparate.height == 1);
+  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+
+  int depth_values = whitePoint - blackLevelSeparate1D(0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Scale in 30.2 fp
@@ -225,14 +228,14 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
       1024.0F * 65535.0F /
-      static_cast<float>(whitePoint - blackLevelSeparate(mOffset.x & 1)));
+      static_cast<float>(whitePoint - blackLevelSeparate1D(mOffset.x & 1)));
   mul |= (static_cast<int>(
              1024.0F * 65535.0F /
              static_cast<float>(whitePoint -
-                                blackLevelSeparate((mOffset.x + 1) & 1))))
+                                blackLevelSeparate1D((mOffset.x + 1) & 1))))
          << 16;
-  uint32_t b = blackLevelSeparate(mOffset.x & 1) |
-               (blackLevelSeparate((mOffset.x + 1) & 1) << 16);
+  uint32_t b = blackLevelSeparate1D(mOffset.x & 1) |
+               (blackLevelSeparate1D((mOffset.x + 1) & 1) << 16);
 
   for (int i = 0; i < 4; i++) {
     sub_mul[i] = b;       // Subtract even lines
@@ -241,14 +244,15 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
   mul = static_cast<int>(
       1024.0F * 65535.0F /
-      static_cast<float>(whitePoint - blackLevelSeparate(2 + (mOffset.x & 1))));
+      static_cast<float>(whitePoint -
+                         blackLevelSeparate1D(2 + (mOffset.x & 1))));
   mul |= (static_cast<int>(
              1024.0F * 65535.0F /
-             static_cast<float>(whitePoint -
-                                blackLevelSeparate(2 + ((mOffset.x + 1) & 1)))))
+             static_cast<float>(
+                 whitePoint - blackLevelSeparate1D(2 + ((mOffset.x + 1) & 1)))))
          << 16;
-  b = blackLevelSeparate(2 + (mOffset.x & 1)) |
-      (blackLevelSeparate(2 + ((mOffset.x + 1) & 1)) << 16);
+  b = blackLevelSeparate1D(2 + (mOffset.x & 1)) |
+      (blackLevelSeparate1D(2 + ((mOffset.x + 1) & 1)) << 16);
 
   for (int i = 0; i < 4; i++) {
     sub_mul[8 + i] = b;    // Subtract odd lines
@@ -341,7 +345,10 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   const CroppedArray2DRef<uint16_t> img(getU16DataAsCroppedArray2DRef());
 
-  int depth_values = whitePoint - blackLevelSeparate(0);
+  assert(blackLevelSeparate.width == 4 && blackLevelSeparate.height == 1);
+  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+
+  int depth_values = whitePoint - blackLevelSeparate1D(0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Scale in 30.2 fp
@@ -353,7 +360,6 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   int gw = dim.x * cpp;
   std::array<int, 4> mul;
   std::array<int, 4> sub;
-  assert(blackLevelSeparate.size() == 4);
   for (int i = 0; i < 4; i++) {
     int v = i;
     if ((mOffset.x & 1) != 0)
@@ -362,8 +368,8 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
       v ^= 2;
     mul[i] = static_cast<int>(
         16384.0F * 65535.0F /
-        static_cast<float>(whitePoint - blackLevelSeparate(v)));
-    sub[i] = blackLevelSeparate(v);
+        static_cast<float>(whitePoint - blackLevelSeparate1D(v)));
+    sub[i] = blackLevelSeparate1D(v);
   }
   for (int y = start_y; y < end_y; y++) {
     int v = dim.x + y * 36969;

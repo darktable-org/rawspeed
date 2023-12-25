@@ -21,6 +21,7 @@
 #include "rawspeedconfig.h"
 #include "decoders/DngDecoder.h"
 #include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/NORangesSet.h"
 #include "adt/NotARational.h"
@@ -632,9 +633,9 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     mRaw->blackAreas.clear();
     mRaw->blackLevel = 0;
     mRaw->blackLevelSeparate =
-        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
-    std::fill(mRaw->blackLevelSeparate.begin(), mRaw->blackLevelSeparate.end(),
-              0);
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
     // FIXME: why do we provide both the `blackLevel` and `blackLevelSeparate`?
     mRaw->whitePoint = 65535;
   }
@@ -830,14 +831,16 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
       ThrowRDE("Error decoding black level");
 
     mRaw->blackLevelSeparate =
-        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
-        mRaw->blackLevelSeparate(y * 2 + x) = implicit_cast<int>(value);
+        blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
     }
   } else {
     mRaw->blackLevelSeparate =
-        Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++) {
         float value = black_entry->getFloat(y * blackdim.x + x);
@@ -847,7 +850,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
             static_cast<double>(value) > std::numeric_limits<BlackType>::max())
           ThrowRDE("Error decoding black level");
 
-        mRaw->blackLevelSeparate(y * 2 + x) = implicit_cast<int>(value);
+        blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
       }
     }
   }
@@ -862,6 +865,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     for (int i = 0; i < mRaw->dim.y; i++)
       black_sum[i & 1] += blackleveldeltav->getFloat(i);
 
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int i = 0; i < 4; i++) {
       const float value =
           black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0F;
@@ -869,9 +873,9 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
           static_cast<double>(value) > std::numeric_limits<BlackType>::max())
         ThrowRDE("Error decoding black level");
 
-      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate(i),
+      if (__builtin_sadd_overflow(blackLevelSeparate1D(i),
                                   implicit_cast<int>(value),
-                                  &mRaw->blackLevelSeparate(i)))
+                                  &blackLevelSeparate1D(i)))
         ThrowRDE("Integer overflow when calculating black level");
     }
   }
@@ -885,6 +889,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     for (int i = 0; i < mRaw->dim.x; i++)
       black_sum[i & 1] += blackleveldeltah->getFloat(i);
 
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int i = 0; i < 4; i++) {
       const float value =
           black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0F;
@@ -892,9 +897,9 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
           static_cast<double>(value) > std::numeric_limits<BlackType>::max())
         ThrowRDE("Error decoding black level");
 
-      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate(i),
+      if (__builtin_sadd_overflow(blackLevelSeparate1D(i),
                                   implicit_cast<int>(value),
-                                  &mRaw->blackLevelSeparate(i)))
+                                  &blackLevelSeparate1D(i)))
         ThrowRDE("Integer overflow when calculating black level");
     }
   }
@@ -909,9 +914,9 @@ void DngDecoder::setBlack(const TiffIFD* raw) const {
   // Black defaults to 0
   // FIXME: is this the right thing to do?
   mRaw->blackLevelSeparate =
-      Array1DRef(mRaw->blackLevelSeparateStorage.data(), 4);
-  std::fill(mRaw->blackLevelSeparate.begin(), mRaw->blackLevelSeparate.end(),
-            0);
+      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+  std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
 
   if (raw->hasEntry(TiffTag::BLACKLEVEL))
     decodeBlackLevels(raw);
