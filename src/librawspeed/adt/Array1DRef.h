@@ -102,6 +102,7 @@ template <class T>
                                                           int size) const {
   invariant(offset >= 0);
   invariant(size >= 0);
+  invariant(offset <= numElts);
   invariant(offset + size <= numElts);
   return {*this, offset, size};
 }
