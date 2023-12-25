@@ -39,7 +39,6 @@
 #include "tiff/TiffEntry.h"
 #include "tiff/TiffIFD.h"
 #include "tiff/TiffTag.h"
-#include <array>
 #include <cassert>
 #include <cstdint>
 #include <string>
@@ -255,15 +254,16 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     mRaw->blackLevel = sensor->mBlackLevel;
     mRaw->whitePoint = sensor->mWhiteLevel;
     if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
-      auto cfaArea = mRaw->cfa.getSize().area();
-      if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
-        for (auto i = 0UL; i < cfaArea; i++) {
-          mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+      auto cfaArea = implicit_cast<int>(mRaw->cfa.getSize().area());
+      if (mRaw->isCFA &&
+          cfaArea <= implicit_cast<int>(sensor->mBlackLevelSeparate.size())) {
+        for (int i = 0; i < cfaArea; i++) {
+          mRaw->blackLevelSeparate(i) = sensor->mBlackLevelSeparate[i];
         }
       } else if (!mRaw->isCFA &&
                  mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
         for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
-          mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+          mRaw->blackLevelSeparate(i) = sensor->mBlackLevelSeparate[i];
         }
       }
     }
@@ -281,7 +281,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
                      "final_cfa_black hint.");
     } else {
       for (int i = 0; i < 4; i++) {
-        mRaw->blackLevelSeparate[i] = stoi(v[i]);
+        mRaw->blackLevelSeparate(i) = stoi(v[i]);
       }
     }
   }

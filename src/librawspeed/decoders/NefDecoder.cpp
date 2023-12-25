@@ -626,10 +626,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (bitPerPixel != 12 && bitPerPixel != 14)
       ThrowRDE("Bad bit per pixel: %i", bitPerPixel);
     const int sh = 14 - bitPerPixel;
-    mRaw->blackLevelSeparate[0] = bl->getU16(0) >> sh;
-    mRaw->blackLevelSeparate[1] = bl->getU16(1) >> sh;
-    mRaw->blackLevelSeparate[2] = bl->getU16(2) >> sh;
-    mRaw->blackLevelSeparate[3] = bl->getU16(3) >> sh;
+    mRaw->blackLevelSeparate(0) = bl->getU16(0) >> sh;
+    mRaw->blackLevelSeparate(1) = bl->getU16(1) >> sh;
+    mRaw->blackLevelSeparate(2) = bl->getU16(2) >> sh;
+    mRaw->blackLevelSeparate(3) = bl->getU16(3) >> sh;
   }
 
   if (meta->hasCamera(id.make, id.model, extended_mode)) {

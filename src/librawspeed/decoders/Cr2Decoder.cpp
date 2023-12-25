@@ -405,7 +405,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
 
   mRaw->whitePoint = wb->getU16(levelOffsets->second);
   for (int c = 0; c != 4; ++c)
-    mRaw->blackLevelSeparate[c] = wb->getU16(c + levelOffsets->first);
+    mRaw->blackLevelSeparate(c) = wb->getU16(c + levelOffsets->first);
 
   // In Canon MakerNotes, the levels are always unscaled, and are 14-bit,
   // and so if the LJpeg precision was lower, we need to adjust.
@@ -415,7 +415,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
     assert(bitDepthDiff >= 1 && bitDepthDiff <= 12);
     if (shouldRescaleBlackLevels(f, ver)) {
       for (int c = 0; c != 4; ++c)
-        mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
+        mRaw->blackLevelSeparate(c) >>= bitDepthDiff;
     }
     mRaw->whitePoint >>= bitDepthDiff;
   }
@@ -495,7 +495,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mShiftUpScaleForExif) {
     mRaw->blackLevel = 0;
     for (int c = 0; c != 4; ++c)
-      mRaw->blackLevelSeparate[c] = -1;
+      mRaw->blackLevelSeparate(c) = -1;
   }
   if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
     mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;

@@ -185,9 +185,10 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
   APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
 
-  APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate[0],
-         r->blackLevelSeparate[1], r->blackLevelSeparate[2],
-         r->blackLevelSeparate[3]);
+  assert(r->blackLevelSeparate.size() == 4);
+  APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate(0),
+         r->blackLevelSeparate(1), r->blackLevelSeparate(2),
+         r->blackLevelSeparate(3));
 
   APPEND(&oss, "wbCoeffs: %f %f %f %f\n",
          implicit_cast<double>(r->metadata.wbCoeffs[0]),

@@ -299,14 +299,14 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
     if (sep_black->count == 4) {
       for (int k = 0; k < 4; k++)
-        mRaw->blackLevelSeparate[k] = sep_black->getU32(k);
+        mRaw->blackLevelSeparate(k) = sep_black->getU32(k);
     } else if (sep_black->count == 36) {
       for (int& k : mRaw->blackLevelSeparate)
         k = 0;
 
       for (int y = 0; y < 6; y++) {
         for (int x = 0; x < 6; x++)
-          mRaw->blackLevelSeparate[2 * (y % 2) + (x % 2)] +=
+          mRaw->blackLevelSeparate(2 * (y % 2) + (x % 2)) +=
               sep_black->getU32(6 * y + x);
       }
 

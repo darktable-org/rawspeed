@@ -646,7 +646,7 @@ void ArwDecoder::GetWB() const {
       if (bl->count != 4)
         ThrowRDE("Black Level has %d entries instead of 4", bl->count);
       for (int i = 0; i < 4; ++i)
-        mRaw->blackLevelSeparate[i] = bl->getU16(i) >> mShiftDownScaleForExif;
+        mRaw->blackLevelSeparate(i) = bl->getU16(i) >> mShiftDownScaleForExif;
     }
 
     if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {

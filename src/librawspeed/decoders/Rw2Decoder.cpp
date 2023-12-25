@@ -271,13 +271,13 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         const CFAColor c = mRaw->cfa.getColorAt(i, j);
         switch (c) {
         case CFAColor::RED:
-          mRaw->blackLevelSeparate[k] = blackRed;
+          mRaw->blackLevelSeparate(k) = blackRed;
           break;
         case CFAColor::GREEN:
-          mRaw->blackLevelSeparate[k] = blackGreen;
+          mRaw->blackLevelSeparate(k) = blackGreen;
           break;
         case CFAColor::BLUE:
-          mRaw->blackLevelSeparate[k] = blackBlue;
+          mRaw->blackLevelSeparate(k) = blackBlue;
           break;
         default:
           ThrowRDE("Unexpected CFA color %s.",

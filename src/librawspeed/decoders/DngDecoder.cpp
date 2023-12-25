@@ -630,8 +630,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     }
     mRaw->blackAreas.clear();
     mRaw->blackLevel = 0;
-    mRaw->blackLevelSeparate[0] = mRaw->blackLevelSeparate[1] =
-        mRaw->blackLevelSeparate[2] = mRaw->blackLevelSeparate[3] = 0;
+    mRaw->blackLevelSeparate(0) = mRaw->blackLevelSeparate(1) =
+        mRaw->blackLevelSeparate(2) = mRaw->blackLevelSeparate(3) = 0;
     mRaw->whitePoint = 65535;
   }
 }
@@ -827,7 +827,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
 
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
-        mRaw->blackLevelSeparate[y * 2 + x] = implicit_cast<int>(value);
+        mRaw->blackLevelSeparate(y * 2 + x) = implicit_cast<int>(value);
     }
   } else {
     for (int y = 0; y < 2; y++) {
@@ -839,7 +839,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
             static_cast<double>(value) > std::numeric_limits<BlackType>::max())
           ThrowRDE("Error decoding black level");
 
-        mRaw->blackLevelSeparate[y * 2 + x] = implicit_cast<int>(value);
+        mRaw->blackLevelSeparate(y * 2 + x) = implicit_cast<int>(value);
       }
     }
   }
@@ -861,9 +861,9 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
           static_cast<double>(value) > std::numeric_limits<BlackType>::max())
         ThrowRDE("Error decoding black level");
 
-      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate[i],
+      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate(i),
                                   implicit_cast<int>(value),
-                                  &mRaw->blackLevelSeparate[i]))
+                                  &mRaw->blackLevelSeparate(i)))
         ThrowRDE("Integer overflow when calculating black level");
     }
   }
@@ -884,9 +884,9 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
           static_cast<double>(value) > std::numeric_limits<BlackType>::max())
         ThrowRDE("Error decoding black level");
 
-      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate[i],
+      if (__builtin_sadd_overflow(mRaw->blackLevelSeparate(i),
                                   implicit_cast<int>(value),
-                                  &mRaw->blackLevelSeparate[i]))
+                                  &mRaw->blackLevelSeparate(i)))
         ThrowRDE("Integer overflow when calculating black level");
     }
   }
@@ -899,7 +899,8 @@ void DngDecoder::setBlack(const TiffIFD* raw) const {
     return;
 
   // Black defaults to 0
-  mRaw->blackLevelSeparate.fill(0);
+  std::fill(mRaw->blackLevelSeparate.begin(), mRaw->blackLevelSeparate.end(),
+            0);
 
   if (raw->hasEntry(TiffTag::BLACKLEVEL))
     decodeBlackLevels(raw);

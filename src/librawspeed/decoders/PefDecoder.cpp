@@ -130,7 +130,7 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
     if (black->count == 4) {
       for (int i = 0; i < 4; i++)
-        mRaw->blackLevelSeparate[i] = black->getU32(i);
+        mRaw->blackLevelSeparate(i) = black->getU32(i);
     }
   }
 

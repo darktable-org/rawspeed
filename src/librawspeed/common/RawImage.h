@@ -160,7 +160,8 @@ public:
   bool isCFA{true};
   ColorFilterArray cfa;
   int blackLevel = -1;
-  std::array<int, 4> blackLevelSeparate;
+  std::array<int, 4> blackLevelSeparateStorage;
+  Array1DRef<int> blackLevelSeparate = {blackLevelSeparateStorage.data(), 4};
   int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
 

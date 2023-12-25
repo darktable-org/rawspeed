@@ -333,11 +333,11 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
-          mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
+          mRaw->blackLevelSeparate(i) = blackEntry->getU16(j);
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
+        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate(0));
       }
     }
   }
