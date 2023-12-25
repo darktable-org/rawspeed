@@ -21,7 +21,6 @@
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -182,10 +181,14 @@ int main(int argc_, char* argv_[]) { // NOLINT
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
     fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
 
-    assert(r->blackLevelSeparate.size() == 4);
-    fprintf(stdout, "blackLevelSeparate: %d %d %d %d\n",
-            r->blackLevelSeparate(0), r->blackLevelSeparate(1),
-            r->blackLevelSeparate(2), r->blackLevelSeparate(3));
+    fprintf(stdout, "blackLevelSeparate: (%i x %i)",
+            r->blackLevelSeparate.size(),
+            r->blackLevelSeparate.size() != 0 ? 1 : 0);
+    if (r->blackLevelSeparate.size() != 0) {
+      for (auto l : r->blackLevelSeparate)
+        fprintf(stdout, " %d", l);
+    }
+    fprintf(stdout, "\n");
 
     fprintf(stdout, "wbCoeffs: %f %f %f %f\n",
             implicit_cast<double>(r->metadata.wbCoeffs[0]),
