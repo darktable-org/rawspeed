@@ -22,7 +22,6 @@
 #include "io/BitPumpTest.h"
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <gtest/gtest.h>
 
 using rawspeed::BitPumpMSB;

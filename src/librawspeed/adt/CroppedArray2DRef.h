@@ -94,6 +94,8 @@ CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
   invariant(offsetRows_ >= 0);
   invariant(croppedWidth_ >= 0);
   invariant(croppedHeight_ >= 0);
+  invariant(offsetCols_ <= base.width);
+  invariant(offsetRows_ <= base.height);
   invariant(offsetCols_ + croppedWidth_ <= base.width);
   invariant(offsetRows_ + croppedHeight_ <= base.height);
 }

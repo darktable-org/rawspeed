@@ -27,7 +27,6 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <vector>
 #include <gtest/gtest.h>
 

@@ -20,6 +20,8 @@
 */
 
 #include "decoders/Rw2Decoder.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -265,19 +267,22 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
     const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
 
+    mRaw->blackLevelSeparate =
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         const int k = i + 2 * j;
         const CFAColor c = mRaw->cfa.getColorAt(i, j);
         switch (c) {
         case CFAColor::RED:
-          mRaw->blackLevelSeparate[k] = blackRed;
+          blackLevelSeparate1D(k) = blackRed;
           break;
         case CFAColor::GREEN:
-          mRaw->blackLevelSeparate[k] = blackGreen;
+          blackLevelSeparate1D(k) = blackGreen;
           break;
         case CFAColor::BLUE:
-          mRaw->blackLevelSeparate[k] = blackBlue;
+          blackLevelSeparate1D(k) = blackBlue;
           break;
         default:
           ThrowRDE("Unexpected CFA color %s.",

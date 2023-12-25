@@ -8,7 +8,6 @@ Checks: >
   -cppcoreguidelines-rvalue-reference-param-not-moved,
   -google-global-names-in-headers,
   -misc-definitions-in-headers,
-  -misc-include-cleaner,
   -misc-use-anonymous-namespace,
   -modernize-avoid-c-arrays,
   -modernize-type-traits,

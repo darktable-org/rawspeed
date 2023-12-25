@@ -61,6 +61,7 @@ private:
   void readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                            const iPoint2D& offset, int inputPitch) const;
   void DecodeNikonSNef(ByteStream input) const;
+  void parseWhiteBalance() const;
   [[nodiscard]] int getBitPerSample() const;
   [[nodiscard]] std::string getMode() const;
   [[nodiscard]] std::string getExtendedMode(const std::string& mode) const;

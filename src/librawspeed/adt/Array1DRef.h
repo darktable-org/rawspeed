@@ -93,8 +93,8 @@ template <typename T> Array1DRef(T* data_, int numElts_) -> Array1DRef<T>;
 template <class T>
 Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
     : data(data_), numElts(numElts_) {
-  invariant(data);
   invariant(numElts >= 0);
+  invariant(data || numElts == 0);
 }
 
 template <class T>
@@ -102,6 +102,7 @@ template <class T>
                                                           int size) const {
   invariant(offset >= 0);
   invariant(size >= 0);
+  invariant(offset <= numElts);
   invariant(offset + size <= numElts);
   return {*this, offset, size};
 }

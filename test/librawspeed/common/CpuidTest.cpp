@@ -21,7 +21,6 @@
 #include "rawspeedconfig.h" // IWYU pragma: keep
 #include "common/Cpuid.h"
 #include <cstdlib>
-#include <string>
 #include <gtest/gtest.h>
 
 using rawspeed::Cpuid;

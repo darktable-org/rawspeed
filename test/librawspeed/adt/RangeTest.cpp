@@ -21,6 +21,7 @@
 #include "adt/Range.h"
 #include "adt/RangeTest.h"
 #include <set>
+#include <gtest/gtest.h>
 
 using rawspeed::Range;
 

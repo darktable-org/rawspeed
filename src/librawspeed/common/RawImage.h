@@ -160,7 +160,8 @@ public:
   bool isCFA{true};
   ColorFilterArray cfa;
   int blackLevel = -1;
-  std::array<int, 4> blackLevelSeparate;
+  std::array<int, 4> blackLevelSeparateStorage;
+  Array2DRef<int> blackLevelSeparate;
   int whitePoint = 65536;
   std::vector<BlackArea> blackAreas;
 
@@ -179,7 +180,7 @@ public:
 
 protected:
   RawImageType dataType;
-  RawImageData();
+  RawImageData() = default;
   RawImageData(RawImageType type, const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;

@@ -21,6 +21,7 @@
 */
 
 #include "decoders/OrfDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/NORangesSet.h"
@@ -315,6 +316,9 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           image_processing.getEntry(static_cast<TiffTag>(0x0600));
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
+        mRaw->blackLevelSeparate =
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+        auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (int i = 0; i < 4; i++) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
@@ -333,11 +337,11 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
-          mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
+          blackLevelSeparate1D(i) = blackEntry->getU16(j);
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
+        mRaw->whitePoint -= (mRaw->blackLevel - blackLevelSeparate1D(0));
       }
     }
   }

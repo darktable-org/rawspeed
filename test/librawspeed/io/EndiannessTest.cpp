@@ -20,11 +20,10 @@
 
 #include "EndiannessTest.h"
 #include "io/Endianness.h"
-#include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
-#include <memory>
 #include <gtest/gtest.h>
 
 using rawspeed::Endianness;

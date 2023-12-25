@@ -25,9 +25,7 @@
 #include <ostream>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <utility>
-#include <variant>
 #include <gtest/gtest.h>
 
 using rawspeed::iPoint2D;

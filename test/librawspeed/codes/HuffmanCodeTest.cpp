@@ -20,6 +20,8 @@
 
 #include "codes/HuffmanCode.h"
 #include "adt/Array1DRef.h"
+#include "adt/Casts.h"
+#include "codes/AbstractPrefixCode.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "io/Buffer.h"
 #include <algorithm>
@@ -30,10 +32,13 @@
 #include <ostream>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 #include <vector>
 #include <gtest/gtest.h>
+
+#ifndef NDEBUG
+#include <cstdlib>
+#endif
 
 namespace rawspeed {
 struct BaselineCodeTag;

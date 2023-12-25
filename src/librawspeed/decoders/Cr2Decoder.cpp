@@ -22,6 +22,7 @@
 
 #include "decoders/Cr2Decoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
@@ -404,8 +405,12 @@ bool Cr2Decoder::decodeCanonColorData() const {
     return false;
 
   mRaw->whitePoint = wb->getU16(levelOffsets->second);
+
+  mRaw->blackLevelSeparate =
+      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
   for (int c = 0; c != 4; ++c)
-    mRaw->blackLevelSeparate[c] = wb->getU16(c + levelOffsets->first);
+    blackLevelSeparate1D(c) = wb->getU16(c + levelOffsets->first);
 
   // In Canon MakerNotes, the levels are always unscaled, and are 14-bit,
   // and so if the LJpeg precision was lower, we need to adjust.
@@ -415,7 +420,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
     assert(bitDepthDiff >= 1 && bitDepthDiff <= 12);
     if (shouldRescaleBlackLevels(f, ver)) {
       for (int c = 0; c != 4; ++c)
-        mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
+        blackLevelSeparate1D(c) >>= bitDepthDiff;
     }
     mRaw->whitePoint >>= bitDepthDiff;
   }
@@ -494,8 +499,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(mShiftUpScaleForExif == 0 || mShiftUpScaleForExif == 2);
   if (mShiftUpScaleForExif) {
     mRaw->blackLevel = 0;
-    for (int c = 0; c != 4; ++c)
-      mRaw->blackLevelSeparate[c] = -1;
+    mRaw->blackLevelSeparate = {};
   }
   if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
     mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
