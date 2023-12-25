@@ -123,6 +123,7 @@ Checks: >
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false
+InheritParentConfig: false
 User:            lebedevri
 CheckOptions:
   - key:             bugprone-reserved-identifier.AllowedIdentifiers
