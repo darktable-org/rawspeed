@@ -23,9 +23,12 @@
 #include "bench/Common.h"
 #include <cstdint>
 #include <cstdlib>
+#include <vector>
 #include <benchmark/benchmark.h>
 
-static inline void BM_MD5(benchmark::State& state) {
+namespace {
+
+void BM_MD5(benchmark::State& state) {
   // Create a zero-initialized data. Content does not matter for our purpose.
   std::vector<uint8_t> buf(rawspeed::implicit_cast<size_t>(state.range(0)),
                            uint8_t(0));
@@ -49,7 +52,7 @@ static inline void BM_MD5(benchmark::State& state) {
   });
 }
 
-static inline void CustomArguments(benchmark::internal::Benchmark* b) {
+void CustomArguments(benchmark::internal::Benchmark* b) {
   b->Unit(benchmark::kMillisecond);
 
   static constexpr int L2dByteSize = 512U * (1U << 10U);
@@ -66,6 +69,8 @@ static inline void CustomArguments(benchmark::internal::Benchmark* b) {
   else
     b->Range(1, 2048UL << 20)->Complexity(benchmark::oN);
 }
+
+} // namespace
 
 BENCHMARK(BM_MD5)->Apply(CustomArguments);
 

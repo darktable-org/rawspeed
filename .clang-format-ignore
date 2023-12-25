@@ -3,9 +3,11 @@
 **/*.md
 **/*.py
 **/*.rst
+**/.clang-tidy
 **/CMakeLists.txt
 .ci/**/*
 .clang-format
+.clang-tidy
 .gitattributes
 .github/**/*
 .gitignore

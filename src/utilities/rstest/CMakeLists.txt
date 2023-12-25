@@ -23,10 +23,6 @@ if(BUILD_TESTING)
     CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wlarger-than=${MAX_MEANINGFUL_SIZE})
   endif()
 
-  set(CMAKE_CXX_CLANG_TIDY_SAVE "${CMAKE_CXX_CLANG_TIDY}")
-
-  unset(CMAKE_CXX_CLANG_TIDY)
-
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-c99-extensions)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-variable-declarations)
   rawspeed_add_executable(MD5Test md5.cpp MD5Test.cpp)
