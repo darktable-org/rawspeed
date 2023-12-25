@@ -89,6 +89,7 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
     : base(base_), offset(offset_), numElts(numElts_) {
   invariant(offset >= 0);
   invariant(numElts >= 0);
+  invariant(offset <= base.size());
   invariant(offset + numElts <= base.size());
 }
 
