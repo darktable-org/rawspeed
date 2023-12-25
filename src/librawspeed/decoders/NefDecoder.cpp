@@ -482,17 +482,7 @@ const std::array<uint8_t, 256> NefDecoder::keymap = {
      0xc6, 0x67, 0x4a, 0xf5, 0xa5, 0x12, 0x65, 0x7e, 0xb0, 0xdf, 0xaf, 0x4e,
      0xb3, 0x61, 0x7f, 0x2f}};
 
-void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
-                   CFAColor::GREEN, CFAColor::BLUE);
-
-  int white = mRaw->whitePoint;
-  int black = mRaw->blackLevel;
-
-  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
-
+void NefDecoder::parseWhiteBalance() const {
   // Read the whitebalance
 
   if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(12))) {
@@ -607,6 +597,20 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->metadata.wbCoeffs[0] *= 256.0F / 527.0F;
     mRaw->metadata.wbCoeffs[2] *= 256.0F / 317.0F;
   }
+}
+
+void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
+  int iso = 0;
+  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                   CFAColor::GREEN, CFAColor::BLUE);
+
+  int white = mRaw->whitePoint;
+  int black = mRaw->blackLevel;
+
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
+
+  parseWhiteBalance();
 
   auto id = mRootIFD->getID();
   std::string mode = getMode();
