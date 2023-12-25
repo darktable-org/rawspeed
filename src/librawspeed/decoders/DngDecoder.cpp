@@ -633,7 +633,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     mRaw->blackAreas.clear();
     mRaw->blackLevel = 0;
     mRaw->blackLevelSeparate =
-        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
     // FIXME: why do we provide both the `blackLevel` and `blackLevelSeparate`?
@@ -831,7 +831,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
       ThrowRDE("Error decoding black level");
 
     mRaw->blackLevelSeparate =
-        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
@@ -839,7 +839,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     }
   } else {
     mRaw->blackLevelSeparate =
-        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++) {
@@ -914,7 +914,7 @@ void DngDecoder::setBlack(const TiffIFD* raw) const {
   // Black defaults to 0
   // FIXME: is this the right thing to do?
   mRaw->blackLevelSeparate =
-      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
   auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
   std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
 

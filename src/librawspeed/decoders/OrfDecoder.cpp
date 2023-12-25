@@ -317,7 +317,7 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
         mRaw->blackLevelSeparate =
-            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
         auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (int i = 0; i < 4; i++) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);

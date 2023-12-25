@@ -646,7 +646,7 @@ void ArwDecoder::GetWB() const {
       if (bl->count != 4)
         ThrowRDE("Black Level has %d entries instead of 4", bl->count);
       mRaw->blackLevelSeparate =
-          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 4, 1);
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
       auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
       for (int i = 0; i < 4; ++i)
         blackLevelSeparate1D(i) = bl->getU16(i) >> mShiftDownScaleForExif;

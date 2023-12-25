@@ -108,7 +108,7 @@ void RawImageDataU16::calculateBlackAreas() {
     }
   }
 
-  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 4, 1);
+  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 2, 2);
   auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
 
   if (!totalpixels) {
@@ -204,7 +204,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #ifdef WITH_SSE2
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
-  assert(blackLevelSeparate.width == 4 && blackLevelSeparate.height == 1);
+  assert(blackLevelSeparate.width == 2 && blackLevelSeparate.height == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
 
   int depth_values = whitePoint - blackLevelSeparate1D(0);
@@ -345,7 +345,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   const CroppedArray2DRef<uint16_t> img(getU16DataAsCroppedArray2DRef());
 
-  assert(blackLevelSeparate.width == 4 && blackLevelSeparate.height == 1);
+  assert(blackLevelSeparate.width == 2 && blackLevelSeparate.height == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
 
   int depth_values = whitePoint - blackLevelSeparate1D(0);
