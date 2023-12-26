@@ -55,6 +55,8 @@ private:
   void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);
   bool decodeMaskedAreas(const TiffIFD* raw) const;
+  void decodeBlackLevelDelta(const TiffIFD* raw, TiffTag tag, int patSize,
+                             int dimSize, auto z) const;
   bool decodeBlackLevels(const TiffIFD* raw) const;
   void setBlack(const TiffIFD* raw) const;
 

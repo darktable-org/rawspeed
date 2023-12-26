@@ -407,7 +407,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
   mRaw->whitePoint = wb->getU16(levelOffsets->second);
 
   mRaw->blackLevelSeparate =
-      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
   auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
   for (int c = 0; c != 4; ++c)
     blackLevelSeparate1D(c) = wb->getU16(c + levelOffsets->first);

@@ -260,7 +260,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       if (mRaw->isCFA &&
           cfaArea <= implicit_cast<int>(sensor->mBlackLevelSeparate.size())) {
         mRaw->blackLevelSeparate =
-            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+            Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
         auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (int i = 0; i < cfaArea; i++) {
           blackLevelSeparate1D(i) = sensor->mBlackLevelSeparate[i];
@@ -268,7 +268,7 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       } else if (!mRaw->isCFA &&
                  mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
         mRaw->blackLevelSeparate =
-            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+            Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
         auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
         for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
           blackLevelSeparate1D(i) = sensor->mBlackLevelSeparate[i];

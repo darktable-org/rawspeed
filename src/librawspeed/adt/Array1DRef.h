@@ -24,6 +24,7 @@
 #include "adt/Invariant.h"
 #include <cstddef>
 #include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 
@@ -75,6 +76,15 @@ public:
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : data(reinterpret_cast<T*>(RHS.data)),
         numElts(sizeof(T2) * RHS.numElts) {}
+
+  template <typename AllocatorType =
+                typename std::vector<cvless_value_type>::allocator_type>
+  static Array1DRef<T>
+  create(std::vector<cvless_value_type, AllocatorType>& storage, int numElts) {
+    using VectorTy = std::remove_reference_t<decltype(storage)>;
+    storage = VectorTy(numElts);
+    return {storage.data(), numElts};
+  }
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
 

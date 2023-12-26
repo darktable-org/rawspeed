@@ -503,6 +503,9 @@ RawImage DngDecoder::decodeRawInternal() {
   if (cpp < 1 || cpp > 4)
     ThrowRDE("Unsupported samples per pixel count: %u.", cpp);
 
+  if (mRaw->isCFA && cpp != 1)
+    ThrowRDE("For CFA images, expecting 1 sample per pixel, got: %u.", cpp);
+
   mRaw->setCpp(cpp);
 
   // Now load the image
@@ -633,7 +636,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     mRaw->blackAreas.clear();
     mRaw->blackLevel = 0;
     mRaw->blackLevelSeparate =
-        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+        Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
     // FIXME: why do we provide both the `blackLevel` and `blackLevelSeparate`?
@@ -791,6 +794,45 @@ bool DngDecoder::decodeMaskedAreas(const TiffIFD* raw) const {
   return !mRaw->blackAreas.empty();
 }
 
+void DngDecoder::decodeBlackLevelDelta(const TiffIFD* raw, TiffTag tag,
+                                       int patSize, int dimSize, auto z) const {
+  using BlackType = decltype(mRaw->blackLevelSeparate)::value_type;
+
+  if (!raw->hasEntry(tag))
+    return;
+
+  const TiffEntry* blackleveldeltah = raw->getEntry(tag);
+  if (static_cast<int>(blackleveldeltah->count) < dimSize)
+    ThrowRDE("BLACKLEVELDELTAH array is too small");
+
+  std::vector<float> sumStorage;
+  auto sum = Array1DRef<float>::create(sumStorage, patSize);
+  std::fill(sum.begin(), sum.end(), 0);
+
+  std::vector<int> numStorage;
+  auto num = Array1DRef<int>::create(numStorage, patSize);
+  std::fill(num.begin(), num.end(), 0);
+
+  for (int y = 0; y < dimSize; y++) {
+    sum(y % patSize) += blackleveldeltah->getFloat(y);
+    num(y % patSize) += 1;
+  }
+
+  for (int y = 0; y < mRaw->blackLevelSeparate.height; y++) {
+    for (int x = 0; x < mRaw->blackLevelSeparate.width; x++) {
+      const int i = z(y, x);
+      const float value = sum(i) / float(num(i));
+      if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
+          static_cast<double>(value) > std::numeric_limits<BlackType>::max())
+        ThrowRDE("Error decoding black level");
+
+      auto& out = mRaw->blackLevelSeparate(y, x);
+      if (__builtin_sadd_overflow(out, implicit_cast<int>(value), &out))
+        ThrowRDE("Integer overflow when calculating black level");
+    }
+  }
+}
+
 bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   iPoint2D blackdim(1, 1);
   if (raw->hasEntry(TiffTag::BLACKLEVELREPEATDIM)) {
@@ -813,96 +855,35 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   if (!raw->hasEntry(TiffTag::BLACKLEVEL))
     return true;
 
-  if (mRaw->getCpp() != 1)
-    return false;
-
   const TiffEntry* black_entry = raw->getEntry(TiffTag::BLACKLEVEL);
-  if (black_entry->count < blackdim.area())
+  if (black_entry->count != mRaw->getCpp() * blackdim.area())
     ThrowRDE("BLACKLEVEL entry is too small");
 
   using BlackType = decltype(mRaw->blackLevelSeparate)::value_type;
 
-  if (blackdim.x < 2 || blackdim.y < 2) {
-    // We so not have enough to fill all individually, read a single and copy it
-    float value = black_entry->getFloat();
+  mRaw->blackLevelSeparate = Array2DRef<int>::create(
+      mRaw->blackLevelSeparateStorage, mRaw->getCpp() * blackdim.x, blackdim.y);
 
-    if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
-        static_cast<double>(value) > std::numeric_limits<BlackType>::max())
-      ThrowRDE("Error decoding black level");
+  for (int y = 0; y < mRaw->blackLevelSeparate.height; y++) {
+    for (int x = 0; x < mRaw->blackLevelSeparate.width; x++) {
+      float value =
+          black_entry->getFloat(y * mRaw->blackLevelSeparate.width + x);
 
-    mRaw->blackLevelSeparate =
-        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
-    for (int y = 0; y < 2; y++) {
-      for (int x = 0; x < 2; x++)
-        blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
-    }
-  } else {
-    mRaw->blackLevelSeparate =
-        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
-    for (int y = 0; y < 2; y++) {
-      for (int x = 0; x < 2; x++) {
-        float value = black_entry->getFloat(y * blackdim.x + x);
+      if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
+          static_cast<double>(value) > std::numeric_limits<BlackType>::max())
+        ThrowRDE("Error decoding black level");
 
-        if (static_cast<double>(value) <
-                std::numeric_limits<BlackType>::min() ||
-            static_cast<double>(value) > std::numeric_limits<BlackType>::max())
-          ThrowRDE("Error decoding black level");
-
-        blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
-      }
+      mRaw->blackLevelSeparate(y, x) = implicit_cast<int>(value);
     }
   }
 
   // DNG Spec says we must add black in deltav and deltah
-  if (raw->hasEntry(TiffTag::BLACKLEVELDELTAV)) {
-    const TiffEntry* blackleveldeltav =
-        raw->getEntry(TiffTag::BLACKLEVELDELTAV);
-    if (static_cast<int>(blackleveldeltav->count) < mRaw->dim.y)
-      ThrowRDE("BLACKLEVELDELTAV array is too small");
-    std::array<float, 2> black_sum = {{}};
-    for (int i = 0; i < mRaw->dim.y; i++)
-      black_sum[i & 1] += blackleveldeltav->getFloat(i);
+  decodeBlackLevelDelta(raw, TiffTag::BLACKLEVELDELTAV, blackdim.y, mRaw->dim.y,
+                        [](int row, int col) { return row; });
+  decodeBlackLevelDelta(
+      raw, TiffTag::BLACKLEVELDELTAH, blackdim.x, mRaw->dim.x,
+      [cpp = mRaw->getCpp()](int row, int col) { return col / cpp; });
 
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
-    for (int i = 0; i < 4; i++) {
-      const float value =
-          black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0F;
-      if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
-          static_cast<double>(value) > std::numeric_limits<BlackType>::max())
-        ThrowRDE("Error decoding black level");
-
-      if (__builtin_sadd_overflow(blackLevelSeparate1D(i),
-                                  implicit_cast<int>(value),
-                                  &blackLevelSeparate1D(i)))
-        ThrowRDE("Integer overflow when calculating black level");
-    }
-  }
-
-  if (raw->hasEntry(TiffTag::BLACKLEVELDELTAH)) {
-    const TiffEntry* blackleveldeltah =
-        raw->getEntry(TiffTag::BLACKLEVELDELTAH);
-    if (static_cast<int>(blackleveldeltah->count) < mRaw->dim.x)
-      ThrowRDE("BLACKLEVELDELTAH array is too small");
-    std::array<float, 2> black_sum = {{}};
-    for (int i = 0; i < mRaw->dim.x; i++)
-      black_sum[i & 1] += blackleveldeltah->getFloat(i);
-
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
-    for (int i = 0; i < 4; i++) {
-      const float value =
-          black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0F;
-      if (static_cast<double>(value) < std::numeric_limits<BlackType>::min() ||
-          static_cast<double>(value) > std::numeric_limits<BlackType>::max())
-        ThrowRDE("Error decoding black level");
-
-      if (__builtin_sadd_overflow(blackLevelSeparate1D(i),
-                                  implicit_cast<int>(value),
-                                  &blackLevelSeparate1D(i)))
-        ThrowRDE("Integer overflow when calculating black level");
-    }
-  }
   return true;
 }
 
@@ -914,7 +895,7 @@ void DngDecoder::setBlack(const TiffIFD* raw) const {
   // Black defaults to 0
   // FIXME: is this the right thing to do?
   mRaw->blackLevelSeparate =
-      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
   auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
   std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
 
