@@ -298,27 +298,19 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
     const TiffEntry* sep_black =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
-    if (sep_black->count == 4) {
+    if (sep_black->count == 2 * 2) {
       mRaw->blackLevelSeparate =
           Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
       auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
       for (int k = 0; k < 4; k++)
         blackLevelSeparate1D(k) = sep_black->getU32(k);
-    } else if (sep_black->count == 36) {
+    } else if (sep_black->count == 6 * 6) {
       mRaw->blackLevelSeparate =
-          Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 2, 2);
-      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
-      for (int& k : blackLevelSeparate1D)
-        k = 0;
-
+          Array2DRef<int>::create(mRaw->blackLevelSeparateStorage, 6, 6);
       for (int y = 0; y < 6; y++) {
         for (int x = 0; x < 6; x++)
-          blackLevelSeparate1D(2 * (y % 2) + (x % 2)) +=
-              sep_black->getU32(6 * y + x);
+          mRaw->blackLevelSeparate(y, x) = sep_black->getU32(6 * y + x);
       }
-
-      for (int& k : blackLevelSeparate1D)
-        k /= 9;
     }
 
     // Set black level to average of EXIF data, can be overridden by XML data.
@@ -326,7 +318,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
     for (int b : blackLevelSeparate1D)
       sum += b;
-    mRaw->blackLevel = (sum + 2) >> 2;
+    mRaw->blackLevel = implicit_cast<int>(roundUpDivision(
+        sum, mRaw->blackLevelSeparate.width * mRaw->blackLevelSeparate.height));
   }
 
   const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
