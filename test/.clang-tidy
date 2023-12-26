@@ -17,11 +17,24 @@ Checks: >
   -performance-move-const-arg,
   -performance-unnecessary-copy-initialization,
   -readability-convert-member-functions-to-static,
-  -readability-function-cognitive-complexity,
-  -readability-function-size,
   -readability-isolate-declaration,
   -readability-make-member-function-const,
   -readability-suspicious-call-argument,
   -readability-uppercase-literal-suffix,
 InheritParentConfig: true
+CheckOptions:
+  - key:             readability-function-size.BranchThreshold
+    value:           '42'
+  - key:             readability-function-size.LineThreshold
+    value:           '51'
+  - key:             readability-function-size.StatementThreshold
+    value:           '209'
+  - key:             readability-function-size.ParameterThreshold
+    value:           '6'
+  - key:             readability-function-size.NestingThreshold
+    value:           '5'
+  - key:             readability-function-size.VariableThreshold
+    value:           '36'
+  - key:             readability-function-cognitive-complexity.Threshold
+    value:           '135'
 ...
