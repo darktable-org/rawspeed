@@ -108,7 +108,7 @@ void RawImageDataU16::calculateBlackAreas() {
     }
   }
 
-  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 2, 2);
+  blackLevelSeparate = Array2DRef<int>::create(blackLevelSeparateStorage, 2, 2);
   auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
 
   if (!totalpixels) {
