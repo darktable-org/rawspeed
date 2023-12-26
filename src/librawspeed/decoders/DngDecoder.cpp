@@ -503,6 +503,9 @@ RawImage DngDecoder::decodeRawInternal() {
   if (cpp < 1 || cpp > 4)
     ThrowRDE("Unsupported samples per pixel count: %u.", cpp);
 
+  if (mRaw->isCFA && cpp != 1)
+    ThrowRDE("For CFA images, expecting 1 sample per pixel, got: %u.", cpp);
+
   mRaw->setCpp(cpp);
 
   // Now load the image
