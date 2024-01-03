@@ -11272,6 +11272,7 @@
 		<Crop x="0" y="0" width="-64" height="0"/>
 		<Sensor black="144" white="4095"/>
 		<Aliases>
+			<Alias>DC-G100D</Alias>
 			<Alias>DC-G110</Alias>
 		</Aliases>
 		<ColorMatrices>
@@ -11287,6 +11288,7 @@
 		<Crop x="0" y="0" width="-64" height="0"/>
 		<Sensor black="144" white="4095"/>
 		<Aliases>
+			<Alias>DC-G100D</Alias>
 			<Alias>DC-G110</Alias>
 		</Aliases>
 		<ColorMatrices>
