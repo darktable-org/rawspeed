@@ -16,6 +16,7 @@ FILE(GLOB SOURCES
   "NotARational.h"
   "Point.h"
   "Range.h"
+  "VariableLengthLoad.h"
   "iterator_range.h"
 )
 
