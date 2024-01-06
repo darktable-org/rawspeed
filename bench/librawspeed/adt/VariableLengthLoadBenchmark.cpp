@@ -49,6 +49,23 @@ namespace {
   variableLengthLoadNaiveViaStdCopy(out, in, inPos);
 }
 
+template <decltype(fixedLengthLoad) Callable>
+[[maybe_unused]] inline void
+fixedLengthLoadOr(rawspeed::Array1DRef<uint8_t> out,
+                  rawspeed::Array1DRef<const uint8_t> in, int inPos) {
+  invariant(out.size() != 0);
+  invariant(in.size() != 0);
+  invariant(out.size() <= in.size());
+  invariant(inPos >= 0);
+
+  if (inPos + out.size() <= in.size()) {
+    fixedLengthLoad(out, in, inPos);
+    return;
+  }
+
+  Callable(out, in, inPos);
+}
+
 } // namespace
 
 } // namespace rawspeed
@@ -56,6 +73,7 @@ namespace {
 namespace {
 
 using rawspeed::fixedLengthLoad;
+using rawspeed::fixedLengthLoadOr;
 using rawspeed::variableLengthLoadNaiveViaConditionalLoad;
 using rawspeed::variableLengthLoadNaiveViaMemcpy;
 using rawspeed::variableLengthLoadNaiveViaStdCopy;
@@ -135,6 +153,11 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
 
 #undef GEN_WRAPPER
 #define GEN_WRAPPER(I) I
+
+GEN_TIME();
+
+#undef GEN_WRAPPER
+#define GEN_WRAPPER(I) fixedLengthLoadOr<I>
 
 GEN_TIME();
 
