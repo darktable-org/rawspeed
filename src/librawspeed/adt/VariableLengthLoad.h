@@ -45,6 +45,28 @@ inline void variableLengthLoadNaiveViaConditionalLoad(
   }
 }
 
+inline void variableLengthLoadNaiveViaStdCopy(Array1DRef<uint8_t> out,
+                                              Array1DRef<const uint8_t> in,
+                                              int inPos) {
+  invariant(out.size() != 0);
+  invariant(in.size() != 0);
+  invariant(out.size() <= in.size());
+  invariant(inPos >= 0);
+
+  inPos = std::min(inPos, in.size());
+
+  int inPosEnd = inPos + out.size();
+  inPosEnd = std::min(inPosEnd, in.size());
+  invariant(inPos <= inPosEnd);
+
+  const int copySize = inPosEnd - inPos;
+  invariant(copySize >= 0);
+  invariant(copySize <= out.size());
+
+  std::fill(out.begin(), out.end(), 0);
+  std::copy(in.addressOf(inPos), in.addressOf(inPosEnd), out.begin());
+}
+
 inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
                                              Array1DRef<const uint8_t> in,
                                              int inPos) {

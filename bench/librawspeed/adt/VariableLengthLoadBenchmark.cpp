@@ -39,6 +39,7 @@ namespace {
 
 using rawspeed::variableLengthLoadNaiveViaConditionalLoad;
 using rawspeed::variableLengthLoadNaiveViaMemcpy;
+using rawspeed::variableLengthLoadNaiveViaStdCopy;
 
 template <decltype(variableLengthLoadNaiveViaMemcpy) Impl, typename T>
 void BM_Impl(benchmark::State& state) {
@@ -109,6 +110,7 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
 
 #define GEN_TIME()                                                             \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaConditionalLoad));        \
+  GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaStdCopy));                \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaMemcpy))
 
 #undef GEN_WRAPPER
