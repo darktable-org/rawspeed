@@ -81,6 +81,14 @@ TEST(VariableLengthLoadTest, Exhaustive) {
             outputImpl0, Array1DRef<const unsigned char>(input), inPos);
 
         EXPECT_THAT(outputImpl0, testing::ContainerEq(outputReference));
+
+        std::vector<unsigned char> outputImpl1Storage(numOutputBytes);
+        auto outputImpl1 =
+            Array1DRef(outputImpl1Storage.data(), numOutputBytes);
+        variableLengthLoadNaiveViaConditionalLoad(
+            outputImpl1, Array1DRef<const unsigned char>(input), inPos);
+
+        EXPECT_THAT(outputImpl1, testing::ContainerEq(outputReference));
       }
     }
   }

@@ -37,6 +37,7 @@ namespace {}
 
 namespace {
 
+using rawspeed::variableLengthLoadNaiveViaConditionalLoad;
 using rawspeed::variableLengthLoadNaiveViaMemcpy;
 
 template <decltype(variableLengthLoadNaiveViaMemcpy) Impl, typename T>
@@ -106,7 +107,9 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   GEN(I, uint32_t);                                                            \
   GEN(I, uint64_t)
 
-#define GEN_TIME() GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaMemcpy))
+#define GEN_TIME()                                                             \
+  GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaConditionalLoad));        \
+  GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaMemcpy))
 
 #undef GEN_WRAPPER
 #define GEN_WRAPPER(I) I

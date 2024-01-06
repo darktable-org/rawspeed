@@ -28,6 +28,23 @@
 
 namespace rawspeed {
 
+inline void variableLengthLoadNaiveViaConditionalLoad(
+    Array1DRef<uint8_t> out, Array1DRef<const uint8_t> in, int inPos) {
+  invariant(out.size() != 0);
+  invariant(in.size() != 0);
+  invariant(out.size() <= in.size());
+  invariant(inPos >= 0);
+
+  std::fill(out.begin(), out.end(), 0);
+
+  for (int outIndex = 0; outIndex != out.size(); ++outIndex) {
+    const int inIndex = inPos + outIndex;
+    if (inIndex >= in.size())
+      return;
+    out(outIndex) = in(inIndex); // masked load
+  }
+}
+
 inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
                                              Array1DRef<const uint8_t> in,
                                              int inPos) {
