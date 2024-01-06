@@ -21,6 +21,7 @@
 #include "adt/VariableLengthLoad.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/Invariant.h"
 #include "bench/Common.h"
 #include "common/Common.h"
 #include <array>
@@ -31,12 +32,30 @@
 
 namespace rawspeed {
 
-namespace {}
+namespace {
+
+[[maybe_unused]] inline void fixedLengthLoad(Array1DRef<uint8_t> out,
+                                             Array1DRef<const uint8_t> in,
+                                             int inPos) {
+  invariant(out.size() != 0);
+  invariant(in.size() != 0);
+  invariant(out.size() <= in.size());
+  invariant(inPos >= 0);
+
+  // Here we "somehow" know that the load is always in-bounds.
+  invariant(inPos < in.size());
+  invariant(inPos + out.size() <= in.size());
+
+  variableLengthLoadNaiveViaStdCopy(out, in, inPos);
+}
+
+} // namespace
 
 } // namespace rawspeed
 
 namespace {
 
+using rawspeed::fixedLengthLoad;
 using rawspeed::variableLengthLoadNaiveViaConditionalLoad;
 using rawspeed::variableLengthLoadNaiveViaMemcpy;
 using rawspeed::variableLengthLoadNaiveViaStdCopy;
@@ -109,6 +128,7 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   GEN(I, uint64_t)
 
 #define GEN_TIME()                                                             \
+  GEN_CALLABLE(GEN_WRAPPER(fixedLengthLoad));                                  \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaConditionalLoad));        \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaStdCopy));                \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaMemcpy))
