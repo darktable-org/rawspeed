@@ -138,7 +138,7 @@ jobs:
             eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
 
             eatmydata apt-get install curl gpg
-            echo 'deb http://download.opensuse.org/repositories/graphics:/darktable:/master/Debian_Testing/ /' | tee /etc/apt/sources.list
+            echo 'deb https://mirror.aardsoft.fi/opensuse/repositories/graphics:/darktable:/master/Debian_Testing/ /' | tee /etc/apt/sources.list
             curl -fsSL https://download.opensuse.org/repositories/graphics:darktable:master/Debian_Testing/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/graphics_darktable_master.gpg > /dev/null
             apt-get update
             eatmydata apt-get install rawspeed-clang-tidy-module
