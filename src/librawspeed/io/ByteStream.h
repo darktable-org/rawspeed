@@ -61,7 +61,7 @@ public:
   }
 
   [[nodiscard]] inline size_type check(size_type bytes) const {
-    if (static_cast<uint64_t>(pos) + bytes > getSize())
+    if (!isValid(pos, bytes))
       ThrowIOE("Out of bounds access in ByteStream");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
