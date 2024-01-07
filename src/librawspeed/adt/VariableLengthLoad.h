@@ -25,6 +25,7 @@
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
 #include "common/Common.h"
+#include "io/Endianness.h"
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -86,12 +87,12 @@ inline void variableLengthLoad(Array1DRef<uint8_t> out,
   in = in.getCrop(inPos, out.size()).getAsArray1DRef();
   invariant(in.size() == out.size());
 
-  T tmp;
-  memcpy(&tmp, in.begin(), sizeof(T));
+  auto tmp = getLE<T>(in.begin());
 
   int posMismatchBits = CHAR_BIT * (-inPosFixup);
   tmp = logicalRightShiftSafe(tmp, posMismatchBits);
 
+  tmp = getLE<T>(&tmp);
   memcpy(out.begin(), &tmp, sizeof(T));
 }
 
