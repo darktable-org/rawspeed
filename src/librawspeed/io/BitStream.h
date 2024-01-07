@@ -116,10 +116,6 @@ template <typename Tag> struct BitStreamReplenisherBase {
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
   }
 
-  explicit BitStreamReplenisherBase(Buffer input_)
-      : BitStreamReplenisherBase({input_.getData(0, input_.getSize()),
-                                  implicit_cast<int>(input_.getSize())}) {}
-
   // A temporary intermediate buffer that may be used by fill() method either
   // in debug build to enforce lack of out-of-bounds reads, or when we are
   // nearing the end of the input buffer and can not just read
@@ -197,7 +193,11 @@ public:
 
   BitStream() = default;
 
-  explicit BitStream(Buffer buf) : replenisher(buf) {}
+  explicit BitStream(Array1DRef<const uint8_t> input) : replenisher(input) {}
+
+  explicit BitStream(Buffer input)
+      : BitStream({input.getData(0, input.getSize()),
+                   implicit_cast<int>(input.getSize())}) {}
 
   explicit BitStream(ByteStream s)
       : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
