@@ -46,7 +46,7 @@ namespace {
   invariant(inPos < in.size());
   invariant(inPos + out.size() <= in.size());
 
-  variableLengthLoadNaiveViaStdCopy(out, in, inPos);
+  variableLengthLoadNaiveViaMemcpy(out, in, inPos);
 }
 
 template <decltype(fixedLengthLoad) Callable>
@@ -77,7 +77,6 @@ using rawspeed::fixedLengthLoadOr;
 using rawspeed::variableLengthLoad;
 using rawspeed::variableLengthLoadNaiveViaConditionalLoad;
 using rawspeed::variableLengthLoadNaiveViaMemcpy;
-using rawspeed::variableLengthLoadNaiveViaStdCopy;
 
 template <decltype(variableLengthLoadNaiveViaMemcpy) Impl, typename T>
 void BM_Impl(benchmark::State& state) {
@@ -150,7 +149,6 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   GEN_CALLABLE(GEN_WRAPPER(fixedLengthLoad));                                  \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoad));                               \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaConditionalLoad));        \
-  GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaStdCopy));                \
   GEN_CALLABLE(GEN_WRAPPER(variableLengthLoadNaiveViaMemcpy))
 
 #undef GEN_WRAPPER

@@ -93,18 +93,10 @@ TEST(VariableLengthLoadTest, Exhaustive) {
         std::vector<unsigned char> outputImpl2Storage(numOutputBytes);
         auto outputImpl2 =
             Array1DRef(outputImpl2Storage.data(), numOutputBytes);
-        variableLengthLoadNaiveViaStdCopy(
-            outputImpl2, Array1DRef<const unsigned char>(input), inPos);
-
-        EXPECT_THAT(outputImpl2, testing::ContainerEq(outputReference));
-
-        std::vector<unsigned char> outputImpl3Storage(numOutputBytes);
-        auto outputImpl3 =
-            Array1DRef(outputImpl3Storage.data(), numOutputBytes);
-        variableLengthLoad(outputImpl3, Array1DRef<const unsigned char>(input),
+        variableLengthLoad(outputImpl2, Array1DRef<const unsigned char>(input),
                            inPos);
 
-        EXPECT_THAT(outputImpl3, testing::ContainerEq(outputReference));
+        EXPECT_THAT(outputImpl2, testing::ContainerEq(outputReference));
       }
     }
   }
