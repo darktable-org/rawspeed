@@ -136,27 +136,26 @@ public:
     pos += check(nmemb, size_);
   }
 
-  inline bool hasPatternAt(const char* pattern, size_type size_,
-                           size_type relPos) const {
-    invariant(data);
-    if (!isValid(pos + relPos, size_))
+  [[nodiscard]] inline bool hasPatternAt(std::string_view pattern,
+                                         size_type relPos) const {
+    if (!isValid(pos + relPos, implicit_cast<size_type>(pattern.size())))
       return false;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    return memcmp(&data[pos + relPos], pattern, size_) == 0;
+    return memcmp(&data[pos + relPos], pattern.data(), pattern.size()) == 0;
 #pragma GCC diagnostic pop
   }
 
-  inline bool hasPrefix(const char* prefix, size_type size_) const {
-    return hasPatternAt(prefix, size_, 0);
+  [[nodiscard]] inline bool hasPrefix(std::string_view prefix) const {
+    return hasPatternAt(prefix, /*relPos=*/0);
   }
 
-  inline bool skipPrefix(const char* prefix, size_type size_) {
-    bool has_prefix = hasPrefix(prefix, size_);
+  inline bool skipPrefix(std::string_view prefix) {
+    bool has_prefix = hasPrefix(prefix);
     if (has_prefix)
-      pos += size_;
+      pos += prefix.size();
     return has_prefix;
   }
 

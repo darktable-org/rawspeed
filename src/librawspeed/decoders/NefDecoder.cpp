@@ -577,9 +577,9 @@ void NefDecoder::parseWhiteBalance() const {
       mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0F;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0F;
-    } else if (bs.hasPatternAt("NRW ", 4, 0)) {
+    } else if (bs.hasPatternAt("NRW ", 0)) {
       uint32_t offset = 0;
-      if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
+      if (!bs.hasPatternAt("0100", 4) && wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
         offset = 1556;
