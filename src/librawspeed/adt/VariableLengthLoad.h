@@ -151,6 +151,8 @@ inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
   invariant(out.size() <= in.size());
   invariant(inPos >= 0);
 
+  std::fill(out.begin(), out.end(), 0);
+
   inPos = std::min(inPos, in.size());
 
   int inPosEnd = inPos + out.size();
@@ -161,8 +163,11 @@ inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
   invariant(copySize >= 0);
   invariant(copySize <= out.size());
 
-  std::fill(out.begin(), out.end(), 0);
-  memcpy(out.begin(), in.addressOf(inPos), copySize);
+  out = out.getCrop(/*inPos=*/0, copySize).getAsArray1DRef();
+  in = in.getCrop(inPos, copySize).getAsArray1DRef();
+  invariant(in.size() == out.size());
+
+  memcpy(out.begin(), in.begin(), copySize);
 }
 
 } // namespace rawspeed
