@@ -62,6 +62,11 @@ public:
     assert(!ASan::RegionIsPoisoned(data, size));
   }
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  operator Array1DRef<const uint8_t>() const {
+    return {getData(0, getSize()), implicit_cast<int>(getSize())};
+  }
+
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
     if (!isValid(0, offset))
       ThrowIOE("Buffer overflow: image file may be truncated");
