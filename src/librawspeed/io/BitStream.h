@@ -25,6 +25,7 @@
 #include "rawspeedconfig.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/VariableLengthLoad.h"
 #include "common/Common.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -164,22 +165,10 @@ struct BitStreamForwardSequentialReplenisher final
     if (Base::pos > Base::size + 2 * BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
 
-    Base::tmp.fill(0);
-
-    // How many bytes are left in input buffer?
-    // Since pos can be past-the-end we need to carefully handle overflow.
-    typename Base::size_type bytesRemaining =
-        (Base::pos < Base::size) ? Base::size - Base::pos : 0;
-    // And if we are not at the end of the input, we may have more than we need.
-    bytesRemaining = std::min<typename Base::size_type>(
-        BitStreamTraits<Tag>::MaxProcessBytes, bytesRemaining);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    memcpy(Base::tmp.data(), Base::data + Base::pos, bytesRemaining);
-#pragma GCC diagnostic pop
+    variableLengthLoadNaiveViaMemcpy(
+        {Base::tmp.data(), implicit_cast<int>(Base::tmp.size())},
+        {Base::data, implicit_cast<int>(Base::size)},
+        implicit_cast<int>(Base::pos));
 
     return Base::tmp.data();
   }
