@@ -49,7 +49,7 @@ namespace {
 
 template <typename Pump, bool IsFullDecode, typename HT>
 void workloop(rawspeed::ByteStream bs, const HT& ht) {
-  Pump bits(bs);
+  Pump bits(bs.peekRemainingBuffer());
   while (true)
     ht.template decode<Pump, IsFullDecode>(bits);
   // FIXME: do we need to escape the result to avoid dead code elimination?

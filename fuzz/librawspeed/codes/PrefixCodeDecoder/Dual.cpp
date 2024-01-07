@@ -53,8 +53,8 @@ namespace {
 template <typename Pump, bool IsFullDecode, typename HT0, typename HT1>
 void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
               const HT0& ht0, const HT1& ht1) {
-  Pump bits0(bs0);
-  Pump bits1(bs1);
+  Pump bits0(bs0.peekRemainingBuffer());
+  Pump bits1(bs1.peekRemainingBuffer());
 
   while (true) {
     int decoded0;

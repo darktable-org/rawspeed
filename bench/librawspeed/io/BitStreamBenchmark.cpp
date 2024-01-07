@@ -85,7 +85,7 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
 
   size_t processedBits = 0;
   for (auto _ : state) {
-    Pump pump(bs);
+    Pump pump(bs.peekRemainingBuffer());
 
     for (processedBits = 0; processedBits <= 8 * b.getSize();) {
       pump.fill(fillSize);

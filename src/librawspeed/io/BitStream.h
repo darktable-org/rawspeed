@@ -199,8 +199,9 @@ public:
       : BitStream({input.getData(0, input.getSize()),
                    implicit_cast<int>(input.getSize())}) {}
 
-  explicit BitStream(ByteStream s)
-      : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
+  template <typename T>
+    requires(!std::is_same_v<T, Buffer>)
+  explicit BitStream(T) = delete;
 
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
     invariant(nbits <= Cache::MaxGetBits);

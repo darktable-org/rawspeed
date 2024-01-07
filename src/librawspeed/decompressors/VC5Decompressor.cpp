@@ -665,7 +665,7 @@ VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
   band = Array2DRef<int16_t>::create(lowpass.storage, wavelet.width,
                                      wavelet.height);
 
-  BitPumpMSB bits(bs);
+  BitPumpMSB bits(bs.peekRemainingBuffer());
   for (auto row = 0; row < band.height; ++row) {
     for (auto col = 0; col < band.width; ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
@@ -691,7 +691,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
 
   public:
     DeRLVer(const PrefixCodeDecoder& decoder_, ByteStream bs, int16_t quant_)
-        : decoder(decoder_), bits(bs), quant(quant_) {}
+        : decoder(decoder_), bits(bs.peekRemainingBuffer()), quant(quant_) {}
 
     void verifyIsAtEnd() {
       if (numPixelsLeft != 0)

@@ -136,7 +136,7 @@ protected:
       const DataBuffer db(b, e);
       const ByteStream bs(db);
 
-      PumpT pump(bs);
+      PumpT pump(bs.peekRemainingBuffer());
       BitPumpPatternTest<T, Tag>::Test(pump, gen);
     }
   }

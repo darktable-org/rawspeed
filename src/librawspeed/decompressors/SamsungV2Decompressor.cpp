@@ -100,7 +100,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   static constexpr const auto headerSize = 16;
   (void)bs.check(headerSize);
 
-  BitPumpMSB32 startpump(bs);
+  BitPumpMSB32 startpump(bs.peekRemainingBuffer());
 
   // Process the initial metadata bits, we only really use initVal, width and
   // height (the last two match the TIFF values anyway)
@@ -331,7 +331,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   if (const auto line_offset = data.getPosition(); (line_offset & 0xf) != 0)
     data.skipBytes(16 - (line_offset & 0xf));
 
-  BitPumpMSB32 pump(data);
+  BitPumpMSB32 pump(data.peekRemainingBuffer());
 
   // Initialize the motion and diff modes at the start of the line
   motion = 7;

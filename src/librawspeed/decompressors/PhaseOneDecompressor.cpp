@@ -90,7 +90,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
 
-  BitPumpMSB32 pump(strip.bs);
+  BitPumpMSB32 pump(strip.bs.peekRemainingBuffer());
 
   std::array<int32_t, 2> pred;
   pred.fill(0);

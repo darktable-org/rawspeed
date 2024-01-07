@@ -222,7 +222,7 @@ void CrwDecompressor::decompress() {
     const unsigned hBlocks = out.height * out.width / 64;
     invariant(hBlocks > 0);
 
-    BitPumpJPEG bs(rawInput);
+    BitPumpJPEG bs(rawInput.peekRemainingBuffer());
 
     int carry = 0;
     std::array<int, 2> base = {512, 512}; // starting predictors

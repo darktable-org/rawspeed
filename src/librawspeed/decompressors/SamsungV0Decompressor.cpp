@@ -111,7 +111,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   invariant(out.width > 0);
 
-  BitPumpMSB32 bits(bs);
+  BitPumpMSB32 bits(bs.peekRemainingBuffer());
 
   std::array<int, 4> len;
   for (int& i : len)

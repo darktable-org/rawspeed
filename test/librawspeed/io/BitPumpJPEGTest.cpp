@@ -76,7 +76,7 @@ TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
     const DataBuffer db(b, e);
     const ByteStream bs(db);
 
-    BitPumpJPEG p(bs);
+    BitPumpJPEG p(bs.peekRemainingBuffer());
 
     ASSERT_EQ(p.getBits(8), 0xFF);
 
@@ -97,7 +97,7 @@ TEST(BitPumpJPEGTest, 0xFF0xXXIsTheEndTest) {
       const DataBuffer db(b, e);
       const ByteStream bs(db);
 
-      BitPumpJPEG p(bs);
+      BitPumpJPEG p(bs.peekRemainingBuffer());
 
       for (int cnt = 0; cnt <= 64 + 32 - 1; cnt++)
         ASSERT_EQ(p.getBits(1), 0);

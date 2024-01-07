@@ -108,6 +108,9 @@ public:
     pos += size_;
     return ret;
   }
+  [[nodiscard]] inline Buffer peekRemainingBuffer() const {
+    return getSubView(pos, getRemainSize());
+  }
   [[nodiscard]] inline ByteStream peekStream(size_type size_) const {
     return getSubStream(pos, size_);
   }
