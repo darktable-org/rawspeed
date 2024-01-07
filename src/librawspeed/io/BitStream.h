@@ -195,14 +195,6 @@ public:
 
   explicit BitStream(Array1DRef<const uint8_t> input) : replenisher(input) {}
 
-  explicit BitStream(Buffer input)
-      : BitStream({input.getData(0, input.getSize()),
-                   implicit_cast<int>(input.getSize())}) {}
-
-  template <typename T>
-    requires(!std::is_same_v<T, Buffer>)
-  explicit BitStream(T) = delete;
-
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
     invariant(nbits <= Cache::MaxGetBits);
 
