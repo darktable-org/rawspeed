@@ -63,12 +63,9 @@ public:
   [[nodiscard]] inline size_type check(size_type bytes) const {
     if (!isValid(pos, bytes))
       ThrowIOE("Out of bounds access in ByteStream");
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    assert(!ASan::RegionIsPoisoned(data + pos, bytes));
-#pragma GCC diagnostic pop
+    [[maybe_unused]] Buffer tmp = getSubView(pos, bytes);
+    assert(tmp.getSize() == bytes);
+    assert(!ASan::RegionIsPoisoned(tmp.begin(), tmp.getSize()));
     return bytes;
   }
 
