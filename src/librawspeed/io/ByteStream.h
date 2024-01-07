@@ -96,7 +96,7 @@ public:
     return Buffer::getData(pos, count);
   }
   inline const uint8_t* getData(size_type count) {
-    const uint8_t* ret = Buffer::getData(pos, count);
+    const uint8_t* ret = peekData(count);
     pos += count;
     return ret;
   }
