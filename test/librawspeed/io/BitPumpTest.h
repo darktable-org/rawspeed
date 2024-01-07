@@ -128,17 +128,11 @@ public:
 protected:
   template <typename Tag, typename TestDataType, typename L>
   void runTest(const TestDataType& data, L gen) {
-    const Buffer b(
-        data.data(),
-        rawspeed::implicit_cast<rawspeed::Buffer::size_type>(data.size()));
+    const rawspeed::Array1DRef<const uint8_t> input(
+        data.data(), rawspeed::implicit_cast<int>(data.size()));
 
-    for (auto e : {Endianness::little, Endianness::big}) {
-      const DataBuffer db(b, e);
-      const ByteStream bs(db);
-
-      PumpT pump(bs.peekRemainingBuffer());
-      BitPumpPatternTest<T, Tag>::Test(pump, gen);
-    }
+    PumpT pump(input);
+    BitPumpPatternTest<T, Tag>::Test(pump, gen);
   }
 };
 
