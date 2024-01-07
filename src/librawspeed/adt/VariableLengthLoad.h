@@ -173,20 +173,18 @@ inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
   invariant(out.size() <= in.size());
   invariant(inPos >= 0);
 
+  inPos = std::min(inPos, in.size());
+
+  int inPosEnd = inPos + out.size();
+  inPosEnd = std::min(inPosEnd, in.size());
+  invariant(inPos <= inPosEnd);
+
+  const int copySize = inPosEnd - inPos;
+  invariant(copySize >= 0);
+  invariant(copySize <= out.size());
+
   std::fill(out.begin(), out.end(), 0);
-
-  // How many bytes are left in input buffer?
-  // Since pos can be past-the-end we need to carefully handle overflow.
-  int bytesRemaining = (inPos < in.size()) ? in.size() - inPos : 0;
-  // And if we are not at the end of the input, we may have more than we need.
-  bytesRemaining = std::min<int>(out.size(), bytesRemaining);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-  memcpy(out.begin(), in.begin() + inPos, bytesRemaining);
-#pragma GCC diagnostic pop
+  memcpy(out.begin(), in.addressOf(inPos), copySize);
 }
 
 } // namespace rawspeed
