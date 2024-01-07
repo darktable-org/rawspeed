@@ -131,22 +131,6 @@ public:
     return getStream(nmemb * size_);
   }
 
-  [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
-    invariant(data);
-    (void)check(i + 1);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    return data[pos + i];
-#pragma GCC diagnostic pop
-  }
-  inline uint8_t getByte() {
-    auto ret = peekByte();
-    pos += 1;
-    return ret;
-  }
-
   inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
   inline void skipBytes(size_type nmemb, size_type size_) {
     pos += check(nmemb, size_);
@@ -179,14 +163,18 @@ public:
   template <typename T> [[nodiscard]] inline T peek(size_type i = 0) const {
     return DataBuffer::get<T>(pos, i);
   }
-
-  [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
-
   template <typename T> inline T get() {
     auto ret = peek<T>();
     pos += sizeof(T);
     return ret;
   }
+
+  [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
+    return peek<uint8_t>(i);
+  }
+  inline uint8_t getByte() { return get<uint8_t>(); }
+
+  [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
 
   inline uint16_t getU16() { return get<uint16_t>(); }
   inline int32_t getI32() { return get<int32_t>(); }
