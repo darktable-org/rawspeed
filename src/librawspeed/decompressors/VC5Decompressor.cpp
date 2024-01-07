@@ -29,6 +29,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/VC5Decompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -641,9 +642,9 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 }
 
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
-                                                   ByteStream bs_,
+                                                   ByteStream bs,
                                                    uint16_t lowpassPrecision_)
-    : AbstractDecodeableBand(wavelet_, bs_),
+    : AbstractDecodeableBand(wavelet_, bs),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.
   // It consists of width * height pixels, `lowpassPrecision` each.
@@ -655,7 +656,8 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   const auto chunksTotal = roundUpDivision(bitsTotal, bitsPerChunk);
   const auto bytesTotal = bytesPerChunk * chunksTotal;
   // And clamp the size / verify sufficient input while we are at it.
-  bs = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal));
+  // NOTE: this might fail (and should throw, not assert).
+  input = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal));
 }
 
 VC5Decompressor::BandData
@@ -665,7 +667,7 @@ VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
   band = Array2DRef<int16_t>::create(lowpass.storage, wavelet.width,
                                      wavelet.height);
 
-  BitPumpMSB bits(bs.peekRemainingBuffer());
+  BitPumpMSB bits(input);
   for (auto row = 0; row < band.height; ++row) {
     for (auto col = 0; col < band.width; ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
@@ -690,8 +692,9 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
   public:
-    DeRLVer(const PrefixCodeDecoder& decoder_, ByteStream bs, int16_t quant_)
-        : decoder(decoder_), bits(bs.peekRemainingBuffer()), quant(quant_) {}
+    DeRLVer(const PrefixCodeDecoder& decoder_, Array1DRef<const uint8_t> input,
+            int16_t quant_)
+        : decoder(decoder_), bits(input), quant(quant_) {}
 
     void verifyIsAtEnd() {
       if (numPixelsLeft != 0)
@@ -724,7 +727,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   };
 
   // decode highpass band
-  DeRLVer d(*decoder, bs, quant);
+  DeRLVer d(*decoder, input, quant);
   BandData highpass;
   auto& band = highpass.description;
   band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
