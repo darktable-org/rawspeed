@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "bench/Common.h"
 #include "io/BitPumpJPEG.h"
@@ -25,8 +26,6 @@
 #include "io/BitPumpMSB.h"
 #include "io/BitPumpMSB16.h"
 #include "io/BitPumpMSB32.h"
-#include "io/Buffer.h"
-#include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <cassert>
 #include <cstddef>
@@ -52,11 +51,10 @@ using rawspeed::Endianness;
 
 namespace {
 
-constexpr const size_t STEP_MAX = 32;
+constexpr const int STEP_MAX = 32;
 
 template <typename Pump>
-inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
-                         unsigned int Step) {
+inline void BM_BitStream(benchmark::State& state, int fillSize, int Step) {
   assert(state.range(0) > 0);
   assert(static_cast<size_t>(state.range(0)) <=
          std::numeric_limits<rawspeed::Buffer::size_type>::max());
@@ -72,26 +70,20 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   assert((Step == 1) || rawspeed::isAligned(Step, 2));
   assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
 
-  const std::vector<uint8_t> storage(
+  const std::vector<uint8_t> inputStorage(
       rawspeed::implicit_cast<size_t>(state.range(0)));
-  const rawspeed::Buffer b(
-      storage.data(),
-      rawspeed::implicit_cast<rawspeed::Buffer::size_type>(state.range(0)));
-  assert(b.getSize() > 0);
-  assert(b.getSize() == static_cast<size_t>(state.range(0)));
+  const rawspeed::Array1DRef<const uint8_t> input(
+      inputStorage.data(), rawspeed::implicit_cast<int>(state.range(0)));
 
-  const rawspeed::DataBuffer db(b, Endianness::unknown);
-  const rawspeed::ByteStream bs(db);
-
-  size_t processedBits = 0;
+  int processedBits = 0;
   for (auto _ : state) {
-    Pump pump(bs.peekRemainingBuffer());
+    Pump pump(input);
 
-    for (processedBits = 0; processedBits <= 8 * b.getSize();) {
+    for (processedBits = 0; processedBits <= 8 * input.size();) {
       pump.fill(fillSize);
 
       // NOTE: you may want to change the callee here
-      for (auto i = 0U; i < fillSize; i += Step)
+      for (auto i = 0; i < fillSize; i += Step)
         pump.skipBitsNoFill(Step);
 
       processedBits += fillSize;
@@ -101,7 +93,8 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   assert(processedBits > fillSize);
   processedBits -= fillSize;
 
-  assert(rawspeed::roundUp(8 * b.getSize(), fillSize) == processedBits);
+  assert(rawspeed::roundUp(8 * input.size(), fillSize) ==
+         rawspeed::implicit_cast<uint64_t>(processedBits));
 
   state.SetComplexityN(processedBits / 8);
   state.SetItemsProcessed(processedBits * state.iterations());
