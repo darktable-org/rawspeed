@@ -23,6 +23,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
@@ -104,17 +105,20 @@ struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
 template <typename Tag> struct BitStreamReplenisherBase {
   using size_type = uint32_t;
 
-  const uint8_t* data;
-  size_type size;
+  Array1DRef<const uint8_t> input;
   unsigned pos = 0;
 
   BitStreamReplenisherBase() = default;
 
-  explicit BitStreamReplenisherBase(Buffer input)
-      : data(input.getData(0, input.getSize())), size(input.getSize()) {
-    if (size < BitStreamTraits<Tag>::MaxProcessBytes)
+  explicit BitStreamReplenisherBase(Array1DRef<const uint8_t> input_)
+      : input(input_) {
+    if (input.size() < BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
   }
+
+  explicit BitStreamReplenisherBase(Buffer input_)
+      : BitStreamReplenisherBase({input_.getData(0, input_.getSize()),
+                                  implicit_cast<int>(input_.getSize())}) {}
 
   // A temporary intermediate buffer that may be used by fill() method either
   // in debug build to enforce lack of out-of-bounds reads, or when we are
@@ -137,7 +141,7 @@ struct BitStreamForwardSequentialReplenisher final
     return Base::pos;
   }
   [[nodiscard]] inline typename Base::size_type getRemainingSize() const {
-    return Base::size - getPos();
+    return Base::input.size() - getPos();
   }
   inline void markNumBytesAsConsumed(typename Base::size_type numBytes) {
     Base::pos += numBytes;
@@ -147,12 +151,13 @@ struct BitStreamForwardSequentialReplenisher final
 #if !defined(DEBUG)
     // Do we have BitStreamTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
-    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <= Base::size) {
+    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <=
+        implicit_cast<unsigned>(Base::input.size())) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-      return Base::data + Base::pos;
+      return Base::input.begin() + Base::pos;
 #pragma GCC diagnostic pop
     }
 #endif
@@ -162,12 +167,12 @@ struct BitStreamForwardSequentialReplenisher final
 
     // Note that in order to keep all fill-level invariants we must allow to
     // over-read past-the-end a bit.
-    if (Base::pos > Base::size + 2 * BitStreamTraits<Tag>::MaxProcessBytes)
+    if (Base::pos > implicit_cast<unsigned>(Base::input.size()) +
+                        2 * BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
 
     variableLengthLoadNaiveViaMemcpy(
-        {Base::tmp.data(), implicit_cast<int>(Base::tmp.size())},
-        {Base::data, implicit_cast<int>(Base::size)},
+        {Base::tmp.data(), implicit_cast<int>(Base::tmp.size())}, Base::input,
         implicit_cast<int>(Base::pos));
 
     return Base::tmp.data();
