@@ -141,6 +141,11 @@ public:
     return data[pos + i];
 #pragma GCC diagnostic pop
   }
+  inline uint8_t getByte() {
+    auto ret = peekByte();
+    pos += 1;
+    return ret;
+  }
 
   inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
   inline void skipBytes(size_type nmemb, size_type size_) {
@@ -169,17 +174,6 @@ public:
     if (has_prefix)
       pos += size_;
     return has_prefix;
-  }
-
-  inline uint8_t getByte() {
-    invariant(data);
-    (void)check(1);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    return data[pos++];
-#pragma GCC diagnostic pop
   }
 
   template <typename T> [[nodiscard]] inline T peek(size_type i = 0) const {
