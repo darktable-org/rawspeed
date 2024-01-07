@@ -38,13 +38,16 @@ template <> struct BitStreamTraits<MSB32BitPumpTag> final {
 
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
+  static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
 template <>
-inline BitPumpMSB32::size_type BitPumpMSB32::fillCache(const uint8_t* input) {
+inline BitPumpMSB32::size_type
+BitPumpMSB32::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
-  cache.push(getLE<uint32_t>(input), 32);
+  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;
 }
 

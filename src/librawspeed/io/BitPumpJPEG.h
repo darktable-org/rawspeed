@@ -41,15 +41,19 @@ template <> struct BitStreamTraits<JPEGBitPumpTag> final {
   // Normally, we want to read 4 bytes, but at worst each one of those can be
   // an 0xFF byte, separated by 0x00 byte, signifying that 0xFF is a data byte.
   static constexpr int MaxProcessBytes = 8;
+  static_assert(MaxProcessBytes == sizeof(uint64_t));
 };
 
 template <>
-inline BitPumpJPEG::size_type BitPumpJPEG::fillCache(const uint8_t* input) {
+inline BitPumpJPEG::size_type
+BitPumpJPEG::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
   std::array<uint8_t, BitStreamTraits<JPEGBitPumpTag>::MaxProcessBytes>
       prefetch;
-  std::copy_n(input, prefetch.size(), prefetch.begin());
+  std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
+              prefetch.begin());
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.

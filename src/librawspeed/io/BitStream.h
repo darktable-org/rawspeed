@@ -125,7 +125,10 @@ template <typename Tag> struct BitStreamReplenisherBase {
   // nearing the end of the input buffer and can not just read
   // BitStreamTraits<Tag>::MaxProcessBytes from it, but have to read as much as
   // we can and fill rest with zeros.
-  std::array<uint8_t, BitStreamTraits<Tag>::MaxProcessBytes> tmp = {};
+  std::array<uint8_t, BitStreamTraits<Tag>::MaxProcessBytes> tmpStorage = {};
+  Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
+    return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
+  }
 };
 
 template <typename Tag>
@@ -147,18 +150,15 @@ struct BitStreamForwardSequentialReplenisher final
     Base::pos += numBytes;
   }
 
-  inline const uint8_t* getInput() {
+  inline Array1DRef<const uint8_t> getInput() {
 #if !defined(DEBUG)
     // Do we have BitStreamTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
     if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <=
         implicit_cast<unsigned>(Base::input.size())) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-      return Base::input.begin() + Base::pos;
-#pragma GCC diagnostic pop
+      return Base::input
+          .getCrop(Base::pos, BitStreamTraits<Tag>::MaxProcessBytes)
+          .getAsArray1DRef();
     }
 #endif
 
@@ -171,11 +171,10 @@ struct BitStreamForwardSequentialReplenisher final
                         2 * BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
 
-    variableLengthLoadNaiveViaMemcpy(
-        {Base::tmp.data(), implicit_cast<int>(Base::tmp.size())}, Base::input,
-        implicit_cast<int>(Base::pos));
+    variableLengthLoadNaiveViaMemcpy(Base::tmp(), Base::input,
+                                     implicit_cast<int>(Base::pos));
 
-    return Base::tmp.data();
+    return Base::tmp();
   }
 };
 
@@ -191,7 +190,7 @@ class BitStream final {
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamTraits<Tag>::MaxProcessBytes bytes of input.
-  size_type fillCache(const uint8_t* input);
+  size_type fillCache(Array1DRef<const uint8_t> input);
 
 public:
   using tag = Tag;
