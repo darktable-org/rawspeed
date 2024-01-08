@@ -125,6 +125,7 @@ template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
 
 template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
   invariant(data);
+  invariant(numElts >= 0);
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
   return *addressOf(eltIdx);
