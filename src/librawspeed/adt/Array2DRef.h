@@ -125,17 +125,22 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
 template <class T>
 [[nodiscard]] inline std::optional<Array1DRef<T>>
 Array2DRef<T>::getAsArray1DRef() const {
-  if (_data && (height == 1 || _pitch == width))
+  // FIXME: this might be called for default-constructed `Array2DRef`,
+  // and it really doesn't work for them.
+  if (!_data)
+    return std::nullopt;
+
+  establishClassInvariants();
+  if (height == 1 || _pitch == width)
     return {{_data, width * height}};
   return std::nullopt;
 }
 
 template <class T>
 inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
-  invariant(_data);
+  establishClassInvariants();
   invariant(row >= 0);
   invariant(row < height);
-  invariant(_pitch >= width);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
@@ -146,6 +151,7 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
 
 template <class T>
 inline T& Array2DRef<T>::operator()(const int row, const int col) const {
+  establishClassInvariants();
   invariant(col >= 0);
   invariant(col < width);
   return (operator[](row))(col);
