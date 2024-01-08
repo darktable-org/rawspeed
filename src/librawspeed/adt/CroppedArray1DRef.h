@@ -102,18 +102,22 @@ CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
 }
 
 template <class T> inline T* CroppedArray1DRef<T>::begin() const {
+  establishClassInvariants();
   return addressOf(/*eltIdx=*/0);
 }
 template <class T> inline T* CroppedArray1DRef<T>::end() const {
+  establishClassInvariants();
   return addressOf(/*eltIdx=*/numElts);
 }
 
 template <class T> inline int CroppedArray1DRef<T>::size() const {
+  establishClassInvariants();
   return numElts;
 }
 
 template <class T>
 inline T* CroppedArray1DRef<T>::addressOf(const int eltIdx) const {
+  establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx <= numElts);
   return base.addressOf(offset + eltIdx);
@@ -121,6 +125,7 @@ inline T* CroppedArray1DRef<T>::addressOf(const int eltIdx) const {
 
 template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
+  establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
   return *addressOf(eltIdx);
