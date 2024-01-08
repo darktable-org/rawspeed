@@ -108,11 +108,11 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
                           const int pitch_ /* = 0 */)
     : _data(data), _pitch(pitch_ == 0 ? width_ : pitch_), width(width_),
       height(height_) {
+  invariant(data);
   invariant(width >= 0);
   invariant(height >= 0);
   invariant(_pitch >= 0);
   invariant(_pitch >= width);
-  invariant(data || (width == 0 && height == 0));
 }
 
 template <class T>
