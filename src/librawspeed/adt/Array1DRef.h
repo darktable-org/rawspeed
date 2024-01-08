@@ -100,6 +100,8 @@ Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
 template <class T>
 [[nodiscard]] CroppedArray1DRef<T> Array1DRef<T>::getCrop(int offset,
                                                           int size) const {
+  invariant(data);
+  invariant(numElts >= 0);
   invariant(offset >= 0);
   invariant(size >= 0);
   invariant(offset <= numElts);
