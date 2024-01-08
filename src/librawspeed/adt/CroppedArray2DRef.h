@@ -94,6 +94,8 @@ inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
   invariant(croppedHeight >= 0);
   invariant(offsetCols <= base.width);
   invariant(offsetRows <= base.height);
+  invariant(croppedWidth <= base.width);
+  invariant(croppedHeight <= base.height);
   invariant(offsetCols + croppedWidth <= base.width);
   invariant(offsetRows + croppedHeight <= base.height);
 }
