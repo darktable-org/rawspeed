@@ -21,6 +21,7 @@
 #include "metadata/ColorFilterArray.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "decoders/RawDecoderException.h"
@@ -169,7 +170,7 @@ uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
 
 namespace {
 
-std::optional<std::string_view> getColorAsString(CFAColor c) {
+Optional<std::string_view> getColorAsString(CFAColor c) {
   switch (c) {
     using enum CFAColor;
   case RED:

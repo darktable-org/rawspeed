@@ -21,9 +21,9 @@
 
 #pragma once
 
+#include "adt/Optional.h"
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -65,7 +65,7 @@ private:
 
   using constructor_t = std::unique_ptr<DngOpcode> (*)(
       const RawImage& ri, ByteStream& bs, iRectangle2D& integrated_subimg);
-  static std::optional<std::pair<const char*, DngOpcodes::constructor_t>>
+  static Optional<std::pair<const char*, DngOpcodes::constructor_t>>
   Map(uint32_t code);
 };
 

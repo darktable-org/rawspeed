@@ -23,6 +23,7 @@
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
@@ -36,7 +37,6 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -279,7 +279,7 @@ void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
 }
 
 JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
-  auto peekMarker = [&]() -> std::optional<JpegMarker> {
+  auto peekMarker = [&]() -> Optional<JpegMarker> {
     uint8_t c0 = input.peekByte(0);
     uint8_t c1 = input.peekByte(1);
 
@@ -289,7 +289,7 @@ JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
   };
 
   while (input.getRemainSize() >= 2) {
-    if (std::optional<JpegMarker> m = peekMarker()) {
+    if (Optional<JpegMarker> m = peekMarker()) {
       input.skipBytes(2); // Skip the bytes we've just consumed.
       return *m;
     }

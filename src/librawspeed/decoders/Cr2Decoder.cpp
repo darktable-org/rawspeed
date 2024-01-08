@@ -25,6 +25,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -239,7 +240,7 @@ enum class ColorDataFormat {
   ColorData8,
 };
 
-[[nodiscard]] std::optional<std::pair<ColorDataFormat, std::optional<int>>>
+[[nodiscard]] Optional<std::pair<ColorDataFormat, Optional<int>>>
 deduceColorDataFormat(const TiffEntry* ccd) {
   // The original ColorData, detect by it's fixed size.
   if (ccd->count == 582)
@@ -307,9 +308,9 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   __builtin_unreachable();
 }
 
-[[nodiscard]] std::optional<std::pair<int, int>>
+[[nodiscard]] Optional<std::pair<int, int>>
 getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
-                                        std::optional<int> colorDataVersion) {
+                                        Optional<int> colorDataVersion) {
   switch (f) {
     using enum ColorDataFormat;
   case ColorData1:
@@ -374,9 +375,8 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
   __builtin_unreachable();
 }
 
-[[nodiscard]] bool
-shouldRescaleBlackLevels(ColorDataFormat f,
-                         std::optional<int> colorDataVersion) {
+[[nodiscard]] bool shouldRescaleBlackLevels(ColorDataFormat f,
+                                            Optional<int> colorDataVersion) {
   return f != ColorDataFormat::ColorData5 || colorDataVersion != -3;
 }
 

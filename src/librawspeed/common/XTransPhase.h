@@ -21,13 +21,13 @@
 #pragma once
 
 #include "adt/Array2DRef.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "metadata/ColorFilterArray.h"
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include <optional>
 
 namespace rawspeed {
 
@@ -70,8 +70,7 @@ inline std::array<CFAColor, 6 * 6> getAsCFAColors(XTransPhase p) {
   return applyPhaseShift(basePat, basePhase, /*tgtPhase=*/p);
 }
 
-inline std::optional<XTransPhase>
-getAsXTransPhase(const ColorFilterArray& CFA) {
+inline Optional<XTransPhase> getAsXTransPhase(const ColorFilterArray& CFA) {
   if (CFA.getSize() != iPoint2D(6, 6))
     return {};
 

@@ -336,7 +336,7 @@ Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
   if (frame.area() < dim.area())
     ThrowRDE("Frame area smaller than the image area");
 
-  std::optional<iRectangle2D> lastTile;
+  Optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getAllOutputTiles()) {
     if (lastTile && evaluateConsecutiveTiles(*lastTile, output) ==
                         TileSequenceStatus::Invalid)

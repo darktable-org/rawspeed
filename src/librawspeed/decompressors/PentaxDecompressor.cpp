@@ -23,6 +23,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
@@ -36,7 +37,6 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -51,7 +51,7 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
     }};
 
 PentaxDecompressor::PentaxDecompressor(RawImage img,
-                                       std::optional<ByteStream> metaData)
+                                       Optional<ByteStream> metaData)
     : mRaw(std::move(img)), ht(SetupPrefixCodeDecoder(metaData)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -139,8 +139,8 @@ PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
 }
 
 PrefixCodeDecoder<>
-PentaxDecompressor::SetupPrefixCodeDecoder(std::optional<ByteStream> metaData) {
-  std::optional<HuffmanCode<BaselineCodeTag>> hc;
+PentaxDecompressor::SetupPrefixCodeDecoder(Optional<ByteStream> metaData) {
+  Optional<HuffmanCode<BaselineCodeTag>> hc;
 
   if (metaData)
     hc = SetupPrefixCodeDecoder_Modern(*metaData);

@@ -20,6 +20,7 @@
 */
 
 #include "metadata/Camera.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "metadata/CameraMetadataException.h"
 #include "metadata/CameraSensorInfo.h"
@@ -100,7 +101,7 @@ namespace {
 
 std::string name(const xml_node& a) { return a.name(); }
 
-std::optional<CFAColor> getAsCFAColor(char c) {
+Optional<CFAColor> getAsCFAColor(char c) {
   switch (c) {
     using enum CFAColor;
   case 'g':
@@ -122,7 +123,7 @@ std::optional<CFAColor> getAsCFAColor(char c) {
   }
 }
 
-std::optional<CFAColor> getAsCFAColor(std::string_view c) {
+Optional<CFAColor> getAsCFAColor(std::string_view c) {
   using enum CFAColor;
   if (c == "GREEN")
     return GREEN;

@@ -21,6 +21,7 @@
 #include "decompressors/PentaxDecompressor.h"
 #include "MemorySanitizer.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
 #include "fuzz/Common.h"
@@ -30,7 +31,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
-#include <optional>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -45,7 +45,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    std::optional<rawspeed::ByteStream> metaData;
+    rawspeed::Optional<rawspeed::ByteStream> metaData;
 
     const bool haveMetadata = bs.get<uint32_t>();
     if (haveMetadata) {

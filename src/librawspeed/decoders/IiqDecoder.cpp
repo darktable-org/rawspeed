@@ -25,6 +25,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Mutex.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -127,7 +128,7 @@ enum class IIQFormat {
 
 };
 
-std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
+Optional<IIQFormat> getAsIIQFormat(uint32_t v) {
   switch (v) {
     using enum IIQFormat;
   case 1:
@@ -178,8 +179,8 @@ RawImage IiqDecoder::decodeRawInternal() {
   uint32_t split_row = 0;
   uint32_t split_col = 0;
 
-  std::optional<IIQFormat> format;
-  std::optional<Buffer> raw_data;
+  Optional<IIQFormat> format;
+  Optional<Buffer> raw_data;
   ByteStream block_offsets;
   ByteStream wb;
   ByteStream correction_meta_data;

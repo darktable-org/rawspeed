@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -38,7 +39,6 @@
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
 
 namespace rawspeed {
@@ -98,7 +98,7 @@ RawImage PefDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  std::optional<ByteStream> metaData;
+  Optional<ByteStream> metaData;
   if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
     /* Attempt to read huffman table, if found in makernote */
     const TiffEntry* t =
