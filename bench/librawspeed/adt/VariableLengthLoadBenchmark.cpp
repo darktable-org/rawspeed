@@ -124,7 +124,7 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   static constexpr int MaxBytesOptimal = L2dByteSize;
 
   if (benchmarkDryRun()) {
-    b->Arg(L1dByteSize);
+    b->Arg(L1dByteSize / 10);
     return;
   }
 
