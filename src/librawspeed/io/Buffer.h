@@ -78,7 +78,7 @@ public:
     if (!isValid(0, offset))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    size_type newSize = size - offset;
+    size_type newSize = getSize() - offset;
     return getSubView(offset, newSize);
   }
 
@@ -134,7 +134,8 @@ public:
 
   [[nodiscard]] inline bool isValid(size_type offset,
                                     size_type count = 1) const {
-    return static_cast<uint64_t>(offset) + count <= static_cast<uint64_t>(size);
+    return static_cast<uint64_t>(offset) + count <=
+           static_cast<uint64_t>(getSize());
   }
 };
 
