@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "adt/Invariant.h"
 #include "io/BitStream.h"
 #include "io/Endianness.h"
 #include <cstdint>
@@ -36,19 +38,17 @@ using BitPumpMSB16 = BitStream<MSB16BitPumpTag, BitStreamCacheRightInLeftOut>;
 template <> struct BitStreamTraits<MSB16BitPumpTag> final {
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
+  static_assert(MaxProcessBytes == 2 * sizeof(uint16_t));
 };
 
 template <>
-inline BitPumpMSB16::size_type BitPumpMSB16::fillCache(const uint8_t* input) {
+inline BitPumpMSB16::size_type
+BitPumpMSB16::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
   for (size_type i = 0; i < 4; i += sizeof(uint16_t)) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    cache.push(getLE<uint16_t>(input + i), 16);
-#pragma GCC diagnostic pop
+    cache.push(getLE<uint16_t>(input.getCrop(i, sizeof(uint16_t)).begin()), 16);
   }
   return 4;
 }

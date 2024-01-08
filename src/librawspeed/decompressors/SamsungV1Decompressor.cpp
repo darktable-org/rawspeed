@@ -120,7 +120,7 @@ void SamsungV1Decompressor::decompress() const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   invariant(out.width % 32 == 0 && "Should have even count of pixels per row.");
   invariant(out.height % 2 == 0 && "Should have even row count.");
-  BitPumpMSB pump(bs);
+  BitPumpMSB pump(bs.peekRemainingBuffer());
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)

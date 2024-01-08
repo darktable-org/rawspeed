@@ -148,7 +148,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   invariant(mRaw->dim.x % 2 == 0);
 
   input.skipBytes(7);
-  BitPumpMSB bits(input);
+  BitPumpMSB bits(input.peekRemainingBuffer());
 
   for (int y = 0; y < mRaw->dim.y; y++)
     decompressRow(bits, y);

@@ -23,17 +23,14 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
 #include "common/Common.h"
-#include "io/Buffer.h"
-#include "io/ByteStream.h"
 #include "io/IOException.h"
-#include <algorithm>
 #include <array>
 #include <cstdint>
-#include <cstring>
 
 namespace rawspeed {
 
@@ -104,15 +101,14 @@ struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
 template <typename Tag> struct BitStreamReplenisherBase {
   using size_type = uint32_t;
 
-  const uint8_t* data;
-  size_type size;
+  Array1DRef<const uint8_t> input;
   unsigned pos = 0;
 
   BitStreamReplenisherBase() = default;
 
-  explicit BitStreamReplenisherBase(Buffer input)
-      : data(input.getData(0, input.getSize())), size(input.getSize()) {
-    if (size < BitStreamTraits<Tag>::MaxProcessBytes)
+  explicit BitStreamReplenisherBase(Array1DRef<const uint8_t> input_)
+      : input(input_) {
+    if (input.size() < BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
   }
 
@@ -121,7 +117,10 @@ template <typename Tag> struct BitStreamReplenisherBase {
   // nearing the end of the input buffer and can not just read
   // BitStreamTraits<Tag>::MaxProcessBytes from it, but have to read as much as
   // we can and fill rest with zeros.
-  std::array<uint8_t, BitStreamTraits<Tag>::MaxProcessBytes> tmp = {};
+  std::array<uint8_t, BitStreamTraits<Tag>::MaxProcessBytes> tmpStorage = {};
+  Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
+    return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
+  }
 };
 
 template <typename Tag>
@@ -137,23 +136,21 @@ struct BitStreamForwardSequentialReplenisher final
     return Base::pos;
   }
   [[nodiscard]] inline typename Base::size_type getRemainingSize() const {
-    return Base::size - getPos();
+    return Base::input.size() - getPos();
   }
   inline void markNumBytesAsConsumed(typename Base::size_type numBytes) {
     Base::pos += numBytes;
   }
 
-  inline const uint8_t* getInput() {
+  inline Array1DRef<const uint8_t> getInput() {
 #if !defined(DEBUG)
     // Do we have BitStreamTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
-    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <= Base::size) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-      return Base::data + Base::pos;
-#pragma GCC diagnostic pop
+    if (Base::pos + BitStreamTraits<Tag>::MaxProcessBytes <=
+        implicit_cast<unsigned>(Base::input.size())) {
+      return Base::input
+          .getCrop(Base::pos, BitStreamTraits<Tag>::MaxProcessBytes)
+          .getAsArray1DRef();
     }
 #endif
 
@@ -162,15 +159,14 @@ struct BitStreamForwardSequentialReplenisher final
 
     // Note that in order to keep all fill-level invariants we must allow to
     // over-read past-the-end a bit.
-    if (Base::pos > Base::size + 2 * BitStreamTraits<Tag>::MaxProcessBytes)
+    if (Base::pos > implicit_cast<unsigned>(Base::input.size()) +
+                        2 * BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Buffer overflow read in BitStream");
 
-    variableLengthLoadNaiveViaMemcpy(
-        {Base::tmp.data(), implicit_cast<int>(Base::tmp.size())},
-        {Base::data, implicit_cast<int>(Base::size)},
-        implicit_cast<int>(Base::pos));
+    variableLengthLoadNaiveViaMemcpy(Base::tmp(), Base::input,
+                                     implicit_cast<int>(Base::pos));
 
-    return Base::tmp.data();
+    return Base::tmp();
   }
 };
 
@@ -186,17 +182,14 @@ class BitStream final {
   // this method hase to be implemented in the concrete BitStream template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamTraits<Tag>::MaxProcessBytes bytes of input.
-  size_type fillCache(const uint8_t* input);
+  size_type fillCache(Array1DRef<const uint8_t> input);
 
 public:
   using tag = Tag;
 
   BitStream() = default;
 
-  explicit BitStream(Buffer buf) : replenisher(buf) {}
-
-  explicit BitStream(ByteStream s)
-      : BitStream(s.getSubView(s.getPosition(), s.getRemainSize())) {}
+  explicit BitStream(Array1DRef<const uint8_t> input) : replenisher(input) {}
 
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
     invariant(nbits <= Cache::MaxGetBits);

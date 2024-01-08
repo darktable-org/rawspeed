@@ -27,6 +27,7 @@
 #include "common/Common.h"
 #include "io/Endianness.h"
 #include <algorithm>
+#include <climits>
 #include <cstdint>
 #include <cstring>
 #include <type_traits>
@@ -163,8 +164,8 @@ inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
   invariant(copySize >= 0);
   invariant(copySize <= out.size());
 
-  out = out.getCrop(/*inPos=*/0, copySize).getAsArray1DRef();
-  in = in.getCrop(inPos, copySize).getAsArray1DRef();
+  out = out.getCrop(/*offset=*/0, copySize).getAsArray1DRef();
+  in = in.getCrop(/*offset=*/inPos, copySize).getAsArray1DRef();
   invariant(in.size() == out.size());
 
   memcpy(out.begin(), in.begin(), copySize);

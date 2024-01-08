@@ -32,13 +32,14 @@
 #include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
-#include "adt/CroppedArray1DRef.h"
+#include "adt/CroppedArray1DRef.h" // IWYU pragma: keep
 #include "adt/Invariant.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <stdint.h>
 #include <string>
 #include <type_traits>
 #include <variant>

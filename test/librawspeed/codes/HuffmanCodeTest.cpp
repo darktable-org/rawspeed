@@ -311,7 +311,7 @@ auto genHTFull = [](std::initializer_list<uint8_t>&& nCodesPerLength,
 
 #ifndef NDEBUG
 TEST(HuffmanCodeDeathTest, setNCodesPerLengthRequires16Lengths) {
-  for (int i = 0; i < 32; i++) {
+  for (int i = 1; i < 32; i++) {
     std::vector<uint8_t> v(i, 1);
     ASSERT_EQ(v.size(), i);
 

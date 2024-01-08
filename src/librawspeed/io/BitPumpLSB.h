@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "adt/Invariant.h"
 #include "io/BitStream.h"
 #include "io/Endianness.h"
 #include <cstdint>
@@ -36,13 +38,16 @@ using BitPumpLSB = BitStream<LSBBitPumpTag, BitStreamCacheLeftInRightOut>;
 template <> struct BitStreamTraits<LSBBitPumpTag> final {
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
+  static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
 template <>
-inline BitPumpLSB::size_type BitPumpLSB::fillCache(const uint8_t* input) {
+inline BitPumpLSB::size_type
+BitPumpLSB::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
-  cache.push(getLE<uint32_t>(input), 32);
+  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;
 }
 

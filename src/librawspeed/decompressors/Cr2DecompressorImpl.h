@@ -408,7 +408,7 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
                       .getCrop(/*offset=*/0, /*size=*/dsc.groupSize)
                       .getAsArray1DRef();
 
-  BitPumpJPEG bs(input);
+  BitPumpJPEG bs(input.peekRemainingBuffer());
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;

@@ -160,7 +160,7 @@ void PentaxDecompressor::decompress(ByteStream data) const {
   invariant(out.width > 0);
   invariant(out.width % 2 == 0);
 
-  BitPumpMSB bs(data);
+  BitPumpMSB bs(data.peekRemainingBuffer());
   for (int row = 0; row < out.height; row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)

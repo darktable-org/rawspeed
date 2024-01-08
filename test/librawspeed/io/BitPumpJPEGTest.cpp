@@ -19,6 +19,8 @@
 */
 
 #include "io/BitPumpJPEG.h"
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "io/BitPumpTest.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -70,19 +72,15 @@ TEST(BitPumpJPEGTest, 0xFF0x00Is0xFFTest) {
   static const std::array<uint8_t, 2 + 8> data{
       {0xFF, 0x00, 0b10100100, 0b01000010, 0b00001000, 0b00011111}};
 
-  const Buffer b(data.data(), data.size());
+  const rawspeed::Array1DRef<const uint8_t> input(
+      data.data(), rawspeed::implicit_cast<int>(data.size()));
 
-  for (auto e : {Endianness::little, Endianness::big}) {
-    const DataBuffer db(b, e);
-    const ByteStream bs(db);
+  BitPumpJPEG p(input);
 
-    BitPumpJPEG p(bs);
+  ASSERT_EQ(p.getBits(8), 0xFF);
 
-    ASSERT_EQ(p.getBits(8), 0xFF);
-
-    for (int len = 1; len <= 7; len++)
-      ASSERT_EQ(p.getBits(len), 1) << "     Where len: " << len;
-  }
+  for (int len = 1; len <= 7; len++)
+    ASSERT_EQ(p.getBits(len), 1) << "     Where len: " << len;
 }
 
 TEST(BitPumpJPEGTest, 0xFF0xXXIsTheEndTest) {
@@ -91,17 +89,13 @@ TEST(BitPumpJPEGTest, 0xFF0xXXIsTheEndTest) {
     static const std::array<uint8_t, 2 + 8> data{
         {0xFF, end, 0xFF, 0xFF, 0xFF, 0xFF}};
 
-    const Buffer b(data.data(), data.size());
+    const rawspeed::Array1DRef<const uint8_t> input(
+        data.data(), rawspeed::implicit_cast<int>(data.size()));
 
-    for (auto e : {Endianness::little, Endianness::big}) {
-      const DataBuffer db(b, e);
-      const ByteStream bs(db);
+    BitPumpJPEG p(input);
 
-      BitPumpJPEG p(bs);
-
-      for (int cnt = 0; cnt <= 64 + 32 - 1; cnt++)
-        ASSERT_EQ(p.getBits(1), 0);
-    }
+    for (int cnt = 0; cnt <= 64 + 32 - 1; cnt++)
+      ASSERT_EQ(p.getBits(1), 0);
   }
 }
 

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "common/RawImage.h"
 #include "decoders/AbstractTiffDecoder.h"
 #include "io/Buffer.h"

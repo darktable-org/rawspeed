@@ -22,6 +22,8 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
@@ -59,7 +61,13 @@ public:
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
+    assert(data);
     assert(!ASan::RegionIsPoisoned(data, size));
+  }
+
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  operator Array1DRef<const uint8_t>() const {
+    return {getData(0, getSize()), implicit_cast<int>(getSize())};
   }
 
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
@@ -73,7 +81,7 @@ public:
     if (!isValid(0, offset))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    size_type newSize = size - offset;
+    size_type newSize = getSize() - offset;
     return getSubView(offset, newSize);
   }
 
@@ -129,7 +137,8 @@ public:
 
   [[nodiscard]] inline bool isValid(size_type offset,
                                     size_type count = 1) const {
-    return static_cast<uint64_t>(offset) + count <= static_cast<uint64_t>(size);
+    return static_cast<uint64_t>(offset) + count <=
+           static_cast<uint64_t>(getSize());
   }
 };
 

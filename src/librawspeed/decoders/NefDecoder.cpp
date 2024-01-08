@@ -335,8 +335,9 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
 
   // The input bytes are laid out in the memory in the following way:
   // First, all even (0-2-4-) rows, and then all odd (1-3-5-) rows.
-  BitPumpMSB even(input.getStream(size.y / 2, inputPitch));
-  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch));
+  BitPumpMSB even(
+      input.getStream(size.y / 2, inputPitch).peekRemainingBuffer());
+  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch).peekRemainingBuffer());
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
       img(row, col) = implicit_cast<uint16_t>(even.getBits(12));
@@ -576,9 +577,9 @@ void NefDecoder::parseWhiteBalance() const {
       mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0F;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0F;
-    } else if (bs.hasPatternAt("NRW ", 4, 0)) {
+    } else if (bs.hasPatternAt("NRW ", 0)) {
       uint32_t offset = 0;
-      if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
+      if (!bs.hasPatternAt("0100", 4) && wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
         offset = 1556;

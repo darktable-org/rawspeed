@@ -21,7 +21,7 @@ function(add_rs_bench src)
     set_tests_properties(${BENCHNAME}-Dummy PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:rawspeed_bench>")
   endif()
 
-  rawspeed_add_test(NAME ${BENCHNAME} COMMAND ${BENCHNAME} --benchmark_min_time=0)
+  rawspeed_add_test(NAME ${BENCHNAME} COMMAND ${BENCHNAME} --benchmark_min_time=1x)
   set_tests_properties(${BENCHNAME} PROPERTIES LABELS "benchmark")
   set_tests_properties(${BENCHNAME} PROPERTIES ENVIRONMENT "RAWSPEED_BENCHMARK_DRYRUN=1")
   if(WIN32)

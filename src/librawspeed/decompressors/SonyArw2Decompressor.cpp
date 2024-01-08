@@ -65,7 +65,7 @@ void SonyArw2Decompressor::decompressRow(int row) const {
   rowBs.skipBytes(row * out.width);
   rowBs = rowBs.peekStream(out.width);
 
-  BitPumpLSB bits(rowBs);
+  BitPumpLSB bits(rowBs.peekRemainingBuffer());
 
   uint32_t random = bits.peekBits(24);
 
