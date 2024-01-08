@@ -34,6 +34,8 @@ template <class T> class Array2DRef final {
   T* _data = nullptr;
   int _pitch = 0;
 
+  void establishClassInvariants() const noexcept;
+
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
   // We need to be able to convert to std::byte.
@@ -104,15 +106,20 @@ explicit Array2DRef(T* data, int width, int height, int pitch = 0)
     -> Array2DRef<T>;
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
-                          const int pitch_ /* = 0 */)
-    : _data(data), _pitch(pitch_ == 0 ? width_ : pitch_), width(width_),
-      height(height_) {
-  invariant(data);
+inline void Array2DRef<T>::establishClassInvariants() const noexcept {
+  invariant(_data);
   invariant(width >= 0);
   invariant(height >= 0);
   invariant(_pitch >= 0);
   invariant(_pitch >= width);
+}
+
+template <class T>
+Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
+                          const int pitch_ /* = 0 */)
+    : _data(data), _pitch(pitch_ == 0 ? width_ : pitch_), width(width_),
+      height(height_) {
+  establishClassInvariants();
 }
 
 template <class T>
