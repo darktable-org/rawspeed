@@ -31,6 +31,10 @@
 #include <cstddef>
 #include <benchmark/benchmark.h>
 
+#ifndef NDEBUG
+#include "io/Buffer.h"
+#endif
+
 #ifndef DEBUG
 #include <cstdint>
 #include <string>

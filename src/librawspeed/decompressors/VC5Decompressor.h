@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "codes/AbstractPrefixCode.h"

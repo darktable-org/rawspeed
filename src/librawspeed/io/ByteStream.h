@@ -29,7 +29,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <limits>
 #include <string_view>

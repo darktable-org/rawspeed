@@ -22,6 +22,8 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
