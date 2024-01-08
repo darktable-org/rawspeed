@@ -59,6 +59,7 @@ public:
   // Data already allocated
   explicit Buffer(const uint8_t* data_, size_type size_)
       : data(data_), size(size_) {
+    assert(data);
     assert(!ASan::RegionIsPoisoned(data, size));
   }
 
