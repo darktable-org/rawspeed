@@ -118,7 +118,7 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
 template <class T>
 [[nodiscard]] inline std::optional<Array1DRef<T>>
 Array2DRef<T>::getAsArray1DRef() const {
-  if (height == 1 || _pitch == width)
+  if (_data && (height == 1 || _pitch == width))
     return {{_data, width * height}};
   return std::nullopt;
 }
