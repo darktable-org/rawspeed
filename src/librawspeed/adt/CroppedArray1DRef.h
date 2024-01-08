@@ -32,8 +32,6 @@ template <class T> class CroppedArray1DRef final {
   int offset = 0;
   int numElts = 0;
 
-  void establishClassInvariants() const noexcept;
-
   friend CroppedArray1DRef<const T>; // We need to be able to convert to const
                                      // version.
 
@@ -43,6 +41,8 @@ template <class T> class CroppedArray1DRef final {
   CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts);
 
 public:
+  void establishClassInvariants() const noexcept;
+
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
@@ -87,6 +87,7 @@ CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts)
 
 template <class T>
 inline void CroppedArray1DRef<T>::establishClassInvariants() const noexcept {
+  base.establishClassInvariants();
   invariant(offset >= 0);
   invariant(numElts >= 0);
   invariant(offset <= base.size());

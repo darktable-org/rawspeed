@@ -31,12 +31,12 @@ namespace rawspeed {
 template <class T> class CroppedArray2DRef final {
   const Array2DRef<T> base;
 
-  void establishClassInvariants() const noexcept;
-
   // We need to be able to convert to const version.
   friend CroppedArray2DRef<const T>;
 
 public:
+  void establishClassInvariants() const noexcept;
+
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
@@ -88,6 +88,7 @@ explicit CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
 
 template <class T>
 inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
+  base.establishClassInvariants();
   invariant(offsetCols >= 0);
   invariant(offsetRows >= 0);
   invariant(croppedWidth >= 0);

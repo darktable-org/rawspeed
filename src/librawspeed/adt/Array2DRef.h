@@ -34,8 +34,6 @@ template <class T> class Array2DRef final {
   T* _data = nullptr;
   int _pitch = 0;
 
-  void establishClassInvariants() const noexcept;
-
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
   // We need to be able to convert to std::byte.
@@ -43,6 +41,8 @@ template <class T> class Array2DRef final {
   friend Array2DRef<const std::byte>;
 
 public:
+  void establishClassInvariants() const noexcept;
+
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 

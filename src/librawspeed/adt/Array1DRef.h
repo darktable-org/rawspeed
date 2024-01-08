@@ -33,8 +33,6 @@ template <class T> class Array1DRef final {
   T* data = nullptr;
   int numElts = 0;
 
-  void establishClassInvariants() const noexcept;
-
   friend Array1DRef<const T>; // We need to be able to convert to const version.
 
   // We need to be able to convert to std::byte.
@@ -42,6 +40,8 @@ template <class T> class Array1DRef final {
   friend Array1DRef<const std::byte>;
 
 public:
+  void establishClassInvariants() const noexcept;
+
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
