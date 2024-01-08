@@ -112,6 +112,7 @@ template <class T>
 
 template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
   invariant(data);
+  invariant(numElts >= 0);
   invariant(eltIdx >= 0);
   invariant(eltIdx <= numElts);
 #pragma GCC diagnostic push
