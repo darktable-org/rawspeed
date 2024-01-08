@@ -137,12 +137,10 @@ public:
                                          size_type relPos) const {
     if (!isValid(pos + relPos, implicit_cast<size_type>(pattern.size())))
       return false;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    return memcmp(&data[pos + relPos], pattern.data(), pattern.size()) == 0;
-#pragma GCC diagnostic pop
+    auto tmp =
+        getSubView(pos + relPos, implicit_cast<size_type>(pattern.size()));
+    assert(tmp.getSize() == pattern.size());
+    return std::equal(tmp.begin(), tmp.end(), pattern.begin());
   }
 
   [[nodiscard]] inline bool hasPrefix(std::string_view prefix) const {
