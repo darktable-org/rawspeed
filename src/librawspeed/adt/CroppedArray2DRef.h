@@ -31,6 +31,8 @@ namespace rawspeed {
 template <class T> class CroppedArray2DRef final {
   const Array2DRef<T> base;
 
+  void establishClassInvariants() const noexcept;
+
   // We need to be able to convert to const version.
   friend CroppedArray2DRef<const T>;
 
@@ -85,24 +87,32 @@ explicit CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
     -> CroppedArray2DRef<typename Array2DRef<T>::value_type>;
 
 template <class T>
+inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
+  invariant(offsetCols >= 0);
+  invariant(offsetRows >= 0);
+  invariant(croppedWidth >= 0);
+  invariant(croppedHeight >= 0);
+  invariant(offsetCols <= base.width);
+  invariant(offsetRows <= base.height);
+  invariant(croppedWidth <= base.width);
+  invariant(croppedHeight <= base.height);
+  invariant(offsetCols + croppedWidth <= base.width);
+  invariant(offsetRows + croppedHeight <= base.height);
+}
+
+template <class T>
 CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
                                         int offsetRows_, int croppedWidth_,
                                         int croppedHeight_)
     : base(base_), offsetCols(offsetCols_), offsetRows(offsetRows_),
       croppedWidth(croppedWidth_), croppedHeight(croppedHeight_) {
-  invariant(offsetCols_ >= 0);
-  invariant(offsetRows_ >= 0);
-  invariant(croppedWidth_ >= 0);
-  invariant(croppedHeight_ >= 0);
-  invariant(offsetCols_ <= base.width);
-  invariant(offsetRows_ <= base.height);
-  invariant(offsetCols_ + croppedWidth_ <= base.width);
-  invariant(offsetRows_ + croppedHeight_ <= base.height);
+  establishClassInvariants();
 }
 
 template <class T>
 inline CroppedArray1DRef<T>
 CroppedArray2DRef<T>::operator[](const int row) const {
+  establishClassInvariants();
   invariant(row >= 0);
   invariant(row < croppedHeight);
   const Array1DRef<T> fullLine = base.operator[](offsetRows + row);
@@ -111,6 +121,7 @@ CroppedArray2DRef<T>::operator[](const int row) const {
 
 template <class T>
 inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
+  establishClassInvariants();
   invariant(col >= 0);
   invariant(col < croppedWidth);
   return (operator[](row))(col);

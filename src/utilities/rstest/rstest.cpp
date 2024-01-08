@@ -187,9 +187,9 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "blackLevelSeparate: (%i x %i)", r->blackLevelSeparate.width,
          r->blackLevelSeparate.height);
-  auto blackLevelSeparate1D = *r->blackLevelSeparate.getAsArray1DRef();
-  if (blackLevelSeparate1D.size() != 0) {
-    for (auto l : blackLevelSeparate1D)
+  if (auto blackLevelSeparate1D = r->blackLevelSeparate.getAsArray1DRef();
+      blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
+    for (auto l : *blackLevelSeparate1D)
       APPEND(&oss, " %d", l);
   }
   APPEND(&oss, "\n");

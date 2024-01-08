@@ -34,6 +34,8 @@ template <class T> class Array2DRef final {
   T* _data = nullptr;
   int _pitch = 0;
 
+  void establishClassInvariants() const noexcept;
+
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
   // We need to be able to convert to std::byte.
@@ -104,20 +106,31 @@ explicit Array2DRef(T* data, int width, int height, int pitch = 0)
     -> Array2DRef<T>;
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
-                          const int pitch_ /* = 0 */)
-    : _data(data), _pitch(pitch_ == 0 ? width_ : pitch_), width(width_),
-      height(height_) {
+inline void Array2DRef<T>::establishClassInvariants() const noexcept {
+  invariant(_data);
   invariant(width >= 0);
   invariant(height >= 0);
   invariant(_pitch >= 0);
   invariant(_pitch >= width);
-  invariant(data || (width == 0 && height == 0));
+}
+
+template <class T>
+Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
+                          const int pitch_ /* = 0 */)
+    : _data(data), _pitch(pitch_ == 0 ? width_ : pitch_), width(width_),
+      height(height_) {
+  establishClassInvariants();
 }
 
 template <class T>
 [[nodiscard]] inline std::optional<Array1DRef<T>>
 Array2DRef<T>::getAsArray1DRef() const {
+  // FIXME: this might be called for default-constructed `Array2DRef`,
+  // and it really doesn't work for them.
+  if (!_data)
+    return std::nullopt;
+
+  establishClassInvariants();
   if (height == 1 || _pitch == width)
     return {{_data, width * height}};
   return std::nullopt;
@@ -125,10 +138,9 @@ Array2DRef<T>::getAsArray1DRef() const {
 
 template <class T>
 inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
-  invariant(_data);
+  establishClassInvariants();
   invariant(row >= 0);
   invariant(row < height);
-  invariant(_pitch >= width);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
@@ -139,6 +151,7 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
 
 template <class T>
 inline T& Array2DRef<T>::operator()(const int row, const int col) const {
+  establishClassInvariants();
   invariant(col >= 0);
   invariant(col < width);
   return (operator[](row))(col);

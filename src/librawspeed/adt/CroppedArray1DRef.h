@@ -32,6 +32,8 @@ template <class T> class CroppedArray1DRef final {
   int offset = 0;
   int numElts = 0;
 
+  void establishClassInvariants() const noexcept;
+
   friend CroppedArray1DRef<const T>; // We need to be able to convert to const
                                      // version.
 
@@ -84,28 +86,38 @@ CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts)
     -> CroppedArray1DRef<T>;
 
 template <class T>
-CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
-                                        const int numElts_)
-    : base(base_), offset(offset_), numElts(numElts_) {
+inline void CroppedArray1DRef<T>::establishClassInvariants() const noexcept {
   invariant(offset >= 0);
   invariant(numElts >= 0);
   invariant(offset <= base.size());
+  invariant(numElts <= base.size());
   invariant(offset + numElts <= base.size());
 }
 
+template <class T>
+CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_, const int offset_,
+                                        const int numElts_)
+    : base(base_), offset(offset_), numElts(numElts_) {
+  establishClassInvariants();
+}
+
 template <class T> inline T* CroppedArray1DRef<T>::begin() const {
+  establishClassInvariants();
   return addressOf(/*eltIdx=*/0);
 }
 template <class T> inline T* CroppedArray1DRef<T>::end() const {
+  establishClassInvariants();
   return addressOf(/*eltIdx=*/numElts);
 }
 
 template <class T> inline int CroppedArray1DRef<T>::size() const {
+  establishClassInvariants();
   return numElts;
 }
 
 template <class T>
 inline T* CroppedArray1DRef<T>::addressOf(const int eltIdx) const {
+  establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx <= numElts);
   return base.addressOf(offset + eltIdx);
@@ -113,6 +125,7 @@ inline T* CroppedArray1DRef<T>::addressOf(const int eltIdx) const {
 
 template <class T>
 inline T& CroppedArray1DRef<T>::operator()(const int eltIdx) const {
+  establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
   return *addressOf(eltIdx);
