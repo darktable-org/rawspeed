@@ -33,6 +33,8 @@ template <class T> class Array1DRef final {
   T* data = nullptr;
   int numElts = 0;
 
+  void establishClassInvariants() const noexcept;
+
   friend Array1DRef<const T>; // We need to be able to convert to const version.
 
   // We need to be able to convert to std::byte.
@@ -91,17 +93,21 @@ public:
 template <typename T> Array1DRef(T* data_, int numElts_) -> Array1DRef<T>;
 
 template <class T>
-Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
-    : data(data_), numElts(numElts_) {
+inline void Array1DRef<T>::establishClassInvariants() const noexcept {
   invariant(data);
   invariant(numElts >= 0);
 }
 
 template <class T>
+Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
+    : data(data_), numElts(numElts_) {
+  establishClassInvariants();
+}
+
+template <class T>
 [[nodiscard]] CroppedArray1DRef<T> Array1DRef<T>::getCrop(int offset,
                                                           int size) const {
-  invariant(data);
-  invariant(numElts >= 0);
+  establishClassInvariants();
   invariant(offset >= 0);
   invariant(size >= 0);
   invariant(offset <= numElts);
@@ -111,8 +117,7 @@ template <class T>
 }
 
 template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
-  invariant(data);
-  invariant(numElts >= 0);
+  establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx <= numElts);
 #pragma GCC diagnostic push
@@ -124,23 +129,23 @@ template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
 }
 
 template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
-  invariant(data);
-  invariant(numElts >= 0);
+  establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
   return *addressOf(eltIdx);
 }
 
 template <class T> inline int Array1DRef<T>::size() const {
-  invariant(data);
-  invariant(numElts >= 0);
+  establishClassInvariants();
   return numElts;
 }
 
 template <class T> inline T* Array1DRef<T>::begin() const {
+  establishClassInvariants();
   return addressOf(/*eltIdx=*/0);
 }
 template <class T> inline T* Array1DRef<T>::end() const {
+  establishClassInvariants();
   return addressOf(/*eltIdx=*/numElts);
 }
 
