@@ -27,6 +27,7 @@
 namespace rawspeed {
 
 template <typename T> class Optional final {
+  // NOLINTNEXTLINE(rawspeed-no-std-optional): we're in the wrapper.
   std::optional<T> impl;
 
 public:
