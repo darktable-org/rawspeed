@@ -22,12 +22,12 @@
 #pragma once
 
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "codes/BinaryPrefixTree.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStream.h"
 #include <cassert>
-#include <optional>
 #include <tuple>
 #include <utility>
 
@@ -57,8 +57,7 @@ protected:
     const auto* top = &(tree.root->getAsBranch());
 
     auto walkBinaryTree = [&partial, &top](bool bit)
-        -> std::optional<
-            std::pair<typename Base::CodeSymbol, int /*codeValue*/>> {
+        -> Optional<std::pair<typename Base::CodeSymbol, int /*codeValue*/>> {
       partial.code <<= 1;
       partial.code |= bit;
       partial.code_len++;

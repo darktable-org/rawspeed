@@ -21,6 +21,7 @@
 #pragma once
 
 #include "adt/Array2DRef.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "metadata/ColorFilterArray.h"
 #include <algorithm>
@@ -29,7 +30,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <iterator>
-#include <optional>
 #include <utility>
 
 namespace rawspeed {
@@ -127,7 +127,7 @@ inline std::array<T, 4> applyStablePhaseShift(std::array<T, 4> srcData,
   return tgtData;
 }
 
-inline std::optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
+inline Optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
   if (CFA.getSize() != iPoint2D(2, 2))
     return {};
 

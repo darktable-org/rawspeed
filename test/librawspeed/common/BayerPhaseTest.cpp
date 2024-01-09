@@ -19,11 +19,11 @@
 */
 
 #include "common/BayerPhase.h"
+#include "adt/Optional.h"
 #include "metadata/ColorFilterArray.h"
 #include <array>
 #include <cassert>
 #include <map>
-#include <optional>
 #include <ostream>
 #include <tuple>
 #include <utility>
@@ -99,7 +99,7 @@ protected:
   }
 
   std::array<CFAColor, 4> in;
-  std::optional<BayerPhase> expected;
+  rawspeed::Optional<BayerPhase> expected;
   ColorFilterArray cfa;
 };
 
@@ -122,7 +122,7 @@ protected:
     assert(in.has_value());
   }
 
-  std::optional<BayerPhase> in;
+  rawspeed::Optional<BayerPhase> in;
   std::array<CFAColor, 4> expected;
 };
 

@@ -29,6 +29,7 @@
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/BayerPhase.h"
 #include "common/Common.h"
@@ -46,7 +47,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -859,14 +859,14 @@ FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
   }
 
   if (mRaw->cfa.getSize() == iPoint2D(6, 6)) {
-    std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
+    Optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
     if (!p)
       ThrowRDE("Invalid X-Trans CFA");
     if (p != iPoint2D(0, 0))
       ThrowRDE("Unexpected X-Trans phase: {%i,%i}. Please file a bug!", p->x,
                p->y);
   } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
-    std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+    Optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
     if (!p)
       ThrowRDE("Invalid Bayer CFA");
     if (p != BayerPhase::RGGB)

@@ -33,6 +33,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCode.h"
@@ -54,7 +55,6 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <optional>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -395,7 +395,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ThrowRDE("Height %u is not a multiple of %u", mRaw->dim.y,
              mVC5.patternHeight);
 
-  std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+  Optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
   if (!p)
     ThrowRDE("Image has invalid CFA.");
   phase = *p;

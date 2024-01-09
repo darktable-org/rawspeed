@@ -23,8 +23,8 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include <cstddef>
-#include <optional>
 #include <type_traits>
 #include <vector>
 
@@ -93,7 +93,7 @@ public:
     return {storage.data(), width, height};
   }
 
-  [[nodiscard]] std::optional<Array1DRef<T>> getAsArray1DRef() const;
+  [[nodiscard]] Optional<Array1DRef<T>> getAsArray1DRef() const;
 
   Array1DRef<T> operator[](int row) const;
 
@@ -123,7 +123,7 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
 }
 
 template <class T>
-[[nodiscard]] inline std::optional<Array1DRef<T>>
+[[nodiscard]] inline Optional<Array1DRef<T>>
 Array2DRef<T>::getAsArray1DRef() const {
   // FIXME: this might be called for default-constructed `Array2DRef`,
   // and it really doesn't work for them.

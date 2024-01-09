@@ -25,6 +25,7 @@
 #include "adt/Casts.h"
 #include "adt/NORangesSet.h"
 #include "adt/NotARational.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/DngOpcodes.h"
@@ -48,7 +49,6 @@
 #include <limits>
 #include <map>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -153,8 +153,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
   }
 }
 
-std::optional<iRectangle2D>
-DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
+Optional<iRectangle2D> DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
   if (!raw->hasEntry(TiffTag::ACTIVEAREA))
     return {};
 
@@ -188,7 +187,7 @@ DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
 }
 
 namespace {
-std::optional<CFAColor> getDNGCFAPatternAsCFAColor(uint32_t c) {
+Optional<CFAColor> getDNGCFAPatternAsCFAColor(uint32_t c) {
   switch (c) {
     using enum CFAColor;
   case 0:
@@ -251,7 +250,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
   // the cfa is specified relative to the ActiveArea. we want it relative (0,0)
   // Since in handleMetadata(), in subFrame() we unconditionally shift CFA by
   // activearea+DefaultCropOrigin; here we need to undo the 'ACTIVEAREA' part.
-  const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw);
+  const Optional<iRectangle2D> aa = parseACTIVEAREA(raw);
   if (!aa)
     return;
 
@@ -515,7 +514,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
 void DngDecoder::handleMetadata(const TiffIFD* raw) {
   // Crop
-  if (const std::optional<iRectangle2D> aa = parseACTIVEAREA(raw))
+  if (const Optional<iRectangle2D> aa = parseACTIVEAREA(raw))
     mRaw->subFrame(*aa);
 
   if (raw->hasEntry(TiffTag::DEFAULTCROPORIGIN) &&

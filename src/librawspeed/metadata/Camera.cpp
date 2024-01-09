@@ -32,11 +32,11 @@
 
 #ifdef HAVE_PUGIXML
 #include "adt/NotARational.h"
+#include "adt/Optional.h"
 #include "common/Common.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
-#include <optional>
 #include <pugixml.hpp>
 #include <string_view>
 
@@ -100,7 +100,7 @@ namespace {
 
 std::string name(const xml_node& a) { return a.name(); }
 
-std::optional<CFAColor> getAsCFAColor(char c) {
+Optional<CFAColor> getAsCFAColor(char c) {
   switch (c) {
     using enum CFAColor;
   case 'g':
@@ -122,7 +122,7 @@ std::optional<CFAColor> getAsCFAColor(char c) {
   }
 }
 
-std::optional<CFAColor> getAsCFAColor(std::string_view c) {
+Optional<CFAColor> getAsCFAColor(std::string_view c) {
   using enum CFAColor;
   if (c == "GREEN")
     return GREEN;
