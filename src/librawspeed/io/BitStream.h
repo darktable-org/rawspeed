@@ -104,7 +104,7 @@ template <typename Tag> struct BitStreamReplenisherBase {
   Array1DRef<const uint8_t> input;
   unsigned pos = 0;
 
-  BitStreamReplenisherBase() = default;
+  BitStreamReplenisherBase() = delete;
 
   explicit BitStreamReplenisherBase(Array1DRef<const uint8_t> input_)
       : input(input_) {
@@ -128,9 +128,9 @@ struct BitStreamForwardSequentialReplenisher final
     : public BitStreamReplenisherBase<Tag> {
   using Base = BitStreamReplenisherBase<Tag>;
 
-  BitStreamForwardSequentialReplenisher() = default;
-
   using Base::BitStreamReplenisherBase;
+
+  BitStreamForwardSequentialReplenisher() = delete;
 
   [[nodiscard]] inline typename Base::size_type getPos() const {
     return Base::pos;
@@ -187,7 +187,7 @@ class BitStream final {
 public:
   using tag = Tag;
 
-  BitStream() = default;
+  BitStream() = delete;
 
   explicit BitStream(Array1DRef<const uint8_t> input) : replenisher(input) {}
 
