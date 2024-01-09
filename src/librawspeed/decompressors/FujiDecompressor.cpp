@@ -249,7 +249,7 @@ struct fuji_compressed_block final {
 
   void reset(const fuji_compressed_params& params);
 
-  BitPumpMSB pump;
+  Optional<BitPumpMSB> pump;
 
   // tables of gradients
   std::array<std::array<int_pair, 41>, 3> grad_even;
@@ -447,7 +447,7 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
                                           std::array<int_pair, 41>& grads) {
   int gradient = std::abs(grad);
 
-  int sampleBits = fuji_zerobits(pump);
+  int sampleBits = fuji_zerobits(*pump);
 
   int codeBits;
   int codeDelta;
@@ -460,9 +460,9 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
   }
 
   int code = 0;
-  pump.fill(32);
+  pump->fill(32);
   if (codeBits)
-    code = pump.getBitsNoFill(codeBits);
+    code = pump->getBitsNoFill(codeBits);
   code += codeDelta;
 
   if (code < 0 || code >= common_info.total_values) {
