@@ -20,7 +20,6 @@
 */
 
 #include "metadata/Camera.h"
-#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "metadata/CameraMetadataException.h"
 #include "metadata/CameraSensorInfo.h"
@@ -33,11 +32,11 @@
 
 #ifdef HAVE_PUGIXML
 #include "adt/NotARational.h"
+#include "adt/Optional.h"
 #include "common/Common.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
-#include <optional>
 #include <pugixml.hpp>
 #include <string_view>
 

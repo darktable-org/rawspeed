@@ -55,7 +55,6 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <optional>
 #include <string>
 #include <tuple>
 #include <type_traits>

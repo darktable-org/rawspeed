@@ -24,7 +24,6 @@
 #include <array>
 #include <cassert>
 #include <map>
-#include <optional>
 #include <ostream>
 #include <tuple>
 #include <utility>

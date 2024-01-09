@@ -47,7 +47,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>

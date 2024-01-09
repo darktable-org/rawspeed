@@ -28,7 +28,6 @@
 #include "decoders/RawDecoderException.h"
 #include "io/BitStream.h"
 #include <cassert>
-#include <optional>
 #include <tuple>
 #include <utility>
 

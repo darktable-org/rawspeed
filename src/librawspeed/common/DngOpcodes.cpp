@@ -42,7 +42,6 @@
 #include <iterator>
 #include <limits>
 #include <memory>
-#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>

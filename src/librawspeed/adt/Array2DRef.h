@@ -25,7 +25,6 @@
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
 #include <cstddef>
-#include <optional>
 #include <type_traits>
 #include <vector>
 

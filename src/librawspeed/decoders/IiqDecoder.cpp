@@ -50,7 +50,6 @@
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>

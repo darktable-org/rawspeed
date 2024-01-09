@@ -32,7 +32,6 @@
 #include "io/Endianness.h"
 #include "metadata/Camera.h"
 #include <map>
-#include <optional>
 #include <string>
 #include <string_view>
 

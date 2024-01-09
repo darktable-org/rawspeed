@@ -20,10 +20,87 @@
 
 #pragma once
 
-#include <optional>
+#include "rawspeedconfig.h"
+#include "adt/Invariant.h"
+#include <optional> // IWYU pragma: export
 
 namespace rawspeed {
 
-template <typename T> using Optional = std::optional<T>;
+template <typename T> class Optional final {
+  std::optional<T> impl;
+
+public:
+  Optional() = default;
+
+  template <typename U = T>
+    requires(!std::same_as<U, Optional<T>> && !std::same_as<U, Optional<T>&> &&
+             !std::same_as<U, Optional<T> &&> &&
+             !std::same_as<U, std::optional<T>>)
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Optional(U&& value) : impl(std::forward<U>(value)) {}
+
+  template <typename U = T>
+    requires(std::same_as<U, T>)
+  Optional<T>& operator=(U&& value) {
+    impl = std::forward<U>(value);
+    return *this;
+  }
+
+  template <typename... Args> T& emplace(Args&&... args) {
+    return impl.emplace(std::forward<Args>(args)...);
+  }
+
+  const T* operator->() const {
+    invariant(has_value());
+    return &impl.value();
+  }
+
+  T* operator->() {
+    invariant(has_value());
+    return &impl.value();
+  }
+
+  const T& operator*() const& {
+    invariant(has_value());
+    return impl.value();
+  }
+
+  T& operator*() & {
+    invariant(has_value());
+    return impl.value();
+  }
+
+  T&& operator*() && {
+    invariant(has_value());
+    return std::move(impl.value());
+  }
+
+  const T&& operator*() const&& {
+    invariant(has_value());
+    return std::move(impl.value());
+  }
+
+  [[nodiscard]] bool has_value() const RAWSPEED_READNONE {
+    return impl.has_value();
+  }
+
+  explicit operator bool() const { return has_value(); }
+
+  void reset() { impl.reset(); }
+};
+
+template <typename T, typename U>
+bool operator==(const Optional<T>& lhs, const U& rhs) {
+  return lhs && *lhs == rhs;
+}
+
+template <typename T, typename U>
+bool operator==(const Optional<T>& lhs, const Optional<U>& rhs) {
+  if (lhs.has_value() != rhs.has_value())
+    return false;
+  if (!lhs.has_value())
+    return true;
+  return *lhs == *rhs;
+}
 
 } // namespace rawspeed

@@ -23,6 +23,7 @@
 #include "rawspeedconfig.h"
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
 #include "common/RawImage.h"
@@ -37,7 +38,6 @@
 #include <cstdint>
 #include <functional>
 #include <iterator>
-#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
