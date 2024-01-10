@@ -182,10 +182,8 @@ struct ConvolutionParams final {
 VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
-  BandData combined;
+  BandData combined(high.width, 2 * high.height);
   auto& dst = combined.description;
-  dst = Array2DRef<int16_t>::create(combined.storage, high.width,
-                                    2 * high.height);
 
   auto process = [low, high, dst]<typename SegmentTy>(int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
@@ -236,10 +234,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
     int descaleShift, bool clampUint = false,
     [[maybe_unused]] bool finalWavelet = false) noexcept {
-  BandData combined;
+  BandData combined(2 * high.width, high.height);
   auto& dst = combined.description;
-  dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,
-                                    high.height);
 
   auto process = [low, high, descaleShift, clampUint,
                   dst]<typename SegmentTy>(int row, int col) {
@@ -662,10 +658,8 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
 
 VC5Decompressor::BandData
 VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
-  BandData lowpass;
+  BandData lowpass(wavelet.width, wavelet.height);
   auto& band = lowpass.description;
-  band = Array2DRef<int16_t>::create(lowpass.storage, wavelet.width,
-                                     wavelet.height);
 
   BitPumpMSB bits(input);
   for (auto row = 0; row < band.height; ++row) {
@@ -728,10 +722,8 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
 
   // decode highpass band
   DeRLVer d(*decoder, input, quant);
-  BandData highpass;
+  BandData highpass(wavelet.width, wavelet.height);
   auto& band = highpass.description;
-  band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
-                                     wavelet.height);
   for (int row = 0; row != wavelet.height; ++row)
     for (int col = 0; col != wavelet.width; ++col)
       band(row, col) = d.decode();

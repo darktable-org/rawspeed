@@ -132,6 +132,9 @@ class VC5Decompressor final : public AbstractDecompressor {
   struct BandData final {
     std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> storage;
     Array2DRef<int16_t> description;
+
+    BandData(int width, int height)
+        : description(Array2DRef<int16_t>::create(storage, width, height)) {}
   };
 
   class Wavelet final {
