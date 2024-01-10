@@ -297,13 +297,11 @@ struct fuji_compressed_block final {
 fuji_compressed_block::fuji_compressed_block(
     Array2DRef<uint16_t> img_, const FujiDecompressor::FujiHeader& header_,
     const fuji_compressed_params& common_info_)
-    : img(img_), header(header_), common_info(common_info_) {}
+    : img(img_), header(header_), common_info(common_info_),
+      linealloc(ltotal * (common_info.line_width + 2), 0),
+      lines(&linealloc[0], common_info.line_width + 2, ltotal) {}
 
 void fuji_compressed_block::reset() {
-  linealloc.resize(ltotal * (common_info.line_width + 2), 0);
-  lines =
-      Array2DRef<uint16_t>(&linealloc[0], common_info.line_width + 2, ltotal);
-
   MSan::Allocated(CroppedArray2DRef(lines));
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
