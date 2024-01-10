@@ -40,12 +40,12 @@ public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int offsetCols = 0;
-  int offsetRows = 0;
-  int croppedWidth = 0;
-  int croppedHeight = 0;
+  int offsetCols;
+  int offsetRows;
+  int croppedWidth;
+  int croppedHeight;
 
-  CroppedArray2DRef() = default;
+  CroppedArray2DRef() = delete;
 
   // Can not cast away constness.
   template <typename T2>
@@ -60,7 +60,8 @@ public:
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
-      : base(RHS), croppedWidth(base.width), croppedHeight(base.height) {}
+      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width),
+        croppedHeight(base.height) {}
 
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);

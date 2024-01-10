@@ -247,9 +247,9 @@ struct fuji_compressed_block final {
                         const FujiDecompressor::FujiHeader& header,
                         const fuji_compressed_params& common_info);
 
-  void reset(const fuji_compressed_params& params);
+  void reset();
 
-  BitPumpMSB pump;
+  Optional<BitPumpMSB> pump;
 
   // tables of gradients
   std::array<std::array<int_pair, 41>, 3> grad_even;
@@ -297,21 +297,18 @@ struct fuji_compressed_block final {
 fuji_compressed_block::fuji_compressed_block(
     Array2DRef<uint16_t> img_, const FujiDecompressor::FujiHeader& header_,
     const fuji_compressed_params& common_info_)
-    : img(img_), header(header_), common_info(common_info_) {}
+    : img(img_), header(header_), common_info(common_info_),
+      linealloc(ltotal * (common_info.line_width + 2), 0),
+      lines(&linealloc[0], common_info.line_width + 2, ltotal) {}
 
-void fuji_compressed_block::reset(const fuji_compressed_params& params) {
-  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
-
-  linealloc.resize(ltotal * (params.line_width + 2), 0);
-  lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
-
+void fuji_compressed_block::reset() {
   MSan::Allocated(CroppedArray2DRef(lines));
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
   // including first and last helper columns of the second row.
   // This is needed for correctness.
   for (xt_lines color : {R0, G0, B0}) {
-    memset(&lines(color, 0), 0, 2 * line_size);
+    memset(&lines(color, 0), 0, 2 * sizeof(uint16_t) * lines.width);
 
     // On the first row, we don't need to zero-init helper columns.
     MSan::Allocated(lines(color, 0));
@@ -327,9 +324,9 @@ void fuji_compressed_block::reset(const fuji_compressed_params& params) {
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
-      grad_even[j][i].value1 = params.maxDiff;
+      grad_even[j][i].value1 = common_info.maxDiff;
       grad_even[j][i].value2 = 1;
-      grad_odd[j][i].value1 = params.maxDiff;
+      grad_odd[j][i].value1 = common_info.maxDiff;
       grad_odd[j][i].value2 = 1;
     }
   }
@@ -447,7 +444,7 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
                                           std::array<int_pair, 41>& grads) {
   int gradient = std::abs(grad);
 
-  int sampleBits = fuji_zerobits(pump);
+  int sampleBits = fuji_zerobits(*pump);
 
   int codeBits;
   int codeDelta;
@@ -460,9 +457,9 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
   }
 
   int code = 0;
-  pump.fill(32);
+  pump->fill(32);
   if (codeBits)
-    code = pump.getBitsNoFill(codeBits);
+    code = pump->getBitsNoFill(codeBits);
   code += codeDelta;
 
   if (code < 0 || code >= common_info.total_values) {
@@ -811,7 +808,7 @@ void FujiDecompressorImpl::decompressThread() const noexcept {
 #endif
   for (int block = 0; block < header.blocks_in_row; ++block) {
     FujiStrip strip(header, block, strips(block));
-    block_info.reset(common_info);
+    block_info.reset();
     try {
       block_info.pump = BitPumpMSB(strip.bs.peekRemainingBuffer());
       block_info.fuji_decode_strip(strip);

@@ -29,8 +29,8 @@ namespace rawspeed {
 
 template <class T> class CroppedArray1DRef final {
   Array1DRef<T> base;
-  int offset = 0;
-  int numElts = 0;
+  int offset;
+  int numElts;
 
   friend CroppedArray1DRef<const T>; // We need to be able to convert to const
                                      // version.
@@ -46,7 +46,7 @@ public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  CroppedArray1DRef() = default;
+  CroppedArray1DRef() = delete;
 
   // Can not cast away constness.
   template <typename T2>
