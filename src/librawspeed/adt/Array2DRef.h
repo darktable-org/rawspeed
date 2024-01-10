@@ -31,8 +31,8 @@
 namespace rawspeed {
 
 template <class T> class Array2DRef final {
-  T* _data = nullptr;
-  int _pitch = 0;
+  T* _data;
+  int _pitch;
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
@@ -46,10 +46,10 @@ public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int width = 0;
-  int height = 0;
+  int width;
+  int height;
 
-  Array2DRef() = default;
+  Array2DRef() = delete;
 
   Array2DRef(T* data, int width, int height, int pitch = 0);
 
@@ -125,11 +125,6 @@ Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
 template <class T>
 [[nodiscard]] inline Optional<Array1DRef<T>>
 Array2DRef<T>::getAsArray1DRef() const {
-  // FIXME: this might be called for default-constructed `Array2DRef`,
-  // and it really doesn't work for them.
-  if (!_data)
-    return std::nullopt;
-
   establishClassInvariants();
   if (height == 1 || _pitch == width)
     return {{_data, width * height}};
