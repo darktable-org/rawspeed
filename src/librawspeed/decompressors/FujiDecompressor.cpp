@@ -300,8 +300,6 @@ fuji_compressed_block::fuji_compressed_block(
     : img(img_), header(header_), common_info(common_info_) {}
 
 void fuji_compressed_block::reset() {
-  const unsigned line_size = sizeof(uint16_t) * (common_info.line_width + 2);
-
   linealloc.resize(ltotal * (common_info.line_width + 2), 0);
   lines =
       Array2DRef<uint16_t>(&linealloc[0], common_info.line_width + 2, ltotal);
@@ -312,7 +310,7 @@ void fuji_compressed_block::reset() {
   // including first and last helper columns of the second row.
   // This is needed for correctness.
   for (xt_lines color : {R0, G0, B0}) {
-    memset(&lines(color, 0), 0, 2 * line_size);
+    memset(&lines(color, 0), 0, 2 * sizeof(uint16_t) * lines.width);
 
     // On the first row, we don't need to zero-init helper columns.
     MSan::Allocated(lines(color, 0));
