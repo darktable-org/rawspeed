@@ -247,7 +247,7 @@ struct fuji_compressed_block final {
                         const FujiDecompressor::FujiHeader& header,
                         const fuji_compressed_params& common_info);
 
-  void reset(const fuji_compressed_params& params);
+  void reset();
 
   Optional<BitPumpMSB> pump;
 
@@ -299,11 +299,12 @@ fuji_compressed_block::fuji_compressed_block(
     const fuji_compressed_params& common_info_)
     : img(img_), header(header_), common_info(common_info_) {}
 
-void fuji_compressed_block::reset(const fuji_compressed_params& params) {
-  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
+void fuji_compressed_block::reset() {
+  const unsigned line_size = sizeof(uint16_t) * (common_info.line_width + 2);
 
-  linealloc.resize(ltotal * (params.line_width + 2), 0);
-  lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
+  linealloc.resize(ltotal * (common_info.line_width + 2), 0);
+  lines =
+      Array2DRef<uint16_t>(&linealloc[0], common_info.line_width + 2, ltotal);
 
   MSan::Allocated(CroppedArray2DRef(lines));
 
@@ -327,9 +328,9 @@ void fuji_compressed_block::reset(const fuji_compressed_params& params) {
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
-      grad_even[j][i].value1 = params.maxDiff;
+      grad_even[j][i].value1 = common_info.maxDiff;
       grad_even[j][i].value2 = 1;
-      grad_odd[j][i].value1 = params.maxDiff;
+      grad_odd[j][i].value1 = common_info.maxDiff;
       grad_odd[j][i].value2 = 1;
     }
   }
@@ -811,7 +812,7 @@ void FujiDecompressorImpl::decompressThread() const noexcept {
 #endif
   for (int block = 0; block < header.blocks_in_row; ++block) {
     FujiStrip strip(header, block, strips(block));
-    block_info.reset(common_info);
+    block_info.reset();
     try {
       block_info.pump = BitPumpMSB(strip.bs.peekRemainingBuffer());
       block_info.fuji_decode_strip(strip);
