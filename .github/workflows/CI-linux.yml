@@ -239,10 +239,10 @@ jobs:
       - name: Set up JDK 11 (for SonarCloud static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
-          java-version: 17
+          java-version: 21
       - name: Download and set up sonar-scanner (for SonarCloud static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
