@@ -123,11 +123,10 @@ inline void Array2DRef<T>::establishClassInvariants() const noexcept {
   data.establishClassInvariants();
   invariant(width >= 0);
   invariant(height >= 0);
+  invariant(_pitch != 0);
   invariant(_pitch >= 0);
   invariant(_pitch >= width);
   invariant((width == 0) == (height == 0));
-  invariant((_pitch == 0) == (width == 0));
-  invariant((_pitch == 0) == (height == 0));
   invariant(data.size() == _pitch * height);
 }
 
