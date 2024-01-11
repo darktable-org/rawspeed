@@ -100,6 +100,7 @@ inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
   invariant(croppedHeight <= base.height());
   invariant(offsetCols + croppedWidth <= base.width());
   invariant(offsetRows + croppedHeight <= base.height());
+  invariant((croppedWidth == 0) == (croppedHeight == 0));
 }
 
 template <class T>
