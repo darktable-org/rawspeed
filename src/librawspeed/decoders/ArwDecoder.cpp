@@ -565,11 +565,11 @@ void ArwDecoder::SonyDecrypt(Array1DRef<const uint8_t> ibuf,
     uint32_t pv = pad[p & 127];
 
     uint32_t bv;
-    memcpy(&bv, ibuf.getCrop(4 * i, 4).begin(), sizeof(uint32_t));
+    memcpy(&bv, ibuf.getBlock(4, i).begin(), sizeof(uint32_t));
 
     bv ^= pv;
 
-    memcpy(obuf.getCrop(4 * i, 4).begin(), &bv, sizeof(uint32_t));
+    memcpy(obuf.getBlock(4, i).begin(), &bv, sizeof(uint32_t));
 
     p++;
   }

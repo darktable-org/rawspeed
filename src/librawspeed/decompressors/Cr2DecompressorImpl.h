@@ -434,8 +434,8 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
           for (int c = 0; c < N_COMP; ++c)
             pred[c] = predNext(c == 0 ? c : dsc.groupSize - (N_COMP - c));
           predNext = out[row]
-                         .getCrop(/*offset=*/dsc.groupSize * col,
-                                  /*size=*/dsc.groupSize)
+                         .getBlock(/*size=*/dsc.groupSize,
+                                   /*index=*/col)
                          .getAsArray1DRef();
           ++globalFrameRow;
           globalFrameCol = 0;
