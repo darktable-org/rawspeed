@@ -183,7 +183,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
   BandData combined(high.width, 2 * high.height);
-  auto& dst = combined.description;
+  const auto& dst = combined.description;
 
   auto process = [low, high, dst]<typename SegmentTy>(int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
@@ -235,7 +235,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     int descaleShift, bool clampUint = false,
     [[maybe_unused]] bool finalWavelet = false) noexcept {
   BandData combined(2 * high.width, high.height);
-  auto& dst = combined.description;
+  const auto& dst = combined.description;
 
   auto process = [low, high, descaleShift, clampUint,
                   dst]<typename SegmentTy>(int row, int col) {
@@ -288,8 +288,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowpassReconstructionTask(const bool& exceptionThrown) noexcept {
-  auto& highlow = wavelet.bands[2]->data;
-  auto& lowlow = wavelet.bands[0]->data;
+  const auto& highlow = wavelet.bands[2]->data;
+  const auto& lowlow = wavelet.bands[0]->data;
   auto& lowpass = intermediates.lowpass;
 
 #ifdef HAVE_OPENMP
@@ -312,8 +312,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createHighpassReconstructionTask(const bool& exceptionThrown) noexcept {
-  auto& highhigh = wavelet.bands[3]->data;
-  auto& lowhigh = wavelet.bands[1]->data;
+  const auto& highhigh = wavelet.bands[3]->data;
+  const auto& lowhigh = wavelet.bands[1]->data;
   auto& highpass = intermediates.highpass;
 
 #ifdef HAVE_OPENMP
@@ -335,8 +335,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept {
-  auto& lowpass = intermediates.lowpass;
-  auto& highpass = intermediates.highpass;
+  const auto& lowpass = intermediates.lowpass;
+  const auto& highpass = intermediates.highpass;
   auto& reconstructedLowpass = data;
 
 #ifdef HAVE_OPENMP
@@ -659,7 +659,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
 VC5Decompressor::BandData
 VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
   BandData lowpass(wavelet.width, wavelet.height);
-  auto& band = lowpass.description;
+  const auto& band = lowpass.description;
 
   BitPumpMSB bits(input);
   for (auto row = 0; row < band.height; ++row) {
@@ -723,7 +723,7 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   // decode highpass band
   DeRLVer d(*decoder, input, quant);
   BandData highpass(wavelet.width, wavelet.height);
-  auto& band = highpass.description;
+  const auto& band = highpass.description;
   for (int row = 0; row != wavelet.height; ++row)
     for (int col = 0; col != wavelet.width; ++col)
       band(row, col) = d.decode();
