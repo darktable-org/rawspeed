@@ -182,7 +182,7 @@ struct ConvolutionParams final {
 VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
-  BandData combined(high.width, 2 * high.height);
+  BandData combined(high.width(), 2 * high.height());
   const auto& dst = combined.description;
 
   auto process = [low, high, dst]<typename SegmentTy>(int row, int col) {
@@ -210,19 +210,19 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(),        \
                                   numChannels))
 #endif
-  for (int row = 0; row < dst.height / 2; ++row) {
+  for (int row = 0; row < dst.height() / 2; ++row) {
 #pragma GCC diagnostic pop
     if (row == 0) {
       // 1st row
-      for (int col = 0; col < dst.width; ++col)
+      for (int col = 0; col < dst.width(); ++col)
         process.template operator()<ConvolutionParams::First>(row, col);
-    } else if (row + 1 < dst.height / 2) {
+    } else if (row + 1 < dst.height() / 2) {
       // middle rows
-      for (int col = 0; col < dst.width; ++col)
+      for (int col = 0; col < dst.width(); ++col)
         process.template operator()<ConvolutionParams::Middle>(row, col);
     } else {
       // last row
-      for (int col = 0; col < dst.width; ++col)
+      for (int col = 0; col < dst.width(); ++col)
         process.template operator()<ConvolutionParams::Last>(row, col);
     }
   }
@@ -234,7 +234,7 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
     int descaleShift, bool clampUint = false,
     [[maybe_unused]] bool finalWavelet = false) noexcept {
-  BandData combined(2 * high.width, high.height);
+  BandData combined(2 * high.width(), high.height());
   const auto& dst = combined.description;
 
   auto process = [low, high, descaleShift, clampUint,
@@ -270,13 +270,13 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(), 2))    \
     mergeable
 #endif
-  for (int row = 0; row < dst.height; ++row) {
+  for (int row = 0; row < dst.height(); ++row) {
 #pragma GCC diagnostic pop
     // First col
     int col = 0;
     process.template operator()<ConvolutionParams::First>(row, col);
     // middle cols
-    for (col = 1; col + 1 < dst.width / 2; ++col) {
+    for (col = 1; col + 1 < dst.width() / 2; ++col) {
       process.template operator()<ConvolutionParams::Middle>(row, col);
     }
     // last col
@@ -662,8 +662,8 @@ VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
   const auto& band = lowpass.description;
 
   BitPumpMSB bits(input);
-  for (auto row = 0; row < band.height; ++row) {
-    for (auto col = 0; col < band.width; ++col)
+  for (auto row = 0; row < band.height(); ++row) {
+    for (auto col = 0; col < band.width(); ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
   }
 
@@ -863,8 +863,8 @@ template <BayerPhase p>
 void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  const int width = out.width / 2;
-  const int height = out.height / 2;
+  const int width = out.width() / 2;
+  const int height = out.height() / 2;
 
   assert(channels[0].wavelets[0].bands[0]->data.has_value() &&
          channels[1].wavelets[0].bands[0]->data.has_value() &&
@@ -907,8 +907,8 @@ void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
       patData = applyStablePhaseShift(patData, basePhase, p);
 
       const Array2DRef<const int> pat(patData.data(), 2, 2);
-      for (int patRow = 0; patRow < pat.height; ++patRow) {
-        for (int patCol = 0; patCol < pat.width; ++patCol) {
+      for (int patRow = 0; patRow < pat.height(); ++patRow) {
+        for (int patCol = 0; patCol < pat.width(); ++patCol) {
           out(2 * row + patRow, 2 * col + patCol) =
               static_cast<uint16_t>(pat(patRow, patCol));
         }

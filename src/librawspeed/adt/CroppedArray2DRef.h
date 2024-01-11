@@ -60,8 +60,8 @@ public:
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
-      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width),
-        croppedHeight(base.height) {}
+      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width()),
+        croppedHeight(base.height()) {}
 
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);
@@ -94,12 +94,12 @@ inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
   invariant(offsetRows >= 0);
   invariant(croppedWidth >= 0);
   invariant(croppedHeight >= 0);
-  invariant(offsetCols <= base.width);
-  invariant(offsetRows <= base.height);
-  invariant(croppedWidth <= base.width);
-  invariant(croppedHeight <= base.height);
-  invariant(offsetCols + croppedWidth <= base.width);
-  invariant(offsetRows + croppedHeight <= base.height);
+  invariant(offsetCols <= base.width());
+  invariant(offsetRows <= base.height());
+  invariant(croppedWidth <= base.width());
+  invariant(croppedHeight <= base.height());
+  invariant(offsetCols + croppedWidth <= base.width());
+  invariant(offsetRows + croppedHeight <= base.height());
 }
 
 template <class T>

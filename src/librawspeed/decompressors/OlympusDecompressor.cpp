@@ -130,7 +130,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
 
   std::array<std::array<int, 3>, 2> acarry{{}};
 
-  for (int col = 0; col < out.width; col++) {
+  for (int col = 0; col < out.width(); col++) {
     int c = col & 1;
 
     std::array<int, 3>& carry = acarry[c];

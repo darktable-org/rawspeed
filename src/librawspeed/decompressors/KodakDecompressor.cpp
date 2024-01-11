@@ -121,8 +121,8 @@ void KodakDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   uint32_t random = 0;
-  for (int row = 0; row < out.height; row++) {
-    for (int col = 0; col < out.width;) {
+  for (int row = 0; row < out.height(); row++) {
+    for (int col = 0; col < out.width();) {
       const int len = std::min(segment_size, mRaw->dim.x - col);
 
       const segment buf = decodeSegment(len);

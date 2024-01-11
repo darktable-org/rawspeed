@@ -523,11 +523,11 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   // allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
-  invariant(out.width % 2 == 0);
-  invariant(out.width >= 2);
+  invariant(out.width() % 2 == 0);
+  invariant(out.width() >= 2);
   for (int row = start_y; row < end_y; row++) {
     std::array<int, 2> pred = pUp[row & 1];
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       pred[col & 1] += ht.decodeDifference(bits);
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];

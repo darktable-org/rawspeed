@@ -185,8 +185,8 @@ int main(int argc_, char* argv_[]) { // NOLINT
     if (!r->blackLevelSeparate) {
       fprintf(stdout, "none");
     } else {
-      fprintf(stdout, "(%i x %i)", r->blackLevelSeparate->width,
-              r->blackLevelSeparate->height);
+      fprintf(stdout, "(%i x %i)", r->blackLevelSeparate->width(),
+              r->blackLevelSeparate->height());
       if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
           blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
         for (auto l : *blackLevelSeparate1D)

@@ -84,8 +84,8 @@ inline std::array<T, 4> applyPhaseShift(std::array<T, 4> srcData,
 
   std::array<T, 4> tgtData;
   const Array2DRef<T> tgt(tgtData.data(), 2, 2);
-  for (int row = 0; row < tgt.height; ++row) {
-    for (int col = 0; col < tgt.width; ++col) {
+  for (int row = 0; row < tgt.height(); ++row) {
+    for (int col = 0; col < tgt.width(); ++col) {
       tgt(row, col) = src((coordOffset.y + row) % 2, (coordOffset.x + col) % 2);
     }
   }
@@ -133,8 +133,8 @@ inline Optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
 
   std::array<CFAColor, 4> patData;
   const Array2DRef<CFAColor> pat(patData.data(), 2, 2);
-  for (int row = 0; row < pat.height; ++row) {
-    for (int col = 0; col < pat.width; ++col) {
+  for (int row = 0; row < pat.height(); ++row) {
+    for (int col = 0; col < pat.width(); ++col) {
       pat(row, col) = CFA.getColorAt(col, row);
     }
   }

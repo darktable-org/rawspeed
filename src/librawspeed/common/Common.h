@@ -61,19 +61,19 @@ inline void copyPixelsImpl(Array1DRef<std::byte> dest,
 
 inline void copyPixelsImpl(Array2DRef<std::byte> dest,
                            Array2DRef<const std::byte> src) {
-  invariant(src.width > 0);
-  invariant(src.height > 0);
-  invariant(dest.width > 0);
-  invariant(dest.height > 0);
-  invariant(src.height == dest.height);
-  invariant(src.width == dest.width);
+  invariant(src.width() > 0);
+  invariant(src.height() > 0);
+  invariant(dest.width() > 0);
+  invariant(dest.height() > 0);
+  invariant(src.height() == dest.height());
+  invariant(src.width() == dest.width());
   if (auto [destAsStrip, srcAsStrip] =
           std::make_tuple(dest.getAsArray1DRef(), src.getAsArray1DRef());
       destAsStrip && srcAsStrip) {
     copyPixelsImpl(*destAsStrip, *srcAsStrip);
     return;
   }
-  for (int row = 0; row != src.height; ++row)
+  for (int row = 0; row != src.height(); ++row)
     copyPixelsImpl(dest[row], src[row]);
 }
 

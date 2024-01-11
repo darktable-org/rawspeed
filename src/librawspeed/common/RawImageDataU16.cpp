@@ -62,8 +62,8 @@ void RawImageDataU16::calculateBlackAreas() {
   std::vector<uint16_t> histogramStorage;
   auto histogram = Array2DRef<uint16_t>::create(histogramStorage, 65536, 4);
 
-  for (int row = 0; row != histogram.height; ++row) {
-    for (int col = 0; col != histogram.width; ++col) {
+  for (int row = 0; row != histogram.height(); ++row) {
+    for (int col = 0; col != histogram.width(); ++col) {
       histogram(row, col) = 0;
     }
   }
@@ -203,7 +203,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #ifdef WITH_SSE2
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
-  assert(blackLevelSeparate->width == 2 && blackLevelSeparate->height == 2);
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   int depth_values = whitePoint - blackLevelSeparate1D(0);
@@ -344,7 +344,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   const CroppedArray2DRef<uint16_t> img(getU16DataAsCroppedArray2DRef());
 
-  assert(blackLevelSeparate->width == 2 && blackLevelSeparate->height == 2);
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   int depth_values = whitePoint - blackLevelSeparate1D(0);

@@ -409,12 +409,12 @@ void ArwDecoder::PostProcessLJpeg() {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
 #endif
-  for (int inRow = 0; inRow < in.height; ++inRow) {
+  for (int inRow = 0; inRow < in.height(); ++inRow) {
     static constexpr iPoint2D inMCUSize = {4, 1};
     static constexpr iPoint2D outMCUSize = {2, 2};
 
-    invariant(in.width % inMCUSize.x == 0);
-    for (int MCUIdx = 0, numMCUsPerRow = in.width / inMCUSize.x;
+    invariant(in.width() % inMCUSize.x == 0);
+    for (int MCUIdx = 0, numMCUsPerRow = in.width() / inMCUSize.x;
          MCUIdx < numMCUsPerRow; ++MCUIdx) {
       for (int outMCURow = 0; outMCURow != outMCUSize.y; ++outMCURow) {
         for (int outMCUСol = 0; outMCUСol != outMCUSize.x; ++outMCUСol) {

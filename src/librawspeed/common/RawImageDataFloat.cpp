@@ -153,7 +153,7 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
   int gw = dim.x * cpp;
   std::array<float, 4> mul;
   std::array<float, 4> sub;
-  assert(blackLevelSeparate->width == 2 && blackLevelSeparate->height == 2);
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
   for (int i = 0; i < 4; i++) {
     int v = i;

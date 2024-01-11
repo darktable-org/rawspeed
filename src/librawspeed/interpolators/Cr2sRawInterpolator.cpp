@@ -104,8 +104,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
   constexpr int ComponentsPerPixel = 3;
   constexpr int OutputComponentsPerMCU = ComponentsPerPixel * PixelsPerMCU;
 
-  invariant(input.width % InputComponentsPerMCU == 0);
-  int numMCUs = input.width / InputComponentsPerMCU;
+  invariant(input.width() % InputComponentsPerMCU == 0);
+  int numMCUs = input.width() / InputComponentsPerMCU;
   invariant(numMCUs > 1);
 
   using MCUTy = std::array<YCbCr, PixelsPerMCU>;
@@ -182,12 +182,12 @@ template <int version> void Cr2sRawInterpolator::interpolate_422_row(int row) {
 
 template <int version> void Cr2sRawInterpolator::interpolate_422() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width > 0);
-  invariant(out.height > 0);
+  invariant(out.width() > 0);
+  invariant(out.height() > 0);
 
   // Benchmarking suggests that for real-world usage, it is not beneficial to
   // parallelize this, and in fact leads to worse performance.
-  for (int row = 0; row < out.height; row++)
+  for (int row = 0; row < out.height(); row++)
     interpolate_422_row<version>(row);
 }
 
@@ -203,8 +203,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
   constexpr int ComponentsPerPixel = 3;
   constexpr int OutputComponentsPerMCU = ComponentsPerPixel * PixelsPerMCU;
 
-  invariant(input.width % InputComponentsPerMCU == 0);
-  int numMCUs = input.width / InputComponentsPerMCU;
+  invariant(input.width() % InputComponentsPerMCU == 0);
+  int numMCUs = input.width() / InputComponentsPerMCU;
   invariant(numMCUs > 1);
 
   using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
@@ -238,7 +238,7 @@ template <int version> void Cr2sRawInterpolator::interpolate_420_row(int row) {
     }
   };
 
-  invariant(row + 1 <= input.height);
+  invariant(row + 1 <= input.height());
 
   // The packed input format is:
   //          p0 p1 p2 p3 p0 p0     p4 p5 p6 p7 p4 p4
@@ -358,8 +358,8 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
   constexpr int ComponentsPerPixel = 3;
   constexpr int OutputComponentsPerMCU = ComponentsPerPixel * PixelsPerMCU;
 
-  invariant(input.width % InputComponentsPerMCU == 0);
-  int numMCUs = input.width / InputComponentsPerMCU;
+  invariant(input.width() % InputComponentsPerMCU == 0);
+  int numMCUs = input.width() / InputComponentsPerMCU;
   invariant(numMCUs > 1);
 
   using MCUTy = std::array<std::array<YCbCr, X_S_F>, Y_S_F>;
@@ -399,10 +399,10 @@ template <int version> void Cr2sRawInterpolator::interpolate_420() {
     num_threads(rawspeed_get_number_of_processor_cores()) firstprivate(out)    \
     lastprivate(row)
 #endif
-  for (row = 0; row < input.height - 1; ++row)
+  for (row = 0; row < input.height() - 1; ++row)
     interpolate_420_row<version>(row);
 
-  invariant(row + 1 == input.height);
+  invariant(row + 1 == input.height());
 
   // Last two lines, the packed input format is:
   //          p0 p1 p2 p3 p0 p0     p4 p5 p6 p7 p4 p4

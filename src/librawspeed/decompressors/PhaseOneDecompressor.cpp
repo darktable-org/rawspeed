@@ -84,8 +84,8 @@ void PhaseOneDecompressor::prepareStrips() {
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  invariant(out.width > 0);
-  invariant(out.width % 2 == 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
@@ -96,10 +96,10 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   pred.fill(0);
   std::array<int, 2> len;
   const int row = strip.n;
-  for (int col = 0; col < out.width; col++) {
+  for (int col = 0; col < out.width(); col++) {
     pump.fill(32);
     if (static_cast<unsigned>(col) >=
-        (out.width & ~7U)) // last 'width % 8' pixels.
+        (out.width() & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (int& i : len) {

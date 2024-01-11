@@ -308,11 +308,11 @@ void fuji_compressed_block::reset() {
   // including first and last helper columns of the second row.
   // This is needed for correctness.
   for (xt_lines color : {R0, G0, B0}) {
-    memset(&lines(color, 0), 0, 2 * sizeof(uint16_t) * lines.width);
+    memset(&lines(color, 0), 0, 2 * sizeof(uint16_t) * lines.width());
 
     // On the first row, we don't need to zero-init helper columns.
     MSan::Allocated(lines(color, 0));
-    MSan::Allocated(lines(color, lines.width - 1));
+    MSan::Allocated(lines(color, lines.width() - 1));
   }
 
   // And the first (real, uninitialized) line of each color gets the content
@@ -320,7 +320,7 @@ void fuji_compressed_block::reset() {
   // line of that color.
   // Again, this is needed for correctness.
   for (xt_lines color : {R2, G2, B2})
-    lines(color, lines.width - 1) = lines(color - 1, lines.width - 2);
+    lines(color, lines.width() - 1) = lines(color - 1, lines.width() - 2);
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
@@ -584,7 +584,7 @@ fuji_compressed_block::fuji_decode_interpolation_even(xt_lines c,
 void fuji_compressed_block::fuji_extend_generic(int start, int end) const {
   for (int i = start; i <= end; i++) {
     lines(i, 0) = lines(i - 1, 1);
-    lines(i, lines.width - 1) = lines(i - 1, lines.width - 2);
+    lines(i, lines.width() - 1) = lines(i - 1, lines.width() - 2);
   }
 }
 
@@ -680,8 +680,8 @@ fuji_compressed_block::fuji_decode_block(T func_even,
   };
 
   for (int row = 0; row != 6; ++row) {
-    CFAColor c0 = CFA(row % CFA.height, /*col=*/0);
-    CFAColor c1 = CFA(row % CFA.height, /*col=*/1);
+    CFAColor c0 = CFA(row % CFA.height(), /*col=*/0);
+    CFAColor c1 = CFA(row % CFA.height(), /*col=*/1);
     pass({CurLineForColor(c0), CurLineForColor(c1)}, row);
     for (CFAColor c : {c0, c1}) {
       switch (c) {
@@ -763,7 +763,7 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
     for (auto i : colors) {
       const auto out = CroppedArray2DRef(
           lines, /*offsetCols=*/0, /*offsetRows=*/i.a + 2,
-          /*croppedWidth=*/lines.width, /*croppedHeight=*/i.b - 2);
+          /*croppedWidth=*/lines.width(), /*croppedHeight=*/i.b - 2);
 
       // All other lines of each color become uninitialized.
       MSan::Allocated(out);
@@ -771,7 +771,7 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
       // And the first (real, uninitialized) line of each color gets the content
       // of the last helper column from the last decoded sample of previous
       // line of that color.
-      lines(i.a + 2, lines.width - 1) = lines(i.a + 2 - 1, lines.width - 2);
+      lines(i.a + 2, lines.width() - 1) = lines(i.a + 2 - 1, lines.width() - 2);
     }
   }
 }

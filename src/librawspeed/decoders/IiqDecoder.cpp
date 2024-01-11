@@ -380,9 +380,9 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
       const std::vector<uint16_t> curve = s.calculateCurve();
 
       int row_start = quadRow == 0 ? 0 : split_row;
-      int row_end = quadRow == 0 ? split_row : img.height;
+      int row_end = quadRow == 0 ? split_row : img.height();
       int col_start = quadCol == 0 ? 0 : split_col;
-      int col_end = quadCol == 0 ? split_col : img.width;
+      int col_end = quadCol == 0 ? split_col : img.width();
 
       for (int row = row_start; row < row_end; row++) {
         for (int col = col_start; col < col_end; col++) {
