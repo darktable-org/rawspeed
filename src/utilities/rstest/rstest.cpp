@@ -186,12 +186,12 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
 
   APPEND(&oss, "blackLevelSeparate: ");
-  if (r->blackLevelSeparate.width == 0 && r->blackLevelSeparate.height == 0) {
+  if (!r->blackLevelSeparate) {
     APPEND(&oss, "none");
   } else {
-    APPEND(&oss, "(%i x %i)", r->blackLevelSeparate.width,
-           r->blackLevelSeparate.height);
-    if (auto blackLevelSeparate1D = r->blackLevelSeparate.getAsArray1DRef();
+    APPEND(&oss, "(%i x %i)", r->blackLevelSeparate->width,
+           r->blackLevelSeparate->height);
+    if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
         blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
       for (auto l : *blackLevelSeparate1D)
         APPEND(&oss, " %d", l);

@@ -133,7 +133,7 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (black->count == 4) {
       mRaw->blackLevelSeparate =
           Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; i++)
         blackLevelSeparate1D(i) = black->getU32(i);
     }

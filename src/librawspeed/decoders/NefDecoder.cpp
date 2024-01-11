@@ -630,7 +630,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int sh = 14 - bitPerPixel;
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     blackLevelSeparate1D(0) = bl->getU16(0) >> sh;
     blackLevelSeparate1D(1) = bl->getU16(1) >> sh;
     blackLevelSeparate1D(2) = bl->getU16(2) >> sh;

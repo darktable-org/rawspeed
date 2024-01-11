@@ -269,7 +269,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 2; j++) {
         const int k = i + 2 * j;

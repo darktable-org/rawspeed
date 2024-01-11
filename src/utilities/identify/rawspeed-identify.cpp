@@ -182,12 +182,12 @@ int main(int argc_, char* argv_[]) { // NOLINT
     fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
 
     fprintf(stdout, "blackLevelSeparate: ");
-    if (r->blackLevelSeparate.width == 0 && r->blackLevelSeparate.height == 0) {
+    if (!r->blackLevelSeparate) {
       fprintf(stdout, "none");
     } else {
-      fprintf(stdout, "(%i x %i)", r->blackLevelSeparate.width,
-              r->blackLevelSeparate.height);
-      if (auto blackLevelSeparate1D = r->blackLevelSeparate.getAsArray1DRef();
+      fprintf(stdout, "(%i x %i)", r->blackLevelSeparate->width,
+              r->blackLevelSeparate->height);
+      if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
           blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
         for (auto l : *blackLevelSeparate1D)
           fprintf(stdout, " %d", l);
