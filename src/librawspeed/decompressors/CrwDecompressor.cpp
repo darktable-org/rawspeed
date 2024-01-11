@@ -211,15 +211,15 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
 // FIXME: this function is horrible.
 void CrwDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width > 0);
-  invariant(out.width % 4 == 0);
-  invariant(out.height > 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 4 == 0);
+  invariant(out.height() > 0);
 
   {
     // Each block encodes 64 pixels
 
-    invariant((out.height * out.width) % 64 == 0);
-    const unsigned hBlocks = out.height * out.width / 64;
+    invariant((out.height() * out.width()) % 64 == 0);
+    const unsigned hBlocks = out.height() * out.width() / 64;
     invariant(hBlocks > 0);
 
     BitPumpJPEG bs(rawInput.peekRemainingBuffer());
@@ -240,7 +240,7 @@ void CrwDecompressor::decompress() {
       carry = diffBuf[0];
 
       for (uint32_t k = 0; k < 64; ++k) {
-        if (col == out.width) {
+        if (col == out.width()) {
           // new line. sadly, does not always happen when k == 0.
           col = 0;
           row++;
@@ -256,14 +256,14 @@ void CrwDecompressor::decompress() {
         ++col;
       }
     }
-    invariant(row == (out.height - 1));
-    invariant(col == out.width);
+    invariant(row == (out.height() - 1));
+    invariant(col == out.width());
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbits) {
-    for (int row = 0; row < out.height; row++) {
-      for (int col = 0; col < out.width; /* NOTE: col += 4 */) {
+    for (int row = 0; row < out.height(); row++) {
+      for (int col = 0; col < out.width(); /* NOTE: col += 4 */) {
         const uint8_t c = lowbitInput.getByte();
         // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
@@ -274,7 +274,7 @@ void CrwDecompressor::decompress() {
           uint16_t low = (c >> (2 * p)) & 0b11;
           auto val = implicit_cast<uint16_t>((pixel << 2) | low);
 
-          if (out.width == 2672 && val < 512)
+          if (out.width() == 2672 && val < 512)
             val += 2; // No idea why this is needed
 
           pixel = val;

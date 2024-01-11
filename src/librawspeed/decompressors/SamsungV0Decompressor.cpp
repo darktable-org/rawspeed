@@ -95,8 +95,8 @@ void SamsungV0Decompressor::decompress() const {
 
   // Swap red and blue pixels to get the final CFA pattern
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  for (int row = 0; row < out.height - 1; row += 2) {
-    for (int col = 0; col < out.width - 1; col += 2)
+  for (int row = 0; row < out.height() - 1; row += 2) {
+    for (int col = 0; col < out.width() - 1; col += 2)
       std::swap(out(row, col + 1), out(row + 1, col));
   }
 }
@@ -109,7 +109,7 @@ int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
 
 void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width > 0);
+  invariant(out.width() > 0);
 
   BitPumpMSB32 bits(bs.peekRemainingBuffer());
 
@@ -118,7 +118,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
     i = row < 2 ? 7 : 4;
 
   // Image is arranged in groups of 16 pixels horizontally
-  for (int col = 0; col < out.width; col += 16) {
+  for (int col = 0; col < out.width(); col += 16) {
     bits.fill();
     bool dir = !!bits.getBitsNoFill(1);
 
@@ -156,7 +156,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
       if (row < 2)
         ThrowRDE("Upward prediction for the first two rows. Raw corrupt");
 
-      if (col + 16 >= out.width)
+      if (col + 16 >= out.width())
         ThrowRDE("Upward prediction for the last block of pixels. Raw corrupt");
 
       // First we decode even pixels
@@ -186,7 +186,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
         int b = len[c >> 3];
         int32_t adj = calcAdj(bits, b);
 
-        if (col + c < out.width)
+        if (col + c < out.width())
           out(row, col + c) = implicit_cast<uint16_t>(adj + pred_left);
       }
 
@@ -196,7 +196,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
         int b = len[2 | (c >> 3)];
         int32_t adj = calcAdj(bits, b);
 
-        if (col + c < out.width)
+        if (col + c < out.width())
           out(row, col + c) = implicit_cast<uint16_t>(adj + pred_left);
       }
     }

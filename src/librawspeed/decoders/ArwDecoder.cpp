@@ -409,12 +409,12 @@ void ArwDecoder::PostProcessLJpeg() {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
 #endif
-  for (int inRow = 0; inRow < in.height; ++inRow) {
+  for (int inRow = 0; inRow < in.height(); ++inRow) {
     static constexpr iPoint2D inMCUSize = {4, 1};
     static constexpr iPoint2D outMCUSize = {2, 2};
 
-    invariant(in.width % inMCUSize.x == 0);
-    for (int MCUIdx = 0, numMCUsPerRow = in.width / inMCUSize.x;
+    invariant(in.width() % inMCUSize.x == 0);
+    for (int MCUIdx = 0, numMCUsPerRow = in.width() / inMCUSize.x;
          MCUIdx < numMCUsPerRow; ++MCUIdx) {
       for (int outMCURow = 0; outMCURow != outMCUSize.y; ++outMCURow) {
         for (int outMCUСol = 0; outMCUСol != outMCUSize.x; ++outMCUСol) {
@@ -565,11 +565,11 @@ void ArwDecoder::SonyDecrypt(Array1DRef<const uint8_t> ibuf,
     uint32_t pv = pad[p & 127];
 
     uint32_t bv;
-    memcpy(&bv, ibuf.getCrop(4 * i, 4).begin(), sizeof(uint32_t));
+    memcpy(&bv, ibuf.getBlock(4, i).begin(), sizeof(uint32_t));
 
     bv ^= pv;
 
-    memcpy(obuf.getCrop(4 * i, 4).begin(), &bv, sizeof(uint32_t));
+    memcpy(obuf.getBlock(4, i).begin(), &bv, sizeof(uint32_t));
 
     p++;
   }
@@ -647,7 +647,7 @@ void ArwDecoder::GetWB() const {
         ThrowRDE("Black Level has %d entries instead of 4", bl->count);
       mRaw->blackLevelSeparate =
           Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; ++i)
         blackLevelSeparate1D(i) = bl->getU16(i) >> mShiftDownScaleForExif;
     }

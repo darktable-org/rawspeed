@@ -407,7 +407,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
 
   mRaw->blackLevelSeparate =
       Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
   for (int c = 0; c != 4; ++c)
     blackLevelSeparate1D(c) = wb->getU16(c + levelOffsets->first);
 
@@ -498,7 +498,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(mShiftUpScaleForExif == 0 || mShiftUpScaleForExif == 2);
   if (mShiftUpScaleForExif) {
     mRaw->blackLevel = 0;
-    mRaw->blackLevelSeparate = {mRaw->blackLevelSeparateStorage.data(), 0, 0};
+    mRaw->blackLevelSeparate = std::nullopt;
   }
   if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
     mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;

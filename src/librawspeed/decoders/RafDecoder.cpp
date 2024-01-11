@@ -301,13 +301,13 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (sep_black->count == 4) {
       mRaw->blackLevelSeparate =
           Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int k = 0; k < 4; k++)
         blackLevelSeparate1D(k) = sep_black->getU32(k);
     } else if (sep_black->count == 36) {
       mRaw->blackLevelSeparate =
           Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int& k : blackLevelSeparate1D)
         k = 0;
 
@@ -323,7 +323,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     // Set black level to average of EXIF data, can be overridden by XML data.
     int sum = 0;
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int b : blackLevelSeparate1D)
       sum += b;
     mRaw->blackLevel = (sum + 2) >> 2;

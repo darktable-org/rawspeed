@@ -633,7 +633,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     mRaw->blackLevel = 0;
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
     // FIXME: why do we provide both the `blackLevel` and `blackLevelSeparate`?
     mRaw->whitePoint = 65535;
@@ -819,7 +819,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   if (black_entry->count < blackdim.area())
     ThrowRDE("BLACKLEVEL entry is too small");
 
-  using BlackType = decltype(mRaw->blackLevelSeparate)::value_type;
+  using BlackType = decltype(mRaw->blackLevelSeparateStorage)::value_type;
 
   if (blackdim.x < 2 || blackdim.y < 2) {
     // We so not have enough to fill all individually, read a single and copy it
@@ -831,7 +831,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
 
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
         blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
@@ -839,7 +839,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
   } else {
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++) {
         float value = black_entry->getFloat(y * blackdim.x + x);
@@ -864,7 +864,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     for (int i = 0; i < mRaw->dim.y; i++)
       black_sum[i & 1] += blackleveldeltav->getFloat(i);
 
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int i = 0; i < 4; i++) {
       const float value =
           black_sum[i >> 1] / static_cast<float>(mRaw->dim.y) * 2.0F;
@@ -888,7 +888,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     for (int i = 0; i < mRaw->dim.x; i++)
       black_sum[i & 1] += blackleveldeltah->getFloat(i);
 
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int i = 0; i < 4; i++) {
       const float value =
           black_sum[i & 1] / static_cast<float>(mRaw->dim.x) * 2.0F;
@@ -914,7 +914,7 @@ void DngDecoder::setBlack(const TiffIFD* raw) const {
   // FIXME: is this the right thing to do?
   mRaw->blackLevelSeparate =
       Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
   std::fill(blackLevelSeparate1D.begin(), blackLevelSeparate1D.end(), 0);
 
   if (raw->hasEntry(TiffTag::BLACKLEVEL))

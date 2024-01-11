@@ -79,6 +79,7 @@ public:
         numElts(sizeof(T2) * RHS.numElts) {}
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
+  [[nodiscard]] CroppedArray1DRef<T> getBlock(int numElts, int index) const;
 
   [[nodiscard]] int RAWSPEED_READONLY size() const;
 
@@ -114,6 +115,17 @@ template <class T>
   invariant(size <= numElts);
   invariant(offset + size <= numElts);
   return {*this, offset, size};
+}
+
+template <class T>
+[[nodiscard]] CroppedArray1DRef<T> Array1DRef<T>::getBlock(int size,
+                                                           int index) const {
+  establishClassInvariants();
+  invariant(index >= 0);
+  invariant(size >= 0);
+  invariant(index <= numElts);
+  invariant(size <= numElts);
+  return getCrop(size * index, size);
 }
 
 template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {

@@ -70,9 +70,9 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
 ByteStream::size_type HasselbladDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  invariant(out.height > 0);
-  invariant(out.width > 0);
-  invariant(out.width % 2 == 0);
+  invariant(out.height() > 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   const auto ht = rec.ht;
   ht.verifyCodeValuesAsDiffLengths();
@@ -81,10 +81,10 @@ ByteStream::size_type HasselbladDecompressor::decompress() {
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT
   // PIXELS
-  for (int row = 0; row < out.height; row++) {
+  for (int row = 0; row < out.height(); row++) {
     int p1 = rec.initPred;
     int p2 = rec.initPred;
-    for (int col = 0; col < out.width; col += 2) {
+    for (int col = 0; col < out.width(); col += 2) {
       int len1 = ht.decodeCodeValue(bitStream);
       int len2 = ht.decodeCodeValue(bitStream);
       p1 += getBits(bitStream, len1);

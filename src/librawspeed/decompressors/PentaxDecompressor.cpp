@@ -156,17 +156,17 @@ PentaxDecompressor::SetupPrefixCodeDecoder(Optional<ByteStream> metaData) {
 void PentaxDecompressor::decompress(ByteStream data) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  invariant(out.height > 0);
-  invariant(out.width > 0);
-  invariant(out.width % 2 == 0);
+  invariant(out.height() > 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   BitPumpMSB bs(data.peekRemainingBuffer());
-  for (int row = 0; row < out.height; row++) {
+  for (int row = 0; row < out.height(); row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       pred[col & 1] += ht.decodeDifference(bs);
       int value = pred[col & 1];
       if (!isIntN(value, 16))

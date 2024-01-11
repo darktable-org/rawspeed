@@ -131,11 +131,11 @@ md5::MD5Hasher::state_type imgDataHash(const RawImage& raw) {
   const rawspeed::Array2DRef<std::byte> img =
       raw->getByteDataAsUncroppedArray2DRef();
 
-  vector<md5::MD5Hasher::state_type> line_hashes(img.height);
+  vector<md5::MD5Hasher::state_type> line_hashes(img.height());
 
-  for (int j = 0; j < img.height; j++) {
-    line_hashes[j] =
-        md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width);
+  for (int j = 0; j < img.height(); j++) {
+    line_hashes[j] = md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)),
+                                   img.width());
   }
 
   auto ret = md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
@@ -185,12 +185,17 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
   APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
 
-  APPEND(&oss, "blackLevelSeparate: (%i x %i)", r->blackLevelSeparate.width,
-         r->blackLevelSeparate.height);
-  if (auto blackLevelSeparate1D = r->blackLevelSeparate.getAsArray1DRef();
-      blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
-    for (auto l : *blackLevelSeparate1D)
-      APPEND(&oss, " %d", l);
+  APPEND(&oss, "blackLevelSeparate: ");
+  if (!r->blackLevelSeparate) {
+    APPEND(&oss, "none");
+  } else {
+    APPEND(&oss, "(%i x %i)", r->blackLevelSeparate->width(),
+           r->blackLevelSeparate->height());
+    if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
+        blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
+      for (auto l : *blackLevelSeparate1D)
+        APPEND(&oss, " %d", l);
+    }
   }
   APPEND(&oss, "\n");
 

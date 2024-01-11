@@ -630,7 +630,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int sh = 14 - bitPerPixel;
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate.getAsArray1DRef();
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     blackLevelSeparate1D(0) = bl->getU16(0) >> sh;
     blackLevelSeparate1D(1) = bl->getU16(1) >> sh;
     blackLevelSeparate1D(2) = bl->getU16(2) >> sh;
@@ -701,12 +701,12 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   auto* tmpch = reinterpret_cast<std::byte*>(&tmp);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  const auto in =
-      Array2DRef(input.peekData(out.width * out.height), out.width, out.height);
+  const auto in = Array2DRef(input.peekData(out.width() * out.height()),
+                             out.width(), out.height());
 
-  for (int row = 0; row < out.height; row++) {
+  for (int row = 0; row < out.height(); row++) {
     uint32_t random = in(row, 0) + (in(row, 1) << 8) + (in(row, 2) << 16);
-    for (int col = 0; col < out.width; col += 6) {
+    for (int col = 0; col < out.width(); col += 6) {
       uint32_t g1 = in(row, col + 0);
       uint32_t g2 = in(row, col + 1);
       uint32_t g3 = in(row, col + 2);
@@ -723,7 +723,7 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       float cr2 = cr;
       // Interpolate right pixel. We assume the sample is aligned with left
       // pixel.
-      if ((col + 6) < out.width) {
+      if ((col + 6) < out.width()) {
         g4 = in(row, col + 6 + 3);
         g5 = in(row, col + 6 + 4);
         g6 = in(row, col + 6 + 5);

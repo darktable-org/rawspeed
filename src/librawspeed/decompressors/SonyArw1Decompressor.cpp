@@ -58,17 +58,17 @@ inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
 
 void SonyArw1Decompressor::decompress(ByteStream input) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width > 0);
-  invariant(out.height > 0);
-  invariant(out.height % 2 == 0);
+  invariant(out.width() > 0);
+  invariant(out.height() > 0);
+  invariant(out.height() % 2 == 0);
 
   BitPumpMSB bits(input.peekRemainingBuffer());
   int pred = 0;
-  for (int col = out.width - 1; col >= 0; col--) {
-    for (int row = 0; row < out.height + 1; row += 2) {
+  for (int col = out.width() - 1; col >= 0; col--) {
+    for (int row = 0; row < out.height() + 1; row += 2) {
       bits.fill(32);
 
-      if (row == out.height)
+      if (row == out.height())
         row = 1;
 
       uint32_t len = 4 - bits.getBitsNoFill(2);

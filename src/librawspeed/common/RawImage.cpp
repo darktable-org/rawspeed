@@ -299,7 +299,7 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
 
   for (int y = start_y; y < end_y; y++) {
     for (int x = 0; x < gw; x++) {
-      const auto block = bad[y].getCrop((32 * x) / 8, 4);
+      const auto block = bad[y].getBlock(32 / 8, x);
 
       // Test if there is a bad pixel within these 32 pixels
       if (std::all_of(block.begin(), block.end(),

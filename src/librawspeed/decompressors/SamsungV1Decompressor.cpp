@@ -118,15 +118,16 @@ void SamsungV1Decompressor::decompress() const {
   }
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width % 32 == 0 && "Should have even count of pixels per row.");
-  invariant(out.height % 2 == 0 && "Should have even row count.");
+  invariant(out.width() % 32 == 0 &&
+            "Should have even count of pixels per row.");
+  invariant(out.height() % 2 == 0 && "Should have even row count.");
   BitPumpMSB pump(bs.peekRemainingBuffer());
-  for (int row = 0; row < out.height; row++) {
+  for (int row = 0; row < out.height(); row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       int32_t diff = samsungDiff(pump, tbl);
       pred[col & 1] += diff;
 

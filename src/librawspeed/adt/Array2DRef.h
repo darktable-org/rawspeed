@@ -22,6 +22,7 @@
 #pragma once
 
 #include "adt/Array1DRef.h"
+#include "adt/CroppedArray1DRef.h" // IWYU pragma: keep
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
 #include <cstddef>
@@ -31,8 +32,11 @@
 namespace rawspeed {
 
 template <class T> class Array2DRef final {
-  T* _data;
+  Array1DRef<T> data;
   int _pitch;
+
+  int _width;
+  int _height;
 
   friend Array2DRef<const T>; // We need to be able to convert to const version.
 
@@ -40,18 +44,22 @@ template <class T> class Array2DRef final {
   friend Array2DRef<std::byte>;
   friend Array2DRef<const std::byte>;
 
+  Array2DRef(Array1DRef<T> data, int width, int height, int pitch);
+
 public:
   void establishClassInvariants() const noexcept;
 
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int width;
-  int height;
+  [[nodiscard]] int RAWSPEED_READONLY width() const;
+  [[nodiscard]] int RAWSPEED_READONLY height() const;
 
   Array2DRef() = delete;
 
-  Array2DRef(T* data, int width, int height, int pitch = 0);
+  Array2DRef(T* data, int width, int height, int pitch);
+
+  Array2DRef(T* data, int width, int height);
 
   // Can not cast away constness.
   template <typename T2>
@@ -70,8 +78,8 @@ public:
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : _data(RHS._data), _pitch(RHS._pitch), width(RHS.width),
-        height(RHS.height) {}
+      : data(RHS.data), _pitch(RHS._pitch), _width(RHS.width()),
+        _height(RHS.height()) {}
 
   // Const-preserving conversion from Array2DRef<T> to Array2DRef<std::byte>.
   template <typename T2>
@@ -80,8 +88,8 @@ public:
                               std::remove_const_t<T2>>) &&
              std::is_same_v<std::remove_const_t<T>, std::byte>)
   Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : _data(reinterpret_cast<T*>(RHS._data)), _pitch(sizeof(T2) * RHS._pitch),
-        width(sizeof(T2) * RHS.width), height(RHS.height) {}
+      : data(RHS.data), _pitch(sizeof(T2) * RHS._pitch),
+        _width(sizeof(T2) * RHS.width()), _height(RHS.height()) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
@@ -102,32 +110,65 @@ public:
 
 // CTAD deduction guide
 template <typename T>
-explicit Array2DRef(T* data, int width, int height, int pitch = 0)
+explicit Array2DRef(Array1DRef<T> data, int width, int height, int pitch)
     -> Array2DRef<T>;
+
+// CTAD deduction guide
+template <typename T>
+explicit Array2DRef(T* data, int width, int height, int pitch) -> Array2DRef<T>;
+
+// CTAD deduction guide
+template <typename T>
+explicit Array2DRef(T* data, int width, int height) -> Array2DRef<T>;
 
 template <class T>
 inline void Array2DRef<T>::establishClassInvariants() const noexcept {
-  invariant(_data);
-  invariant(width >= 0);
-  invariant(height >= 0);
+  data.establishClassInvariants();
+  invariant(_width >= 0);
+  invariant(_height >= 0);
+  invariant(_pitch != 0);
   invariant(_pitch >= 0);
-  invariant(_pitch >= width);
+  invariant(_pitch >= _width);
+  invariant((_width == 0) == (_height == 0));
+  invariant(data.size() == _pitch * _height);
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data, const int width_, const int height_,
-                          const int pitch_ /* = 0 */)
-    : _data(data), _pitch(pitch_ == 0 ? width_ : pitch_), width(width_),
-      height(height_) {
+Array2DRef<T>::Array2DRef(Array1DRef<T> data_, const int width_,
+                          const int height_, const int pitch_)
+    : data(data_), _pitch(pitch_), _width(width_), _height(height_) {
   establishClassInvariants();
+}
+
+template <class T>
+Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_,
+                          const int pitch_)
+    : Array2DRef({data_, pitch_ * height_}, width_, height_, pitch_) {
+  establishClassInvariants();
+}
+
+template <class T>
+Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
+    : Array2DRef(data_, width_, height_, /*pitch=*/width_) {
+  establishClassInvariants();
+}
+
+template <class T> inline int Array2DRef<T>::width() const {
+  establishClassInvariants();
+  return _width;
+}
+
+template <class T> inline int Array2DRef<T>::height() const {
+  establishClassInvariants();
+  return _height;
 }
 
 template <class T>
 [[nodiscard]] inline Optional<Array1DRef<T>>
 Array2DRef<T>::getAsArray1DRef() const {
   establishClassInvariants();
-  if (height == 1 || _pitch == width)
-    return {{_data, width * height}};
+  if (height() == 1 || _pitch == width())
+    return data.getCrop(/*offset=*/0, width() * height()).getAsArray1DRef();
   return std::nullopt;
 }
 
@@ -135,20 +176,15 @@ template <class T>
 inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
   establishClassInvariants();
   invariant(row >= 0);
-  invariant(row < height);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-  return Array1DRef<T>(&_data[row * _pitch], width);
-#pragma GCC diagnostic pop
+  invariant(row < height());
+  return data.getCrop(row * _pitch, width()).getAsArray1DRef();
 }
 
 template <class T>
 inline T& Array2DRef<T>::operator()(const int row, const int col) const {
   establishClassInvariants();
   invariant(col >= 0);
-  invariant(col < width);
+  invariant(col < width());
   return (operator[](row))(col);
 }
 

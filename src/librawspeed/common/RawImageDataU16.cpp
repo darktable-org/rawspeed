@@ -62,8 +62,8 @@ void RawImageDataU16::calculateBlackAreas() {
   std::vector<uint16_t> histogramStorage;
   auto histogram = Array2DRef<uint16_t>::create(histogramStorage, 65536, 4);
 
-  for (int row = 0; row != histogram.height; ++row) {
-    for (int col = 0; col != histogram.width; ++col) {
+  for (int row = 0; row != histogram.height(); ++row) {
+    for (int col = 0; col != histogram.width(); ++col) {
       histogram(row, col) = 0;
     }
   }
@@ -109,7 +109,7 @@ void RawImageDataU16::calculateBlackAreas() {
   }
 
   blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 2, 2);
-  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   if (!totalpixels) {
     for (int& i : blackLevelSeparate1D)
@@ -147,8 +147,7 @@ void RawImageDataU16::calculateBlackAreas() {
 void RawImageDataU16::scaleBlackWhite() {
   const int skipBorder = 250;
   int gw = (dim.x - skipBorder) * cpp;
-  if ((blackAreas.empty() && blackLevelSeparate.width == 0 &&
-       blackLevelSeparate.height == 0 && blackLevel < 0) ||
+  if ((blackAreas.empty() && !blackLevelSeparate && blackLevel < 0) ||
       whitePoint >= 65536) { // Estimate
     int b = 65536;
     int m = 0;
@@ -171,12 +170,12 @@ void RawImageDataU16::scaleBlackWhite() {
 
   /* Skip, if not needed */
   if ((blackAreas.empty() && blackLevel == 0 && whitePoint == 65535 &&
-       blackLevelSeparate.width == 0 && blackLevelSeparate.height == 0) ||
+       !blackLevelSeparate) ||
       dim.area() <= 0)
     return;
 
   /* If filter has not set separate blacklevel, compute or fetch it */
-  if (blackLevelSeparate.width == 0 && blackLevelSeparate.height == 0)
+  if (!blackLevelSeparate)
     calculateBlackAreas();
 
   startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
@@ -189,7 +188,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #else
 
-  int depth_values = whitePoint - blackLevelSeparate(0, 0);
+  int depth_values = whitePoint - (*blackLevelSeparate)(0, 0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Check SSE2
@@ -204,8 +203,8 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #ifdef WITH_SSE2
 void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
-  assert(blackLevelSeparate.width == 2 && blackLevelSeparate.height == 2);
-  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   int depth_values = whitePoint - blackLevelSeparate1D(0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
@@ -345,8 +344,8 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   const CroppedArray2DRef<uint16_t> img(getU16DataAsCroppedArray2DRef());
 
-  assert(blackLevelSeparate.width == 2 && blackLevelSeparate.height == 2);
-  auto blackLevelSeparate1D = *blackLevelSeparate.getAsArray1DRef();
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   int depth_values = whitePoint - blackLevelSeparate1D(0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);

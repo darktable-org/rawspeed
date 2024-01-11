@@ -86,8 +86,7 @@ void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0; rblock < blocksperrow; rblock++) {
     ByteStream block = rowInput.getStream(BytesPerBlock);
-    decompressBlock(block,
-                    outRow.getCrop(PixelsPerBlock * rblock, PixelsPerBlock));
+    decompressBlock(block, outRow.getBlock(PixelsPerBlock, rblock));
   }
 }
 
