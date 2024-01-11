@@ -112,6 +112,9 @@ inline void Array2DRef<T>::establishClassInvariants() const noexcept {
   invariant(height >= 0);
   invariant(_pitch >= 0);
   invariant(_pitch >= width);
+  invariant((width == 0) == (height == 0));
+  invariant((_pitch == 0) == (width == 0));
+  invariant((_pitch == 0) == (height == 0));
 }
 
 template <class T>
