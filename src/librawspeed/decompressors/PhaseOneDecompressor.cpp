@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -138,9 +139,10 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
+  for (const auto& strip :
+       Array1DRef(strips.data(), implicit_cast<int>(strips.size()))) {
     try {
-      decompressStrip(*strip);
+      decompressStrip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
