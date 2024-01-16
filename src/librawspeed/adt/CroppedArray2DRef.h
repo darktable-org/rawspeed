@@ -60,8 +60,8 @@ public:
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
-      : base(RHS), offsetCols(0), offsetRows(0), croppedWidth(base.width()),
-        croppedHeight(base.height()) {}
+      : CroppedArray2DRef(RHS, /*offsetCols=*/0, /*offsetRows=*/0, RHS.width(),
+                          RHS.height()) {}
 
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);
@@ -72,8 +72,8 @@ public:
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   CroppedArray2DRef( // NOLINT google-explicit-constructor
       CroppedArray2DRef<T2> RHS)
-      : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
-        croppedWidth(RHS.croppedWidth), croppedHeight(RHS.croppedHeight) {}
+      : CroppedArray2DRef(RHS.base, RHS.offsetCols, RHS.offsetRows,
+                          RHS.croppedWidth, RHS.croppedHeight) {}
 
   CroppedArray1DRef<T> operator[](int row) const;
 
