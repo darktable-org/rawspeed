@@ -65,7 +65,7 @@ public:
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   CroppedArray1DRef( // NOLINT google-explicit-constructor
       CroppedArray1DRef<T2> RHS)
-      : base(RHS.base), offset(RHS.offset), numElts(RHS.numElts) {}
+      : CroppedArray1DRef(RHS.base, RHS.offset, RHS.numElts) {}
 
   [[nodiscard]] Array1DRef<T> getAsArray1DRef() const {
     return {begin(), size()};
