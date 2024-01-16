@@ -56,9 +56,11 @@ class CiffEntry final {
 
   ByteStream data;
 
+  CiffEntry(ByteStream data, CiffTag tag, CiffDataType type, uint32_t count);
+
 public:
-  explicit CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
-                     ByteStream dirEntry);
+  static CiffEntry Create(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                          ByteStream dirEntry);
 
   [[nodiscard]] ByteStream getData() const { return data; }
 
@@ -70,7 +72,9 @@ public:
   [[nodiscard]] std::vector<std::string> getStrings() const;
 
   [[nodiscard]] uint32_t RAWSPEED_READONLY getElementSize() const;
-  [[nodiscard]] uint32_t RAWSPEED_READONLY getElementShift() const;
+
+  [[nodiscard]] static uint32_t
+  getElementShift(CiffDataType type) RAWSPEED_READONLY;
 
   // variables:
   CiffTag tag;
