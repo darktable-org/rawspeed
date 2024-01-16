@@ -66,17 +66,16 @@ public:
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : data(RHS.data), numElts(RHS.numElts) {}
+      : Array1DRef(RHS.data, RHS.numElts) {}
 
   // Const-preserving conversion from Array1DRef<T> to Array1DRef<std::byte>.
   template <typename T2>
-    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
-             !(std::is_same_v<std::remove_const_t<T>,
-                              std::remove_const_t<T2>>) &&
-             std::is_same_v<std::remove_const_t<T>, std::byte>)
+    requires(
+        !(std::is_const_v<T2> && !std::is_const_v<T>) &&
+        !(std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>) &&
+        std::is_same_v<std::remove_const_t<T>, std::byte>)
   Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : data(reinterpret_cast<T*>(RHS.data)),
-        numElts(sizeof(T2) * RHS.numElts) {}
+      : Array1DRef(reinterpret_cast<T*>(RHS.data), sizeof(T2) * RHS.numElts) {}
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
   [[nodiscard]] CroppedArray1DRef<T> getBlock(int numElts, int index) const;
