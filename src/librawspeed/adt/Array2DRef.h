@@ -78,18 +78,17 @@ public:
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
   Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : data(RHS.data), _pitch(RHS._pitch), _width(RHS.width()),
-        _height(RHS.height()) {}
+      : Array2DRef(RHS.data, RHS._width, RHS._height, RHS._pitch) {}
 
   // Const-preserving conversion from Array2DRef<T> to Array2DRef<std::byte>.
   template <typename T2>
-    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
-             !(std::is_same_v<std::remove_const_t<T>,
-                              std::remove_const_t<T2>>) &&
-             std::is_same_v<std::remove_const_t<T>, std::byte>)
+    requires(
+        !(std::is_const_v<T2> && !std::is_const_v<T>) &&
+        !(std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>) &&
+        std::is_same_v<std::remove_const_t<T>, std::byte>)
   Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : data(RHS.data), _pitch(sizeof(T2) * RHS._pitch),
-        _width(sizeof(T2) * RHS.width()), _height(RHS.height()) {}
+      : Array2DRef(RHS.data, sizeof(T2) * RHS._width, RHS._height,
+                   sizeof(T2) * RHS._pitch) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
