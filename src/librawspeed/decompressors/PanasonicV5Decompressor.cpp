@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/PanasonicV5Decompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -237,10 +238,12 @@ void PanasonicV5Decompressor::decompressInternal() const noexcept {
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
 #endif
-  for (auto block = blocks.cbegin(); block < blocks.cend();
-       ++block) { // NOLINT(openmp-exception-escape): we have checked size
-                  // already.
-    processBlock<dsc>(*block);
+  for (const auto& block :
+       Array1DRef(blocks.data(),
+                  implicit_cast<int>(
+                      blocks.size()))) { // NOLINT(openmp-exception-escape): we
+                                         // have checked size already.
+    processBlock<dsc>(block);
   }
 }
 
