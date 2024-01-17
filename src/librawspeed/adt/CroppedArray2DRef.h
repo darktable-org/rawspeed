@@ -89,7 +89,8 @@ explicit CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
     -> CroppedArray2DRef<typename Array2DRef<T>::value_type>;
 
 template <class T>
-inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
+__attribute__((always_inline)) inline void
+CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
   base.establishClassInvariants();
   invariant(offsetCols >= 0);
   invariant(offsetRows >= 0);

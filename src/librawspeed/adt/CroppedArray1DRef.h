@@ -86,7 +86,8 @@ CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts)
     -> CroppedArray1DRef<T>;
 
 template <class T>
-inline void CroppedArray1DRef<T>::establishClassInvariants() const noexcept {
+__attribute__((always_inline)) inline void
+CroppedArray1DRef<T>::establishClassInvariants() const noexcept {
   base.establishClassInvariants();
   invariant(offset >= 0);
   invariant(numElts >= 0);

@@ -121,7 +121,8 @@ template <typename T>
 explicit Array2DRef(T* data, int width, int height) -> Array2DRef<T>;
 
 template <class T>
-inline void Array2DRef<T>::establishClassInvariants() const noexcept {
+__attribute__((always_inline)) inline void
+Array2DRef<T>::establishClassInvariants() const noexcept {
   data.establishClassInvariants();
   invariant(_width >= 0);
   invariant(_height >= 0);

@@ -93,7 +93,8 @@ public:
 template <typename T> Array1DRef(T* data_, int numElts_) -> Array1DRef<T>;
 
 template <class T>
-inline void Array1DRef<T>::establishClassInvariants() const noexcept {
+__attribute__((always_inline)) inline void
+Array1DRef<T>::establishClassInvariants() const noexcept {
   invariant(data);
   invariant(numElts >= 0);
 }
