@@ -58,8 +58,8 @@ bool CrwDecoder::isCRW(Buffer input) {
   static const std::array<char, 8> magic = {
       {'H', 'E', 'A', 'P', 'C', 'C', 'D', 'R'}};
   static const size_t magic_offset = 6;
-  const unsigned char* data = input.getData(magic_offset, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(magic_offset, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
 CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file)
