@@ -46,8 +46,8 @@ MrwDecoder::MrwDecoder(Buffer file) : RawDecoder(file) { parseHeader(); }
 
 int MrwDecoder::isMRW(Buffer input) {
   static const std::array<char, 4> magic = {{0x00, 'M', 'R', 'M'}};
-  const unsigned char* data = input.getData(0, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(0, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
 void MrwDecoder::parseHeader() {
