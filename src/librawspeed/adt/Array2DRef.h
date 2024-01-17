@@ -153,12 +153,14 @@ inline Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
   establishClassInvariants();
 }
 
-template <class T> inline int Array2DRef<T>::width() const {
+template <class T>
+__attribute__((always_inline)) inline int Array2DRef<T>::width() const {
   establishClassInvariants();
   return _width;
 }
 
-template <class T> inline int Array2DRef<T>::height() const {
+template <class T>
+__attribute__((always_inline)) inline int Array2DRef<T>::height() const {
   establishClassInvariants();
   return _height;
 }
@@ -181,7 +183,8 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
 }
 
 template <class T>
-inline T& Array2DRef<T>::operator()(const int row, const int col) const {
+__attribute__((always_inline)) inline T&
+Array2DRef<T>::operator()(const int row, const int col) const {
   establishClassInvariants();
   invariant(col >= 0);
   invariant(col < width());
