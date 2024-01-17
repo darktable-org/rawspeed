@@ -65,7 +65,7 @@ public:
   template <typename T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
+  inline Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : Array1DRef(RHS.data, RHS.numElts) {}
 
   // Const-preserving conversion from Array1DRef<T> to Array1DRef<std::byte>.
@@ -74,7 +74,7 @@ public:
         !(std::is_const_v<T2> && !std::is_const_v<T>) &&
         !(std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>) &&
         std::is_same_v<std::remove_const_t<T>, std::byte>)
-  Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
+  inline Array1DRef(Array1DRef<T2> RHS) // NOLINT google-explicit-constructor
       : Array1DRef(reinterpret_cast<T*>(RHS.data), sizeof(T2) * RHS.numElts) {}
 
   [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
@@ -99,14 +99,14 @@ inline void Array1DRef<T>::establishClassInvariants() const noexcept {
 }
 
 template <class T>
-Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
+inline Array1DRef<T>::Array1DRef(T* data_, const int numElts_)
     : data(data_), numElts(numElts_) {
   establishClassInvariants();
 }
 
 template <class T>
-[[nodiscard]] CroppedArray1DRef<T> Array1DRef<T>::getCrop(int offset,
-                                                          int size) const {
+[[nodiscard]] inline CroppedArray1DRef<T>
+Array1DRef<T>::getCrop(int offset, int size) const {
   establishClassInvariants();
   invariant(offset >= 0);
   invariant(size >= 0);
@@ -117,8 +117,8 @@ template <class T>
 }
 
 template <class T>
-[[nodiscard]] CroppedArray1DRef<T> Array1DRef<T>::getBlock(int size,
-                                                           int index) const {
+[[nodiscard]] inline CroppedArray1DRef<T>
+Array1DRef<T>::getBlock(int size, int index) const {
   establishClassInvariants();
   invariant(index >= 0);
   invariant(size >= 0);
