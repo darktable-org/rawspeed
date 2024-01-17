@@ -21,6 +21,8 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/AbstractDngDecompressor.h"
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -52,12 +54,13 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
+  for (const auto& e :
+       Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
 
-    iPoint2D tileSize(e->width, e->height);
-    iPoint2D pos(e->offX, e->offY);
+    iPoint2D tileSize(e.width, e.height);
+    iPoint2D pos(e.offX, e.offY);
 
-    bool big_endian = e->bs.getByteOrder() == Endianness::big;
+    bool big_endian = e.bs.getByteOrder() == Endianness::big;
 
     // DNG spec says that if not 8/16/32 bit/sample, always use big endian.
     // It's not very obvious, but that does not appear to apply to FP.
@@ -75,16 +78,16 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
     try {
       const uint32_t inputPixelBits = mRaw->getCpp() * mBps;
 
-      if (e->dsc.tileW > std::numeric_limits<int>::max() / inputPixelBits)
+      if (e.dsc.tileW > std::numeric_limits<int>::max() / inputPixelBits)
         ThrowIOE("Integer overflow when calculating input pitch");
 
-      const int inputPitchBits = inputPixelBits * e->dsc.tileW;
+      const int inputPitchBits = inputPixelBits * e.dsc.tileW;
       invariant(inputPitchBits > 0);
 
       if (inputPitchBits % 8 != 0) {
         ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
                  "pitch is %u bits, which is not a multiple of 8 (1 byte)",
-                 mRaw->getCpp(), mBps, e->width, inputPitchBits);
+                 mRaw->getCpp(), mBps, e.width, inputPitchBits);
       }
 
       const int inputPitch = inputPitchBits / 8;
@@ -92,7 +95,7 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
         ThrowRDE("Data input pitch is too short. Can not decode!");
 
       UncompressedDecompressor decompressor(
-          e->bs, mRaw, iRectangle2D(pos, tileSize), inputPitch, mBps,
+          e.bs, mRaw, iRectangle2D(pos, tileSize), inputPitch, mBps,
           big_endian ? BitOrder::MSB : BitOrder::LSB);
       decompressor.readUncompressedRaw();
     } catch (const RawDecoderException& err) {
@@ -107,10 +110,11 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
+  for (const auto& e :
+       Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
     try {
-      LJpegDecoder d(e->bs, mRaw);
-      d.decode(e->offX, e->offY, e->width, e->height, mFixLjpeg);
+      LJpegDecoder d(e.bs, mRaw);
+      d.decode(e.offX, e.offY, e.width, e.height, mFixLjpeg);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -126,13 +130,14 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    DeflateDecompressor z(e->bs.peekBuffer(e->bs.getRemainSize()), mRaw,
+  for (const auto& e :
+       Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
+    DeflateDecompressor z(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw,
                           mPredictor, mBps);
     try {
-      z.decode(&uBuffer, iPoint2D(mRaw->getCpp() * e->dsc.tileW, e->dsc.tileH),
-               iPoint2D(mRaw->getCpp() * e->width, e->height),
-               iPoint2D(mRaw->getCpp() * e->offX, e->offY));
+      z.decode(&uBuffer, iPoint2D(mRaw->getCpp() * e.dsc.tileW, e.dsc.tileH),
+               iPoint2D(mRaw->getCpp() * e.width, e.height),
+               iPoint2D(mRaw->getCpp() * e.offX, e.offY));
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -146,10 +151,11 @@ template <> void AbstractDngDecompressor::decompressThread<9>() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
+  for (const auto& e :
+       Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
     try {
-      VC5Decompressor d(e->bs, mRaw);
-      d.decode(e->offX, e->offY, e->width, e->height);
+      VC5Decompressor d(e.bs, mRaw);
+      d.decode(e.offX, e.offY, e.width, e.height);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -164,10 +170,11 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto e = slices.cbegin(); e < slices.cend(); ++e) {
-    JpegDecompressor j(e->bs.peekBuffer(e->bs.getRemainSize()), mRaw);
+  for (const auto& e :
+       Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
+    JpegDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw);
     try {
-      j.decode(e->offX, e->offY);
+      j.decode(e.offX, e.offY);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {

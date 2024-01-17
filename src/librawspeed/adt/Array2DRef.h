@@ -77,23 +77,22 @@ public:
   template <typename T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : data(RHS.data), _pitch(RHS._pitch), _width(RHS.width()),
-        _height(RHS.height()) {}
+  inline Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
+      : Array2DRef(RHS.data, RHS._width, RHS._height, RHS._pitch) {}
 
   // Const-preserving conversion from Array2DRef<T> to Array2DRef<std::byte>.
   template <typename T2>
-    requires(!(std::is_const_v<T2> && !std::is_const_v<T>) &&
-             !(std::is_same_v<std::remove_const_t<T>,
-                              std::remove_const_t<T2>>) &&
-             std::is_same_v<std::remove_const_t<T>, std::byte>)
-  Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
-      : data(RHS.data), _pitch(sizeof(T2) * RHS._pitch),
-        _width(sizeof(T2) * RHS.width()), _height(RHS.height()) {}
+    requires(
+        !(std::is_const_v<T2> && !std::is_const_v<T>) &&
+        !(std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>) &&
+        std::is_same_v<std::remove_const_t<T>, std::byte>)
+  inline Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
+      : Array2DRef(RHS.data, sizeof(T2) * RHS._width, RHS._height,
+                   sizeof(T2) * RHS._pitch) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
-  static Array2DRef<T>
+  inline static Array2DRef<T>
   create(std::vector<cvless_value_type, AllocatorType>& storage, int width,
          int height) {
     using VectorTy = std::remove_reference_t<decltype(storage)>;
@@ -122,7 +121,8 @@ template <typename T>
 explicit Array2DRef(T* data, int width, int height) -> Array2DRef<T>;
 
 template <class T>
-inline void Array2DRef<T>::establishClassInvariants() const noexcept {
+__attribute__((always_inline)) inline void
+Array2DRef<T>::establishClassInvariants() const noexcept {
   data.establishClassInvariants();
   invariant(_width >= 0);
   invariant(_height >= 0);
@@ -134,31 +134,33 @@ inline void Array2DRef<T>::establishClassInvariants() const noexcept {
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(Array1DRef<T> data_, const int width_,
-                          const int height_, const int pitch_)
+inline Array2DRef<T>::Array2DRef(Array1DRef<T> data_, const int width_,
+                                 const int height_, const int pitch_)
     : data(data_), _pitch(pitch_), _width(width_), _height(height_) {
   establishClassInvariants();
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_,
-                          const int pitch_)
+inline Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_,
+                                 const int pitch_)
     : Array2DRef({data_, pitch_ * height_}, width_, height_, pitch_) {
   establishClassInvariants();
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
+inline Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
     : Array2DRef(data_, width_, height_, /*pitch=*/width_) {
   establishClassInvariants();
 }
 
-template <class T> inline int Array2DRef<T>::width() const {
+template <class T>
+__attribute__((always_inline)) inline int Array2DRef<T>::width() const {
   establishClassInvariants();
   return _width;
 }
 
-template <class T> inline int Array2DRef<T>::height() const {
+template <class T>
+__attribute__((always_inline)) inline int Array2DRef<T>::height() const {
   establishClassInvariants();
   return _height;
 }
@@ -181,7 +183,8 @@ inline Array1DRef<T> Array2DRef<T>::operator[](const int row) const {
 }
 
 template <class T>
-inline T& Array2DRef<T>::operator()(const int row, const int col) const {
+__attribute__((always_inline)) inline T&
+Array2DRef<T>::operator()(const int row, const int col) const {
   establishClassInvariants();
   invariant(col >= 0);
   invariant(col < width());

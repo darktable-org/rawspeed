@@ -106,7 +106,7 @@ template <typename Tag> struct BitStreamReplenisherBase {
 
   BitStreamReplenisherBase() = delete;
 
-  explicit BitStreamReplenisherBase(Array1DRef<const uint8_t> input_)
+  inline explicit BitStreamReplenisherBase(Array1DRef<const uint8_t> input_)
       : input(input_) {
     if (input.size() < BitStreamTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
@@ -118,7 +118,7 @@ template <typename Tag> struct BitStreamReplenisherBase {
   // BitStreamTraits<Tag>::MaxProcessBytes from it, but have to read as much as
   // we can and fill rest with zeros.
   std::array<uint8_t, BitStreamTraits<Tag>::MaxProcessBytes> tmpStorage = {};
-  Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
+  inline Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
     return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
   }
 };
@@ -189,7 +189,8 @@ public:
 
   BitStream() = delete;
 
-  explicit BitStream(Array1DRef<const uint8_t> input) : replenisher(input) {}
+  inline explicit BitStream(Array1DRef<const uint8_t> input)
+      : replenisher(input) {}
 
   inline void fill(uint32_t nbits = Cache::MaxGetBits) {
     invariant(nbits <= Cache::MaxGetBits);

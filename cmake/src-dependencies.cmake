@@ -25,7 +25,7 @@ if(WITH_OPENMP)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
      CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     # Clang has an option to specify the OpenMP standard to use. Specify it.
-    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=45")
+    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=50")
   endif()
 
   set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
@@ -33,7 +33,9 @@ if(WITH_OPENMP)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
 
-  find_package(OpenMP 4.5)
+  # NOTE: we want at least 5.0, but we don't need full implementation,
+  # so we neither can't really check for a version, not need to...
+  find_package(OpenMP)
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")

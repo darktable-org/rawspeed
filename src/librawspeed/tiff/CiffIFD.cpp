@@ -48,20 +48,20 @@ void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
 
   ByteStream dirEntry = dirEntries.getStream(10); // Entry is 10 bytes.
 
-  auto t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
+  CiffEntry t = CiffEntry::Create(valueDatas, valueData, dirEntry);
 
-  switch (t->type) {
+  switch (t.type) {
   case CiffDataType::SUB1:
   case CiffDataType::SUB2: {
-    add(std::make_unique<CiffIFD>(this, t->data));
+    add(std::make_unique<CiffIFD>(this, t.data));
     break;
   }
 
   default:
     // Will we ever look for this entry?
-    if (!isIn(t->tag, CiffTagsWeCareAbout))
+    if (!isIn(t.tag, CiffTagsWeCareAbout))
       return;
-    add(std::move(t));
+    add(std::make_unique<CiffEntry>(t));
   }
 }
 

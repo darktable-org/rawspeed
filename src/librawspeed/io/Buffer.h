@@ -65,10 +65,12 @@ public:
     assert(!ASan::RegionIsPoisoned(data, size));
   }
 
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  operator Array1DRef<const uint8_t>() const {
+  [[nodiscard]] Array1DRef<const uint8_t> getAsArray1DRef() const {
     return {getData(0, getSize()), implicit_cast<int>(getSize())};
   }
+
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  operator Array1DRef<const uint8_t>() const { return getAsArray1DRef(); }
 
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
     if (!isValid(0, offset))
