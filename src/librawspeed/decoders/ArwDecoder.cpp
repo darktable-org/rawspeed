@@ -612,7 +612,7 @@ void ArwDecoder::GetWB() const {
     const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
-    SonyDecrypt({EncryptedBuffer.begin(), implicit_cast<int>(len)},
+    SonyDecrypt(EncryptedBuffer,
                 {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
