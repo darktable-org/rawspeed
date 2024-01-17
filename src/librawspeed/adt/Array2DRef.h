@@ -77,7 +77,7 @@ public:
   template <typename T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
+  inline Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
       : Array2DRef(RHS.data, RHS._width, RHS._height, RHS._pitch) {}
 
   // Const-preserving conversion from Array2DRef<T> to Array2DRef<std::byte>.
@@ -86,13 +86,13 @@ public:
         !(std::is_const_v<T2> && !std::is_const_v<T>) &&
         !(std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>) &&
         std::is_same_v<std::remove_const_t<T>, std::byte>)
-  Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
+  inline Array2DRef(Array2DRef<T2> RHS) // NOLINT google-explicit-constructor
       : Array2DRef(RHS.data, sizeof(T2) * RHS._width, RHS._height,
                    sizeof(T2) * RHS._pitch) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
-  static Array2DRef<T>
+  inline static Array2DRef<T>
   create(std::vector<cvless_value_type, AllocatorType>& storage, int width,
          int height) {
     using VectorTy = std::remove_reference_t<decltype(storage)>;
@@ -133,21 +133,21 @@ inline void Array2DRef<T>::establishClassInvariants() const noexcept {
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(Array1DRef<T> data_, const int width_,
-                          const int height_, const int pitch_)
+inline Array2DRef<T>::Array2DRef(Array1DRef<T> data_, const int width_,
+                                 const int height_, const int pitch_)
     : data(data_), _pitch(pitch_), _width(width_), _height(height_) {
   establishClassInvariants();
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_,
-                          const int pitch_)
+inline Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_,
+                                 const int pitch_)
     : Array2DRef({data_, pitch_ * height_}, width_, height_, pitch_) {
   establishClassInvariants();
 }
 
 template <class T>
-Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
+inline Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
     : Array2DRef(data_, width_, height_, /*pitch=*/width_) {
   establishClassInvariants();
 }
