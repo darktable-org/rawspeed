@@ -76,10 +76,10 @@ public:
   operator Array1DRef<const uint8_t>() const { return getAsArray1DRef(); }
 
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
-    if (!isValid(0, offset))
+    if (!isValid(offset, size_))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    return Buffer(getData(offset, size_), size_);
+    return getAsArray1DRef().getCrop(offset, size_).getAsArray1DRef();
   }
 
   [[nodiscard]] Buffer getSubView(size_type offset) const {
