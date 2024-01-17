@@ -101,7 +101,9 @@ public:
   }
 
   // convenience getter for single bytes
-  uint8_t operator[](size_type offset) const { return *getData(offset, 1); }
+  uint8_t operator[](size_type offset) const {
+    return getAsArray1DRef()(offset);
+  }
 
   // std begin/end iterators to allow for range loop
   [[nodiscard]] const uint8_t* begin() const {
