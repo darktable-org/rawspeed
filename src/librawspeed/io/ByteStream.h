@@ -89,7 +89,7 @@ public:
     return getSize() - pos;
   }
   [[nodiscard]] inline const uint8_t* peekData(size_type count) const {
-    return Buffer::getData(pos, count);
+    return Buffer::getSubView(pos, count).begin();
   }
   inline const uint8_t* getData(size_type count) {
     const uint8_t* ret = peekData(count);

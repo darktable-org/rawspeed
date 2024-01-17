@@ -65,7 +65,7 @@ void process(const char* filename) noexcept {
     return;
   }
 
-  LLVMFuzzerTestOneInput(buf.getData(0, buf.getSize()), buf.getSize());
+  LLVMFuzzerTestOneInput(buf.begin(), buf.getSize());
 }
 
 } // namespace

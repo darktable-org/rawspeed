@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
 #include "adt/CroppedArray1DRef.h" // IWYU pragma: keep
 #include "adt/Invariant.h"

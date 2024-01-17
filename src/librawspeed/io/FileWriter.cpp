@@ -50,8 +50,8 @@ void FileWriter::writeFile(Buffer filemap, uint32_t size) const {
   if (file == nullptr)
     ThrowFIE("Could not open file.");
 
-  const auto* const src = filemap.getData(0, filemap.getSize());
-  bytes_written = fwrite(src, 1, size != 0 ? size : filemap.getSize(), file);
+  bytes_written =
+      fwrite(filemap.begin(), 1, size != 0 ? size : filemap.getSize(), file);
   fclose(file);
   if (size != bytes_written) {
     ThrowFIE("Could not write file.");
@@ -68,8 +68,8 @@ void FileWriter::writeFile(Buffer filemap, uint32_t size) const {
   }
 
   DWORD bytes_written;
-  if (!WriteFile(file_h, filemap.getData(0, filemap.getSize()),
-                 size ? size : filemap.getSize(), &bytes_written, nullptr)) {
+  if (!WriteFile(file_h, filemap.begin(), size ? size : filemap.getSize(),
+                 &bytes_written, nullptr)) {
     CloseHandle(file_h);
     ThrowFIE("Could not read file.");
   }

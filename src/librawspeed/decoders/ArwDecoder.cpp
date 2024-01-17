@@ -83,23 +83,22 @@ RawImage ArwDecoder::decodeSRF() {
   uint32_t head_off = 164600;
 
   // Replicate the dcraw contortions to get the "decryption" key
-  const uint8_t* keyData = mFile.getData(key_off, 1);
-  uint32_t offset = (*keyData) * 4;
-  keyData = mFile.getData(key_off + offset, 4);
-  uint32_t key = getU32BE(keyData);
+  uint8_t offset = mFile[key_off];
+  const Buffer keyData = mFile.getSubView(key_off + 4 * offset, 4);
+  uint32_t key = getU32BE(keyData.begin());
+
   static const size_t head_size = 40;
-  const uint8_t* head_orig = mFile.getData(head_off, head_size);
+  const Buffer head_orig = mFile.getSubView(head_off, head_size);
   vector<uint8_t> head(head_size);
-  SonyDecrypt({head_orig, head_size}, {head.data(), head_size}, head_size / 4,
-              key);
+  SonyDecrypt(head_orig, {head.data(), head_size}, head_size / 4, key);
   for (int i = 26; i > 22; i--)
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
-  const auto* image_data = mFile.getData(off, len);
+  const Buffer image_data = mFile.getSubView(off, len);
   std::vector<uint8_t> image_decoded(len);
-  SonyDecrypt({image_data, implicit_cast<int>(len)},
-              {image_decoded.data(), implicit_cast<int>(len)}, len / 4, key);
+  SonyDecrypt(image_data, {image_decoded.data(), implicit_cast<int>(len)},
+              len / 4, key);
 
   Buffer di(image_decoded.data(), len);
 
@@ -613,7 +612,7 @@ void ArwDecoder::GetWB() const {
     const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
-    SonyDecrypt({EncryptedBuffer.begin(), implicit_cast<int>(len)},
+    SonyDecrypt(EncryptedBuffer,
                 {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;

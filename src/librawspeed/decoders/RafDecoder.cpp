@@ -53,8 +53,8 @@ bool RafDecoder::isRAF(Buffer input) {
   static const std::array<char, 16> magic = {{'F', 'U', 'J', 'I', 'F', 'I', 'L',
                                               'M', 'C', 'C', 'D', '-', 'R', 'A',
                                               'W', ' '}};
-  const unsigned char* data = input.getData(0, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(0, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
 bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
