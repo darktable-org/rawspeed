@@ -90,13 +90,6 @@ public:
     return getSubView(offset, newSize);
   }
 
-  // get pointer to memory at 'offset', make sure at least 'count' bytes are
-  // accessible
-  [[nodiscard]] const uint8_t* getData(size_type offset,
-                                       size_type count) const {
-    return getSubView(offset, count).begin();
-  }
-
   // convenience getter for single bytes
   uint8_t operator[](size_type offset) const {
     return getAsArray1DRef()(offset);
