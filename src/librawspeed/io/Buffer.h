@@ -69,7 +69,7 @@ public:
       : Buffer(Array1DRef(data_, implicit_cast<int>(size_))) {}
 
   [[nodiscard]] Array1DRef<const uint8_t> getAsArray1DRef() const {
-    return {getData(0, getSize()), implicit_cast<int>(getSize())};
+    return {data, implicit_cast<int>(size)};
   }
 
   // NOLINTNEXTLINE(google-explicit-constructor)
