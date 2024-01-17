@@ -59,7 +59,8 @@ public:
   CroppedArray2DRef(CroppedArray2DRef<T2> RHS) = delete;
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
-  CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  inline CroppedArray2DRef(Array2DRef<T> RHS)
       : CroppedArray2DRef(RHS, /*offsetCols=*/0, /*offsetRows=*/0, RHS.width(),
                           RHS.height()) {}
 
@@ -70,7 +71,7 @@ public:
   template <class T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  CroppedArray2DRef( // NOLINT google-explicit-constructor
+  inline CroppedArray2DRef( // NOLINT google-explicit-constructor
       CroppedArray2DRef<T2> RHS)
       : CroppedArray2DRef(RHS.base, RHS.offsetCols, RHS.offsetRows,
                           RHS.croppedWidth, RHS.croppedHeight) {}
@@ -104,9 +105,10 @@ inline void CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
 }
 
 template <class T>
-CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
-                                        int offsetRows_, int croppedWidth_,
-                                        int croppedHeight_)
+inline CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_,
+                                               int offsetCols_, int offsetRows_,
+                                               int croppedWidth_,
+                                               int croppedHeight_)
     : base(base_), offsetCols(offsetCols_), offsetRows(offsetRows_),
       croppedWidth(croppedWidth_), croppedHeight(croppedHeight_) {
   establishClassInvariants();
