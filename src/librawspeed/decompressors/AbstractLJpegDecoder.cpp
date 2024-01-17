@@ -21,7 +21,6 @@
 */
 
 #include "decompressors/AbstractLJpegDecoder.h"
-#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
 #include "adt/Point.h"
@@ -30,7 +29,6 @@
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <array>
@@ -250,8 +248,7 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
 
     // copy nCodes bytes from input stream to code values table
     const auto codesBuf = dht.getBuffer(nCodes);
-    hc.setCodeValues(
-        Array1DRef<const uint8_t>(codesBuf.begin(), codesBuf.getSize()));
+    hc.setCodeValues(codesBuf);
 
     // see if we already have a PrefixCodeDecoder with the same codes
     assert(PrefixCodeDecoderStore.size() == huffmanCodeStore.size());
