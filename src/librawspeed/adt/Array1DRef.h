@@ -128,7 +128,9 @@ Array1DRef<T>::getBlock(int size, int index) const {
   return getCrop(size * index, size);
 }
 
-template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
+template <class T>
+__attribute__((always_inline)) inline T*
+Array1DRef<T>::addressOf(const int eltIdx) const {
   establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx <= numElts);
@@ -140,7 +142,9 @@ template <class T> inline T* Array1DRef<T>::addressOf(const int eltIdx) const {
 #pragma GCC diagnostic pop
 }
 
-template <class T> inline T& Array1DRef<T>::operator()(const int eltIdx) const {
+template <class T>
+__attribute__((always_inline)) inline T&
+Array1DRef<T>::operator()(const int eltIdx) const {
   establishClassInvariants();
   invariant(eltIdx >= 0);
   invariant(eltIdx < numElts);
