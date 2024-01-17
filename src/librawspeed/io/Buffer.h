@@ -58,12 +58,15 @@ private:
 public:
   Buffer() = default;
 
-  // Data already allocated
-  explicit Buffer(const uint8_t* data_, size_type size_)
-      : data(data_), size(size_) {
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Buffer(Array1DRef<const uint8_t> data_)
+      : data(data_.begin()), size(data_.size()) {
     assert(data);
     assert(!ASan::RegionIsPoisoned(data, size));
   }
+
+  explicit Buffer(const uint8_t* data_, size_type size_)
+      : Buffer(Array1DRef(data_, implicit_cast<int>(size_))) {}
 
   [[nodiscard]] Array1DRef<const uint8_t> getAsArray1DRef() const {
     return {getData(0, getSize()), implicit_cast<int>(getSize())};
