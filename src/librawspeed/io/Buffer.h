@@ -105,18 +105,9 @@ public:
 
   // std begin/end iterators to allow for range loop
   [[nodiscard]] const uint8_t* begin() const {
-    invariant(data);
-    return data;
+    return getAsArray1DRef().begin();
   }
-  [[nodiscard]] const uint8_t* end() const {
-    invariant(data);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    return data + size;
-#pragma GCC diagnostic pop
-  }
+  [[nodiscard]] const uint8_t* end() const { return getAsArray1DRef().end(); }
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
