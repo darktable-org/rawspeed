@@ -113,10 +113,10 @@ public:
   template <typename T>
   [[nodiscard]] inline T get(bool inNativeByteOrder, size_type offset,
                              size_type index = 0) const {
-    return getByteSwapped<T>(
-        getData(offset + index * static_cast<size_type>(sizeof(T)),
-                static_cast<size_type>(sizeof(T))),
-        !inNativeByteOrder);
+    const Buffer buf =
+        getSubView(offset + index * static_cast<size_type>(sizeof(T)),
+                   static_cast<size_type>(sizeof(T)));
+    return getByteSwapped<T>(buf.begin(), !inNativeByteOrder);
   }
 
   [[nodiscard]] inline size_type RAWSPEED_READONLY getSize() const {
