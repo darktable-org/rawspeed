@@ -29,6 +29,7 @@
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Mutex.h"
 #include "adt/NotARational.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/ErrorLog.h"
