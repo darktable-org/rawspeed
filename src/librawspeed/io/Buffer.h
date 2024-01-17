@@ -94,10 +94,7 @@ public:
   // accessible
   [[nodiscard]] const uint8_t* getData(size_type offset,
                                        size_type count) const {
-    if (!isValid(offset, count))
-      ThrowIOE("Buffer overflow: image file may be truncated");
-
-    return getAsArray1DRef().getCrop(offset, count).begin();
+    return getSubView(offset, count).begin();
   }
 
   // convenience getter for single bytes
