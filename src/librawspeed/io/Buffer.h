@@ -87,7 +87,7 @@ public:
       ThrowIOE("Buffer overflow: image file may be truncated");
 
     size_type newSize = getSize() - offset;
-    return getSubView(offset, newSize);
+    return getAsArray1DRef().getCrop(offset, newSize).getAsArray1DRef();
   }
 
   // get pointer to memory at 'offset', make sure at least 'count' bytes are
