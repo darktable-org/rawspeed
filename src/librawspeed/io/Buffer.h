@@ -97,14 +97,7 @@ public:
     if (!isValid(offset, count))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    invariant(data);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
-    return data + offset;
-#pragma GCC diagnostic pop
+    return getAsArray1DRef().getCrop(offset, count).begin();
   }
 
   // convenience getter for single bytes
