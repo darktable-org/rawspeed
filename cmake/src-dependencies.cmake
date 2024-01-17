@@ -33,7 +33,9 @@ if(WITH_OPENMP)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
 
-  find_package(OpenMP 5.0)
+  # NOTE: we want at least 5.0, but we don't need full implementation,
+  # so we neither can't really check for a version, not need to...
+  find_package(OpenMP)
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")
