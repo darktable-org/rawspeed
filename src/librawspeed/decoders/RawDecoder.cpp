@@ -175,20 +175,6 @@ bool RawDecoder::handleCameraSupport(const CameraMetaData* meta,
     return false;
   }
 
-  return true;
-}
-
-bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
-                                      const std::string& make,
-                                      const std::string& model,
-                                      const std::string& mode) {
-  mRaw->metadata.make = make;
-  mRaw->metadata.model = model;
-  const Camera* cam = meta->getCamera(make, model, mode);
-
-  if (!handleCameraSupport(meta, make, model, mode))
-    return false;
-
   switch (cam->supportStatus) {
     using enum Camera::SupportStatus;
   case Supported:
@@ -204,6 +190,20 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
              make.c_str(), model.c_str(), mode.c_str());
     break; // WYSIWYG.
   }
+
+  return true;
+}
+
+bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
+                                      const std::string& make,
+                                      const std::string& model,
+                                      const std::string& mode) {
+  mRaw->metadata.make = make;
+  mRaw->metadata.model = model;
+  const Camera* cam = meta->getCamera(make, model, mode);
+
+  if (!handleCameraSupport(meta, make, model, mode))
+    return false;
 
   if (cam->decoderVersion > getDecoderVersion())
     ThrowRDE(
