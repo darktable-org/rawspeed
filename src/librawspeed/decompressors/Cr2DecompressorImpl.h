@@ -46,7 +46,8 @@ namespace rawspeed {
 
 class ByteStream;
 
-// NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
+// This is not really a header, inline namespace is fine.
+// NOLINTNEXTLINE(google-build-namespaces)
 namespace {
 
 enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
@@ -237,7 +238,8 @@ Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() const {
                                          std::end(outputTiles))};
 }
 
-// NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
+// This is not really a header, inline namespace is fine.
+// NOLINTNEXTLINE(google-build-namespaces)
 namespace {
 
 struct Dsc final {

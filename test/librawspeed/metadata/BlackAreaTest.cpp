@@ -88,7 +88,7 @@ TEST_P(BlackAreaTest, Getters) {
 TEST_P(BlackAreaTest, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const BlackArea AreaOrig(offset, size, isVertical);
-    BlackArea Area(AreaOrig); // NOLINT trying to test the copy
+    BlackArea Area(AreaOrig);
     checkHelper(AreaOrig);
     checkHelper(Area);
   });
