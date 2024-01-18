@@ -156,12 +156,10 @@ void RawDecoder::askForSamples([[maybe_unused]] const CameraMetaData* meta,
            make.c_str(), model.c_str(), mode.c_str());
 }
 
-bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
-                                      const std::string& make,
-                                      const std::string& model,
-                                      const std::string& mode) {
-  mRaw->metadata.make = make;
-  mRaw->metadata.model = model;
+bool RawDecoder::handleCameraSupport(const CameraMetaData* meta,
+                                     const std::string& make,
+                                     const std::string& model,
+                                     const std::string& mode) {
   const Camera* cam = meta->getCamera(make, model, mode);
   if (!cam) {
     askForSamples(meta, make, model, mode);
@@ -176,6 +174,20 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
     // that we are unsure.
     return false;
   }
+
+  return true;
+}
+
+bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
+                                      const std::string& make,
+                                      const std::string& model,
+                                      const std::string& mode) {
+  mRaw->metadata.make = make;
+  mRaw->metadata.model = model;
+  const Camera* cam = meta->getCamera(make, model, mode);
+
+  if (!handleCameraSupport(meta, make, model, mode))
+    return false;
 
   switch (cam->supportStatus) {
     using enum Camera::SupportStatus;
@@ -206,17 +218,9 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
                              const std::string& mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
   const Camera* cam = meta->getCamera(make, model, mode);
-  if (!cam) {
-    askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown) {
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
-               "guess. Sorry.",
-               make.c_str(), model.c_str(), mode.c_str());
-    }
-
+  if (!handleCameraSupport(meta, make, model, mode))
     return;
-  }
 
   // Only final CFA with the data from cameras.xml if it actually contained
   // the CFA.

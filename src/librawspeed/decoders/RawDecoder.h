@@ -129,6 +129,9 @@ protected:
   static void askForSamples(const CameraMetaData* meta, const std::string& make,
                             const std::string& model, const std::string& mode);
 
+  bool handleCameraSupport(const CameraMetaData* meta, const std::string& make,
+                           const std::string& model, const std::string& mode);
+
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */
   /* Unknown cameras does NOT generate any errors, but returns false */
