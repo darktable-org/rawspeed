@@ -125,10 +125,6 @@ protected:
   virtual void decodeMetaDataInternal(const CameraMetaData* meta) = 0;
   virtual void checkSupportInternal(const CameraMetaData* meta) = 0;
 
-  /* Ask for sample submission, if makes sense */
-  static void askForSamples(const CameraMetaData* meta, const std::string& make,
-                            const std::string& model, const std::string& mode);
-
   bool handleCameraSupport(const CameraMetaData* meta, const std::string& make,
                            const std::string& model, const std::string& mode);
 

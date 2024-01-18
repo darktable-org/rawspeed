@@ -77,9 +77,12 @@ public:
 class Camera final {
 public:
   enum class SupportStatus {
-    Unsupported,
-    Supported,
-    NoSamples,
+    SupportedNoSamples, // Tentatively supported, no RPU samples.
+    Supported,          // Claimed as supported (explicitly).
+    Unknown,            // Placeholder camera, support is unknown.
+    UnknownCamera,      // Not found in database.
+    UnknownNoSamples, // Placeholder camera, no RPU samples, support is unknown.
+    Unsupported,      // Claimed as unsupported (explicitly).
   };
 
 #ifdef HAVE_PUGIXML

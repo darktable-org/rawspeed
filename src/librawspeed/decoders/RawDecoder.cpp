@@ -142,46 +142,29 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   }
 }
 
-void RawDecoder::askForSamples([[maybe_unused]] const CameraMetaData* meta,
-                               const std::string& make,
-                               const std::string& model,
-                               const std::string& mode) {
-  if ("dng" == mode)
-    return;
-
-  writeLog(DEBUG_PRIO::WARNING,
-           "Unable to find camera in database: '%s' '%s' "
-           "'%s'\nPlease consider providing samples on "
-           "<https://raw.pixls.us/>, thanks!",
-           make.c_str(), model.c_str(), mode.c_str());
-}
-
 bool RawDecoder::handleCameraSupport(const CameraMetaData* meta,
                                      const std::string& make,
                                      const std::string& model,
                                      const std::string& mode) {
+  Camera::SupportStatus supportStatus = Camera::SupportStatus::UnknownCamera;
   const Camera* cam = meta->getCamera(make, model, mode);
-  if (!cam) {
-    askForSamples(meta, make, model, mode);
+  if (cam)
+    supportStatus = cam->supportStatus;
 
-    if (failOnUnknown) {
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
-               "guess. Sorry.",
+  // Sample beggary block.
+  switch (supportStatus) {
+    using enum Camera::SupportStatus;
+  case UnknownCamera:
+    if ("dng" != mode) {
+      noSamples = true;
+      writeLog(DEBUG_PRIO::WARNING,
+               "Unable to find camera in database: '%s' '%s' '%s'\nPlease "
+               "consider providing samples on <https://raw.pixls.us/>, thanks!",
                make.c_str(), model.c_str(), mode.c_str());
     }
-
-    // Assume the camera can be decoded, but return false, so decoders can see
-    // that we are unsure.
-    return false;
-  }
-
-  switch (cam->supportStatus) {
-    using enum Camera::SupportStatus;
-  case Supported:
-    break; // Yay us!
-  case Unsupported:
-    ThrowRDE("Camera not supported (explicit). Sorry.");
-  case NoSamples:
+    break;
+  case UnknownNoSamples:
+  case SupportedNoSamples:
     noSamples = true;
     writeLog(DEBUG_PRIO::WARNING,
              "Camera support status is unknown: '%s' '%s' '%s'\n"
@@ -189,6 +172,29 @@ bool RawDecoder::handleCameraSupport(const CameraMetaData* meta,
              "if you wish for the support to not be discontinued, thanks!",
              make.c_str(), model.c_str(), mode.c_str());
     break; // WYSIWYG.
+  case Supported:
+  case Unknown:
+  case Unsupported:
+    break; // All these imply existence of a sample on RPU.
+  }
+
+  // Actual support handling.
+  switch (supportStatus) {
+    using enum Camera::SupportStatus;
+  case Supported:
+  case SupportedNoSamples:
+    return true; // Explicitly supported.
+  case Unsupported:
+    ThrowRDE("Camera not supported (explicit). Sorry.");
+  case UnknownCamera:
+  case UnknownNoSamples:
+  case Unknown:
+    if (failOnUnknown) {
+      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
+               "guess. Sorry.",
+               make.c_str(), model.c_str(), mode.c_str());
+    }
+    return cam; // Might be implicitly supported.
   }
 
   return true;
@@ -200,10 +206,12 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
                                       const std::string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
-  const Camera* cam = meta->getCamera(make, model, mode);
 
   if (!handleCameraSupport(meta, make, model, mode))
     return false;
+
+  const Camera* cam = meta->getCamera(make, model, mode);
+  assert(cam);
 
   if (cam->decoderVersion > getDecoderVersion())
     ThrowRDE(
@@ -217,10 +225,12 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
                              const std::string& make, const std::string& model,
                              const std::string& mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
-  const Camera* cam = meta->getCamera(make, model, mode);
 
   if (!handleCameraSupport(meta, make, model, mode))
     return;
+
+  const Camera* cam = meta->getCamera(make, model, mode);
+  assert(cam);
 
   // Only final CFA with the data from cameras.xml if it actually contained
   // the CFA.

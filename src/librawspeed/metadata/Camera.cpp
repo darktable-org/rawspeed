@@ -71,7 +71,11 @@ Camera::Camera(const pugi::xml_node& camera) {
     if (v == "no")
       return Unsupported;
     if (v == "no-samples")
-      return NoSamples;
+      return SupportedNoSamples;
+    if (v == "unknown")
+      return Unknown;
+    if (v == "unknown-no-samples")
+      return UnknownNoSamples;
     ThrowCME("Attribute 'supported' has unknown value.");
   }();
   mode = camera.attribute("mode").as_string("");
