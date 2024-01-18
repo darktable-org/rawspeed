@@ -41,13 +41,19 @@ class CameraSensorInfoTestDumb
     : public ::testing::TestWithParam<std::tuple<int, int>> {
 protected:
   CameraSensorInfoTestDumb()
-      : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
-        mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
+      : mBlackLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
+        mWhiteLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
         mBlackLevelSeparate({
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand()  // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand()  // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
         }) {}
   virtual void SetUp() final {
     mMinIso = std::get<0>(GetParam());
@@ -114,7 +120,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig); // NOLINT trying to test the copy
+    CameraSensorInfo Info(InfoOrig); // NOLINT(foo): trying to test the copy
   });
 
   ASSERT_NO_THROW({
@@ -261,13 +267,19 @@ class CameraSensorInfoTest : public ::testing::TestWithParam<IsoExpectationsT> {
 protected:
   CameraSensorInfoTest()
       : data(IsoExpectationsT{-1, -1, -1, false, false}),
-        mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
-        mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
+        mBlackLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
+        mWhiteLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
         mBlackLevelSeparate({
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand()  // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand()  // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
         }) {}
   virtual void SetUp() final { data = GetParam(); }
 
