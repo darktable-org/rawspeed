@@ -15689,8 +15689,26 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="FUJIFILM" model="X-A20" supported="unknown-no-samples">
+	<Camera make="FUJIFILM" model="X-A20">
 		<ID make="Fujifilm" model="X-A20">Fujifilm X-A20</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="256" white="4094"/>
+		<Hints>
+			<Hint name="jpeg32_bitorder" value=""/>
+		</Hints>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11540 -4999 -991</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2949 10963 2278</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-382 1049 5605</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="FUJIFILM" model="XQ1">
 		<ID make="Fujifilm" model="XQ1">Fujifilm XQ1</ID>
