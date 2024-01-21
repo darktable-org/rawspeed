@@ -1,4 +1,5 @@
 FILE(GLOB RAWSPEED_BENCHS_SOURCES
+  "BitPumpJPEGBenchmark.cpp"
   "BitStreamBenchmark.cpp"
 )
 

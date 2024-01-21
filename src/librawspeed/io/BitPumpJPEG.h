@@ -46,6 +46,11 @@ template <> struct BitStreamTraits<JPEGBitPumpTag> final {
   static_assert(MaxProcessBytes == sizeof(uint64_t));
 };
 
+// NOTE: on average, probability of encountering an `0xFF` byte
+// is ~0.51% (1 in ~197), only ~2.02% (1 in ~50) of 4-byte blocks will contain
+// an `0xFF` byte, and out of *those* blocks, only ~0.77% (1 in ~131)
+// will contain more than one `0xFF` byte.
+
 template <>
 inline BitPumpJPEG::size_type
 BitPumpJPEG::fillCache(Array1DRef<const uint8_t> input) {
