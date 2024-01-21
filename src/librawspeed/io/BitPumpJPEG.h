@@ -62,11 +62,14 @@ BitPumpJPEG::fillCache(Array1DRef<const uint8_t> input) {
   std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
               prefetch.begin());
 
+  auto speculativeOptimisticCache = cache;
+  speculativeOptimisticCache.push(getBE<uint32_t>(prefetch.data()), 32);
+
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
   if (std::none_of(&prefetch[0], &prefetch[4],
                    [](uint8_t byte) { return byte == 0xFF; })) {
-    cache.push(getBE<uint32_t>(prefetch.data()), 32);
+    cache = speculativeOptimisticCache;
     return 4;
   }
 
