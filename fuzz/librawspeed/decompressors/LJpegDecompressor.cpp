@@ -88,7 +88,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::LJpegDecompressor d(
         mRaw, rawspeed::iRectangle2D(mRaw->dim.x, mRaw->dim.y), frame, rec,
-        bs.getSubStream(/*offset=*/0));
+        bs.getSubStream(/*offset=*/0).peekRemainingBuffer().getAsArray1DRef());
     mRaw->createData();
     d.decode();
 
