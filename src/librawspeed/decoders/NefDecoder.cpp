@@ -125,13 +125,12 @@ RawImage NefDecoder::decodeRawInternal() {
     }
   }
 
-  ByteStream rawData(
-      DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
-                 Endianness::little));
+  const auto input =
+      mFile.getSubView(offsets->getU32(), counts->getU32()).getAsArray1DRef();
 
   NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
   mRaw->createData();
-  n.decompress(rawData, uncorrectedRawValues);
+  n.decompress(input, uncorrectedRawValues);
 
   return mRaw;
 }

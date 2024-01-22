@@ -50,7 +50,7 @@ class NikonDecompressor final : public AbstractDecompressor {
 public:
   NikonDecompressor(RawImage raw, ByteStream metadata, uint32_t bitsPS);
 
-  void decompress(ByteStream data, bool uncorrectedRawValues);
+  void decompress(Array1DRef<const uint8_t> input, bool uncorrectedRawValues);
 
 private:
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 6> nikon_tree;
