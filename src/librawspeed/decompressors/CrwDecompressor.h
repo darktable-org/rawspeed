@@ -37,14 +37,14 @@ class CrwDecompressor final : public AbstractDecompressor {
 
   RawImage mRaw;
   crw_hts mHuff;
-  const bool lowbits;
 
-  ByteStream lowbitInput;
-  ByteStream rawInput;
+  Array1DRef<const uint8_t> input;
+  Optional<Array1DRef<const uint8_t>> lowbitInput;
 
 public:
-  CrwDecompressor(RawImage img, uint32_t dec_table_, bool lowbits_,
-                  ByteStream rawData);
+  CrwDecompressor(RawImage img, uint32_t dec_table_,
+                  Array1DRef<const uint8_t> input,
+                  Optional<Array1DRef<const uint8_t>> lowbitInput);
 
   void decompress();
 

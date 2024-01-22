@@ -81,6 +81,10 @@ RawImage CrwDecoder::decodeRawInternal() {
   uint32_t height = sensorInfo->getU16(2);
   mRaw->dim = iPoint2D(width, height);
 
+  if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
+      height > 3048 || (height * width) % 64 != 0)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   const CiffEntry* decTable =
       mRootIFD->getEntryRecursive(CiffTag::DECODERTABLE);
   if (!decTable || decTable->type != CiffDataType::LONG)
@@ -91,7 +95,24 @@ RawImage CrwDecoder::decodeRawInternal() {
 
   bool lowbits = !hints.contains("no_decompressed_lowbits");
 
-  CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
+  ByteStream rawInput = rawData->getData();
+
+  Optional<Array1DRef<const uint8_t>> lowbitInput;
+  if (lowbits) {
+    // If there are low bits, the first part (size is calculable) is low bits
+    // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
+    const int lBlocks = 1 * height * width / 4;
+    invariant(lBlocks > 0);
+    lowbitInput = rawInput.getStream(lBlocks);
+  }
+
+  // We always ignore next 514 bytes of 'padding'. No idea what is in there.
+  rawInput.skipBytes(514);
+
+  Array1DRef<const uint8_t> input =
+      rawInput.peekRemainingBuffer().getAsArray1DRef();
+
+  CrwDecompressor c(mRaw, dec_table, input, lowbitInput);
   mRaw->createData();
   c.decompress();
 

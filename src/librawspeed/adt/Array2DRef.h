@@ -45,10 +45,10 @@ template <class T> class Array2DRef final {
   friend Array2DRef<std::byte>;
   friend Array2DRef<const std::byte>;
 
-  Array2DRef(Array1DRef<T> data, int width, int height, int pitch);
-
 public:
   void establishClassInvariants() const noexcept;
+
+  Array2DRef(Array1DRef<T> data, int width, int height, int pitch);
 
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
