@@ -159,7 +159,7 @@ UncompressedDecompressor::UncompressedDecompressor(
 template <typename Pump, typename NarrowFpType>
 void UncompressedDecompressor::decodePackedFP(int rows, int row) const {
   const Array2DRef<float> out(mRaw->getF32DataAsUncroppedArray2DRef());
-  Pump bits(input.peekRemainingBuffer());
+  Pump bits(input.peekRemainingBuffer().getAsArray1DRef());
 
   int cols = size.x * mRaw->getCpp();
   for (; row < rows; row++) {
@@ -176,7 +176,7 @@ void UncompressedDecompressor::decodePackedFP(int rows, int row) const {
 template <typename Pump>
 void UncompressedDecompressor::decodePackedInt(int rows, int row) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  Pump bits(input.peekRemainingBuffer());
+  Pump bits(input.peekRemainingBuffer().getAsArray1DRef());
 
   int cols = size.x * mRaw->getCpp();
   for (; row < rows; row++) {

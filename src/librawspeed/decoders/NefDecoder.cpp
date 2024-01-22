@@ -335,9 +335,12 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
 
   // The input bytes are laid out in the memory in the following way:
   // First, all even (0-2-4-) rows, and then all odd (1-3-5-) rows.
-  BitPumpMSB even(
-      input.getStream(size.y / 2, inputPitch).peekRemainingBuffer());
-  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch).peekRemainingBuffer());
+  BitPumpMSB even(input.getStream(size.y / 2, inputPitch)
+                      .peekRemainingBuffer()
+                      .getAsArray1DRef());
+  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch)
+                     .peekRemainingBuffer()
+                     .getAsArray1DRef());
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
       img(row, col) = implicit_cast<uint16_t>(even.getBits(12));

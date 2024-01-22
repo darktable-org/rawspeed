@@ -62,7 +62,7 @@ void SonyArw1Decompressor::decompress(ByteStream input) const {
   invariant(out.height() > 0);
   invariant(out.height() % 2 == 0);
 
-  BitPumpMSB bits(input.peekRemainingBuffer());
+  BitPumpMSB bits(input.peekRemainingBuffer().getAsArray1DRef());
   int pred = 0;
   for (int col = out.width() - 1; col >= 0; col--) {
     for (int row = 0; row < out.height() + 1; row += 2) {

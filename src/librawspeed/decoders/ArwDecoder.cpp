@@ -90,15 +90,16 @@ RawImage ArwDecoder::decodeSRF() {
   static const size_t head_size = 40;
   const Buffer head_orig = mFile.getSubView(head_off, head_size);
   vector<uint8_t> head(head_size);
-  SonyDecrypt(head_orig, {head.data(), head_size}, head_size / 4, key);
+  SonyDecrypt(head_orig.getAsArray1DRef(), {head.data(), head_size},
+              head_size / 4, key);
   for (int i = 26; i > 22; i--)
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
   const Buffer image_data = mFile.getSubView(off, len);
   std::vector<uint8_t> image_decoded(len);
-  SonyDecrypt(image_data, {image_decoded.data(), implicit_cast<int>(len)},
-              len / 4, key);
+  SonyDecrypt(image_data.getAsArray1DRef(),
+              {image_decoded.data(), implicit_cast<int>(len)}, len / 4, key);
 
   Buffer di(image_decoded.data(), len);
 
@@ -612,7 +613,7 @@ void ArwDecoder::GetWB() const {
     const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
-    SonyDecrypt(EncryptedBuffer,
+    SonyDecrypt(EncryptedBuffer.getAsArray1DRef(),
                 {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;

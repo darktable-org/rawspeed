@@ -640,7 +640,7 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
                                                    ByteStream bs,
                                                    uint16_t lowpassPrecision_)
-    : AbstractDecodeableBand(wavelet_, bs),
+    : AbstractDecodeableBand(wavelet_, bs.getAsArray1DRef()),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.
   // It consists of width * height pixels, `lowpassPrecision` each.
@@ -653,7 +653,8 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   const auto bytesTotal = bytesPerChunk * chunksTotal;
   // And clamp the size / verify sufficient input while we are at it.
   // NOTE: this might fail (and should throw, not assert).
-  input = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal));
+  input = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal))
+              .getAsArray1DRef();
 }
 
 VC5Decompressor::BandData
@@ -785,8 +786,8 @@ void VC5Decompressor::parseLargeCodeblock(ByteStream bs) {
   } else {
     if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs, codeDecoder,
-                                                      *mVC5.quantization);
+    dstBand = std::make_unique<Wavelet::HighPassBand>(
+        wavelet, bs.getAsArray1DRef(), codeDecoder, *mVC5.quantization);
     mVC5.quantization.reset();
   }
   wavelet.setBandValid(band);

@@ -174,7 +174,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   auto pred = getInitialPreds<N_COMP>();
   uint16_t* predNext = pred.data();
 
-  BitPumpJPEG bitStream(input.peekRemainingBuffer());
+  BitPumpJPEG bitStream(input.peekRemainingBuffer().getAsArray1DRef());
 
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of

@@ -163,7 +163,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   {
-    BitPumpMSB bs(evenLinesInput.peekRemainingBuffer());
+    BitPumpMSB bs(evenLinesInput.peekRemainingBuffer().getAsArray1DRef());
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
@@ -172,7 +172,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     }
   }
   {
-    BitPumpMSB bs(oddLinesInput.peekRemainingBuffer());
+    BitPumpMSB bs(oddLinesInput.peekRemainingBuffer().getAsArray1DRef());
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;

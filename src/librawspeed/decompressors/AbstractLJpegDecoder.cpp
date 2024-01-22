@@ -248,7 +248,7 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
 
     // copy nCodes bytes from input stream to code values table
     const auto codesBuf = dht.getBuffer(nCodes);
-    hc.setCodeValues(codesBuf);
+    hc.setCodeValues(codesBuf.getAsArray1DRef());
 
     // see if we already have a PrefixCodeDecoder with the same codes
     assert(PrefixCodeDecoderStore.size() == huffmanCodeStore.size());

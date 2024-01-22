@@ -541,7 +541,7 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
 void NikonDecompressor::decompress(ByteStream data, bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
-  BitPumpMSB bits(data.peekRemainingBuffer());
+  BitPumpMSB bits(data.peekRemainingBuffer().getAsArray1DRef());
 
   random = bits.peekBits(24);
 

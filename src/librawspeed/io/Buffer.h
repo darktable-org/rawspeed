@@ -71,8 +71,9 @@ public:
     return {data, implicit_cast<int>(size)};
   }
 
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  operator Array1DRef<const uint8_t>() const { return getAsArray1DRef(); }
+  explicit operator Array1DRef<const uint8_t>() const {
+    return getAsArray1DRef();
+  }
 
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
     if (!isValid(offset, size_))
