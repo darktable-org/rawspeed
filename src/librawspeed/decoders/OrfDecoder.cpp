@@ -146,24 +146,28 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
   int inputPitchBytes = inputPitchBits / 8;
 
   const auto numEvenLines = implicit_cast<int>(roundUpDivision(h, 2));
-  ByteStream evenLinesInput = s.getStream(numEvenLines, inputPitchBytes);
+  const auto evenLinesInput = s.getStream(numEvenLines, inputPitchBytes)
+                                  .peekRemainingBuffer()
+                                  .getAsArray1DRef();
 
   const auto oddLinesInputBegin =
-      implicit_cast<uint32_t>(roundUp(evenLinesInput.getSize(), 1U << 11U));
-  assert(oddLinesInputBegin >= evenLinesInput.getSize());
-  int padding = oddLinesInputBegin - evenLinesInput.getSize();
+      implicit_cast<int>(roundUp(evenLinesInput.size(), 1U << 11U));
+  assert(oddLinesInputBegin >= evenLinesInput.size());
+  int padding = oddLinesInputBegin - evenLinesInput.size();
   assert(padding >= 0);
   s.skipBytes(padding);
 
   const int numOddLines = h - numEvenLines;
-  ByteStream oddLinesInput = s.getStream(numOddLines, inputPitchBytes);
+  const auto oddLinesInput = s.getStream(numOddLines, inputPitchBytes)
+                                 .peekRemainingBuffer()
+                                 .getAsArray1DRef();
 
   // By now we know we have enough input to produce the image.
   mRaw->createData();
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   {
-    BitPumpMSB bs(evenLinesInput.peekRemainingBuffer().getAsArray1DRef());
+    BitPumpMSB bs(evenLinesInput);
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
@@ -172,7 +176,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     }
   }
   {
-    BitPumpMSB bs(oddLinesInput.peekRemainingBuffer().getAsArray1DRef());
+    BitPumpMSB bs(oddLinesInput);
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;
