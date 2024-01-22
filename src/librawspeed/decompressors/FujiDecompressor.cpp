@@ -114,7 +114,7 @@ struct FujiStrip final {
   const int n;
 
   // the compressed data of this strip
-  const ByteStream bs;
+  const Array1DRef<const uint8_t> input;
 
   FujiStrip() = delete;
   FujiStrip(const FujiStrip&) = delete;
@@ -122,8 +122,9 @@ struct FujiStrip final {
   FujiStrip& operator=(const FujiStrip&) noexcept = delete;
   FujiStrip& operator=(FujiStrip&&) noexcept = delete;
 
-  FujiStrip(const FujiDecompressor::FujiHeader& h_, int block, ByteStream bs_)
-      : h(h_), n(block), bs(bs_) {
+  FujiStrip(const FujiDecompressor::FujiHeader& h_, int block,
+            Array1DRef<const uint8_t> input_)
+      : h(h_), n(block), input(input_) {
     invariant(n >= 0 && n < h.blocks_in_row);
   }
 
@@ -778,7 +779,7 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
 
 class FujiDecompressorImpl final {
   RawImage mRaw;
-  const Array1DRef<const ByteStream> strips;
+  const Array1DRef<const Array1DRef<const uint8_t>> strips;
 
   const FujiDecompressor::FujiHeader& header;
 
@@ -787,14 +788,15 @@ class FujiDecompressorImpl final {
   void decompressThread() const noexcept;
 
 public:
-  FujiDecompressorImpl(RawImage mRaw, Array1DRef<const ByteStream> strips,
+  FujiDecompressorImpl(RawImage mRaw,
+                       Array1DRef<const Array1DRef<const uint8_t>> strips,
                        const FujiDecompressor::FujiHeader& h);
 
   void decompress();
 };
 
 FujiDecompressorImpl::FujiDecompressorImpl(
-    RawImage mRaw_, Array1DRef<const ByteStream> strips_,
+    RawImage mRaw_, Array1DRef<const Array1DRef<const uint8_t>> strips_,
     const FujiDecompressor::FujiHeader& h_)
     : mRaw(std::move(mRaw_)), strips(strips_), header(h_), common_info(header) {
 }
@@ -810,8 +812,7 @@ void FujiDecompressorImpl::decompressThread() const noexcept {
     FujiStrip strip(header, block, strips(block));
     block_info.reset();
     try {
-      block_info.pump =
-          BitPumpMSB(strip.bs.peekRemainingBuffer().getAsArray1DRef());
+      block_info.pump = BitPumpMSB(strip.input);
       block_info.fuji_decode_strip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
@@ -890,13 +891,13 @@ FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
   strips.reserve(header.blocks_in_row);
 
   for (const auto& block_size : block_sizes)
-    strips.emplace_back(input.getStream(block_size));
+    strips.emplace_back(input.getStream(block_size).getAsArray1DRef());
 }
 
 void FujiDecompressor::decompress() const {
   FujiDecompressorImpl impl(
       mRaw,
-      Array1DRef<const ByteStream>(
+      Array1DRef<const Array1DRef<const uint8_t>>(
           strips.data(), implicit_cast<Buffer::size_type>(strips.size())),
       header);
   impl.decompress();

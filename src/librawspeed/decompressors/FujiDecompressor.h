@@ -63,7 +63,7 @@ private:
 
   ByteStream input;
 
-  std::vector<ByteStream> strips;
+  std::vector<Array1DRef<const uint8_t>> strips;
 };
 
 } // namespace rawspeed
