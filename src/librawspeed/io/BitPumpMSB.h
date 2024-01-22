@@ -47,6 +47,7 @@ template <>
 inline BitPumpMSB::size_type
 BitPumpMSB::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  establishClassInvariants();
   invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
   cache.push(getBE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);

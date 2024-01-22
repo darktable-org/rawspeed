@@ -199,7 +199,7 @@ inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
 
   for (int p = 0; p < dsc.pixelsPerPacket;) {
     bs.fill();
-    for (; bs.getFillLevel() >= dsc.bps; ++p, ++col)
+    for (; bs.getFillLevel() >= implicit_cast<int>(dsc.bps); ++p, ++col)
       out(row, col) = implicit_cast<uint16_t>(bs.getBitsNoFill(dsc.bps));
   }
   bs.skipBitsNoFill(bs.getFillLevel()); // get rid of padding.

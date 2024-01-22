@@ -45,6 +45,7 @@ template <>
 inline BitPumpMSB16::size_type
 BitPumpMSB16::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  establishClassInvariants();
   invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
   for (size_type i = 0; i < 4; i += sizeof(uint16_t)) {
