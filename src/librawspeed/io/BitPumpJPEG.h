@@ -55,6 +55,7 @@ template <>
 inline BitPumpJPEG::size_type
 BitPumpJPEG::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  establishClassInvariants();
   invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
 
   std::array<uint8_t, BitStreamTraits<JPEGBitPumpTag>::MaxProcessBytes>
