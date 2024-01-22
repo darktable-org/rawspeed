@@ -22,7 +22,10 @@
 
 #include "rawspeedconfig.h"
 #include "decoders/CrwDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"

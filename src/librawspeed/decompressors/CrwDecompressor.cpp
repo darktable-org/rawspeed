@@ -25,6 +25,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
@@ -34,7 +35,6 @@
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpJPEG.h"
 #include "io/Buffer.h"
-#include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
 #include <utility>

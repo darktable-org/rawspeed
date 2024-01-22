@@ -21,10 +21,10 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "io/ByteStream.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>

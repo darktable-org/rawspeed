@@ -22,11 +22,12 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "adt/Optional.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
 #include "io/BitPumpJPEG.h"
-#include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
 

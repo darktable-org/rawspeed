@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "io/BitPumpMSB32.h"

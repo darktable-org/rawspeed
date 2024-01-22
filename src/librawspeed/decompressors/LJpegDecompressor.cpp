@@ -20,6 +20,7 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
@@ -29,7 +30,6 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpJPEG.h"
-#include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
 #include <cinttypes>

@@ -21,6 +21,7 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"

@@ -20,7 +20,9 @@
 
 #include "decompressors/CrwDecompressor.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
 #include "fuzz/Common.h"

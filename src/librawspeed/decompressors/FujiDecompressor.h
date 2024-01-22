@@ -22,6 +22,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"

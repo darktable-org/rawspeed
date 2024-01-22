@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #ifndef IMPL
 #error IMPL must be defined to one of rawspeeds huffman table implementations

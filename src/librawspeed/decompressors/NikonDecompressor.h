@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
