@@ -88,18 +88,18 @@ RawImage ArwDecoder::decodeSRF() {
   uint32_t key = getU32BE(keyData.begin());
 
   static const size_t head_size = 40;
-  const Buffer head_orig = mFile.getSubView(head_off, head_size);
+  const auto head_orig =
+      mFile.getSubView(head_off, head_size).getAsArray1DRef();
   vector<uint8_t> head(head_size);
-  SonyDecrypt(head_orig.getAsArray1DRef(), {head.data(), head_size},
-              head_size / 4, key);
+  SonyDecrypt(head_orig, {head.data(), head_size}, head_size / 4, key);
   for (int i = 26; i > 22; i--)
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
-  const Buffer image_data = mFile.getSubView(off, len);
+  const auto image_data = mFile.getSubView(off, len).getAsArray1DRef();
   std::vector<uint8_t> image_decoded(len);
-  SonyDecrypt(image_data.getAsArray1DRef(),
-              {image_decoded.data(), implicit_cast<int>(len)}, len / 4, key);
+  SonyDecrypt(image_data, {image_decoded.data(), implicit_cast<int>(len)},
+              len / 4, key);
 
   Buffer di(image_decoded.data(), len);
 
@@ -608,12 +608,13 @@ void ArwDecoder::GetWB() const {
 
     // "Decrypt" IFD
     const auto& ifd_crypt = priv->getRootIfdData();
-    const auto EncryptedBuffer = ifd_crypt.getSubView(off, len);
+    const auto EncryptedBuffer =
+        ifd_crypt.getSubView(off, len).getAsArray1DRef();
     // We do have to prepend 'off' padding, because TIFF uses absolute offsets.
-    const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
+    const auto DecryptedBufferSize = off + EncryptedBuffer.size();
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
-    SonyDecrypt(EncryptedBuffer.getAsArray1DRef(),
+    SonyDecrypt(EncryptedBuffer,
                 {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
