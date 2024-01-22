@@ -19,7 +19,7 @@
 */
 
 #include "rawspeedconfig.h" // IWYU pragma: keep
-#include "common/Cpuid.h"
+#include "common/CpuFeatures.h"
 #include <cstdlib>
 #include <gtest/gtest.h>
 

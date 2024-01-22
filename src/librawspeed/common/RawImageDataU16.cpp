@@ -37,7 +37,7 @@
 #include <vector>
 
 #ifdef WITH_SSE2
-#include "common/Cpuid.h"
+#include "common/CpuFeatures.h"
 #include <emmintrin.h>
 #endif
 
