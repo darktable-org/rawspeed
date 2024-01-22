@@ -26,7 +26,6 @@
 #include "io/BitPumpMSB.h"
 #include "io/BitPumpMSB16.h"
 #include "io/BitPumpMSB32.h"
-#include "io/Endianness.h"
 #include <cassert>
 #include <cstddef>
 #include <benchmark/benchmark.h>
@@ -51,7 +50,6 @@ using rawspeed::BitPumpLSB;
 using rawspeed::BitPumpMSB;
 using rawspeed::BitPumpMSB16;
 using rawspeed::BitPumpMSB32;
-using rawspeed::Endianness;
 
 namespace {
 
