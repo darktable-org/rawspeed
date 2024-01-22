@@ -138,7 +138,7 @@ private:
 
   const std::vector<PerComponentRecipe> rec;
 
-  const ByteStream input;
+  const Array1DRef<const uint8_t> input;
 
   template <int N_COMP, size_t... I>
   [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder>,
@@ -166,7 +166,7 @@ public:
       RawImage mRaw,
       std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format,
       iPoint2D frame, Cr2SliceWidths slicing,
-      std::vector<PerComponentRecipe> rec, ByteStream input);
+      std::vector<PerComponentRecipe> rec, Array1DRef<const uint8_t> input);
 
   void decompress() const;
 };

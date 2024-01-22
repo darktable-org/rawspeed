@@ -119,7 +119,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
         });
 
     rawspeed::Cr2Decompressor<rawspeed::PrefixCodeDecoderImpl<>> d(
-        mRaw, format, frame, slicing, rec, bs.getSubStream(/*offset=*/0));
+        mRaw, format, frame, slicing, rec,
+        bs.getSubStream(/*offset=*/0).peekRemainingBuffer().getAsArray1DRef());
     mRaw->createData();
     d.decompress();
 
