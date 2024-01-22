@@ -43,13 +43,13 @@ private:
 
   const PerComponentRecipe& rec;
 
-  const ByteStream input;
+  const Array1DRef<const uint8_t> input;
 
   static int getBits(BitPumpMSB32& bs, int len);
 
 public:
   HasselbladDecompressor(RawImage mRaw, const PerComponentRecipe& rec,
-                         ByteStream input);
+                         Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decompress();
 };
