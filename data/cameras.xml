@@ -7251,6 +7251,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DMC-CM10" supported="unknown-no-samples">
+		<ID make="Panasonic" model="DMC-CM10">Panasonic DMC-CM10</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-FX150" supported="no-samples">
 		<ID make="Panasonic" model="DMC-FX150">Panasonic DMC-FX150</ID>
 		<Crop x="0" y="0" width="4429" height="3324"/>
@@ -9280,6 +9283,9 @@
 				<ColorMatrixRow plane="2">-821 1977 6119</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-LC1" supported="unknown-no-samples">
+		<ID make="Panasonic" model="DMC-LC1">Panasonic DMC-LC1</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LF1">
 		<ID make="Panasonic" model="DMC-LF1">Panasonic DMC-LF1</ID>
@@ -11640,6 +11646,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="PENTAX Corporation" model="PENTAX *ist DS2" supported="unknown-no-samples">
+		<ID make="Pentax" model="*ist DS2">Pentax *ist DS2</ID>
+	</Camera>
 	<Camera make="PENTAX Corporation" model="PENTAX K10D">
 		<ID make="Pentax" model="K10D">Pentax K10D</ID>
 		<CFA width="2" height="2">
@@ -12480,6 +12489,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SAMSUNG" model="NX3300" supported="unknown-no-samples">
+		<ID make="Samsung" model="NX3300">Samsung NX3300</ID>
+	</Camera>
 	<Camera make="SAMSUNG" model="NX500">
 		<ID make="Samsung" model="NX500">Samsung NX500</ID>
 		<CFA width="2" height="2">
@@ -12846,6 +12858,9 @@
 				<ColorMatrixRow plane="2">-622 1381 6514</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="SONY" model="DSC-V3" supported="unknown-no-samples">
+		<ID make="Sony" model="DSC-V3">Sony DSC-V3</ID>
 	</Camera>
 	<Camera make="SONY" model="DSLR-A100" decoder_version="1">
 		<ID make="Sony" model="DSLR-A100">Sony DSLR-A100</ID>
@@ -13860,6 +13875,9 @@
 				<ColorMatrixRow plane="2">-670 1489 6550</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="SONY" model="ILCE-9M3" supported="unknown-no-samples">
+		<ID make="Sony" model="ILCE-9M3">Sony ILCE-9M3</ID>
 	</Camera>
 	<Camera make="SONY" model="DSC-RX1">
 		<ID make="Sony" model="DSC-RX1">Sony DSC-RX1</ID>
@@ -16215,6 +16233,9 @@
 				<ColorMatrixRow plane="2">-610 1217 6147</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="KYOCERA" model="CONTAX N DIGITAL" supported="unknown-no-samples">
+		<ID make="Contax" model="N Digital">Contax N Digital</ID>
 	</Camera>
 	<Camera make="ImBack" model="ImB35mm" mode="chdk">
 		<ID make="ImBack" model="ImB35mm">ImBack</ID>

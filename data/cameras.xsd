@@ -22,6 +22,7 @@
       <xs:minLength value="2"/>
       <xs:maxLength value="10"/>
       <xs:enumeration value="Canon"/>
+      <xs:enumeration value="Contax"/>
       <xs:enumeration value="Epson"/>
       <xs:enumeration value="Fujifilm"/>
       <xs:enumeration value="GITUP"/>
@@ -429,6 +430,7 @@
       <xs:enumeration value="KONICA MINOLTA"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="Konica Minolta Camera, Inc."/>
+      <xs:enumeration value="KYOCERA"/>
       <xs:enumeration value="LEICA CAMERA AG"/>
       <xs:enumeration value="LEICA"/>
       <xs:enumeration value="LG Mobile"/>
