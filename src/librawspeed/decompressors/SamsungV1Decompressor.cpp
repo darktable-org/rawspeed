@@ -30,7 +30,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -61,7 +61,7 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
 }
 
 inline int32_t
-SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
+SamsungV1Decompressor::samsungDiff(BitStreamerMSB& pump,
                                    const std::vector<encTableItem>& tbl) {
   pump.fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
@@ -121,7 +121,7 @@ void SamsungV1Decompressor::decompress() const {
   invariant(out.width() % 32 == 0 &&
             "Should have even count of pixels per row.");
   invariant(out.height() % 2 == 0 && "Should have even row count.");
-  BitPumpMSB pump(bs.peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerMSB pump(bs.peekRemainingBuffer().getAsArray1DRef());
   for (int row = 0; row < out.height(); row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)

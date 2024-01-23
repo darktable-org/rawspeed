@@ -21,8 +21,8 @@
 #include "adt/Array1DRef.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
-#include "io/BitPumpMSB.h"
-#include "io/BitStream.h"
+#include "io/BitStreamer.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -38,7 +38,7 @@ namespace rawspeed {
 class RawDecoderException;
 }
 
-using rawspeed::BitPumpMSB;
+using rawspeed::BitStreamerMSB;
 using rawspeed::Buffer;
 using rawspeed::ByteStream;
 using rawspeed::DataBuffer;
@@ -73,7 +73,7 @@ TEST(PrefixCodeDecoderTest, decodeCodeValueIdentityTest) {
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
 
-  BitPumpMSB p(bs);
+  BitStreamerMSB p(bs);
 
   auto ht = genHTFull({2}, {4, 8});
   ht.setup(false, false);
@@ -91,7 +91,7 @@ TEST(PrefixCodeDecoderTest, decodeDifferenceIdentityTest) {
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
 
-  BitPumpMSB p(bs);
+  BitStreamerMSB p(bs);
 
   auto ht = genHTFull({2}, {7, 7 + 8});
   ht.setup(true, false);
@@ -107,7 +107,7 @@ TEST(PrefixCodeDecoderTest, decodeCodeValueBadCodeTest) {
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
 
-  BitPumpMSB p(bs);
+  BitStreamerMSB p(bs);
 
   auto ht = genHTFull({1}, {4});
   ht.setup(false, false);
@@ -122,7 +122,7 @@ TEST(PrefixCodeDecoderTest, decodeDifferenceBadCodeTest) {
   const DataBuffer db(b, Endianness::little);
   const ByteStream bs(db);
 
-  BitPumpMSB p(bs);
+  BitStreamerMSB p(bs);
 
   auto ht = genHTFull({1}, {1});
   ht.setup(true, false);

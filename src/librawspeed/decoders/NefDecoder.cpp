@@ -29,7 +29,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/NikonDecompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -322,10 +322,10 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
   if (inputPitch != ((3 * size.x) / 2))
     ThrowRDE("Unexpected input pitch");
 
-  // BitPumpMSB loads exactly 4 bytes at once, and we squeeze 12 bits each time.
-  // We produce 2 pixels per 3 bytes (24 bits). If we want to be smart and to
-  // know where the first input bit for first odd row is, the input slice width
-  // must be a multiple of 8 pixels.
+  // BitStreamerMSB loads exactly 4 bytes at once, and we squeeze 12 bits each
+  // time. We produce 2 pixels per 3 bytes (24 bits). If we want to be smart and
+  // to know where the first input bit for first odd row is, the input slice
+  // width must be a multiple of 8 pixels.
 
   if (offset.x > mRaw->dim.x || offset.y > mRaw->dim.y)
     ThrowRDE("All pixels outside of image");
@@ -341,8 +341,8 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
                                  .peekRemainingBuffer()
                                  .getAsArray1DRef();
 
-  BitPumpMSB even(evenLinesInput);
-  BitPumpMSB odd(oddLinesInput);
+  BitStreamerMSB even(evenLinesInput);
+  BitStreamerMSB odd(oddLinesInput);
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
       img(row, col) = implicit_cast<uint16_t>(even.getBits(12));

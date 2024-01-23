@@ -29,10 +29,10 @@
 #include "common/FloatingPoint.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpLSB.h"
-#include "io/BitPumpMSB.h"
-#include "io/BitPumpMSB16.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerLSB.h"
+#include "io/BitStreamerMSB.h"
+#include "io/BitStreamerMSB16.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -210,22 +210,22 @@ void UncompressedDecompressor::readUncompressedRaw() {
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary16>(
+      decodePackedFP<BitStreamerMSB, ieee_754_2008::Binary16>(
           h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 16) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary16>(
+      decodePackedFP<BitStreamerLSB, ieee_754_2008::Binary16>(
           h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::MSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpMSB, ieee_754_2008::Binary24>(
+      decodePackedFP<BitStreamerMSB, ieee_754_2008::Binary24>(
           h, implicit_cast<int>(y));
       return;
     }
     if (BitOrder::LSB == order && bitPerPixel == 24) {
-      decodePackedFP<BitPumpLSB, ieee_754_2008::Binary24>(
+      decodePackedFP<BitStreamerLSB, ieee_754_2008::Binary24>(
           h, implicit_cast<int>(y));
       return;
     }
@@ -234,11 +234,11 @@ void UncompressedDecompressor::readUncompressedRaw() {
   }
 
   if (BitOrder::MSB == order) {
-    decodePackedInt<BitPumpMSB>(h, implicit_cast<int>(y));
+    decodePackedInt<BitStreamerMSB>(h, implicit_cast<int>(y));
   } else if (BitOrder::MSB16 == order) {
-    decodePackedInt<BitPumpMSB16>(h, implicit_cast<int>(y));
+    decodePackedInt<BitStreamerMSB16>(h, implicit_cast<int>(y));
   } else if (BitOrder::MSB32 == order) {
-    decodePackedInt<BitPumpMSB32>(h, implicit_cast<int>(y));
+    decodePackedInt<BitStreamerMSB32>(h, implicit_cast<int>(y));
   } else {
     if (bitPerPixel == 16 && getHostEndianness() == Endianness::little) {
       const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -251,7 +251,7 @@ void UncompressedDecompressor::readUncompressedRaw() {
           inputPitchBytes, w * mRaw->getBpp(), implicit_cast<int>(h - y));
       return;
     }
-    decodePackedInt<BitPumpLSB>(h, implicit_cast<int>(y));
+    decodePackedInt<BitStreamerLSB>(h, implicit_cast<int>(y));
   }
 }
 

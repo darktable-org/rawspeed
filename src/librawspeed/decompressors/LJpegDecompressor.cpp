@@ -29,7 +29,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpJPEG.h"
+#include "io/BitStreamerJPEG.h"
 #include <algorithm>
 #include <array>
 #include <cinttypes>
@@ -174,7 +174,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   auto pred = getInitialPreds<N_COMP>();
   uint16_t* predNext = pred.data();
 
-  BitPumpJPEG bitStream(input);
+  BitStreamerJPEG bitStreamer(input);
 
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of
@@ -203,7 +203,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] =
             uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-                                   .decodeDifference(bitStream));
+                                   .decodeDifference(bitStreamer));
         img(row, col + i) = pred[i];
       }
     }
@@ -221,14 +221,14 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
       for (; c < trailingPixels; ++c) {
         pred[c] =
             uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                                   .decodeDifference(bitStream));
+                                   .decodeDifference(bitStreamer));
         img(row, col + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
       for (; c < N_COMP; ++c) {
         (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-            .decodeDifference(bitStream);
+            .decodeDifference(bitStreamer);
       }
       col += N_COMP; // We did just process one more block.
     }
@@ -237,7 +237,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
     for (; col < N_COMP * frame.dim.x; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i)
         (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-            .decodeDifference(bitStream);
+            .decodeDifference(bitStreamer);
     }
   }
 }

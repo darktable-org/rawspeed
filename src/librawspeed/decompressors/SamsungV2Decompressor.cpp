@@ -29,7 +29,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cassert>
@@ -75,7 +75,7 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
 }
 
 inline __attribute__((always_inline)) int16_t
-SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
+SamsungV2Decompressor::getDiff(BitStreamerMSB32& pump, uint32_t len) {
   if (len == 0)
     return 0;
   invariant(len <= 15 && "Difference occupies at most 15 bits.");
@@ -100,7 +100,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   static constexpr const auto headerSize = 16;
   (void)bs.check(headerSize);
 
-  BitPumpMSB32 startpump(bs.peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerMSB32 startpump(bs.peekRemainingBuffer().getAsArray1DRef());
 
   // Process the initial metadata bits, we only really use initVal, width and
   // height (the last two match the TIFF values anyway)
@@ -150,7 +150,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 // the actual difference bits
 
 inline __attribute__((always_inline)) std::array<uint16_t, 16>
-SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32& pump, int row,
+SamsungV2Decompressor::prepareBaselineValues(BitStreamerMSB32& pump, int row,
                                              int col) {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -228,7 +228,7 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32& pump, int row,
 }
 
 inline __attribute__((always_inline)) std::array<uint32_t, 4>
-SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32& pump, int row) {
+SamsungV2Decompressor::decodeDiffLengths(BitStreamerMSB32& pump, int row) {
   if (!(optflags & OptFlags::SKIP) && pump.getBits(1))
     return {};
 
@@ -275,7 +275,7 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32& pump, int row) {
 }
 
 inline __attribute__((always_inline)) std::array<int, 16>
-SamsungV2Decompressor::decodeDifferences(BitPumpMSB32& pump, int row) {
+SamsungV2Decompressor::decodeDifferences(BitStreamerMSB32& pump, int row) {
   // Figure out how many difference bits we have to read for each pixel
   const std::array<uint32_t, 4> diffBits = decodeDiffLengths(pump, row);
 
@@ -312,7 +312,7 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32& pump, int row) {
 }
 
 inline __attribute__((always_inline)) void
-SamsungV2Decompressor::processBlock(BitPumpMSB32& pump, int row, int col) {
+SamsungV2Decompressor::processBlock(BitStreamerMSB32& pump, int row, int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const std::array<uint16_t, 16> baseline =
@@ -331,7 +331,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   if (const auto line_offset = data.getPosition(); (line_offset & 0xf) != 0)
     data.skipBytes(16 - (line_offset & 0xf));
 
-  BitPumpMSB32 pump(data.peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerMSB32 pump(data.peekRemainingBuffer().getAsArray1DRef());
 
   // Initialize the motion and diff modes at the start of the line
   motion = 7;

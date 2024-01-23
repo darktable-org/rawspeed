@@ -1,6 +1,6 @@
 FILE(GLOB RAWSPEED_BENCHS_SOURCES
-  "BitPumpJPEGBenchmark.cpp"
-  "BitStreamBenchmark.cpp"
+  "BitStreamerJPEGBenchmark.cpp"
+  "BitStreamerBenchmark.cpp"
 )
 
 foreach(SRC ${RAWSPEED_BENCHS_SOURCES})

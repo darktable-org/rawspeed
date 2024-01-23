@@ -32,7 +32,7 @@
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
@@ -225,7 +225,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   std::array<Channel, numChannels> channels;
 
   static inline std::pair<int16_t /*value*/, unsigned int /*count*/>
-  getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits);
+  getRLV(const PrefixCodeDecoder& decoder, BitStreamerMSB& bits);
 
   void parseLargeCodeblock(ByteStream bs);
 

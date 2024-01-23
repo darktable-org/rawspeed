@@ -36,7 +36,7 @@
 #include "common/RawImage.h"
 #include "common/XTransPhase.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -250,7 +250,7 @@ struct fuji_compressed_block final {
 
   void reset();
 
-  Optional<BitPumpMSB> pump;
+  Optional<BitStreamerMSB> pump;
 
   // tables of gradients
   std::array<std::array<int_pair, 41>, 3> grad_even;
@@ -267,7 +267,7 @@ struct fuji_compressed_block final {
   void copy_line_to_xtrans(const FujiStrip& strip, int cur_line) const;
   void copy_line_to_bayer(const FujiStrip& strip, int cur_line) const;
 
-  static int fuji_zerobits(BitPumpMSB& pump);
+  static int fuji_zerobits(BitStreamerMSB& pump);
   static int bitDiff(int value1, int value2);
 
   [[nodiscard]] int fuji_decode_sample(int grad, int interp_val,
@@ -403,7 +403,7 @@ void fuji_compressed_block::copy_line_to_bayer(const FujiStrip& strip,
   copy_line<BayerTag>(strip, cur_line, index);
 }
 
-inline int fuji_compressed_block::fuji_zerobits(BitPumpMSB& pump) {
+inline int fuji_compressed_block::fuji_zerobits(BitStreamerMSB& pump) {
   int count = 0;
 
   // Count-and-skip all the leading `0`s.
@@ -812,7 +812,7 @@ void FujiDecompressorImpl::decompressThread() const noexcept {
     FujiStrip strip(header, block, strips(block));
     block_info.reset();
     try {
-      block_info.pump = BitPumpMSB(strip.input);
+      block_info.pump = BitStreamerMSB(strip.input);
       block_info.fuji_decode_strip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.

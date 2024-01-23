@@ -30,7 +30,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpLSB.h"
+#include "io/BitStreamerLSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -188,7 +188,8 @@ public:
 };
 
 template <const PanasonicV5Decompressor::PacketDsc& dsc>
-inline void PanasonicV5Decompressor::processPixelPacket(BitPumpLSB& bs, int row,
+inline void PanasonicV5Decompressor::processPixelPacket(BitStreamerLSB& bs,
+                                                        int row,
                                                         int col) const {
   static_assert(dsc.pixelsPerPacket > 0, "dsc should be compile-time const");
   static_assert(dsc.bps > 0 && dsc.bps <= 16);
@@ -211,7 +212,7 @@ void PanasonicV5Decompressor::processBlock(const Block& block) const {
   static_assert(BlockSize % bytesPerPacket == 0);
 
   ProxyStream proxy(block.bs);
-  BitPumpLSB bs(proxy.getStream().peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerLSB bs(proxy.getStream().peekRemainingBuffer().getAsArray1DRef());
 
   for (int row = block.beginCoord.y; row <= block.endCoord.y; row++) {
     int col = 0;

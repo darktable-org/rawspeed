@@ -21,7 +21,7 @@
 #pragma once
 
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <vector>
@@ -35,7 +35,7 @@ class RawImage;
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   struct encTableItem;
 
-  static inline int32_t samsungDiff(BitPumpMSB& pump,
+  static inline int32_t samsungDiff(BitStreamerMSB& pump,
                                     const std::vector<encTableItem>& tbl);
 
   ByteStream bs;
