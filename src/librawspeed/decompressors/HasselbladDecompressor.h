@@ -25,7 +25,7 @@
 #include "adt/Array1DRef.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>
@@ -46,7 +46,7 @@ private:
 
   const Array1DRef<const uint8_t> input;
 
-  static int getBits(BitPumpMSB32& bs, int len);
+  static int getBits(BitStreamerMSB32& bs, int len);
 
 public:
   HasselbladDecompressor(RawImage mRaw, const PerComponentRecipe& rec,

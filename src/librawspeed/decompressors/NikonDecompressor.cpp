@@ -30,7 +30,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <array>
@@ -317,11 +317,11 @@ public:
    * Next coded symbol
    *
    * Side effects:
-   * Bitstream is parsed.
+   * Bitstreamer is parsed.
    *
    *--------------------------------------------------------------
    */
-  int decodeDifference(BitPumpMSB& bits) {
+  int decodeDifference(BitStreamerMSB& bits) {
     int rv;
     int l;
     int temp;
@@ -515,7 +515,8 @@ NikonDecompressor::NikonDecompressor(RawImage raw, ByteStream metadata,
 }
 
 template <typename Huffman>
-void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
+void NikonDecompressor::decompress(BitStreamerMSB& bits, int start_y,
+                                   int end_y) {
   auto ht = createPrefixCodeDecoder<Huffman>(huffSelect);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -542,7 +543,7 @@ void NikonDecompressor::decompress(Array1DRef<const uint8_t> input,
                                    bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
-  BitPumpMSB bits(input);
+  BitStreamerMSB bits(input);
 
   random = bits.peekBits(24);
 

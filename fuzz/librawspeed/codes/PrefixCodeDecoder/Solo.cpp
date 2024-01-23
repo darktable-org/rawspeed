@@ -31,9 +31,9 @@
 #include "codes/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
 #include "codes/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
 #include "common/RawspeedException.h"
-#include "io/BitPumpJPEG.h"
-#include "io/BitPumpMSB.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerJPEG.h"
+#include "io/BitStreamerMSB.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -77,13 +77,13 @@ template <typename CodeTag> void checkFlavour(rawspeed::ByteStream bs) {
   const auto input = bs.peekRemainingBuffer().getAsArray1DRef();
   switch (format) {
   case 0:
-    checkPump<rawspeed::BitPumpMSB>(input, ht);
+    checkPump<rawspeed::BitStreamerMSB>(input, ht);
     break;
   case 1:
-    checkPump<rawspeed::BitPumpMSB32>(input, ht);
+    checkPump<rawspeed::BitStreamerMSB32>(input, ht);
     break;
   case 2:
-    checkPump<rawspeed::BitPumpJPEG>(input, ht);
+    checkPump<rawspeed::BitStreamerJPEG>(input, ht);
     break;
   default:
     ThrowRSE("Unknown bit pump");

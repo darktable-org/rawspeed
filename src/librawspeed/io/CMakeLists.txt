@@ -2,13 +2,13 @@ rawspeed_add_library(rawspeed_io OBJECT)
 set_target_properties(rawspeed_io PROPERTIES LINKER_LANGUAGE CXX)
 
 FILE(GLOB SOURCES
-  "BitPumpJPEG.h"
-  "BitPumpLSB.h"
-  "BitPumpMSB.h"
-  "BitPumpMSB16.h"
-  "BitPumpMSB32.h"
-  "BitStream.cpp"
-  "BitStream.h"
+  "BitStreamerJPEG.h"
+  "BitStreamerLSB.h"
+  "BitStreamerMSB.h"
+  "BitStreamerMSB16.h"
+  "BitStreamerMSB32.h"
+  "BitStreamer.cpp"
+  "BitStreamer.h"
   "Buffer.h"
   "ByteStream.h"
   "Endianness.h"

@@ -31,7 +31,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/OlympusDecompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -167,7 +167,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   {
-    BitPumpMSB bs(evenLinesInput);
+    BitStreamerMSB bs(evenLinesInput);
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
@@ -176,7 +176,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     }
   }
   {
-    BitPumpMSB bs(oddLinesInput);
+    BitStreamerMSB bs(oddLinesInput);
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;

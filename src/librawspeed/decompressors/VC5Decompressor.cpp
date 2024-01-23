@@ -43,7 +43,7 @@
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -662,7 +662,7 @@ VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
   BandData lowpass(wavelet.width, wavelet.height);
   const auto& band = lowpass.description;
 
-  BitPumpMSB bits(input);
+  BitStreamerMSB bits(input);
   for (auto row = 0; row < band.height(); ++row) {
     for (auto col = 0; col < band.width(); ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
@@ -675,7 +675,7 @@ VC5Decompressor::BandData
 VC5Decompressor::Wavelet::HighPassBand::decode() const {
   class DeRLVer final {
     const PrefixCodeDecoder& decoder;
-    BitPumpMSB bits;
+    BitStreamerMSB bits;
     const int16_t quant;
 
     int16_t pixelValue = 0;
@@ -934,7 +934,8 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
 }
 
 inline std::pair<int16_t /*value*/, unsigned int /*count*/>
-VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits) {
+VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder,
+                        BitStreamerMSB& bits) {
   unsigned bitfield = decoder.decodeCodeValue(bits);
 
   unsigned int count = bitfield & ((1U << RLVRunLengthBitWidth) - 1U);

@@ -21,7 +21,7 @@
 #pragma once
 
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
@@ -49,19 +49,19 @@ private:
   std::array<std::array<int, 2>, 3> diffBitsMode;
 
   static inline __attribute__((always_inline)) int16_t
-  getDiff(BitPumpMSB32& pump, uint32_t len);
+  getDiff(BitStreamerMSB32& pump, uint32_t len);
 
   inline __attribute__((always_inline)) std::array<uint16_t, 16>
-  prepareBaselineValues(BitPumpMSB32& pump, int row, int col);
+  prepareBaselineValues(BitStreamerMSB32& pump, int row, int col);
 
   inline __attribute__((always_inline)) std::array<uint32_t, 4>
-  decodeDiffLengths(BitPumpMSB32& pump, int row);
+  decodeDiffLengths(BitStreamerMSB32& pump, int row);
 
   inline __attribute__((always_inline)) std::array<int, 16>
-  decodeDifferences(BitPumpMSB32& pump, int row);
+  decodeDifferences(BitStreamerMSB32& pump, int row);
 
-  inline __attribute__((always_inline)) void processBlock(BitPumpMSB32& pump,
-                                                          int row, int col);
+  inline __attribute__((always_inline)) void
+  processBlock(BitStreamerMSB32& pump, int row, int col);
 
   void decompressRow(int row);
 

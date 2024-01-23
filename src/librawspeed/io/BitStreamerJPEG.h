@@ -22,7 +22,7 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStream.h"
+#include "io/BitStreamer.h"
 #include "io/Endianness.h"
 #include <algorithm>
 #include <array>
@@ -30,13 +30,14 @@
 
 namespace rawspeed {
 
-struct JPEGBitPumpTag;
+struct JPEGBitStreamerTag;
 
 // The JPEG data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
-using BitPumpJPEG = BitStream<JPEGBitPumpTag, BitStreamCacheRightInLeftOut>;
+using BitStreamerJPEG =
+    BitStreamer<JPEGBitStreamerTag, BitStreamerCacheRightInLeftOut>;
 
-template <> struct BitStreamTraits<JPEGBitPumpTag> final {
+template <> struct BitStreamerTraits<JPEGBitStreamerTag> final {
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -52,13 +53,13 @@ template <> struct BitStreamTraits<JPEGBitPumpTag> final {
 // will contain more than one `0xFF` byte.
 
 template <>
-inline BitPumpJPEG::size_type
-BitPumpJPEG::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+inline BitStreamerJPEG::size_type
+BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
+  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
+  invariant(input.size() == BitStreamerTraits<tag>::MaxProcessBytes);
 
-  std::array<uint8_t, BitStreamTraits<JPEGBitPumpTag>::MaxProcessBytes>
+  std::array<uint8_t, BitStreamerTraits<JPEGBitStreamerTag>::MaxProcessBytes>
       prefetch;
   std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
               prefetch.begin());
@@ -113,7 +114,7 @@ BitPumpJPEG::fillCache(Array1DRef<const uint8_t> input) {
 }
 
 template <>
-inline BitPumpJPEG::size_type BitPumpJPEG::getStreamPosition() const {
+inline BitStreamerJPEG::size_type BitStreamerJPEG::getStreamPosition() const {
   // the current number of bytes we consumed -> at the end of the stream pos, it
   // points to the JPEG marker FF
   return getInputPosition();

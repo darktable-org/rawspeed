@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpJPEG.h"
+#include "io/BitStreamerJPEG.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
@@ -169,7 +169,7 @@ struct JPEGUnstuffedByteStreamGenerator final {
   }
 };
 
-void BM_BitPumpJPEG(benchmark::State& state, bool Stuffed) {
+void BM_BitStreamerJPEG(benchmark::State& state, bool Stuffed) {
   int64_t numBytes = state.range(0);
   assert(numBytes > 0);
   assert(numBytes <= std::numeric_limits<int>::max());
@@ -189,7 +189,7 @@ void BM_BitPumpJPEG(benchmark::State& state, bool Stuffed) {
   benchmark::DoNotOptimize(input->begin());
 
   for (auto _ : state) {
-    BitPumpJPEG bs(*input);
+    BitStreamerJPEG bs(*input);
 
     constexpr int MaxGetBits = 32;
     int processedBytes = 0;
@@ -237,8 +237,8 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
-BENCHMARK_CAPTURE(BM_BitPumpJPEG, Stuffed, true)->Apply(CustomArguments);
-BENCHMARK_CAPTURE(BM_BitPumpJPEG, Unstuffed, false)->Apply(CustomArguments);
+BENCHMARK_CAPTURE(BM_BitStreamerJPEG, Stuffed, true)->Apply(CustomArguments);
+BENCHMARK_CAPTURE(BM_BitStreamerJPEG, Unstuffed, false)->Apply(CustomArguments);
 
 } // namespace
 

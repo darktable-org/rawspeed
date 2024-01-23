@@ -29,7 +29,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <utility>
@@ -49,7 +49,7 @@ SonyArw1Decompressor::SonyArw1Decompressor(RawImage img)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 }
 
-inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
+inline int SonyArw1Decompressor::getDiff(BitStreamerMSB& bs, uint32_t len) {
   if (len == 0)
     return 0;
   int diff = bs.getBitsNoFill(len);
@@ -62,7 +62,7 @@ void SonyArw1Decompressor::decompress(ByteStream input) const {
   invariant(out.height() > 0);
   invariant(out.height() % 2 == 0);
 
-  BitPumpMSB bits(input.peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerMSB bits(input.peekRemainingBuffer().getAsArray1DRef());
   int pred = 0;
   for (int col = out.width() - 1; col >= 0; col--) {
     for (int row = 0; row < out.height() + 1; row += 2) {

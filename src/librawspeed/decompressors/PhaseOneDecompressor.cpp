@@ -30,7 +30,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -91,7 +91,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
 
-  BitPumpMSB32 pump(strip.bs.peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerMSB32 pump(strip.bs.peekRemainingBuffer().getAsArray1DRef());
 
   std::array<int32_t, 2> pred;
   pred.fill(0);

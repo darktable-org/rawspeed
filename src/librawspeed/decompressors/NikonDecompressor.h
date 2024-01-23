@@ -24,7 +24,7 @@
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -60,7 +60,7 @@ private:
                                            uint32_t v1, uint32_t* split);
 
   template <typename Huffman>
-  void decompress(BitPumpMSB& bits, int start_y, int end_y);
+  void decompress(BitStreamerMSB& bits, int start_y, int end_y);
 
   template <typename Huffman>
   static Huffman createPrefixCodeDecoder(uint32_t huffSelect);

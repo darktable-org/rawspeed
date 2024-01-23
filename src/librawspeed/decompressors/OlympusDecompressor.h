@@ -24,7 +24,7 @@
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -49,11 +49,11 @@ class OlympusDecompressor final : public AbstractDecompressor {
       }};
 
   inline __attribute__((always_inline)) int
-  parseCarry(BitPumpMSB& bits, std::array<int, 3>* carry) const;
+  parseCarry(BitStreamerMSB& bits, std::array<int, 3>* carry) const;
 
   static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
 
-  void decompressRow(BitPumpMSB& bits, int row) const;
+  void decompressRow(BitStreamerMSB& bits, int row) const;
 
 public:
   explicit OlympusDecompressor(RawImage img);

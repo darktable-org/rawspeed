@@ -27,7 +27,7 @@
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpJPEG.h"
+#include "io/BitStreamerJPEG.h"
 #include <array>
 #include <cstdint>
 
@@ -55,7 +55,7 @@ private:
   static crw_hts initHuffTables(uint32_t table);
 
   inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,
-                                 const crw_hts& mHuff, BitPumpJPEG& bs);
+                                 const crw_hts& mHuff, BitStreamerJPEG& bs);
 };
 
 } // namespace rawspeed

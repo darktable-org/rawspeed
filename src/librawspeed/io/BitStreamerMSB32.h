@@ -22,31 +22,34 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStream.h"
+#include "io/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-struct LSBBitPumpTag;
+struct MSB32BitStreamerTag;
 
-// The LSBPump is ordered in LSB bit order,
-// i.e. we push into the cache from the left and read it from the right
+// The MSB data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
 
-using BitPumpLSB = BitStream<LSBBitPumpTag, BitStreamCacheLeftInRightOut>;
+using BitStreamerMSB32 =
+    BitStreamer<MSB32BitStreamerTag, BitStreamerCacheRightInLeftOut>;
 
-template <> struct BitStreamTraits<LSBBitPumpTag> final {
+template <> struct BitStreamerTraits<MSB32BitStreamerTag> final {
+  static constexpr bool canUseWithPrefixCodeDecoder = true;
+
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
   static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
 template <>
-inline BitPumpLSB::size_type
-BitPumpLSB::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+inline BitStreamerMSB32::size_type
+BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
+  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamTraits<tag>::MaxProcessBytes);
+  invariant(input.size() == BitStreamerTraits<tag>::MaxProcessBytes);
 
   cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;

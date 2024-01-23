@@ -29,7 +29,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/Cr2Decompressor.h"
-#include "io/BitPumpJPEG.h"
+#include "io/BitStreamerJPEG.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -410,7 +410,7 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
                       .getCrop(/*offset=*/0, /*size=*/dsc.groupSize)
                       .getAsArray1DRef();
 
-  BitPumpJPEG bs(input);
+  BitStreamerJPEG bs(input);
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;

@@ -24,7 +24,7 @@
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpLSB.h"
+#include "io/BitStreamerLSB.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <vector>
@@ -89,7 +89,7 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
   void chopInputIntoBlocks(const PacketDsc& dsc);
 
   template <const PacketDsc& dsc>
-  inline void processPixelPacket(BitPumpLSB& bs, int row, int col) const;
+  inline void processPixelPacket(BitStreamerLSB& bs, int row, int col) const;
 
   template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 

@@ -33,7 +33,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpJPEG.h"
+#include "io/BitStreamerJPEG.h"
 #include "io/Buffer.h"
 #include <array>
 #include <cstdint>
@@ -166,7 +166,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
 
 inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
                                          const crw_hts& mHuff,
-                                         BitPumpJPEG& bs) {
+                                         BitStreamerJPEG& bs) {
   invariant(diffBuf);
 
   // decode the block
@@ -220,7 +220,7 @@ void CrwDecompressor::decompress() {
     const unsigned hBlocks = out.height() * out.width() / 64;
     invariant(hBlocks > 0);
 
-    BitPumpJPEG bs(input);
+    BitStreamerJPEG bs(input);
 
     int carry = 0;
     std::array<int, 2> base = {512, 512}; // starting predictors

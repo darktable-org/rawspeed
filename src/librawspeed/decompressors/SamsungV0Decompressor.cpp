@@ -29,7 +29,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -101,7 +101,7 @@ void SamsungV0Decompressor::decompress() const {
   }
 }
 
-int32_t SamsungV0Decompressor::calcAdj(BitPumpMSB32& bits, int nbits) {
+int32_t SamsungV0Decompressor::calcAdj(BitStreamerMSB32& bits, int nbits) {
   if (!nbits)
     return 0;
   return signExtend(bits.getBits(nbits), nbits);
@@ -111,7 +111,7 @@ void SamsungV0Decompressor::decompressStrip(int row, ByteStream bs) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   invariant(out.width() > 0);
 
-  BitPumpMSB32 bits(bs.peekRemainingBuffer().getAsArray1DRef());
+  BitStreamerMSB32 bits(bs.peekRemainingBuffer().getAsArray1DRef());
 
   std::array<int, 4> len;
   for (int& i : len)
