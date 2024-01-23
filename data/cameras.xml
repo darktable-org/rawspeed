@@ -299,8 +299,8 @@
 			<Horizontal y="0" height="12"/>
 		</BlackAreas>
 		<Aliases>
-			<Alias id="Digital Rebel XT">Canon EOS DIGITAL REBEL XT</Alias>
-			<Alias id="Kiss Digital N">Canon EOS Kiss Digital N</Alias>
+			<Alias id="EOS Digital Rebel XT">Canon EOS DIGITAL REBEL XT</Alias>
+			<Alias id="EOS Kiss Digital N">Canon EOS Kiss Digital N</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D Digital</Alias>
 		</Aliases>
@@ -374,9 +374,9 @@
 		</CFA>
 		<Crop x="22" y="18" width="4290" height="2856"/>
 		<Aliases>
-			<Alias id="Digital Rebel XSi">Canon EOS DIGITAL REBEL XSi</Alias>
-			<Alias id="Kiss Digital X2">Canon EOS Kiss Digital X2</Alias>
-			<Alias id="Kiss X2">Canon EOS Kiss X2</Alias>
+			<Alias id="EOS Digital Rebel XSi">Canon EOS DIGITAL REBEL XSi</Alias>
+			<Alias id="EOS Kiss Digital X2">Canon EOS Kiss Digital X2</Alias>
+			<Alias id="EOS Kiss X2">Canon EOS Kiss X2</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
