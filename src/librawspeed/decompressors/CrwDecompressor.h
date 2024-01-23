@@ -22,11 +22,12 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "adt/Optional.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
 #include "io/BitPumpJPEG.h"
-#include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
 
@@ -37,14 +38,14 @@ class CrwDecompressor final : public AbstractDecompressor {
 
   RawImage mRaw;
   crw_hts mHuff;
-  const bool lowbits;
 
-  ByteStream lowbitInput;
-  ByteStream rawInput;
+  Array1DRef<const uint8_t> input;
+  Optional<Array1DRef<const uint8_t>> lowbitInput;
 
 public:
-  CrwDecompressor(RawImage img, uint32_t dec_table_, bool lowbits_,
-                  ByteStream rawData);
+  CrwDecompressor(RawImage img, uint32_t dec_table_,
+                  Array1DRef<const uint8_t> input,
+                  Optional<Array1DRef<const uint8_t>> lowbitInput);
 
   void decompress();
 

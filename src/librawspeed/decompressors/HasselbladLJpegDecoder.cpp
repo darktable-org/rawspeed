@@ -56,7 +56,8 @@ void HasselbladLJpegDecoder::decodeScan() {
   const HasselbladDecompressor::PerComponentRecipe rec = {
       *getPrefixCodeDecoders(1)[0], getInitialPredictors(1)[0]};
 
-  HasselbladDecompressor d(mRaw, rec, input);
+  HasselbladDecompressor d(mRaw, rec,
+                           input.peekRemainingBuffer().getAsArray1DRef());
   input.skipBytes(d.decompress());
 }
 

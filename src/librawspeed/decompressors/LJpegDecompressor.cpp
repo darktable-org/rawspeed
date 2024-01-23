@@ -20,6 +20,7 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
@@ -29,7 +30,6 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpJPEG.h"
-#include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
 #include <cinttypes>
@@ -47,8 +47,8 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     ByteStream bs)
-    : mRaw(std::move(img)), input(bs), imgFrame(imgFrame_),
+                                     Array1DRef<const uint8_t> input_)
+    : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
@@ -174,7 +174,7 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   auto pred = getInitialPreds<N_COMP>();
   uint16_t* predNext = pred.data();
 
-  BitPumpJPEG bitStream(input.peekRemainingBuffer());
+  BitPumpJPEG bitStream(input);
 
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of

@@ -211,7 +211,7 @@ void PanasonicV5Decompressor::processBlock(const Block& block) const {
   static_assert(BlockSize % bytesPerPacket == 0);
 
   ProxyStream proxy(block.bs);
-  BitPumpLSB bs(proxy.getStream().peekRemainingBuffer());
+  BitPumpLSB bs(proxy.getStream().peekRemainingBuffer().getAsArray1DRef());
 
   for (int row = block.beginCoord.y; row <= block.endCoord.y; row++) {
     int col = 0;

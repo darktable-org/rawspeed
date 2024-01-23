@@ -25,6 +25,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
@@ -34,7 +35,6 @@
 #include "decoders/RawDecoderException.h"
 #include "io/BitPumpJPEG.h"
 #include "io/Buffer.h"
-#include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
 #include <utility>
@@ -43,10 +43,11 @@ using std::array;
 
 namespace rawspeed {
 
-CrwDecompressor::CrwDecompressor(RawImage img, uint32_t dec_table,
-                                 bool lowbits_, ByteStream rawData)
-    : mRaw(std::move(img)), mHuff(initHuffTables(dec_table)),
-      lowbits(lowbits_) {
+CrwDecompressor::CrwDecompressor(
+    RawImage img, uint32_t dec_table, Array1DRef<const uint8_t> input_,
+    Optional<Array1DRef<const uint8_t>> lowbitInput_)
+    : mRaw(std::move(img)), mHuff(initHuffTables(dec_table)), input(input_),
+      lowbitInput(lowbitInput_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -58,19 +59,16 @@ CrwDecompressor::CrwDecompressor(RawImage img, uint32_t dec_table,
       height > 3048 || (height * width) % 64 != 0)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  if (lowbits) {
+  if (lowbitInput) {
     // If there are low bits, the first part (size is calculable) is low bits
     // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
-    const unsigned lBlocks = 1 * height * width / 4;
+    const int lBlocks = 1 * height * width / 4;
     invariant(lBlocks > 0);
-    lowbitInput = rawData.getStream(lBlocks);
+    if (lowbitInput->size() < lBlocks)
+      ThrowRDE("Unsufficient number of low bit blocks");
+    lowbitInput =
+        lowbitInput->getCrop(/*offset=*/0, /*size*/ lBlocks).getAsArray1DRef();
   }
-
-  // We always ignore next 514 bytes of 'padding'. No idea what is in there.
-  rawData.skipBytes(514);
-
-  // Rest is the high bits.
-  rawInput = rawData.getStream(rawData.getRemainSize());
 }
 
 PrefixCodeDecoder<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
@@ -222,7 +220,7 @@ void CrwDecompressor::decompress() {
     const unsigned hBlocks = out.height() * out.width() / 64;
     invariant(hBlocks > 0);
 
-    BitPumpJPEG bs(rawInput.peekRemainingBuffer());
+    BitPumpJPEG bs(input);
 
     int carry = 0;
     std::array<int, 2> base = {512, 512}; // starting predictors
@@ -261,10 +259,13 @@ void CrwDecompressor::decompress() {
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
-  if (lowbits) {
+  if (lowbitInput) {
+    Array2DRef<const uint8_t> lowbits(*lowbitInput, out.width() / 4,
+                                      out.height(), out.width() / 4);
     for (int row = 0; row < out.height(); row++) {
       for (int col = 0; col < out.width(); /* NOTE: col += 4 */) {
-        const uint8_t c = lowbitInput.getByte();
+        invariant(col % 4 == 0);
+        const uint8_t c = lowbits(row, col / 4);
         // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
         // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.

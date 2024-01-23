@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #ifndef IMPL
 #error IMPL must be defined to one of rawspeeds huffman table implementations
@@ -48,19 +49,19 @@ struct VC5CodeTag;
 namespace {
 
 template <typename Pump, bool IsFullDecode, typename HT>
-void workloop(rawspeed::ByteStream bs, const HT& ht) {
-  Pump bits(bs.peekRemainingBuffer());
+void workloop(rawspeed::Array1DRef<const uint8_t> input, const HT& ht) {
+  Pump bits(input);
   while (true)
     ht.template decode<Pump, IsFullDecode>(bits);
   // FIXME: do we need to escape the result to avoid dead code elimination?
 }
 
 template <typename Pump, typename HT>
-void checkPump(rawspeed::ByteStream bs, const HT& ht) {
+void checkPump(rawspeed::Array1DRef<const uint8_t> input, const HT& ht) {
   if (ht.isFullDecode())
-    workloop<Pump, /*IsFullDecode=*/true>(bs, ht);
+    workloop<Pump, /*IsFullDecode=*/true>(input, ht);
   else
-    workloop<Pump, /*IsFullDecode=*/false>(bs, ht);
+    workloop<Pump, /*IsFullDecode=*/false>(input, ht);
 }
 
 template <typename CodeTag> void checkFlavour(rawspeed::ByteStream bs) {
@@ -72,15 +73,17 @@ template <typename CodeTag> void checkFlavour(rawspeed::ByteStream bs) {
 #endif
 
   // Which bit pump should we use?
-  switch (bs.getByte()) {
+  const auto format = bs.getByte();
+  const auto input = bs.peekRemainingBuffer().getAsArray1DRef();
+  switch (format) {
   case 0:
-    checkPump<rawspeed::BitPumpMSB>(bs, ht);
+    checkPump<rawspeed::BitPumpMSB>(input, ht);
     break;
   case 1:
-    checkPump<rawspeed::BitPumpMSB32>(bs, ht);
+    checkPump<rawspeed::BitPumpMSB32>(input, ht);
     break;
   case 2:
-    checkPump<rawspeed::BitPumpJPEG>(bs, ht);
+    checkPump<rawspeed::BitPumpJPEG>(input, ht);
     break;
   default:
     ThrowRSE("Unknown bit pump");

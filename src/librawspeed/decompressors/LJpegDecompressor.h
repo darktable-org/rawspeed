@@ -21,10 +21,10 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "io/ByteStream.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -49,7 +49,7 @@ public:
 
 private:
   RawImage mRaw;
-  ByteStream input;
+  const Array1DRef<const uint8_t> input;
 
   const iRectangle2D imgFrame;
 
@@ -76,7 +76,8 @@ private:
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
-                    std::vector<PerComponentRecipe> rec, ByteStream bs);
+                    std::vector<PerComponentRecipe> rec,
+                    Array1DRef<const uint8_t> input);
 
   void decode();
 };

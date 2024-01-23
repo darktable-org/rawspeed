@@ -21,6 +21,7 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -36,7 +37,7 @@ namespace rawspeed {
 
 HasselbladDecompressor::HasselbladDecompressor(RawImage mRaw_,
                                                const PerComponentRecipe& rec_,
-                                               ByteStream input_)
+                                               Array1DRef<const uint8_t> input_)
     : mRaw(std::move(mRaw_)), rec(rec_), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
@@ -77,7 +78,7 @@ ByteStream::size_type HasselbladDecompressor::decompress() {
   const auto ht = rec.ht;
   ht.verifyCodeValuesAsDiffLengths();
 
-  BitPumpMSB32 bitStream(input.peekRemainingBuffer());
+  BitPumpMSB32 bitStream(input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT
   // PIXELS

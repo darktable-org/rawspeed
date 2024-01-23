@@ -125,13 +125,12 @@ RawImage NefDecoder::decodeRawInternal() {
     }
   }
 
-  ByteStream rawData(
-      DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
-                 Endianness::little));
+  const auto input =
+      mFile.getSubView(offsets->getU32(), counts->getU32()).getAsArray1DRef();
 
   NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
   mRaw->createData();
-  n.decompress(rawData, uncorrectedRawValues);
+  n.decompress(input, uncorrectedRawValues);
 
   return mRaw;
 }
@@ -335,9 +334,15 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
 
   // The input bytes are laid out in the memory in the following way:
   // First, all even (0-2-4-) rows, and then all odd (1-3-5-) rows.
-  BitPumpMSB even(
-      input.getStream(size.y / 2, inputPitch).peekRemainingBuffer());
-  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch).peekRemainingBuffer());
+  const auto evenLinesInput = input.getStream(size.y / 2, inputPitch)
+                                  .peekRemainingBuffer()
+                                  .getAsArray1DRef();
+  const auto oddLinesInput = input.getStream(size.y / 2, inputPitch)
+                                 .peekRemainingBuffer()
+                                 .getAsArray1DRef();
+
+  BitPumpMSB even(evenLinesInput);
+  BitPumpMSB odd(oddLinesInput);
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
       img(row, col) = implicit_cast<uint16_t>(even.getBits(12));

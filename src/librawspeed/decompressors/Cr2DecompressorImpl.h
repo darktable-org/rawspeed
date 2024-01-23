@@ -276,7 +276,7 @@ Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
     RawImage mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
     iPoint2D frame_, Cr2SliceWidths slicing_,
-    std::vector<PerComponentRecipe> rec_, ByteStream input_)
+    std::vector<PerComponentRecipe> rec_, Array1DRef<const uint8_t> input_)
     : mRaw(std::move(mRaw_)), format(std::move(format_)), frame(frame_),
       slicing(slicing_), rec(std::move(rec_)), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
@@ -410,7 +410,7 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
                       .getCrop(/*offset=*/0, /*size=*/dsc.groupSize)
                       .getAsArray1DRef();
 
-  BitPumpJPEG bs(input.peekRemainingBuffer());
+  BitPumpJPEG bs(input);
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;

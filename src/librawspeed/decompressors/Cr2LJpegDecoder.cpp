@@ -144,7 +144,8 @@ void Cr2LJpegDecoder::decodeScan() {
       });
 
   Cr2Decompressor<PrefixCodeDecoder<>> d(
-      mRaw, format, iPoint2D(frame.w, frame.h), slicing, rec, input);
+      mRaw, format, iPoint2D(frame.w, frame.h), slicing, rec,
+      input.peekRemainingBuffer().getAsArray1DRef());
   d.decompress();
 }
 

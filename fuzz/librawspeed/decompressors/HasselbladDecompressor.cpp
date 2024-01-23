@@ -51,8 +51,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::HasselbladDecompressor::PerComponentRecipe rec = {ht, initPred};
 
-    rawspeed::HasselbladDecompressor d(mRaw, rec,
-                                       bs.getSubStream(/*offset=*/0));
+    rawspeed::HasselbladDecompressor d(
+        mRaw, rec,
+        bs.getSubStream(/*offset=*/0).peekRemainingBuffer().getAsArray1DRef());
     mRaw->createData();
     (void)d.decompress();
 

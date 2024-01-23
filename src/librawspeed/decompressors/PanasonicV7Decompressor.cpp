@@ -69,7 +69,7 @@ inline void __attribute__((always_inline))
 PanasonicV7Decompressor::decompressBlock(
     ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept {
   invariant(out.size() == PixelsPerBlock);
-  BitPumpLSB pump(block.peekRemainingBuffer());
+  BitPumpLSB pump(block.peekRemainingBuffer().getAsArray1DRef());
   for (int pix = 0; pix < PixelsPerBlock; pix++)
     out(pix) = implicit_cast<uint16_t>(pump.getBits(BitsPerSample));
 }
