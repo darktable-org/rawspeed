@@ -1,3 +1,4 @@
+BitVacuumerRoundtripFuzzer
 CiffParserFuzzer-GetDecoder
 CiffParserFuzzer-GetDecoder-Decode
 Cr2DecompressorFuzzer-DummyPrefixCodeDecoder
