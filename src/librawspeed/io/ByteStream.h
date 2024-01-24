@@ -169,6 +169,10 @@ public:
 
   [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
 
+  [[nodiscard]] inline uint32_t peekU32(size_type i = 0) const {
+    return peek<uint32_t>(i);
+  }
+
   inline uint16_t getU16() { return get<uint16_t>(); }
   inline int32_t getI32() { return get<int32_t>(); }
   inline uint32_t getU32() { return get<uint32_t>(); }
