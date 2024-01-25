@@ -17294,6 +17294,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Hasselblad" model="Hasselblad CFV-50c">
+		<ID make="Hasselblad" model="CFV-50c">Hasselblad 50-15-Coated5</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="56" y="104" width="-56" height="0"/>
+		<Sensor black="256" white="62914"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">4932 -835 141</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4878 11868 3437</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1138 1961 7067</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>	
 	<Camera make="Hasselblad" model="Flash Sync">
 		<ID make="Hasselblad" model="CF132">Hasselblad 22-Uncoated</ID>
 		<CFA width="2" height="2">
