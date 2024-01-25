@@ -162,10 +162,10 @@ struct JPEGUnstuffedByteStreamGenerator final {
   }
 
   __attribute__((noinline)) explicit JPEGUnstuffedByteStreamGenerator(
-      const int64_t numBytesMax) {
-    invariant(numBytesMax > 0);
-    dataStorage.resize(implicit_cast<size_t>(numBytesMax), 0x00);
-    numBytesGenerated = numBytesMax;
+      const int64_t numBytesMax)
+      : numBytesGenerated(numBytesMax) {
+    invariant(numBytesGenerated > 0);
+    dataStorage.resize(implicit_cast<size_t>(numBytesGenerated), 0x00);
   }
 };
 

@@ -206,6 +206,30 @@ constexpr int countl_zero(T x) noexcept {
 }
 
 template <class T>
+  requires std::unsigned_integral<T>
+constexpr RAWSPEED_READNONE T extractLowBits(T value, unsigned nBits) {
+  // invariant(nBits >= 0);
+  invariant(nBits != 0);             // Would result in out-of-bound shift.
+  invariant(nBits <= bitwidth<T>()); // No-op is fine.
+  unsigned numHighPaddingBits = bitwidth<T>() - nBits;
+  // invariant(numHighPaddingBits >= 0);
+  invariant(numHighPaddingBits < bitwidth<T>()); // Shift is in-bounds.
+  value <<= numHighPaddingBits;
+  value >>= numHighPaddingBits;
+  return value;
+}
+
+template <class T>
+  requires std::unsigned_integral<T>
+constexpr RAWSPEED_READNONE T extractLowBitsSafe(T value, unsigned nBits) {
+  // invariant(nBits >= 0);
+  invariant(nBits <= bitwidth<T>());
+  if (nBits == 0)
+    return 0;
+  return extractLowBits(value, nBits);
+}
+
+template <class T>
   requires std::is_unsigned_v<T>
 constexpr RAWSPEED_READNONE T extractHighBits(
     T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>()) {
