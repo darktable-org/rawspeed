@@ -25,9 +25,11 @@
 #include "common/Common.h"
 #include "common/RawspeedException.h"
 #include "io/BitStreamer.h"
+#include "io/BitStreamerJPEG.h"
 #include "io/BitStreamerLSB.h"
 #include "io/BitStreamerMSB.h"
 #include "io/BitStreamerMSB32.h"
+#include "io/BitVacuumerJPEG.h"
 #include "io/BitVacuumerLSB.h"
 #include "io/BitVacuumerMSB.h"
 #include "io/BitVacuumerMSB32.h"
@@ -49,6 +51,7 @@ namespace {
 struct BitstreamFlavorLSB;
 struct BitstreamFlavorMSB;
 struct BitstreamFlavorMSB32;
+struct BitstreamFlavorJPEG;
 
 template <typename T> struct BitStreamRoundtripTypes final {};
 
@@ -71,6 +74,13 @@ template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB32> final {
 
   template <typename OutputIterator>
   using vacuumer = BitVacuumerMSB32<OutputIterator>;
+};
+
+template <> struct BitStreamRoundtripTypes<BitstreamFlavorJPEG> final {
+  using streamer = BitStreamerJPEG;
+
+  template <typename OutputIterator>
+  using vacuumer = BitVacuumerJPEG<OutputIterator>;
 };
 
 class InputWrapper final {
@@ -184,6 +194,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       return 0;
     case 2:
       checkFlavour<BitstreamFlavorMSB32>(w);
+      return 0;
+    case 3:
+      checkFlavour<BitstreamFlavorJPEG>(w);
       return 0;
     default:
       ThrowRSE("Unknown flavor");
