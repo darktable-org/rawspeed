@@ -4,6 +4,7 @@ FILE(GLOB RAWSPEED_TEST_SOURCES
   "BitStreamerMSB16Test.cpp"
   "BitStreamerMSB32Test.cpp"
   "BitStreamerMSBTest.cpp"
+  "BitVacuumerLSBTest.cpp"
   "BitVacuumerMSBTest.cpp"
   "EndiannessTest.cpp"
 )

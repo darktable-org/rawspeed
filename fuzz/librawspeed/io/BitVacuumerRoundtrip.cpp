@@ -25,7 +25,9 @@
 #include "common/Common.h"
 #include "common/RawspeedException.h"
 #include "io/BitStreamer.h"
+#include "io/BitStreamerLSB.h"
 #include "io/BitStreamerMSB.h"
+#include "io/BitVacuumerLSB.h"
 #include "io/BitVacuumerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -42,9 +44,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 namespace rawspeed {
 namespace {
 
+struct BitstreamFlavorLSB;
 struct BitstreamFlavorMSB;
 
 template <typename T> struct BitStreamRoundtripTypes final {};
+
+template <> struct BitStreamRoundtripTypes<BitstreamFlavorLSB> final {
+  using streamer = BitStreamerLSB;
+
+  template <typename OutputIterator>
+  using vacuumer = BitVacuumerLSB<OutputIterator>;
+};
 
 template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB> final {
   using streamer = BitStreamerMSB;
@@ -155,9 +165,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const InputWrapper w(bitLengths, bitVals);
 
     // Which flavor?
-    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (flavor) {
     case 0:
+      checkFlavour<BitstreamFlavorLSB>(w);
+      return 0;
+    case 1:
       checkFlavour<BitstreamFlavorMSB>(w);
       return 0;
     default:
