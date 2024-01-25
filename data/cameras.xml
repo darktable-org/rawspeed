@@ -12489,8 +12489,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG" model="NX3300" supported="unknown-no-samples">
+	<Camera make="SAMSUNG" model="NX3300">
 		<ID make="Samsung" model="NX3300">Samsung NX3300</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="96" y="42" width="-32" height="-24"/>
+		<Sensor black="0" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8060 -2933 -761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4504 12890 1762</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-630 1489 5227</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="SAMSUNG" model="NX500">
 		<ID make="Samsung" model="NX500">Samsung NX500</ID>
