@@ -13,6 +13,7 @@ FILE(GLOB SOURCES
   "BitVacuumerJPEG.h"
   "BitVacuumerLSB.h"
   "BitVacuumerMSB.h"
+  "BitVacuumerMSB16.h"
   "BitVacuumerMSB32.h"
   "Buffer.h"
   "ByteStream.h"

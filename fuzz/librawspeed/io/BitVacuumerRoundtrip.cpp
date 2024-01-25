@@ -28,10 +28,12 @@
 #include "io/BitStreamerJPEG.h"
 #include "io/BitStreamerLSB.h"
 #include "io/BitStreamerMSB.h"
+#include "io/BitStreamerMSB16.h"
 #include "io/BitStreamerMSB32.h"
 #include "io/BitVacuumerJPEG.h"
 #include "io/BitVacuumerLSB.h"
 #include "io/BitVacuumerMSB.h"
+#include "io/BitVacuumerMSB16.h"
 #include "io/BitVacuumerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -50,6 +52,7 @@ namespace {
 
 struct BitstreamFlavorLSB;
 struct BitstreamFlavorMSB;
+struct BitstreamFlavorMSB16;
 struct BitstreamFlavorMSB32;
 struct BitstreamFlavorJPEG;
 
@@ -67,6 +70,13 @@ template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB> final {
 
   template <typename OutputIterator>
   using vacuumer = BitVacuumerMSB<OutputIterator>;
+};
+
+template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB16> final {
+  using streamer = BitStreamerMSB16;
+
+  template <typename OutputIterator>
+  using vacuumer = BitVacuumerMSB16<OutputIterator>;
 };
 
 template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB32> final {
@@ -193,9 +203,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       checkFlavour<BitstreamFlavorMSB>(w);
       return 0;
     case 2:
-      checkFlavour<BitstreamFlavorMSB32>(w);
+      checkFlavour<BitstreamFlavorMSB16>(w);
       return 0;
     case 3:
+      checkFlavour<BitstreamFlavorMSB32>(w);
+      return 0;
+    case 4:
       checkFlavour<BitstreamFlavorJPEG>(w);
       return 0;
     default:
