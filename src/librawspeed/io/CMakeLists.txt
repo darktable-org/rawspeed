@@ -12,6 +12,7 @@ FILE(GLOB SOURCES
   "BitVacuumer.h"
   "BitVacuumerLSB.h"
   "BitVacuumerMSB.h"
+  "BitVacuumerMSB32.h"
   "Buffer.h"
   "ByteStream.h"
   "Endianness.h"

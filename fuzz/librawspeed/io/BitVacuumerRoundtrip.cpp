@@ -27,8 +27,10 @@
 #include "io/BitStreamer.h"
 #include "io/BitStreamerLSB.h"
 #include "io/BitStreamerMSB.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/BitVacuumerLSB.h"
 #include "io/BitVacuumerMSB.h"
+#include "io/BitVacuumerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -46,6 +48,7 @@ namespace {
 
 struct BitstreamFlavorLSB;
 struct BitstreamFlavorMSB;
+struct BitstreamFlavorMSB32;
 
 template <typename T> struct BitStreamRoundtripTypes final {};
 
@@ -61,6 +64,13 @@ template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB> final {
 
   template <typename OutputIterator>
   using vacuumer = BitVacuumerMSB<OutputIterator>;
+};
+
+template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB32> final {
+  using streamer = BitStreamerMSB32;
+
+  template <typename OutputIterator>
+  using vacuumer = BitVacuumerMSB32<OutputIterator>;
 };
 
 class InputWrapper final {
@@ -171,6 +181,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       return 0;
     case 1:
       checkFlavour<BitstreamFlavorMSB>(w);
+      return 0;
+    case 2:
+      checkFlavour<BitstreamFlavorMSB32>(w);
       return 0;
     default:
       ThrowRSE("Unknown flavor");
