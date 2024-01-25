@@ -80,8 +80,7 @@ struct BitStreamerCacheLeftInRightOut final : BitStreamerCacheBase {
     invariant(count != 0);
     invariant(count <= Size);
     invariant(count <= fillLevel);
-    invariant(count <= 31);
-    return cache & ((1U << count) - 1U);
+    return extractLowBits(static_cast<uint32_t>(cache), count);
   }
 
   inline void skip(int count) noexcept {
