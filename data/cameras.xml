@@ -17291,7 +17291,9 @@
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="X1D II 50C">Hasselblad X1D II 50C</Alias>
-			<Alias id="X1DM2-50c">Hasselblad X1DM2-50c</Alias>
+			<Alias id="X1D II 50C">Hasselblad X1DM2-50c</Alias>
+			<Alias id="CFV II 50C">Hasselblad CFV II 50C</Alias>
+			<Alias id="CFV II 50C">CFV II 50C/907X</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
