@@ -113,10 +113,17 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
     cache.cache &= ~((~0ULL) >> cache.fillLevel);
     cache.fillLevel = 64;
 
-    // No further reading from this buffer shall happen. Do signal that by
-    // claiming that we have consumed all the remaining bytes of the buffer.
-    return getRemainingSize();
+    // This buffer has been exhausted. While it is incredibly tempting to
+    // signal *that* by claiming that we have consumed all the remaining bytes
+    // of the buffer, we can't actually do that, because the caller code
+    // may depend on the position of the end-of-stream marker / marker itself.
+    break;
   }
+
+  invariant(p >= 0);
+  invariant(p <= 8);
+  // NOTE: `p` may be `0`!
+
   return p;
 }
 
