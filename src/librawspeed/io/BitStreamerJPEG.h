@@ -80,18 +80,19 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   size_type p = 0;
   for (size_type i = 0; i < 4; ++i) {
     // Pre-execute most common case, where next byte is 'normal'/non-FF
-    const int c0 = prefetch[p];
-    ++p;
+    const int c0 = prefetch[p + 0];
     cache.push(c0, 8);
-    if (c0 != 0xFF)
+    if (c0 != 0xFF) {
+      p += 1;
       continue; // Got normal byte.
+    }
 
     // Found FF -> pre-execute case of FF/00, which represents an FF data byte
-    const int c1 = prefetch[p];
-    ++p;
+    const int c1 = prefetch[p + 1];
     if (c1 == 0x00) {
       // Got FF/00, where 0x00 is a stuffing byte (that should be ignored),
       // so 0xFF is a normal byte. All good.
+      p += 2;
       continue;
     }
 
