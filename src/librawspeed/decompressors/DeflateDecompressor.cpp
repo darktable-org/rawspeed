@@ -19,6 +19,7 @@
 */
 
 #include "rawspeedconfig.h" // IWYU pragma: keep
+#include "adt/Bit.h"
 
 #ifdef HAVE_ZLIB
 
@@ -29,7 +30,6 @@
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
-#include "common/Common.h"
 #include "common/FloatingPoint.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"

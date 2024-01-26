@@ -22,6 +22,7 @@
 #include "rawspeedconfig.h"
 #include "interpolators/Cr2sRawInterpolator.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"

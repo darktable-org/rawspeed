@@ -21,9 +21,9 @@
 
 #pragma once
 
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStreamer.h"
 #include <cassert>

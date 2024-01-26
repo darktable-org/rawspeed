@@ -22,6 +22,7 @@
 
 #include "decompressors/UncompressedDecompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"

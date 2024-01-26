@@ -24,10 +24,10 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
-#include "common/Common.h"
 #include "io/IOException.h"
 #include <array>
 #include <cstdint>

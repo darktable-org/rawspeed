@@ -22,6 +22,7 @@
 #include "common/RawImage.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Point.h"
