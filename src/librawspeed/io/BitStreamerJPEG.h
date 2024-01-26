@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <numeric>
 
 namespace rawspeed {
 
@@ -69,8 +70,9 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
-  if (std::none_of(&prefetch[0], &prefetch[4],
-                   [](uint8_t byte) { return byte == 0xFF; })) {
+  if (std::accumulate(
+          &prefetch[0], &prefetch[4], bool(true),
+          [](bool b, uint8_t byte) { return b && (byte != 0xFF); })) {
     cache = speculativeOptimisticCache;
     return 4;
   }
@@ -78,38 +80,50 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   size_type p = 0;
   for (size_type i = 0; i < 4; ++i) {
     // Pre-execute most common case, where next byte is 'normal'/non-FF
-    const int c0 = prefetch[p];
-    ++p;
+    const int c0 = prefetch[p + 0];
     cache.push(c0, 8);
-    if (c0 != 0xFF)
-      continue;
-    // Found FF -> pre-execute case of FF/00, which represents an FF data byte
-    // -> ignore the 00
-    const int c1 = prefetch[p];
-    ++p;
-    if (c1 != 0) {
-      // Found FF/xx with xx != 00. This is the end of stream marker.
-      // That means we shouldn't have pushed last 8 bits (0xFF, from c0).
-      // We need to "unpush" them, and fill the vacant cache bits with zeros.
-
-      // First, recover the cache fill level.
-      cache.fillLevel -= 8;
-      // Now, this code is incredibly underencapsulated, and the
-      // implementation details are leaking into here. Thus, we know that
-      // all the fillLevel bits in cache are all high bits. So to "unpush"
-      // the last 8 bits, and fill the vacant cache bits with zeros, we only
-      // need to keep the high fillLevel bits. So just create a mask with only
-      // high fillLevel bits set, and 'and' the cache with it.
-      // Caution, we know fillLevel won't be 64, but it may be 0,
-      // so pick the mask-creation idiom accordingly.
-      cache.cache &= ~((~0ULL) >> cache.fillLevel);
-      cache.fillLevel = 64;
-
-      // No further reading from this buffer shall happen. Do signal that by
-      // claiming that we have consumed all the remaining bytes of the buffer.
-      return getRemainingSize();
+    if (c0 != 0xFF) {
+      p += 1;
+      continue; // Got normal byte.
     }
+
+    // Found FF -> pre-execute case of FF/00, which represents an FF data byte
+    const int c1 = prefetch[p + 1];
+    if (c1 == 0x00) {
+      // Got FF/00, where 0x00 is a stuffing byte (that should be ignored),
+      // so 0xFF is a normal byte. All good.
+      p += 2;
+      continue;
+    }
+
+    // Found FF/xx with xx != 00. This is the end of stream marker.
+    // That means we shouldn't have pushed last 8 bits (0xFF, from c0).
+    // We need to "unpush" them, and fill the vacant cache bits with zeros.
+
+    // First, recover the cache fill level.
+    cache.fillLevel -= 8;
+    // Now, this code is incredibly underencapsulated, and the
+    // implementation details are leaking into here. Thus, we know that
+    // all the fillLevel bits in cache are all high bits. So to "unpush"
+    // the last 8 bits, and fill the vacant cache bits with zeros, we only
+    // need to keep the high fillLevel bits. So just create a mask with only
+    // high fillLevel bits set, and 'and' the cache with it.
+    // Caution, we know fillLevel won't be 64, but it may be 0,
+    // so pick the mask-creation idiom accordingly.
+    cache.cache &= ~((~0ULL) >> cache.fillLevel);
+    cache.fillLevel = 64;
+
+    // This buffer has been exhausted. While it is incredibly tempting to
+    // signal *that* by claiming that we have consumed all the remaining bytes
+    // of the buffer, we can't actually do that, because the caller code
+    // may depend on the position of the end-of-stream marker / marker itself.
+    break;
   }
+
+  invariant(p >= 0);
+  invariant(p <= 8);
+  // NOTE: `p` may be `0`!
+
   return p;
 }
 
