@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/HasselbladDecompressor.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <vector>
@@ -46,7 +47,7 @@ HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
   }
 }
 
-void HasselbladLJpegDecoder::decodeScan() {
+Buffer::size_type HasselbladLJpegDecoder::decodeScan() {
   if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
       frame.h != static_cast<unsigned>(mRaw->dim.y)) {
     ThrowRDE("LJPEG frame does not match EXIF dimensions: (%u; %u) vs (%i; %i)",
@@ -58,7 +59,7 @@ void HasselbladLJpegDecoder::decodeScan() {
 
   HasselbladDecompressor d(mRaw, rec,
                            input.peekRemainingBuffer().getAsArray1DRef());
-  input.skipBytes(d.decompress());
+  return d.decompress();
 }
 
 void HasselbladLJpegDecoder::decode() {

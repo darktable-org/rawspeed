@@ -30,6 +30,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStreamerJPEG.h"
+#include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
 #include <cinttypes>
@@ -159,7 +160,8 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 
 // N_COMP == number of components (2, 3 or 4)
 
-template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
+template <int N_COMP, bool WeirdWidth>
+ByteStream::size_type LJpegDecompressor::decodeN() {
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
 
@@ -240,23 +242,20 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
             .decodeDifference(bitStreamer);
     }
   }
+  return bitStreamer.getStreamPosition();
 }
 
-void LJpegDecompressor::decode() {
+ByteStream::size_type LJpegDecompressor::decode() {
   if (trailingPixels == 0) {
     switch (frame.cps) {
     case 1:
-      decodeN<1>();
-      break;
+      return decodeN<1>();
     case 2:
-      decodeN<2>();
-      break;
+      return decodeN<2>();
     case 3:
-      decodeN<3>();
-      break;
+      return decodeN<3>();
     case 4:
-      decodeN<4>();
-      break;
+      return decodeN<4>();
     default:
       __builtin_unreachable();
     }
@@ -267,14 +266,11 @@ void LJpegDecompressor::decode() {
     switch (frame.cps) {
     // Naturally can't happen for CPS=1.
     case 2:
-      decodeN<2, /*WeirdWidth=*/true>();
-      break;
+      return decodeN<2, /*WeirdWidth=*/true>();
     case 3:
-      decodeN<3, /*WeirdWidth=*/true>();
-      break;
+      return decodeN<3, /*WeirdWidth=*/true>();
     case 4:
-      decodeN<4, /*WeirdWidth=*/true>();
-      break;
+      return decodeN<4, /*WeirdWidth=*/true>();
     default:
       __builtin_unreachable();
     }

@@ -27,6 +27,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/LJpegDecompressor.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -91,7 +92,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
   AbstractLJpegDecoder::decodeSOI();
 }
 
-void LJpegDecoder::decodeScan() {
+Buffer::size_type LJpegDecoder::decodeScan() {
   invariant(frame.cps > 0);
 
   if (predictorMode != 1)
@@ -119,7 +120,7 @@ void LJpegDecoder::decodeScan() {
                    {static_cast<int>(w), static_cast<int>(h)}),
       LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, rec,
       input.peekRemainingBuffer().getAsArray1DRef());
-  d.decode();
+  return d.decode();
 }
 
 } // namespace rawspeed

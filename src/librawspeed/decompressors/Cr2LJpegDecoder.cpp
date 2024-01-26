@@ -28,6 +28,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/Cr2Decompressor.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -54,7 +55,7 @@ Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
   }
 }
 
-void Cr2LJpegDecoder::decodeScan() {
+Buffer::size_type Cr2LJpegDecoder::decodeScan() {
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
 
@@ -146,7 +147,7 @@ void Cr2LJpegDecoder::decodeScan() {
   Cr2Decompressor<PrefixCodeDecoder<>> d(
       mRaw, format, iPoint2D(frame.w, frame.h), slicing, rec,
       input.peekRemainingBuffer().getAsArray1DRef());
-  input.skipBytes(d.decompress());
+  return d.decompress();
 }
 
 void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
