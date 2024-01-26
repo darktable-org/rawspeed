@@ -206,7 +206,7 @@ protected:
     return pred;
   }
 
-  virtual void decodeScan() = 0;
+  [[nodiscard]] virtual ByteStream::size_type decodeScan() = 0;
 
   ByteStream input;
   RawImage mRaw;

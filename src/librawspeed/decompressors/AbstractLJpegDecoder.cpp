@@ -219,7 +219,9 @@ void AbstractLJpegDecoder::parseSOS(ByteStream sos) {
   if (Pt != 0)
     ThrowRDE("Point transform not supported.");
 
-  decodeScan();
+  const auto scanLength = decodeScan();
+  invariant(scanLength != 0);
+  input.skipBytes(scanLength);
 }
 
 void AbstractLJpegDecoder::parseDHT(ByteStream dht) {

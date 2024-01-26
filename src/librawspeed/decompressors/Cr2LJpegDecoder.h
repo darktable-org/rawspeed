@@ -32,7 +32,7 @@ class RawImage;
 class Cr2LJpegDecoder final : public AbstractLJpegDecoder {
   Cr2SliceWidths slicing;
 
-  void decodeScan() override;
+  [[nodiscard]] ByteStream::size_type decodeScan() override;
 
 public:
   Cr2LJpegDecoder(ByteStream bs, const RawImage& img);

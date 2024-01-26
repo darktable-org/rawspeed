@@ -21,6 +21,7 @@
 #include "adt/Casts.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
+#include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "fuzz/Common.h"
 #include "io/Buffer.h"
@@ -35,7 +36,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 namespace {
 
 class DummyLJpegDecoder final : public rawspeed::AbstractLJpegDecoder {
-  void decodeScan() final {}
+  [[nodiscard]] rawspeed::ByteStream::size_type decodeScan() final {
+    ThrowRDE("Success!");
+  }
 
 public:
   DummyLJpegDecoder(const rawspeed::ByteStream& bs,
