@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <numeric>
 
 namespace rawspeed {
 
@@ -69,8 +70,9 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
-  if (std::none_of(&prefetch[0], &prefetch[4],
-                   [](uint8_t byte) { return byte == 0xFF; })) {
+  if (std::accumulate(
+          &prefetch[0], &prefetch[4], bool(true),
+          [](bool b, uint8_t byte) { return b && (byte != 0xFF); })) {
     cache = speculativeOptimisticCache;
     return 4;
   }
