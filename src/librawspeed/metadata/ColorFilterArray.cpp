@@ -19,6 +19,7 @@
 */
 
 #include "metadata/ColorFilterArray.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Optional.h"

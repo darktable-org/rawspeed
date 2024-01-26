@@ -22,10 +22,10 @@
 
 #include "decompressors/SamsungV0Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
-#include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"

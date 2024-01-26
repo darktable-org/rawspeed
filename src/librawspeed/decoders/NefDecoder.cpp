@@ -22,6 +22,7 @@
 #include "decoders/NefDecoder.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"

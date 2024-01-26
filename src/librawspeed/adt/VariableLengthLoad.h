@@ -21,10 +21,10 @@
 #pragma once
 
 #include "adt/Array1DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "io/Endianness.h"
 #include <algorithm>
 #include <climits>

@@ -24,6 +24,7 @@
 #include "decompressors/PanasonicV4Decompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Mutex.h"

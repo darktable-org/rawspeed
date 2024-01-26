@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"
+#include "adt/Bit.h"
 #include <cassert>
 #include <cstdint>
 #include <cstring>

@@ -23,7 +23,6 @@
 #include "rawspeedconfig.h"
 #include "adt/BitIterator.h"
 #include "adt/iterator_range.h"
-#include "common/Common.h"
 #include "decoders/RawDecoderException.h"
 #include <cassert>
 #include <cstdint>

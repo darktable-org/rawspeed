@@ -20,10 +20,12 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "adt/Invariant.h"
 #include "io/BitStreamer.h"
 #include "io/BitVacuumer.h"
+#include <cstddef>
 #include <cstdint>
-#include <iterator>
 
 namespace rawspeed {
 

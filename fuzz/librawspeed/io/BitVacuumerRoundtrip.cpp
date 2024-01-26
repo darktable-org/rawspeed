@@ -19,10 +19,10 @@
 */
 
 #include "rawspeedconfig.h"
+#include "adt/Bit.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "common/RawspeedException.h"
 #include "io/BitStreamer.h"
 #include "io/BitStreamerJPEG.h"

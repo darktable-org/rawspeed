@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "common/Common.h"
+#include "adt/Bit.h"
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"

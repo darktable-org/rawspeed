@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include "adt/Bit.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include <cstddef>
 #include <iterator>
 #include <type_traits>

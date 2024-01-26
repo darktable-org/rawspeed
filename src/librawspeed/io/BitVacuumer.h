@@ -21,9 +21,7 @@
 #pragma once
 
 #include "adt/Invariant.h"
-#include "io/Endianness.h"
 #include <cstdint>
-#include <iterator>
 
 namespace rawspeed {
 

@@ -22,11 +22,11 @@
 
 #include "decompressors/SonyArw1Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
-#include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStreamerMSB.h"
