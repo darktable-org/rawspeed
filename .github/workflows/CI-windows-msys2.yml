@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Fetch/Checkout RawSpeed git repo
         timeout-minutes: 2
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'rawspeed'
           fetch-depth: 1
@@ -150,7 +150,7 @@ jobs:
       - if: inputs.flavor == 'Coverage'
         timeout-minutes: 1
         name: Cache code coverage (windows reports)
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
           key: coverage-${{ github.sha }}-windows

@@ -29,7 +29,7 @@ jobs:
           sanitizer: ${{ inputs.sanitizer }}
       - name: Upload Crash
         timeout-minutes: 1
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: failure() && steps.build.outcome == 'success'
         with:
           name: artifacts
