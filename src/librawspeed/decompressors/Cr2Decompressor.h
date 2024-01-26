@@ -28,6 +28,7 @@
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "io/ByteStream.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -153,7 +154,8 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y() const;
+  template <int N_COMP, int X_S_F, int Y_S_F>
+  [[nodiscard]] ByteStream::size_type decompressN_X_Y() const;
 
   [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices() const;
   [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles() const;
@@ -168,7 +170,7 @@ public:
       iPoint2D frame, Cr2SliceWidths slicing,
       std::vector<PerComponentRecipe> rec, Array1DRef<const uint8_t> input);
 
-  void decompress() const;
+  [[nodiscard]] ByteStream::size_type decompress() const;
 };
 
 extern template class Cr2Decompressor<PrefixCodeDecoder<>>;

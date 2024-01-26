@@ -390,7 +390,8 @@ Cr2Decompressor<PrefixCodeDecoder>::getInitialPreds() const {
 
 template <typename PrefixCodeDecoder>
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
+ByteStream::size_type
+Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -458,25 +459,22 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
       }
     }
   }
+  return bs.getStreamPosition();
 }
 
 template <typename PrefixCodeDecoder>
-void Cr2Decompressor<PrefixCodeDecoder>::decompress() const {
+ByteStream::size_type Cr2Decompressor<PrefixCodeDecoder>::decompress() const {
   if (std::make_tuple(3, 2, 2) == format) {
-    decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
-    return;
+    return decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
   }
   if (std::make_tuple(3, 2, 1) == format) {
-    decompressN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
-    return;
+    return decompressN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
   }
   if (std::make_tuple(2, 1, 1) == format) {
-    decompressN_X_Y<2, 1, 1>();
-    return;
+    return decompressN_X_Y<2, 1, 1>();
   }
   if (std::make_tuple(4, 1, 1) == format) {
-    decompressN_X_Y<4, 1, 1>();
-    return;
+    return decompressN_X_Y<4, 1, 1>();
   }
   __builtin_unreachable();
 }
