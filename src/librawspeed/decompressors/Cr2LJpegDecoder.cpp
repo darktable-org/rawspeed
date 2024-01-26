@@ -146,7 +146,7 @@ void Cr2LJpegDecoder::decodeScan() {
   Cr2Decompressor<PrefixCodeDecoder<>> d(
       mRaw, format, iPoint2D(frame.w, frame.h), slicing, rec,
       input.peekRemainingBuffer().getAsArray1DRef());
-  d.decompress();
+  input.skipBytes(d.decompress());
 }
 
 void Cr2LJpegDecoder::decode(const Cr2SliceWidths& slicing_) {
