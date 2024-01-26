@@ -119,7 +119,7 @@ void LJpegDecoder::decodeScan() {
                    {static_cast<int>(w), static_cast<int>(h)}),
       LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, rec,
       input.peekRemainingBuffer().getAsArray1DRef());
-  d.decode();
+  input.skipBytes(d.decode());
 }
 
 } // namespace rawspeed

@@ -25,6 +25,7 @@
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
+#include "io/ByteStream.h"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -72,14 +73,15 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, bool WeirdWidth = false> void decodeN();
+  template <int N_COMP, bool WeirdWidth = false>
+  [[nodiscard]] ByteStream::size_type decodeN();
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
                     Array1DRef<const uint8_t> input);
 
-  void decode();
+  [[nodiscard]] ByteStream::size_type decode();
 };
 
 } // namespace rawspeed
