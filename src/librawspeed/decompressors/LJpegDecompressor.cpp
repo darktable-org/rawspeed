@@ -136,9 +136,6 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (numRowsPerRestartInterval < 1)
     ThrowRDE("Number of rows per restart interval must be positives");
 
-  if (numRowsPerRestartInterval < imgFrame.dim.y)
-    ThrowRDE("Restart interval not supported");
-
   // How many full pixel blocks will we produce?
   fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!
   // Do we need to also produce part of a block?
@@ -254,6 +251,10 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
        restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
     auto pred = getInitialPreds<N_COMP>();
     auto predNext = Array1DRef(pred.data(), pred.size());
+
+    if (restartIntervalIndex != 0) {
+      inputStream.skipBytes(2); // Hopefully, a proper restart marker.
+    }
 
     BitStreamerJPEG bs(inputStream.peekRemainingBuffer().getAsArray1DRef());
 
