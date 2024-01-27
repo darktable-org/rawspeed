@@ -191,11 +191,13 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
 
   // For y, we can simply stop decoding when we reached the border.
   for (int row = 0; row < imgFrame.dim.y; ++row) {
+    auto outRow = img[row];
+
     int col = 0;
 
     copy_n(predNext.begin(), N_COMP, pred.data());
     // the predictor for the next line is the start of this line
-    predNext = img[row]
+    predNext = outRow
                    .getBlock(/*size=*/N_COMP,
                              /*index=*/0)
                    .getAsArray1DRef();
@@ -209,7 +211,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
         pred[i] =
             uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
                                    .decodeDifference(bs));
-        img(row, col + i) = pred[i];
+        outRow(col + i) = pred[i];
       }
     }
 
@@ -227,7 +229,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
         pred[c] =
             uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                                    .decodeDifference(bs));
-        img(row, col + c) = pred[c];
+        outRow(col + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
