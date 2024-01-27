@@ -176,7 +176,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
   auto pred = getInitialPreds<N_COMP>();
   uint16_t* predNext = pred.data();
 
-  BitStreamerJPEG bitStreamer(input);
+  BitStreamerJPEG bs(input);
 
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of
@@ -205,7 +205,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
       for (int i = 0; i != N_COMP; ++i) {
         pred[i] =
             uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-                                   .decodeDifference(bitStreamer));
+                                   .decodeDifference(bs));
         img(row, col + i) = pred[i];
       }
     }
@@ -223,14 +223,13 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
       for (; c < trailingPixels; ++c) {
         pred[c] =
             uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                                   .decodeDifference(bitStreamer));
+                                   .decodeDifference(bs));
         img(row, col + c) = pred[c];
       }
       // Discard the rest of the block.
       invariant(c < N_COMP);
       for (; c < N_COMP; ++c) {
-        (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-            .decodeDifference(bitStreamer);
+        (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
       }
       col += N_COMP; // We did just process one more block.
     }
@@ -238,11 +237,10 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
     // ... and discard the rest.
     for (; col < N_COMP * frame.dim.x; col += N_COMP) {
       for (int i = 0; i != N_COMP; ++i)
-        (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-            .decodeDifference(bitStreamer);
+        (static_cast<const PrefixCodeDecoder<>&>(ht[i])).decodeDifference(bs);
     }
   }
-  return bitStreamer.getStreamPosition();
+  return bs.getStreamPosition();
 }
 
 ByteStream::size_type LJpegDecompressor::decode() {
