@@ -95,6 +95,9 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 Buffer::size_type LJpegDecoder::decodeScan() {
   invariant(frame.cps > 0);
 
+  if (numMCUsPerRestartInterval != 0)
+    ThrowRDE("Non-zero restart interval not supported.");
+
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 

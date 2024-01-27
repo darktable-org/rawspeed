@@ -99,7 +99,7 @@ protected:
   void parseSOF(ByteStream data, SOFInfo* i);
   void parseSOS(ByteStream data);
   void parseDHT(ByteStream data);
-  static void parseDRI(ByteStream dri);
+  void parseDRI(ByteStream dri);
   JpegMarker getNextMarker(bool allowskip);
 
   [[nodiscard]] std::vector<const PrefixCodeDecoder<>*>
@@ -134,6 +134,7 @@ protected:
   RawImage mRaw;
 
   SOFInfo frame;
+  uint16_t numMCUsPerRestartInterval = 0;
   uint32_t predictorMode = 0;
 };
 

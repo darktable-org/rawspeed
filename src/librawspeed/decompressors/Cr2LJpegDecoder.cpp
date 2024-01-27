@@ -56,6 +56,9 @@ Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
 }
 
 Buffer::size_type Cr2LJpegDecoder::decodeScan() {
+  if (numMCUsPerRestartInterval != 0)
+    ThrowRDE("Non-zero restart interval not supported.");
+
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode.");
 

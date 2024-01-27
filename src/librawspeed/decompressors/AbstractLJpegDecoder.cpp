@@ -274,8 +274,7 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
 void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
   if (dri.getRemainSize() != 2)
     ThrowRDE("Invalid DRI header length.");
-  if (uint16_t Ri = dri.getU16(); Ri != 0)
-    ThrowRDE("Non-zero restart interval not supported.");
+  numMCUsPerRestartInterval = dri.getU16();
 }
 
 JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
