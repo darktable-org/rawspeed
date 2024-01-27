@@ -48,9 +48,11 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
+                                     int numRowsPerRestartInterval_,
                                      Array1DRef<const uint8_t> input_)
     : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
-      frame(std::move(frame_)), rec(std::move(rec_)) {
+      frame(std::move(frame_)), rec(std::move(rec_)),
+      numRowsPerRestartInterval(numRowsPerRestartInterval_) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -128,6 +130,12 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
              static_cast<int64_t>(frame.cps) * frame.dim.x, frame.dim.y,
              tileRequiredWidth, imgFrame.dim.y);
   }
+
+  if (numRowsPerRestartInterval < 1)
+    ThrowRDE("Number of rows per restart interval must be positives");
+
+  if (numRowsPerRestartInterval < imgFrame.dim.y)
+    ThrowRDE("Restart interval not supported");
 
   // How many full pixel blocks will we produce?
   fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!

@@ -95,9 +95,6 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 Buffer::size_type LJpegDecoder::decodeScan() {
   invariant(frame.cps > 0);
 
-  if (numMCUsPerRestartInterval != 0)
-    ThrowRDE("Non-zero restart interval not supported.");
-
   if (predictorMode != 1)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 
@@ -123,7 +120,19 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   const LJpegDecompressor::Frame jpegFrame = {N_COMP,
                                               iPoint2D(frame.w, frame.h)};
 
-  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec,
+  int numRowsPerRestartInterval;
+  if (numMCUsPerRestartInterval == 0) {
+    // Restart interval not enabled, so all of the rows
+    // are contained in the first (implicit) restart interval.
+    numRowsPerRestartInterval = jpegFrame.dim.y;
+  } else {
+    const int numMCUsPerRow = jpegFrame.dim.x;
+    if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
+      ThrowRDE("Restart interval is not a multiple of frame row size");
+    numRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
+  }
+
+  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec, numRowsPerRestartInterval,
                       input.peekRemainingBuffer().getAsArray1DRef());
   return d.decode();
 }
