@@ -158,8 +158,57 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
   return preds;
 }
 
-// N_COMP == number of components (2, 3 or 4)
+template <int N_COMP, bool WeirdWidth>
+void LJpegDecompressor::decodeRowN(
+    CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+    std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
+    BitStreamerJPEG& bs) const {
+  // FIXME: predictor may have value outside of the uint16_t.
+  // https://github.com/darktable-org/rawspeed/issues/175
 
+  int col = 0;
+  // For x, we first process all full pixel blocks within the image buffer ...
+  for (; col < N_COMP * fullBlocks; col += N_COMP) {
+    for (int i = 0; i != N_COMP; ++i) {
+      pred[i] =
+          uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
+                                 .decodeDifference(bs));
+      outRow(col + i) = pred[i];
+    }
+  }
+
+  // Sometimes we also need to consume one more block, and produce part of it.
+  if /*constexpr*/ (WeirdWidth) {
+    // FIXME: evaluate i-cache implications due to this being compile-time.
+    static_assert(N_COMP > 1 || !WeirdWidth,
+                  "can't want part of 1-pixel-wide block");
+    // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
+    // We may end up needing just part of last N_COMP pixels.
+    invariant(trailingPixels > 0);
+    invariant(trailingPixels < N_COMP);
+    int c = 0;
+    for (; c < trailingPixels; ++c) {
+      pred[c] =
+          uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                                 .decodeDifference(bs));
+      outRow(col + c) = pred[c];
+    }
+    // Discard the rest of the block.
+    invariant(c < N_COMP);
+    for (; c < N_COMP; ++c) {
+      (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
+    }
+    col += N_COMP; // We did just process one more block.
+  }
+
+  // ... and discard the rest.
+  for (; col < N_COMP * frame.dim.x; col += N_COMP) {
+    for (int i = 0; i != N_COMP; ++i)
+      (static_cast<const PrefixCodeDecoder<>&>(ht[i])).decodeDifference(bs);
+  }
+}
+
+// N_COMP == number of components (2, 3 or 4)
 template <int N_COMP, bool WeirdWidth>
 ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(mRaw->getCpp() > 0);
@@ -193,8 +242,6 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   for (int row = 0; row < imgFrame.dim.y; ++row) {
     auto outRow = img[row];
 
-    int col = 0;
-
     copy_n(predNext.begin(), N_COMP, pred.data());
     // the predictor for the next line is the start of this line
     predNext = outRow
@@ -202,48 +249,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                              /*index=*/0)
                    .getAsArray1DRef();
 
-    // FIXME: predictor may have value outside of the uint16_t.
-    // https://github.com/darktable-org/rawspeed/issues/175
-
-    // For x, we first process all full pixel blocks within the image buffer ...
-    for (; col < N_COMP * fullBlocks; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i) {
-        pred[i] =
-            uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-                                   .decodeDifference(bs));
-        outRow(col + i) = pred[i];
-      }
-    }
-
-    // Sometimes we also need to consume one more block, and produce part of it.
-    if /*constexpr*/ (WeirdWidth) {
-      // FIXME: evaluate i-cache implications due to this being compile-time.
-      static_assert(N_COMP > 1 || !WeirdWidth,
-                    "can't want part of 1-pixel-wide block");
-      // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
-      // We may end up needing just part of last N_COMP pixels.
-      invariant(trailingPixels > 0);
-      invariant(trailingPixels < N_COMP);
-      int c = 0;
-      for (; c < trailingPixels; ++c) {
-        pred[c] =
-            uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                                   .decodeDifference(bs));
-        outRow(col + c) = pred[c];
-      }
-      // Discard the rest of the block.
-      invariant(c < N_COMP);
-      for (; c < N_COMP; ++c) {
-        (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
-      }
-      col += N_COMP; // We did just process one more block.
-    }
-
-    // ... and discard the rest.
-    for (; col < N_COMP * frame.dim.x; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i)
-        (static_cast<const PrefixCodeDecoder<>&>(ht[i])).decodeDifference(bs);
-    }
+    decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
   }
   return bs.getStreamPosition();
 }

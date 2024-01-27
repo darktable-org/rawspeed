@@ -25,6 +25,7 @@
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
+#include "io/BitStreamerJPEG.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstddef>
@@ -72,6 +73,12 @@ private:
 
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
+
+  template <int N_COMP, bool WeirdWidth>
+  __attribute__((always_inline)) inline void decodeRowN(
+      CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+      std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
+      BitStreamerJPEG& bs) const;
 
   template <int N_COMP, bool WeirdWidth = false>
   [[nodiscard]] ByteStream::size_type decodeN() const;
