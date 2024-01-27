@@ -230,10 +230,6 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                               mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y);
 
   const auto ht = getPrefixCodeDecoders<N_COMP>();
-  auto pred = getInitialPreds<N_COMP>();
-  auto predNext = Array1DRef(pred.data(), pred.size());
-
-  BitStreamerJPEG bs(input);
 
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of
@@ -246,20 +242,54 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  // For y, we can simply stop decoding when we reached the border.
-  for (int row = 0; row < imgFrame.dim.y; ++row) {
-    auto outRow = img[row];
+  const auto numRestartIntervals = implicit_cast<int>(
+      roundUpDivision(imgFrame.dim.y, numRowsPerRestartInterval));
+  invariant(numRestartIntervals >= 0);
+  invariant(numRestartIntervals != 0);
 
-    copy_n(predNext.begin(), N_COMP, pred.data());
-    // the predictor for the next line is the start of this line
-    predNext = outRow
-                   .getBlock(/*size=*/N_COMP,
-                             /*index=*/0)
-                   .getAsArray1DRef();
+  int numBytesConsumedTotal = 0;
+  for (int restartIntervalIndex = 0;
+       restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
+    auto pred = getInitialPreds<N_COMP>();
+    auto predNext = Array1DRef(pred.data(), pred.size());
 
-    decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
+    const auto restartIntervalInput =
+        input
+            .getCrop(numBytesConsumedTotal,
+                     input.size() - numBytesConsumedTotal)
+            .getAsArray1DRef();
+
+    BitStreamerJPEG bs(restartIntervalInput);
+
+    for (int rowOfRestartInterval = 0;
+         rowOfRestartInterval != numRowsPerRestartInterval;
+         ++rowOfRestartInterval) {
+      const int row = numRowsPerRestartInterval * restartIntervalIndex +
+                      rowOfRestartInterval;
+      invariant(row >= 0);
+      invariant(row <= imgFrame.dim.y);
+
+      // For y, we can simply stop decoding when we reached the border.
+      if (row == imgFrame.dim.y) {
+        invariant((restartIntervalIndex + 1) == numRestartIntervals);
+        break;
+      }
+
+      auto outRow = img[row];
+      copy_n(predNext.begin(), N_COMP, pred.data());
+      // the predictor for the next line is the start of this line
+      predNext = outRow
+                     .getBlock(/*size=*/N_COMP,
+                               /*index=*/0)
+                     .getAsArray1DRef();
+
+      decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
+    }
+
+    numBytesConsumedTotal += bs.getStreamPosition();
   }
-  return bs.getStreamPosition();
+
+  return numBytesConsumedTotal;
 }
 
 ByteStream::size_type LJpegDecompressor::decode() const {
