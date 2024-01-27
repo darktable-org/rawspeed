@@ -174,7 +174,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
 
   const auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
-  uint16_t* predNext = pred.data();
+  auto predNext = Array1DRef(pred.data(), pred.size());
 
   BitStreamerJPEG bs(input);
 
@@ -193,9 +193,12 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
   for (int row = 0; row < imgFrame.dim.y; ++row) {
     int col = 0;
 
-    copy_n(predNext, N_COMP, pred.data());
+    copy_n(predNext.begin(), N_COMP, pred.data());
     // the predictor for the next line is the start of this line
-    predNext = &img(row, col);
+    predNext = img[row]
+                   .getBlock(/*size=*/N_COMP,
+                             /*index=*/0)
+                   .getAsArray1DRef();
 
     // FIXME: predictor may have value outside of the uint16_t.
     // https://github.com/darktable-org/rawspeed/issues/175
