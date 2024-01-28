@@ -74,14 +74,14 @@ private:
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
   template <int N_COMP, bool WeirdWidth = false>
-  [[nodiscard]] ByteStream::size_type decodeN();
+  [[nodiscard]] ByteStream::size_type decodeN() const;
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
                     Array1DRef<const uint8_t> input);
 
-  [[nodiscard]] ByteStream::size_type decode();
+  [[nodiscard]] ByteStream::size_type decode() const;
 };
 
 } // namespace rawspeed

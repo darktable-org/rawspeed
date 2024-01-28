@@ -161,7 +161,7 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 // N_COMP == number of components (2, 3 or 4)
 
 template <int N_COMP, bool WeirdWidth>
-ByteStream::size_type LJpegDecompressor::decodeN() {
+ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
 
@@ -248,7 +248,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() {
   return bs.getStreamPosition();
 }
 
-ByteStream::size_type LJpegDecompressor::decode() {
+ByteStream::size_type LJpegDecompressor::decode() const {
   if (trailingPixels == 0) {
     switch (frame.cps) {
     case 1:
