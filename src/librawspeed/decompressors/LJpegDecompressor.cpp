@@ -24,11 +24,13 @@
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "decompressors/JpegMarkers.h"
 #include "io/BitStreamerJPEG.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -253,7 +255,15 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
     auto predNext = Array1DRef(pred.data(), pred.size());
 
     if (restartIntervalIndex != 0) {
-      inputStream.skipBytes(2); // Hopefully, a proper restart marker.
+      auto marker = peekMarker(inputStream);
+      if (!marker) // FIXME: can there be padding bytes before the marker?
+        ThrowRDE("Jpeg marker not encountered");
+      Optional<int> number = getRestartMarkerNumber(*marker);
+      if (!number)
+        ThrowRDE("Not a restart marker!");
+      if (*number != ((restartIntervalIndex - 1) % 8))
+        ThrowRDE("Unexpected restart marker found");
+      inputStream.skipBytes(2); // Good restart marker.
     }
 
     BitStreamerJPEG bs(inputStream.peekRemainingBuffer().getAsArray1DRef());
