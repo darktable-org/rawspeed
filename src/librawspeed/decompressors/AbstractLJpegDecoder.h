@@ -28,6 +28,7 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractDecompressor.h"
+#include "decompressors/JpegMarkers.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -36,90 +37,11 @@
 #include <vector>
 
 /*
- * The following enum and two structs are stolen from the IJG JPEG library
+ * The two following structs are stolen from the IJG JPEG library
  * Comments added by tm. See also Copyright in PrefixCodeDecoder.h.
  */
 
 namespace rawspeed {
-
-enum class JpegMarker { /* JPEG marker codes			*/
-                        STUFF = 0x00,
-                        SOF0 = 0xc0, /* baseline DCT */
-                        SOF1 = 0xc1, /* extended sequential DCT		*/
-                        SOF2 = 0xc2, /* progressive DCT			*/
-                        SOF3 = 0xc3, /* lossless (sequential)		*/
-
-                        SOF5 = 0xc5, /* differential sequential DCT
-                                      */
-                        SOF6 = 0xc6, /* differential progressive DCT
-                                      */
-                        SOF7 = 0xc7, /* differential lossless		*/
-
-                        JPG = 0xc8,   /* JPEG extensions			*/
-                        SOF9 = 0xc9,  /* extended sequential DCT		*/
-                        SOF10 = 0xca, /* progressive DCT */
-                        SOF11 = 0xcb, /* lossless (sequential)		*/
-
-                        SOF13 = 0xcd, /* differential sequential DCT
-                                       */
-                        SOF14 = 0xce, /* differential progressive DCT
-                                       */
-                        SOF15 = 0xcf, /* differential lossless		*/
-
-                        DHT = 0xc4, /* define Huffman tables		*/
-
-                        DAC = 0xcc, /* define arithmetic conditioning table
-                                     */
-
-                        RST0 = 0xd0, /* restart				*/
-                        RST1 = 0xd1, /* restart				*/
-                        RST2 = 0xd2, /* restart				*/
-                        RST3 = 0xd3, /* restart				*/
-                        RST4 = 0xd4, /* restart				*/
-                        RST5 = 0xd5, /* restart				*/
-                        RST6 = 0xd6, /* restart				*/
-                        RST7 = 0xd7, /* restart				*/
-
-                        SOI = 0xd8, /* start of image			*/
-                        EOI = 0xd9, /* end of image */
-                        SOS = 0xda, /* start of scan			*/
-                        DQT =
-                            0xdb,   /* define quantization tables		*/
-                        DNL = 0xdc, /* define number of lines		*/
-                        DRI = 0xdd, /* define restart interval		*/
-                        DHP = 0xde, /* define hierarchical progression	*/
-                        EXP =
-                            0xdf, /* expand reference image(s)		*/
-
-                        APP0 =
-                            0xe0,     /* application marker, used for JFIF	*/
-                        APP1 = 0xe1,  /* application marker  */
-                        APP2 = 0xe2,  /* application marker  */
-                        APP3 = 0xe3,  /* application marker  */
-                        APP4 = 0xe4,  /* application marker  */
-                        APP5 = 0xe5,  /* application marker  */
-                        APP6 = 0xe6,  /* application marker  */
-                        APP7 = 0xe7,  /* application marker  */
-                        APP8 = 0xe8,  /* application marker  */
-                        APP9 = 0xe9,  /* application marker  */
-                        APP10 = 0xea, /* application marker */
-                        APP11 = 0xeb, /* application marker */
-                        APP12 = 0xec, /* application marker */
-                        APP13 = 0xed, /* application marker */
-                        APP14 =
-                            0xee,     /* application marker, used by Adobe	*/
-                        APP15 = 0xef, /* application marker */
-
-                        JPG0 = 0xf0,  /* reserved for JPEG extensions
-                                       */
-                        JPG13 = 0xfd, /* reserved for JPEG extensions
-                                       */
-                        COM = 0xfe,   /* comment				*/
-
-                        TEM = 0x01, /* temporary use			*/
-                        FILL = 0xFF
-
-};
 
 /*
  * The following structure stores basic information about one component.

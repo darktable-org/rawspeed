@@ -29,6 +29,7 @@
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "decompressors/JpegMarkers.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <array>

@@ -25,6 +25,7 @@ FILE(GLOB SOURCES
   "HasselbladLJpegDecoder.h"
   "JpegDecompressor.cpp"
   "JpegDecompressor.h"
+  "JpegMarkers.h"
   "KodakDecompressor.cpp"
   "KodakDecompressor.h"
   "LJpegDecoder.cpp"
