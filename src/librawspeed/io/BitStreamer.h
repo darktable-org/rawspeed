@@ -329,6 +329,12 @@ public:
     return peekBitsNoFill(nbits);
   }
 
+  inline void skipBits(int nbits) {
+    establishClassInvariants();
+    fill(nbits);
+    skipBitsNoFill(nbits);
+  }
+
   inline uint32_t getBits(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
