@@ -19,6 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Optional.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 
@@ -113,6 +114,24 @@ inline Optional<JpegMarker> peekMarker(ByteStream input) {
   if (c0 == 0xFF && c1 != 0 && c1 != 0xFF)
     return static_cast<JpegMarker>(c1);
   return {};
+}
+
+// Get the number of this restart marker (modulo 8).
+inline Optional<int> getRestartMarkerNumber(JpegMarker m) {
+  switch (m) {
+    using enum JpegMarker;
+  case RST0:
+  case RST1:
+  case RST2:
+  case RST3:
+  case RST4:
+  case RST5:
+  case RST6:
+  case RST7:
+    return static_cast<uint8_t>(m) - static_cast<uint8_t>(RST0);
+  default:
+    return std::nullopt; // Not a restart marker.
+  }
 }
 
 } // namespace rawspeed
