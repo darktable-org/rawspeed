@@ -30,7 +30,9 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "io/BitStreamerJPEG.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
+#include "io/Endianness.h"
 #include <algorithm>
 #include <array>
 #include <cinttypes>
@@ -247,19 +249,13 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(numRestartIntervals >= 0);
   invariant(numRestartIntervals != 0);
 
-  int numBytesConsumedTotal = 0;
+  ByteStream inputStream(DataBuffer(input, Endianness::little));
   for (int restartIntervalIndex = 0;
        restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
     auto pred = getInitialPreds<N_COMP>();
     auto predNext = Array1DRef(pred.data(), pred.size());
 
-    const auto restartIntervalInput =
-        input
-            .getCrop(numBytesConsumedTotal,
-                     input.size() - numBytesConsumedTotal)
-            .getAsArray1DRef();
-
-    BitStreamerJPEG bs(restartIntervalInput);
+    BitStreamerJPEG bs(inputStream.peekRemainingBuffer().getAsArray1DRef());
 
     for (int rowOfRestartInterval = 0;
          rowOfRestartInterval != numRowsPerRestartInterval;
@@ -286,10 +282,10 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
       decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
     }
 
-    numBytesConsumedTotal += bs.getStreamPosition();
+    inputStream.skipBytes(bs.getStreamPosition());
   }
 
-  return numBytesConsumedTotal;
+  return inputStream.getPosition();
 }
 
 ByteStream::size_type LJpegDecompressor::decode() const {
