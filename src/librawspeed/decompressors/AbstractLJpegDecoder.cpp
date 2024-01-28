@@ -279,17 +279,8 @@ void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
 }
 
 JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
-  auto peekMarker = [&]() -> Optional<JpegMarker> {
-    uint8_t c0 = input.peekByte(0);
-    uint8_t c1 = input.peekByte(1);
-
-    if (c0 == 0xFF && c1 != 0 && c1 != 0xFF)
-      return static_cast<JpegMarker>(c1);
-    return {};
-  };
-
   while (input.getRemainSize() >= 2) {
-    if (Optional<JpegMarker> m = peekMarker()) {
+    if (Optional<JpegMarker> m = peekMarker(input)) {
       input.skipBytes(2); // Skip the bytes we've just consumed.
       return *m;
     }

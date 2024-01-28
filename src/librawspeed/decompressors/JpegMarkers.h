@@ -19,6 +19,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "io/ByteStream.h"
 #include <cstdint>
 
 #pragma once
@@ -104,5 +105,14 @@ enum class JpegMarker : uint8_t {
   FILL = 0xFF
 
 };
+
+inline Optional<JpegMarker> peekMarker(ByteStream input) {
+  uint8_t c0 = input.peekByte(0);
+  uint8_t c1 = input.peekByte(1);
+
+  if (c0 == 0xFF && c1 != 0 && c1 != 0xFF)
+    return static_cast<JpegMarker>(c1);
+  return {};
+}
 
 } // namespace rawspeed
