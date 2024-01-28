@@ -38,6 +38,7 @@
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
+#include "io/IOException.h"
 #include "metadata/Camera.h"
 #include "metadata/ColorFilterArray.h"
 #include "tiff/TiffEntry.h"
@@ -374,16 +375,32 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
     shared(offsets, counts) firstprivate(tilesX, tilew, tileh)
 #endif
   for (int tile = 0U; tile < static_cast<int>(offsets->count); tile++) {
-    const uint32_t tileX = tile % tilesX;
-    const uint32_t tileY = tile / tilesX;
-    const uint32_t offset = offsets->getU32(tile);
-    const uint32_t length = counts->getU32(tile);
+    try {
+      const uint32_t tileX = tile % tilesX;
+      const uint32_t tileY = tile / tilesX;
+      const uint32_t offset = offsets->getU32(tile);
+      const uint32_t length = counts->getU32(tile);
 
-    LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
-                                               Endianness::little)),
-                         mRaw);
-    decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
-                   implicit_cast<uint32_t>(tilew), tileh, false);
+      LJpegDecoder decoder(
+          ByteStream(
+              DataBuffer(mFile.getSubView(offset, length), Endianness::little)),
+          mRaw);
+      decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
+                     implicit_cast<uint32_t>(tilew), tileh, false);
+    } catch (const RawDecoderException& err) {
+      mRaw->setError(err.what());
+    } catch (const IOException& err) {
+      mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
+    }
+  }
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
   }
 
   PostProcessLJpeg();

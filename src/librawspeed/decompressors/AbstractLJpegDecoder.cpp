@@ -29,6 +29,7 @@
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
+#include "decompressors/JpegMarkers.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <array>
@@ -273,22 +274,12 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
 void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
   if (dri.getRemainSize() != 2)
     ThrowRDE("Invalid DRI header length.");
-  if (uint16_t Ri = dri.getU16(); Ri != 0)
-    ThrowRDE("Non-zero restart interval not supported.");
+  numMCUsPerRestartInterval = dri.getU16();
 }
 
 JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
-  auto peekMarker = [&]() -> Optional<JpegMarker> {
-    uint8_t c0 = input.peekByte(0);
-    uint8_t c1 = input.peekByte(1);
-
-    if (c0 == 0xFF && c1 != 0 && c1 != 0xFF)
-      return static_cast<JpegMarker>(c1);
-    return {};
-  };
-
   while (input.getRemainSize() >= 2) {
-    if (Optional<JpegMarker> m = peekMarker()) {
+    if (Optional<JpegMarker> m = peekMarker(input)) {
       input.skipBytes(2); // Skip the bytes we've just consumed.
       return *m;
     }

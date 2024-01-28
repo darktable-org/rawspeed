@@ -25,6 +25,7 @@
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
+#include "io/BitStreamerJPEG.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstddef>
@@ -56,6 +57,7 @@ private:
 
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
+  const int numRowsPerRestartInterval;
 
   int fullBlocks = 0;
   int trailingPixels = 0;
@@ -73,15 +75,22 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
+  template <int N_COMP, bool WeirdWidth>
+  __attribute__((always_inline)) inline void decodeRowN(
+      CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+      std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
+      BitStreamerJPEG& bs) const;
+
   template <int N_COMP, bool WeirdWidth = false>
-  [[nodiscard]] ByteStream::size_type decodeN();
+  [[nodiscard]] ByteStream::size_type decodeN() const;
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
+                    int numRowsPerRestartInterval_,
                     Array1DRef<const uint8_t> input);
 
-  [[nodiscard]] ByteStream::size_type decode();
+  [[nodiscard]] ByteStream::size_type decode() const;
 };
 
 } // namespace rawspeed

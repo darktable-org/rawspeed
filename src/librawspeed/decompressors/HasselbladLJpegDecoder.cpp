@@ -48,6 +48,9 @@ HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
 }
 
 Buffer::size_type HasselbladLJpegDecoder::decodeScan() {
+  if (numMCUsPerRestartInterval != 0)
+    ThrowRDE("Non-zero restart interval not supported.");
+
   if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
       frame.h != static_cast<unsigned>(mRaw->dim.y)) {
     ThrowRDE("LJPEG frame does not match EXIF dimensions: (%u; %u) vs (%i; %i)",

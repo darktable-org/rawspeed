@@ -38,6 +38,7 @@ template <class T> class CroppedArray1DRef final {
   // Only allow construction from `Array1DRef<T>::getCrop()`.
   friend CroppedArray1DRef<T> Array1DRef<T>::getCrop(int offset,
                                                      int numElts) const;
+
   CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts);
 
 public:
@@ -71,6 +72,9 @@ public:
     return {begin(), size()};
   }
 
+  [[nodiscard]] CroppedArray1DRef<T> getCrop(int offset, int numElts) const;
+  [[nodiscard]] CroppedArray1DRef<T> getBlock(int size, int index) const;
+
   [[nodiscard]] T* begin() const;
   [[nodiscard]] T* end() const;
 
@@ -102,6 +106,32 @@ inline CroppedArray1DRef<T>::CroppedArray1DRef(Array1DRef<T> base_,
                                                const int numElts_)
     : base(base_), offset(offset_), numElts(numElts_) {
   establishClassInvariants();
+}
+
+template <class T>
+[[nodiscard]] inline CroppedArray1DRef<T>
+CroppedArray1DRef<T>::getCrop(int additionalOffset, int size) const {
+  establishClassInvariants();
+  invariant(additionalOffset >= 0);
+  invariant(size >= 0);
+  invariant(additionalOffset <= numElts);
+  invariant(size <= numElts);
+  invariant(additionalOffset + size <= numElts);
+  return base.getCrop(offset + additionalOffset, size);
+}
+
+template <class T>
+[[nodiscard]] inline CroppedArray1DRef<T>
+CroppedArray1DRef<T>::getBlock(int size, int index) const {
+  establishClassInvariants();
+  invariant(index >= 0);
+  invariant(size >= 0);
+  invariant(index <= numElts);
+  invariant(size <= numElts);
+  const int additionalOffset = size * index;
+  invariant(additionalOffset <= numElts);
+  invariant(additionalOffset + size <= numElts);
+  return getCrop(additionalOffset, size);
 }
 
 template <class T> inline T* CroppedArray1DRef<T>::begin() const {
