@@ -633,6 +633,9 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 #pragma omp atomic write
 #endif
         exceptionThrown = true;
+      } catch (...) {
+        // We should not get any other exception type here.
+        __builtin_unreachable();
       }
     }
   }
