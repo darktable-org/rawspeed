@@ -260,8 +260,8 @@ void CrwDecompressor::decompress() {
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
   if (lowbitInput) {
-    Array2DRef<const uint8_t> lowbits(*lowbitInput, out.width() / 4,
-                                      out.height(), out.width() / 4);
+    Array2DRef lowbits(*lowbitInput, out.width() / 4, out.height(),
+                       out.width() / 4);
     for (int row = 0; row < out.height(); row++) {
       for (int col = 0; col < out.width(); /* NOTE: col += 4 */) {
         invariant(col % 4 == 0);
