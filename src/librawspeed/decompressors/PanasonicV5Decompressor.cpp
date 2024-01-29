@@ -244,7 +244,12 @@ void PanasonicV5Decompressor::decompressInternal() const noexcept {
                   implicit_cast<int>(
                       blocks.size()))) { // NOLINT(openmp-exception-escape): we
                                          // have checked size already.
-    processBlock<dsc>(block);
+    try {
+      processBlock<dsc>(block);
+    } catch (...) {
+      // We should not get any exceptions here.
+      __builtin_unreachable();
+    }
   }
 }
 

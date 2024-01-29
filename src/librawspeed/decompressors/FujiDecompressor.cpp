@@ -810,14 +810,17 @@ void FujiDecompressorImpl::decompressThread() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (int block = 0; block < header.blocks_in_row; ++block) {
-    FujiStrip strip(header, block, strips(block));
-    block_info.reset();
     try {
+      FujiStrip strip(header, block, strips(block));
+      block_info.reset();
       block_info.pump = BitStreamerMSB(strip.input);
       block_info.fuji_decode_strip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }

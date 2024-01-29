@@ -248,8 +248,14 @@ void PanasonicV4Decompressor::decompressThread() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (const auto& block :
-       Array1DRef(blocks.data(), implicit_cast<int>(blocks.size())))
-    processBlock(block, &zero_pos);
+       Array1DRef(blocks.data(), implicit_cast<int>(blocks.size()))) {
+    try {
+      processBlock(block, &zero_pos);
+    } catch (...) {
+      // We should not get any exceptions here.
+      __builtin_unreachable();
+    }
+  }
 
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);

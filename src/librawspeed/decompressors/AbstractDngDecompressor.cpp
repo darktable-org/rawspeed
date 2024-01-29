@@ -56,26 +56,25 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
 #endif
   for (const auto& e :
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
-
-    iPoint2D tileSize(e.width, e.height);
-    iPoint2D pos(e.offX, e.offY);
-
-    bool big_endian = e.bs.getByteOrder() == Endianness::big;
-
-    // DNG spec says that if not 8/16/32 bit/sample, always use big endian.
-    // It's not very obvious, but that does not appear to apply to FP.
-    switch (mBps) {
-    case 8:
-    case 16:
-    case 32:
-      break;
-    default:
-      if (mRaw->getDataType() == RawImageType::UINT16)
-        big_endian = true;
-      break;
-    }
-
     try {
+      iPoint2D tileSize(e.width, e.height);
+      iPoint2D pos(e.offX, e.offY);
+
+      bool big_endian = e.bs.getByteOrder() == Endianness::big;
+
+      // DNG spec says that if not 8/16/32 bit/sample, always use big endian.
+      // It's not very obvious, but that does not appear to apply to FP.
+      switch (mBps) {
+      case 8:
+      case 16:
+      case 32:
+        break;
+      default:
+        if (mRaw->getDataType() == RawImageType::UINT16)
+          big_endian = true;
+        break;
+      }
+
       const uint32_t inputPixelBits = mRaw->getCpp() * mBps;
 
       if (e.dsc.tileW > std::numeric_limits<int>::max() / inputPixelBits)
@@ -102,6 +101,9 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -119,6 +121,9 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -132,9 +137,9 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
 #endif
   for (const auto& e :
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
-    DeflateDecompressor z(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw,
-                          mPredictor, mBps);
     try {
+      DeflateDecompressor z(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw,
+                            mPredictor, mBps);
       z.decode(&uBuffer, iPoint2D(mRaw->getCpp() * e.dsc.tileW, e.dsc.tileH),
                iPoint2D(mRaw->getCpp() * e.width, e.height),
                iPoint2D(mRaw->getCpp() * e.offX, e.offY));
@@ -142,6 +147,9 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -160,6 +168,9 @@ template <> void AbstractDngDecompressor::decompressThread<9>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -172,13 +183,16 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
 #endif
   for (const auto& e :
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
-    JpegDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw);
     try {
+      JpegDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw);
       j.decode(e.offX, e.offY);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
