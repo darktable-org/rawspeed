@@ -102,6 +102,9 @@ template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -119,6 +122,9 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -142,6 +148,9 @@ template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -160,6 +169,9 @@ template <> void AbstractDngDecompressor::decompressThread<9>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -179,6 +191,9 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
