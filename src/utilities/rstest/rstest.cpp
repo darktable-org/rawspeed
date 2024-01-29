@@ -587,6 +587,9 @@ int main(int argc_, char** argv_) {
 #endif
         failedTests.try_emplace(argv(i), msg);
       }
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 
