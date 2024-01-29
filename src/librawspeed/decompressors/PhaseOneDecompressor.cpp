@@ -146,6 +146,9 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
