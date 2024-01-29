@@ -98,7 +98,12 @@ void PanasonicV7Decompressor::decompress() const {
   for (int row = 0; row < mRaw->dim.y;
        ++row) { // NOLINT(openmp-exception-escape): we know no exceptions will
                 // be thrown.
-    decompressRow(row);
+    try {
+      decompressRow(row);
+    } catch (...) {
+      // We should not get any exceptions here.
+      __builtin_unreachable();
+    }
   }
 }
 
