@@ -361,6 +361,9 @@ void RawImageWorker::performTask() noexcept {
     data->setError(e.what());
   } catch (const IOException& e) {
     data->setError(e.what());
+  } catch (...) {
+    // We should not get any other exception type here.
+    __builtin_unreachable();
   }
 }
 
