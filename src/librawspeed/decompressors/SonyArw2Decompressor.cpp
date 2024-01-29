@@ -126,6 +126,9 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp cancel for
 #endif
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
