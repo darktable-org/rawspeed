@@ -255,10 +255,13 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
     auto predNext = Array1DRef(pred.data(), pred.size());
 
     if (restartIntervalIndex != 0) {
-      auto marker = peekMarker(inputStream);
-      if (!marker) // FIXME: can there be padding bytes before the marker?
+      if (Optional<ByteStream> markerPos =
+              advanceToNextMarker(inputStream, /*skipPadding=*/true))
+        inputStream = *markerPos;
+      else
         ThrowRDE("Jpeg marker not encountered");
-      Optional<int> number = getRestartMarkerNumber(*marker);
+      JpegMarker marker = *peekMarker(inputStream);
+      Optional<int> number = getRestartMarkerNumber(marker);
       if (!number)
         ThrowRDE("Not a restart marker!");
       if (*number != ((restartIntervalIndex - 1) % 8))
