@@ -14161,6 +14161,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SONY" model="ZV-1M2" supported="unknown-no-samples">
+		<ID make="Sony" model="ZV-1M2">Sony ZV-1M2</ID>
+	</Camera>
 	<Camera make="SONY" model="ZV-E1">
 		<ID make="Sony" model="ZV-E1">Sony ZV-E1</ID>
 		<CFA width="2" height="2">
