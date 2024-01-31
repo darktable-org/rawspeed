@@ -99,7 +99,7 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           OS: macOS
-          ARCH: x86_64
+          ARCH: aarch64
           CXX: XCode
           JOB_NAME: macOS.XCode.Coverage
         with:
@@ -115,7 +115,7 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           OS: macOS
-          ARCH: x86_64
+          ARCH: aarch64
           CXX: XCode
           JOB_NAME: macOS.XCode.Coverage
         with:
