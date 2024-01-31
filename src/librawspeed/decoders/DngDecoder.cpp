@@ -603,7 +603,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
     // Default white level is 1.0f. But we can't represent that here.
-    mRaw->whitePoint = 65535;
+    // Fall back to uninitialized value instead.
+    mRaw->whitePoint = 65536;
   }
 
   if (raw->hasEntry(TiffTag::WHITELEVEL)) {
