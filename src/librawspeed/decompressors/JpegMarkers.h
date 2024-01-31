@@ -116,6 +116,23 @@ inline Optional<JpegMarker> peekMarker(ByteStream input) {
   return {};
 }
 
+inline Optional<ByteStream> advanceToNextMarker(ByteStream input,
+                                                bool skipPadding) {
+  while (input.getRemainSize() >= 2) {
+    if (Optional<JpegMarker> m = peekMarker(input))
+      return input;
+
+    // Marker not found. Might there be leading padding bytes?
+    if (!skipPadding)
+      break; // Nope, give up.
+
+    // Advance by a single(!) byte and try again.
+    input.skipBytes(1);
+  }
+
+  return std::nullopt;
+}
+
 // Get the number of this restart marker (modulo 8).
 inline Optional<int> getRestartMarkerNumber(JpegMarker m) {
   switch (m) {

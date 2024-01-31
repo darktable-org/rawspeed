@@ -199,6 +199,7 @@ struct BitStreamerForwardSequentialReplenisher final
   inline void markNumBytesAsConsumed(typename Base::size_type numBytes) {
     Base::establishClassInvariants();
     invariant(numBytes >= 0);
+    invariant(numBytes != 0);
     Base::pos += numBytes;
   }
 

@@ -26,6 +26,7 @@
 #include "adt/Optional.h"
 #include "bench/Common.h"
 #include "common/Common.h"
+#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -169,7 +170,7 @@ struct JPEGUnstuffedByteStreamGenerator final {
   }
 };
 
-void BM_BitStreamerJPEG(benchmark::State& state, bool Stuffed) {
+template <typename T> void BM(benchmark::State& state, bool Stuffed) {
   int64_t numBytes = state.range(0);
   assert(numBytes > 0);
   assert(numBytes <= std::numeric_limits<int>::max());
@@ -189,7 +190,7 @@ void BM_BitStreamerJPEG(benchmark::State& state, bool Stuffed) {
   benchmark::DoNotOptimize(input->begin());
 
   for (auto _ : state) {
-    BitStreamerJPEG bs(*input);
+    T bs(*input);
 
     constexpr int MaxGetBits = 32;
     int processedBytes = 0;
@@ -237,8 +238,23 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
-BENCHMARK_CAPTURE(BM_BitStreamerJPEG, Stuffed, true)->Apply(CustomArguments);
-BENCHMARK_CAPTURE(BM_BitStreamerJPEG, Unstuffed, false)->Apply(CustomArguments);
+#ifndef BENCHMARK_TEMPLATE1_CAPTURE
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define BENCHMARK_TEMPLATE1_CAPTURE(func, a, test_case_name, ...)              \
+  BENCHMARK_PRIVATE_DECLARE(func) =                                            \
+      (::benchmark::internal::RegisterBenchmarkInternal(                       \
+          new ::benchmark::internal::FunctionBenchmark(                        \
+              #func "<" #a ">"                                                 \
+                    "/" #test_case_name,                                       \
+              [](::benchmark::State& st) { func<a>(st, __VA_ARGS__); })))
+#endif // BENCHMARK_TEMPLATE1_CAPTURE
+
+BENCHMARK_TEMPLATE1_CAPTURE(BM, BitStreamerJPEG, Stuffed, true)
+    ->Apply(CustomArguments);
+BENCHMARK_TEMPLATE1_CAPTURE(BM, BitStreamerJPEG, Unstuffed, false)
+    ->Apply(CustomArguments);
+BENCHMARK_TEMPLATE1_CAPTURE(BM, BitStreamerMSB, Unstuffed, false)
+    ->Apply(CustomArguments);
 
 } // namespace
 
