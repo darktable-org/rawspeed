@@ -296,7 +296,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
       decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
     }
 
-    inputStream.skipBytes(bs.getStreamPosition());
+    // FIXME: inputStream.skipBytes(bs.getStreamPosition());
   }
 
   return inputStream.getPosition();
