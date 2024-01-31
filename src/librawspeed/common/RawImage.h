@@ -163,6 +163,11 @@ public:
   int blackLevel = -1;
   std::array<int, 4> blackLevelSeparateStorage;
   Optional<Array2DRef<int>> blackLevelSeparate;
+  // A white level of the image, if known.
+  // NOTE: it is always correct to divide the pixel by float(whiteLevel) to
+  // normalize the image.
+  // NOTE: for floating-point images, the white level is never non-integral, and
+  // thus >= 1.0f
   Optional<int> whitePoint;
   std::vector<BlackArea> blackAreas;
 
