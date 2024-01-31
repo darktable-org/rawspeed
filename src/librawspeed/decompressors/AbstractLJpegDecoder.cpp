@@ -278,19 +278,14 @@ void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
 }
 
 JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
-  while (input.getRemainSize() >= 2) {
-    if (Optional<JpegMarker> m = peekMarker(input)) {
-      input.skipBytes(2); // Skip the bytes we've just consumed.
-      return *m;
-    }
-    // Marker not found. Might there be leading padding bytes?
-    if (!allowskip)
-      break; // Nope, give up.
-    // Advance by a single(!) byte and try again.
-    input.skipBytes(1);
-  }
+  if (Optional<ByteStream> markerPos = advanceToNextMarker(input, allowskip))
+    input = *markerPos;
+  else
+    ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
 
-  ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
+  JpegMarker m = *peekMarker(input);
+  input.skipBytes(2); // Skip the bytes we've just consumed.
+  return m;
 }
 
 } // namespace rawspeed
