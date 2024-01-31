@@ -149,7 +149,7 @@ void RawImageDataU16::scaleBlackWhite() {
   const int skipBorder = 250;
   int gw = (dim.x - skipBorder) * cpp;
   if ((blackAreas.empty() && !blackLevelSeparate && blackLevel < 0) ||
-      whitePoint >= 65536) { // Estimate
+      !whitePoint) { // Estimate
     int b = 65536;
     int m = 0;
     auto img = getU16DataAsCroppedArray2DRef();
@@ -162,11 +162,11 @@ void RawImageDataU16::scaleBlackWhite() {
     }
     if (blackLevel < 0)
       blackLevel = b;
-    if (whitePoint >= 65536)
+    if (!whitePoint)
       whitePoint = m;
     writeLog(DEBUG_PRIO::INFO,
              "ISO:%d, Estimated black:%d, Estimated white: %d",
-             metadata.isoSpeed, blackLevel, whitePoint);
+             metadata.isoSpeed, blackLevel, *whitePoint);
   }
 
   /* Skip, if not needed */
@@ -189,7 +189,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 
 #else
 
-  int depth_values = whitePoint - (*blackLevelSeparate)(0, 0);
+  int depth_values = *whitePoint - (*blackLevelSeparate)(0, 0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Check SSE2
@@ -207,7 +207,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
-  int depth_values = whitePoint - blackLevelSeparate1D(0);
+  int depth_values = *whitePoint - blackLevelSeparate1D(0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Scale in 30.2 fp
@@ -228,10 +228,10 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   // 10 bit fraction
   uint32_t mul = static_cast<int>(
       1024.0F * 65535.0F /
-      static_cast<float>(whitePoint - blackLevelSeparate1D(mOffset.x & 1)));
+      static_cast<float>(*whitePoint - blackLevelSeparate1D(mOffset.x & 1)));
   mul |= (static_cast<int>(
              1024.0F * 65535.0F /
-             static_cast<float>(whitePoint -
+             static_cast<float>(*whitePoint -
                                 blackLevelSeparate1D((mOffset.x + 1) & 1))))
          << 16;
   uint32_t b = blackLevelSeparate1D(mOffset.x & 1) |
@@ -244,12 +244,12 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
 
   mul = static_cast<int>(
       1024.0F * 65535.0F /
-      static_cast<float>(whitePoint -
+      static_cast<float>(*whitePoint -
                          blackLevelSeparate1D(2 + (mOffset.x & 1))));
   mul |= (static_cast<int>(
              1024.0F * 65535.0F /
-             static_cast<float>(
-                 whitePoint - blackLevelSeparate1D(2 + ((mOffset.x + 1) & 1)))))
+             static_cast<float>(*whitePoint - blackLevelSeparate1D(
+                                                  2 + ((mOffset.x + 1) & 1)))))
          << 16;
   b = blackLevelSeparate1D(2 + (mOffset.x & 1)) |
       (blackLevelSeparate1D(2 + ((mOffset.x + 1) & 1)) << 16);
@@ -348,7 +348,7 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
-  int depth_values = whitePoint - blackLevelSeparate1D(0);
+  int depth_values = *whitePoint - blackLevelSeparate1D(0);
   float app_scale = 65535.0F / implicit_cast<float>(depth_values);
 
   // Scale in 30.2 fp
@@ -368,7 +368,7 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
       v ^= 2;
     mul[i] = static_cast<int>(
         16384.0F * 65535.0F /
-        static_cast<float>(whitePoint - blackLevelSeparate1D(v)));
+        static_cast<float>(*whitePoint - blackLevelSeparate1D(v)));
     sub[i] = blackLevelSeparate1D(v);
   }
   for (int y = start_y; y < end_y; y++) {

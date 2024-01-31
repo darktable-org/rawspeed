@@ -123,7 +123,7 @@ void RawImageDataFloat::scaleBlackWhite() {
   const int skipBorder = 150;
   int gw = (dim.x - skipBorder) * cpp;
   if ((blackAreas.empty() && !blackLevelSeparate && blackLevel < 0) ||
-      whitePoint == 65536) { // Estimate
+      !whitePoint) { // Estimate
     float b = 100000000;
     float m = -10000000;
     for (int row = skipBorder * cpp; row < (dim.y - skipBorder); row++) {
@@ -135,10 +135,10 @@ void RawImageDataFloat::scaleBlackWhite() {
     }
     if (blackLevel < 0)
       blackLevel = static_cast<int>(b);
-    if (whitePoint == 65536)
+    if (!whitePoint)
       whitePoint = static_cast<int>(m);
     writeLog(DEBUG_PRIO::INFO, "Estimated black:%d, Estimated white: %d",
-             blackLevel, whitePoint);
+             blackLevel, *whitePoint);
   }
 
   /* If filter has not set separate blacklevel, compute or fetch it */
@@ -162,7 +162,7 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
     if ((mOffset.y & 1) != 0)
       v ^= 2;
     mul[i] =
-        65535.0F / static_cast<float>(whitePoint - blackLevelSeparate1D(v));
+        65535.0F / static_cast<float>(*whitePoint - blackLevelSeparate1D(v));
     sub[i] = static_cast<float>(blackLevelSeparate1D(v));
   }
   for (int y = start_y; y < end_y; y++) {

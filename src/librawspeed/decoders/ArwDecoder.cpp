@@ -538,7 +538,8 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
 
   setMetaData(meta, id, "", iso);
-  mRaw->whitePoint >>= mShiftDownScale;
+  if (mRaw->whitePoint)
+    mRaw->whitePoint = *mRaw->whitePoint >> mShiftDownScale;
   mRaw->blackLevel >>= mShiftDownScale;
 
   // Set the whitebalance

@@ -346,7 +346,8 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - blackLevelSeparate1D(0));
+        mRaw->whitePoint =
+            *mRaw->whitePoint - (mRaw->blackLevel - blackLevelSeparate1D(0));
       }
     }
   }

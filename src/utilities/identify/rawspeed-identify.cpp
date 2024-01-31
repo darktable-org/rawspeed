@@ -179,7 +179,13 @@ int main(int argc_, char* argv_[]) { // NOLINT
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
-    fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
+
+    fprintf(stdout, "whitePoint: ");
+    if (!r->whitePoint)
+      fprintf(stdout, "unknown");
+    else
+      fprintf(stdout, "%d", *r->whitePoint);
+    fprintf(stdout, "\n");
 
     fprintf(stdout, "blackLevelSeparate: ");
     if (!r->blackLevelSeparate) {

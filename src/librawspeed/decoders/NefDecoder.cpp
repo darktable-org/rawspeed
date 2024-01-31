@@ -612,8 +612,8 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
                    CFAColor::GREEN, CFAColor::BLUE);
 
-  int white = mRaw->whitePoint;
-  int black = mRaw->blackLevel;
+  auto makernotesWhite = mRaw->whitePoint;
+  int makernotesBlack = mRaw->blackLevel;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
@@ -651,10 +651,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     setMetaData(meta, id, "", iso);
   }
 
-  if (white != 65536)
-    mRaw->whitePoint = white;
-  if (black != -1)
-    mRaw->blackLevel = black;
+  if (makernotesWhite)
+    mRaw->whitePoint = *makernotesWhite;
+  if (makernotesBlack != -1)
+    mRaw->blackLevel = makernotesBlack;
 }
 
 // DecodeNikonYUY2 decodes 12 bit data in an YUY2-like pattern (2 Luma, 1 Chroma
