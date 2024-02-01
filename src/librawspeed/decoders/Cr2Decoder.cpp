@@ -421,7 +421,7 @@ bool Cr2Decoder::decodeCanonColorData() const {
       for (int c = 0; c != 4; ++c)
         blackLevelSeparate1D(c) >>= bitDepthDiff;
     }
-    mRaw->whitePoint >>= bitDepthDiff;
+    mRaw->whitePoint = *mRaw->whitePoint >> bitDepthDiff;
   }
 
   return true;
@@ -500,10 +500,10 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = 0;
     mRaw->blackLevelSeparate = std::nullopt;
   }
-  if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
-    mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
+  if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + *mRaw->whitePoint))
+    mRaw->whitePoint = ((1 + *mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
   else
-    mRaw->whitePoint <<= mShiftUpScaleForExif;
+    mRaw->whitePoint = *mRaw->whitePoint << mShiftUpScaleForExif;
 }
 
 bool Cr2Decoder::isSubSampled() const {

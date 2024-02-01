@@ -184,7 +184,13 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "isoSpeed: %d\n", r->metadata.isoSpeed);
   APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
-  APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
+
+  APPEND(&oss, "whitePoint: ");
+  if (!r->whitePoint)
+    APPEND(&oss, "unknown");
+  else
+    APPEND(&oss, "%d", *r->whitePoint);
+  APPEND(&oss, "\n");
 
   APPEND(&oss, "blackLevelSeparate: ");
   if (!r->blackLevelSeparate) {

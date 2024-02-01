@@ -87,6 +87,10 @@ public:
 
   explicit operator bool() const { return has_value(); }
 
+  template <typename U> T value_or(U&& fallback) const& {
+    return impl.value_or(std::forward<U>(fallback));
+  }
+
   void reset() { impl.reset(); }
 };
 

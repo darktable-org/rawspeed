@@ -163,7 +163,7 @@ public:
   int blackLevel = -1;
   std::array<int, 4> blackLevelSeparateStorage;
   Optional<Array2DRef<int>> blackLevelSeparate;
-  int whitePoint = 65536;
+  Optional<int> whitePoint;
   std::vector<BlackArea> blackAreas;
 
   /* Vector containing the positions of bad pixels */
