@@ -602,9 +602,9 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
     // Default white level is (2 ** BitsPerSample) - 1
     mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
-    // Default white level is 1.0f. But we can't represent that here.
-    // Fall back to uninitialized value instead.
-    mRaw->whitePoint = 65536;
+    // Default white level is 1.0f. But we can't represent that here,
+    // so just claim that we don't know it, and users shall default to 1.0F.
+    mRaw->whitePoint.reset();
   }
 
   if (raw->hasEntry(TiffTag::WHITELEVEL)) {
