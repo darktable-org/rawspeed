@@ -28,4 +28,8 @@ target_include_directories(rawspeed_parsers PUBLIC "${RAWSPEED_BINARY_DIR}/src")
 target_include_directories(rawspeed_parsers SYSTEM PUBLIC "${RAWSPEED_SOURCE_DIR}/src/external")
 target_include_directories(rawspeed_parsers PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
+if(TARGET RawSpeed::OpenMP_CXX)
+  target_link_libraries(rawspeed_parsers PUBLIC RawSpeed::OpenMP_CXX)
+endif()
+
 target_link_libraries(rawspeed PRIVATE rawspeed_parsers)
