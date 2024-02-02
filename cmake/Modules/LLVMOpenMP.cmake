@@ -25,6 +25,9 @@ endif()
 # We are building it separately from the LLVM itself.
 set(OPENMP_STANDALONE_BUILD ON CACHE BOOL "" FORCE)
 
+# We never want offloading support.
+set(OPENMP_ENABLE_LIBOMPTARGET OFF CACHE BOOL "" FORCE)
+
 # let's insist on static library.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(LIBOMP_ENABLE_SHARED OFF CACHE BOOL "" FORCE)
