@@ -428,6 +428,9 @@ bool Cr2Decoder::decodeCanonColorData() const {
 }
 
 void Cr2Decoder::parseWhiteBalance() const {
+  // Default white point is LJpeg sample precision.
+  mRaw->whitePoint = (1U << ljpegSamplePrecision) - 1;
+
   if (decodeCanonColorData())
     return;
 
