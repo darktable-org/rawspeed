@@ -815,7 +815,7 @@ void VC5Decompressor::createWaveletBandDecodingTasks(
   for (int waveletLevel = numWaveletLevels; waveletLevel >= 0; waveletLevel--) {
     const int numBandsInCurrentWavelet =
         waveletLevel == 0 ? 1 : Wavelet::maxBands;
-    for (int bandId = 0; bandId != numBandsInCurrentWavelet; ++bandId) {
+    for (int bandId = numBandsInCurrentWavelet - 1; bandId >= 0; --bandId) {
       for (const auto& channel : channels) {
         channel.wavelets[waveletLevel].bands[bandId]->createDecodingTasks(
             static_cast<ErrorLog&>(*mRaw), exceptionThrown);
