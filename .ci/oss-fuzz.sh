@@ -30,7 +30,7 @@ cd build
 # https://github.com/google/oss-fuzz/pull/2781).
 ln -f -s /usr/bin/gold /usr/bin/ld
 cmake \
-  -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=ON \
+  -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=OFF \
   -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
   -DBUILD_TESTING=OFF -DBUILD_TOOLS=OFF -DBUILD_BENCHMARKING=OFF \
   -DCMAKE_BUILD_TYPE=FUZZ -DBUILD_FUZZERS=ON \
