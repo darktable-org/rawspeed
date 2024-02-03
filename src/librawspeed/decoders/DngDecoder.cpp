@@ -380,7 +380,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   }
 
   AbstractDngDecompressor slices(mRaw, getTilingDescription(raw), compression,
-                                 mFixLjpeg, bps, predictor);
+                                 mFixLjpeg, *bps, predictor);
 
   slices.slices.reserve(slices.dsc.numTiles);
 
@@ -443,8 +443,8 @@ RawImage DngDecoder::decodeRawInternal() {
   const TiffIFD* raw = data[0];
 
   bps = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
-  if (bps < 1 || bps > 32)
-    ThrowRDE("Unsupported bit per sample count: %u.", bps);
+  if (*bps < 1 || *bps > 32)
+    ThrowRDE("Unsupported bit per sample count: %u.", *bps);
 
   uint32_t sample_format = 1;
   if (raw->hasEntry(TiffTag::SAMPLEFORMAT))
@@ -474,10 +474,10 @@ RawImage DngDecoder::decodeRawInternal() {
     writeLog(DEBUG_PRIO::EXTRA, "This is NOT a CFA image");
   }
 
-  if (sample_format == 1 && bps > 16)
+  if (sample_format == 1 && *bps > 16)
     ThrowRDE("Integer precision larger than 16 bits currently not supported.");
 
-  if (sample_format == 3 && bps != 16 && bps != 24 && bps != 32)
+  if (sample_format == 3 && *bps != 16 && *bps != 24 && *bps != 32)
     ThrowRDE("Floating point must be 16/24/32 bits per sample.");
 
   mRaw->dim.x = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
@@ -595,7 +595,7 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
 
   if (mRaw->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
-    mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
+    mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
     // Default white level is 1.0f. But we can't represent that here,
     // so just claim that we don't know it, and users shall default to 1.0F.
