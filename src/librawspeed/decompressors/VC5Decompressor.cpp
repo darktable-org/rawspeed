@@ -341,9 +341,14 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
   auto& reconstructedLowpass = data;
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) depend(in : lowpass, highpass)
+#pragma omp task default(none) shared(exceptionThrown)                         \
+    depend(in : lowpass, highpass)
 #endif
-  wavelet.bands.clear();
+  {
+    if (!readValue(exceptionThrown)) {
+      wavelet.bands.clear();
+    }
+  }
 
 #ifdef HAVE_OPENMP
 #pragma omp task default(none)                                                 \
@@ -815,10 +820,13 @@ void VC5Decompressor::createWaveletBandDecodingTasks(
   for (int waveletLevel = numWaveletLevels; waveletLevel >= 0; waveletLevel--) {
     const int numBandsInCurrentWavelet =
         waveletLevel == 0 ? 1 : Wavelet::maxBands;
-    for (int bandId = 0; bandId != numBandsInCurrentWavelet; ++bandId) {
+    for (int bandId = numBandsInCurrentWavelet - 1; bandId >= 0; --bandId) {
       for (const auto& channel : channels) {
         channel.wavelets[waveletLevel].bands[bandId]->createDecodingTasks(
             static_cast<ErrorLog&>(*mRaw), exceptionThrown);
+        if (readValue(exceptionThrown)) {
+          return;
+        }
       }
     }
   }

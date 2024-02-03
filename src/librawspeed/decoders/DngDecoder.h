@@ -58,7 +58,7 @@ private:
   bool decodeBlackLevels(const TiffIFD* raw) const;
   void setBlack(const TiffIFD* raw) const;
 
-  int bps = -1;
+  Optional<int> bps;
   int compression = -1;
 };
 
