@@ -173,6 +173,9 @@ iPoint2D RAWSPEED_READONLY RawImageData::getCropOffset() const {
 }
 
 void RawImageData::subFrame(iRectangle2D crop) {
+  if (!crop.hasPositiveArea())
+    ThrowRDE("No positive crop area");
+
   if (!crop.dim.isThisInside(dim - crop.pos)) {
     writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Attempted "
                                   "to create new subframe larger than original "

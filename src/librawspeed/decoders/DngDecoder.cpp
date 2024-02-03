@@ -552,13 +552,8 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
         (size + cropped.pos).isThisInside(mRaw->dim))
       cropped.dim = size;
 
-    if (!cropped.hasPositiveArea())
-      ThrowRDE("No positive crop area");
-
     mRaw->subFrame(cropped);
   }
-  if (mRaw->dim.area() <= 0)
-    ThrowRDE("No image left after crop");
 
   // Adapt DNG DefaultScale to aspect-ratio
   if (raw->hasEntry(TiffTag::DEFAULTSCALE)) {
