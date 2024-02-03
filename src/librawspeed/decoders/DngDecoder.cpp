@@ -372,6 +372,15 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   if (raw->hasEntry(TiffTag::PREDICTOR))
     predictor = raw->getEntry(TiffTag::PREDICTOR)->getU32();
 
+  if (mRaw->getDataType() == RawImageType::UINT16) {
+    // Default white level is (2 ** BitsPerSample) - 1
+    mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
+  } else if (mRaw->getDataType() == RawImageType::F32) {
+    // Default white level is 1.0f. But we can't represent that here,
+    // so just claim that we don't know it, and users shall default to 1.0F.
+    mRaw->whitePoint.reset();
+  }
+
   // Some decompressors (such as VC5) may depend on the white point
   if (raw->hasEntry(TiffTag::WHITELEVEL)) {
     const TiffEntry* whitelevel = raw->getEntry(TiffTag::WHITELEVEL);
@@ -593,20 +602,6 @@ void DngDecoder::handleMetadata(const TiffIFD* raw) {
       mRaw->sixteenBitLookup();
   }
 
-  if (mRaw->getDataType() == RawImageType::UINT16) {
-    // Default white level is (2 ** BitsPerSample) - 1
-    mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
-  } else if (mRaw->getDataType() == RawImageType::F32) {
-    // Default white level is 1.0f. But we can't represent that here,
-    // so just claim that we don't know it, and users shall default to 1.0F.
-    mRaw->whitePoint.reset();
-  }
-
-  if (raw->hasEntry(TiffTag::WHITELEVEL)) {
-    const TiffEntry* whitelevel = raw->getEntry(TiffTag::WHITELEVEL);
-    if (whitelevel->isInt())
-      mRaw->whitePoint = whitelevel->getU32();
-  }
   // Set black
   setBlack(raw);
 
