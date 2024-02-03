@@ -42,6 +42,9 @@ cmake --build "$LIBCXX_BUILD" -- -j$(nproc) cxx cxxabi
 
 CXXFLAGS="$CXXFLAGS -nostdinc++ -nostdlib++ -isystem $LIBCXX_BUILD/include -isystem $LIBCXX_BUILD/include/c++/v1 -L$LIBCXX_BUILD/lib -lc++ -lc++abi"
 
+THINLTO_CACHE="$WORK/thinlto-cache"
+LDFLAGS="${LDFLAGS:-} -Wl,--thinlto-cache-dir=\"$THINLTO_CACHE\""
+
 if [[ $SANITIZER = *undefined* ]]; then
   CFLAGS="$CFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
   CXXFLAGS="$CXXFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
@@ -57,6 +60,7 @@ mkdir build
 cd build
 
 cmake \
+  -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
   -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
   -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
   -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
