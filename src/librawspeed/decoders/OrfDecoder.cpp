@@ -277,6 +277,8 @@ void OrfDecoder::parseCFA() const {
 }
 
 void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
+  mRaw->whitePoint = (1U << 12) - 1;
+
   int iso = 0;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
