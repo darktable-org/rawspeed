@@ -39,7 +39,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 
 # libomp is UB-ridden.
-set(no_sanitizers "-fno-sanitize=address,undefined,memory,integer")
+set(no_sanitizers "-fno-sanitize=undefined,memory,integer")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${no_sanitizers}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${no_sanitizers}")
