@@ -8,10 +8,10 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 80
     steps:
       - name: (OSS-FUZZ) Building with ${{ inputs.sanitizer }} sanitizer
-        timeout-minutes: 15
+        timeout-minutes: 35
         id: build
         uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
         with:
