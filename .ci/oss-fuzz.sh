@@ -45,6 +45,3 @@ cmake \
   "$SRC/librawspeed/"
 
 make -j$(nproc) all && make -j$(nproc) install
-
-cd "$SRC"
-rm -rf "$WORK/build"
