@@ -107,8 +107,7 @@ protected:
   inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
 
     // Start from completely unknown symbol.
@@ -132,8 +131,7 @@ public:
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
@@ -142,8 +140,7 @@ public:
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
@@ -156,8 +153,7 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
 

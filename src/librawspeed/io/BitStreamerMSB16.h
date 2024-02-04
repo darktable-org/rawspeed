@@ -28,26 +28,35 @@
 
 namespace rawspeed {
 
-struct MSB16BitStreamerTag;
+class BitStreamerMSB16;
 
-// The MSB data is ordered in MSB bit order,
-// i.e. we push into the cache from the right and read it from the left
-
-using BitStreamerMSB16 =
-    BitStreamer<MSB16BitStreamerTag, BitStreamerCacheRightInLeftOut>;
-
-template <> struct BitStreamerTraits<MSB16BitStreamerTag> final {
+template <> struct BitStreamerTraits<BitStreamerMSB16> final {
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
   static_assert(MaxProcessBytes == 2 * sizeof(uint16_t));
 };
 
-template <>
+// The MSB data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
+
+class BitStreamerMSB16 final
+    : public BitStreamer<BitStreamerMSB16, BitStreamerCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB16, BitStreamerCacheRightInLeftOut>;
+
+  friend void Base::fill(int); // Allow it to call our `fillCache()`.
+
+  size_type fillCache(Array1DRef<const uint8_t> input);
+
+public:
+  using Base::Base;
+};
+
 inline BitStreamerMSB16::size_type
 BitStreamerMSB16::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamerTraits<tag>::MaxProcessBytes);
+  invariant(input.size() ==
+            BitStreamerTraits<BitStreamerMSB16>::MaxProcessBytes);
 
   for (size_type i = 0; i < 4; i += sizeof(uint16_t)) {
     cache.push(getLE<uint16_t>(input.getCrop(i, sizeof(uint16_t)).begin()), 16);

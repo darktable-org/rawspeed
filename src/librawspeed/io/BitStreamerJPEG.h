@@ -31,14 +31,9 @@
 
 namespace rawspeed {
 
-struct JPEGBitStreamerTag;
+class BitStreamerJPEG;
 
-// The JPEG data is ordered in MSB bit order,
-// i.e. we push into the cache from the right and read it from the left
-using BitStreamerJPEG =
-    BitStreamer<JPEGBitStreamerTag, BitStreamerCacheRightInLeftOut>;
-
-template <> struct BitStreamerTraits<JPEGBitStreamerTag> final {
+template <> struct BitStreamerTraits<BitStreamerJPEG> final {
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -48,19 +43,35 @@ template <> struct BitStreamerTraits<JPEGBitStreamerTag> final {
   static_assert(MaxProcessBytes == sizeof(uint64_t));
 };
 
+// The JPEG data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
+class BitStreamerJPEG final
+    : public BitStreamer<BitStreamerJPEG, BitStreamerCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerJPEG, BitStreamerCacheRightInLeftOut>;
+
+  friend void Base::fill(int); // Allow it to call our `fillCache()`.
+
+  size_type fillCache(Array1DRef<const uint8_t> input);
+
+public:
+  using Base::Base;
+
+  [[nodiscard]] inline size_type getStreamPosition() const;
+};
+
 // NOTE: on average, probability of encountering an `0xFF` byte
 // is ~0.51% (1 in ~197), only ~2.02% (1 in ~50) of 4-byte blocks will contain
 // an `0xFF` byte, and out of *those* blocks, only ~0.77% (1 in ~131)
 // will contain more than one `0xFF` byte.
 
-template <>
 inline BitStreamerJPEG::size_type
 BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamerTraits<tag>::MaxProcessBytes);
+  invariant(input.size() ==
+            BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes);
 
-  std::array<uint8_t, BitStreamerTraits<JPEGBitStreamerTag>::MaxProcessBytes>
+  std::array<uint8_t, BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes>
       prefetch;
   std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
               prefetch.begin());
@@ -120,7 +131,6 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   return p;
 }
 
-template <>
 inline BitStreamerJPEG::size_type BitStreamerJPEG::getStreamPosition() const {
   // the current number of bytes we consumed -> at the end of the stream pos, it
   // points to the JPEG marker FF

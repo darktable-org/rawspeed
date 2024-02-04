@@ -28,26 +28,34 @@
 
 namespace rawspeed {
 
-struct LSBBitStreamerTag;
+class BitStreamerLSB;
 
-// The LSBPump is ordered in LSB bit order,
-// i.e. we push into the cache from the left and read it from the right
-
-using BitStreamerLSB =
-    BitStreamer<LSBBitStreamerTag, BitStreamerCacheLeftInRightOut>;
-
-template <> struct BitStreamerTraits<LSBBitStreamerTag> final {
+template <> struct BitStreamerTraits<BitStreamerLSB> final {
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
   static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
-template <>
+// The LSBPump is ordered in LSB bit order,
+// i.e. we push into the cache from the left and read it from the right
+
+class BitStreamerLSB final
+    : public BitStreamer<BitStreamerLSB, BitStreamerCacheLeftInRightOut> {
+  using Base = BitStreamer<BitStreamerLSB, BitStreamerCacheLeftInRightOut>;
+
+  friend void Base::fill(int); // Allow it to call our `fillCache()`.
+
+  size_type fillCache(Array1DRef<const uint8_t> input);
+
+public:
+  using Base::Base;
+};
+
 inline BitStreamerLSB::size_type
 BitStreamerLSB::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamerTraits<tag>::MaxProcessBytes);
+  invariant(input.size() == BitStreamerTraits<BitStreamerLSB>::MaxProcessBytes);
 
   cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;

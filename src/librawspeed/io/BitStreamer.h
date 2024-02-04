@@ -232,14 +232,18 @@ struct BitStreamerForwardSequentialReplenisher final
   }
 };
 
-template <typename Tag, typename Cache,
-          typename Replenisher = BitStreamerForwardSequentialReplenisher<Tag>>
-class BitStreamer final {
+template <typename Derived, typename Cache,
+          typename Replenisher =
+              BitStreamerForwardSequentialReplenisher<Derived>>
+class BitStreamer {
+public:
+  using size_type = int32_t;
+
+protected:
   Cache cache;
 
+private:
   Replenisher replenisher;
-
-  using size_type = int32_t;
 
   // this method hase to be implemented in the concrete BitStreamer template
   // specializations. It will return the number of bytes processed. It needs
@@ -247,8 +251,6 @@ class BitStreamer final {
   size_type fillCache(Array1DRef<const uint8_t> input);
 
 public:
-  using tag = Tag;
-
   void establishClassInvariants() const noexcept {
     cache.establishClassInvariants();
     replenisher.establishClassInvariants();
@@ -270,7 +272,9 @@ public:
     if (cache.fillLevel >= nbits)
       return;
 
-    replenisher.markNumBytesAsConsumed(fillCache(replenisher.getInput()));
+    const auto input = replenisher.getInput();
+    const auto numBytes = static_cast<Derived*>(this)->fillCache(input);
+    replenisher.markNumBytesAsConsumed(numBytes);
   }
 
   // these methods might be specialized by implementations that support it

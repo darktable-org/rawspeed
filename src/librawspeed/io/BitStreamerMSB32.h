@@ -28,15 +28,9 @@
 
 namespace rawspeed {
 
-struct MSB32BitStreamerTag;
+class BitStreamerMSB32;
 
-// The MSB data is ordered in MSB bit order,
-// i.e. we push into the cache from the right and read it from the left
-
-using BitStreamerMSB32 =
-    BitStreamer<MSB32BitStreamerTag, BitStreamerCacheRightInLeftOut>;
-
-template <> struct BitStreamerTraits<MSB32BitStreamerTag> final {
+template <> struct BitStreamerTraits<BitStreamerMSB32> final {
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -44,12 +38,27 @@ template <> struct BitStreamerTraits<MSB32BitStreamerTag> final {
   static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
-template <>
+// The MSB data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
+
+class BitStreamerMSB32 final
+    : public BitStreamer<BitStreamerMSB32, BitStreamerCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB32, BitStreamerCacheRightInLeftOut>;
+
+  friend void Base::fill(int); // Allow it to call our `fillCache()`.
+
+  size_type fillCache(Array1DRef<const uint8_t> input);
+
+public:
+  using Base::Base;
+};
+
 inline BitStreamerMSB32::size_type
 BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamerTraits<tag>::MaxProcessBytes);
+  invariant(input.size() ==
+            BitStreamerTraits<BitStreamerMSB32>::MaxProcessBytes);
 
   cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;
