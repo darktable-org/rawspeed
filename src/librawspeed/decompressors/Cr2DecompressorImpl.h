@@ -459,8 +459,7 @@ Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
       }
     }
   }
-  // FIXME: return bs.getStreamPosition();
-  return 0; // We don't know how far we've advanced.
+  return bs.getStreamPosition();
 }
 
 template <typename PrefixCodeDecoder>
