@@ -151,8 +151,7 @@ public:
   inline __attribute__((always_inline)) int
   decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
@@ -162,8 +161,7 @@ public:
   inline __attribute__((always_inline)) int
   decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
@@ -176,8 +174,7 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamerTraits<
-            typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);

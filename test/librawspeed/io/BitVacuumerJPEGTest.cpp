@@ -192,7 +192,7 @@ TEST_P(BitVacuumerJPEGTest, Dissolution) {
     return;
 
   if (constexpr int MinSize =
-          BitStreamerTraits<typename BitStreamerJPEG::tag>::MaxProcessBytes;
+          BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes;
       expectedOutput.size() < MinSize)
     expectedOutput.resize(MinSize, uint8_t(0));
 

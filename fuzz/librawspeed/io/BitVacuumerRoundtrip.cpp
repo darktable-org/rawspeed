@@ -144,8 +144,7 @@ std::vector<uint8_t> produceBitstream(const InputWrapper& w) {
   }
 
   using BitStreamer = typename BitStreamRoundtripTypes<flavor>::streamer;
-  if (constexpr int MinSize =
-          BitStreamerTraits<typename BitStreamer::tag>::MaxProcessBytes;
+  if (constexpr int MinSize = BitStreamerTraits<BitStreamer>::MaxProcessBytes;
       bitstream.size() < MinSize)
     bitstream.resize(MinSize, uint8_t(0));
 
