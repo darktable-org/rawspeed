@@ -158,8 +158,8 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
       v ^= 1;
     if ((mOffset.y & 1) != 0)
       v ^= 2;
-    mul[i] = 65535.0F / static_cast<float>(whitePoint.value_or(1.0F) -
-                                           blackLevelSeparate1D(v));
+    mul[i] =
+        65535.0F / static_cast<float>(*whitePoint - blackLevelSeparate1D(v));
     sub[i] = static_cast<float>(blackLevelSeparate1D(v));
   }
   for (int y = start_y; y < end_y; y++) {
