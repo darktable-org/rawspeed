@@ -31,6 +31,34 @@
 
 namespace rawspeed {
 
+template <typename T>
+  requires std::signed_integral<T>
+class PosOrUnknown final {
+  T val = -1; // Start with unknown position.
+
+public:
+  PosOrUnknown() = default;
+
+  [[nodiscard]] bool has_value() const RAWSPEED_READONLY { return val >= 0; }
+
+  template <typename U>
+    requires std::same_as<U, T>
+  PosOrUnknown& operator=(U newValue) {
+    invariant(!has_value());
+    val = newValue;
+    invariant(has_value());
+    return *this;
+  }
+
+  template <typename U>
+    requires std::same_as<U, T>
+  [[nodiscard]] T value_or(U fallback) const {
+    if (has_value())
+      return val;
+    return fallback;
+  }
+};
+
 class BitStreamerJPEG;
 
 template <> struct BitStreamerTraits<BitStreamerJPEG> final {
@@ -48,6 +76,8 @@ template <> struct BitStreamerTraits<BitStreamerJPEG> final {
 class BitStreamerJPEG final
     : public BitStreamer<BitStreamerJPEG, BitStreamerCacheRightInLeftOut> {
   using Base = BitStreamer<BitStreamerJPEG, BitStreamerCacheRightInLeftOut>;
+
+  PosOrUnknown<size_type> endOfStreamPos;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 
@@ -108,6 +138,8 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
     }
 
     // Found FF/xx with xx != 00. This is the end of stream marker.
+    endOfStreamPos = getInputPosition() + p;
+
     // That means we shouldn't have pushed last 8 bits (0xFF, from c0).
     // We need to "unpush" them, and fill the vacant cache bits with zeros.
 
@@ -132,9 +164,9 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
 }
 
 inline BitStreamerJPEG::size_type BitStreamerJPEG::getStreamPosition() const {
-  // the current number of bytes we consumed -> at the end of the stream pos, it
-  // points to the JPEG marker FF
-  return getInputPosition();
+  // The current number of bytes we consumed.
+  // When at the end of the stream pos, it points to the JPEG marker FF
+  return endOfStreamPos.value_or(getInputPosition());
 }
 
 } // namespace rawspeed
