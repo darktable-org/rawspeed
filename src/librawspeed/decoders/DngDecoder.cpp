@@ -376,9 +376,21 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
     // Default white level is (2 ** BitsPerSample) - 1
     mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
-    // Default white level is 1.0f. But we can't represent that here,
-    // so just claim that we don't know it, and users shall default to 1.0F.
-    mRaw->whitePoint.reset();
+    // 1. We divide by white level to normalize the image,
+    //    s.t. the 1.0 becomes the white level.
+    // 2. In DNG spec, white level is always an integer,
+    //    there can not be a non-integral white level.
+    // 3. Additionally, no white level for FP DNG's means that
+    //    it is pre-normalized (default is 1.0).
+    //
+    // Therefore, we can surmise that:
+    // a) FP DNG's never have white level of <1.0
+    // b) FP DNG's always have integral white level
+    // c) if FP DNG has a white level of `w`, it is always correct
+    //    to divide by `float(w)` to normalize the image
+    // ... therefore, we can, as an optimization,
+    // store FP DNG white level as an integer.
+    mRaw->whitePoint = 1;
   }
 
   // Some decompressors (such as VC5) may depend on the white point
