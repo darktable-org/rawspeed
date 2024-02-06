@@ -17504,6 +17504,9 @@
 	<Camera make="Leica Camera AG" model="LEICA M-D (Typ 262)" mode="dng">
 		<ID make="Leica" model="M-D (Typ 262)">LEICA M-D (Typ 262)</ID>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X1" mode="dng">
+		<ID make="Leica" model="X1">LEICA X1</ID>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA X2" mode="dng">
 		<ID make="Leica" model="X2">LEICA X2</ID>
 		<ColorMatrices>
