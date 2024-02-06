@@ -61,8 +61,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       rawspeed::Array2DRef<uint16_t> img =
           mRaw->getU16DataAsUncroppedArray2DRef();
       const uint16_t fill = bs.getU16();
-      for (auto row = 0; row < img.height; ++row) {
-        for (auto col = 0; col < img.width; ++col) {
+      for (auto row = 0; row < img.height(); ++row) {
+        for (auto col = 0; col < img.width(); ++col) {
           img(row, col) = fill;
         }
       }
@@ -71,8 +71,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     case rawspeed::RawImageType::F32: {
       rawspeed::Array2DRef<float> img = mRaw->getF32DataAsUncroppedArray2DRef();
       const float fill = bs.getFloat();
-      for (auto row = 0; row < img.height; ++row) {
-        for (auto col = 0; col < img.width; ++col) {
+      for (auto row = 0; row < img.height(); ++row) {
+        for (auto col = 0; col < img.width(); ++col) {
           img(row, col) = fill;
         }
       }

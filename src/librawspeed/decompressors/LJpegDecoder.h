@@ -31,7 +31,7 @@ class RawImage;
 // Decompresses Lossless JPEGs, with 2-4 components
 
 class LJpegDecoder final : public AbstractLJpegDecoder {
-  void decodeScan() override;
+  [[nodiscard]] ByteStream::size_type decodeScan() override;
 
   uint32_t offX = 0;
   uint32_t offY = 0;

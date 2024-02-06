@@ -22,7 +22,10 @@
 
 #include "rawspeedconfig.h"
 #include "decoders/CrwDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
@@ -42,6 +45,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -57,8 +61,8 @@ bool CrwDecoder::isCRW(Buffer input) {
   static const std::array<char, 8> magic = {
       {'H', 'E', 'A', 'P', 'C', 'C', 'D', 'R'}};
   static const size_t magic_offset = 6;
-  const unsigned char* data = input.getData(magic_offset, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(magic_offset, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
 CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file)
@@ -80,6 +84,10 @@ RawImage CrwDecoder::decodeRawInternal() {
   uint32_t height = sensorInfo->getU16(2);
   mRaw->dim = iPoint2D(width, height);
 
+  if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
+      height > 3048 || (height * width) % 64 != 0)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   const CiffEntry* decTable =
       mRootIFD->getEntryRecursive(CiffTag::DECODERTABLE);
   if (!decTable || decTable->type != CiffDataType::LONG)
@@ -90,7 +98,24 @@ RawImage CrwDecoder::decodeRawInternal() {
 
   bool lowbits = !hints.contains("no_decompressed_lowbits");
 
-  CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
+  ByteStream rawInput = rawData->getData();
+
+  Optional<Array1DRef<const uint8_t>> lowbitInput;
+  if (lowbits) {
+    // If there are low bits, the first part (size is calculable) is low bits
+    // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
+    const int lBlocks = 1 * height * width / 4;
+    invariant(lBlocks > 0);
+    lowbitInput = rawInput.getStream(lBlocks);
+  }
+
+  // We always ignore next 514 bytes of 'padding'. No idea what is in there.
+  rawInput.skipBytes(514);
+
+  Array1DRef<const uint8_t> input =
+      rawInput.peekRemainingBuffer().getAsArray1DRef();
+
+  CrwDecompressor c(mRaw, dec_table, input, lowbitInput);
   mRaw->createData();
   c.decompress();
 
@@ -220,7 +245,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       if (wb_index > 9)
         ThrowRDE("Invalid white balance index");
-      int wb_offset = 1 + ("0134567028"[wb_index] - '0') * 4;
+      int wb_offset = 1 + (std::string_view("0134567028")[wb_index] - '0') * 4;
       mRaw->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
       mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
       mRaw->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);

@@ -22,10 +22,12 @@
 
 #include "decoders/Cr2Decoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
-#include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/Cr2Decompressor.h"
@@ -44,8 +46,8 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -209,7 +211,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
 RawImage Cr2Decoder::decodeRawInternal() {
   if (mRootIFD->getSubIFDs().size() < 4)
     return decodeOldFormat();
-  else // NOLINT ok, here it make sense
+  else // NOLINT(readability-else-after-return): ok, here it make sense
     return decodeNewFormat();
 }
 
@@ -237,7 +239,7 @@ enum class ColorDataFormat {
   ColorData8,
 };
 
-[[nodiscard]] std::optional<std::pair<ColorDataFormat, std::optional<int>>>
+[[nodiscard]] Optional<std::pair<ColorDataFormat, Optional<int>>>
 deduceColorDataFormat(const TiffEntry* ccd) {
   // The original ColorData, detect by it's fixed size.
   if (ccd->count == 582)
@@ -305,9 +307,9 @@ deduceColorDataFormat(const TiffEntry* ccd) {
   __builtin_unreachable();
 }
 
-[[nodiscard]] std::optional<std::pair<int, int>>
+[[nodiscard]] Optional<std::pair<int, int>>
 getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
-                                        int colorDataVersion) {
+                                        Optional<int> colorDataVersion) {
   switch (f) {
     using enum ColorDataFormat;
   case ColorData1:
@@ -316,7 +318,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     // These seemingly did not contain `SpecularWhiteLevel` yet.
     return std::nullopt;
   case ColorData4:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 2:
     case 3:
       return std::nullopt; // Still no `SpecularWhiteLevel`.
@@ -332,7 +334,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
       __builtin_unreachable();
     }
   case ColorData5:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case -4:
       return {{333, 1386}};
     case -3:
@@ -342,14 +344,14 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
     }
   case ColorData6:
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 10:
       return {{479, 484}};
     default:
       __builtin_unreachable();
     }
   case ColorData7:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 10:
       return {{504, 509}};
     case 11:
@@ -358,7 +360,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
       __builtin_unreachable();
     }
   case ColorData8:
-    switch (colorDataVersion) {
+    switch (*colorDataVersion) {
     case 12:
     case 13:
     case 15:
@@ -373,7 +375,7 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
 }
 
 [[nodiscard]] bool shouldRescaleBlackLevels(ColorDataFormat f,
-                                            int colorDataVersion) {
+                                            Optional<int> colorDataVersion) {
   return f != ColorDataFormat::ColorData5 || colorDataVersion != -3;
 }
 
@@ -397,13 +399,17 @@ bool Cr2Decoder::decodeCanonColorData() const {
   mRaw->metadata.wbCoeffs[1] = static_cast<float>(wb->getU16(offset + 1));
   mRaw->metadata.wbCoeffs[2] = static_cast<float>(wb->getU16(offset + 3));
 
-  auto levelOffsets = getBlackAndWhiteLevelOffsetsInColorData(f, *ver);
+  auto levelOffsets = getBlackAndWhiteLevelOffsetsInColorData(f, ver);
   if (!levelOffsets)
     return false;
 
   mRaw->whitePoint = wb->getU16(levelOffsets->second);
+
+  mRaw->blackLevelSeparate =
+      Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+  auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
   for (int c = 0; c != 4; ++c)
-    mRaw->blackLevelSeparate[c] = wb->getU16(c + levelOffsets->first);
+    blackLevelSeparate1D(c) = wb->getU16(c + levelOffsets->first);
 
   // In Canon MakerNotes, the levels are always unscaled, and are 14-bit,
   // and so if the LJpeg precision was lower, we need to adjust.
@@ -411,14 +417,54 @@ bool Cr2Decoder::decodeCanonColorData() const {
   if (makernotesPrecision > ljpegSamplePrecision) {
     int bitDepthDiff = makernotesPrecision - ljpegSamplePrecision;
     assert(bitDepthDiff >= 1 && bitDepthDiff <= 12);
-    if (shouldRescaleBlackLevels(f, *ver)) {
+    if (shouldRescaleBlackLevels(f, ver)) {
       for (int c = 0; c != 4; ++c)
-        mRaw->blackLevelSeparate[c] >>= bitDepthDiff;
+        blackLevelSeparate1D(c) >>= bitDepthDiff;
     }
-    mRaw->whitePoint >>= bitDepthDiff;
+    mRaw->whitePoint = *mRaw->whitePoint >> bitDepthDiff;
   }
 
   return true;
+}
+
+void Cr2Decoder::parseWhiteBalance() const {
+  // Default white point is LJpeg sample precision.
+  mRaw->whitePoint = (1U << ljpegSamplePrecision) - 1;
+
+  if (decodeCanonColorData())
+    return;
+
+  if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
+      mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
+    const TiffEntry* shot_info =
+        mRootIFD->getEntryRecursive(TiffTag::CANONSHOTINFO);
+    const TiffEntry* g9_wb =
+        mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
+
+    uint16_t wb_index = shot_info->getU16(7);
+    int wb_offset = (wb_index < 18)
+                        ? std::string_view("012347800000005896")[wb_index] - '0'
+                        : 0;
+    wb_offset = wb_offset * 8 + 2;
+
+    mRaw->metadata.wbCoeffs[0] =
+        static_cast<float>(g9_wb->getU32(wb_offset + 1));
+    mRaw->metadata.wbCoeffs[1] =
+        (static_cast<float>(g9_wb->getU32(wb_offset + 0)) +
+         static_cast<float>(g9_wb->getU32(wb_offset + 3))) /
+        2.0F;
+    mRaw->metadata.wbCoeffs[2] =
+        static_cast<float>(g9_wb->getU32(wb_offset + 2));
+  } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
+    // WB for the old 1D and 1DS
+    const TiffEntry* wb =
+        mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
+    if (wb->count >= 3) {
+      mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
+      mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
+      mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
+    }
+  }
 }
 
 void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -446,38 +492,7 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // Fetch the white balance
   try {
-    if (!decodeCanonColorData()) {
-      if (mRootIFD->hasEntryRecursive(TiffTag::CANONSHOTINFO) &&
-          mRootIFD->hasEntryRecursive(TiffTag::CANONPOWERSHOTG9WB)) {
-        const TiffEntry* shot_info =
-            mRootIFD->getEntryRecursive(TiffTag::CANONSHOTINFO);
-        const TiffEntry* g9_wb =
-            mRootIFD->getEntryRecursive(TiffTag::CANONPOWERSHOTG9WB);
-
-        uint16_t wb_index = shot_info->getU16(7);
-        int wb_offset =
-            (wb_index < 18) ? "012347800000005896"[wb_index] - '0' : 0;
-        wb_offset = wb_offset * 8 + 2;
-
-        mRaw->metadata.wbCoeffs[0] =
-            static_cast<float>(g9_wb->getU32(wb_offset + 1));
-        mRaw->metadata.wbCoeffs[1] =
-            (static_cast<float>(g9_wb->getU32(wb_offset + 0)) +
-             static_cast<float>(g9_wb->getU32(wb_offset + 3))) /
-            2.0F;
-        mRaw->metadata.wbCoeffs[2] =
-            static_cast<float>(g9_wb->getU32(wb_offset + 2));
-      } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0xa4))) {
-        // WB for the old 1D and 1DS
-        const TiffEntry* wb =
-            mRootIFD->getEntryRecursive(static_cast<TiffTag>(0xa4));
-        if (wb->count >= 3) {
-          mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
-          mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
-          mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
-        }
-      }
-    }
+    parseWhiteBalance();
   } catch (const RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
@@ -486,13 +501,12 @@ void Cr2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   assert(mShiftUpScaleForExif == 0 || mShiftUpScaleForExif == 2);
   if (mShiftUpScaleForExif) {
     mRaw->blackLevel = 0;
-    for (int c = 0; c != 4; ++c)
-      mRaw->blackLevelSeparate[c] = -1;
+    mRaw->blackLevelSeparate = std::nullopt;
   }
-  if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + mRaw->whitePoint))
-    mRaw->whitePoint = ((1 + mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
+  if (mShiftUpScaleForExif != 0 && isPowerOfTwo(1 + *mRaw->whitePoint))
+    mRaw->whitePoint = ((1 + *mRaw->whitePoint) << mShiftUpScaleForExif) - 1;
   else
-    mRaw->whitePoint <<= mShiftUpScaleForExif;
+    mRaw->whitePoint = *mRaw->whitePoint << mShiftUpScaleForExif;
 }
 
 bool Cr2Decoder::isSubSampled() const {

@@ -21,7 +21,6 @@
 
 #include "metadata/ColorFilterArray.h"
 #include "adt/Point.h"
-#include <algorithm>
 #include <cstdint>
 #include <iosfwd>
 #include <string>

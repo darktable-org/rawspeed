@@ -27,11 +27,9 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <vector>
 #include <gtest/gtest.h>
 
-using rawspeed::clampBits;
 using rawspeed::copyPixels;
 using rawspeed::isAligned;
 using rawspeed::isIn;
@@ -48,31 +46,6 @@ using std::string;
 using std::vector;
 
 namespace rawspeed_test {
-
-using powerOfTwoType = std::tuple<int, bool>;
-class PowerOfTwoTest : public ::testing::TestWithParam<powerOfTwoType> {
-protected:
-  PowerOfTwoTest() = default;
-  virtual void SetUp() {
-    in = std::get<0>(GetParam());
-    expected = std::get<1>(GetParam());
-  }
-
-  int in;        // input
-  bool expected; // expected output
-};
-static const powerOfTwoType powerOfTwoValues[] = {
-    make_tuple(0, true),  make_tuple(1, true),   make_tuple(2, true),
-    make_tuple(3, false), make_tuple(4, true),   make_tuple(5, false),
-    make_tuple(6, false), make_tuple(7, false),  make_tuple(8, true),
-    make_tuple(9, false), make_tuple(10, false), make_tuple(11, false),
-
-};
-INSTANTIATE_TEST_SUITE_P(PowerOfTwoTest, PowerOfTwoTest,
-                         ::testing::ValuesIn(powerOfTwoValues));
-TEST_P(PowerOfTwoTest, PowerOfTwoTest) {
-  ASSERT_EQ(isPowerOfTwo(in), expected);
-}
 
 using RoundDownType = std::tuple<uint64_t, uint64_t, uint64_t>;
 class RoundDownTest : public ::testing::TestWithParam<RoundDownType> {
@@ -225,66 +198,6 @@ TEST_P(IsInTest, IsInTest) {
   ASSERT_EQ(isIn(in, {"foo", "foo2", "bar", "baz"}), expected);
 }
 
-using ClampBitsType = std::tuple<int, int, uint16_t>;
-class ClampBitsTest : public ::testing::TestWithParam<ClampBitsType> {
-protected:
-  ClampBitsTest() = default;
-  virtual void SetUp() {
-    in = std::get<0>(GetParam());
-    n = std::get<1>(GetParam());
-    expected = std::get<2>(GetParam());
-  }
-
-  int in; // input
-  int n;
-  uint16_t expected; // expected output
-};
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-#define ROW(v, p, pv) make_tuple((v), (p), MIN(pv, MAX(v, 0))),
-
-#define ROWS(v, p, pv) ROW(-v, p, 0) ROW(v, p, pv)
-
-#define THREEROWS(v, p)                                                        \
-  ROWS(((1 << (v)) - 1), (p), ((1 << (p)) - 1))                                \
-  ROWS(((1 << (v)) - 0), (p), ((1 << (p)) - 1))                                \
-  ROWS(((1 << (v)) + 1), (p), ((1 << (p)) - 1))
-
-#define MOREROWS(v)                                                            \
-  THREEROWS(v, 0)                                                              \
-  THREEROWS(v, 1)                                                              \
-  THREEROWS(v, 2)                                                              \
-  THREEROWS(v, 4)                                                              \
-  THREEROWS(v, 8) THREEROWS(v, 16)
-
-#define GENERATE()                                                             \
-  MOREROWS(0)                                                                  \
-  MOREROWS(1)                                                                  \
-  MOREROWS(2) MOREROWS(4) MOREROWS(8) MOREROWS(16) MOREROWS(24) MOREROWS(30)
-
-static const ClampBitsType ClampBitsValues[] = {
-    make_tuple(0, 0, 0),    make_tuple(0, 16, 0),
-    make_tuple(32, 0, 0),   make_tuple(32, 16, 32),
-    make_tuple(32, 2, 3),   make_tuple(-32, 0, 0),
-    make_tuple(-32, 16, 0), GENERATE()};
-INSTANTIATE_TEST_SUITE_P(ClampBitsTest, ClampBitsTest,
-                         ::testing::ValuesIn(ClampBitsValues));
-TEST_P(ClampBitsTest, ClampBitsTest) { ASSERT_EQ(clampBits(in, n), expected); }
-TEST(ClampBitsDeathTest, Only16Bit) {
-#ifndef NDEBUG
-  ASSERT_DEATH({ ASSERT_EQ(clampBits(0, 17), 0); }, "nBits <= 16");
-#endif
-}
-
-TEST(ClampBitsUnsignedDeathTest, NoNopClamps) {
-#ifndef NDEBUG
-  ASSERT_DEATH({ ASSERT_EQ(clampBits<uint16_t>(0, 16), 0); },
-               "bitwidth<T>\\(\\) > nBits");
-#endif
-}
-
 using TrimSpacesType = std::tuple<string, string>;
 class TrimSpacesTest : public ::testing::TestWithParam<TrimSpacesType> {
 protected:
@@ -336,10 +249,14 @@ protected:
   vector<string> out; // expected output
 };
 static const splitStringType splitStringValues[] = {
+    make_tuple("", ' ', vector<string>({})),
+    make_tuple(" ", ' ', vector<string>({})),
     make_tuple(" ini mi,ni  moe ", ' ',
                vector<string>({"ini", "mi,ni", "moe"})),
     make_tuple(" 412, 542,732 , ", ',',
                vector<string>({" 412", " 542", "732 ", " "})),
+    make_tuple("\0 412, 542,732 , ", ',', vector<string>({})),
+    make_tuple(" 412, 542\0,732 , ", ',', vector<string>({" 412", " 542"})),
 
 };
 INSTANTIATE_TEST_SUITE_P(SplitStringTest, SplitStringTest,

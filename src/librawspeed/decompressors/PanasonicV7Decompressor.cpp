@@ -30,7 +30,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpLSB.h"
+#include "io/BitStreamerLSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>
@@ -69,7 +69,7 @@ inline void __attribute__((always_inline))
 PanasonicV7Decompressor::decompressBlock(
     ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept {
   invariant(out.size() == PixelsPerBlock);
-  BitPumpLSB pump(block);
+  BitStreamerLSB pump(block.peekRemainingBuffer().getAsArray1DRef());
   for (int pix = 0; pix < PixelsPerBlock; pix++)
     out(pix) = implicit_cast<uint16_t>(pump.getBits(BitsPerSample));
 }
@@ -86,8 +86,7 @@ void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   ByteStream rowInput = input.getSubStream(bytesPerRow * row, bytesPerRow);
   for (int rblock = 0; rblock < blocksperrow; rblock++) {
     ByteStream block = rowInput.getStream(BytesPerBlock);
-    decompressBlock(block,
-                    outRow.getCrop(PixelsPerBlock * rblock, PixelsPerBlock));
+    decompressBlock(block, outRow.getBlock(PixelsPerBlock, rblock));
   }
 }
 
@@ -99,7 +98,12 @@ void PanasonicV7Decompressor::decompress() const {
   for (int row = 0; row < mRaw->dim.y;
        ++row) { // NOLINT(openmp-exception-escape): we know no exceptions will
                 // be thrown.
-    decompressRow(row);
+    try {
+      decompressRow(row);
+    } catch (...) {
+      // We should not get any exceptions here.
+      __builtin_unreachable();
+    }
   }
 }
 

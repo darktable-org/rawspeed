@@ -20,11 +20,11 @@
 
 #pragma once
 
+#include "adt/Optional.h"
 #include "common/RawImage.h"
 #include "decoders/AbstractTiffDecoder.h"
 #include "tiff/TiffIFD.h"
 #include <cstdint>
-#include <optional>
 #include <vector>
 
 namespace rawspeed {
@@ -47,7 +47,7 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  std::optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;
+  Optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;
   void parseCFA(const TiffIFD* raw) const;
   void parseColorMatrix() const;
   void parseWhiteBalance() const;
@@ -58,7 +58,7 @@ private:
   bool decodeBlackLevels(const TiffIFD* raw) const;
   void setBlack(const TiffIFD* raw) const;
 
-  int bps = -1;
+  Optional<int> bps;
   int compression = -1;
 };
 

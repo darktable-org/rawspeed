@@ -20,7 +20,6 @@
 
 #include "common/ChecksumFile.h"
 #include "common/RawspeedException.h"
-#include <memory>
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>

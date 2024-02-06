@@ -21,6 +21,7 @@
 
 #include "decoders/ArwDecoder.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -37,6 +38,7 @@
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
+#include "io/IOException.h"
 #include "metadata/Camera.h"
 #include "metadata/ColorFilterArray.h"
 #include "tiff/TiffEntry.h"
@@ -44,6 +46,7 @@
 #include "tiff/TiffTag.h"
 #include <array>
 #include <cassert>
+#include <cinttypes>
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -81,23 +84,23 @@ RawImage ArwDecoder::decodeSRF() {
   uint32_t head_off = 164600;
 
   // Replicate the dcraw contortions to get the "decryption" key
-  const uint8_t* keyData = mFile.getData(key_off, 1);
-  uint32_t offset = (*keyData) * 4;
-  keyData = mFile.getData(key_off + offset, 4);
-  uint32_t key = getU32BE(keyData);
+  uint8_t offset = mFile[key_off];
+  const Buffer keyData = mFile.getSubView(key_off + 4 * offset, 4);
+  uint32_t key = getU32BE(keyData.begin());
+
   static const size_t head_size = 40;
-  const uint8_t* head_orig = mFile.getData(head_off, head_size);
+  const auto head_orig =
+      mFile.getSubView(head_off, head_size).getAsArray1DRef();
   vector<uint8_t> head(head_size);
-  SonyDecrypt(reinterpret_cast<const uint32_t*>(head_orig),
-              reinterpret_cast<uint32_t*>(&head[0]), 10, key);
+  SonyDecrypt(head_orig, {head.data(), head_size}, head_size / 4, key);
   for (int i = 26; i > 22; i--)
     key = key << 8 | head[i - 1];
 
   // "Decrypt" the whole image buffer
-  const auto* image_data = mFile.getData(off, len);
+  const auto image_data = mFile.getSubView(off, len).getAsArray1DRef();
   std::vector<uint8_t> image_decoded(len);
-  SonyDecrypt(reinterpret_cast<const uint32_t*>(image_data),
-              reinterpret_cast<uint32_t*>(image_decoded.data()), len / 4, key);
+  SonyDecrypt(image_data, {image_decoded.data(), implicit_cast<int>(len)},
+              len / 4, key);
 
   Buffer di(image_decoded.data(), len);
 
@@ -317,11 +320,11 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
 
   mRaw->dim = iPoint2D(2 * width, height / 2);
 
-  uint32_t tilew = raw->getEntry(TiffTag::TILEWIDTH)->getU32();
+  auto tilew = uint64_t(raw->getEntry(TiffTag::TILEWIDTH)->getU32());
   uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
 
   if (tilew <= 0 || tileh <= 0 || tileh % 2 != 0)
-    ThrowRDE("Invalid tile size: (%u, %u)", tilew, tileh);
+    ThrowRDE("Invalid tile size: (%" PRIu64 ", %u)", tilew, tileh);
 
   tileh /= 2;
   tilew *= 2;
@@ -338,6 +341,12 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   if (!tilesY)
     ThrowRDE("Zero tiles vertically");
 
+  // Math thoughs: if we know that the total size is 100, while tile size is 11,
+  // we end up with 9 full tiles, and 1 partial tile (10 total).
+  //
+  // BUT! If we know that the total size is 100, and we have same 10 tiles,
+  // we'd naively guess that each tile's size is 10, and not 11...
+
   const TiffEntry* offsets = raw->getEntry(TiffTag::TILEOFFSETS);
   const TiffEntry* counts = raw->getEntry(TiffTag::TILEBYTECOUNTS);
   if (offsets->count != counts->count) {
@@ -352,21 +361,46 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
              tilesX, tilesY);
   }
 
+  NORangesSet<Buffer> tilesLegality;
+  for (int tile = 0U; tile < implicit_cast<int>(offsets->count); tile++) {
+    const uint32_t offset = offsets->getU32(tile);
+    const uint32_t length = counts->getU32(tile);
+    if (!tilesLegality.insert(mFile.getSubView(offset, length)))
+      ThrowRDE("Two tiles overlap. Raw corrupt!");
+  }
+
   mRaw->createData();
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) default(none)                        \
     shared(offsets, counts) firstprivate(tilesX, tilew, tileh)
 #endif
   for (int tile = 0U; tile < static_cast<int>(offsets->count); tile++) {
-    const uint32_t tileX = tile % tilesX;
-    const uint32_t tileY = tile / tilesX;
-    const uint32_t offset = offsets->getU32(tile);
-    const uint32_t length = counts->getU32(tile);
+    try {
+      const uint32_t tileX = tile % tilesX;
+      const uint32_t tileY = tile / tilesX;
+      const uint32_t offset = offsets->getU32(tile);
+      const uint32_t length = counts->getU32(tile);
 
-    LJpegDecoder decoder(ByteStream(DataBuffer(mFile.getSubView(offset, length),
-                                               Endianness::little)),
-                         mRaw);
-    decoder.decode(tileX * tilew, tileY * tileh, tilew, tileh, false);
+      LJpegDecoder decoder(
+          ByteStream(
+              DataBuffer(mFile.getSubView(offset, length), Endianness::little)),
+          mRaw);
+      decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
+                     implicit_cast<uint32_t>(tilew), tileh, false);
+    } catch (const RawDecoderException& err) {
+      mRaw->setError(err.what());
+    } catch (const IOException& err) {
+      mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
+    }
+  }
+
+  std::string firstErr;
+  if (mRaw->isTooManyErrors(1, &firstErr)) {
+    ThrowRDE("Too many errors encountered. Giving up. First Error:\n%s",
+             firstErr.c_str());
   }
 
   PostProcessLJpeg();
@@ -392,12 +426,12 @@ void ArwDecoder::PostProcessLJpeg() {
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
 #endif
-  for (int inRow = 0; inRow < in.height; ++inRow) {
+  for (int inRow = 0; inRow < in.height(); ++inRow) {
     static constexpr iPoint2D inMCUSize = {4, 1};
     static constexpr iPoint2D outMCUSize = {2, 2};
 
-    invariant(in.width % inMCUSize.x == 0);
-    for (int MCUIdx = 0, numMCUsPerRow = in.width / inMCUSize.x;
+    invariant(in.width() % inMCUSize.x == 0);
+    for (int MCUIdx = 0, numMCUsPerRow = in.width() / inMCUSize.x;
          MCUIdx < numMCUsPerRow; ++MCUIdx) {
       for (int outMCURow = 0; outMCURow != outMCUSize.y; ++outMCURow) {
         for (int outMCUСol = 0; outMCUСol != outMCUSize.x; ++outMCUСol) {
@@ -504,7 +538,8 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = mRootIFD->getID();
 
   setMetaData(meta, id, "", iso);
-  mRaw->whitePoint >>= mShiftDownScale;
+  if (mRaw->whitePoint)
+    mRaw->whitePoint = *mRaw->whitePoint >> mShiftDownScale;
   mRaw->blackLevel >>= mShiftDownScale;
 
   // Set the whitebalance
@@ -520,8 +555,12 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   }
 }
 
-void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
-                             uint32_t key) {
+void ArwDecoder::SonyDecrypt(Array1DRef<const uint8_t> ibuf,
+                             Array1DRef<uint8_t> obuf, int len, uint32_t key) {
+  invariant(ibuf.size() == obuf.size());
+  invariant(ibuf.size() == 4 * len);
+  invariant(obuf.size() == 4 * len);
+
   if (0 == len)
     return;
 
@@ -538,21 +577,18 @@ void ArwDecoder::SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
 
   int p = 127;
   // Decrypt the buffer in place using the pad
-  for (; len > 0; len--) {
+  for (int i = 0; i != len; ++i) {
     pad[p & 127] = pad[(p + 1) & 127] ^ pad[(p + 1 + 64) & 127];
 
-    uint32_t pv;
-    memcpy(&pv, &(pad[p & 127]), sizeof(uint32_t));
+    uint32_t pv = pad[p & 127];
 
     uint32_t bv;
-    memcpy(&bv, ibuf, sizeof(uint32_t));
+    memcpy(&bv, ibuf.getBlock(4, i).begin(), sizeof(uint32_t));
 
     bv ^= pv;
 
-    memcpy(obuf, &bv, sizeof(uint32_t));
+    memcpy(obuf.getBlock(4, i).begin(), &bv, sizeof(uint32_t));
 
-    ibuf++;
-    obuf++;
     p++;
   }
 }
@@ -590,14 +626,14 @@ void ArwDecoder::GetWB() const {
 
     // "Decrypt" IFD
     const auto& ifd_crypt = priv->getRootIfdData();
-    const auto EncryptedBuffer = ifd_crypt.getSubView(off, len);
+    const auto EncryptedBuffer =
+        ifd_crypt.getSubView(off, len).getAsArray1DRef();
     // We do have to prepend 'off' padding, because TIFF uses absolute offsets.
-    const auto DecryptedBufferSize = off + EncryptedBuffer.getSize();
+    const auto DecryptedBufferSize = off + EncryptedBuffer.size();
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
-    SonyDecrypt(reinterpret_cast<const uint32_t*>(EncryptedBuffer.begin()),
-                reinterpret_cast<uint32_t*>(DecryptedBuffer.data() + off),
-                len / 4, key);
+    SonyDecrypt(EncryptedBuffer,
+                {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
     Buffer decIFD(DecryptedBuffer.data(), DecryptedBufferSize);
@@ -628,8 +664,11 @@ void ArwDecoder::GetWB() const {
       const TiffEntry* bl = encryptedIFD.getEntry(TiffTag::SONYBLACKLEVEL);
       if (bl->count != 4)
         ThrowRDE("Black Level has %d entries instead of 4", bl->count);
+      mRaw->blackLevelSeparate =
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; ++i)
-        mRaw->blackLevelSeparate[i] = bl->getU16(i) >> mShiftDownScaleForExif;
+        blackLevelSeparate1D(i) = bl->getU16(i) >> mShiftDownScaleForExif;
     }
 
     if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {

@@ -18,19 +18,21 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "bench/Common.h"
-#include "io/BitPumpJPEG.h"
-#include "io/BitPumpLSB.h"
-#include "io/BitPumpMSB.h"
-#include "io/BitPumpMSB16.h"
-#include "io/BitPumpMSB32.h"
-#include "io/Buffer.h"
-#include "io/ByteStream.h"
-#include "io/Endianness.h"
+#include "io/BitStreamerJPEG.h"
+#include "io/BitStreamerLSB.h"
+#include "io/BitStreamerMSB.h"
+#include "io/BitStreamerMSB16.h"
+#include "io/BitStreamerMSB32.h"
 #include <cassert>
 #include <cstddef>
 #include <benchmark/benchmark.h>
+
+#ifndef NDEBUG
+#include "io/Buffer.h"
+#endif
 
 #ifndef DEBUG
 #include <cstdint>
@@ -43,20 +45,18 @@
 #include <limits>
 #endif
 
-using rawspeed::BitPumpJPEG;
-using rawspeed::BitPumpLSB;
-using rawspeed::BitPumpMSB;
-using rawspeed::BitPumpMSB16;
-using rawspeed::BitPumpMSB32;
-using rawspeed::Endianness;
+using rawspeed::BitStreamerJPEG;
+using rawspeed::BitStreamerLSB;
+using rawspeed::BitStreamerMSB;
+using rawspeed::BitStreamerMSB16;
+using rawspeed::BitStreamerMSB32;
 
 namespace {
 
-constexpr const size_t STEP_MAX = 32;
+constexpr const int STEP_MAX = 32;
 
 template <typename Pump>
-inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
-                         unsigned int Step) {
+inline void BM_BitStreamer(benchmark::State& state, int fillSize, int Step) {
   assert(state.range(0) > 0);
   assert(static_cast<size_t>(state.range(0)) <=
          std::numeric_limits<rawspeed::Buffer::size_type>::max());
@@ -72,26 +72,20 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   assert((Step == 1) || rawspeed::isAligned(Step, 2));
   assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
 
-  const std::vector<uint8_t> storage(
+  const std::vector<uint8_t> inputStorage(
       rawspeed::implicit_cast<size_t>(state.range(0)));
-  const rawspeed::Buffer b(
-      storage.data(),
-      rawspeed::implicit_cast<rawspeed::Buffer::size_type>(state.range(0)));
-  assert(b.getSize() > 0);
-  assert(b.getSize() == static_cast<size_t>(state.range(0)));
+  const rawspeed::Array1DRef<const uint8_t> input(
+      inputStorage.data(), rawspeed::implicit_cast<int>(state.range(0)));
 
-  const rawspeed::DataBuffer db(b, Endianness::unknown);
-  const rawspeed::ByteStream bs(db);
-
-  size_t processedBits = 0;
+  int processedBits = 0;
   for (auto _ : state) {
-    Pump pump(bs);
+    Pump pump(input);
 
-    for (processedBits = 0; processedBits <= 8 * b.getSize();) {
+    for (processedBits = 0; processedBits <= 8 * input.size();) {
       pump.fill(fillSize);
 
       // NOTE: you may want to change the callee here
-      for (auto i = 0U; i < fillSize; i += Step)
+      for (auto i = 0; i < fillSize; i += Step)
         pump.skipBitsNoFill(Step);
 
       processedBits += fillSize;
@@ -101,7 +95,8 @@ inline void BM_BitStream(benchmark::State& state, unsigned int fillSize,
   assert(processedBits > fillSize);
   processedBits -= fillSize;
 
-  assert(rawspeed::roundUp(8 * b.getSize(), fillSize) == processedBits);
+  assert(rawspeed::roundUp(8 * input.size(), fillSize) ==
+         rawspeed::implicit_cast<uint64_t>(processedBits));
 
   state.SetComplexityN(processedBits / 8);
   state.SetItemsProcessed(processedBits * state.iterations());
@@ -128,7 +123,7 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
 template <typename PUMP> void registerPump(const char* pumpName) {
   for (size_t i = 1; i <= STEP_MAX; i *= 2) {
     for (size_t j = 1; j <= i && j <= STEP_MAX; j *= 2) {
-      std::string name("BM_BitStream<");
+      std::string name("BM_BitStreamer<");
       name += "Spec<";
       name += pumpName;
       name += ">, Fill<";
@@ -137,7 +132,7 @@ template <typename PUMP> void registerPump(const char* pumpName) {
       name += std::to_string(j);
       name += ">>";
 
-      const auto Fn = BM_BitStream<PUMP>;
+      const auto Fn = BM_BitStreamer<PUMP>;
       auto* b = benchmark::RegisterBenchmark(name, Fn, i, j);
       b->Apply(CustomArguments);
     }
@@ -149,11 +144,11 @@ template <typename PUMP> void registerPump(const char* pumpName) {
 #define REGISTER_PUMP(PUMP) registerPump<PUMP>(#PUMP)
 
 int main(int argc, char** argv) {
-  REGISTER_PUMP(BitPumpLSB);
-  REGISTER_PUMP(BitPumpMSB);
-  REGISTER_PUMP(BitPumpMSB16);
-  REGISTER_PUMP(BitPumpMSB32);
-  REGISTER_PUMP(BitPumpJPEG);
+  REGISTER_PUMP(BitStreamerLSB);
+  REGISTER_PUMP(BitStreamerMSB);
+  REGISTER_PUMP(BitStreamerMSB16);
+  REGISTER_PUMP(BitStreamerMSB32);
+  REGISTER_PUMP(BitStreamerJPEG);
 
   benchmark::Initialize(&argc, argv);
   benchmark::RunSpecifiedBenchmarks();

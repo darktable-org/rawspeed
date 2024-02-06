@@ -18,6 +18,7 @@
 */
 
 #include "RawSpeed-API.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include <array>
 #include <cstddef>
@@ -109,14 +110,15 @@ using rawspeed::RawParser;
 using rawspeed::RawspeedException;
 using rawspeed::identify::find_cameras_xml;
 
-int main(int argc, char* argv[]) { // NOLINT
+int main(int argc_, char* argv_[]) { // NOLINT
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
 
-  if (argc != 2) {
+  if (argv.size() != 2) {
     fprintf(stderr, "Usage: darktable-rs-identify <file>\n");
     return 0;
   }
 
-  const std::string camfile = find_cameras_xml(argv[0]);
+  const std::string camfile = find_cameras_xml(argv(0));
   if (camfile.empty()) {
     // fprintf(stderr, "ERROR: Couldn't find cameras.xml\n");
     return 2;
@@ -137,9 +139,9 @@ int main(int argc, char* argv[]) { // NOLINT
       return 2;
     }
 
-    fprintf(stderr, "Loading file: \"%s\"\n", argv[1]);
+    fprintf(stderr, "Loading file: \"%s\"\n", argv(1));
 
-    FileReader f(argv[1]);
+    FileReader f(argv(1));
 
     auto [storage, buf] = f.readFile();
 
@@ -177,11 +179,27 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
-    fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
 
-    fprintf(stdout, "blackLevelSeparate: %d %d %d %d\n",
-            r->blackLevelSeparate[0], r->blackLevelSeparate[1],
-            r->blackLevelSeparate[2], r->blackLevelSeparate[3]);
+    fprintf(stdout, "whitePoint: ");
+    if (!r->whitePoint)
+      fprintf(stdout, "unknown");
+    else
+      fprintf(stdout, "%d", *r->whitePoint);
+    fprintf(stdout, "\n");
+
+    fprintf(stdout, "blackLevelSeparate: ");
+    if (!r->blackLevelSeparate) {
+      fprintf(stdout, "none");
+    } else {
+      fprintf(stdout, "(%i x %i)", r->blackLevelSeparate->width(),
+              r->blackLevelSeparate->height());
+      if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
+          blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
+        for (auto l : *blackLevelSeparate1D)
+          fprintf(stdout, " %d", l);
+      }
+    }
+    fprintf(stdout, "\n");
 
     fprintf(stdout, "wbCoeffs: %f %f %f %f\n",
             implicit_cast<double>(r->metadata.wbCoeffs[0]),

@@ -163,7 +163,7 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     // dcraw does actual parsing, since we just want one field we bruteforce it
     while (bs.getRemainSize() > minSize) {
-      if (bs.skipPrefix("NeutObj_neutrals", 16)) {
+      if (bs.skipPrefix("NeutObj_neutrals")) {
         bs.skipBytes(28);
         // check for nulltermination of string inside bounds
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))

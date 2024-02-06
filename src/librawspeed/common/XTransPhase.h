@@ -21,13 +21,13 @@
 #pragma once
 
 #include "adt/Array2DRef.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "metadata/ColorFilterArray.h"
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include <optional>
 
 namespace rawspeed {
 
@@ -49,8 +49,8 @@ inline std::array<T, 6 * 6> applyPhaseShift(std::array<T, 6 * 6> srcData,
 
   std::array<T, 6 * 6> tgtData;
   const Array2DRef<T> tgt(tgtData.data(), 6, 6);
-  for (int row = 0; row < tgt.height; ++row) {
-    for (int col = 0; col < tgt.width; ++col) {
+  for (int row = 0; row < tgt.height(); ++row) {
+    for (int col = 0; col < tgt.width(); ++col) {
       tgt(row, col) = src((coordOffset.y + row) % 6, (coordOffset.x + col) % 6);
     }
   }
@@ -70,22 +70,21 @@ inline std::array<CFAColor, 6 * 6> getAsCFAColors(XTransPhase p) {
   return applyPhaseShift(basePat, basePhase, /*tgtPhase=*/p);
 }
 
-inline std::optional<XTransPhase>
-getAsXTransPhase(const ColorFilterArray& CFA) {
+inline Optional<XTransPhase> getAsXTransPhase(const ColorFilterArray& CFA) {
   if (CFA.getSize() != iPoint2D(6, 6))
     return {};
 
   std::array<CFAColor, 6 * 6> patData;
   const Array2DRef<CFAColor> pat(patData.data(), 6, 6);
-  for (int row = 0; row < pat.height; ++row) {
-    for (int col = 0; col < pat.width; ++col) {
+  for (int row = 0; row < pat.height(); ++row) {
+    for (int col = 0; col < pat.width(); ++col) {
       pat(row, col) = CFA.getColorAt(col, row);
     }
   }
 
   iPoint2D off;
-  for (off.y = 0; off.y < pat.height; ++off.y) {
-    for (off.x = 0; off.x < pat.width; ++off.x) {
+  for (off.y = 0; off.y < pat.height(); ++off.y) {
+    for (off.x = 0; off.x < pat.width(); ++off.x) {
       if (getAsCFAColors(off) == patData)
         return off;
     }

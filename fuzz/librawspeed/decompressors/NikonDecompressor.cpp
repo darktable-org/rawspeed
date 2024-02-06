@@ -48,11 +48,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto uncorrectedRawValues = bs.get<uint32_t>();
     const auto medataLength = bs.get<uint32_t>();
     rawspeed::ByteStream metaData = bs.getStream(medataLength);
-    rawspeed::ByteStream rawData = bs.getStream(bs.getRemainSize());
+    const auto input = bs.getStream(bs.getRemainSize()).getAsArray1DRef();
 
     rawspeed::NikonDecompressor n(mRaw, metaData, bitsPS);
     mRaw->createData();
-    n.decompress(rawData, uncorrectedRawValues);
+    n.decompress(input, uncorrectedRawValues);
 
     rawspeed::MSan::CheckMemIsInitialized(
         mRaw->getByteDataAsUncroppedArray2DRef());

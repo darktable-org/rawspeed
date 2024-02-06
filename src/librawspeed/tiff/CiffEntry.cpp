@@ -22,10 +22,13 @@
 
 #include "rawspeedconfig.h"
 #include "tiff/CiffEntry.h"
+#include "adt/Invariant.h"
 #include "adt/NORangesSet.h"
+#include "adt/Optional.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "parsers/CiffParserException.h"
+#include "tiff/CiffTag.h"
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -35,18 +38,22 @@ using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
-                     ByteStream dirEntry) {
+CiffEntry::CiffEntry(ByteStream data_, CiffTag tag_, CiffDataType type_,
+                     uint32_t count_)
+    : data(data_), tag(tag_), type(type_), count(count_) {}
+
+CiffEntry CiffEntry::Create(NORangesSet<Buffer>* valueDatas,
+                            ByteStream valueData, ByteStream dirEntry) {
   uint16_t p = dirEntry.getU16();
 
-  // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
-  tag = static_cast<CiffTag>(p & 0x3fff);
+  const auto tag = static_cast<CiffTag>(p & 0x3fff);
   uint16_t datalocation = (p & 0xc000);
-  // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
-  type = static_cast<CiffDataType>(p & 0x3800);
+  const auto type = static_cast<CiffDataType>(p & 0x3800);
 
   uint32_t data_offset;
   uint32_t bytesize;
+
+  Optional<ByteStream> data;
 
   switch (datalocation) {
   case 0x0000:
@@ -54,7 +61,7 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
     bytesize = dirEntry.getU32();
     data_offset = dirEntry.getU32();
     data = valueData.getSubStream(data_offset, bytesize);
-    if (!valueDatas->insert(data))
+    if (!valueDatas->insert(*data))
       ThrowCPE("Two valueData's overlap. Raw corrupt!");
     break;
   case 0x4000:
@@ -67,12 +74,15 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
   default:
     ThrowCPE("Don't understand data location 0x%x", datalocation);
   }
+  invariant(data.has_value());
 
   // Set the number of items using the shift
-  count = bytesize >> getElementShift();
+  uint32_t count = bytesize >> getElementShift(type);
+
+  return {*data, tag, type, count};
 }
 
-uint32_t RAWSPEED_READONLY CiffEntry::getElementShift() const {
+uint32_t CiffEntry::getElementShift(CiffDataType type) {
   switch (type) {
     using enum CiffDataType;
   case SHORT:

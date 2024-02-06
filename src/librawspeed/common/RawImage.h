@@ -29,6 +29,7 @@
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Mutex.h"
 #include "adt/NotARational.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/ErrorLog.h"
@@ -160,8 +161,16 @@ public:
   bool isCFA{true};
   ColorFilterArray cfa;
   int blackLevel = -1;
-  std::array<int, 4> blackLevelSeparate;
-  int whitePoint = 65536;
+  std::array<int, 4> blackLevelSeparateStorage;
+  Optional<Array2DRef<int>> blackLevelSeparate;
+
+  // A white level of the image, if known.
+  // NOTE: it is always correct to divide the pixel by `float(whiteLevel)`,
+  //       to normalize the image.
+  // NOTE: for floating-point images, the white level is never non-integral,
+  //       and thus >= 1.0f
+  Optional<int> whitePoint;
+
   std::vector<BlackArea> blackAreas;
 
   /* Vector containing the positions of bad pixels */
@@ -179,7 +188,7 @@ public:
 
 protected:
   RawImageType dataType;
-  RawImageData();
+  RawImageData() = default;
   RawImageData(RawImageType type, const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
@@ -331,10 +340,8 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, std::byte* dst,
     return;
   }
   if (table->dither) {
-    const auto* t = reinterpret_cast<const uint32_t*>(table->tables.data());
-    uint32_t lookup = t[value];
-    uint32_t base = lookup & 0xffff;
-    uint32_t delta = lookup >> 16;
+    uint32_t base = table->tables[2 * value + 0];
+    uint32_t delta = table->tables[2 * value + 1];
     uint32_t r = *random;
 
     uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);

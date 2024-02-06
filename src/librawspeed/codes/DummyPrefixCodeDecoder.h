@@ -24,7 +24,7 @@
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
-#include "io/BitStream.h"
+#include "io/BitStreamer.h"
 
 namespace rawspeed {
 class Buffer;
@@ -53,8 +53,8 @@ public:
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(!fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
@@ -62,8 +62,8 @@ public:
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
@@ -75,8 +75,8 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(FULL_DECODE == fullDecode);
 
     (void)bs;

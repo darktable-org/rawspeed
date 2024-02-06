@@ -21,6 +21,7 @@
 #pragma once
 
 #include "adt/Array2DRef.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "metadata/ColorFilterArray.h"
 #include <algorithm>
@@ -29,7 +30,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <iterator>
-#include <optional>
 #include <utility>
 
 namespace rawspeed {
@@ -84,8 +84,8 @@ inline std::array<T, 4> applyPhaseShift(std::array<T, 4> srcData,
 
   std::array<T, 4> tgtData;
   const Array2DRef<T> tgt(tgtData.data(), 2, 2);
-  for (int row = 0; row < tgt.height; ++row) {
-    for (int col = 0; col < tgt.width; ++col) {
+  for (int row = 0; row < tgt.height(); ++row) {
+    for (int col = 0; col < tgt.width(); ++col) {
       tgt(row, col) = src((coordOffset.y + row) % 2, (coordOffset.x + col) % 2);
     }
   }
@@ -127,14 +127,14 @@ inline std::array<T, 4> applyStablePhaseShift(std::array<T, 4> srcData,
   return tgtData;
 }
 
-inline std::optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
+inline Optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
   if (CFA.getSize() != iPoint2D(2, 2))
     return {};
 
   std::array<CFAColor, 4> patData;
   const Array2DRef<CFAColor> pat(patData.data(), 2, 2);
-  for (int row = 0; row < pat.height; ++row) {
-    for (int col = 0; col < pat.width; ++col) {
+  for (int row = 0; row < pat.height(); ++row) {
+    for (int col = 0; col < pat.width(); ++col) {
       pat(row, col) = CFA.getColorAt(col, row);
     }
   }

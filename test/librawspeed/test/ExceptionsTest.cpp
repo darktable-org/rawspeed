@@ -109,7 +109,7 @@ TYPED_TEST(ExceptionsTest, Constructor) {
 TYPED_TEST(ExceptionsTest, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const TypeParam ExceptionOne(msg);
-    TypeParam ExceptionTwo(ExceptionOne); // NOLINT trying to test the copy
+    TypeParam ExceptionTwo(ExceptionOne);
   });
 
   ASSERT_NO_THROW({

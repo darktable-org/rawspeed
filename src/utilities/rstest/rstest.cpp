@@ -20,7 +20,9 @@
 
 #include "RawSpeed-API.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/NotARational.h"
@@ -71,9 +73,9 @@ using std::ostringstream;
 using std::vector;
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-using std::setw;
-using std::left;
 using std::internal;
+using std::left;
+using std::setw;
 #endif
 
 namespace rawspeed::rstest {
@@ -83,7 +85,7 @@ std::string img_hash(const rawspeed::RawImage& r);
 void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
 void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
 
-md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
+md5::MD5Hasher::state_type imgDataHash(const rawspeed::RawImage& raw);
 
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
@@ -126,22 +128,19 @@ struct Timer final {
 
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
-md5::md5_state imgDataHash(const RawImage& raw) {
+md5::MD5Hasher::state_type imgDataHash(const RawImage& raw) {
   const rawspeed::Array2DRef<std::byte> img =
       raw->getByteDataAsUncroppedArray2DRef();
 
-  md5::md5_state ret = md5::md5_init;
+  vector<md5::MD5Hasher::state_type> line_hashes(img.height());
 
-  vector<md5::md5_state> line_hashes;
-  line_hashes.resize(img.height, md5::md5_init);
-
-  for (int j = 0; j < img.height; j++) {
-    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
-                  &line_hashes[j]);
+  for (int j = 0; j < img.height(); j++) {
+    line_hashes[j] = md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)),
+                                   img.width());
   }
 
-  md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
-                sizeof(line_hashes[0]) * line_hashes.size(), &ret);
+  auto ret = md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
+                           sizeof(line_hashes[0]) * line_hashes.size());
 
   return ret;
 }
@@ -185,11 +184,27 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "isoSpeed: %d\n", r->metadata.isoSpeed);
   APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
-  APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
 
-  APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate[0],
-         r->blackLevelSeparate[1], r->blackLevelSeparate[2],
-         r->blackLevelSeparate[3]);
+  APPEND(&oss, "whitePoint: ");
+  if (!r->whitePoint)
+    APPEND(&oss, "unknown");
+  else
+    APPEND(&oss, "%d", *r->whitePoint);
+  APPEND(&oss, "\n");
+
+  APPEND(&oss, "blackLevelSeparate: ");
+  if (!r->blackLevelSeparate) {
+    APPEND(&oss, "none");
+  } else {
+    APPEND(&oss, "(%i x %i)", r->blackLevelSeparate->width(),
+           r->blackLevelSeparate->height());
+    if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
+        blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
+      for (auto l : *blackLevelSeparate1D)
+        APPEND(&oss, " %d", l);
+    }
+  }
+  APPEND(&oss, "\n");
 
   APPEND(&oss, "wbCoeffs: %f %f %f %f\n",
          implicit_cast<double>(r->metadata.wbCoeffs[0]),
@@ -242,7 +257,7 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "\n");
 
-  rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(r);
+  rawspeed::md5::MD5Hasher::state_type hash_of_line_hashes = imgDataHash(r);
   APPEND(&oss, "md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
@@ -513,28 +528,30 @@ int usage(const char* progname) {
 
 } // namespace rawspeed::rstest
 
-using rawspeed::rstest::usage;
 using rawspeed::rstest::options;
 using rawspeed::rstest::process;
 using rawspeed::rstest::results;
+using rawspeed::rstest::usage;
 
-int main(int argc, char **argv) {
-  int remaining_argc = argc;
+int main(int argc_, char** argv_) {
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
 
-  auto hasFlag = [argc, &remaining_argc, argv](std::string_view flag) {
+  int remaining_argc = argv.size();
+
+  auto hasFlag = [&remaining_argc, argv](std::string_view flag) {
     bool found = false;
-    for (int i = 1; i < argc; ++i) {
-      if (!argv[i] || argv[i] != flag)
+    for (int i = 1; i < argv.size(); ++i) {
+      if (!argv(i) || argv(i) != flag)
         continue;
       found = true;
-      argv[i] = nullptr;
+      argv(i) = nullptr;
       remaining_argc--;
     }
     return found;
   };
 
-  if (1 == argc || hasFlag("-h"))
-    return usage(argv[0]);
+  if (1 == argv.size() || hasFlag("-h"))
+    return usage(argv(0));
 
   options o;
   o.create = hasFlag("-c");
@@ -550,17 +567,17 @@ int main(int argc, char **argv) {
   int64_t time = 0;
   map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(argc, argv, o)             \
-    shared(metadata) shared(cerr, failedTests) schedule(dynamic, 1)            \
+#pragma omp parallel for default(none) firstprivate(argv, o) shared(metadata)  \
+    shared(cerr, failedTests) schedule(dynamic, 1)                             \
     reduction(+ : time) if (remaining_argc > 2)
 #endif
-  for (int i = 1; i < argc; ++i) {
-    if (!argv[i])
+  for (int i = 1; i < argv.size(); ++i) {
+    if (!argv(i))
       continue;
 
     try {
       try {
-        time += process(argv[i], &metadata, o);
+        time += process(argv(i), &metadata, o);
       } catch (const rawspeed::rstest::RstestHashMismatch& e) {
         time += e.time;
         throw;
@@ -570,12 +587,15 @@ int main(int argc, char **argv) {
 #pragma omp critical(io)
 #endif
       {
-        std::string msg = std::string(argv[i]) + " failed: " + e.what();
+        std::string msg = std::string(argv(i)) + " failed: " + e.what();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
         cerr << msg << '\n';
 #endif
-        failedTests.try_emplace(argv[i], msg);
+        failedTests.try_emplace(argv(i), msg);
       }
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 

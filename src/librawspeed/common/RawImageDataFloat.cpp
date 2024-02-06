@@ -19,6 +19,7 @@
 */
 
 #include "common/RawImage.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
@@ -28,6 +29,7 @@
 #include "metadata/BlackArea.h"
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -85,8 +87,11 @@ void RawImageDataFloat::calculateBlackAreas() {
     }
   }
 
+  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 2, 2);
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
+
   if (!totalpixels) {
-    for (int& i : blackLevelSeparate)
+    for (int& i : blackLevelSeparate1D)
       i = blackLevel;
     return;
   }
@@ -97,17 +102,17 @@ void RawImageDataFloat::calculateBlackAreas() {
   totalpixels /= 4;
 
   for (int i = 0; i < 4; i++) {
-    blackLevelSeparate[i] = static_cast<int>(65535.0F * accPixels[i] /
-                                             implicit_cast<float>(totalpixels));
+    blackLevelSeparate1D(i) = static_cast<int>(
+        65535.0F * accPixels[i] / implicit_cast<float>(totalpixels));
   }
 
   /* If this is not a CFA image, we do not use separate blacklevels, use average
    */
   if (!isCFA) {
     int total = 0;
-    for (int i : blackLevelSeparate)
+    for (int i : blackLevelSeparate1D)
       total += i;
-    for (int& i : blackLevelSeparate)
+    for (int& i : blackLevelSeparate1D)
       i = (total + 2) >> 2;
   }
 }
@@ -117,8 +122,8 @@ void RawImageDataFloat::scaleBlackWhite() {
 
   const int skipBorder = 150;
   int gw = (dim.x - skipBorder) * cpp;
-  if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) ||
-      whitePoint == 65536) { // Estimate
+  // NOTE: lack of whitePoint means that it is pre-normalized.
+  if (blackAreas.empty() && !blackLevelSeparate && blackLevel < 0) { // Estimate
     float b = 100000000;
     float m = -10000000;
     for (int row = skipBorder * cpp; row < (dim.y - skipBorder); row++) {
@@ -130,14 +135,11 @@ void RawImageDataFloat::scaleBlackWhite() {
     }
     if (blackLevel < 0)
       blackLevel = static_cast<int>(b);
-    if (whitePoint == 65536)
-      whitePoint = static_cast<int>(m);
-    writeLog(DEBUG_PRIO::INFO, "Estimated black:%d, Estimated white: %d",
-             blackLevel, whitePoint);
+    writeLog(DEBUG_PRIO::INFO, "Estimated black:%d", blackLevel);
   }
 
   /* If filter has not set separate blacklevel, compute or fetch it */
-  if (blackLevelSeparate[0] < 0)
+  if (!blackLevelSeparate)
     calculateBlackAreas();
 
   startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
@@ -148,20 +150,22 @@ void RawImageDataFloat::scaleValues(int start_y, int end_y) {
   int gw = dim.x * cpp;
   std::array<float, 4> mul;
   std::array<float, 4> sub;
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
   for (int i = 0; i < 4; i++) {
     int v = i;
     if ((mOffset.x & 1) != 0)
       v ^= 1;
     if ((mOffset.y & 1) != 0)
       v ^= 2;
-    mul[i] = 65535.0F / static_cast<float>(whitePoint - blackLevelSeparate[v]);
-    sub[i] = static_cast<float>(blackLevelSeparate[v]);
+    mul[i] =
+        65535.0F / static_cast<float>(*whitePoint - blackLevelSeparate1D(v));
+    sub[i] = static_cast<float>(blackLevelSeparate1D(v));
   }
   for (int y = start_y; y < end_y; y++) {
-    const float* mul_local = &mul[2 * (y & 1)];
-    const float* sub_local = &sub[2 * (y & 1)];
     for (int x = 0; x < gw; x++)
-      img(y, x) = (img(y, x) - sub_local[x & 1]) * mul_local[x & 1];
+      img(y, x) = (img(y, x) - sub[(2 * (y & 1)) + (x & 1)]) *
+                  mul[(2 * (y & 1)) + (x & 1)];
   }
 }
 
@@ -178,7 +182,8 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   std::array<float, 4> dist = {{}};
   std::array<float, 4> weight;
 
-  const uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
   // We can have cfa or no-cfa for RawImageDataFloat
   int step = isCFA ? 2 : 1;
 
@@ -186,7 +191,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   int x_find = static_cast<int>(x) - step;
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[x_find >> 3] >> (x_find & 7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<float>(static_cast<int>(x) - x_find);
     }
@@ -196,19 +201,18 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   x_find = static_cast<int>(x) + step;
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
-    if (0 == ((bad_line[x_find >> 3] >> (x_find & 7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<float>(x_find - static_cast<int>(x));
     }
     x_find += step;
   }
 
-  bad_line = &mBadPixelMap[x >> 3];
   // Find pixel upwards
   int y_find = static_cast<int>(y) - step;
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[y_find * mBadPixelMapPitch] >> (x & 7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<float>(static_cast<int>(y) - y_find);
     }
@@ -218,7 +222,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   y_find = static_cast<int>(y) + step;
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
-    if (0 == ((bad_line[y_find * mBadPixelMapPitch] >> (x & 7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<float>(y_find - static_cast<int>(y));
     }

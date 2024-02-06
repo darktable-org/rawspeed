@@ -20,7 +20,10 @@
 */
 
 #include "decoders/PefDecoder.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -36,7 +39,6 @@
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
 
 namespace rawspeed {
@@ -96,7 +98,7 @@ RawImage PefDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  std::optional<ByteStream> metaData;
+  Optional<ByteStream> metaData;
   if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
     /* Attempt to read huffman table, if found in makernote */
     const TiffEntry* t =
@@ -129,8 +131,11 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* black =
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
     if (black->count == 4) {
+      mRaw->blackLevelSeparate =
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; i++)
-        mRaw->blackLevelSeparate[i] = black->getU32(i);
+        blackLevelSeparate1D(i) = black->getU32(i);
     }
   }
 

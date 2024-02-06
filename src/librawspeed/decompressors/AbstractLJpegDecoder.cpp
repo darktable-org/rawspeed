@@ -21,22 +21,21 @@
 */
 
 #include "decompressors/AbstractLJpegDecoder.h"
-#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/Buffer.h"
+#include "decompressors/JpegMarkers.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include <array>
 #include <cassert>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -221,7 +220,9 @@ void AbstractLJpegDecoder::parseSOS(ByteStream sos) {
   if (Pt != 0)
     ThrowRDE("Point transform not supported.");
 
-  decodeScan();
+  const auto scanLength = decodeScan();
+  // FIXME: invariant(scanLength != 0);
+  input.skipBytes(scanLength);
 }
 
 void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
@@ -250,8 +251,7 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
 
     // copy nCodes bytes from input stream to code values table
     const auto codesBuf = dht.getBuffer(nCodes);
-    hc.setCodeValues(
-        Array1DRef<const uint8_t>(codesBuf.begin(), codesBuf.getSize()));
+    hc.setCodeValues(codesBuf.getAsArray1DRef());
 
     // see if we already have a PrefixCodeDecoder with the same codes
     assert(PrefixCodeDecoderStore.size() == huffmanCodeStore.size());
@@ -274,33 +274,18 @@ void AbstractLJpegDecoder::parseDHT(ByteStream dht) {
 void AbstractLJpegDecoder::parseDRI(ByteStream dri) {
   if (dri.getRemainSize() != 2)
     ThrowRDE("Invalid DRI header length.");
-  if (uint16_t Ri = dri.getU16(); Ri != 0)
-    ThrowRDE("Non-zero restart interval not supported.");
+  numMCUsPerRestartInterval = dri.getU16();
 }
 
 JpegMarker AbstractLJpegDecoder::getNextMarker(bool allowskip) {
-  auto peekMarker = [&]() -> std::optional<JpegMarker> {
-    uint8_t c0 = input.peekByte(0);
-    uint8_t c1 = input.peekByte(1);
+  if (Optional<ByteStream> markerPos = advanceToNextMarker(input, allowskip))
+    input = *markerPos;
+  else
+    ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
 
-    if (c0 == 0xFF && c1 != 0 && c1 != 0xFF)
-      return static_cast<JpegMarker>(c1);
-    return {};
-  };
-
-  while (input.getRemainSize() >= 2) {
-    if (std::optional<JpegMarker> m = peekMarker()) {
-      input.skipBytes(2); // Skip the bytes we've just consumed.
-      return *m;
-    }
-    // Marker not found. Might there be leading padding bytes?
-    if (!allowskip)
-      break; // Nope, give up.
-    // Advance by a single(!) byte and try again.
-    input.skipBytes(1);
-  }
-
-  ThrowRDE("(Noskip) Expected marker not found. Probably corrupt file.");
+  JpegMarker m = *peekMarker(input);
+  input.skipBytes(2); // Skip the bytes we've just consumed.
+  return m;
 }
 
 } // namespace rawspeed

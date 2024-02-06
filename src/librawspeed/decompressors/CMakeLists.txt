@@ -1,3 +1,6 @@
+rawspeed_add_library(rawspeed_decompressors OBJECT)
+set_target_properties(rawspeed_decompressors PROPERTIES LINKER_LANGUAGE CXX)
+
 FILE(GLOB SOURCES
   "AbstractDecompressor.h"
   "AbstractDngDecompressor.cpp"
@@ -7,6 +10,7 @@ FILE(GLOB SOURCES
   "AbstractSamsungDecompressor.h"
   "Cr2Decompressor.cpp"
   "Cr2Decompressor.h"
+  "Cr2DecompressorImpl.h"
   "Cr2LJpegDecoder.cpp"
   "Cr2LJpegDecoder.h"
   "CrwDecompressor.cpp"
@@ -21,6 +25,7 @@ FILE(GLOB SOURCES
   "HasselbladLJpegDecoder.h"
   "JpegDecompressor.cpp"
   "JpegDecompressor.h"
+  "JpegMarkers.h"
   "KodakDecompressor.cpp"
   "KodakDecompressor.h"
   "LJpegDecoder.cpp"
@@ -59,6 +64,20 @@ FILE(GLOB SOURCES
   "VC5Decompressor.h"
 )
 
-target_sources(rawspeed PRIVATE
+target_sources(rawspeed_decompressors PRIVATE
   ${SOURCES}
 )
+
+target_include_directories(rawspeed_decompressors PUBLIC "${RAWSPEED_BINARY_DIR}/src")
+target_include_directories(rawspeed_decompressors SYSTEM PUBLIC "${RAWSPEED_SOURCE_DIR}/src/external")
+target_include_directories(rawspeed_decompressors PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+if(TARGET RawSpeed::OpenMP_CXX)
+  target_link_libraries(rawspeed_decompressors PUBLIC RawSpeed::OpenMP_CXX)
+endif()
+
+if(WITH_JPEG AND TARGET JPEG::JPEG)
+  target_link_libraries(rawspeed_decompressors PUBLIC JPEG::JPEG)
+endif()
+
+target_link_libraries(rawspeed PRIVATE rawspeed_decompressors)

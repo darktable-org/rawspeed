@@ -20,6 +20,7 @@
 */
 
 #include "decoders/NakedDecoder.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -31,7 +32,6 @@
 #include "io/Endianness.h"
 #include "metadata/Camera.h"
 #include <map>
-#include <optional>
 #include <string>
 #include <string_view>
 
@@ -46,7 +46,7 @@ NakedDecoder::NakedDecoder(Buffer file, const Camera* c)
 
 namespace {
 
-std::optional<BitOrder> getAsBitOrder(std::string_view s) {
+Optional<BitOrder> getAsBitOrder(std::string_view s) {
   using enum BitOrder;
   if (s == "plain")
     return LSB;

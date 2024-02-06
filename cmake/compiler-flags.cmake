@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Workaround cmake-3.28 referencing (non-existant) `@foo.modmap`
+# in compilation commands.
+set(CMAKE_CXX_SCAN_FOR_MODULES NO)
+set(CMAKE_CXX_MODULE_MAP_FORMAT "")
+
 include(debug-info)
 
 if(RAWSPEED_RELEASE_BUILD)

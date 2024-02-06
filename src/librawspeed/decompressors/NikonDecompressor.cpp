@@ -21,6 +21,7 @@
 #include "decompressors/NikonDecompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -30,7 +31,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <array>
@@ -317,11 +318,11 @@ public:
    * Next coded symbol
    *
    * Side effects:
-   * Bitstream is parsed.
+   * Bitstreamer is parsed.
    *
    *--------------------------------------------------------------
    */
-  int decodeDifference(BitPumpMSB& bits) {
+  int decodeDifference(BitStreamerMSB& bits) {
     int rv;
     int l;
     int temp;
@@ -515,7 +516,8 @@ NikonDecompressor::NikonDecompressor(RawImage raw, ByteStream metadata,
 }
 
 template <typename Huffman>
-void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
+void NikonDecompressor::decompress(BitStreamerMSB& bits, int start_y,
+                                   int end_y) {
   auto ht = createPrefixCodeDecoder<Huffman>(huffSelect);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
@@ -523,11 +525,11 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   // allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
-  invariant(out.width % 2 == 0);
-  invariant(out.width >= 2);
+  invariant(out.width() % 2 == 0);
+  invariant(out.width() >= 2);
   for (int row = start_y; row < end_y; row++) {
     std::array<int, 2> pred = pUp[row & 1];
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       pred[col & 1] += ht.decodeDifference(bits);
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];
@@ -538,10 +540,11 @@ void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
   }
 }
 
-void NikonDecompressor::decompress(ByteStream data, bool uncorrectedRawValues) {
+void NikonDecompressor::decompress(Array1DRef<const uint8_t> input,
+                                   bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
-  BitPumpMSB bits(data);
+  BitStreamerMSB bits(input);
 
   random = bits.peekBits(24);
 

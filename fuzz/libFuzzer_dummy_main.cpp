@@ -20,6 +20,7 @@
 
 #include "rawspeedconfig.h"
 #include "adt/AlignedAllocator.h"
+#include "adt/Array1DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "io/Buffer.h"
 #include "io/FileIOException.h"
@@ -64,25 +65,28 @@ void process(const char* filename) noexcept {
     return;
   }
 
-  LLVMFuzzerTestOneInput(buf.getData(0, buf.getSize()), buf.getSize());
+  LLVMFuzzerTestOneInput(buf.begin(), buf.getSize());
 }
 
 } // namespace
 
-int main(int argc, char** argv) {
-  if (1 == argc || (2 == argc && std::string("-help=1") == argv[1]))
+int main(int argc_, char** argv_) {
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
+
+  if (1 == argv.size() ||
+      (2 == argv.size() && std::string("-help=1") == argv(1)))
     return usage();
 
 #ifdef HAVE_OPENMP
-  const auto corpusCount = argc - 1;
+  const auto corpusCount = argv.size() - 1;
   auto chunkSize = (corpusCount / (10 * omp_get_num_threads()));
   if (chunkSize <= 1)
     chunkSize = 1;
-#pragma omp parallel for default(none) firstprivate(argc, argv, chunkSize)     \
+#pragma omp parallel for default(none) firstprivate(argv, chunkSize)           \
     schedule(dynamic, chunkSize)
 #endif
-  for (int i = 1; i < argc; ++i)
-    process(argv[i]);
+  for (int i = 1; i < argv.size(); ++i)
+    process(argv(i));
 
   return EXIT_SUCCESS;
 }

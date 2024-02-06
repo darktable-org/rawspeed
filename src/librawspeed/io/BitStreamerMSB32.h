@@ -20,31 +20,47 @@
 
 #pragma once
 
-#include "io/BitStream.h"
+#include "adt/Array1DRef.h"
+#include "adt/Invariant.h"
+#include "io/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-struct MSBBitPumpTag;
+class BitStreamerMSB32;
 
-// The MSB data is ordered in MSB bit order,
-// i.e. we push into the cache from the right and read it from the left
-
-using BitPumpMSB = BitStream<MSBBitPumpTag, BitStreamCacheRightInLeftOut>;
-
-template <> struct BitStreamTraits<MSBBitPumpTag> final {
+template <> struct BitStreamerTraits<BitStreamerMSB32> final {
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
+  static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
-template <>
-inline BitPumpMSB::size_type BitPumpMSB::fillCache(const uint8_t* input) {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+// The MSB data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
 
-  cache.push(getBE<uint32_t>(input), 32);
+class BitStreamerMSB32 final
+    : public BitStreamer<BitStreamerMSB32, BitStreamerCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB32, BitStreamerCacheRightInLeftOut>;
+
+  friend void Base::fill(int); // Allow it to call our `fillCache()`.
+
+  size_type fillCache(Array1DRef<const uint8_t> input);
+
+public:
+  using Base::Base;
+};
+
+inline BitStreamerMSB32::size_type
+BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
+  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
+  establishClassInvariants();
+  invariant(input.size() ==
+            BitStreamerTraits<BitStreamerMSB32>::MaxProcessBytes);
+
+  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;
 }
 

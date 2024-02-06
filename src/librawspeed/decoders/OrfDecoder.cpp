@@ -21,6 +21,7 @@
 */
 
 #include "decoders/OrfDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/NORangesSet.h"
@@ -30,7 +31,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/OlympusDecompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -145,24 +146,28 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
   int inputPitchBytes = inputPitchBits / 8;
 
   const auto numEvenLines = implicit_cast<int>(roundUpDivision(h, 2));
-  ByteStream evenLinesInput = s.getStream(numEvenLines, inputPitchBytes);
+  const auto evenLinesInput = s.getStream(numEvenLines, inputPitchBytes)
+                                  .peekRemainingBuffer()
+                                  .getAsArray1DRef();
 
   const auto oddLinesInputBegin =
-      implicit_cast<uint32_t>(roundUp(evenLinesInput.getSize(), 1U << 11U));
-  assert(oddLinesInputBegin >= evenLinesInput.getSize());
-  int padding = oddLinesInputBegin - evenLinesInput.getSize();
+      implicit_cast<int>(roundUp(evenLinesInput.size(), 1U << 11U));
+  assert(oddLinesInputBegin >= evenLinesInput.size());
+  int padding = oddLinesInputBegin - evenLinesInput.size();
   assert(padding >= 0);
   s.skipBytes(padding);
 
   const int numOddLines = h - numEvenLines;
-  ByteStream oddLinesInput = s.getStream(numOddLines, inputPitchBytes);
+  const auto oddLinesInput = s.getStream(numOddLines, inputPitchBytes)
+                                 .peekRemainingBuffer()
+                                 .getAsArray1DRef();
 
   // By now we know we have enough input to produce the image.
   mRaw->createData();
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   {
-    BitPumpMSB bs(evenLinesInput);
+    BitStreamerMSB bs(evenLinesInput);
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
@@ -171,7 +176,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     }
   }
   {
-    BitPumpMSB bs(oddLinesInput);
+    BitStreamerMSB bs(oddLinesInput);
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;
@@ -272,6 +277,8 @@ void OrfDecoder::parseCFA() const {
 }
 
 void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
+  mRaw->whitePoint = (1U << 12) - 1;
+
   int iso = 0;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
@@ -315,6 +322,10 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           image_processing.getEntry(static_cast<TiffTag>(0x0600));
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
+        mRaw->blackLevelSeparate =
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+        auto blackLevelSeparate1D =
+            *mRaw->blackLevelSeparate->getAsArray1DRef();
         for (int i = 0; i < 4; i++) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
@@ -333,11 +344,12 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
             ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
-          mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
+          blackLevelSeparate1D(i) = blackEntry->getU16(j);
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
+        mRaw->whitePoint =
+            *mRaw->whitePoint - (mRaw->blackLevel - blackLevelSeparate1D(0));
       }
     }
   }

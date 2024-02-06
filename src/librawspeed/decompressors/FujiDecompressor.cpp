@@ -26,16 +26,18 @@
 #include "MemorySanitizer.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/BayerPhase.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "common/XTransPhase.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -46,7 +48,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -114,7 +115,7 @@ struct FujiStrip final {
   const int n;
 
   // the compressed data of this strip
-  const ByteStream bs;
+  const Array1DRef<const uint8_t> input;
 
   FujiStrip() = delete;
   FujiStrip(const FujiStrip&) = delete;
@@ -122,8 +123,9 @@ struct FujiStrip final {
   FujiStrip& operator=(const FujiStrip&) noexcept = delete;
   FujiStrip& operator=(FujiStrip&&) noexcept = delete;
 
-  FujiStrip(const FujiDecompressor::FujiHeader& h_, int block, ByteStream bs_)
-      : h(h_), n(block), bs(bs_) {
+  FujiStrip(const FujiDecompressor::FujiHeader& h_, int block,
+            Array1DRef<const uint8_t> input_)
+      : h(h_), n(block), input(input_) {
     invariant(n >= 0 && n < h.blocks_in_row);
   }
 
@@ -247,9 +249,9 @@ struct fuji_compressed_block final {
                         const FujiDecompressor::FujiHeader& header,
                         const fuji_compressed_params& common_info);
 
-  void reset(const fuji_compressed_params& params);
+  void reset();
 
-  BitPumpMSB pump;
+  Optional<BitStreamerMSB> pump;
 
   // tables of gradients
   std::array<std::array<int_pair, 41>, 3> grad_even;
@@ -266,7 +268,7 @@ struct fuji_compressed_block final {
   void copy_line_to_xtrans(const FujiStrip& strip, int cur_line) const;
   void copy_line_to_bayer(const FujiStrip& strip, int cur_line) const;
 
-  static int fuji_zerobits(BitPumpMSB& pump);
+  static int fuji_zerobits(BitStreamerMSB& pump);
   static int bitDiff(int value1, int value2);
 
   [[nodiscard]] int fuji_decode_sample(int grad, int interp_val,
@@ -297,25 +299,22 @@ struct fuji_compressed_block final {
 fuji_compressed_block::fuji_compressed_block(
     Array2DRef<uint16_t> img_, const FujiDecompressor::FujiHeader& header_,
     const fuji_compressed_params& common_info_)
-    : img(img_), header(header_), common_info(common_info_) {}
+    : img(img_), header(header_), common_info(common_info_),
+      linealloc(ltotal * (common_info.line_width + 2), 0),
+      lines(&linealloc[0], common_info.line_width + 2, ltotal) {}
 
-void fuji_compressed_block::reset(const fuji_compressed_params& params) {
-  const unsigned line_size = sizeof(uint16_t) * (params.line_width + 2);
-
-  linealloc.resize(ltotal * (params.line_width + 2), 0);
-  lines = Array2DRef<uint16_t>(&linealloc[0], params.line_width + 2, ltotal);
-
+void fuji_compressed_block::reset() {
   MSan::Allocated(CroppedArray2DRef(lines));
 
   // Zero-initialize first two (read-only, carry-in) lines of each color,
   // including first and last helper columns of the second row.
   // This is needed for correctness.
   for (xt_lines color : {R0, G0, B0}) {
-    memset(&lines(color, 0), 0, 2 * line_size);
+    memset(&lines(color, 0), 0, 2 * sizeof(uint16_t) * lines.width());
 
     // On the first row, we don't need to zero-init helper columns.
     MSan::Allocated(lines(color, 0));
-    MSan::Allocated(lines(color, lines.width - 1));
+    MSan::Allocated(lines(color, lines.width() - 1));
   }
 
   // And the first (real, uninitialized) line of each color gets the content
@@ -323,13 +322,13 @@ void fuji_compressed_block::reset(const fuji_compressed_params& params) {
   // line of that color.
   // Again, this is needed for correctness.
   for (xt_lines color : {R2, G2, B2})
-    lines(color, lines.width - 1) = lines(color - 1, lines.width - 2);
+    lines(color, lines.width() - 1) = lines(color - 1, lines.width() - 2);
 
   for (int j = 0; j < 3; j++) {
     for (int i = 0; i < 41; i++) {
-      grad_even[j][i].value1 = params.maxDiff;
+      grad_even[j][i].value1 = common_info.maxDiff;
       grad_even[j][i].value2 = 1;
-      grad_odd[j][i].value1 = params.maxDiff;
+      grad_odd[j][i].value1 = common_info.maxDiff;
       grad_odd[j][i].value2 = 1;
     }
   }
@@ -405,7 +404,7 @@ void fuji_compressed_block::copy_line_to_bayer(const FujiStrip& strip,
   copy_line<BayerTag>(strip, cur_line, index);
 }
 
-inline int fuji_compressed_block::fuji_zerobits(BitPumpMSB& pump) {
+inline int fuji_compressed_block::fuji_zerobits(BitStreamerMSB& pump) {
   int count = 0;
 
   // Count-and-skip all the leading `0`s.
@@ -447,7 +446,7 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
                                           std::array<int_pair, 41>& grads) {
   int gradient = std::abs(grad);
 
-  int sampleBits = fuji_zerobits(pump);
+  int sampleBits = fuji_zerobits(*pump);
 
   int codeBits;
   int codeDelta;
@@ -460,9 +459,9 @@ fuji_compressed_block::fuji_decode_sample(int grad, int interp_val,
   }
 
   int code = 0;
-  pump.fill(32);
+  pump->fill(32);
   if (codeBits)
-    code = pump.getBitsNoFill(codeBits);
+    code = pump->getBitsNoFill(codeBits);
   code += codeDelta;
 
   if (code < 0 || code >= common_info.total_values) {
@@ -587,7 +586,7 @@ fuji_compressed_block::fuji_decode_interpolation_even(xt_lines c,
 void fuji_compressed_block::fuji_extend_generic(int start, int end) const {
   for (int i = start; i <= end; i++) {
     lines(i, 0) = lines(i - 1, 1);
-    lines(i, lines.width - 1) = lines(i - 1, lines.width - 2);
+    lines(i, lines.width() - 1) = lines(i - 1, lines.width() - 2);
   }
 }
 
@@ -683,8 +682,8 @@ fuji_compressed_block::fuji_decode_block(T func_even,
   };
 
   for (int row = 0; row != 6; ++row) {
-    CFAColor c0 = CFA(row % CFA.height, /*col=*/0);
-    CFAColor c1 = CFA(row % CFA.height, /*col=*/1);
+    CFAColor c0 = CFA(row % CFA.height(), /*col=*/0);
+    CFAColor c1 = CFA(row % CFA.height(), /*col=*/1);
     pass({CurLineForColor(c0), CurLineForColor(c1)}, row);
     for (CFAColor c : {c0, c1}) {
       switch (c) {
@@ -766,7 +765,7 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
     for (auto i : colors) {
       const auto out = CroppedArray2DRef(
           lines, /*offsetCols=*/0, /*offsetRows=*/i.a + 2,
-          /*croppedWidth=*/lines.width, /*croppedHeight=*/i.b - 2);
+          /*croppedWidth=*/lines.width(), /*croppedHeight=*/i.b - 2);
 
       // All other lines of each color become uninitialized.
       MSan::Allocated(out);
@@ -774,14 +773,14 @@ void fuji_compressed_block::fuji_decode_strip(const FujiStrip& strip) {
       // And the first (real, uninitialized) line of each color gets the content
       // of the last helper column from the last decoded sample of previous
       // line of that color.
-      lines(i.a + 2, lines.width - 1) = lines(i.a + 2 - 1, lines.width - 2);
+      lines(i.a + 2, lines.width() - 1) = lines(i.a + 2 - 1, lines.width() - 2);
     }
   }
 }
 
 class FujiDecompressorImpl final {
   RawImage mRaw;
-  const Array1DRef<const ByteStream> strips;
+  const Array1DRef<const Array1DRef<const uint8_t>> strips;
 
   const FujiDecompressor::FujiHeader& header;
 
@@ -790,14 +789,15 @@ class FujiDecompressorImpl final {
   void decompressThread() const noexcept;
 
 public:
-  FujiDecompressorImpl(RawImage mRaw, Array1DRef<const ByteStream> strips,
+  FujiDecompressorImpl(RawImage mRaw,
+                       Array1DRef<const Array1DRef<const uint8_t>> strips,
                        const FujiDecompressor::FujiHeader& h);
 
   void decompress();
 };
 
 FujiDecompressorImpl::FujiDecompressorImpl(
-    RawImage mRaw_, Array1DRef<const ByteStream> strips_,
+    RawImage mRaw_, Array1DRef<const Array1DRef<const uint8_t>> strips_,
     const FujiDecompressor::FujiHeader& h_)
     : mRaw(std::move(mRaw_)), strips(strips_), header(h_), common_info(header) {
 }
@@ -810,14 +810,17 @@ void FujiDecompressorImpl::decompressThread() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (int block = 0; block < header.blocks_in_row; ++block) {
-    FujiStrip strip(header, block, strips(block));
-    block_info.reset(common_info);
     try {
-      block_info.pump = BitPumpMSB(strip.bs);
+      FujiStrip strip(header, block, strips(block));
+      block_info.reset();
+      block_info.pump = BitStreamerMSB(strip.input);
       block_info.fuji_decode_strip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }
@@ -859,14 +862,14 @@ FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
   }
 
   if (mRaw->cfa.getSize() == iPoint2D(6, 6)) {
-    std::optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
+    Optional<XTransPhase> p = getAsXTransPhase(mRaw->cfa);
     if (!p)
       ThrowRDE("Invalid X-Trans CFA");
     if (p != iPoint2D(0, 0))
       ThrowRDE("Unexpected X-Trans phase: {%i,%i}. Please file a bug!", p->x,
                p->y);
   } else if (mRaw->cfa.getSize() == iPoint2D(2, 2)) {
-    std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+    Optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
     if (!p)
       ThrowRDE("Invalid Bayer CFA");
     if (p != BayerPhase::RGGB)
@@ -892,13 +895,13 @@ FujiDecompressor::FujiDecompressor(RawImage img, ByteStream input_)
   strips.reserve(header.blocks_in_row);
 
   for (const auto& block_size : block_sizes)
-    strips.emplace_back(input.getStream(block_size));
+    strips.emplace_back(input.getStream(block_size).getAsArray1DRef());
 }
 
 void FujiDecompressor::decompress() const {
   FujiDecompressorImpl impl(
       mRaw,
-      Array1DRef<const ByteStream>(
+      Array1DRef<const Array1DRef<const uint8_t>>(
           strips.data(), implicit_cast<Buffer::size_type>(strips.size())),
       header);
   impl.decompress();

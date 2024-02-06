@@ -20,7 +20,9 @@
 
 #include "decompressors/CrwDecompressor.h"
 #include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/Optional.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
 #include "fuzz/Common.h"
@@ -47,8 +49,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const uint32_t dec_table = bs.getU32();
     const uint32_t lowbits = bs.getU32();
 
-    rawspeed::CrwDecompressor c(mRaw, dec_table, lowbits,
-                                bs.getStream(bs.getRemainSize()));
+    rawspeed::Optional<rawspeed::Array1DRef<const uint8_t>> lowbitInput;
+    if (lowbits != 0) {
+      lowbitInput = bs.getBuffer(lowbits);
+    }
+
+    rawspeed::Array1DRef<const uint8_t> input =
+        bs.peekRemainingBuffer().getAsArray1DRef();
+
+    rawspeed::CrwDecompressor c(mRaw, dec_table, input, lowbitInput);
     mRaw->createData();
     c.decompress();
 

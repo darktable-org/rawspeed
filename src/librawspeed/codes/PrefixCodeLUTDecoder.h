@@ -21,11 +21,11 @@
 
 #pragma once
 
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStream.h"
+#include "io/BitStreamer.h"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -151,8 +151,8 @@ public:
   inline __attribute__((always_inline)) int
   decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
@@ -161,8 +161,8 @@ public:
   inline __attribute__((always_inline)) int
   decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
@@ -174,8 +174,8 @@ public:
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(FULL_DECODE == Base::fullDecode);
     bs.fill(32);
 

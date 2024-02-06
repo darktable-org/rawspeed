@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"
+#include "adt/Bit.h"
 #include <algorithm>
 #include <cassert>
 #include <functional>

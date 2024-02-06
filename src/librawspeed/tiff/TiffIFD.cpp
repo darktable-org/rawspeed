@@ -37,6 +37,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -172,28 +173,28 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
     bs.skipBytes(newPosition);
   };
 
-  if (bs.hasPrefix("AOC\0", 4)) {
+  if (bs.hasPrefix(std::string_view("AOC\0", 4))) {
     setup(false, 6, 4, "Pentax makernote");
-  } else if (bs.hasPrefix("PENTAX", 6)) {
+  } else if (bs.hasPrefix("PENTAX")) {
     setup(true, 10, 8, "Pentax makernote");
-  } else if (bs.hasPrefix("FUJIFILM\x0c\x00\x00\x00", 12)) {
+  } else if (bs.hasPrefix(std::string_view("FUJIFILM\x0c\x00\x00\x00", 12))) {
     bs.setByteOrder(Endianness::little);
     setup(true, 12);
-  } else if (bs.hasPrefix("Nikon\x00\x02", 7)) {
+  } else if (bs.hasPrefix(std::string_view("Nikon\x00\x02", 7))) {
     // this is Nikon type 3 maker note format
     // TODO: implement Nikon type 1 maker note format
     // see http://www.ozhiker.com/electronics/pjmt/jpeg_info/nikon_mn.html
     bs.skipBytes(10);
     setup(true, 8, 0, "Nikon makernote");
-  } else if (bs.hasPrefix("OLYMPUS", 7)) { // new Olympus
+  } else if (bs.hasPrefix("OLYMPUS")) { // new Olympus
     setup(true, 12);
-  } else if (bs.hasPrefix("OLYMP", 5)) { // old Olympus
+  } else if (bs.hasPrefix("OLYMP")) { // old Olympus
     setup(true, 8);
-  } else if (bs.hasPrefix("OM SYSTEM", 9)) { // ex Olympus
+  } else if (bs.hasPrefix("OM SYSTEM")) { // ex Olympus
     setup(true, 16);
-  } else if (bs.hasPrefix("EPSON", 5)) {
+  } else if (bs.hasPrefix("EPSON")) {
     setup(false, 8);
-  } else if (bs.hasPatternAt("Exif", 4, 6)) {
+  } else if (bs.hasPatternAt("Exif", 6)) {
     // TODO: for none of the rawsamples.ch files from Panasonic is this true,
     // instead their MakerNote start with "Panasonic" Panasonic has the word
     // Exif at byte 6, a complete Tiff header starts at byte 12 This TIFF is 0
@@ -209,9 +210,9 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
 
     // At least one MAKE has not been handled explicitly and starts its
     // MakerNote with an endian prefix: Kodak
-    if (bs.skipPrefix("II", 2)) {
+    if (bs.skipPrefix("II")) {
       bs.setByteOrder(Endianness::little);
-    } else if (bs.skipPrefix("MM", 2)) {
+    } else if (bs.skipPrefix("MM")) {
       bs.setByteOrder(Endianness::big);
     }
   }

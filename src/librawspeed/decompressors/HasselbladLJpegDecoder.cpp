@@ -25,6 +25,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/HasselbladDecompressor.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <vector>
@@ -46,7 +47,10 @@ HasselbladLJpegDecoder::HasselbladLJpegDecoder(ByteStream bs,
   }
 }
 
-void HasselbladLJpegDecoder::decodeScan() {
+Buffer::size_type HasselbladLJpegDecoder::decodeScan() {
+  if (numMCUsPerRestartInterval != 0)
+    ThrowRDE("Non-zero restart interval not supported.");
+
   if (frame.w != static_cast<unsigned>(mRaw->dim.x) ||
       frame.h != static_cast<unsigned>(mRaw->dim.y)) {
     ThrowRDE("LJPEG frame does not match EXIF dimensions: (%u; %u) vs (%i; %i)",
@@ -56,8 +60,9 @@ void HasselbladLJpegDecoder::decodeScan() {
   const HasselbladDecompressor::PerComponentRecipe rec = {
       *getPrefixCodeDecoders(1)[0], getInitialPredictors(1)[0]};
 
-  HasselbladDecompressor d(mRaw, rec, input);
-  input.skipBytes(d.decompress());
+  HasselbladDecompressor d(mRaw, rec,
+                           input.peekRemainingBuffer().getAsArray1DRef());
+  return d.decompress();
 }
 
 void HasselbladLJpegDecoder::decode() {

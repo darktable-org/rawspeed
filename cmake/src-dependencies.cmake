@@ -25,44 +25,49 @@ if(WITH_OPENMP)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
      CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     # Clang has an option to specify the OpenMP standard to use. Specify it.
-    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=45")
-  endif()
-
-  set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS_SAVE "${CMAKE_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
-
-  find_package(OpenMP 4.5)
-
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")
-
-  if(NOT OPENMP_FOUND)
-    message(SEND_ERROR "Did not find OpenMP! Either make it find OpenMP, "
-                       "or pass -DWITH_OPENMP=OFF to disable OpenMP support.")
-  else()
-    message(STATUS "Looking for OpenMP - found (system)")
+    set(OPENMP_VERSION_SPECIFIER "-fopenmp-version=50")
   endif()
 
   # The wrapper library that *actually* should be linked to.
   add_library(RawSpeed::OpenMP_CXX INTERFACE IMPORTED)
-  set_property(TARGET RawSpeed::OpenMP_CXX        PROPERTY INTERFACE_COMPILE_OPTIONS $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>)
-  set_property(TARGET RawSpeed::OpenMP_CXX APPEND PROPERTY INTERFACE_COMPILE_OPTIONS ${OPENMP_VERSION_SPECIFIER})
-  set_property(TARGET RawSpeed::OpenMP_CXX        PROPERTY INTERFACE_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_INCLUDE_DIRECTORIES>)
+
   if(NOT USE_BUNDLED_LLVMOPENMP)
-    set_property(TARGET RawSpeed::OpenMP_CXX      PROPERTY INTERFACE_LINK_LIBRARIES  $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_LINK_LIBRARIES>)
+    set(CMAKE_C_FLAGS_SAVE "${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS_SAVE "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_VERSION_SPECIFIER}")
+
+    # NOTE: we want at least 5.0, but we don't need full implementation,
+    # so we neither can't really check for a version, not need to...
+    find_package(OpenMP)
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")
+
+    if(NOT OPENMP_FOUND)
+      message(SEND_ERROR "Did not find OpenMP! Either make it find OpenMP, "
+                        "or pass -DWITH_OPENMP=OFF to disable OpenMP support.")
+    else()
+      message(STATUS "Looking for OpenMP - found (system)")
+    endif()
+
+    set_property(TARGET RawSpeed::OpenMP_CXX PROPERTY INTERFACE_COMPILE_OPTIONS $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_COMPILE_OPTIONS>)
+    set_property(TARGET RawSpeed::OpenMP_CXX PROPERTY INTERFACE_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_INCLUDE_DIRECTORIES>)
+    set_property(TARGET RawSpeed::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES  $<TARGET_PROPERTY:OpenMP::OpenMP_CXX,INTERFACE_LINK_LIBRARIES>)
   else()
     include(LLVMOpenMP)
 
-    message(STATUS "Looking for OpenMP - found 'in-tree' runtime library")
+    message(STATUS "Looking for OpenMP - found 'in-tree' runtime library, skipping compiler check")
 
     add_dependencies(RawSpeed::OpenMP_CXX omp)
     add_dependencies(dependencies omp)
 
-    set_property(TARGET RawSpeed::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES omp)
+    target_compile_options(RawSpeed::OpenMP_CXX INTERFACE -fopenmp)
+    target_include_directories(RawSpeed::OpenMP_CXX INTERFACE $<TARGET_PROPERTY:omp,BINARY_DIR>)
+    target_link_libraries(RawSpeed::OpenMP_CXX INTERFACE omp)
   endif()
 
+  target_compile_options(RawSpeed::OpenMP_CXX INTERFACE ${OPENMP_VERSION_SPECIFIER})
   target_link_libraries(rawspeed PUBLIC RawSpeed::OpenMP_CXX)
 
   set(HAVE_OPENMP 1)

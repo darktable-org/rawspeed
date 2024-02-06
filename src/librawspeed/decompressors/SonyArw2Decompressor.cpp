@@ -29,7 +29,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpLSB.h"
+#include "io/BitStreamerLSB.h"
 #include "io/ByteStream.h"
 #include <cstddef>
 #include <cstdint>
@@ -55,22 +55,22 @@ SonyArw2Decompressor::SonyArw2Decompressor(RawImage img, ByteStream input_)
 
 void SonyArw2Decompressor::decompressRow(int row) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width > 0);
-  invariant(out.width % 32 == 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 32 == 0);
 
   // Allow compiler to devirtualize the calls below.
   auto& rawdata = reinterpret_cast<RawImageDataU16&>(*mRaw);
 
   ByteStream rowBs = input;
-  rowBs.skipBytes(row * out.width);
-  rowBs = rowBs.peekStream(out.width);
+  rowBs.skipBytes(row * out.width());
+  rowBs = rowBs.peekStream(out.width());
 
-  BitPumpLSB bits(rowBs);
+  BitStreamerLSB bits(rowBs.peekRemainingBuffer().getAsArray1DRef());
 
   uint32_t random = bits.peekBits(24);
 
   // Each loop iteration processes 16 pixels, consuming 128 bits of input.
-  for (int col = 0; col < out.width; col += ((col & 1) != 0) ? 31 : 1) {
+  for (int col = 0; col < out.width(); col += ((col & 1) != 0) ? 31 : 1) {
     // 30 bits.
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);
@@ -126,6 +126,9 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp cancel for
 #endif
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }

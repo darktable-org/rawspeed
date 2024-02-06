@@ -22,7 +22,8 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "adt/Invariant.h"
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
 #include <cassert>
@@ -56,61 +57,59 @@ private:
 public:
   Buffer() = default;
 
-  // Data already allocated
-  explicit Buffer(const uint8_t* data_, size_type size_)
-      : data(data_), size(size_) {
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Buffer(Array1DRef<const uint8_t> data_)
+      : data(data_.begin()), size(data_.size()) {
+    assert(data);
     assert(!ASan::RegionIsPoisoned(data, size));
   }
 
+  explicit Buffer(const uint8_t* data_, size_type size_)
+      : Buffer(Array1DRef(data_, implicit_cast<int>(size_))) {}
+
+  [[nodiscard]] Array1DRef<const uint8_t> getAsArray1DRef() const {
+    return {data, implicit_cast<int>(size)};
+  }
+
+  explicit operator Array1DRef<const uint8_t>() const {
+    return getAsArray1DRef();
+  }
+
   [[nodiscard]] Buffer getSubView(size_type offset, size_type size_) const {
-    if (!isValid(0, offset))
+    if (!isValid(offset, size_))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    return Buffer(getData(offset, size_), size_);
+    return getAsArray1DRef().getCrop(offset, size_).getAsArray1DRef();
   }
 
   [[nodiscard]] Buffer getSubView(size_type offset) const {
     if (!isValid(0, offset))
       ThrowIOE("Buffer overflow: image file may be truncated");
 
-    size_type newSize = size - offset;
+    size_type newSize = getSize() - offset;
     return getSubView(offset, newSize);
   }
 
-  // get pointer to memory at 'offset', make sure at least 'count' bytes are
-  // accessible
-  [[nodiscard]] const uint8_t* getData(size_type offset,
-                                       size_type count) const {
-    if (!isValid(offset, count))
-      ThrowIOE("Buffer overflow: image file may be truncated");
-
-    invariant(data);
-
-    return data + offset;
-  }
-
   // convenience getter for single bytes
-  uint8_t operator[](size_type offset) const { return *getData(offset, 1); }
+  uint8_t operator[](size_type offset) const {
+    return getAsArray1DRef()(offset);
+  }
 
   // std begin/end iterators to allow for range loop
   [[nodiscard]] const uint8_t* begin() const {
-    invariant(data);
-    return data;
+    return getAsArray1DRef().begin();
   }
-  [[nodiscard]] const uint8_t* end() const {
-    invariant(data);
-    return data + size;
-  }
+  [[nodiscard]] const uint8_t* end() const { return getAsArray1DRef().end(); }
 
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
   [[nodiscard]] inline T get(bool inNativeByteOrder, size_type offset,
                              size_type index = 0) const {
-    return getByteSwapped<T>(
-        getData(offset + index * static_cast<size_type>(sizeof(T)),
-                static_cast<size_type>(sizeof(T))),
-        !inNativeByteOrder);
+    const Buffer buf =
+        getSubView(offset + index * static_cast<size_type>(sizeof(T)),
+                   static_cast<size_type>(sizeof(T)));
+    return getByteSwapped<T>(buf.begin(), !inNativeByteOrder);
   }
 
   [[nodiscard]] inline size_type RAWSPEED_READONLY getSize() const {
@@ -119,7 +118,8 @@ public:
 
   [[nodiscard]] inline bool isValid(size_type offset,
                                     size_type count = 1) const {
-    return static_cast<uint64_t>(offset) + count <= static_cast<uint64_t>(size);
+    return static_cast<uint64_t>(offset) + count <=
+           static_cast<uint64_t>(getSize());
   }
 };
 

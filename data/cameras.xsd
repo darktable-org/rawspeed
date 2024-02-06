@@ -22,6 +22,7 @@
       <xs:minLength value="2"/>
       <xs:maxLength value="10"/>
       <xs:enumeration value="Canon"/>
+      <xs:enumeration value="Contax"/>
       <xs:enumeration value="Epson"/>
       <xs:enumeration value="Fujifilm"/>
       <xs:enumeration value="GITUP"/>
@@ -284,7 +285,7 @@
   </xs:complexType>
   <xs:simpleType name="AliasTypeType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-,]{4,27}"/>
+      <xs:pattern value="[a-zA-Z0-9 \-,/]{4,27}"/>
       <xs:minLength value="4"/>
       <xs:maxLength value="27"/>
     </xs:restriction>
@@ -429,6 +430,7 @@
       <xs:enumeration value="KONICA MINOLTA"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="Konica Minolta Camera, Inc."/>
+      <xs:enumeration value="KYOCERA"/>
       <xs:enumeration value="LEICA CAMERA AG"/>
       <xs:enumeration value="LEICA"/>
       <xs:enumeration value="LG Mobile"/>
@@ -514,11 +516,13 @@
   </xs:simpleType>
   <xs:simpleType name="CameraTypeSupportedType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="(no|no-samples)"/>
+      <xs:pattern value="(no|no-samples|unknown|unknown-no-samples)"/>
       <xs:minLength value="2"/>
-      <xs:maxLength value="10"/>
+      <xs:maxLength value="18"/>
       <xs:enumeration value="no"/>
       <xs:enumeration value="no-samples"/>
+      <xs:enumeration value="unknown"/>
+      <xs:enumeration value="unknown-no-samples"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="CameraType">

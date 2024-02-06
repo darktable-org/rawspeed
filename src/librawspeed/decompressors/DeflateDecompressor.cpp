@@ -19,15 +19,17 @@
 */
 
 #include "rawspeedconfig.h" // IWYU pragma: keep
+#include "adt/Bit.h"
 
 #ifdef HAVE_ZLIB
 
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray1DRef.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
-#include "common/Common.h"
 #include "common/FloatingPoint.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
@@ -37,7 +39,6 @@
 #include <array>
 #include <climits>
 #include <cstdint>
-#include <cstdio>
 #include <utility>
 #include <zconf.h>
 #include <zlib.h>
@@ -67,13 +68,13 @@ namespace {
 
 // decodeFPDeltaRow(): MIT License, copyright 2014 Javier Celaya
 // <jcelaya@gmail.com>
-inline void decodeDeltaBytes(unsigned char* src, size_t realTileWidth,
-                             unsigned int bytesps, int factor) {
-  for (size_t col = factor; col < realTileWidth * bytesps; ++col) {
+inline void decodeDeltaBytes(Array1DRef<unsigned char> src, int realTileWidth,
+                             int bytesps, int factor) {
+  for (int col = factor; col < realTileWidth * bytesps; ++col) {
     // Yes, this is correct, and is symmetrical with EncodeDeltaBytes in
     // hdrmerge, and they both combined are lossless.
     // This is indeed working in modulo-2^n arighmetics.
-    src[col] = static_cast<unsigned char>(src[col] + src[col - factor]);
+    src(col) = static_cast<unsigned char>(src(col) + src(col - factor));
   }
 }
 
@@ -96,8 +97,8 @@ template <> struct StorageType<ieee_754_2008::Binary32> {
 namespace {
 
 template <typename T>
-inline void decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
-                             CroppedArray1DRef<float> out) {
+inline void decodeFPDeltaRow(Array1DRef<const unsigned char> src,
+                             int realTileWidth, CroppedArray1DRef<float> out) {
   using storage_type = typename StorageType<T>::type;
   constexpr unsigned storage_bytes = sizeof(storage_type);
   constexpr unsigned bytesps = T::StorageWidth / 8;
@@ -105,7 +106,7 @@ inline void decodeFPDeltaRow(const unsigned char* src, size_t realTileWidth,
   for (int col = 0; col < out.size(); ++col) {
     std::array<unsigned char, storage_bytes> bytes;
     for (int c = 0; c != bytesps; ++c)
-      bytes[c] = src[col + c * realTileWidth];
+      bytes[c] = src(col + c * realTileWidth);
 
     auto tmp = getBE<storage_type>(bytes.data());
     tmp >>= CHAR_BIT * StorageType<T>::padding_bytes;
@@ -141,6 +142,8 @@ void DeflateDecompressor::decode(
     *uBuffer =
         std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]); // NOLINT
 
+  Array2DRef<unsigned char> tmp(uBuffer->get(), bytesps * maxDim.x, maxDim.y);
+
   if (int err =
           uncompress(uBuffer->get(), &dstLen, input.begin(), input.getSize());
       err != Z_OK) {
@@ -152,19 +155,17 @@ void DeflateDecompressor::decode(
       /*offsetRows=*/off.y, /*croppedWidth=*/dim.x, /*croppedHeight=*/dim.y);
 
   for (int row = 0; row < out.croppedHeight; ++row) {
-    unsigned char* src = uBuffer->get() + row * maxDim.x * bytesps;
-
-    decodeDeltaBytes(src, maxDim.x, bytesps, predFactor);
+    decodeDeltaBytes(tmp[row], maxDim.x, bytesps, predFactor);
 
     switch (bytesps) {
     case 2:
-      decodeFPDeltaRow<ieee_754_2008::Binary16>(src, maxDim.x, out[row]);
+      decodeFPDeltaRow<ieee_754_2008::Binary16>(tmp[row], maxDim.x, out[row]);
       break;
     case 3:
-      decodeFPDeltaRow<ieee_754_2008::Binary24>(src, maxDim.x, out[row]);
+      decodeFPDeltaRow<ieee_754_2008::Binary24>(tmp[row], maxDim.x, out[row]);
       break;
     case 4:
-      decodeFPDeltaRow<ieee_754_2008::Binary32>(src, maxDim.x, out[row]);
+      decodeFPDeltaRow<ieee_754_2008::Binary32>(tmp[row], maxDim.x, out[row]);
       break;
     default:
       __builtin_unreachable();

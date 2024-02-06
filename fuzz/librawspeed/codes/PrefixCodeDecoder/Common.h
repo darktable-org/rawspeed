@@ -21,6 +21,7 @@
 #pragma once
 
 #include "adt/Array1DRef.h"
+#include "adt/Optional.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
@@ -29,7 +30,6 @@
 #include "io/ByteStream.h"
 #include <cassert>
 #include <cstdint>
-#include <optional>
 #include <type_traits>
 #include <vector>
 
@@ -147,7 +147,7 @@ template <typename T>
 static T createPrefixCodeDecoder(rawspeed::ByteStream& bs) {
   using CodeTag = typename T::Tag;
 
-  std::optional<T> ht;
+  rawspeed::Optional<T> ht;
   if (bool huffmanCode = bs.getByte() != 0; huffmanCode)
     ht = createHuffmanPrefixCodeDecoderImpl<T, CodeTag>(bs);
   else

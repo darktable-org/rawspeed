@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Array1DRef.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -33,11 +34,11 @@ using rawspeed::Endianness;
 
 namespace rawspeed_test {
 
-template <typename T, typename Tag> struct BitPumpPatternTest final {};
+template <typename T, typename Tag> struct BitStreamerPatternTest final {};
 
 struct TestGetBitsTag;
 
-template <typename T> struct BitPumpPatternTest<T, TestGetBitsTag> {
+template <typename T> struct BitStreamerPatternTest<T, TestGetBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
@@ -49,7 +50,7 @@ template <typename T> struct BitPumpPatternTest<T, TestGetBitsTag> {
 
 struct TestGetBitsNoFillTag;
 
-template <typename T> struct BitPumpPatternTest<T, TestGetBitsNoFillTag> {
+template <typename T> struct BitStreamerPatternTest<T, TestGetBitsNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
@@ -62,7 +63,7 @@ template <typename T> struct BitPumpPatternTest<T, TestGetBitsNoFillTag> {
 
 struct TestPeekBitsTag;
 
-template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
+template <typename T> struct BitStreamerPatternTest<T, TestPeekBitsTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
@@ -76,7 +77,7 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsTag> {
 
 struct TestPeekBitsNoFillTag;
 
-template <typename T> struct BitPumpPatternTest<T, TestPeekBitsNoFillTag> {
+template <typename T> struct BitStreamerPatternTest<T, TestPeekBitsNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
@@ -93,7 +94,7 @@ template <typename T> struct BitPumpPatternTest<T, TestPeekBitsNoFillTag> {
 struct TestIncreasingPeekLengthTag;
 
 template <typename T>
-struct BitPumpPatternTest<T, TestIncreasingPeekLengthTag> {
+struct BitStreamerPatternTest<T, TestIncreasingPeekLengthTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
@@ -107,7 +108,7 @@ struct BitPumpPatternTest<T, TestIncreasingPeekLengthTag> {
 struct TestIncreasingPeekLengthNoFillTag;
 
 template <typename T>
-struct BitPumpPatternTest<T, TestIncreasingPeekLengthNoFillTag> {
+struct BitStreamerPatternTest<T, TestIncreasingPeekLengthNoFillTag> {
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
 
@@ -120,7 +121,7 @@ struct BitPumpPatternTest<T, TestIncreasingPeekLengthNoFillTag> {
   }
 };
 
-template <typename T> class BitPumpTest : public ::testing::Test {
+template <typename T> class BitStreamerTest : public ::testing::Test {
 public:
   using PumpT = typename T::PumpT;
   using PatternT = typename T::PatternT;
@@ -128,48 +129,42 @@ public:
 protected:
   template <typename Tag, typename TestDataType, typename L>
   void runTest(const TestDataType& data, L gen) {
-    const Buffer b(
-        data.data(),
-        rawspeed::implicit_cast<rawspeed::Buffer::size_type>(data.size()));
+    const rawspeed::Array1DRef<const uint8_t> input(
+        data.data(), rawspeed::implicit_cast<int>(data.size()));
 
-    for (auto e : {Endianness::little, Endianness::big}) {
-      const DataBuffer db(b, e);
-      const ByteStream bs(db);
-
-      PumpT pump(bs);
-      BitPumpPatternTest<T, Tag>::Test(pump, gen);
-    }
+    PumpT pump(input);
+    BitStreamerPatternTest<T, Tag>::Test(pump, gen);
   }
 };
 
-TYPED_TEST_SUITE_P(BitPumpTest);
+TYPED_TEST_SUITE_P(BitStreamerTest);
 
-TYPED_TEST_P(BitPumpTest, GetTest) {
+TYPED_TEST_P(BitStreamerTest, GetTest) {
   this->template runTest<TestGetBitsTag>(TypeParam::PatternT::Data,
                                          TypeParam::PatternT::element);
 }
-TYPED_TEST_P(BitPumpTest, GetNoFillTest) {
+TYPED_TEST_P(BitStreamerTest, GetNoFillTest) {
   this->template runTest<TestGetBitsNoFillTag>(TypeParam::PatternT::Data,
                                                TypeParam::PatternT::element);
 }
-TYPED_TEST_P(BitPumpTest, PeekTest) {
+TYPED_TEST_P(BitStreamerTest, PeekTest) {
   this->template runTest<TestPeekBitsTag>(TypeParam::PatternT::Data,
                                           TypeParam::PatternT::element);
 }
-TYPED_TEST_P(BitPumpTest, PeekNoFillTest) {
+TYPED_TEST_P(BitStreamerTest, PeekNoFillTest) {
   this->template runTest<TestPeekBitsNoFillTag>(TypeParam::PatternT::Data,
                                                 TypeParam::PatternT::element);
 }
-TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthTest) {
+TYPED_TEST_P(BitStreamerTest, IncreasingPeekLengthTest) {
   this->template runTest<TestIncreasingPeekLengthTag>(
       TypeParam::PatternT::Data, TypeParam::PatternT::data);
 }
-TYPED_TEST_P(BitPumpTest, IncreasingPeekLengthNoFillTest) {
+TYPED_TEST_P(BitStreamerTest, IncreasingPeekLengthNoFillTest) {
   this->template runTest<TestIncreasingPeekLengthNoFillTag>(
       TypeParam::PatternT::Data, TypeParam::PatternT::data);
 }
 
-REGISTER_TYPED_TEST_SUITE_P(BitPumpTest, GetTest, GetNoFillTest, PeekTest,
+REGISTER_TYPED_TEST_SUITE_P(BitStreamerTest, GetTest, GetNoFillTest, PeekTest,
                             PeekNoFillTest, IncreasingPeekLengthTest,
                             IncreasingPeekLengthNoFillTest);
 

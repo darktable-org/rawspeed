@@ -259,6 +259,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 20Da" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS 20Da">Canon EOS 20Da</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 30D">
 		<ID make="Canon" model="EOS 30D">Canon EOS 30D</ID>
 		<CFA width="2" height="2">
@@ -296,8 +299,8 @@
 			<Horizontal y="0" height="12"/>
 		</BlackAreas>
 		<Aliases>
-			<Alias id="Digital Rebel XT">Canon EOS DIGITAL REBEL XT</Alias>
-			<Alias id="Kiss Digital N">Canon EOS Kiss Digital N</Alias>
+			<Alias id="EOS Digital Rebel XT">Canon EOS DIGITAL REBEL XT</Alias>
+			<Alias id="EOS Kiss Digital N">Canon EOS Kiss Digital N</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D Digital</Alias>
 		</Aliases>
@@ -371,9 +374,9 @@
 		</CFA>
 		<Crop x="22" y="18" width="4290" height="2856"/>
 		<Aliases>
-			<Alias id="Digital Rebel XSi">Canon EOS DIGITAL REBEL XSi</Alias>
-			<Alias id="Kiss Digital X2">Canon EOS Kiss Digital X2</Alias>
-			<Alias id="Kiss X2">Canon EOS Kiss X2</Alias>
+			<Alias id="EOS Digital Rebel XSi">Canon EOS DIGITAL REBEL XSi</Alias>
+			<Alias id="EOS Kiss Digital X2">Canon EOS Kiss Digital X2</Alias>
+			<Alias id="EOS Kiss X2">Canon EOS Kiss X2</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -468,6 +471,9 @@
 				<ColorMatrixRow plane="2">-887 2129 6051</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 60Da" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS 60Da">Canon EOS 60Da</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 70D" decoder_version="1">
 		<ID make="Canon" model="EOS 70D">Canon EOS 70D</ID>
@@ -1596,6 +1602,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS-1D C" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS-1D C">Canon EOS-1D C</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS-1DS" decoder_version="8">
 		<ID make="Canon" model="EOS-1Ds">Canon EOS-1Ds</ID>
 		<CFA width="2" height="2">
@@ -1977,6 +1986,9 @@
 				<ColorMatrixRow plane="3">-2238 10873 1342</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot Pro90 IS" supported="unknown-no-samples">
+		<ID make="Canon" model="PowerShot Pro90 IS">Canon PowerShot Pro90 IS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1">
 		<ID make="Canon" model="PowerShot G1">Canon PowerShot G1</ID>
@@ -5554,6 +5566,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" supported="unknown-no-samples">
+		<ID make="Nikon" model="D810A">Nikon D810A</ID>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D850" mode="12bit-compressed">
 		<ID make="Nikon" model="D850">Nikon D850</ID>
 		<CFA width="2" height="2">
@@ -7194,6 +7209,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="OM Digital Solutions" model="OM-1MarkII" supported="unknown-no-samples">
+		<ID make="OM System" model="OM-1 Mark II">OM Digital Solutions OM-1 Mark II</ID>
+	</Camera>
 	<Camera make="OM Digital Solutions" model="OM-5">
 		<ID make="OM System" model="OM-5">OM Digital Solutions OM-5</ID>
 		<Crop x="0" y="0" width="-30" height="0"/>
@@ -7247,6 +7265,9 @@
 				<ColorMatrixRow plane="2">-513 1552 4434</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-CM10" supported="unknown-no-samples">
+		<ID make="Panasonic" model="DMC-CM10">Panasonic DMC-CM10</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FX150" supported="no-samples">
 		<ID make="Panasonic" model="DMC-FX150">Panasonic DMC-FX150</ID>
@@ -7420,6 +7441,66 @@
 		<ID make="Panasonic" model="DMC-FZ200">Panasonic DMC-FZ200</ID>
 		<Crop x="0" y="0" width="-128" height="0"/>
 		<Sensor black="150" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="-4"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="4:3">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="-4"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="3:2">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="1:1">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-16" height="0"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="16:9">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="143" white="3956"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
@@ -9102,6 +9183,30 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="V-Lux 5">
+		<ID make="Leica" model="V-Lux 5">Leica V-Lux 5</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9803 -4185 -992</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4066 12578 1628</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-838 1824 5288</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="V-Lux 5" mode="3:2">
+		<ID make="Leica" model="V-Lux 5">Leica V-Lux 5</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9803 -4185 -992</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4066 12578 1628</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-838 1824 5288</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-GX1">
 		<ID make="Panasonic" model="DMC-GX1">Panasonic DMC-GX1</ID>
 		<Crop x="0" y="0" width="-154" height="0"/>
@@ -9277,6 +9382,9 @@
 				<ColorMatrixRow plane="2">-821 1977 6119</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-LC1" supported="unknown-no-samples">
+		<ID make="Panasonic" model="DMC-LC1">Panasonic DMC-LC1</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-LF1">
 		<ID make="Panasonic" model="DMC-LF1">Panasonic DMC-LF1</ID>
@@ -9574,6 +9682,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="LEICA" model="D-LUX2" supported="unknown-no-samples">
+		<ID make="Leica" model="D-Lux 2">Leica D-Lux2</ID>
+	</Camera>
 	<Camera make="LEICA" model="D-LUX 3" decoder_version="2">
 		<ID make="Leica" model="D-LUX 3">Leica D-LUX 3</ID>
 		<CFA width="2" height="2">
@@ -9753,6 +9864,12 @@
 				<ColorMatrixRow plane="2">-1922 2631 6537</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 2" supported="unknown-no-samples">
+		<ID make="Leica" model="V-LUX 2">Leica V-LUX 2</ID>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 3" supported="unknown-no-samples">
+		<ID make="Leica" model="V-LUX 3">Leica V-LUX 3</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-L10" decoder_version="2">
 		<ID make="Panasonic" model="DMC-L10">Panasonic DMC-L10</ID>
@@ -11637,6 +11754,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="PENTAX Corporation" model="PENTAX *ist DS2" supported="unknown-no-samples">
+		<ID make="Pentax" model="*ist DS2">Pentax *ist DS2</ID>
+	</Camera>
 	<Camera make="PENTAX Corporation" model="PENTAX K10D">
 		<ID make="Pentax" model="K10D">Pentax K10D</ID>
 		<CFA width="2" height="2">
@@ -12477,6 +12597,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SAMSUNG" model="NX3300">
+		<ID make="Samsung" model="NX3300">Samsung NX3300</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">RED</Color>
+			<Color x="0" y="1">BLUE</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="96" y="42" width="-32" height="-24"/>
+		<Sensor black="0" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8060 -2933 -761</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4504 12890 1762</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-630 1489 5227</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="SAMSUNG" model="NX500">
 		<ID make="Samsung" model="NX500">Samsung NX500</ID>
 		<CFA width="2" height="2">
@@ -12843,6 +12981,9 @@
 				<ColorMatrixRow plane="2">-622 1381 6514</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="SONY" model="DSC-V3" supported="unknown-no-samples">
+		<ID make="Sony" model="DSC-V3">Sony DSC-V3</ID>
 	</Camera>
 	<Camera make="SONY" model="DSLR-A100" decoder_version="1">
 		<ID make="Sony" model="DSLR-A100">Sony DSLR-A100</ID>
@@ -13858,6 +13999,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SONY" model="ILCE-9M3" supported="unknown-no-samples">
+		<ID make="Sony" model="ILCE-9M3">Sony ILCE-9M3</ID>
+	</Camera>
 	<Camera make="SONY" model="DSC-RX1">
 		<ID make="Sony" model="DSC-RX1">Sony DSC-RX1</ID>
 		<CFA width="2" height="2">
@@ -14122,6 +14266,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SONY" model="ZV-1M2" supported="unknown-no-samples">
+		<ID make="Sony" model="ZV-1M2">Sony ZV-1M2</ID>
+	</Camera>
 	<Camera make="SONY" model="ZV-E1">
 		<ID make="Sony" model="ZV-E1">Sony ZV-E1</ID>
 		<CFA width="2" height="2">
@@ -14363,6 +14510,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F710" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix F710">Fujifilm FinePix F710</ID>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix F770EXR">
 		<ID make="Fujifilm" model="FinePix F770EXR">Fujifilm FinePix F770EXR</ID>
 		<CFA width="2" height="2">
@@ -14380,6 +14530,12 @@
 				<ColorMatrixRow plane="2">-132 1554 4395</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F800EXR" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix F800EXR">Fujifilm FinePix F800EXR</ID>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F810" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix F810">Fujifilm FinePix F810</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="FinePix F900EXR">
 		<ID make="Fujifilm" model="FinePix F900EXR">Fujifilm FinePix F900EXR</ID>
@@ -14532,6 +14688,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S20Pro" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix S20Pro">Fujifilm FinePix S20Pro</ID>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S5000">
 		<ID make="Fujifilm" model="FinePix S5000">Fujifilm FinePix S5000</ID>
 		<CFA2 width="2" height="2">
@@ -14550,6 +14709,9 @@
 				<ColorMatrixRow plane="2">-1702 2334 6982</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5100" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix S5100">Fujifilm FinePix S5100</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S5200">
 		<ID make="Fujifilm" model="FinePix S5200">Fujifilm FinePix S5200</ID>
@@ -14623,6 +14785,9 @@
 				<ColorMatrixRow plane="2">-2003 2399 7505</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S9100" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix S9100">Fujifilm FinePix S9100</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S9500">
 		<ID make="Fujifilm" model="FinePix S9500">Fujifilm FinePix S9500</ID>
@@ -15030,6 +15195,42 @@
 				<ColorMatrixRow plane="0">16212 -8423 -1583</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4336 12583 1937</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-195 726 6199</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="GFX100 II">
+		<ID make="Fujifilm" model="GFX100 II">Fujifilm GFX 100 II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-146" height="-6"/>
+		<Sensor black="0" white="0"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">12806 -5779 -1110</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3546 11507 2318</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-177 996 5715</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="GFX100 II" mode="compressed">
+		<ID make="Fujifilm" model="GFX100 II">Fujifilm GFX 100 II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-146" height="-6"/>
+		<Sensor black="0" white="0"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">12806 -5779 -1110</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3546 11507 2318</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-177 996 5715</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -15610,6 +15811,9 @@
 				<ColorMatrixRow plane="2">-382 1049 5605</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-A20" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="X-A20">Fujifilm X-A20</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="XQ1">
 		<ID make="Fujifilm" model="XQ1">Fujifilm XQ1</ID>
@@ -16212,6 +16416,9 @@
 				<ColorMatrixRow plane="2">-610 1217 6147</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="KYOCERA" model="CONTAX N DIGITAL" supported="unknown-no-samples">
+		<ID make="Contax" model="N Digital">Contax N Digital</ID>
 	</Camera>
 	<Camera make="ImBack" model="ImB35mm" mode="chdk">
 		<ID make="ImBack" model="ImB35mm">ImBack</ID>
@@ -17209,8 +17416,11 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="50" y="104" width="-48" height="0"/>
+		<Crop x="56" y="104" width="-56" height="0"/>
 		<Sensor black="256" white="62914"/>
+		<Aliases>
+			<Alias id="CFV-50c">Hasselblad CFV-50c</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">4932 -835 141</ColorMatrixRow>
@@ -17267,7 +17477,9 @@
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="X1D II 50C">Hasselblad X1D II 50C</Alias>
-			<Alias id="X1DM2-50c">Hasselblad X1DM2-50c</Alias>
+			<Alias id="X1D II 50C">Hasselblad X1DM2-50c</Alias>
+			<Alias id="CFV II 50C">Hasselblad CFV II 50C</Alias>
+			<Alias id="CFV II 50C">CFV II 50C/907X</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -17373,6 +17585,15 @@
 	<Camera make="PENTAX RICOH IMAGING" model="PENTAX MX-1" mode="dng">
 		<ID make="Pentax" model="MX-1">PENTAX MX-1</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA S (Typ 007)" mode="dng">
+		<ID make="Leica" model="S (Typ 007)">LEICA S (Typ 007)</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="S2" mode="dng">
+		<ID make="Leica" model="S2">Leica S2</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA S3" mode="dng">
+		<ID make="Leica" model="S3">LEICA S3</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
 	</Camera>
@@ -17409,15 +17630,35 @@
 	<Camera make="Leica Camera AG" model="LEICA M MONOCHROM (Typ 246)" mode="dng">
 		<ID make="Leica" model="M Monochrom (Typ 246)">LEICA M MONOCHROM (Typ 246)</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M (Typ 262)" mode="dng">
+		<ID make="Leica" model="M (Typ 262)">LEICA M (Typ 262)</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M-D (Typ 262)" mode="dng">
+		<ID make="Leica" model="M-D (Typ 262)">LEICA M-D (Typ 262)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA T (Typ 701)" mode="dng">
+		<ID make="Leica" model="T (Typ 701)">LEICA T (Typ 701)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA TL" mode="dng">
+		<ID make="Leica" model="TL">LEICA TL</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA TL2" mode="dng">
+		<ID make="Leica" model="TL2">LEICA TL2</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X1" mode="dng">
+		<ID make="Leica" model="X1">LEICA X1</ID>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA X2" mode="dng">
 		<ID make="Leica" model="X2">LEICA X2</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">7158 -1911 -606</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3603 10669 2530</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-659 1236 5530</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X VARIO (Typ 107)" mode="dng">
+		<ID make="Leica" model="X Vario (Typ 107)">LEICA X VARIO (Typ 107)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X (Typ 113)" mode="dng">
+		<ID make="Leica" model="X (Typ 113)">LEICA X (Typ 113)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X-U (Typ 113)" mode="dng">
+		<ID make="Leica" model="X-U (Typ 113)">LEICA X-U (Typ 113)</ID>
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA Q (Typ 116)" mode="dng">
 		<ID make="Leica" model="Q (Typ 116)">LEICA Q (Typ 116)</ID>

@@ -152,9 +152,9 @@ public:
 
 inline Endianness getTiffByteOrder(ByteStream bs, uint32_t pos,
                                    const char* context = "") {
-  if (bs.hasPatternAt("II", 2, pos))
+  if (bs.hasPatternAt("II", pos))
     return Endianness::little;
-  if (bs.hasPatternAt("MM", 2, pos))
+  if (bs.hasPatternAt("MM", pos))
     return Endianness::big;
 
   ThrowTPE("Failed to parse TIFF endianness information in %s.", context);

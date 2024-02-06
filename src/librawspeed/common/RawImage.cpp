@@ -53,8 +53,6 @@ void RawImageData::anchor() const {
   // the class's vtable to this Translational Unit.
 }
 
-RawImageData::RawImageData() { blackLevelSeparate.fill(-1); }
-
 RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
                            int _cpp)
     : dim(_dim), isCFA(_cpp == 1), dataType(type), cpp(_cpp) {
@@ -64,7 +62,6 @@ RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
     ThrowRDE("Components-per-pixel is too large.");
 
   bpp = _bpc * _cpp;
-  blackLevelSeparate.fill(-1);
   createData();
 }
 
@@ -106,12 +103,6 @@ void RawImageData::createData() {
 #ifndef NDEBUG
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
 
-  if (dim.y > 1) {
-    // padding is the size of the area after last pixel of line n
-    // and before the first pixel of line n+1
-    assert(&img(0, img.width - 1) + 1 + padding == &img(1, 0));
-  }
-
   for (int j = 0; j < dim.y; j++) {
     // each line is indeed 16-byte aligned
     assert(isAligned(&img(j, 0), alignment));
@@ -129,7 +120,7 @@ void RawImageData::poisonPadding() {
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
     // and now poison the padding.
-    ASan::PoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
+    ASan::PoisonMemoryRegion(img[j].end(), padding);
   }
 }
 #else
@@ -148,7 +139,7 @@ void RawImageData::unpoisonPadding() {
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
     // and now unpoison the padding.
-    ASan::UnPoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
+    ASan::UnPoisonMemoryRegion(img[j].end(), padding);
   }
 }
 #else
@@ -182,6 +173,9 @@ iPoint2D RAWSPEED_READONLY RawImageData::getCropOffset() const {
 }
 
 void RawImageData::subFrame(iRectangle2D crop) {
+  if (!crop.hasPositiveArea())
+    ThrowRDE("No positive crop area");
+
   if (!crop.dim.isThisInside(dim - crop.pos)) {
     writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Attempted "
                                   "to create new subframe larger than original "
@@ -303,18 +297,22 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
 void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   int gw = (uncropped_dim.x + 15) / 32;
 
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
+
   for (int y = start_y; y < end_y; y++) {
-    const auto* bad_map =
-        reinterpret_cast<const uint32_t*>(&mBadPixelMap[y * mBadPixelMapPitch]);
     for (int x = 0; x < gw; x++) {
+      const auto block = bad[y].getBlock(32 / 8, x);
+
       // Test if there is a bad pixel within these 32 pixels
-      if (bad_map[x] == 0)
+      if (std::all_of(block.begin(), block.end(),
+                      [](const auto& val) { return val == 0; }))
         continue;
-      const auto* bad = reinterpret_cast<const uint8_t*>(&bad_map[x]);
+
       // Go through each pixel
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 8; j++) {
-          if (1 != ((bad[i] >> j) & 1))
+          if (1 != ((block(i) >> j) & 1))
             continue;
 
           fixBadPixel(x * 32 + i * 8 + j, y, 0);
@@ -366,6 +364,9 @@ void RawImageWorker::performTask() noexcept {
     data->setError(e.what());
   } catch (const IOException& e) {
     data->setError(e.what());
+  } catch (...) {
+    // We should not get any other exception type here.
+    __builtin_unreachable();
   }
 }
 

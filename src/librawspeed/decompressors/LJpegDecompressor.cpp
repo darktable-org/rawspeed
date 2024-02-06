@@ -20,18 +20,24 @@
 */
 
 #include "decompressors/LJpegDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpJPEG.h"
+#include "decompressors/JpegMarkers.h"
+#include "io/BitStreamerJPEG.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
+#include "io/Endianness.h"
 #include <algorithm>
 #include <array>
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -46,9 +52,12 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     ByteStream bs)
-    : mRaw(std::move(img)), input(bs), imgFrame(imgFrame_),
-      frame(std::move(frame_)), rec(std::move(rec_)) {
+                                     int numRowsPerRestartInterval_,
+                                     Array1DRef<const uint8_t> input_)
+    : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
+      frame(std::move(frame_)), rec(std::move(rec_)),
+      numRowsPerRestartInterval(numRowsPerRestartInterval_) {
+
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
              static_cast<unsigned>(mRaw->getDataType()));
@@ -60,6 +69,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
 
   if (!mRaw->dim.hasPositiveArea())
     ThrowRDE("Image has zero size");
+
+  if (!imgFrame.hasPositiveArea())
+    ThrowRDE("Tile has zero size");
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
@@ -95,8 +107,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if (static_cast<unsigned>(frame.cps) < mRaw->getCpp())
-    ThrowRDE("Unexpected number of components");
+  // We assume that the tile width requires at least one frame column.
+  if (imgFrame.dim.x < frame.cps)
+    ThrowRDE("Tile width is smaller than the frame cps");
 
   if (static_cast<int64_t>(frame.cps) * frame.dim.x >
       std::numeric_limits<int>::max())
@@ -117,10 +130,13 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
       static_cast<int64_t>(frame.cps) * frame.dim.x <
           static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
-    ThrowRDE("LJpeg frame (%u, %u) is smaller than expected (%u, %u)",
-             frame.cps * frame.dim.x, frame.dim.y, tileRequiredWidth,
-             imgFrame.dim.y);
+    ThrowRDE("LJpeg frame (%" PRIu64 ", %u) is smaller than expected (%u, %u)",
+             static_cast<int64_t>(frame.cps) * frame.dim.x, frame.dim.y,
+             tileRequiredWidth, imgFrame.dim.y);
   }
+
+  if (numRowsPerRestartInterval < 1)
+    ThrowRDE("Number of rows per restart interval must be positives");
 
   // How many full pixel blocks will we produce?
   fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!
@@ -151,13 +167,61 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
   return preds;
 }
 
-// N_COMP == number of components (2, 3 or 4)
+template <int N_COMP, bool WeirdWidth>
+void LJpegDecompressor::decodeRowN(
+    CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+    std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
+    BitStreamerJPEG& bs) const {
+  // FIXME: predictor may have value outside of the uint16_t.
+  // https://github.com/darktable-org/rawspeed/issues/175
 
-template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
+  int col = 0;
+  // For x, we first process all full pixel blocks within the image buffer ...
+  for (; col < N_COMP * fullBlocks; col += N_COMP) {
+    for (int i = 0; i != N_COMP; ++i) {
+      pred[i] =
+          uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
+                                 .decodeDifference(bs));
+      outRow(col + i) = pred[i];
+    }
+  }
+
+  // Sometimes we also need to consume one more block, and produce part of it.
+  if /*constexpr*/ (WeirdWidth) {
+    // FIXME: evaluate i-cache implications due to this being compile-time.
+    static_assert(N_COMP > 1 || !WeirdWidth,
+                  "can't want part of 1-pixel-wide block");
+    // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
+    // We may end up needing just part of last N_COMP pixels.
+    invariant(trailingPixels > 0);
+    invariant(trailingPixels < N_COMP);
+    int c = 0;
+    for (; c < trailingPixels; ++c) {
+      pred[c] =
+          uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                                 .decodeDifference(bs));
+      outRow(col + c) = pred[c];
+    }
+    // Discard the rest of the block.
+    invariant(c < N_COMP);
+    for (; c < N_COMP; ++c) {
+      (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
+    }
+    col += N_COMP; // We did just process one more block.
+  }
+
+  // ... and discard the rest.
+  for (; col < N_COMP * frame.dim.x; col += N_COMP) {
+    for (int i = 0; i != N_COMP; ++i)
+      (static_cast<const PrefixCodeDecoder<>&>(ht[i])).decodeDifference(bs);
+  }
+}
+
+// N_COMP == number of components (2, 3 or 4)
+template <int N_COMP, bool WeirdWidth>
+ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
-  invariant(N_COMP >= mRaw->getCpp());
-  invariant((N_COMP / mRaw->getCpp()) > 0);
 
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
@@ -167,10 +231,6 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
                               mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y);
 
   const auto ht = getPrefixCodeDecoders<N_COMP>();
-  auto pred = getInitialPreds<N_COMP>();
-  uint16_t* predNext = pred.data();
-
-  BitPumpJPEG bitStream(input);
 
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of
@@ -183,76 +243,73 @@ template <int N_COMP, bool WeirdWidth> void LJpegDecompressor::decodeN() {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  // For y, we can simply stop decoding when we reached the border.
-  for (int row = 0; row < imgFrame.dim.y; ++row) {
-    int col = 0;
+  const auto numRestartIntervals = implicit_cast<int>(
+      roundUpDivision(imgFrame.dim.y, numRowsPerRestartInterval));
+  invariant(numRestartIntervals >= 0);
+  invariant(numRestartIntervals != 0);
 
-    copy_n(predNext, N_COMP, pred.data());
-    // the predictor for the next line is the start of this line
-    predNext = &img(row, col);
+  ByteStream inputStream(DataBuffer(input, Endianness::little));
+  for (int restartIntervalIndex = 0;
+       restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
+    auto pred = getInitialPreds<N_COMP>();
+    auto predNext = Array1DRef(pred.data(), pred.size());
 
-    // FIXME: predictor may have value outside of the uint16_t.
-    // https://github.com/darktable-org/rawspeed/issues/175
-
-    // For x, we first process all full pixel blocks within the image buffer ...
-    for (; col < N_COMP * fullBlocks; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i) {
-        pred[i] =
-            uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-                                   .decodeDifference(bitStream));
-        img(row, col + i) = pred[i];
-      }
+    if (restartIntervalIndex != 0) {
+      auto marker = peekMarker(inputStream);
+      if (!marker) // FIXME: can there be padding bytes before the marker?
+        ThrowRDE("Jpeg marker not encountered");
+      Optional<int> number = getRestartMarkerNumber(*marker);
+      if (!number)
+        ThrowRDE("Not a restart marker!");
+      if (*number != ((restartIntervalIndex - 1) % 8))
+        ThrowRDE("Unexpected restart marker found");
+      inputStream.skipBytes(2); // Good restart marker.
     }
 
-    // Sometimes we also need to consume one more block, and produce part of it.
-    if /*constexpr*/ (WeirdWidth) {
-      // FIXME: evaluate i-cache implications due to this being compile-time.
-      static_assert(N_COMP > 1 || !WeirdWidth,
-                    "can't want part of 1-pixel-wide block");
-      // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
-      // We may end up needing just part of last N_COMP pixels.
-      invariant(trailingPixels > 0);
-      invariant(trailingPixels < N_COMP);
-      int c = 0;
-      for (; c < trailingPixels; ++c) {
-        pred[c] =
-            uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                                   .decodeDifference(bitStream));
-        img(row, col + c) = pred[c];
+    BitStreamerJPEG bs(inputStream.peekRemainingBuffer().getAsArray1DRef());
+
+    for (int rowOfRestartInterval = 0;
+         rowOfRestartInterval != numRowsPerRestartInterval;
+         ++rowOfRestartInterval) {
+      const int row = numRowsPerRestartInterval * restartIntervalIndex +
+                      rowOfRestartInterval;
+      invariant(row >= 0);
+      invariant(row <= imgFrame.dim.y);
+
+      // For y, we can simply stop decoding when we reached the border.
+      if (row == imgFrame.dim.y) {
+        invariant((restartIntervalIndex + 1) == numRestartIntervals);
+        break;
       }
-      // Discard the rest of the block.
-      invariant(c < N_COMP);
-      for (; c < N_COMP; ++c) {
-        (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-            .decodeDifference(bitStream);
-      }
-      col += N_COMP; // We did just process one more block.
+
+      auto outRow = img[row];
+      copy_n(predNext.begin(), N_COMP, pred.data());
+      // the predictor for the next line is the start of this line
+      predNext = outRow
+                     .getBlock(/*size=*/N_COMP,
+                               /*index=*/0)
+                     .getAsArray1DRef();
+
+      decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
     }
 
-    // ... and discard the rest.
-    for (; col < N_COMP * frame.dim.x; col += N_COMP) {
-      for (int i = 0; i != N_COMP; ++i)
-        (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-            .decodeDifference(bitStream);
-    }
+    inputStream.skipBytes(bs.getStreamPosition());
   }
+
+  return inputStream.getPosition();
 }
 
-void LJpegDecompressor::decode() {
+ByteStream::size_type LJpegDecompressor::decode() const {
   if (trailingPixels == 0) {
     switch (frame.cps) {
     case 1:
-      decodeN<1>();
-      break;
+      return decodeN<1>();
     case 2:
-      decodeN<2>();
-      break;
+      return decodeN<2>();
     case 3:
-      decodeN<3>();
-      break;
+      return decodeN<3>();
     case 4:
-      decodeN<4>();
-      break;
+      return decodeN<4>();
     default:
       __builtin_unreachable();
     }
@@ -263,14 +320,11 @@ void LJpegDecompressor::decode() {
     switch (frame.cps) {
     // Naturally can't happen for CPS=1.
     case 2:
-      decodeN<2, /*WeirdWidth=*/true>();
-      break;
+      return decodeN<2, /*WeirdWidth=*/true>();
     case 3:
-      decodeN<3, /*WeirdWidth=*/true>();
-      break;
+      return decodeN<3, /*WeirdWidth=*/true>();
     case 4:
-      decodeN<4, /*WeirdWidth=*/true>();
-      break;
+      return decodeN<4, /*WeirdWidth=*/true>();
     default:
       __builtin_unreachable();
     }

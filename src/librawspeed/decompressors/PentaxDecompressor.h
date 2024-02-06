@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Optional.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
@@ -28,7 +29,6 @@
 #include "decompressors/AbstractDecompressor.h"
 #include <array>
 #include <cstdint>
-#include <optional>
 
 namespace rawspeed {
 
@@ -39,7 +39,7 @@ class PentaxDecompressor final : public AbstractDecompressor {
   const PrefixCodeDecoder<> ht;
 
 public:
-  PentaxDecompressor(RawImage img, std::optional<ByteStream> metaData);
+  PentaxDecompressor(RawImage img, Optional<ByteStream> metaData);
 
   void decompress(ByteStream data) const;
 
@@ -48,7 +48,7 @@ private:
   static HuffmanCode<BaselineCodeTag>
   SetupPrefixCodeDecoder_Modern(ByteStream stream);
   static PrefixCodeDecoder<>
-  SetupPrefixCodeDecoder(std::optional<ByteStream> metaData);
+  SetupPrefixCodeDecoder(Optional<ByteStream> metaData);
 
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
       pentax_tree;

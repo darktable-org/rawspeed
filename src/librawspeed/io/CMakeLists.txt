@@ -1,11 +1,20 @@
+rawspeed_add_library(rawspeed_io OBJECT)
+set_target_properties(rawspeed_io PROPERTIES LINKER_LANGUAGE CXX)
+
 FILE(GLOB SOURCES
-  "BitPumpJPEG.h"
-  "BitPumpLSB.h"
-  "BitPumpMSB.h"
-  "BitPumpMSB16.h"
-  "BitPumpMSB32.h"
-  "BitStream.cpp"
-  "BitStream.h"
+  "BitStreamer.cpp"
+  "BitStreamer.h"
+  "BitStreamerJPEG.h"
+  "BitStreamerLSB.h"
+  "BitStreamerMSB.h"
+  "BitStreamerMSB16.h"
+  "BitStreamerMSB32.h"
+  "BitVacuumer.h"
+  "BitVacuumerJPEG.h"
+  "BitVacuumerLSB.h"
+  "BitVacuumerMSB.h"
+  "BitVacuumerMSB16.h"
+  "BitVacuumerMSB32.h"
   "Buffer.h"
   "ByteStream.h"
   "Endianness.h"
@@ -20,6 +29,12 @@ FILE(GLOB SOURCES
   "IOException.h"
 )
 
-target_sources(rawspeed PRIVATE
+target_sources(rawspeed_io PRIVATE
   ${SOURCES}
 )
+
+target_include_directories(rawspeed_io PUBLIC "${RAWSPEED_BINARY_DIR}/src")
+target_include_directories(rawspeed_io SYSTEM PUBLIC "${RAWSPEED_SOURCE_DIR}/src/external")
+target_include_directories(rawspeed_io PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+target_link_libraries(rawspeed PRIVATE rawspeed_io)

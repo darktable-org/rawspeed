@@ -25,6 +25,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Mutex.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -49,7 +50,6 @@
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -127,7 +127,7 @@ enum class IIQFormat {
 
 };
 
-std::optional<IIQFormat> getAsIIQFormat(uint32_t v) {
+Optional<IIQFormat> getAsIIQFormat(uint32_t v) {
   switch (v) {
     using enum IIQFormat;
   case 1:
@@ -178,8 +178,8 @@ RawImage IiqDecoder::decodeRawInternal() {
   uint32_t split_row = 0;
   uint32_t split_col = 0;
 
-  std::optional<IIQFormat> format;
-  Buffer raw_data;
+  Optional<IIQFormat> format;
+  Optional<Buffer> raw_data;
   ByteStream block_offsets;
   ByteStream wb;
   ByteStream correction_meta_data;
@@ -240,6 +240,9 @@ RawImage IiqDecoder::decodeRawInternal() {
   if (!format)
     ThrowRDE("Unspecified RawFormat");
 
+  if (!raw_data)
+    ThrowRDE("No raw data found");
+
   if (split_col > width || split_row > height)
     ThrowRDE("Invalid sensor quadrant split values (%u, %u)", split_row,
              split_col);
@@ -254,10 +257,10 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   // to simplify slice size calculation, we insert a dummy offset,
   // which will be used much like end()
-  offsets.emplace_back(height, raw_data.getSize());
+  offsets.emplace_back(height, raw_data->getSize());
 
   std::vector<PhaseOneStrip> strips(
-      computeSripes(raw_data, std::move(offsets), height));
+      computeSripes(*raw_data, std::move(offsets), height));
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -377,9 +380,9 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
       const std::vector<uint16_t> curve = s.calculateCurve();
 
       int row_start = quadRow == 0 ? 0 : split_row;
-      int row_end = quadRow == 0 ? split_row : img.height;
+      int row_end = quadRow == 0 ? split_row : img.height();
       int col_start = quadCol == 0 ? 0 : split_col;
-      int col_end = quadCol == 0 ? split_col : img.width;
+      int col_end = quadCol == 0 ? split_col : img.width();
 
       for (int row = row_start; row < row_end; row++) {
         for (int col = col_start; col < col_end; col++) {

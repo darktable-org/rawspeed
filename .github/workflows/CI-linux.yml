@@ -136,6 +136,12 @@ jobs:
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
             eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
+
+            eatmydata apt-get install curl gpg
+            echo 'deb https://mirror.aardsoft.fi/opensuse/repositories/graphics:/darktable:/master/Debian_Testing/ /' | tee /etc/apt/sources.list
+            curl -fsSL https://download.opensuse.org/repositories/graphics:darktable:master/Debian_Testing/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/graphics_darktable_master.gpg > /dev/null
+            apt-get update
+            eatmydata apt-get install rawspeed-clang-tidy-module
           fi
           if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
             eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
@@ -172,7 +178,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Fetch/Checkout RawSpeed git repo
         timeout-minutes: 1
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'rawspeed'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
@@ -190,7 +196,7 @@ jobs:
       - name: Cache raw.pixls.us masterset
         timeout-minutes: 2
         if: inputs.flavor == 'Coverage'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.RPUU_DST }}
           key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
@@ -206,7 +212,7 @@ jobs:
       - name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'ClangStaticAnalysis'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: 'Ericsson/codechecker'
           path: 'codechecker'
@@ -233,10 +239,10 @@ jobs:
       - name: Set up JDK 11 (for SonarCloud static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
-          java-version: 17
+          java-version: 21
       - name: Download and set up sonar-scanner (for SonarCloud static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
@@ -371,7 +377,7 @@ jobs:
       - if: inputs.flavor == 'Coverage'
         timeout-minutes: 1
         name: Cache code coverage (linux reports)
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
           key: coverage-${{ github.sha }}-linux
@@ -408,7 +414,7 @@ jobs:
       - name: Upload results of clang static analysis (plain mode)
         timeout-minutes: 1
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: codechecker_report.tar.xz
           path: ${{ github.workspace }}/codechecker_report.tar.xz
@@ -433,7 +439,7 @@ jobs:
           [ $bugs -eq 0 ] || exit 1
       - name: Upload results of clang static analysis (CTU mode)
         timeout-minutes: 1
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: codechecker_ctu_report.tar.xz

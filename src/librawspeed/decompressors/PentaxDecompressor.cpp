@@ -21,22 +21,22 @@
 #include "decompressors/PentaxDecompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
-#include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cassert>
 #include <cstdint>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -51,7 +51,7 @@ const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
     }};
 
 PentaxDecompressor::PentaxDecompressor(RawImage img,
-                                       std::optional<ByteStream> metaData)
+                                       Optional<ByteStream> metaData)
     : mRaw(std::move(img)), ht(SetupPrefixCodeDecoder(metaData)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -139,8 +139,8 @@ PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
 }
 
 PrefixCodeDecoder<>
-PentaxDecompressor::SetupPrefixCodeDecoder(std::optional<ByteStream> metaData) {
-  std::optional<HuffmanCode<BaselineCodeTag>> hc;
+PentaxDecompressor::SetupPrefixCodeDecoder(Optional<ByteStream> metaData) {
+  Optional<HuffmanCode<BaselineCodeTag>> hc;
 
   if (metaData)
     hc = SetupPrefixCodeDecoder_Modern(*metaData);
@@ -156,17 +156,17 @@ PentaxDecompressor::SetupPrefixCodeDecoder(std::optional<ByteStream> metaData) {
 void PentaxDecompressor::decompress(ByteStream data) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  invariant(out.height > 0);
-  invariant(out.width > 0);
-  invariant(out.width % 2 == 0);
+  invariant(out.height() > 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
-  BitPumpMSB bs(data);
-  for (int row = 0; row < out.height; row++) {
+  BitStreamerMSB bs(data.peekRemainingBuffer().getAsArray1DRef());
+  for (int row = 0; row < out.height(); row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       pred[col & 1] += ht.decodeDifference(bs);
       int value = pred[col & 1];
       if (!isIntN(value, 16))

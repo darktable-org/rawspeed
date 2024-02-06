@@ -28,7 +28,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpLSB.h"
+#include "io/BitStreamerLSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <array>
@@ -88,7 +88,7 @@ template <int B> struct pana_cs6_page_decoder final {
 template <>
 inline void __attribute__((always_inline))
 pana_cs6_page_decoder<12>::fillBuffer(ByteStream bs_) noexcept {
-  BitPumpLSB bs(bs_);
+  BitStreamerLSB bs(bs_.peekRemainingBuffer().getAsArray1DRef());
   bs.fill(32);
   pixelbuffer[17] = implicit_cast<uint16_t>(bs.getBits(8));
   pixelbuffer[16] = implicit_cast<uint16_t>(bs.getBits(8));
@@ -113,7 +113,7 @@ pana_cs6_page_decoder<12>::fillBuffer(ByteStream bs_) noexcept {
 template <>
 inline void __attribute__((always_inline))
 pana_cs6_page_decoder<14>::fillBuffer(ByteStream bs_) noexcept {
-  BitPumpLSB bs(bs_);
+  BitStreamerLSB bs(bs_.peekRemainingBuffer().getAsArray1DRef());
   bs.fill(32);
   bs.skipBitsNoFill(4);
   pixelbuffer[13] = implicit_cast<uint16_t>(bs.getBits(10));
@@ -242,7 +242,12 @@ void PanasonicV6Decompressor::decompressInternal() const noexcept {
   for (int row = 0; row < mRaw->dim.y;
        ++row) { // NOLINT(openmp-exception-escape): we know no exceptions will
                 // be thrown.
-    decompressRow<dsc>(row);
+    try {
+      decompressRow<dsc>(row);
+    } catch (...) {
+      // We should not get any exceptions here.
+      __builtin_unreachable();
+    }
   }
 }
 

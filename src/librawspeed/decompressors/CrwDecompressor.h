@@ -22,11 +22,12 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
+#include "adt/Optional.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpJPEG.h"
-#include "io/ByteStream.h"
+#include "io/BitStreamerJPEG.h"
 #include <array>
 #include <cstdint>
 
@@ -37,14 +38,14 @@ class CrwDecompressor final : public AbstractDecompressor {
 
   RawImage mRaw;
   crw_hts mHuff;
-  const bool lowbits;
 
-  ByteStream lowbitInput;
-  ByteStream rawInput;
+  Array1DRef<const uint8_t> input;
+  Optional<Array1DRef<const uint8_t>> lowbitInput;
 
 public:
-  CrwDecompressor(RawImage img, uint32_t dec_table_, bool lowbits_,
-                  ByteStream rawData);
+  CrwDecompressor(RawImage img, uint32_t dec_table_,
+                  Array1DRef<const uint8_t> input,
+                  Optional<Array1DRef<const uint8_t>> lowbitInput);
 
   void decompress();
 
@@ -54,7 +55,7 @@ private:
   static crw_hts initHuffTables(uint32_t table);
 
   inline static void decodeBlock(std::array<int16_t, 64>* diffBuf,
-                                 const crw_hts& mHuff, BitPumpJPEG& bs);
+                                 const crw_hts& mHuff, BitStreamerJPEG& bs);
 };
 
 } // namespace rawspeed

@@ -22,6 +22,11 @@ if [[ $SANITIZER = *undefined* ]]; then
   CXXFLAGS="$CXXFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
 fi
 
+WITH_OPENMP=ON
+if [[ $SANITIZER = *memory* ]]; then
+  WITH_OPENMP=OFF
+fi
+
 cd "$WORK"
 mkdir build
 cd build
@@ -30,7 +35,8 @@ cd build
 # https://github.com/google/oss-fuzz/pull/2781).
 ln -f -s /usr/bin/gold /usr/bin/ld
 cmake \
-  -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=OFF \
+  -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
+  -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
   -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
   -DBUILD_TESTING=OFF -DBUILD_TOOLS=OFF -DBUILD_BENCHMARKING=OFF \
   -DCMAKE_BUILD_TYPE=FUZZ -DBUILD_FUZZERS=ON \
@@ -39,6 +45,3 @@ cmake \
   "$SRC/librawspeed/"
 
 make -j$(nproc) all && make -j$(nproc) install
-
-cd "$SRC"
-rm -rf "$WORK/build"

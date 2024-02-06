@@ -23,12 +23,13 @@
 #include "rawspeedconfig.h"
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/Cr2Decompressor.h"
-#include "io/BitPumpJPEG.h"
+#include "io/BitStreamerJPEG.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -37,7 +38,6 @@
 #include <cstdint>
 #include <functional>
 #include <iterator>
-#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -46,7 +46,8 @@ namespace rawspeed {
 
 class ByteStream;
 
-// NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
+// This is not really a header, inline namespace is fine.
+// NOLINTNEXTLINE(google-build-namespaces)
 namespace {
 
 enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
@@ -237,7 +238,8 @@ Cr2Decompressor<PrefixCodeDecoder>::getVerticalOutputStrips() const {
                                          std::end(outputTiles))};
 }
 
-// NOLINTNEXTLINE: this is not really a header, inline namespace is fine.
+// This is not really a header, inline namespace is fine.
+// NOLINTNEXTLINE(google-build-namespaces)
 namespace {
 
 struct Dsc final {
@@ -274,7 +276,7 @@ Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
     RawImage mRaw_,
     std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format_,
     iPoint2D frame_, Cr2SliceWidths slicing_,
-    std::vector<PerComponentRecipe> rec_, ByteStream input_)
+    std::vector<PerComponentRecipe> rec_, Array1DRef<const uint8_t> input_)
     : mRaw(std::move(mRaw_)), format(std::move(format_)), frame(frame_),
       slicing(slicing_), rec(std::move(rec_)), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
@@ -336,7 +338,7 @@ Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
   if (frame.area() < dim.area())
     ThrowRDE("Frame area smaller than the image area");
 
-  std::optional<iRectangle2D> lastTile;
+  Optional<iRectangle2D> lastTile;
   for (iRectangle2D output : getAllOutputTiles()) {
     if (lastTile && evaluateConsecutiveTiles(*lastTile, output) ==
                         TileSequenceStatus::Invalid)
@@ -388,7 +390,8 @@ Cr2Decompressor<PrefixCodeDecoder>::getInitialPreds() const {
 
 template <typename PrefixCodeDecoder>
 template <int N_COMP, int X_S_F, int Y_S_F>
-void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
+ByteStream::size_type
+Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // To understand the CR2 slice handling and sampling factor behavior, see
@@ -404,9 +407,11 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
 
   auto ht = getPrefixCodeDecoders<N_COMP>();
   auto pred = getInitialPreds<N_COMP>();
-  const auto* predNext = &out(0, 0);
+  auto predNext = out[/*row=*/0]
+                      .getCrop(/*offset=*/0, /*size=*/dsc.groupSize)
+                      .getAsArray1DRef();
 
-  BitPumpJPEG bs(input);
+  BitStreamerJPEG bs(input);
 
   int globalFrameCol = 0;
   int globalFrameRow = 0;
@@ -430,8 +435,11 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
           // makes no sense from an image compression point of view, ask
           // Canon.
           for (int c = 0; c < N_COMP; ++c)
-            pred[c] = predNext[c == 0 ? c : dsc.groupSize - (N_COMP - c)];
-          predNext = &out(row, dsc.groupSize * col);
+            pred[c] = predNext(c == 0 ? c : dsc.groupSize - (N_COMP - c));
+          predNext = out[row]
+                         .getBlock(/*size=*/dsc.groupSize,
+                                   /*index=*/col)
+                         .getAsArray1DRef();
           ++globalFrameRow;
           globalFrameCol = 0;
           invariant(globalFrameRow < frame.y && "Run out of frame");
@@ -451,25 +459,22 @@ void Cr2Decompressor<PrefixCodeDecoder>::decompressN_X_Y() const {
       }
     }
   }
+  return bs.getStreamPosition();
 }
 
 template <typename PrefixCodeDecoder>
-void Cr2Decompressor<PrefixCodeDecoder>::decompress() const {
+ByteStream::size_type Cr2Decompressor<PrefixCodeDecoder>::decompress() const {
   if (std::make_tuple(3, 2, 2) == format) {
-    decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
-    return;
+    return decompressN_X_Y<3, 2, 2>(); // Cr2 sRaw1/mRaw
   }
   if (std::make_tuple(3, 2, 1) == format) {
-    decompressN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
-    return;
+    return decompressN_X_Y<3, 2, 1>(); // Cr2 sRaw2/sRaw
   }
   if (std::make_tuple(2, 1, 1) == format) {
-    decompressN_X_Y<2, 1, 1>();
-    return;
+    return decompressN_X_Y<2, 1, 1>();
   }
   if (std::make_tuple(4, 1, 1) == format) {
-    decompressN_X_Y<4, 1, 1>();
-    return;
+    return decompressN_X_Y<4, 1, 1>();
   }
   __builtin_unreachable();
 }

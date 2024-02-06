@@ -27,6 +27,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include "decompressors/LJpegDecompressor.h"
+#include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
@@ -91,7 +92,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
   AbstractLJpegDecoder::decodeSOI();
 }
 
-void LJpegDecoder::decodeScan() {
+Buffer::size_type LJpegDecoder::decodeScan() {
   invariant(frame.cps > 0);
 
   if (predictorMode != 1)
@@ -113,12 +114,27 @@ void LJpegDecoder::decodeScan() {
                     return {*hts[i], initPred[i]};
                   });
 
-  LJpegDecompressor d(
-      mRaw,
-      iRectangle2D({static_cast<int>(offX), static_cast<int>(offY)},
-                   {static_cast<int>(w), static_cast<int>(h)}),
-      LJpegDecompressor::Frame{N_COMP, iPoint2D(frame.w, frame.h)}, rec, input);
-  d.decode();
+  const iRectangle2D imgFrame = {
+      {static_cast<int>(offX), static_cast<int>(offY)},
+      {static_cast<int>(w), static_cast<int>(h)}};
+  const LJpegDecompressor::Frame jpegFrame = {N_COMP,
+                                              iPoint2D(frame.w, frame.h)};
+
+  int numRowsPerRestartInterval;
+  if (numMCUsPerRestartInterval == 0) {
+    // Restart interval not enabled, so all of the rows
+    // are contained in the first (implicit) restart interval.
+    numRowsPerRestartInterval = jpegFrame.dim.y;
+  } else {
+    const int numMCUsPerRow = jpegFrame.dim.x;
+    if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
+      ThrowRDE("Restart interval is not a multiple of frame row size");
+    numRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
+  }
+
+  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec, numRowsPerRestartInterval,
+                      input.peekRemainingBuffer().getAsArray1DRef());
+  return d.decode();
 }
 
 } // namespace rawspeed

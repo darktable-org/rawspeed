@@ -27,7 +27,7 @@
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cmath>
@@ -57,7 +57,7 @@ OlympusDecompressor::OlympusDecompressor(RawImage img) : mRaw(std::move(img)) {
  */
 
 inline __attribute__((always_inline)) int
-OlympusDecompressor::parseCarry(BitPumpMSB& bits,
+OlympusDecompressor::parseCarry(BitStreamerMSB& bits,
                                 std::array<int, 3>* carry) const {
   bits.fill();
   int i = 2 * ((*carry)[2] < 3);
@@ -121,7 +121,7 @@ inline int OlympusDecompressor::getPred(const Array2DRef<uint16_t> out, int row,
   return pred;
 }
 
-void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
+void OlympusDecompressor::decompressRow(BitStreamerMSB& bits, int row) const {
   invariant(mRaw->dim.y > 0);
   invariant(mRaw->dim.x > 0);
   invariant(mRaw->dim.x % 2 == 0);
@@ -130,7 +130,7 @@ void OlympusDecompressor::decompressRow(BitPumpMSB& bits, int row) const {
 
   std::array<std::array<int, 3>, 2> acarry{{}};
 
-  for (int col = 0; col < out.width; col++) {
+  for (int col = 0; col < out.width(); col++) {
     int c = col & 1;
 
     std::array<int, 3>& carry = acarry[c];
@@ -148,7 +148,7 @@ void OlympusDecompressor::decompress(ByteStream input) const {
   invariant(mRaw->dim.x % 2 == 0);
 
   input.skipBytes(7);
-  BitPumpMSB bits(input);
+  BitStreamerMSB bits(input.peekRemainingBuffer().getAsArray1DRef());
 
   for (int y = 0; y < mRaw->dim.y; y++)
     decompressRow(bits, y);

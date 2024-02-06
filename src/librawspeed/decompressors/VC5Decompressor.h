@@ -21,8 +21,10 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/Optional.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCodeLUTDecoder.h"
 #include "codes/PrefixCodeVectorDecoder.h"
@@ -30,12 +32,11 @@
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -104,7 +105,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   using PrefixCodeDecoder =
       PrefixCodeLUTDecoder<VC5CodeTag, PrefixCodeVectorDecoder<VC5CodeTag>>;
 
-  std::optional<PrefixCodeDecoder> codeDecoder;
+  Optional<PrefixCodeDecoder> codeDecoder;
 
   void initPrefixCodeDecoder();
 
@@ -118,9 +119,9 @@ class VC5Decompressor final : public AbstractDecompressor {
 
   struct {
     uint16_t iChannel = 0; // 0'th channel is the default
-    std::optional<uint16_t> iSubband;
-    std::optional<uint16_t> lowpassPrecision;
-    std::optional<int16_t> quantization;
+    Optional<uint16_t> iSubband;
+    Optional<uint16_t> lowpassPrecision;
+    Optional<int16_t> quantization;
 
     const uint16_t imgFormat = 4;
     const uint16_t patternWidth = 2;
@@ -131,6 +132,9 @@ class VC5Decompressor final : public AbstractDecompressor {
   struct BandData final {
     std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> storage;
     Array2DRef<int16_t> description;
+
+    BandData(int width, int height)
+        : description(Array2DRef<int16_t>::create(storage, width, height)) {}
   };
 
   class Wavelet final {
@@ -141,7 +145,7 @@ class VC5Decompressor final : public AbstractDecompressor {
 
     struct AbstractBand {
       Wavelet& wavelet;
-      std::optional<BandData> data;
+      Optional<BandData> data;
       virtual void anchor() const;
       explicit AbstractBand(Wavelet& wavelet_) : wavelet(wavelet_) {}
       virtual ~AbstractBand() = default;
@@ -152,8 +156,8 @@ class VC5Decompressor final : public AbstractDecompressor {
       bool clampUint;
       bool finalWavelet;
       struct {
-        std::optional<BandData> lowpass;
-        std::optional<BandData> highpass;
+        Optional<BandData> lowpass;
+        Optional<BandData> highpass;
       } intermediates;
       explicit ReconstructableBand(Wavelet& wavelet_, bool clampUint_ = false,
                                    bool finalWavelet_ = false)
@@ -168,25 +172,25 @@ class VC5Decompressor final : public AbstractDecompressor {
                                bool& exceptionThrown) noexcept override;
     };
     struct AbstractDecodeableBand : AbstractBand {
-      ByteStream bs;
-      explicit AbstractDecodeableBand(Wavelet& wavelet_, ByteStream bs_)
-          : AbstractBand(wavelet_), bs(bs_) {}
+      Array1DRef<const uint8_t> input;
+      explicit AbstractDecodeableBand(Wavelet& wavelet_,
+                                      Array1DRef<const uint8_t> input_)
+          : AbstractBand(wavelet_), input(input_) {}
       [[nodiscard]] virtual BandData decode() const = 0;
       void createDecodingTasks(ErrorLog& errLog,
                                bool& exceptionThrown) noexcept final;
     };
     struct LowPassBand final : AbstractDecodeableBand {
       uint16_t lowpassPrecision;
-      LowPassBand(Wavelet& wavelet_, ByteStream bs_,
-                  uint16_t lowpassPrecision_);
+      LowPassBand(Wavelet& wavelet_, ByteStream bs, uint16_t lowpassPrecision_);
       [[nodiscard]] BandData decode() const noexcept override;
     };
     struct HighPassBand final : AbstractDecodeableBand {
-      const PrefixCodeDecoder& decoder;
+      const Optional<PrefixCodeDecoder>& decoder;
       int16_t quant;
-      HighPassBand(Wavelet& wavelet_, ByteStream bs_,
-                   const PrefixCodeDecoder& decoder_, int16_t quant_)
-          : AbstractDecodeableBand(wavelet_, bs_), decoder(decoder_),
+      HighPassBand(Wavelet& wavelet_, Array1DRef<const uint8_t> input_,
+                   const Optional<PrefixCodeDecoder>& decoder_, int16_t quant_)
+          : AbstractDecodeableBand(wavelet_, input_), decoder(decoder_),
             quant(quant_) {}
       [[nodiscard]] BandData decode() const override;
     };
@@ -221,7 +225,7 @@ class VC5Decompressor final : public AbstractDecompressor {
   std::array<Channel, numChannels> channels;
 
   static inline std::pair<int16_t /*value*/, unsigned int /*count*/>
-  getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits);
+  getRLV(const PrefixCodeDecoder& decoder, BitStreamerMSB& bits);
 
   void parseLargeCodeblock(ByteStream bs);
 

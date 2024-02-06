@@ -18,7 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/Cpuid.h"
+#include "common/CpuFeatures.h"
 
 #if defined(__i386__) || defined(__x86_64__)
 #include <cpuid.h>

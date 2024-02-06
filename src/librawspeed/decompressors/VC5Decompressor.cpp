@@ -29,9 +29,12 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/VC5Decompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCode.h"
@@ -41,7 +44,7 @@
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -53,7 +56,6 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <optional>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -181,10 +183,8 @@ struct ConvolutionParams final {
 VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     const Array2DRef<const int16_t> high,
     const Array2DRef<const int16_t> low) noexcept {
-  BandData combined;
-  auto& dst = combined.description;
-  dst = Array2DRef<int16_t>::create(combined.storage, high.width,
-                                    2 * high.height);
+  BandData combined(high.width(), 2 * high.height());
+  const auto& dst = combined.description;
 
   auto process = [low, high, dst]<typename SegmentTy>(int row, int col) {
     auto lowGetter = [&row, &col, low](int delta) {
@@ -211,19 +211,19 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
     num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(),        \
                                   numChannels))
 #endif
-  for (int row = 0; row < dst.height / 2; ++row) {
+  for (int row = 0; row < dst.height() / 2; ++row) {
 #pragma GCC diagnostic pop
     if (row == 0) {
       // 1st row
-      for (int col = 0; col < dst.width; ++col)
+      for (int col = 0; col < dst.width(); ++col)
         process.template operator()<ConvolutionParams::First>(row, col);
-    } else if (row + 1 < dst.height / 2) {
+    } else if (row + 1 < dst.height() / 2) {
       // middle rows
-      for (int col = 0; col < dst.width; ++col)
+      for (int col = 0; col < dst.width(); ++col)
         process.template operator()<ConvolutionParams::Middle>(row, col);
     } else {
       // last row
-      for (int col = 0; col < dst.width; ++col)
+      for (int col = 0; col < dst.width(); ++col)
         process.template operator()<ConvolutionParams::Last>(row, col);
     }
   }
@@ -235,10 +235,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     const Array2DRef<const int16_t> low, const Array2DRef<const int16_t> high,
     int descaleShift, bool clampUint = false,
     [[maybe_unused]] bool finalWavelet = false) noexcept {
-  BandData combined;
-  auto& dst = combined.description;
-  dst = Array2DRef<int16_t>::create(combined.storage, 2 * high.width,
-                                    high.height);
+  BandData combined(2 * high.width(), high.height());
+  const auto& dst = combined.description;
 
   auto process = [low, high, descaleShift, clampUint,
                   dst]<typename SegmentTy>(int row, int col) {
@@ -273,13 +271,13 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
     num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(), 2))    \
     mergeable
 #endif
-  for (int row = 0; row < dst.height; ++row) {
+  for (int row = 0; row < dst.height(); ++row) {
 #pragma GCC diagnostic pop
     // First col
     int col = 0;
     process.template operator()<ConvolutionParams::First>(row, col);
     // middle cols
-    for (col = 1; col + 1 < dst.width / 2; ++col) {
+    for (col = 1; col + 1 < dst.width() / 2; ++col) {
       process.template operator()<ConvolutionParams::Middle>(row, col);
     }
     // last col
@@ -291,8 +289,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowpassReconstructionTask(const bool& exceptionThrown) noexcept {
-  auto& highlow = wavelet.bands[2]->data;
-  auto& lowlow = wavelet.bands[0]->data;
+  const auto& highlow = wavelet.bands[2]->data;
+  const auto& lowlow = wavelet.bands[0]->data;
   auto& lowpass = intermediates.lowpass;
 
 #ifdef HAVE_OPENMP
@@ -315,8 +313,8 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createHighpassReconstructionTask(const bool& exceptionThrown) noexcept {
-  auto& highhigh = wavelet.bands[3]->data;
-  auto& lowhigh = wavelet.bands[1]->data;
+  const auto& highhigh = wavelet.bands[3]->data;
+  const auto& lowhigh = wavelet.bands[1]->data;
   auto& highpass = intermediates.highpass;
 
 #ifdef HAVE_OPENMP
@@ -338,14 +336,19 @@ void VC5Decompressor::Wavelet::ReconstructableBand::
 
 void VC5Decompressor::Wavelet::ReconstructableBand::
     createLowHighPassCombiningTask(const bool& exceptionThrown) noexcept {
-  auto& lowpass = intermediates.lowpass;
-  auto& highpass = intermediates.highpass;
+  const auto& lowpass = intermediates.lowpass;
+  const auto& highpass = intermediates.highpass;
   auto& reconstructedLowpass = data;
 
 #ifdef HAVE_OPENMP
-#pragma omp task default(none) depend(in : lowpass, highpass)
+#pragma omp task default(none) shared(exceptionThrown)                         \
+    depend(in : lowpass, highpass)
 #endif
-  wavelet.bands.clear();
+  {
+    if (!readValue(exceptionThrown)) {
+      wavelet.bands.clear();
+    }
+  }
 
 #ifdef HAVE_OPENMP
 #pragma omp task default(none)                                                 \
@@ -394,7 +397,7 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     ThrowRDE("Height %u is not a multiple of %u", mRaw->dim.y,
              mVC5.patternHeight);
 
-  std::optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
+  Optional<BayerPhase> p = getAsBayerPhase(mRaw->cfa);
   if (!p)
     ThrowRDE("Image has invalid CFA.");
   phase = *p;
@@ -417,11 +420,11 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     }
   }
 
-  if (img->whitePoint <= 0 || img->whitePoint > int(((1U << 16U) - 1U)))
-    ThrowRDE("Bad white level %i", img->whitePoint);
+  if (*img->whitePoint <= 0 || *img->whitePoint > int(((1U << 16U) - 1U)))
+    ThrowRDE("Bad white level %i", *img->whitePoint);
 
   outputBits = 0;
-  for (int wp = img->whitePoint; wp != 0; wp >>= 1)
+  for (int wp = *img->whitePoint; wp != 0; wp >>= 1)
     ++outputBits;
   invariant(outputBits <= 16);
 
@@ -635,15 +638,18 @@ void VC5Decompressor::Wavelet::AbstractDecodeableBand::createDecodingTasks(
 #pragma omp atomic write
 #endif
         exceptionThrown = true;
+      } catch (...) {
+        // We should not get any other exception type here.
+        __builtin_unreachable();
       }
     }
   }
 }
 
 VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
-                                                   ByteStream bs_,
+                                                   ByteStream bs,
                                                    uint16_t lowpassPrecision_)
-    : AbstractDecodeableBand(wavelet_, bs_),
+    : AbstractDecodeableBand(wavelet_, bs.getAsArray1DRef()),
       lowpassPrecision(lowpassPrecision_) {
   // Low-pass band is a uncompressed version of the image, hugely downscaled.
   // It consists of width * height pixels, `lowpassPrecision` each.
@@ -655,19 +661,19 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   const auto chunksTotal = roundUpDivision(bitsTotal, bitsPerChunk);
   const auto bytesTotal = bytesPerChunk * chunksTotal;
   // And clamp the size / verify sufficient input while we are at it.
-  bs = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal));
+  // NOTE: this might fail (and should throw, not assert).
+  input = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal))
+              .getAsArray1DRef();
 }
 
 VC5Decompressor::BandData
 VC5Decompressor::Wavelet::LowPassBand::decode() const noexcept {
-  BandData lowpass;
-  auto& band = lowpass.description;
-  band = Array2DRef<int16_t>::create(lowpass.storage, wavelet.width,
-                                     wavelet.height);
+  BandData lowpass(wavelet.width, wavelet.height);
+  const auto& band = lowpass.description;
 
-  BitPumpMSB bits(bs);
-  for (auto row = 0; row < band.height; ++row) {
-    for (auto col = 0; col < band.width; ++col)
+  BitStreamerMSB bits(input);
+  for (auto row = 0; row < band.height(); ++row) {
+    for (auto col = 0; col < band.width(); ++col)
       band(row, col) = static_cast<int16_t>(bits.getBits(lowpassPrecision));
   }
 
@@ -678,7 +684,7 @@ VC5Decompressor::BandData
 VC5Decompressor::Wavelet::HighPassBand::decode() const {
   class DeRLVer final {
     const PrefixCodeDecoder& decoder;
-    BitPumpMSB bits;
+    BitStreamerMSB bits;
     const int16_t quant;
 
     int16_t pixelValue = 0;
@@ -690,8 +696,9 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
     }
 
   public:
-    DeRLVer(const PrefixCodeDecoder& decoder_, ByteStream bs, int16_t quant_)
-        : decoder(decoder_), bits(bs), quant(quant_) {}
+    DeRLVer(const PrefixCodeDecoder& decoder_, Array1DRef<const uint8_t> input,
+            int16_t quant_)
+        : decoder(decoder_), bits(input), quant(quant_) {}
 
     void verifyIsAtEnd() {
       if (numPixelsLeft != 0)
@@ -724,11 +731,9 @@ VC5Decompressor::Wavelet::HighPassBand::decode() const {
   };
 
   // decode highpass band
-  DeRLVer d(decoder, bs, quant);
-  BandData highpass;
-  auto& band = highpass.description;
-  band = Array2DRef<int16_t>::create(highpass.storage, wavelet.width,
-                                     wavelet.height);
+  DeRLVer d(*decoder, input, quant);
+  BandData highpass(wavelet.width, wavelet.height);
+  const auto& band = highpass.description;
   for (int row = 0; row != wavelet.height; ++row)
     for (int col = 0; col != wavelet.width; ++col)
       band(row, col) = d.decode();
@@ -790,8 +795,8 @@ void VC5Decompressor::parseLargeCodeblock(ByteStream bs) {
   } else {
     if (!mVC5.quantization.has_value())
       ThrowRDE("Did not see VC5Tag::Quantization yet");
-    dstBand = std::make_unique<Wavelet::HighPassBand>(wavelet, bs, *codeDecoder,
-                                                      *mVC5.quantization);
+    dstBand = std::make_unique<Wavelet::HighPassBand>(
+        wavelet, bs.getAsArray1DRef(), codeDecoder, *mVC5.quantization);
     mVC5.quantization.reset();
   }
   wavelet.setBandValid(band);
@@ -815,10 +820,13 @@ void VC5Decompressor::createWaveletBandDecodingTasks(
   for (int waveletLevel = numWaveletLevels; waveletLevel >= 0; waveletLevel--) {
     const int numBandsInCurrentWavelet =
         waveletLevel == 0 ? 1 : Wavelet::maxBands;
-    for (int bandId = 0; bandId != numBandsInCurrentWavelet; ++bandId) {
+    for (int bandId = numBandsInCurrentWavelet - 1; bandId >= 0; --bandId) {
       for (const auto& channel : channels) {
         channel.wavelets[waveletLevel].bands[bandId]->createDecodingTasks(
             static_cast<ErrorLog&>(*mRaw), exceptionThrown);
+        if (readValue(exceptionThrown)) {
+          return;
+        }
       }
     }
   }
@@ -868,8 +876,8 @@ template <BayerPhase p>
 void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  const int width = out.width / 2;
-  const int height = out.height / 2;
+  const int width = out.width() / 2;
+  const int height = out.height() / 2;
 
   assert(channels[0].wavelets[0].bands[0]->data.has_value() &&
          channels[1].wavelets[0].bands[0]->data.has_value() &&
@@ -912,8 +920,8 @@ void VC5Decompressor::combineFinalLowpassBandsImpl() const noexcept {
       patData = applyStablePhaseShift(patData, basePhase, p);
 
       const Array2DRef<const int> pat(patData.data(), 2, 2);
-      for (int patRow = 0; patRow < pat.height; ++patRow) {
-        for (int patCol = 0; patCol < pat.width; ++patCol) {
+      for (int patRow = 0; patRow < pat.height(); ++patRow) {
+        for (int patCol = 0; patCol < pat.width(); ++patCol) {
           out(2 * row + patRow, 2 * col + patCol) =
               static_cast<uint16_t>(pat(patRow, patCol));
         }
@@ -938,7 +946,8 @@ void VC5Decompressor::combineFinalLowpassBands() const noexcept {
 }
 
 inline std::pair<int16_t /*value*/, unsigned int /*count*/>
-VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder, BitPumpMSB& bits) {
+VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder,
+                        BitStreamerMSB& bits) {
   unsigned bitfield = decoder.decodeCodeValue(bits);
 
   unsigned int count = bitfield & ((1U << RLVRunLengthBitWidth) - 1U);

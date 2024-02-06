@@ -18,14 +18,13 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitPumpLSB.h"
-#include "io/BitPumpTest.h"
+#include "io/BitStreamerLSB.h"
+#include "io/BitStreamerTest.h"
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <gtest/gtest.h>
 
-using rawspeed::BitPumpLSB;
+using rawspeed::BitStreamerLSB;
 
 namespace rawspeed_test {
 
@@ -33,23 +32,23 @@ struct InvOnesTag;
 struct OnesTag;
 
 template <>
-const std::array<uint8_t, 8> Pattern<BitPumpLSB, OnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitStreamerLSB, OnesTag>::Data = {
     {/* [Byte0 Byte1 Byte2 Byte3] */
      /* Byte: [Bit7 .. Bit0] */
      0b01001011, 0b10000100, 0b00100000, 0b11110000}};
-template <> uint32_t Pattern<BitPumpLSB, OnesTag>::data(int index) {
+template <> uint32_t Pattern<BitStreamerLSB, OnesTag>::data(int index) {
   const auto set = GenOnesLE(0, -1);
   return set[index];
 }
 
 template <>
-const std::array<uint8_t, 8> Pattern<BitPumpLSB, InvOnesTag>::Data = {
+const std::array<uint8_t, 8> Pattern<BitStreamerLSB, InvOnesTag>::Data = {
     {0b00100101, 0b01000010, 0b00010000, 0b11111000}};
-template <> uint32_t Pattern<BitPumpLSB, InvOnesTag>::data(int index) {
+template <> uint32_t Pattern<BitStreamerLSB, InvOnesTag>::data(int index) {
   const auto set = GenOnesLE(1, 0);
   return set[index];
 }
 
-INSTANTIATE_TYPED_TEST_SUITE_P(LSB, BitPumpTest, Patterns<BitPumpLSB>);
+INSTANTIATE_TYPED_TEST_SUITE_P(LSB, BitStreamerTest, Patterns<BitStreamerLSB>);
 
 } // namespace rawspeed_test

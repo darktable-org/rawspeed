@@ -61,7 +61,12 @@ void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
   if (num_bytes > static_cast<int>(src->bytes_in_buffer))
     ThrowIOE("read out of buffer");
   if (num_bytes > 0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
     src->next_input_byte += static_cast<size_t>(num_bytes);
+#pragma GCC diagnostic pop
     src->bytes_in_buffer -= static_cast<size_t>(num_bytes);
   }
 }

@@ -77,9 +77,12 @@ public:
 class Camera final {
 public:
   enum class SupportStatus {
-    Unsupported,
-    Supported,
-    NoSamples,
+    SupportedNoSamples, // Tentatively supported, no RPU samples.
+    Supported,          // Claimed as supported (explicitly).
+    Unknown,            // Placeholder camera, support is unknown.
+    UnknownCamera,      // Not found in database.
+    UnknownNoSamples, // Placeholder camera, no RPU samples, support is unknown.
+    Unsupported,      // Claimed as unsupported (explicitly).
   };
 
 #ifdef HAVE_PUGIXML
@@ -114,6 +117,8 @@ public:
   bool cropAvailable = false;
 
 #ifdef HAVE_PUGIXML
+  void parseColorRow(const pugi::xml_node& node);
+  void parseColor(const pugi::xml_node& node);
   void parseCFA(const pugi::xml_node& node);
   void parseCrop(const pugi::xml_node& node);
   void parseBlackAreas(const pugi::xml_node& node);

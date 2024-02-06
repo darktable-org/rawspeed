@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
@@ -138,7 +139,7 @@ private:
 
   const std::vector<PerComponentRecipe> rec;
 
-  const ByteStream input;
+  const Array1DRef<const uint8_t> input;
 
   template <int N_COMP, size_t... I>
   [[nodiscard]] std::array<std::reference_wrapper<const PrefixCodeDecoder>,
@@ -153,7 +154,8 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, int X_S_F, int Y_S_F> void decompressN_X_Y() const;
+  template <int N_COMP, int X_S_F, int Y_S_F>
+  [[nodiscard]] ByteStream::size_type decompressN_X_Y() const;
 
   [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices() const;
   [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles() const;
@@ -166,9 +168,9 @@ public:
       RawImage mRaw,
       std::tuple<int /*N_COMP*/, int /*X_S_F*/, int /*Y_S_F*/> format,
       iPoint2D frame, Cr2SliceWidths slicing,
-      std::vector<PerComponentRecipe> rec, ByteStream input);
+      std::vector<PerComponentRecipe> rec, Array1DRef<const uint8_t> input);
 
-  void decompress() const;
+  [[nodiscard]] ByteStream::size_type decompress() const;
 };
 
 extern template class Cr2Decompressor<PrefixCodeDecoder<>>;

@@ -22,6 +22,7 @@
 #pragma once
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Point.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
@@ -63,7 +64,7 @@ private:
 
   ByteStream input;
 
-  std::vector<ByteStream> strips;
+  std::vector<Array1DRef<const uint8_t>> strips;
 };
 
 } // namespace rawspeed

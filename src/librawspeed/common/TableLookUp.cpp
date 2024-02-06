@@ -20,9 +20,11 @@
 */
 
 #include "common/TableLookUp.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
-#include "common/Common.h"
 #include "decoders/RawDecoderException.h"
 #include <algorithm>
 #include <cassert>
@@ -55,10 +57,11 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
-  uint16_t* t = &tables[ntable * TABLE_SIZE];
+
+  auto t = Array2DRef(tables.data(), TABLE_SIZE, ntables)[ntable];
   if (!dither) {
     for (int i = 0; i < TABLE_MAX_ELTS; i++) {
-      t[i] = (i < nfilled) ? table[i] : table[nfilled - 1];
+      t(i) = (i < nfilled) ? table[i] : table[nfilled - 1];
     }
     return;
   }
@@ -71,21 +74,21 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     upper = std::max(upper, center);
     int delta = upper - lower;
     invariant(delta >= 0);
-    t[i * 2] = clampBits(center - ((upper - lower + 2) / 4), 16);
-    t[i * 2 + 1] = implicit_cast<uint16_t>(delta);
+    t(i * 2) = clampBits(center - ((upper - lower + 2) / 4), 16);
+    t(i * 2 + 1) = implicit_cast<uint16_t>(delta);
   }
 
   for (int i = nfilled; i < TABLE_MAX_ELTS; i++) {
-    t[i * 2] = table[nfilled - 1];
-    t[i * 2 + 1] = 0;
+    t(i * 2) = table[nfilled - 1];
+    t(i * 2 + 1) = 0;
   }
 }
 
-uint16_t* TableLookUp::getTable(int n) {
+Array1DRef<uint16_t> TableLookUp::getTable(int n) {
   if (n > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
-  return &tables[n * TABLE_SIZE];
+  return Array2DRef(tables.data(), TABLE_SIZE, ntables)[n];
 }
 
 } // namespace rawspeed

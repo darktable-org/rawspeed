@@ -29,7 +29,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <limits>
 #include <string_view>
@@ -61,9 +60,11 @@ public:
   }
 
   [[nodiscard]] inline size_type check(size_type bytes) const {
-    if (static_cast<uint64_t>(pos) + bytes > getSize())
+    if (!isValid(pos, bytes))
       ThrowIOE("Out of bounds access in ByteStream");
-    assert(!ASan::RegionIsPoisoned(data + pos, bytes));
+    [[maybe_unused]] Buffer tmp = getSubView(pos, bytes);
+    assert(tmp.getSize() == bytes);
+    assert(!ASan::RegionIsPoisoned(tmp.begin(), tmp.getSize()));
     return bytes;
   }
 
@@ -88,10 +89,10 @@ public:
     return getSize() - pos;
   }
   [[nodiscard]] inline const uint8_t* peekData(size_type count) const {
-    return Buffer::getData(pos, count);
+    return Buffer::getSubView(pos, count).begin();
   }
   inline const uint8_t* getData(size_type count) {
-    const uint8_t* ret = Buffer::getData(pos, count);
+    const uint8_t* ret = peekData(count);
     pos += count;
     return ret;
   }
@@ -102,6 +103,9 @@ public:
     Buffer ret = peekBuffer(size_);
     pos += size_;
     return ret;
+  }
+  [[nodiscard]] inline Buffer peekRemainingBuffer() const {
+    return getSubView(pos, getRemainSize());
   }
   [[nodiscard]] inline ByteStream peekStream(size_type size_) const {
     return getSubStream(pos, size_);
@@ -123,52 +127,50 @@ public:
     return getStream(nmemb * size_);
   }
 
-  [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
-    invariant(data);
-    (void)check(i + 1);
-    return data[pos + i];
-  }
-
   inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
   inline void skipBytes(size_type nmemb, size_type size_) {
     pos += check(nmemb, size_);
   }
 
-  inline bool hasPatternAt(const char* pattern, size_type size_,
-                           size_type relPos) const {
-    invariant(data);
-    if (!isValid(pos + relPos, size_))
+  [[nodiscard]] inline bool hasPatternAt(std::string_view pattern,
+                                         size_type relPos) const {
+    if (!isValid(pos + relPos, implicit_cast<size_type>(pattern.size())))
       return false;
-    return memcmp(&data[pos + relPos], pattern, size_) == 0;
+    auto tmp =
+        getSubView(pos + relPos, implicit_cast<size_type>(pattern.size()));
+    assert(tmp.getSize() == pattern.size());
+    return std::equal(tmp.begin(), tmp.end(), pattern.begin());
   }
 
-  inline bool hasPrefix(const char* prefix, size_type size_) const {
-    return hasPatternAt(prefix, size_, 0);
+  [[nodiscard]] inline bool hasPrefix(std::string_view prefix) const {
+    return hasPatternAt(prefix, /*relPos=*/0);
   }
 
-  inline bool skipPrefix(const char* prefix, size_type size_) {
-    bool has_prefix = hasPrefix(prefix, size_);
+  inline bool skipPrefix(std::string_view prefix) {
+    bool has_prefix = hasPrefix(prefix);
     if (has_prefix)
-      pos += size_;
+      pos += prefix.size();
     return has_prefix;
-  }
-
-  inline uint8_t getByte() {
-    invariant(data);
-    (void)check(1);
-    return data[pos++];
   }
 
   template <typename T> [[nodiscard]] inline T peek(size_type i = 0) const {
     return DataBuffer::get<T>(pos, i);
   }
-
-  [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
-
   template <typename T> inline T get() {
     auto ret = peek<T>();
     pos += sizeof(T);
     return ret;
+  }
+
+  [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
+    return peek<uint8_t>(i);
+  }
+  inline uint8_t getByte() { return get<uint8_t>(); }
+
+  [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
+
+  [[nodiscard]] inline uint32_t peekU32(size_type i = 0) const {
+    return peek<uint32_t>(i);
   }
 
   inline uint16_t getU16() { return get<uint16_t>(); }

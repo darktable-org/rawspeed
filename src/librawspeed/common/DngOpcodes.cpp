@@ -25,6 +25,7 @@
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Mutex.h"
+#include "adt/Optional.h"
 #include "adt/Point.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -41,7 +42,6 @@
 #include <iterator>
 #include <limits>
 #include <memory>
-#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -743,7 +743,7 @@ DngOpcodes::constructor(const RawImage& ri, ByteStream& bs,
 
 // ALL opcodes specified in DNG Specification MUST be listed here.
 // however, some of them might not be implemented.
-std::optional<std::pair<const char*, DngOpcodes::constructor_t>>
+Optional<std::pair<const char*, DngOpcodes::constructor_t>>
 DngOpcodes::Map(uint32_t code) {
   switch (code) {
   case 1U:

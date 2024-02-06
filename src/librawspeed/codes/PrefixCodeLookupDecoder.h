@@ -26,7 +26,7 @@
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStream.h"
+#include "io/BitStreamer.h"
 #include <cassert>
 #include <cstdint>
 #include <limits>
@@ -116,8 +116,8 @@ public:
   template <typename BIT_STREAM>
   inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(!Base::fullDecode);
     return decode<BIT_STREAM, false>(bs);
   }
@@ -125,8 +125,8 @@ public:
   template <typename BIT_STREAM>
   inline int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     invariant(Base::fullDecode);
     return decode<BIT_STREAM, true>(bs);
   }
@@ -137,8 +137,8 @@ protected:
   finishReadingPartialSymbol(BIT_STREAM& bs,
                              typename Base::CodeSymbol partial) const {
     static_assert(
-        BitStreamTraits<typename BIT_STREAM::tag>::canUseWithPrefixCodeDecoder,
-        "This BitStream specialization is not marked as usable here");
+        BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
+        "This BitStreamer specialization is not marked as usable here");
     while (partial.code_len < Base::maxCodeLength() &&
            (MaxCodeValue == maxCodeOL[partial.code_len] ||
             partial.code > maxCodeOL[partial.code_len])) {

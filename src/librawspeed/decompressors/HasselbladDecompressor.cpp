@@ -21,13 +21,14 @@
 */
 
 #include "decompressors/HasselbladDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <utility>
@@ -36,7 +37,7 @@ namespace rawspeed {
 
 HasselbladDecompressor::HasselbladDecompressor(RawImage mRaw_,
                                                const PerComponentRecipe& rec_,
-                                               ByteStream input_)
+                                               Array1DRef<const uint8_t> input_)
     : mRaw(std::move(mRaw_)), rec(rec_), input(input_) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
@@ -57,7 +58,7 @@ HasselbladDecompressor::HasselbladDecompressor(RawImage mRaw_,
 
 // Returns len bits as a signed value.
 // Highest bit is a sign bit
-inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
+inline int HasselbladDecompressor::getBits(BitStreamerMSB32& bs, int len) {
   if (!len)
     return 0;
   int diff = bs.getBits(len);
@@ -70,32 +71,32 @@ inline int HasselbladDecompressor::getBits(BitPumpMSB32& bs, int len) {
 ByteStream::size_type HasselbladDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  invariant(out.height > 0);
-  invariant(out.width > 0);
-  invariant(out.width % 2 == 0);
+  invariant(out.height() > 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   const auto ht = rec.ht;
   ht.verifyCodeValuesAsDiffLengths();
 
-  BitPumpMSB32 bitStream(input);
+  BitStreamerMSB32 bitStreamer(input);
   // Pixels are packed two at a time, not like LJPEG:
   // [p1_length_as_huffman][p2_length_as_huffman][p0_diff_with_length][p1_diff_with_length]|NEXT
   // PIXELS
-  for (int row = 0; row < out.height; row++) {
+  for (int row = 0; row < out.height(); row++) {
     int p1 = rec.initPred;
     int p2 = rec.initPred;
-    for (int col = 0; col < out.width; col += 2) {
-      int len1 = ht.decodeCodeValue(bitStream);
-      int len2 = ht.decodeCodeValue(bitStream);
-      p1 += getBits(bitStream, len1);
-      p2 += getBits(bitStream, len2);
+    for (int col = 0; col < out.width(); col += 2) {
+      int len1 = ht.decodeCodeValue(bitStreamer);
+      int len2 = ht.decodeCodeValue(bitStreamer);
+      p1 += getBits(bitStreamer, len1);
+      p2 += getBits(bitStreamer, len2);
       // NOTE: this is rather unusual and weird, but appears to be correct.
       // clampBits(p, 16) results in completely garbled images.
       out(row, col) = uint16_t(p1);
       out(row, col + 1) = uint16_t(p2);
     }
   }
-  return bitStream.getStreamPosition();
+  return bitStreamer.getStreamPosition();
 }
 
 } // namespace rawspeed

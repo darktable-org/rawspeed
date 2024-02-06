@@ -35,15 +35,17 @@ template <class T> class CroppedArray2DRef final {
   friend CroppedArray2DRef<const T>;
 
 public:
+  void establishClassInvariants() const noexcept;
+
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
-  int offsetCols = 0;
-  int offsetRows = 0;
-  int croppedWidth = 0;
-  int croppedHeight = 0;
+  int offsetCols;
+  int offsetRows;
+  int croppedWidth;
+  int croppedHeight;
 
-  CroppedArray2DRef() = default;
+  CroppedArray2DRef() = delete;
 
   // Can not cast away constness.
   template <typename T2>
@@ -57,8 +59,10 @@ public:
   CroppedArray2DRef(CroppedArray2DRef<T2> RHS) = delete;
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
-  CroppedArray2DRef(Array2DRef<T> RHS) // NOLINT google-explicit-constructor
-      : base(RHS), croppedWidth(base.width), croppedHeight(base.height) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  inline CroppedArray2DRef(Array2DRef<T> RHS)
+      : CroppedArray2DRef(RHS, /*offsetCols=*/0, /*offsetRows=*/0, RHS.width(),
+                          RHS.height()) {}
 
   CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_, int offsetRows_,
                     int croppedWidth_, int croppedHeight_);
@@ -67,10 +71,10 @@ public:
   template <class T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  CroppedArray2DRef( // NOLINT google-explicit-constructor
+  inline CroppedArray2DRef( // NOLINT(google-explicit-constructor)
       CroppedArray2DRef<T2> RHS)
-      : base(RHS.base), offsetCols(RHS.offsetCols), offsetRows(RHS.offsetRows),
-        croppedWidth(RHS.croppedWidth), croppedHeight(RHS.croppedHeight) {}
+      : CroppedArray2DRef(RHS.base, RHS.offsetCols, RHS.offsetRows,
+                          RHS.croppedWidth, RHS.croppedHeight) {}
 
   CroppedArray1DRef<T> operator[](int row) const;
 
@@ -85,22 +89,36 @@ explicit CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
     -> CroppedArray2DRef<typename Array2DRef<T>::value_type>;
 
 template <class T>
-CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_, int offsetCols_,
-                                        int offsetRows_, int croppedWidth_,
-                                        int croppedHeight_)
+__attribute__((always_inline)) inline void
+CroppedArray2DRef<T>::establishClassInvariants() const noexcept {
+  base.establishClassInvariants();
+  invariant(offsetCols >= 0);
+  invariant(offsetRows >= 0);
+  invariant(croppedWidth >= 0);
+  invariant(croppedHeight >= 0);
+  invariant(offsetCols <= base.width());
+  invariant(offsetRows <= base.height());
+  invariant(croppedWidth <= base.width());
+  invariant(croppedHeight <= base.height());
+  invariant(offsetCols + croppedWidth <= base.width());
+  invariant(offsetRows + croppedHeight <= base.height());
+  invariant((croppedWidth == 0) == (croppedHeight == 0));
+}
+
+template <class T>
+inline CroppedArray2DRef<T>::CroppedArray2DRef(Array2DRef<T> base_,
+                                               int offsetCols_, int offsetRows_,
+                                               int croppedWidth_,
+                                               int croppedHeight_)
     : base(base_), offsetCols(offsetCols_), offsetRows(offsetRows_),
       croppedWidth(croppedWidth_), croppedHeight(croppedHeight_) {
-  invariant(offsetCols_ >= 0);
-  invariant(offsetRows_ >= 0);
-  invariant(croppedWidth_ >= 0);
-  invariant(croppedHeight_ >= 0);
-  invariant(offsetCols_ + croppedWidth_ <= base.width);
-  invariant(offsetRows_ + croppedHeight_ <= base.height);
+  establishClassInvariants();
 }
 
 template <class T>
 inline CroppedArray1DRef<T>
 CroppedArray2DRef<T>::operator[](const int row) const {
+  establishClassInvariants();
   invariant(row >= 0);
   invariant(row < croppedHeight);
   const Array1DRef<T> fullLine = base.operator[](offsetRows + row);
@@ -109,6 +127,7 @@ CroppedArray2DRef<T>::operator[](const int row) const {
 
 template <class T>
 inline T& CroppedArray2DRef<T>::operator()(const int row, const int col) const {
+  establishClassInvariants();
   invariant(col >= 0);
   invariant(col < croppedWidth);
   return (operator[](row))(col);

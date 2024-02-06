@@ -51,6 +51,7 @@ private:
   [[nodiscard]] iPoint2D getSubSampling() const;
   [[nodiscard]] int getHue() const;
   [[nodiscard]] bool decodeCanonColorData() const;
+  void parseWhiteBalance() const;
   int ljpegSamplePrecision;
   int mShiftUpScaleForExif = 0;
 };

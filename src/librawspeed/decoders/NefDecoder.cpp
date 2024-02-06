@@ -20,7 +20,9 @@
 */
 
 #include "decoders/NefDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "common/Common.h"
@@ -28,7 +30,7 @@
 #include "decoders/RawDecoderException.h"
 #include "decompressors/NikonDecompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -124,13 +126,12 @@ RawImage NefDecoder::decodeRawInternal() {
     }
   }
 
-  ByteStream rawData(
-      DataBuffer(mFile.getSubView(offsets->getU32(), counts->getU32()),
-                 Endianness::little));
+  const auto input =
+      mFile.getSubView(offsets->getU32(), counts->getU32()).getAsArray1DRef();
 
   NikonDecompressor n(mRaw, meta->getData(), bitPerPixel);
   mRaw->createData();
-  n.decompress(rawData, uncorrectedRawValues);
+  n.decompress(input, uncorrectedRawValues);
 
   return mRaw;
 }
@@ -141,7 +142,7 @@ are only needed for the D100, thanks to a bug in some cameras
 that tags all images as "compressed".
 */
 bool NefDecoder::D100IsCompressed(uint32_t offset) const {
-  const uint8_t* test = mFile.getData(offset, 256);
+  const auto test = mFile.getSubView(offset, 256);
   for (int i = 15; i < 256; i += 16)
     if (test[i])
       return true;
@@ -322,10 +323,10 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
   if (inputPitch != ((3 * size.x) / 2))
     ThrowRDE("Unexpected input pitch");
 
-  // BitPumpMSB loads exactly 4 bytes at once, and we squeeze 12 bits each time.
-  // We produce 2 pixels per 3 bytes (24 bits). If we want to be smart and to
-  // know where the first input bit for first odd row is, the input slice width
-  // must be a multiple of 8 pixels.
+  // BitStreamerMSB loads exactly 4 bytes at once, and we squeeze 12 bits each
+  // time. We produce 2 pixels per 3 bytes (24 bits). If we want to be smart and
+  // to know where the first input bit for first odd row is, the input slice
+  // width must be a multiple of 8 pixels.
 
   if (offset.x > mRaw->dim.x || offset.y > mRaw->dim.y)
     ThrowRDE("All pixels outside of image");
@@ -334,8 +335,15 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
 
   // The input bytes are laid out in the memory in the following way:
   // First, all even (0-2-4-) rows, and then all odd (1-3-5-) rows.
-  BitPumpMSB even(input.getStream(size.y / 2, inputPitch));
-  BitPumpMSB odd(input.getStream(size.y / 2, inputPitch));
+  const auto evenLinesInput = input.getStream(size.y / 2, inputPitch)
+                                  .peekRemainingBuffer()
+                                  .getAsArray1DRef();
+  const auto oddLinesInput = input.getStream(size.y / 2, inputPitch)
+                                 .peekRemainingBuffer()
+                                 .getAsArray1DRef();
+
+  BitStreamerMSB even(evenLinesInput);
+  BitStreamerMSB odd(oddLinesInput);
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
       img(row, col) = implicit_cast<uint16_t>(even.getBits(12));
@@ -482,17 +490,7 @@ const std::array<uint8_t, 256> NefDecoder::keymap = {
      0xc6, 0x67, 0x4a, 0xf5, 0xa5, 0x12, 0x65, 0x7e, 0xb0, 0xdf, 0xaf, 0x4e,
      0xb3, 0x61, 0x7f, 0x2f}};
 
-void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  int iso = 0;
-  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
-                   CFAColor::GREEN, CFAColor::BLUE);
-
-  int white = mRaw->whitePoint;
-  int black = mRaw->blackLevel;
-
-  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
-    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
-
+void NefDecoder::parseWhiteBalance() const {
   // Read the whitebalance
 
   if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(12))) {
@@ -547,7 +545,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // Get the decryption key
         const TiffEntry* key =
             mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x00a7));
-        const uint8_t* keydata = key->getData().getData(4);
+        const auto keydata = key->getData().getBuffer(4);
         uint32_t keyno = keydata[0] ^ keydata[1] ^ keydata[2] ^ keydata[3];
 
         // "Decrypt" the block using the serial and key
@@ -568,11 +566,11 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         // Finally set the WB coeffs
         uint32_t off = (version == 0x204) ? 6 : 14;
         mRaw->metadata.wbCoeffs[0] =
-            static_cast<float>(getU16BE(buf.data() + off + 0));
+            static_cast<float>(getU16BE(&buf[off + 0]));
         mRaw->metadata.wbCoeffs[1] =
-            static_cast<float>(getU16BE(buf.data() + off + 2));
+            static_cast<float>(getU16BE(&buf[off + 2]));
         mRaw->metadata.wbCoeffs[2] =
-            static_cast<float>(getU16BE(buf.data() + off + 6));
+            static_cast<float>(getU16BE(&buf[off + 6]));
       }
     }
   } else if (mRootIFD->hasEntryRecursive(static_cast<TiffTag>(0x0014))) {
@@ -585,9 +583,9 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       mRaw->metadata.wbCoeffs[0] = static_cast<float>(bs.getU16()) / 256.0F;
       mRaw->metadata.wbCoeffs[1] = 1.0F;
       mRaw->metadata.wbCoeffs[2] = static_cast<float>(bs.getU16()) / 256.0F;
-    } else if (bs.hasPatternAt("NRW ", 4, 0)) {
+    } else if (bs.hasPatternAt("NRW ", 0)) {
       uint32_t offset = 0;
-      if (!bs.hasPatternAt("0100", 4, 4) && wb->count > 72)
+      if (!bs.hasPatternAt("0100", 4) && wb->count > 72)
         offset = 56;
       else if (wb->count > 1572)
         offset = 1556;
@@ -607,6 +605,20 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->metadata.wbCoeffs[0] *= 256.0F / 527.0F;
     mRaw->metadata.wbCoeffs[2] *= 256.0F / 317.0F;
   }
+}
+
+void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
+  int iso = 0;
+  mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
+                   CFAColor::GREEN, CFAColor::BLUE);
+
+  auto makernotesWhite = mRaw->whitePoint;
+  int makernotesBlack = mRaw->blackLevel;
+
+  if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
+    iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
+
+  parseWhiteBalance();
 
   auto id = mRootIFD->getID();
   std::string mode = getMode();
@@ -622,10 +634,13 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (bitPerPixel != 12 && bitPerPixel != 14)
       ThrowRDE("Bad bit per pixel: %i", bitPerPixel);
     const int sh = 14 - bitPerPixel;
-    mRaw->blackLevelSeparate[0] = bl->getU16(0) >> sh;
-    mRaw->blackLevelSeparate[1] = bl->getU16(1) >> sh;
-    mRaw->blackLevelSeparate[2] = bl->getU16(2) >> sh;
-    mRaw->blackLevelSeparate[3] = bl->getU16(3) >> sh;
+    mRaw->blackLevelSeparate =
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+    blackLevelSeparate1D(0) = bl->getU16(0) >> sh;
+    blackLevelSeparate1D(1) = bl->getU16(1) >> sh;
+    blackLevelSeparate1D(2) = bl->getU16(2) >> sh;
+    blackLevelSeparate1D(3) = bl->getU16(3) >> sh;
   }
 
   if (meta->hasCamera(id.make, id.model, extended_mode)) {
@@ -636,10 +651,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     setMetaData(meta, id, "", iso);
   }
 
-  if (white != 65536)
-    mRaw->whitePoint = white;
-  if (black != -1)
-    mRaw->blackLevel = black;
+  if (makernotesWhite)
+    mRaw->whitePoint = *makernotesWhite;
+  if (makernotesBlack != -1)
+    mRaw->blackLevel = makernotesBlack;
 }
 
 // DecodeNikonYUY2 decodes 12 bit data in an YUY2-like pattern (2 Luma, 1 Chroma
@@ -692,19 +707,19 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   auto* tmpch = reinterpret_cast<std::byte*>(&tmp);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  const uint8_t* in = input.peekData(out.width * out.height);
+  const auto in = Array2DRef(input.peekData(out.width() * out.height()),
+                             out.width(), out.height());
 
-  for (int row = 0; row < out.height; row++) {
-    uint32_t random = in[0] + (in[1] << 8) + (in[2] << 16);
-    for (int col = 0; col < out.width; col += 6) {
-      uint32_t g1 = in[0];
-      uint32_t g2 = in[1];
-      uint32_t g3 = in[2];
-      uint32_t g4 = in[3];
-      uint32_t g5 = in[4];
-      uint32_t g6 = in[5];
+  for (int row = 0; row < out.height(); row++) {
+    uint32_t random = in(row, 0) + (in(row, 1) << 8) + (in(row, 2) << 16);
+    for (int col = 0; col < out.width(); col += 6) {
+      uint32_t g1 = in(row, col + 0);
+      uint32_t g2 = in(row, col + 1);
+      uint32_t g3 = in(row, col + 2);
+      uint32_t g4 = in(row, col + 3);
+      uint32_t g5 = in(row, col + 4);
+      uint32_t g6 = in(row, col + 5);
 
-      in += 6;
       auto y1 = static_cast<float>(g1 | ((g2 & 0x0f) << 8));
       auto y2 = static_cast<float>((g2 >> 4) | (g3 << 4));
       auto cb = static_cast<float>(g4 | ((g5 & 0x0f) << 8));
@@ -714,10 +729,10 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       float cr2 = cr;
       // Interpolate right pixel. We assume the sample is aligned with left
       // pixel.
-      if ((col + 6) < out.width) {
-        g4 = in[3];
-        g5 = in[4];
-        g6 = in[5];
+      if ((col + 6) < out.width()) {
+        g4 = in(row, col + 6 + 3);
+        g5 = in(row, col + 6 + 4);
+        g6 = in(row, col + 6 + 5);
         cb2 = (static_cast<float>((g4 | ((g5 & 0x0f) << 8))) + cb) * 0.5F;
         cr2 = (static_cast<float>(((g5 >> 4) | (g6 << 4))) + cr) * 0.5F;
       }

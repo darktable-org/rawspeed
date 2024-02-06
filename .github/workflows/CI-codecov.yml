@@ -18,13 +18,13 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Fetch/Checkout RawSpeed git repo
         timeout-minutes: 1
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'rawspeed'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Fetch code coverage reports (linux reports)
         timeout-minutes: 1
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.COVERAGE_REPORT_PREFIX }}/linux # relative path!
           key: coverage-${{ github.sha }}-linux
@@ -32,7 +32,7 @@ jobs:
           fail-on-cache-miss: true
       - name: Fetch code coverage reports (macOS reports)
         timeout-minutes: 1
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.COVERAGE_REPORT_PREFIX }}/macOS # relative path!
           key: coverage-${{ github.sha }}-macOS
@@ -40,7 +40,7 @@ jobs:
           fail-on-cache-miss: true
       - name: Fetch code coverage reports (windows reports)
         timeout-minutes: 1
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
           key: coverage-${{ github.sha }}-windows
@@ -99,7 +99,7 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           OS: macOS
-          ARCH: x86_64
+          ARCH: aarch64
           CXX: XCode
           JOB_NAME: macOS.XCode.Coverage
         with:
@@ -115,7 +115,7 @@ jobs:
         uses: codecov/codecov-action@v3
         env:
           OS: macOS
-          ARCH: x86_64
+          ARCH: aarch64
           CXX: XCode
           JOB_NAME: macOS.XCode.Coverage
         with:

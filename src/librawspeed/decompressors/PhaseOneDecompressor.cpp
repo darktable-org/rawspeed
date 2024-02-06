@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
@@ -29,7 +30,7 @@
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -84,22 +85,22 @@ void PhaseOneDecompressor::prepareStrips() {
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  invariant(out.width > 0);
-  invariant(out.width % 2 == 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
 
-  BitPumpMSB32 pump(strip.bs);
+  BitStreamerMSB32 pump(strip.bs.peekRemainingBuffer().getAsArray1DRef());
 
   std::array<int32_t, 2> pred;
   pred.fill(0);
   std::array<int, 2> len;
   const int row = strip.n;
-  for (int col = 0; col < out.width; col++) {
+  for (int col = 0; col < out.width(); col++) {
     pump.fill(32);
     if (static_cast<unsigned>(col) >=
-        (out.width & ~7U)) // last 'width % 8' pixels.
+        (out.width() & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (int& i : len) {
@@ -138,12 +139,16 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
+  for (const auto& strip :
+       Array1DRef(strips.data(), implicit_cast<int>(strips.size()))) {
     try {
-      decompressStrip(*strip);
+      decompressStrip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }

@@ -21,7 +21,7 @@
 #pragma once
 
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <vector>
@@ -38,7 +38,7 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
 
   void decompressStrip(int row, ByteStream bs) const;
 
-  static int32_t calcAdj(BitPumpMSB32& bits, int b);
+  static int32_t calcAdj(BitStreamerMSB32& bits, int b);
 
 public:
   SamsungV0Decompressor(const RawImage& image, ByteStream bso, ByteStream bsr);

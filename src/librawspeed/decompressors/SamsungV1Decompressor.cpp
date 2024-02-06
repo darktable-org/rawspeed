@@ -22,15 +22,15 @@
 
 #include "decompressors/SamsungV1Decompressor.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "codes/PrefixCodeDecoder.h"
-#include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -61,7 +61,7 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
 }
 
 inline int32_t
-SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
+SamsungV1Decompressor::samsungDiff(BitStreamerMSB& pump,
                                    const std::vector<encTableItem>& tbl) {
   pump.fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
@@ -118,15 +118,16 @@ void SamsungV1Decompressor::decompress() const {
   }
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  invariant(out.width % 32 == 0 && "Should have even count of pixels per row.");
-  invariant(out.height % 2 == 0 && "Should have even row count.");
-  BitPumpMSB pump(bs);
-  for (int row = 0; row < out.height; row++) {
+  invariant(out.width() % 32 == 0 &&
+            "Should have even count of pixels per row.");
+  invariant(out.height() % 2 == 0 && "Should have even row count.");
+  BitStreamerMSB pump(bs.peekRemainingBuffer().getAsArray1DRef());
+  for (int row = 0; row < out.height(); row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       int32_t diff = samsungDiff(pump, tbl);
       pred[col & 1] += diff;
 

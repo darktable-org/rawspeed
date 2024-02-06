@@ -20,10 +20,11 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitPumpMSB.h"
+#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -50,7 +51,7 @@ class NikonDecompressor final : public AbstractDecompressor {
 public:
   NikonDecompressor(RawImage raw, ByteStream metadata, uint32_t bitsPS);
 
-  void decompress(ByteStream data, bool uncorrectedRawValues);
+  void decompress(Array1DRef<const uint8_t> input, bool uncorrectedRawValues);
 
 private:
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 6> nikon_tree;
@@ -59,7 +60,7 @@ private:
                                            uint32_t v1, uint32_t* split);
 
   template <typename Huffman>
-  void decompress(BitPumpMSB& bits, int start_y, int end_y);
+  void decompress(BitStreamerMSB& bits, int start_y, int end_y);
 
   template <typename Huffman>
   static Huffman createPrefixCodeDecoder(uint32_t huffSelect);

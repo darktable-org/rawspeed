@@ -118,9 +118,12 @@ Checks: >
   -readability-implicit-bool-conversion,
   -readability-inconsistent-declaration-parameter-name,
   -readability-magic-numbers,
+
+  -rawspeed-std-array-no-operator-at
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false
+InheritParentConfig: false
 User:            lebedevri
 CheckOptions:
   - key:             bugprone-reserved-identifier.AllowedIdentifiers
@@ -181,4 +184,7 @@ CheckOptions:
     value:           1
   - key:             cppcoreguidelines-macro-usage.AllowedRegexp
     value:           'DEBUG|_GLIBCXX_SANITIZE_VECTOR|RAWSPEED_SOURCE_DIR|STR|XSTR|BSWAP16|BSWAP32|BSWAP64|ThrowExceptionHelper|ThrowIOE|ThrowRSE|ThrowCME|ThrowRDE|ThrowRPE|ThrowTPE|ThrowFIE|ThrowCPE|ThrowFPE|DECODER|fuji_quant_gradient|JPEG_MEMSRC|RLVTABLE|PRECISION_MIN|PRECISION_MAX|MARKER_BAND_END|SQR|RS_CAMERAS_XML_PATH|FULLDECODE|IMPL|IMPL0|IMPL1|PUMP|DECODE|PARSER|GEN_E|GEN_PFS|GEN_PSS|BENCHMARK_CAPTURE_NAME|RAWSPEED_UNLIKELY_FUNCTION|RAWSPEED_NOINLINE|GEN_INNER|GEN_F_BPS|GEN_F|GEN_U_BPS|GEN_U|GEN_BO|invariant'
+  - key:             performance-unnecessary-value-param.AllowedTypes
+    value:           '(Cropped)?Array[12]DRef'
+
 ...

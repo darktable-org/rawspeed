@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #ifndef IMPL0
 #error IMPL0 must be defined to one of rawspeeds huffman table implementations
@@ -32,9 +33,9 @@
 #include "codes/PrefixCodeLookupDecoder.h" // IWYU pragma: keep
 #include "codes/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
 #include "codes/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
-#include "io/BitPumpJPEG.h"
-#include "io/BitPumpMSB.h"
-#include "io/BitPumpMSB32.h"
+#include "io/BitStreamerJPEG.h"
+#include "io/BitStreamerMSB.h"
+#include "io/BitStreamerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
@@ -51,10 +52,10 @@ struct VC5CodeTag;
 namespace {
 
 template <typename Pump, bool IsFullDecode, typename HT0, typename HT1>
-void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
-              const HT0& ht0, const HT1& ht1) {
-  Pump bits0(bs0);
-  Pump bits1(bs1);
+void workloop(rawspeed::Array1DRef<const uint8_t> input, const HT0& ht0,
+              const HT1& ht1) {
+  Pump bits0(input);
+  Pump bits1(input);
 
   while (true) {
     int decoded0;
@@ -97,14 +98,13 @@ void workloop(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
 }
 
 template <typename Pump, typename HT0, typename HT1>
-void checkPump(rawspeed::ByteStream bs0, rawspeed::ByteStream bs1,
-               const HT0& ht0, const HT1& ht1) {
-  assert(bs0.getPosition() == bs1.getPosition());
+void checkPump(rawspeed::Array1DRef<const uint8_t> input, const HT0& ht0,
+               const HT1& ht1) {
   assert(ht0.isFullDecode() == ht1.isFullDecode());
   if (ht0.isFullDecode())
-    workloop<Pump, /*IsFullDecode=*/true>(bs0, bs1, ht0, ht1);
+    workloop<Pump, /*IsFullDecode=*/true>(input, ht0, ht1);
   else
-    workloop<Pump, /*IsFullDecode=*/false>(bs0, bs1, ht0, ht1);
+    workloop<Pump, /*IsFullDecode=*/false>(input, ht0, ht1);
 }
 
 template <typename CodeTag> void checkFlavour(rawspeed::ByteStream bs) {
@@ -125,21 +125,29 @@ template <typename CodeTag> void checkFlavour(rawspeed::ByteStream bs) {
       rawspeed::IMPL1<CodeTag, rawspeed::BACKIMPL1<CodeTag>>>(bs1);
 #endif
 
+  // Which bit pump should we use?
+  const int format0 = bs0.getByte();
+  const int format1 = bs1.getByte();
+
   // should have consumed 16 bytes for n-codes-per-length, at *least* 1 byte
   // as code value, and a byte per 'fixDNGBug16'/'fullDecode' booleans
   assert(bs0.getPosition() == bs1.getPosition());
 
-  // Which bit pump should we use?
-  bs1.skipBytes(1);
-  switch (bs0.getByte()) {
+  assert(format0 == format1);
+  (void)format1;
+
+  const auto input = bs0.peekRemainingBuffer().getAsArray1DRef();
+
+  assert(format0 == format1);
+  switch (format0) {
   case 0:
-    checkPump<rawspeed::BitPumpMSB>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitStreamerMSB>(input, ht0, ht1);
     break;
   case 1:
-    checkPump<rawspeed::BitPumpMSB32>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitStreamerMSB32>(input, ht0, ht1);
     break;
   case 2:
-    checkPump<rawspeed::BitPumpJPEG>(bs0, bs1, ht0, ht1);
+    checkPump<rawspeed::BitStreamerJPEG>(input, ht0, ht1);
     break;
   default:
     ThrowRSE("Unknown bit pump");
