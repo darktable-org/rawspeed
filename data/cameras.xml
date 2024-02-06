@@ -17462,6 +17462,15 @@
 	<Camera make="PENTAX RICOH IMAGING" model="PENTAX MX-1" mode="dng">
 		<ID make="Pentax" model="MX-1">PENTAX MX-1</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA S (Typ 007)" mode="dng">
+		<ID make="Leica" model="S (Typ 007)">LEICA S (Typ 007)</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="S2" mode="dng">
+		<ID make="Leica" model="S2">Leica S2</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA S3" mode="dng">
+		<ID make="Leica" model="S3">LEICA S3</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
 	</Camera>
@@ -17498,15 +17507,35 @@
 	<Camera make="Leica Camera AG" model="LEICA M MONOCHROM (Typ 246)" mode="dng">
 		<ID make="Leica" model="M Monochrom (Typ 246)">LEICA M MONOCHROM (Typ 246)</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M (Typ 262)" mode="dng">
+		<ID make="Leica" model="M (Typ 262)">LEICA M (Typ 262)</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M-D (Typ 262)" mode="dng">
+		<ID make="Leica" model="M-D (Typ 262)">LEICA M-D (Typ 262)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA T (Typ 701)" mode="dng">
+		<ID make="Leica" model="T (Typ 701)">LEICA T (Typ 701)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA TL" mode="dng">
+		<ID make="Leica" model="TL">LEICA TL</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA TL2" mode="dng">
+		<ID make="Leica" model="TL2">LEICA TL2</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X1" mode="dng">
+		<ID make="Leica" model="X1">LEICA X1</ID>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA X2" mode="dng">
 		<ID make="Leica" model="X2">LEICA X2</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">7158 -1911 -606</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3603 10669 2530</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-659 1236 5530</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X VARIO (Typ 107)" mode="dng">
+		<ID make="Leica" model="X Vario (Typ 107)">LEICA X VARIO (Typ 107)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X (Typ 113)" mode="dng">
+		<ID make="Leica" model="X (Typ 113)">LEICA X (Typ 113)</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X-U (Typ 113)" mode="dng">
+		<ID make="Leica" model="X-U (Typ 113)">LEICA X-U (Typ 113)</ID>
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA Q (Typ 116)" mode="dng">
 		<ID make="Leica" model="Q (Typ 116)">LEICA Q (Typ 116)</ID>
