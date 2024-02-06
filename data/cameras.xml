@@ -17517,6 +17517,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA X VARIO (Typ 107)" mode="dng">
+		<ID make="Leica" model="X Vario (Typ 107)">LEICA X VARIO (Typ 107)</ID>
+	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA Q (Typ 116)" mode="dng">
 		<ID make="Leica" model="Q (Typ 116)">LEICA Q (Typ 116)</ID>
 	</Camera>
