@@ -472,6 +472,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 60Da" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS 60Da">Canon EOS 60Da</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 70D" decoder_version="1">
 		<ID make="Canon" model="EOS 70D">Canon EOS 70D</ID>
 		<CFA width="2" height="2">
@@ -1599,6 +1602,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS-1D C" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS-1D C">Canon EOS-1D C</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS-1DS" decoder_version="8">
 		<ID make="Canon" model="EOS-1Ds">Canon EOS-1Ds</ID>
 		<CFA width="2" height="2">
@@ -1980,6 +1986,9 @@
 				<ColorMatrixRow plane="3">-2238 10873 1342</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot Pro90 IS" supported="unknown-no-samples">
+		<ID make="Canon" model="PowerShot Pro90 IS">Canon PowerShot Pro90 IS</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1">
 		<ID make="Canon" model="PowerShot G1">Canon PowerShot G1</ID>
@@ -5556,6 +5565,9 @@
 				<ColorMatrixRow plane="2">-893 1796 6872</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" supported="unknown-no-samples">
+		<ID make="Nikon" model="D810A">Nikon D810A</ID>
 	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D850" mode="12bit-compressed">
 		<ID make="Nikon" model="D850">Nikon D850</ID>
@@ -9586,6 +9598,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="LEICA" model="D-LUX2" supported="unknown-no-samples">
+		<ID make="Leica" model="D-Lux 2">Leica D-Lux2</ID>
+	</Camera>
 	<Camera make="LEICA" model="D-LUX 3" decoder_version="2">
 		<ID make="Leica" model="D-LUX 3">Leica D-LUX 3</ID>
 		<CFA width="2" height="2">
@@ -9765,6 +9780,12 @@
 				<ColorMatrixRow plane="2">-1922 2631 6537</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 2" supported="unknown-no-samples">
+		<ID make="Leica" model="V-LUX 2">Leica V-LUX 2</ID>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 3" supported="unknown-no-samples">
+		<ID make="Leica" model="V-LUX 3">Leica V-LUX 3</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-L10" decoder_version="2">
 		<ID make="Panasonic" model="DMC-L10">Panasonic DMC-L10</ID>
@@ -14405,6 +14426,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F710" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix F710">Fujifilm FinePix F710</ID>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix F770EXR">
 		<ID make="Fujifilm" model="FinePix F770EXR">Fujifilm FinePix F770EXR</ID>
 		<CFA width="2" height="2">
@@ -14422,6 +14446,12 @@
 				<ColorMatrixRow plane="2">-132 1554 4395</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F800EXR" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix F800EXR">Fujifilm FinePix F800EXR</ID>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix F810" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix F810">Fujifilm FinePix F810</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="FinePix F900EXR">
 		<ID make="Fujifilm" model="FinePix F900EXR">Fujifilm FinePix F900EXR</ID>
@@ -14574,6 +14604,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S20Pro" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix S20Pro">Fujifilm FinePix S20Pro</ID>
+	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S5000">
 		<ID make="Fujifilm" model="FinePix S5000">Fujifilm FinePix S5000</ID>
 		<CFA2 width="2" height="2">
@@ -14592,6 +14625,9 @@
 				<ColorMatrixRow plane="2">-1702 2334 6982</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S5100" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix S5100">Fujifilm FinePix S5100</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S5200">
 		<ID make="Fujifilm" model="FinePix S5200">Fujifilm FinePix S5200</ID>
@@ -14665,6 +14701,9 @@
 				<ColorMatrixRow plane="2">-2003 2399 7505</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="FinePix S9100" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="FinePix S9100">Fujifilm FinePix S9100</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="FinePix S9500">
 		<ID make="Fujifilm" model="FinePix S9500">Fujifilm FinePix S9500</ID>
