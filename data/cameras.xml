@@ -17462,6 +17462,15 @@
 	<Camera make="PENTAX RICOH IMAGING" model="PENTAX MX-1" mode="dng">
 		<ID make="Pentax" model="MX-1">PENTAX MX-1</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA S (Typ 007)" mode="dng">
+		<ID make="Leica" model="S (Typ 007)">LEICA S (Typ 007)</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="S2" mode="dng">
+		<ID make="Leica" model="S2">Leica S2</ID>
+	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA S3" mode="dng">
+		<ID make="Leica" model="S3">LEICA S3</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="M8 Digital Camera" mode="dng">
 		<ID make="Leica" model="M8">M8 Digital Camera</ID>
 	</Camera>
