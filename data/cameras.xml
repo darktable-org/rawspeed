@@ -9183,6 +9183,30 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="V-Lux 5">
+		<ID make="Leica" model="V-Lux 5">Leica V-Lux 5</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9803 -4185 -992</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4066 12578 1628</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-838 1824 5288</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="V-Lux 5" mode="3:2">
+		<ID make="Leica" model="V-Lux 5">Leica V-Lux 5</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="143" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9803 -4185 -992</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4066 12578 1628</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-838 1824 5288</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-GX1">
 		<ID make="Panasonic" model="DMC-GX1">Panasonic DMC-GX1</ID>
 		<Crop x="0" y="0" width="-154" height="0"/>
