@@ -7449,6 +7449,66 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="LEICA" model="V-LUX 4">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="-4"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="4:3">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="-4"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="3:2">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="1:1">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-16" height="0"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="LEICA" model="V-LUX 4" mode="16:9">
+		<ID make="Leica" model="V-Lux 4">Leica V-LUX 4</ID>
+		<Crop x="0" y="0" width="-128" height="0"/>
+		<Sensor black="143" white="3956"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8112 -2563 -740</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3730 11784 2197</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-941 2075 4933</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ2000">
 		<ID make="Panasonic" model="DMC-FZ2000">Panasonic DMC-FZ2000</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
