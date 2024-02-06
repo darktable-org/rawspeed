@@ -17518,13 +17518,6 @@
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA X2" mode="dng">
 		<ID make="Leica" model="X2">LEICA X2</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">7158 -1911 -606</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3603 10669 2530</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-659 1236 5530</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA X VARIO (Typ 107)" mode="dng">
 		<ID make="Leica" model="X Vario (Typ 107)">LEICA X VARIO (Typ 107)</ID>
