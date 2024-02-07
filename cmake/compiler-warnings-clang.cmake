@@ -15,6 +15,7 @@ set (CLANG_DISABLED_WARNING_FLAGS
   "c++98-compat-pedantic"
   "c++20-extensions"
   "padded"
+  "switch-default"
   "switch-enum"
   "unused-parameter"
   "sign-conversion" # FIXME: should enable this.
