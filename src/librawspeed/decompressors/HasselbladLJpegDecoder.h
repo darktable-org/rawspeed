@@ -29,6 +29,12 @@ class ByteStream;
 class RawImage;
 
 class HasselbladLJpegDecoder final : public AbstractLJpegDecoder {
+  // Old Hasselblad cameras don't end their LJpeg stream with an EOI.
+  // After fully decoding (first) Scan, just stop.
+  [[nodiscard]] bool erratumImplicitEOIMarkerAfterScan() const final {
+    return true;
+  }
+
   [[nodiscard]] ByteStream::size_type decodeScan() override;
 
 public:
