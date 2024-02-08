@@ -17420,6 +17420,16 @@
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="CFV-50c">Hasselblad CFV-50c</Alias>
+			<Alias id="CFV-50c/Flash Sync">CFV-50c/Flash Sync</Alias>
+			<Alias id="CFV-50c/SWC">CFV-50c/SWC</Alias>
+			<Alias id="CFV-50c/200">CFV-50c/200</Alias>
+			<Alias id="CFV-50c/500">CFV-50c/500</Alias>
+			<Alias id="CFV-50c/Schneider">CFV-50c/Schneider</Alias>
+			<Alias id="CFV-50c/LensCtrl S">CFV-50c/LensCtrl S</Alias>
+			<Alias id="CFV-50c/Winder CW">CFV-50c/Winder CW</Alias>
+			<Alias id="CFV-50c/ELD">CFV-50c/ELD</Alias>
+			<Alias id="CFV-50c/ELX">CFV-50c/ELX</Alias>
+			<Alias id="CFV-50c/Pinhole">CFV-50c/Pinhole</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
