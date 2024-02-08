@@ -22,9 +22,9 @@
 #pragma once
 
 #include "adt/Invariant.h"
+#include "bitstreams/BitStreamer.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamer.h"
 #include <cassert>
 #include <cstdint>
 #include <tuple>

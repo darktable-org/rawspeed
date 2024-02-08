@@ -22,15 +22,16 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStreamer.h"
+#include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-class BitStreamerMSB32;
+class BitStreamerMSB;
 
-template <> struct BitStreamerTraits<BitStreamerMSB32> final {
+template <> struct BitStreamerTraits<BitStreamerMSB> final {
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -40,10 +41,9 @@ template <> struct BitStreamerTraits<BitStreamerMSB32> final {
 
 // The MSB data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
-
-class BitStreamerMSB32 final
-    : public BitStreamer<BitStreamerMSB32, BitStreamerCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerMSB32, BitStreamerCacheRightInLeftOut>;
+class BitStreamerMSB final
+    : public BitStreamer<BitStreamerMSB, BitStreamCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB, BitStreamCacheRightInLeftOut>;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 
@@ -53,14 +53,14 @@ public:
   using Base::Base;
 };
 
-inline BitStreamerMSB32::size_type
-BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
-  establishClassInvariants();
-  invariant(input.size() ==
-            BitStreamerTraits<BitStreamerMSB32>::MaxProcessBytes);
+inline BitStreamerMSB::size_type
+BitStreamerMSB::fillCache(Array1DRef<const uint8_t> input) {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+  Base::establishClassInvariants();
+  invariant(input.size() == BitStreamerTraits<BitStreamerMSB>::MaxProcessBytes);
 
-  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
+  Base::cache.push(getBE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()),
+                   32);
   return 4;
 }
 

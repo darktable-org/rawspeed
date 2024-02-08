@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitStreamerJPEG.h"
+#include "bitstreams/BitStreamerJPEG.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
-#include "io/BitStreamerTest.h"
+#include "bitstreams/BitStreamerTest.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"

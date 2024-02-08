@@ -22,26 +22,29 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStreamer.h"
+#include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-class BitStreamerLSB;
+class BitStreamerMSB32;
 
-template <> struct BitStreamerTraits<BitStreamerLSB> final {
+template <> struct BitStreamerTraits<BitStreamerMSB32> final {
+  static constexpr bool canUseWithPrefixCodeDecoder = true;
+
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
   static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
-// The LSBPump is ordered in LSB bit order,
-// i.e. we push into the cache from the left and read it from the right
+// The MSB data is ordered in MSB bit order,
+// i.e. we push into the cache from the right and read it from the left
 
-class BitStreamerLSB final
-    : public BitStreamer<BitStreamerLSB, BitStreamerCacheLeftInRightOut> {
-  using Base = BitStreamer<BitStreamerLSB, BitStreamerCacheLeftInRightOut>;
+class BitStreamerMSB32 final
+    : public BitStreamer<BitStreamerMSB32, BitStreamCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB32, BitStreamCacheRightInLeftOut>;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 
@@ -51,11 +54,12 @@ public:
   using Base::Base;
 };
 
-inline BitStreamerLSB::size_type
-BitStreamerLSB::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
+inline BitStreamerMSB32::size_type
+BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() == BitStreamerTraits<BitStreamerLSB>::MaxProcessBytes);
+  invariant(input.size() ==
+            BitStreamerTraits<BitStreamerMSB32>::MaxProcessBytes);
 
   cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;

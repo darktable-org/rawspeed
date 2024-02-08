@@ -24,7 +24,6 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
-#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
@@ -36,111 +35,6 @@ namespace rawspeed {
 
 template <typename BIT_STREAM> struct BitStreamerTraits final {
   static constexpr bool canUseWithPrefixCodeDecoder = false;
-};
-
-// simple 64-bit wide cache implementation that acts like a FiFo.
-// There are two variants:
-//  * L->R: new bits are pushed in on the left and pulled out on the right
-//  * L<-R: new bits are pushed in on the right and pulled out on the left
-// Each BitStreamer specialization uses one of the two.
-
-struct BitStreamerCacheBase {
-  uint64_t cache = 0; // the actual bits stored in the cache
-  int fillLevel = 0;  // bits left in cache
-
-  static constexpr int Size = bitwidth<decltype(cache)>();
-
-  // how many bits could be requested to be filled
-  static constexpr int MaxGetBits = bitwidth<uint32_t>();
-
-  void establishClassInvariants() const noexcept;
-};
-
-__attribute__((always_inline)) inline void
-BitStreamerCacheBase::establishClassInvariants() const noexcept {
-  invariant(fillLevel >= 0);
-  invariant(fillLevel <= Size);
-}
-
-struct BitStreamerCacheLeftInRightOut final : BitStreamerCacheBase {
-  inline void push(uint64_t bits, int count) noexcept {
-    establishClassInvariants();
-    invariant(count >= 0);
-    invariant(count != 0);
-    invariant(count <= Size);
-    invariant(count + fillLevel <= Size);
-    cache |= bits << fillLevel;
-    fillLevel += count;
-  }
-
-  [[nodiscard]] inline uint32_t peek(int count) const noexcept {
-    establishClassInvariants();
-    invariant(count >= 0);
-    invariant(count <= MaxGetBits);
-    invariant(count != 0);
-    invariant(count <= Size);
-    invariant(count <= fillLevel);
-    return extractLowBits(static_cast<uint32_t>(cache), count);
-  }
-
-  inline void skip(int count) noexcept {
-    establishClassInvariants();
-    invariant(count >= 0);
-    // `count` *could* be larger than `MaxGetBits`.
-    invariant(count != 0);
-    invariant(count <= Size);
-    invariant(count <= fillLevel);
-    cache >>= count;
-    fillLevel -= count;
-  }
-};
-
-struct BitStreamerCacheRightInLeftOut final : BitStreamerCacheBase {
-  inline void push(uint64_t bits, int count) noexcept {
-    establishClassInvariants();
-    invariant(count >= 0);
-    invariant(count != 0);
-    invariant(count <= Size);
-    invariant(count + fillLevel <= Size);
-    // If the maximal size of the cache is BitStreamerCacheBase::Size, and we
-    // have fillLevel [high] bits set, how many empty [low] bits do we have?
-    const int vacantBits = BitStreamerCacheBase::Size - fillLevel;
-    invariant(vacantBits >= 0);
-    invariant(vacantBits <= Size);
-    invariant(vacantBits != 0);
-    invariant(vacantBits >= count);
-    // If we just directly 'or' these low bits into the cache right now,
-    // how many unfilled bits of a gap will there be in the middle of a cache?
-    const int emptyBitsGap = vacantBits - count;
-    invariant(emptyBitsGap >= 0);
-    invariant(emptyBitsGap < Size);
-    // So just shift the new bits so that there is no gap in the middle.
-    cache |= bits << emptyBitsGap;
-    fillLevel += count;
-  }
-
-  [[nodiscard]] inline auto peek(int count) const noexcept {
-    establishClassInvariants();
-    invariant(count >= 0);
-    invariant(count <= Size);
-    invariant(count <= MaxGetBits);
-    invariant(count != 0);
-    invariant(count <= fillLevel);
-    return implicit_cast<uint32_t>(
-        extractHighBits(cache, count,
-                        /*effectiveBitwidth=*/BitStreamerCacheBase::Size));
-  }
-
-  inline void skip(int count) noexcept {
-    establishClassInvariants();
-    invariant(count >= 0);
-    // `count` *could* be larger than `MaxGetBits`.
-    // `count` could be zero.
-    invariant(count <= Size);
-    invariant(count <= fillLevel);
-    fillLevel -= count;
-    cache <<= count;
-  }
 };
 
 template <typename Tag> struct BitStreamerReplenisherBase {

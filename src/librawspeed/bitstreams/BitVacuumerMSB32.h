@@ -22,35 +22,37 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStreamer.h"
-#include "io/BitVacuumer.h"
+#include "bitstreams/BitStream.h"
+#include "bitstreams/BitVacuumer.h"
+#include "io/Endianness.h"
 #include <cstddef>
 #include <cstdint>
 
 namespace rawspeed {
 
-struct JPEGBitVacuumerTag;
-
 template <typename OutputIterator>
-using BitVacuumerJPEG =
-    BitVacuumer<JPEGBitVacuumerTag, BitStreamerCacheRightInLeftOut,
-                OutputIterator>;
+class BitVacuumerMSB32 final
+    : public BitVacuumer<BitVacuumerMSB32<OutputIterator>,
+                         BitStreamCacheRightInLeftOut, OutputIterator> {
+  using Base = BitVacuumer<BitVacuumerMSB32<OutputIterator>,
+                           BitStreamCacheRightInLeftOut, OutputIterator>;
 
-template <typename Class>
-  requires(std::same_as<Class, BitVacuumerJPEG<typename Class::OutputIterator>>)
-inline void bitVacuumerCacheDrainer(Class& This) {
-  invariant(This.cache.fillLevel >= Class::chunk_bitwidth);
+  friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
-  typename Class::chunk_type chunk = This.cache.peek(Class::chunk_bitwidth);
-  chunk = getBE<typename Class::chunk_type>(&chunk);
-  This.cache.skip(Class::chunk_bitwidth);
+  inline void drainImpl() {
+    invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
 
-  const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-  for (const auto byte : bytes) {
-    *This.output = static_cast<uint8_t>(byte);
-    if (static_cast<uint8_t>(byte) == 0xFF)
-      *This.output = uint8_t(0x00); // Stuffing byte
+    typename Base::chunk_type chunk = Base::cache.peek(Base::chunk_bitwidth);
+    chunk = getLE<typename Base::chunk_type>(&chunk);
+    Base::cache.skip(Base::chunk_bitwidth);
+
+    const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
+    for (const auto byte : bytes)
+      *Base::output = static_cast<uint8_t>(byte);
   }
-}
+
+public:
+  using Base::Base;
+};
 
 } // namespace rawspeed

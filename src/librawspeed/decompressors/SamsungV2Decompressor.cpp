@@ -26,10 +26,10 @@
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB32.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cassert>

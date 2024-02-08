@@ -18,8 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitStreamerMSB32.h"
-#include "io/BitStreamerTest.h"
+#include "bitstreams/BitStreamerMSB32.h"
+#include "bitstreams/BitStreamerTest.h"
 #include <array>
 #include <cstdint>
 #include <gtest/gtest.h>

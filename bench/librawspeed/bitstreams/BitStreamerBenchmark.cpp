@@ -21,11 +21,11 @@
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "bench/Common.h"
-#include "io/BitStreamerJPEG.h"
-#include "io/BitStreamerLSB.h"
-#include "io/BitStreamerMSB.h"
-#include "io/BitStreamerMSB16.h"
-#include "io/BitStreamerMSB32.h"
+#include "bitstreams/BitStreamerJPEG.h"
+#include "bitstreams/BitStreamerLSB.h"
+#include "bitstreams/BitStreamerMSB.h"
+#include "bitstreams/BitStreamerMSB16.h"
+#include "bitstreams/BitStreamerMSB32.h"
 #include <cassert>
 #include <cstddef>
 #include <benchmark/benchmark.h>

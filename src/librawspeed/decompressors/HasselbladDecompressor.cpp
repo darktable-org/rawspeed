@@ -25,10 +25,10 @@
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB32.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <utility>

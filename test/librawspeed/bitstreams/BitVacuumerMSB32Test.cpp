@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitVacuumerMSB32.h"
+#include "bitstreams/BitVacuumerMSB32.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
-#include "io/BitStreamerMSB32.h"
+#include "bitstreams/BitStreamerMSB32.h"
 #include <cstdint>
 #include <iterator>
 #include <utility>
