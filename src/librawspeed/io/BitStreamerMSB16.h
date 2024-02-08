@@ -22,6 +22,7 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
+#include "io/BitStream.h"
 #include "io/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
@@ -40,8 +41,8 @@ template <> struct BitStreamerTraits<BitStreamerMSB16> final {
 // i.e. we push into the cache from the right and read it from the left
 
 class BitStreamerMSB16 final
-    : public BitStreamer<BitStreamerMSB16, BitStreamerCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerMSB16, BitStreamerCacheRightInLeftOut>;
+    : public BitStreamer<BitStreamerMSB16, BitStreamCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB16, BitStreamCacheRightInLeftOut>;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 
@@ -53,7 +54,7 @@ public:
 
 inline BitStreamerMSB16::size_type
 BitStreamerMSB16::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
   invariant(input.size() ==
             BitStreamerTraits<BitStreamerMSB16>::MaxProcessBytes);

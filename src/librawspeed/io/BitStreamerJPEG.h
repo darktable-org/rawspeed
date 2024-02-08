@@ -22,6 +22,7 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
+#include "io/BitStream.h"
 #include "io/BitStreamer.h"
 #include "io/Endianness.h"
 #include <algorithm>
@@ -74,8 +75,8 @@ template <> struct BitStreamerTraits<BitStreamerJPEG> final {
 // The JPEG data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
 class BitStreamerJPEG final
-    : public BitStreamer<BitStreamerJPEG, BitStreamerCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerJPEG, BitStreamerCacheRightInLeftOut>;
+    : public BitStreamer<BitStreamerJPEG, BitStreamCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerJPEG, BitStreamCacheRightInLeftOut>;
 
   PosOrUnknown<size_type> endOfStreamPos;
 
@@ -96,7 +97,7 @@ public:
 
 inline BitStreamerJPEG::size_type
 BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamerCacheBase::MaxGetBits >= 32, "check implementation");
+  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
   invariant(input.size() ==
             BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes);

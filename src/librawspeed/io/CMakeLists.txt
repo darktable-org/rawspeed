@@ -2,6 +2,7 @@ rawspeed_add_library(rawspeed_io OBJECT)
 set_target_properties(rawspeed_io PROPERTIES LINKER_LANGUAGE CXX)
 
 FILE(GLOB SOURCES
+  "BitStream.h"
   "BitStreamer.cpp"
   "BitStreamer.h"
   "BitStreamerJPEG.h"
