@@ -17589,8 +17589,11 @@
 	<Camera make="PENTAX" model="PENTAX Q7" mode="dng">
 		<ID make="Pentax" model="Q7">PENTAX Q7</ID>
 	</Camera>
-	<Camera make="PENTAX" model="PENTAX Q10" mode="dng" supported="no-samples">
+	<Camera make="PENTAX" model="PENTAX Q10" mode="dng">
 		<ID make="Pentax" model="Q10">PENTAX Q10</ID>
+	</Camera>
+	<Camera make="PENTAX" model="PENTAX Q-S1" mode="dng">
+		<ID make="Pentax" model="Q-S1">PENTAX Q-S1</ID>
 	</Camera>
 	<Camera make="PENTAX RICOH IMAGING" model="PENTAX MX-1" mode="dng">
 		<ID make="Pentax" model="MX-1">PENTAX MX-1</ID>
