@@ -23,10 +23,10 @@
 
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
+#include "bitstreams/BitStreamer.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "codes/BinaryPrefixTree.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamer.h"
 #include <cassert>
 #include <tuple>
 #include <utility>

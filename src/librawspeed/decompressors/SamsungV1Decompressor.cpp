@@ -26,11 +26,11 @@
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cstdint>
 #include <vector>

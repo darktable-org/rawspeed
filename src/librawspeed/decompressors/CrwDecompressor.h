@@ -24,10 +24,10 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Optional.h"
+#include "bitstreams/BitStreamerJPEG.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitStreamerJPEG.h"
 #include <array>
 #include <cstdint>
 

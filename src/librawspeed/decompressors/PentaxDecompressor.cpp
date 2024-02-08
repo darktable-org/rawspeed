@@ -26,12 +26,12 @@
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamerMSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <array>

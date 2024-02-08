@@ -24,8 +24,8 @@
 #include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "bitstreams/BitStreamer.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamer.h"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>

@@ -28,12 +28,12 @@
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerJPEG.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamerJPEG.h"
 #include "io/Buffer.h"
 #include <array>
 #include <cstdint>

@@ -22,27 +22,29 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStream.h"
-#include "io/BitStreamer.h"
+#include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-class BitStreamerMSB16;
+class BitStreamerMSB32;
 
-template <> struct BitStreamerTraits<BitStreamerMSB16> final {
+template <> struct BitStreamerTraits<BitStreamerMSB32> final {
+  static constexpr bool canUseWithPrefixCodeDecoder = true;
+
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
-  static_assert(MaxProcessBytes == 2 * sizeof(uint16_t));
+  static_assert(MaxProcessBytes == sizeof(uint32_t));
 };
 
 // The MSB data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
 
-class BitStreamerMSB16 final
-    : public BitStreamer<BitStreamerMSB16, BitStreamCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerMSB16, BitStreamCacheRightInLeftOut>;
+class BitStreamerMSB32 final
+    : public BitStreamer<BitStreamerMSB32, BitStreamCacheRightInLeftOut> {
+  using Base = BitStreamer<BitStreamerMSB32, BitStreamCacheRightInLeftOut>;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 
@@ -52,16 +54,14 @@ public:
   using Base::Base;
 };
 
-inline BitStreamerMSB16::size_type
-BitStreamerMSB16::fillCache(Array1DRef<const uint8_t> input) {
+inline BitStreamerMSB32::size_type
+BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
   invariant(input.size() ==
-            BitStreamerTraits<BitStreamerMSB16>::MaxProcessBytes);
+            BitStreamerTraits<BitStreamerMSB32>::MaxProcessBytes);
 
-  for (size_type i = 0; i < 4; i += sizeof(uint16_t)) {
-    cache.push(getLE<uint16_t>(input.getCrop(i, sizeof(uint16_t)).begin()), 16);
-  }
+  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
   return 4;
 }
 

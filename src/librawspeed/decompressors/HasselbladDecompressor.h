@@ -23,9 +23,9 @@
 #pragma once
 
 #include "adt/Array1DRef.h"
+#include "bitstreams/BitStreamerMSB32.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "io/BitStreamerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>

@@ -22,8 +22,8 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "io/BitStream.h"
-#include "io/BitStreamer.h"
+#include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
 

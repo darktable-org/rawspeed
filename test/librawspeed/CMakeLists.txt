@@ -27,6 +27,7 @@ function(add_rs_test src)
 endfunction()
 
 add_subdirectory(adt)
+add_subdirectory(bitstreams)
 add_subdirectory(codes)
 add_subdirectory(common)
 add_subdirectory(io)

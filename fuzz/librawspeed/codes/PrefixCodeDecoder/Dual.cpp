@@ -27,15 +27,15 @@
 #error IMPL1 must be defined to one of rawspeeds huffman table implementations
 #endif
 
+#include "bitstreams/BitStreamerJPEG.h"
+#include "bitstreams/BitStreamerMSB.h"
+#include "bitstreams/BitStreamerMSB32.h"
 #include "codes/PrefixCodeDecoder.h" // IWYU pragma: keep
 #include "codes/PrefixCodeDecoder/Common.h"
 #include "codes/PrefixCodeLUTDecoder.h"    // IWYU pragma: keep
 #include "codes/PrefixCodeLookupDecoder.h" // IWYU pragma: keep
 #include "codes/PrefixCodeTreeDecoder.h"   // IWYU pragma: keep
 #include "codes/PrefixCodeVectorDecoder.h" // IWYU pragma: keep
-#include "io/BitStreamerJPEG.h"
-#include "io/BitStreamerMSB.h"
-#include "io/BitStreamerMSB32.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include "io/Endianness.h"

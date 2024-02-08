@@ -26,10 +26,10 @@
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerLSB.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamerLSB.h"
 #include "io/ByteStream.h"
 #include <cstddef>
 #include <cstdint>

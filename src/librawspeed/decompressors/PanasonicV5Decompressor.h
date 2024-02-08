@@ -22,9 +22,9 @@
 #pragma once
 
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerLSB.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitStreamerLSB.h"
 #include "io/ByteStream.h"
 #include <cstdint>
 #include <vector>

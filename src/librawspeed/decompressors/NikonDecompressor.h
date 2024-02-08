@@ -21,10 +21,10 @@
 #pragma once
 
 #include "adt/Array1DRef.h"
+#include "bitstreams/BitStreamerMSB.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitStreamerMSB.h"
 #include <array>
 #include <cstdint>
 #include <vector>

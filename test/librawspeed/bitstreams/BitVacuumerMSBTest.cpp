@@ -18,10 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "io/BitVacuumerLSB.h"
+#include "bitstreams/BitVacuumerMSB.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
-#include "io/BitStreamerLSB.h"
+#include "bitstreams/BitStreamerMSB.h"
 #include <cstdint>
 #include <iterator>
 #include <utility>
@@ -45,9 +45,9 @@ using RecepieType = std::vector<RecepieEntryType>;
 using ResultType = std::vector<uint8_t>;
 
 using valueType = std::pair<RecepieType, ResultType>;
-class BitVacuumerLSBTest : public ::testing::TestWithParam<valueType> {
+class BitVacuumerMSBTest : public ::testing::TestWithParam<valueType> {
 protected:
-  BitVacuumerLSBTest() = default;
+  BitVacuumerMSBTest() = default;
   virtual void SetUp() {
     recepie = std::get<0>(GetParam());
     expectedOutput = std::get<1>(GetParam());
@@ -129,42 +129,42 @@ const std::vector<valueType> values = {{
     {RecepieType({{std::make_pair(0xFF, 8), std::make_pair(0x00, 32)}}), ResultType({{0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}})},
 
     {RecepieType({{std::make_pair(0x00, 0), std::make_pair(0xFF, 8)}}), ResultType({{0xFF, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 1), std::make_pair(0xFF, 8)}}), ResultType({{0xFE, 0x01, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 2), std::make_pair(0xFF, 8)}}), ResultType({{0xFC, 0x03, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 3), std::make_pair(0xFF, 8)}}), ResultType({{0xF8, 0x07, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 4), std::make_pair(0xFF, 8)}}), ResultType({{0xF0, 0x0F, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 5), std::make_pair(0xFF, 8)}}), ResultType({{0xE0, 0x1F, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 6), std::make_pair(0xFF, 8)}}), ResultType({{0xC0, 0x3F, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 7), std::make_pair(0xFF, 8)}}), ResultType({{0x80, 0x7F, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 1), std::make_pair(0xFF, 8)}}), ResultType({{0x7F, 0x80, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 2), std::make_pair(0xFF, 8)}}), ResultType({{0x3F, 0xC0, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 3), std::make_pair(0xFF, 8)}}), ResultType({{0x1F, 0xE0, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 4), std::make_pair(0xFF, 8)}}), ResultType({{0x0F, 0xF0, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 5), std::make_pair(0xFF, 8)}}), ResultType({{0x07, 0xF8, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 6), std::make_pair(0xFF, 8)}}), ResultType({{0x03, 0xFC, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 7), std::make_pair(0xFF, 8)}}), ResultType({{0x01, 0xFE, 0x00, 0x00}})},
     {RecepieType({{std::make_pair(0x00, 8), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xFF, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 9), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xFE, 0x01, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 10), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xFC, 0x03, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 11), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xF8, 0x07, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 12), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xF0, 0x0F, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 13), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xE0, 0x1F, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 14), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0xC0, 0x3F, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 15), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x80, 0x7F, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 9), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x7F, 0x80, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 10), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x3F, 0xC0, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 11), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x1F, 0xE0, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 12), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x0F, 0xF0, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 13), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x07, 0xF8, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 14), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x03, 0xFC, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 15), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x01, 0xFE, 0x00}})},
     {RecepieType({{std::make_pair(0x00, 16), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xFF, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 17), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xFE, 0x01}})},
-    {RecepieType({{std::make_pair(0x00, 18), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xFC, 0x03}})},
-    {RecepieType({{std::make_pair(0x00, 19), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xF8, 0x07}})},
-    {RecepieType({{std::make_pair(0x00, 20), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xF0, 0x0F}})},
-    {RecepieType({{std::make_pair(0x00, 21), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xE0, 0x1F}})},
-    {RecepieType({{std::make_pair(0x00, 22), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0xC0, 0x3F}})},
-    {RecepieType({{std::make_pair(0x00, 23), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x80, 0x7F}})},
+    {RecepieType({{std::make_pair(0x00, 17), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x7F, 0x80}})},
+    {RecepieType({{std::make_pair(0x00, 18), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x3F, 0xC0}})},
+    {RecepieType({{std::make_pair(0x00, 19), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x1F, 0xE0}})},
+    {RecepieType({{std::make_pair(0x00, 20), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x0F, 0xF0}})},
+    {RecepieType({{std::make_pair(0x00, 21), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x07, 0xF8}})},
+    {RecepieType({{std::make_pair(0x00, 22), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x03, 0xFC}})},
+    {RecepieType({{std::make_pair(0x00, 23), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x01, 0xFE}})},
     {RecepieType({{std::make_pair(0x00, 24), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xFF}})},
-    {RecepieType({{std::make_pair(0x00, 25), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xFE, 0x01, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 26), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xFC, 0x03, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 27), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xF8, 0x07, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 28), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xF0, 0x0F, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 29), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xE0, 0x1F, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 30), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0xC0, 0x3F, 0x00, 0x00, 0x00}})},
-    {RecepieType({{std::make_pair(0x00, 31), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x80, 0x7F, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 25), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x7F, 0x80, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 26), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x3F, 0xC0, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 27), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x1F, 0xE0, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 28), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x0F, 0xF0, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 29), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x07, 0xF8, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 30), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x03, 0xFC, 0x00, 0x00, 0x00}})},
+    {RecepieType({{std::make_pair(0x00, 31), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x01, 0xFE, 0x00, 0x00, 0x00}})},
     {RecepieType({{std::make_pair(0x00, 32), std::make_pair(0xFF, 8)}}), ResultType({{0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00}})},
     // clang-format on
 }};
 
-INSTANTIATE_TEST_SUITE_P(Patterns, BitVacuumerLSBTest,
+INSTANTIATE_TEST_SUITE_P(Patterns, BitVacuumerMSBTest,
                          ::testing::ValuesIn(values));
 
 ResultType synthesizeBitstream(const RecepieType& recepie) {
@@ -172,7 +172,7 @@ ResultType synthesizeBitstream(const RecepieType& recepie) {
 
   {
     auto bsInserter = std::back_inserter(bitstream);
-    using BitVacuumer = BitVacuumerLSB<decltype(bsInserter)>;
+    using BitVacuumer = BitVacuumerMSB<decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);
 
     for (const auto& e : recepie)
@@ -182,16 +182,16 @@ ResultType synthesizeBitstream(const RecepieType& recepie) {
   return bitstream;
 }
 
-TEST_P(BitVacuumerLSBTest, Synthesis) {
+TEST_P(BitVacuumerMSBTest, Synthesis) {
   const ResultType bitstream = synthesizeBitstream(recepie);
   ASSERT_THAT(bitstream, testing::ContainerEq(expectedOutput));
 }
 
-TEST_P(BitVacuumerLSBTest, Dissolution) {
+TEST_P(BitVacuumerMSBTest, Dissolution) {
   if (expectedOutput.empty())
     return;
 
-  auto bs = BitStreamerLSB(Array1DRef(
+  auto bs = BitStreamerMSB(Array1DRef(
       expectedOutput.data(), implicit_cast<int>(expectedOutput.size())));
   for (int i = 0; i != implicit_cast<int>(recepie.size()); ++i) {
     const auto [expectedVal, len] = recepie[i];

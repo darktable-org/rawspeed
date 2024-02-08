@@ -27,10 +27,10 @@
 #include "adt/CroppedArray1DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerLSB.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamerLSB.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
 #include <cstdint>

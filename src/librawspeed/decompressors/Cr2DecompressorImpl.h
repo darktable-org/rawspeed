@@ -26,10 +26,10 @@
 #include "adt/Optional.h"
 #include "adt/Point.h"
 #include "adt/iterator_range.h"
+#include "bitstreams/BitStreamerJPEG.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/Cr2Decompressor.h"
-#include "io/BitStreamerJPEG.h"
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
