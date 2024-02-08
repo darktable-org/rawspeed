@@ -29,25 +29,29 @@
 
 namespace rawspeed {
 
-struct LSBBitVacuumerTag;
-
 template <typename OutputIterator>
-using BitVacuumerLSB =
-    BitVacuumer<LSBBitVacuumerTag, BitStreamerCacheLeftInRightOut,
-                OutputIterator>;
+class BitVacuumerLSB final
+    : public BitVacuumer<BitVacuumerLSB<OutputIterator>,
+                         BitStreamerCacheLeftInRightOut, OutputIterator> {
+  using Base = BitVacuumer<BitVacuumerLSB<OutputIterator>,
+                           BitStreamerCacheLeftInRightOut, OutputIterator>;
 
-template <typename Class>
-  requires(std::same_as<Class, BitVacuumerLSB<typename Class::OutputIterator>>)
-inline void bitVacuumerCacheDrainer(Class& This) {
-  invariant(This.cache.fillLevel >= Class::chunk_bitwidth);
+  friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
-  typename Class::chunk_type chunk = This.cache.peek(Class::chunk_bitwidth);
-  chunk = getLE<typename Class::chunk_type>(&chunk);
-  This.cache.skip(Class::chunk_bitwidth);
+  inline void drainImpl() {
+    invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
 
-  const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-  for (const auto byte : bytes)
-    *This.output = static_cast<uint8_t>(byte);
-}
+    typename Base::chunk_type chunk = Base::cache.peek(Base::chunk_bitwidth);
+    chunk = getLE<typename Base::chunk_type>(&chunk);
+    Base::cache.skip(Base::chunk_bitwidth);
+
+    const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
+    for (const auto byte : bytes)
+      *Base::output = static_cast<uint8_t>(byte);
+  }
+
+public:
+  using Base::Base;
+};
 
 } // namespace rawspeed

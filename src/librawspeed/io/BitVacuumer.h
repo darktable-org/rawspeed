@@ -22,20 +22,15 @@
 
 #include "adt/Invariant.h"
 #include <cstdint>
+#include <iterator>
 
 namespace rawspeed {
 
-template <typename Tag, typename Cache, typename OutputIterator>
-  requires std::output_iterator<OutputIterator, uint8_t>
-class BitVacuumer;
-
-template <typename Class> inline void bitVacuumerCacheDrainer(Class& This);
-
-template <typename Tag, typename Cache, typename OutputIterator_>
+template <typename Derived_, typename Cache, typename OutputIterator_>
   requires std::output_iterator<OutputIterator_, uint8_t>
-class BitVacuumer final {
+class BitVacuumer {
 public:
-  using tag = Tag;
+  using Derived = Derived_;
   using cache_type = Cache;
   using OutputIterator = OutputIterator_;
 
@@ -54,7 +49,7 @@ public:
     if (cache.fillLevel < chunk_bitwidth)
       return; // NOTE: does not mean the cache is empty!
 
-    bitVacuumerCacheDrainer(*this);
+    static_cast<Derived*>(this)->drainImpl();
     invariant(cache.fillLevel < chunk_bitwidth);
   }
 

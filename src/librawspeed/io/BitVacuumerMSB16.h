@@ -29,30 +29,33 @@
 
 namespace rawspeed {
 
-struct MSB16BitVacuumerTag;
-
 template <typename OutputIterator>
-using BitVacuumerMSB16 =
-    BitVacuumer<MSB16BitVacuumerTag, BitStreamerCacheRightInLeftOut,
-                OutputIterator>;
+class BitVacuumerMSB16 final
+    : public BitVacuumer<BitVacuumerMSB16<OutputIterator>,
+                         BitStreamerCacheRightInLeftOut, OutputIterator> {
+  using Base = BitVacuumer<BitVacuumerMSB16<OutputIterator>,
+                           BitStreamerCacheRightInLeftOut, OutputIterator>;
 
-template <typename Class>
-  requires(
-      std::same_as<Class, BitVacuumerMSB16<typename Class::OutputIterator>>)
-inline void bitVacuumerCacheDrainer(Class& This) {
-  invariant(This.cache.fillLevel >= Class::chunk_bitwidth);
-  invariant(Class::chunk_bitwidth == 32);
+  friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
-  for (int i = 0; i != 2; ++i) {
-    auto chunk =
-        implicit_cast<uint16_t>(This.cache.peek(Class::chunk_bitwidth / 2));
-    chunk = getLE<uint16_t>(&chunk);
-    This.cache.skip(Class::chunk_bitwidth / 2);
+  inline void drainImpl() {
+    invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
+    invariant(Base::chunk_bitwidth == 32);
 
-    const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-    for (const auto byte : bytes)
-      *This.output = static_cast<uint8_t>(byte);
+    for (int i = 0; i != 2; ++i) {
+      auto chunk =
+          implicit_cast<uint16_t>(Base::cache.peek(Base::chunk_bitwidth / 2));
+      chunk = getLE<uint16_t>(&chunk);
+      Base::cache.skip(Base::chunk_bitwidth / 2);
+
+      const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
+      for (const auto byte : bytes)
+        *Base::output = static_cast<uint8_t>(byte);
+    }
   }
-}
+
+public:
+  using Base::Base;
+};
 
 } // namespace rawspeed
