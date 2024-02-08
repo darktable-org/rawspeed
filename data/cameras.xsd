@@ -292,7 +292,7 @@
   </xs:simpleType>
   <xs:simpleType name="AliasTypeIdType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-/]{7,21}"/>
+      <xs:pattern value="[a-zA-Z0-9 \-]{7,21}"/>
       <xs:minLength value="7"/>
       <xs:maxLength value="21"/>
     </xs:restriction>
