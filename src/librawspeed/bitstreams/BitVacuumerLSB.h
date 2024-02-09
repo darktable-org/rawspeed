@@ -43,20 +43,6 @@ class BitVacuumerLSB final
     : public BitVacuumer<BitVacuumerLSB<OutputIterator>, OutputIterator> {
   using Base = BitVacuumer<BitVacuumerLSB<OutputIterator>, OutputIterator>;
 
-  friend void Base::drain(); // Allow it to actually call `drainImpl()`.
-
-  inline void drainImpl() {
-    invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
-
-    typename Base::chunk_type chunk = Base::cache.peek(Base::chunk_bitwidth);
-    chunk = getLE<typename Base::chunk_type>(&chunk);
-    Base::cache.skip(Base::chunk_bitwidth);
-
-    const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-    for (const auto byte : bytes)
-      *Base::output = static_cast<uint8_t>(byte);
-  }
-
 public:
   using Base::Base;
 };
