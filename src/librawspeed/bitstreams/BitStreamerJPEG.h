@@ -101,16 +101,22 @@ inline BitStreamerJPEG::size_type
 BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() ==
-            BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes);
+  invariant(input.size() == Traits::MaxProcessBytes);
 
-  std::array<uint8_t, BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes>
-      prefetch;
+  constexpr int StreamChunkBitwidth =
+      bitwidth<typename StreamTraits::ChunkType>();
+
+  std::array<uint8_t, Traits::MaxProcessBytes> prefetch;
   std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
               prefetch.begin());
 
   auto speculativeOptimisticCache = cache;
-  speculativeOptimisticCache.push(getBE<uint32_t>(prefetch.data()), 32);
+  auto speculativeOptimisticChunk =
+      getByteSwapped<typename StreamTraits::ChunkType>(
+          prefetch.data(),
+          StreamTraits::ChunkEndianness != getHostEndianness());
+  speculativeOptimisticCache.push(speculativeOptimisticChunk,
+                                  StreamChunkBitwidth);
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
