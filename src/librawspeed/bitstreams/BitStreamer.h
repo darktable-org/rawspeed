@@ -27,15 +27,14 @@
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
+#include "bitstreams/BitStream.h"
 #include "io/IOException.h"
 #include <array>
 #include <cstdint>
 
 namespace rawspeed {
 
-template <typename BIT_STREAM> struct BitStreamerTraits final {
-  static constexpr bool canUseWithPrefixCodeDecoder = false;
-};
+template <typename BIT_STREAM> struct BitStreamerTraits;
 
 template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
@@ -126,12 +125,16 @@ struct BitStreamerForwardSequentialReplenisher final
   }
 };
 
-template <typename Derived, typename Cache,
+template <typename Derived,
           typename Replenisher =
               BitStreamerForwardSequentialReplenisher<Derived>>
 class BitStreamer {
 public:
   using size_type = int32_t;
+  using Traits = BitStreamerTraits<Derived>;
+  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+
+  using Cache = typename StreamTraits::StreamFlow;
 
 protected:
   Cache cache;

@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamMSB.h"
 #include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
@@ -32,6 +33,8 @@ namespace rawspeed {
 class BitStreamerMSB;
 
 template <> struct BitStreamerTraits<BitStreamerMSB> final {
+  using Stream = BitStreamMSB;
+
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -41,9 +44,8 @@ template <> struct BitStreamerTraits<BitStreamerMSB> final {
 
 // The MSB data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
-class BitStreamerMSB final
-    : public BitStreamer<BitStreamerMSB, BitStreamCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerMSB, BitStreamCacheRightInLeftOut>;
+class BitStreamerMSB final : public BitStreamer<BitStreamerMSB> {
+  using Base = BitStreamer<BitStreamerMSB>;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 

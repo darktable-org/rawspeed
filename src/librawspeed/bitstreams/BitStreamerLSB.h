@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamLSB.h"
 #include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <cstdint>
@@ -32,6 +33,8 @@ namespace rawspeed {
 class BitStreamerLSB;
 
 template <> struct BitStreamerTraits<BitStreamerLSB> final {
+  using Stream = BitStreamLSB;
+
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;
   static_assert(MaxProcessBytes == sizeof(uint32_t));
@@ -40,9 +43,8 @@ template <> struct BitStreamerTraits<BitStreamerLSB> final {
 // The LSBPump is ordered in LSB bit order,
 // i.e. we push into the cache from the left and read it from the right
 
-class BitStreamerLSB final
-    : public BitStreamer<BitStreamerLSB, BitStreamCacheLeftInRightOut> {
-  using Base = BitStreamer<BitStreamerLSB, BitStreamCacheLeftInRightOut>;
+class BitStreamerLSB final : public BitStreamer<BitStreamerLSB> {
+  using Base = BitStreamer<BitStreamerLSB>;
 
   friend void Base::fill(int); // Allow it to call our `fillCache()`.
 

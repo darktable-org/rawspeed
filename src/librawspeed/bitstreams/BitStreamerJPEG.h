@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamJPEG.h"
 #include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <algorithm>
@@ -63,6 +64,8 @@ public:
 class BitStreamerJPEG;
 
 template <> struct BitStreamerTraits<BitStreamerJPEG> final {
+  using Stream = BitStreamJPEG;
+
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -74,9 +77,8 @@ template <> struct BitStreamerTraits<BitStreamerJPEG> final {
 
 // The JPEG data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
-class BitStreamerJPEG final
-    : public BitStreamer<BitStreamerJPEG, BitStreamCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerJPEG, BitStreamCacheRightInLeftOut>;
+class BitStreamerJPEG final : public BitStreamer<BitStreamerJPEG> {
+  using Base = BitStreamer<BitStreamerJPEG>;
 
   PosOrUnknown<size_type> endOfStreamPos;
 
