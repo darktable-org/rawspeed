@@ -20,14 +20,8 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h"
-#include "adt/Invariant.h"
-#include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamMSB32.h"
 #include "bitstreams/BitVacuumer.h"
-#include "io/Endianness.h"
-#include <cstddef>
-#include <cstdint>
 
 namespace rawspeed {
 

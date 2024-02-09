@@ -3,6 +3,11 @@ set_target_properties(rawspeed_bitstreams PROPERTIES LINKER_LANGUAGE CXX)
 
 FILE(GLOB SOURCES
   "BitStream.h"
+  "BitStreamJPEG.h"
+  "BitStreamLSB.h"
+  "BitStreamMSB.h"
+  "BitStreamMSB16.h"
+  "BitStreamMSB32.h"
   "BitStreamer.cpp"
   "BitStreamer.h"
   "BitStreamerJPEG.h"

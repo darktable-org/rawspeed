@@ -22,7 +22,6 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamJPEG.h"
 #include "bitstreams/BitVacuumer.h"
 #include "io/Endianness.h"

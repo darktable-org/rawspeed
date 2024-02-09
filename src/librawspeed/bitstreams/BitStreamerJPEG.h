@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
+#include "adt/Bit.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamJPEG.h"

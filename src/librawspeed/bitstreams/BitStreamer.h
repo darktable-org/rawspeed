@@ -31,6 +31,7 @@
 #include "io/Endianness.h"
 #include "io/IOException.h"
 #include <array>
+#include <climits>
 #include <cstdint>
 
 namespace rawspeed {

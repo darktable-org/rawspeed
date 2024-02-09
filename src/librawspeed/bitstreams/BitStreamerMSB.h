@@ -20,9 +20,6 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h"
-#include "adt/Invariant.h"
-#include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamMSB.h"
 #include "bitstreams/BitStreamer.h"
 #include <cstdint>
