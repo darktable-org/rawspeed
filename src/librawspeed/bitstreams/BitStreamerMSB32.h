@@ -25,7 +25,6 @@
 #include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamMSB32.h"
 #include "bitstreams/BitStreamer.h"
-#include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
@@ -48,23 +47,8 @@ template <> struct BitStreamerTraits<BitStreamerMSB32> final {
 class BitStreamerMSB32 final : public BitStreamer<BitStreamerMSB32> {
   using Base = BitStreamer<BitStreamerMSB32>;
 
-  friend void Base::fill(int); // Allow it to call our `fillCache()`.
-
-  size_type fillCache(Array1DRef<const uint8_t> input);
-
 public:
   using Base::Base;
 };
-
-inline BitStreamerMSB32::size_type
-BitStreamerMSB32::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
-  establishClassInvariants();
-  invariant(input.size() ==
-            BitStreamerTraits<BitStreamerMSB32>::MaxProcessBytes);
-
-  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
-  return 4;
-}
 
 } // namespace rawspeed
