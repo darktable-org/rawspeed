@@ -58,13 +58,25 @@ inline BitStreamerMSB16::size_type
 BitStreamerMSB16::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() ==
-            BitStreamerTraits<BitStreamerMSB16>::MaxProcessBytes);
+  invariant(input.size() == Traits::MaxProcessBytes);
 
-  for (size_type i = 0; i < 4; i += sizeof(uint16_t)) {
-    cache.push(getLE<uint16_t>(input.getCrop(i, sizeof(uint16_t)).begin()), 16);
+  constexpr int StreamChunkBitwidth =
+      bitwidth<typename StreamTraits::ChunkType>();
+  static_assert(CHAR_BIT * Traits::MaxProcessBytes >= StreamChunkBitwidth);
+  static_assert(CHAR_BIT * Traits::MaxProcessBytes % StreamChunkBitwidth == 0);
+  constexpr int NumChunksNeeded =
+      (CHAR_BIT * Traits::MaxProcessBytes) / StreamChunkBitwidth;
+  static_assert(NumChunksNeeded >= 1);
+
+  for (int i = 0; i != NumChunksNeeded; ++i) {
+    auto chunkInput =
+        input.getBlock(sizeof(typename StreamTraits::ChunkType), i);
+    auto chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+        chunkInput.begin(),
+        StreamTraits::ChunkEndianness != getHostEndianness());
+    cache.push(chunk, StreamChunkBitwidth);
   }
-  return 4;
+  return Traits::MaxProcessBytes;
 }
 
 } // namespace rawspeed
