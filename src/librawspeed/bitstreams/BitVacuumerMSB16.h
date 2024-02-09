@@ -42,33 +42,6 @@ template <typename OutputIterator>
 class BitVacuumerMSB16 final
     : public BitVacuumer<BitVacuumerMSB16<OutputIterator>, OutputIterator> {
   using Base = BitVacuumer<BitVacuumerMSB16<OutputIterator>, OutputIterator>;
-  using StreamTraits = typename Base::StreamTraits;
-
-  friend void Base::drain(); // Allow it to actually call `drainImpl()`.
-
-  inline void drainImpl() {
-    invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
-    invariant(Base::chunk_bitwidth == 32);
-
-    constexpr int StreamChunkBitwidth =
-        bitwidth<typename StreamTraits::ChunkType>();
-    static_assert(Base::chunk_bitwidth >= StreamChunkBitwidth);
-    static_assert(Base::chunk_bitwidth % StreamChunkBitwidth == 0);
-    constexpr int NumChunksNeeded = Base::chunk_bitwidth / StreamChunkBitwidth;
-    static_assert(NumChunksNeeded >= 1);
-
-    for (int i = 0; i != NumChunksNeeded; ++i) {
-      auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
-          Base::cache.peek(StreamChunkBitwidth));
-      chunk = getByteSwapped<typename StreamTraits::ChunkType>(
-          &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
-      Base::cache.skip(StreamChunkBitwidth);
-
-      const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-      for (const auto byte : bytes)
-        *Base::output = static_cast<uint8_t>(byte);
-    }
-  }
 
 public:
   using Base::Base;
