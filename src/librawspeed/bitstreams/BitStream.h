@@ -29,6 +29,8 @@
 
 namespace rawspeed {
 
+template <typename BIT_STREAM> struct BitStreamTraits;
+
 // simple 64-bit wide cache implementation that acts like a FiFo.
 // There are two variants:
 //  * L->R: new bits are pushed in on the left and pulled out on the right

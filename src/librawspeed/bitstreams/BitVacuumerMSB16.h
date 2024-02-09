@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamMSB16.h"
 #include "bitstreams/BitVacuumer.h"
 #include "io/Endianness.h"
 #include <cstddef>
@@ -30,12 +31,17 @@
 
 namespace rawspeed {
 
+template <typename OutputIterator> class BitVacuumerMSB16;
+
+template <typename OutputIterator>
+struct BitVacuumerTraits<BitVacuumerMSB16<OutputIterator>> final {
+  using Stream = BitStreamMSB16;
+};
+
 template <typename OutputIterator>
 class BitVacuumerMSB16 final
-    : public BitVacuumer<BitVacuumerMSB16<OutputIterator>,
-                         BitStreamCacheRightInLeftOut, OutputIterator> {
-  using Base = BitVacuumer<BitVacuumerMSB16<OutputIterator>,
-                           BitStreamCacheRightInLeftOut, OutputIterator>;
+    : public BitVacuumer<BitVacuumerMSB16<OutputIterator>, OutputIterator> {
+  using Base = BitVacuumer<BitVacuumerMSB16<OutputIterator>, OutputIterator>;
 
   friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
