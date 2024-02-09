@@ -25,7 +25,6 @@
 #include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamMSB16.h"
 #include "bitstreams/BitStreamer.h"
-#include "io/Endianness.h"
 #include <cstdint>
 
 namespace rawspeed {
@@ -46,37 +45,8 @@ template <> struct BitStreamerTraits<BitStreamerMSB16> final {
 class BitStreamerMSB16 final : public BitStreamer<BitStreamerMSB16> {
   using Base = BitStreamer<BitStreamerMSB16>;
 
-  friend void Base::fill(int); // Allow it to call our `fillCache()`.
-
-  size_type fillCache(Array1DRef<const uint8_t> input);
-
 public:
   using Base::Base;
 };
-
-inline BitStreamerMSB16::size_type
-BitStreamerMSB16::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
-  establishClassInvariants();
-  invariant(input.size() == Traits::MaxProcessBytes);
-
-  constexpr int StreamChunkBitwidth =
-      bitwidth<typename StreamTraits::ChunkType>();
-  static_assert(CHAR_BIT * Traits::MaxProcessBytes >= StreamChunkBitwidth);
-  static_assert(CHAR_BIT * Traits::MaxProcessBytes % StreamChunkBitwidth == 0);
-  constexpr int NumChunksNeeded =
-      (CHAR_BIT * Traits::MaxProcessBytes) / StreamChunkBitwidth;
-  static_assert(NumChunksNeeded >= 1);
-
-  for (int i = 0; i != NumChunksNeeded; ++i) {
-    auto chunkInput =
-        input.getBlock(sizeof(typename StreamTraits::ChunkType), i);
-    auto chunk = getByteSwapped<typename StreamTraits::ChunkType>(
-        chunkInput.begin(),
-        StreamTraits::ChunkEndianness != getHostEndianness());
-    cache.push(chunk, StreamChunkBitwidth);
-  }
-  return Traits::MaxProcessBytes;
-}
 
 } // namespace rawspeed

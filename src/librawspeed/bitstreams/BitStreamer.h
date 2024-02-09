@@ -28,6 +28,7 @@
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
 #include "bitstreams/BitStream.h"
+#include "io/Endianness.h"
 #include "io/IOException.h"
 #include <array>
 #include <cstdint>
@@ -142,10 +143,33 @@ protected:
 private:
   Replenisher replenisher;
 
-  // this method hase to be implemented in the concrete BitStreamer template
+  // this method can be re-implemented in the concrete BitStreamer template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamerTraits<Tag>::MaxProcessBytes bytes of input.
-  size_type fillCache(Array1DRef<const uint8_t> input);
+  size_type fillCache(Array1DRef<const uint8_t> input) {
+    static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
+    establishClassInvariants();
+    invariant(input.size() == Traits::MaxProcessBytes);
+
+    constexpr int StreamChunkBitwidth =
+        bitwidth<typename StreamTraits::ChunkType>();
+    static_assert(CHAR_BIT * Traits::MaxProcessBytes >= StreamChunkBitwidth);
+    static_assert(CHAR_BIT * Traits::MaxProcessBytes % StreamChunkBitwidth ==
+                  0);
+    constexpr int NumChunksNeeded =
+        (CHAR_BIT * Traits::MaxProcessBytes) / StreamChunkBitwidth;
+    static_assert(NumChunksNeeded >= 1);
+
+    for (int i = 0; i != NumChunksNeeded; ++i) {
+      auto chunkInput =
+          input.getBlock(sizeof(typename StreamTraits::ChunkType), i);
+      auto chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+          chunkInput.begin(),
+          StreamTraits::ChunkEndianness != getHostEndianness());
+      cache.push(chunk, StreamChunkBitwidth);
+    }
+    return Traits::MaxProcessBytes;
+  }
 
 public:
   void establishClassInvariants() const noexcept {
