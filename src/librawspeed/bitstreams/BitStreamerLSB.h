@@ -46,22 +46,8 @@ template <> struct BitStreamerTraits<BitStreamerLSB> final {
 class BitStreamerLSB final : public BitStreamer<BitStreamerLSB> {
   using Base = BitStreamer<BitStreamerLSB>;
 
-  friend void Base::fill(int); // Allow it to call our `fillCache()`.
-
-  size_type fillCache(Array1DRef<const uint8_t> input);
-
 public:
   using Base::Base;
 };
-
-inline BitStreamerLSB::size_type
-BitStreamerLSB::fillCache(Array1DRef<const uint8_t> input) {
-  static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
-  establishClassInvariants();
-  invariant(input.size() == BitStreamerTraits<BitStreamerLSB>::MaxProcessBytes);
-
-  cache.push(getLE<uint32_t>(input.getCrop(0, sizeof(uint32_t)).begin()), 32);
-  return 4;
-}
 
 } // namespace rawspeed
