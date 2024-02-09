@@ -32,12 +32,12 @@ template <typename BIT_STREAM> struct BitVacuumerTraits;
 template <typename Derived_, typename OutputIterator_>
   requires std::output_iterator<OutputIterator_, uint8_t>
 class BitVacuumer {
+public:
   using Traits = BitVacuumerTraits<Derived_>;
   using StreamTraits = BitStreamTraits<typename Traits::Stream>;
 
   using Cache = typename StreamTraits::StreamFlow;
 
-public:
   using Derived = Derived_;
   using cache_type = Cache;
   using OutputIterator = OutputIterator_;
