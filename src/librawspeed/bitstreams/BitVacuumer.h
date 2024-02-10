@@ -20,16 +20,26 @@
 
 #pragma once
 
+#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
+#include "bitstreams/BitStream.h"
+#include "io/Endianness.h"
+#include <cstddef>
 #include <cstdint>
-#include <iterator>
 
 namespace rawspeed {
 
-template <typename Derived_, typename Cache, typename OutputIterator_>
+template <typename BIT_STREAM> struct BitVacuumerTraits;
+
+template <typename Derived_, typename OutputIterator_>
   requires std::output_iterator<OutputIterator_, uint8_t>
 class BitVacuumer {
 public:
+  using Traits = BitVacuumerTraits<Derived_>;
+  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+
+  using Cache = typename StreamTraits::StreamFlow;
+
   using Derived = Derived_;
   using cache_type = Cache;
   using OutputIterator = OutputIterator_;
@@ -42,6 +52,30 @@ public:
 
   using chunk_type = uint32_t;
   static constexpr int chunk_bitwidth = 32;
+
+  inline void drainImpl() {
+    invariant(cache.fillLevel >= chunk_bitwidth);
+    static_assert(chunk_bitwidth == 32);
+
+    constexpr int StreamChunkBitwidth =
+        bitwidth<typename StreamTraits::ChunkType>();
+    static_assert(chunk_bitwidth >= StreamChunkBitwidth);
+    static_assert(chunk_bitwidth % StreamChunkBitwidth == 0);
+    constexpr int NumChunksNeeded = chunk_bitwidth / StreamChunkBitwidth;
+    static_assert(NumChunksNeeded >= 1);
+
+    for (int i = 0; i != NumChunksNeeded; ++i) {
+      auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
+          cache.peek(StreamChunkBitwidth));
+      chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+          &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
+      cache.skip(StreamChunkBitwidth);
+
+      const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
+      for (const auto byte : bytes)
+        *output = static_cast<uint8_t>(byte);
+    }
+  }
 
   inline void drain() {
     invariant(!flushed);

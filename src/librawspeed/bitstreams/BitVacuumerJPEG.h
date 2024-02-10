@@ -22,7 +22,7 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
-#include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamJPEG.h"
 #include "bitstreams/BitVacuumer.h"
 #include "io/Endianness.h"
 #include <cstddef>
@@ -30,21 +30,37 @@
 
 namespace rawspeed {
 
+template <typename OutputIterator> class BitVacuumerJPEG;
+
+template <typename OutputIterator>
+struct BitVacuumerTraits<BitVacuumerJPEG<OutputIterator>> final {
+  using Stream = BitStreamJPEG;
+};
+
 template <typename OutputIterator>
 class BitVacuumerJPEG final
-    : public BitVacuumer<BitVacuumerJPEG<OutputIterator>,
-                         BitStreamCacheRightInLeftOut, OutputIterator> {
-  using Base = BitVacuumer<BitVacuumerJPEG<OutputIterator>,
-                           BitStreamCacheRightInLeftOut, OutputIterator>;
+    : public BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator> {
+  using Base = BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator>;
+  using StreamTraits = typename Base::StreamTraits;
 
   friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
   inline void drainImpl() {
     invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
+    invariant(Base::chunk_bitwidth == 32);
 
-    typename Base::chunk_type chunk = Base::cache.peek(Base::chunk_bitwidth);
-    chunk = getBE<typename Base::chunk_type>(&chunk);
-    Base::cache.skip(Base::chunk_bitwidth);
+    constexpr int StreamChunkBitwidth =
+        bitwidth<typename StreamTraits::ChunkType>();
+    static_assert(Base::chunk_bitwidth >= StreamChunkBitwidth);
+    static_assert(Base::chunk_bitwidth % StreamChunkBitwidth == 0);
+    constexpr int NumChunksNeeded = Base::chunk_bitwidth / StreamChunkBitwidth;
+    static_assert(NumChunksNeeded == 1);
+
+    auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
+        Base::cache.peek(StreamChunkBitwidth));
+    chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+        &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
+    Base::cache.skip(StreamChunkBitwidth);
 
     const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
     for (const auto byte : bytes) {

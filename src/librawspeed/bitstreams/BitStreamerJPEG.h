@@ -20,9 +20,12 @@
 
 #pragma once
 
+#include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
+#include "adt/Bit.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamJPEG.h"
 #include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
 #include <algorithm>
@@ -63,6 +66,8 @@ public:
 class BitStreamerJPEG;
 
 template <> struct BitStreamerTraits<BitStreamerJPEG> final {
+  using Stream = BitStreamJPEG;
+
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
   // How many bytes can we read from the input per each fillCache(), at most?
@@ -74,9 +79,8 @@ template <> struct BitStreamerTraits<BitStreamerJPEG> final {
 
 // The JPEG data is ordered in MSB bit order,
 // i.e. we push into the cache from the right and read it from the left
-class BitStreamerJPEG final
-    : public BitStreamer<BitStreamerJPEG, BitStreamCacheRightInLeftOut> {
-  using Base = BitStreamer<BitStreamerJPEG, BitStreamCacheRightInLeftOut>;
+class BitStreamerJPEG final : public BitStreamer<BitStreamerJPEG> {
+  using Base = BitStreamer<BitStreamerJPEG>;
 
   PosOrUnknown<size_type> endOfStreamPos;
 
@@ -99,16 +103,22 @@ inline BitStreamerJPEG::size_type
 BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
-  invariant(input.size() ==
-            BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes);
+  invariant(input.size() == Traits::MaxProcessBytes);
 
-  std::array<uint8_t, BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes>
-      prefetch;
+  constexpr int StreamChunkBitwidth =
+      bitwidth<typename StreamTraits::ChunkType>();
+
+  std::array<uint8_t, Traits::MaxProcessBytes> prefetch;
   std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
               prefetch.begin());
 
   auto speculativeOptimisticCache = cache;
-  speculativeOptimisticCache.push(getBE<uint32_t>(prefetch.data()), 32);
+  auto speculativeOptimisticChunk =
+      getByteSwapped<typename StreamTraits::ChunkType>(
+          prefetch.data(),
+          StreamTraits::ChunkEndianness != getHostEndianness());
+  speculativeOptimisticCache.push(speculativeOptimisticChunk,
+                                  StreamChunkBitwidth);
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.

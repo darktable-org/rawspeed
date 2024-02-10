@@ -1,7 +1,9 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2024 Roman Lebedev
+    Copyright (C) 2009-2014 Klaus Post
+    Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2017-2021 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,25 +22,20 @@
 
 #pragma once
 
-#include "bitstreams/BitStreamMSB.h"
-#include "bitstreams/BitVacuumer.h"
+#include "bitstreams/BitStream.h"
+#include "io/Endianness.h"
+#include <cstdint>
 
 namespace rawspeed {
 
-template <typename OutputIterator> class BitVacuumerMSB;
+class BitStreamJPEG;
 
-template <typename OutputIterator>
-struct BitVacuumerTraits<BitVacuumerMSB<OutputIterator>> final {
-  using Stream = BitStreamMSB;
-};
+template <> struct BitStreamTraits<BitStreamJPEG> final {
+  using StreamFlow = BitStreamCacheRightInLeftOut;
 
-template <typename OutputIterator>
-class BitVacuumerMSB final
-    : public BitVacuumer<BitVacuumerMSB<OutputIterator>, OutputIterator> {
-  using Base = BitVacuumer<BitVacuumerMSB<OutputIterator>, OutputIterator>;
+  using ChunkType = uint32_t;
 
-public:
-  using Base::Base;
+  static constexpr Endianness ChunkEndianness = Endianness::big;
 };
 
 } // namespace rawspeed

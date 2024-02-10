@@ -20,36 +20,22 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h"
-#include "adt/Invariant.h"
-#include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamMSB32.h"
 #include "bitstreams/BitVacuumer.h"
-#include "io/Endianness.h"
-#include <cstddef>
-#include <cstdint>
 
 namespace rawspeed {
 
+template <typename OutputIterator> class BitVacuumerMSB32;
+
+template <typename OutputIterator>
+struct BitVacuumerTraits<BitVacuumerMSB32<OutputIterator>> final {
+  using Stream = BitStreamMSB32;
+};
+
 template <typename OutputIterator>
 class BitVacuumerMSB32 final
-    : public BitVacuumer<BitVacuumerMSB32<OutputIterator>,
-                         BitStreamCacheRightInLeftOut, OutputIterator> {
-  using Base = BitVacuumer<BitVacuumerMSB32<OutputIterator>,
-                           BitStreamCacheRightInLeftOut, OutputIterator>;
-
-  friend void Base::drain(); // Allow it to actually call `drainImpl()`.
-
-  inline void drainImpl() {
-    invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
-
-    typename Base::chunk_type chunk = Base::cache.peek(Base::chunk_bitwidth);
-    chunk = getLE<typename Base::chunk_type>(&chunk);
-    Base::cache.skip(Base::chunk_bitwidth);
-
-    const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-    for (const auto byte : bytes)
-      *Base::output = static_cast<uint8_t>(byte);
-  }
+    : public BitVacuumer<BitVacuumerMSB32<OutputIterator>, OutputIterator> {
+  using Base = BitVacuumer<BitVacuumerMSB32<OutputIterator>, OutputIterator>;
 
 public:
   using Base::Base;
