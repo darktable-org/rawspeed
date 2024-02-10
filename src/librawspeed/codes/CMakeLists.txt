@@ -4,6 +4,7 @@ set_target_properties(rawspeed_codes PROPERTIES LINKER_LANGUAGE CXX)
 FILE(GLOB SOURCES
   "AbstractPrefixCode.h"
   "AbstractPrefixCodeDecoder.h"
+  "AbstractPrefixCodeTranscoder.h"
   "BinaryPrefixTree.h"
   "DummyPrefixCodeDecoder.h"
   "HuffmanCode.h"
