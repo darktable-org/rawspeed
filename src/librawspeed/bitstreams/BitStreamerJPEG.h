@@ -84,7 +84,7 @@ class BitStreamerJPEG final : public BitStreamer<BitStreamerJPEG> {
 
   PosOrUnknown<size_type> endOfStreamPos;
 
-  friend void Base::fill(int); // Allow it to call our `fillCache()`.
+  friend void Base::fill(int nbits); // Allow it to call our `fillCache()`.
 
   size_type fillCache(Array1DRef<const uint8_t> input);
 
