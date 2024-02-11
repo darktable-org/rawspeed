@@ -1,0 +1,108 @@
+on:
+  workflow_call:
+    inputs:
+      distro:
+        required: true
+        type: string
+    outputs:
+      rpuu-cache-key:
+        value: ${{ jobs.linux.outputs.rpuu-cache-key }}
+
+env:
+  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    name: Cache RPU masterset
+    timeout-minutes: 3
+    container:
+      image: ${{ inputs.distro }}
+      options: --tmpfs /tmp:exec
+    steps:
+      - name: Configure APT
+        timeout-minutes: 1
+        run: |
+          set -xe
+          tee /etc/dpkg/dpkg.cfg.d/force-unsafe-io > /dev/null <<EOT
+          force-unsafe-io
+          EOT
+          tee /etc/apt/apt.conf.d/tmpfs > /dev/null <<EOT
+          Dir::Cache::Archives "/tmp/apt/archives";
+          APT::ExtractTemplates::TempDir "/tmp/apt/temp";
+          EOT
+          mkdir -p /tmp/apt/archives
+          tee /etc/apt/apt.conf.d/80retry > /dev/null <<EOT
+          Acquire::Retries "10";
+          EOT
+          tee /etc/apt/apt.conf.d/80recommends > /dev/null <<EOT
+          APT::Install-Recommends "false";
+          EOT
+          tee /etc/apt/apt.conf.d/80suggests > /dev/null <<EOT
+          APT::Install-Suggests "false";
+          EOT
+          tee /etc/apt/apt.conf.d/80forceyes > /dev/null <<EOT
+          APT::Get::Assume-Yes "true";
+          EOT
+          tee /etc/apt/apt.conf.d/80fixmissing > /dev/null <<EOT
+          APT::Get::Fix-Missing "true";
+          EOT
+          rm -rf /etc/apt/sources.list*
+          if [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://debian-archive.trafficmanager.net/debian trixie main
+          deb http://debian-archive.trafficmanager.net/debian trixie-updates main
+          deb http://debian-archive.trafficmanager.net/debian-security trixie-security main
+          deb http://debian-archive.trafficmanager.net/debian trixie-backports main
+          EOT
+          fi
+      - name: Update base packages
+        timeout-minutes: 1
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          COMPILER_FAMILY: ${{ inputs.compiler-family }}
+          FLAVOR: ${{ inputs.flavor }}
+        run: |
+          set -xe
+          rm -rf /var/lib/apt/lists/*
+          apt-get update
+          apt-get install eatmydata
+          eatmydata apt-get upgrade
+      - name: Install necessary packages
+        timeout-minutes: 1
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          COMPILER_FAMILY: ${{ inputs.compiler-family }}
+          FLAVOR: ${{ inputs.flavor }}
+        run: |
+          set -xe
+          eatmydata apt-get install rsync zstd
+      - name: Fetch raw.pixls.us masterset digest
+        timeout-minutes: 1
+        env:
+          RPUU_DST: ${{ env.RPUU_DST }}
+        id: fetch-rpuu-digest
+        run: |
+          set -xe
+          mkdir -p ${RPUU_DST}
+          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/
+          echo "rpuu-cache-key=raw.pixls.us-masterset-$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')" >> $GITHUB_OUTPUT
+      - name: Cache raw.pixls.us masterset
+        timeout-minutes: 1
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.RPUU_DST }}
+          key: ${{ steps.fetch-rpuu-digest.outputs.rpuu-cache-key }}
+          lookup-only: true
+      - name: Fetch/update raw.pixls.us masterset
+        timeout-minutes: 3
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          RPUU_DST: ${{ env.RPUU_DST }}
+        run: |
+          set -xe
+          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ ${RPUU_DST}/
+          cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1
+    outputs:
+      rpuu-cache-key: ${{ steps.fetch-rpuu-digest.outputs.rpuu-cache-key }}
