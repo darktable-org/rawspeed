@@ -69,6 +69,9 @@ jobs:
             flavor: ClangStaticAnalysis
           - os: linux
             compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+            flavor: ClangCTUStaticAnalysis
+          - os: linux
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
             flavor: CodeQLAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:

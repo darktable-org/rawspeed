@@ -20,7 +20,7 @@ case "$FLAVOR" in
   "Release")
     CMAKE_BUILD_TYPE="Release"
     ;;
-  "ReleaseWithAsserts" | "ClangTidy" | "ClangStaticAnalysis" | "CodeQLAnalysis" | "SonarCloudStaticAnalysis")
+  "ReleaseWithAsserts" | "ClangTidy" | "ClangStaticAnalysis" | "ClangCTUStaticAnalysis" | "CodeQLAnalysis" | "SonarCloudStaticAnalysis")
     CMAKE_BUILD_TYPE="ReleaseWithAsserts"
     ;;
   "Coverage")
