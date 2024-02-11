@@ -143,7 +143,7 @@ jobs:
             apt-get update
             eatmydata apt-get install rawspeed-clang-tidy-module
           fi
-          if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
+          if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
             eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
                                       curl \
                                       libxml2-dev \
@@ -162,7 +162,7 @@ jobs:
           fi
           eatmydata apt-get clean
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
-          if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
+          if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
             ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/clang
             ln -s /usr/bin/${{ inputs.compiler-CXX }} /usr/local/bin/clang++
             ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/gcc
@@ -211,7 +211,7 @@ jobs:
           cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1
       - name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
         timeout-minutes: 1
-        if: inputs.flavor == 'ClangStaticAnalysis'
+        if: inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'ClangCTUStaticAnalysis'
         uses: actions/checkout@v4
         with:
           repository: 'Ericsson/codechecker'
@@ -219,7 +219,7 @@ jobs:
           fetch-depth: '1'
       - name: Install CodeChecker (for clang static analysis)
         timeout-minutes: 1
-        if: inputs.flavor == 'ClangStaticAnalysis'
+        if: inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'ClangCTUStaticAnalysis'
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -425,7 +425,7 @@ jobs:
           path: ${{ github.workspace }}/codechecker_report.tar.xz
       - name: Perform clang static analysis (CTU mode)
         timeout-minutes: 25
-        if: inputs.flavor == 'ClangStaticAnalysis'
+        if: inputs.flavor == 'ClangCTUStaticAnalysis'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
