@@ -39,12 +39,23 @@ public:
   using Base::Base;
 
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    if (fullDecode_)
-      ThrowRSE("We don't currently support full encoding");
     if (fixDNGBug16_)
       ThrowRSE("We don't support handling DNG 1.0 LJpeg bug here");
 
     Base::setup(fullDecode_, fixDNGBug16_);
+  }
+
+  inline static std::pair<uint32_t, uint8_t>
+      RAWSPEED_READNONE reduce(int32_t extendedDiff) {
+    if (extendedDiff >= 0) {
+      auto diff = static_cast<uint32_t>(extendedDiff);
+      return {diff, numActiveBits(diff)};
+    }
+    --extendedDiff;
+    auto diff = static_cast<uint32_t>(extendedDiff);
+    int len = numSignificantBits(diff) - 1;
+    diff = extractLowBitsSafe(diff, len);
+    return {diff, len};
   }
 };
 

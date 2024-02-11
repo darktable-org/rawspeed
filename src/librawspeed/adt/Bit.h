@@ -52,6 +52,25 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
   return CHAR_BIT * sizeof(T);
 }
 
+template <class T>
+  requires std::unsigned_integral<T>
+unsigned numSignBits(const T v) {
+  using SignedT = std::make_signed_t<T>;
+  return static_cast<SignedT>(v) < 0 ? std::countl_one(v) : std::countl_zero(v);
+}
+
+template <class T>
+  requires std::unsigned_integral<T>
+unsigned numActiveBits(const T v) {
+  return bitwidth(v) - std::countl_zero(v);
+}
+
+template <class T>
+  requires std::unsigned_integral<T>
+unsigned numSignificantBits(const T v) {
+  return bitwidth(v) - numSignBits(v) + 1;
+}
+
 // Clamps the given value to the range 0 .. 2^n-1, with n <= 16
 template <typename T>
   requires std::is_arithmetic_v<T>
