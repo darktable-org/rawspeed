@@ -2,22 +2,14 @@
 if(NOT CMAKE_BUILD_TYPE)
   message(WARNING "CMAKE_BUILD_TYPE is not defined!")
 
-  set(default_build_type "RelWithDebInfo")
-
-  if(BUILD_TESTING)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      set(default_build_type "Coverage")
-    else()
-      set(default_build_type "Sanitize")
-    endif()
-  endif()
+  set(default_build_type "ReleaseWithAsserts")
 
   message("WARNING: Defaulting to CMAKE_BUILD_TYPE=${default_build_type}. Use ccmake to set a proper value.")
 
   SET(CMAKE_BUILD_TYPE ${default_build_type} CACHE STRING "" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-set(RAWSPEED_STANDARD_BUILD_TYPES Debug RelWithDebInfo Release)
+set(RAWSPEED_STANDARD_BUILD_TYPES Debug ReleaseWithAsserts Release)
 set(RAWSPEED_SPECIAL_BUILD_TYPES Coverage Sanitize TSan Fuzz)
 set(CMAKE_CONFIGURATION_TYPES ${RAWSPEED_STANDARD_BUILD_TYPES} ${RAWSPEED_SPECIAL_BUILD_TYPES} CACHE STRING "All the available build types" FORCE)
 
