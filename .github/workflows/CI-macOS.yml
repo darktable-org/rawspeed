@@ -73,9 +73,6 @@ jobs:
           TARGET: configure
         run: |
           set -xe
-          if [[ "$MACOSX_DEPLOYMENT_TARGET" == "10.7" ]]; then
-            export CXXFLAGS="$CXXFLAGS -stdlib=libc++"
-          fi
           cmake -E make_directory "${BUILD_DIR}"
           cmake -E make_directory "${INSTALL_PREFIX}"
           "${SRC_DIR}/.ci/ci-script.sh"
