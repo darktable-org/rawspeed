@@ -14,7 +14,18 @@ concurrency:
 # FIXME: add no-openmp, and maybe -DCMAKE_BUILD_TYPE=Debug jobs
 
 jobs:
+  cache-rpuu:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            distro: "debian:trixie-slim"
+    uses: ./.github/workflows/CI-rpuu.yml
+    with:
+      distro: ${{ matrix.distro }}
   linux-fast:
+    needs: cache-rpuu
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +45,8 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
+      enable-sample-based-testing: true
+      rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
   linux-legacy:
     strategy:
       fail-fast: false
@@ -85,6 +98,7 @@ jobs:
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
   linux-coverage:
+    needs: cache-rpuu
     strategy:
       fail-fast: false
       matrix:
@@ -103,6 +117,8 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
+      enable-sample-based-testing: true
+      rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
   linux-sonarcloud-static-analysis:
     if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
     strategy:

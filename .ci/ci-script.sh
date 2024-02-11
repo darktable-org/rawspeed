@@ -80,7 +80,9 @@ target_test_benchmarks()
 
 target_test_integration()
 {
-  cmake --build "$BUILD_DIR" --target gcov-clean
+  if [ "$FLAVOR" = "Coverage" ]; then
+    cmake --build "$BUILD_DIR" --target gcov-clean
+  fi
   cmake --build "$BUILD_DIR" --target rstest-check
 }
 
