@@ -95,6 +95,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: build
         run: |
           set -xe
@@ -105,6 +106,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test
         run: |
           set -xe
@@ -117,6 +119,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage
         run: |
           set -xe
@@ -129,6 +132,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test_benchmarks
         run: |
           set -xe
@@ -141,6 +145,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage_benchmarks
         run: |
           set -xe
@@ -161,6 +166,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: install
         run: |
           set -xe
