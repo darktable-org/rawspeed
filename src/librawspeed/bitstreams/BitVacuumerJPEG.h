@@ -35,6 +35,8 @@ template <typename OutputIterator> class BitVacuumerJPEG;
 template <typename OutputIterator>
 struct BitVacuumerTraits<BitVacuumerJPEG<OutputIterator>> final {
   using Stream = BitStreamJPEG;
+
+  static constexpr bool canUseWithPrefixCodeEncoder = true;
 };
 
 template <typename OutputIterator>

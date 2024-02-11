@@ -85,6 +85,7 @@ protected:
 
 public:
   [[nodiscard]] bool isFullDecode() const { return fullDecode; }
+  [[nodiscard]] bool handleDNGBug16() const { return fixDNGBug16; }
 
   bool operator==(const AbstractPrefixCodeTranscoder& other) const {
     return code.symbols == other.code.symbols &&
