@@ -32,7 +32,7 @@ jobs:
         os: [ linux ]
         compiler:
           - { distro: "debian:trixie-slim", family: GNU,  version: 13, CC: gcc-13,   CXX: g++-13 }
-          - { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+          - { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17, CodeQLAnalysis: true }
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -47,6 +47,7 @@ jobs:
       flavor: ${{ matrix.flavor }}
       enable-sample-based-testing: true
       rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
+      CodeQLAnalysis: ${{ matrix.compiler.CodeQLAnalysis != '' && matrix.compiler.CodeQLAnalysis || false }}
   linux-legacy:
     strategy:
       fail-fast: false
@@ -83,9 +84,6 @@ jobs:
           - os: linux
             compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
             flavor: ClangCTUStaticAnalysis
-          - os: linux
-            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
-            flavor: CodeQLAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
