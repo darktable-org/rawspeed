@@ -1,25 +1,29 @@
-# Download and unpack googlebenchmark at configure time
 set(GOOGLEBENCHMARK_PREFIX "${RAWSPEED_BINARY_DIR}/src/external/googlebenchmark")
-configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in ${GOOGLEBENCHMARK_PREFIX}/CMakeLists.txt @ONLY)
 
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
-  -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=${ALLOW_DOWNLOADING_GOOGLEBENCHMARK} -DGOOGLEBENCHMARK_PATH:PATH=${GOOGLEBENCHMARK_PATH} .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${GOOGLEBENCHMARK_PREFIX}
-)
+if(NOT EXISTS ${GOOGLEBENCHMARK_PREFIX}/googlebenchmark-paths.cmake OR
+   ${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in IS_NEWER_THAN ${GOOGLEBENCHMARK_PREFIX}/googlebenchmark-paths.cmake)
+  # Download and unpack googlebenchmark at configure time
+  configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleBenchmark.cmake.in ${GOOGLEBENCHMARK_PREFIX}/CMakeLists.txt @ONLY)
 
-if(result)
-  message(FATAL_ERROR "CMake step for googlebenchmark failed: ${result}")
-endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
+    -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=${ALLOW_DOWNLOADING_GOOGLEBENCHMARK} -DGOOGLEBENCHMARK_PATH:PATH=${GOOGLEBENCHMARK_PATH} .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${GOOGLEBENCHMARK_PREFIX}
+  )
 
-execute_process(
-  COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${GOOGLEBENCHMARK_PREFIX}
-)
+  if(result)
+    message(FATAL_ERROR "CMake step for googlebenchmark failed: ${result}")
+  endif()
 
-if(result)
-  message(FATAL_ERROR "Build step for googlebenchmark failed: ${result}")
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${GOOGLEBENCHMARK_PREFIX}
+  )
+
+  if(result)
+    message(FATAL_ERROR "Build step for googlebenchmark failed: ${result}")
+  endif()
 endif()
 
 # shared googlebenchmark exibits various spurious failures.
