@@ -33,6 +33,8 @@ class BitStreamLSB;
 template <> struct BitStreamTraits<BitStreamLSB> final {
   using StreamFlow = BitStreamCacheLeftInRightOut;
 
+  static constexpr bool FixedSizeChunks = true;
+
   using ChunkType = uint32_t;
 
   static constexpr Endianness ChunkEndianness = Endianness::little;

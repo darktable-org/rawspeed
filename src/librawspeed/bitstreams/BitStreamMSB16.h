@@ -33,6 +33,8 @@ class BitStreamMSB16;
 template <> struct BitStreamTraits<BitStreamMSB16> final {
   using StreamFlow = BitStreamCacheRightInLeftOut;
 
+  static constexpr bool FixedSizeChunks = true;
+
   using ChunkType = uint16_t;
 
   static constexpr Endianness ChunkEndianness = Endianness::little;
