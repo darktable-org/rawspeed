@@ -29,7 +29,7 @@ if(BUILD_TESTING)
   target_include_directories(MD5Test PRIVATE "${RAWSPEED_BINARY_DIR}/src")
   target_include_directories(MD5Test PRIVATE "${RAWSPEED_SOURCE_DIR}/src/librawspeed")
   target_link_libraries(MD5Test gtest_main)
-  rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test)
   set_tests_properties(utilities/rstest/md5 PROPERTIES LABELS "unittest")
   add_dependencies(tests MD5Test)
 
