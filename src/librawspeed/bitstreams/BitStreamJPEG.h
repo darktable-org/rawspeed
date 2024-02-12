@@ -33,6 +33,8 @@ class BitStreamJPEG;
 template <> struct BitStreamTraits<BitStreamJPEG> final {
   using StreamFlow = BitStreamCacheRightInLeftOut;
 
+  static constexpr bool FixedSizeChunks = false; // Stuffing byte...
+
   using ChunkType = uint32_t;
 
   static constexpr Endianness ChunkEndianness = Endianness::big;
