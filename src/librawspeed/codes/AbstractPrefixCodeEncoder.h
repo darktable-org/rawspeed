@@ -20,27 +20,32 @@
 
 #pragma once
 
-#include "bitstreams/BitStreamMSB.h"
-#include "bitstreams/BitVacuumer.h"
+#include "rawspeedconfig.h"
+#include "adt/Invariant.h"
+#include "codes/AbstractPrefixCodeTranscoder.h"
 
 namespace rawspeed {
 
-template <typename OutputIterator> class BitVacuumerMSB;
-
-template <typename OutputIterator>
-struct BitVacuumerTraits<BitVacuumerMSB<OutputIterator>> final {
-  using Stream = BitStreamMSB;
-
-  static constexpr bool canUseWithPrefixCodeEncoder = true;
-};
-
-template <typename OutputIterator>
-class BitVacuumerMSB final
-    : public BitVacuumer<BitVacuumerMSB<OutputIterator>, OutputIterator> {
-  using Base = BitVacuumer<BitVacuumerMSB<OutputIterator>, OutputIterator>;
-
+template <typename CodeTag>
+class AbstractPrefixCodeEncoder : public AbstractPrefixCodeTranscoder<CodeTag> {
 public:
+  using Base = AbstractPrefixCodeTranscoder<CodeTag>;
+
+  using Tag = typename Base::Tag;
+  using Parent = typename Base::Parent;
+  using CodeSymbol = typename Base::CodeSymbol;
+  using Traits = typename Base::Traits;
+
   using Base::Base;
+
+  void setup(bool fullDecode_, bool fixDNGBug16_) {
+    if (fullDecode_)
+      ThrowRSE("We don't currently support full encoding");
+    if (fixDNGBug16_)
+      ThrowRSE("We don't support handling DNG 1.0 LJpeg bug here");
+
+    Base::setup(fullDecode_, fixDNGBug16_);
+  }
 };
 
 } // namespace rawspeed
