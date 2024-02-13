@@ -39,9 +39,6 @@ public:
   using Base::Base;
 
   void setup(bool fullDecode_, bool fixDNGBug16_) {
-    if (fixDNGBug16_)
-      ThrowRSE("We don't support handling DNG 1.0 LJpeg bug here");
-
     Base::setup(fullDecode_, fixDNGBug16_);
   }
 

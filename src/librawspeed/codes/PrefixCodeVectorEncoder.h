@@ -83,7 +83,7 @@ public:
     auto [diff, diffLen] = Base::reduce(value);
     int codeIndex = getCodeIndexOfCodeValue(diffLen);
     encodeCodeValueImpl(bv, codeIndex);
-    if (diffLen != 16)
+    if (diffLen != 16 || Base::handleDNGBug16())
       bv.put(diff, diffLen);
   }
 
