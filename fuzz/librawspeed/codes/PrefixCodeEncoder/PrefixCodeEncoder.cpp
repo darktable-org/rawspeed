@@ -173,10 +173,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     case 0:
       checkFlavour<BaselineCodeTag>(bs);
       break;
-      // FIXME:
-      //    case 1:
-      //      checkFlavour<VC5CodeTag>(bs);
-      //      break;
+    case 1:
+      checkFlavour<VC5CodeTag>(bs);
+      break;
     default:
       ThrowRSE("Unknown flavor");
     }
