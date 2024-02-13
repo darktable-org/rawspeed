@@ -29,6 +29,7 @@
 #include "bitstreams/BitVacuumerMSB32.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "codes/PrefixCodeDecoder/Common.h"
+#include "codes/PrefixCodeTreeDecoder.h"
 #include "codes/PrefixCodeVectorDecoder.h"
 #include "codes/PrefixCodeVectorEncoder.h"
 #include "common/RawspeedException.h"
@@ -165,13 +166,35 @@ template <typename CodeTag> void checkFlavour(ByteStream bs) {
   const auto decoderImpl = bs.getByte();
   switch (decoderImpl) {
   case 0:
-    checkDecoder<
-        PrefixCodeLUTDecoder<CodeTag, PrefixCodeLookupDecoder<CodeTag>>>(bs);
+    checkDecoder<PrefixCodeTreeDecoder<CodeTag>>(bs);
     break;
   case 1:
-    checkDecoder<
-        PrefixCodeLUTDecoder<CodeTag, PrefixCodeVectorDecoder<CodeTag>>>(bs);
+    checkDecoder<PrefixCodeVectorDecoder<CodeTag>>(bs);
     break;
+  case 2:
+    checkDecoder<PrefixCodeLookupDecoder<CodeTag>>(bs);
+    break;
+  case 3: {
+    // Which backing decoder implementation should we use?
+    const auto backingDecoderImpl = bs.getByte();
+    switch (backingDecoderImpl) {
+    case 0:
+      checkDecoder<
+          PrefixCodeLUTDecoder<CodeTag, PrefixCodeTreeDecoder<CodeTag>>>(bs);
+      break;
+    case 1:
+      checkDecoder<
+          PrefixCodeLUTDecoder<CodeTag, PrefixCodeVectorDecoder<CodeTag>>>(bs);
+      break;
+    case 2:
+      checkDecoder<
+          PrefixCodeLUTDecoder<CodeTag, PrefixCodeLookupDecoder<CodeTag>>>(bs);
+      break;
+    default:
+      ThrowRSE("Unknown decoder");
+    }
+    break;
+  }
   default:
     ThrowRSE("Unknown decoder");
   }
