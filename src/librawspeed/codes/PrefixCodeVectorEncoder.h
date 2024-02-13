@@ -36,17 +36,6 @@ public:
   using Base::Base;
 
 private:
-  [[nodiscard]] int getCodeIndexOfCodeValue(const int value) const {
-    for (int codeIndex = 0;
-         codeIndex != implicit_cast<int>(Base::code.codeValues.size());
-         ++codeIndex) {
-      const auto& codeValue = Base::code.codeValues[codeIndex];
-      if (codeValue == value)
-        return codeIndex;
-    }
-    __builtin_unreachable();
-  }
-
   template <typename BIT_VACUUMER>
   inline void encodeCodeValueImpl(BIT_VACUUMER& bv, int codeIndex) const {
     static_assert(
@@ -57,6 +46,17 @@ private:
     invariant(codeIndex < numCodeSymbols);
     const typename Base::CodeSymbol& symbol = Base::code.symbols[codeIndex];
     bv.put(symbol.code, symbol.code_len);
+  }
+
+  [[nodiscard]] int getCodeIndexOfCodeValue(const int value) const {
+    for (int codeIndex = 0;
+         codeIndex != implicit_cast<int>(Base::code.codeValues.size());
+         ++codeIndex) {
+      const auto& codeValue = Base::code.codeValues[codeIndex];
+      if (codeValue == value)
+        return codeIndex;
+    }
+    __builtin_unreachable();
   }
 
 public:
@@ -80,7 +80,11 @@ public:
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
     invariant(Base::fullDecode);
-    __builtin_unreachable();
+    auto [diff, diffLen] = Base::reduce(value);
+    int codeIndex = getCodeIndexOfCodeValue(diffLen);
+    encodeCodeValueImpl(bv, codeIndex);
+    if (diffLen != 16 || Base::handleDNGBug16())
+      bv.put(diff, diffLen);
   }
 
   template <typename BIT_VACUUMER, bool FULL_DECODE>
