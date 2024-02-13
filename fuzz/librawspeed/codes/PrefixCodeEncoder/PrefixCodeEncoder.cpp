@@ -29,6 +29,7 @@
 #include "bitstreams/BitVacuumerMSB32.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "codes/PrefixCodeDecoder/Common.h"
+#include "codes/PrefixCodeVectorDecoder.h"
 #include "codes/PrefixCodeVectorEncoder.h"
 #include "common/RawspeedException.h"
 #include "io/Buffer.h"
@@ -138,9 +139,8 @@ void checkPump(Array1DRef<const uint8_t> input, const HT& ht) {
     workloop<flavor, /*IsFullDecode=*/false>(input, ht);
 }
 
-template <typename CodeTag> void checkFlavour(ByteStream bs) {
-  // FIXME:
-  const auto ht = createPrefixCodeDecoder<PrefixCodeDecoder<CodeTag>>(bs);
+template <typename HT> void checkDecoder(ByteStream bs) {
+  const auto ht = createPrefixCodeDecoder<HT>(bs);
 
   // Which bit stream flavor should we use?
   const auto flavor = bs.getByte();
@@ -157,6 +157,23 @@ template <typename CodeTag> void checkFlavour(ByteStream bs) {
     break;
   default:
     ThrowRSE("Unknown bit pump");
+  }
+}
+
+template <typename CodeTag> void checkFlavour(ByteStream bs) {
+  // Which decoder implementation should we use?
+  const auto decoderImpl = bs.getByte();
+  switch (decoderImpl) {
+  case 0:
+    checkDecoder<
+        PrefixCodeLUTDecoder<CodeTag, PrefixCodeLookupDecoder<CodeTag>>>(bs);
+    break;
+  case 1:
+    checkDecoder<
+        PrefixCodeLUTDecoder<CodeTag, PrefixCodeVectorDecoder<CodeTag>>>(bs);
+    break;
+  default:
+    ThrowRSE("Unknown decoder");
   }
 }
 
