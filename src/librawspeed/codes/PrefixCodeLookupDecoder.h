@@ -22,11 +22,11 @@
 #pragma once
 
 #include "adt/Invariant.h"
+#include "bitstreams/BitStreamer.h"
 #include "codes/AbstractPrefixCodeDecoder.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
 #include "decoders/RawDecoderException.h"
-#include "io/BitStreamer.h"
 #include <cassert>
 #include <cstdint>
 #include <limits>

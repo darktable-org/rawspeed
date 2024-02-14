@@ -20,9 +20,9 @@
 
 #pragma once
 
+#include "bitstreams/BitStreamerMSB.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitStreamerMSB.h"
 #include <cstdint>
 
 namespace rawspeed {

@@ -21,10 +21,10 @@
 #pragma once
 
 #include "adt/Bit.h"
+#include "bitstreams/BitStreamerMSB.h"
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitStreamerMSB.h"
 #include <algorithm>
 #include <array>
 #include <cstddef>

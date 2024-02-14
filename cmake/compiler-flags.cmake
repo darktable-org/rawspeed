@@ -12,10 +12,14 @@ set(CMAKE_CXX_MODULE_MAP_FORMAT "")
 include(debug-info)
 
 if(RAWSPEED_RELEASE_BUILD)
-  # want assertions in all but Release build type.
+  # No assertions in Release build type.
   add_definitions(-DNDEBUG)
-elseif(NOT (RAWSPEED_RELWITHDEBINFO_BUILD OR RAWSPEED_FUZZ_BUILD))
-  # if not Release/RelWithDebInfo/Fuzz build, enable extra debug mode
+elseif(RAWSPEED_RELEASEWITHASSERTS_BUILD)
+  # Assertions in ReleaseWithAsserts build type.
+  add_definitions(-UNDEBUG)
+elseif(NOT (RAWSPEED_FUZZ_BUILD))
+  # if not Release/ReleaseWithAsserts/Fuzz build, enable extra debug mode
+  add_definitions(-UNDEBUG)
   add_definitions(-DDEBUG)
 
   # all this does not work with integer sanitizer
@@ -210,8 +214,8 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_TSAN
     CMAKE_SHARED_MODULE_FLAGS_TSAN )
 
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
+set(CMAKE_C_FLAGS_RELEASEWITHASSERTS "${CMAKE_C_FLAGS_RELEASEWITHASSERTS} -O3")
+set(CMAKE_CXX_FLAGS_RELEASEWITHASSERTS "${CMAKE_CXX_FLAGS_RELEASEWITHASSERTS} -O3")
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")

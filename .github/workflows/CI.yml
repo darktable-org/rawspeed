@@ -14,7 +14,18 @@ concurrency:
 # FIXME: add no-openmp, and maybe -DCMAKE_BUILD_TYPE=Debug jobs
 
 jobs:
+  cache-rpuu:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            distro: "debian:bookworm-slim"
+    uses: ./.github/workflows/CI-rpuu.yml
+    with:
+      distro: ${{ matrix.distro }}
   linux-fast:
+    needs: cache-rpuu
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +33,7 @@ jobs:
         compiler:
           - { distro: "debian:trixie-slim", family: GNU,  version: 13, CC: gcc-13,   CXX: g++-13 }
           - { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
-        flavor: [ RelWithDebInfo, Release ]
+        flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -34,6 +45,8 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
+      enable-sample-based-testing: true
+      rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
   linux-legacy:
     strategy:
       fail-fast: false
@@ -41,10 +54,10 @@ jobs:
         os: [ linux ]
         compiler:
           - { distro: "debian:bookworm-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
-          - { distro: "debian:trixie-slim",   family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
+          - { distro: "debian:bookworm-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
           - { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
           - { distro: "debian:bookworm-slim", family: LLVM, version: 14, CC: clang-14, CXX: clang++-14 }
-        flavor: [ RelWithDebInfo, Release ]
+        flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
       os: ${{ matrix.os }}
@@ -69,6 +82,9 @@ jobs:
             flavor: ClangStaticAnalysis
           - os: linux
             compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+            flavor: ClangCTUStaticAnalysis
+          - os: linux
+            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
             flavor: CodeQLAnalysis
     uses: ./.github/workflows/CI-linux.yml
     with:
@@ -82,6 +98,7 @@ jobs:
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
   linux-coverage:
+    needs: cache-rpuu
     strategy:
       fail-fast: false
       matrix:
@@ -100,6 +117,8 @@ jobs:
       compiler-GCOV: ${{ matrix.compiler.GCOV }}
       compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
       flavor: ${{ matrix.flavor }}
+      enable-sample-based-testing: true
+      rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
   linux-sonarcloud-static-analysis:
     if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
     strategy:
@@ -144,7 +163,7 @@ jobs:
           - { msystem: CLANG64,    arch: x86_64,  family: LLVM, CC: clang, CXX: clang++ }
           - { msystem: CLANG32,    arch: i686,    family: LLVM, CC: clang, CXX: clang++ }
           - { msystem: UCRT64,     arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
-        flavor: [ RelWithDebInfo, Release ]
+        flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
       os: ${{ matrix.os }}
@@ -178,7 +197,7 @@ jobs:
         compiler:
           - { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # LLVM16, native
           - { os: macos-12, family: XCode, version: 14.2, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM14, native
-        flavor: [ RelWithDebInfo, Release ]
+        flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
       os: ${{ matrix.compiler.os }}
@@ -196,7 +215,7 @@ jobs:
           - { os: macos-14, family: XCode, version: 15.2, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM16, "backdeploy"
           - { os: macos-14, family: XCode, version: 14.3, deployment_target: 13.0, CC: cc, CXX: c++ } # LLVM15, native
           # - { os: macos-14, family: XCode, version: 14.3, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM15, "backdeploy"
-        flavor: [ RelWithDebInfo, Release ]
+        flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
       os: ${{ matrix.compiler.os }}

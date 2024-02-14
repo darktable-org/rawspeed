@@ -23,74 +23,21 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
-#include "codes/AbstractPrefixCode.h"
-#include "codes/PrefixCode.h"
-#include "decoders/RawDecoderException.h"
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
+#include "codes/AbstractPrefixCodeTranscoder.h"
 
 namespace rawspeed {
 
-template <typename CodeTag> class AbstractPrefixCodeDecoder {
+template <typename CodeTag>
+class AbstractPrefixCodeDecoder : public AbstractPrefixCodeTranscoder<CodeTag> {
 public:
-  using Tag = CodeTag;
-  using Parent = AbstractPrefixCode<CodeTag>;
-  using CodeSymbol = typename AbstractPrefixCode<CodeTag>::CodeSymbol;
-  using Traits = typename AbstractPrefixCode<CodeTag>::Traits;
+  using Base = AbstractPrefixCodeTranscoder<CodeTag>;
 
-  PrefixCode<CodeTag> code;
+  using Tag = typename Base::Tag;
+  using Parent = typename Base::Parent;
+  using CodeSymbol = typename Base::CodeSymbol;
+  using Traits = typename Base::Traits;
 
-  explicit AbstractPrefixCodeDecoder(PrefixCode<CodeTag> code_)
-      : code(std::move(code_)) {}
-
-  void verifyCodeValuesAsDiffLengths() const {
-    for (const auto cValue : code.Base::codeValues) {
-      if (cValue <= Traits::MaxDiffLength)
-        continue;
-      ThrowRDE("Corrupt Huffman code: difference length %u longer than %u",
-               cValue, Traits::MaxDiffLength);
-    }
-    assert(maxCodePlusDiffLength() <= 32U);
-  }
-
-protected:
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
-  [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodeLength() const {
-    return code.nCodesPerLength.size() - 1;
-  }
-
-  [[nodiscard]] inline size_t RAWSPEED_READONLY __attribute__((pure))
-  maxCodePlusDiffLength() const {
-    return maxCodeLength() + *(std::max_element(code.Base::codeValues.cbegin(),
-                                                code.Base::codeValues.cend()));
-  }
-
-  void setup(bool fullDecode_, bool fixDNGBug16_) {
-    invariant(!fullDecode_ || Traits::SupportsFullDecode);
-
-    this->fullDecode = fullDecode_;
-    this->fixDNGBug16 = fixDNGBug16_;
-
-    if (fullDecode) {
-      // If we are in a full-decoding mode, we will be interpreting code values
-      // as bit length of the following difference, which incurs hard limit
-      // of 16 (since we want to need to read at most 32 bits max for a symbol
-      // plus difference). Though we could enforce it per-code instead?
-      verifyCodeValuesAsDiffLengths();
-    }
-  }
-
-public:
-  [[nodiscard]] bool isFullDecode() const { return fullDecode; }
-
-  bool operator==(const AbstractPrefixCodeDecoder& other) const {
-    return code.symbols == other.code.symbols &&
-           code.Base::codeValues == other.codeValues;
-  }
+  using Base::Base;
 
   template <typename BIT_STREAM, bool FULL_DECODE>
   inline int processSymbol(BIT_STREAM& bs, CodeSymbol symbol,
@@ -108,7 +55,7 @@ public:
     invariant(diff_l >= 0 && diff_l <= 16);
 
     if (diff_l == 16) {
-      if (fixDNGBug16)
+      if (Base::fixDNGBug16)
         bs.skipBitsNoFill(16);
       return -32768;
     }

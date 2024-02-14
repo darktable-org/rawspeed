@@ -26,6 +26,11 @@ on:
       flavor:
         required: true
         type: string
+      enable-sample-based-testing:
+        type: boolean
+        default: false
+      rpuu-cache-key:
+        type: string
       ECO:
         type: string
     secrets:
@@ -108,6 +113,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
           COMPILER_FAMILY: ${{ inputs.compiler-family }}
           FLAVOR: ${{ inputs.flavor }}
+          ENABLE_SAMPLE_BASED_TESTING: ${{ inputs.enable-sample-based-testing }}
         run: |
           set -xe
           eatmydata apt-get install ca-certificates \
@@ -119,9 +125,6 @@ jobs:
                                     libxml2-utils \
                                     ninja-build \
                                     zlib1g-dev
-          if [ "${{ inputs.distro }}" = "ubuntu:jammy" ]; then
-            eatmydata apt-get purge googletest
-          fi
           if [ "$COMPILER_FAMILY" = "GNU" ]; then
             eatmydata apt-get install g++-${{ inputs.compiler-version }} \
                                       gcc \
@@ -131,8 +134,8 @@ jobs:
             eatmydata apt-get install clang-${{ inputs.compiler-version }} \
                                       libomp-${{ inputs.compiler-version }}-dev
           fi
-          if [ "$FLAVOR" = "Coverage" ]; then
-            eatmydata apt-get install rsync zstd
+          if [ "$ENABLE_SAMPLE_BASED_TESTING" = "true" ]; then
+            eatmydata apt-get install zstd
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
             eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
@@ -143,7 +146,7 @@ jobs:
             apt-get update
             eatmydata apt-get install rawspeed-clang-tidy-module
           fi
-          if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
+          if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
             eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
                                       curl \
                                       libxml2-dev \
@@ -162,7 +165,7 @@ jobs:
           fi
           eatmydata apt-get clean
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
-          if [ "$FLAVOR" = "ClangStaticAnalysis" ]; then
+          if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
             ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/clang
             ln -s /usr/bin/${{ inputs.compiler-CXX }} /usr/local/bin/clang++
             ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/gcc
@@ -182,36 +185,17 @@ jobs:
         with:
           path: 'rawspeed'
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Fetch raw.pixls.us masterset digest
-        timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
-        env:
-          RPUU_DST: ${{ env.RPUU_DST }}
-        id: fetch-rpuu-digest
-        run: |
-          set -xe
-          mkdir -p ${RPUU_DST}
-          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/filelist.sha1 ${RPUU_DST}/
-          echo "::set-output name=rpuu-digest-hash::$(sha512sum ${RPUU_DST}/filelist.sha1 | awk '{print $1}')"
       - name: Cache raw.pixls.us masterset
-        timeout-minutes: 2
-        if: inputs.flavor == 'Coverage'
-        uses: actions/cache@v4
+        timeout-minutes: 1
+        if: inputs.enable-sample-based-testing
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.RPUU_DST }}
-          key: raw.pixls.us-masterset-${{ steps.fetch-rpuu-digest.outputs.rpuu-digest-hash }}
-      - name: Fetch/update raw.pixls.us masterset
-        timeout-minutes: 3
-        if: inputs.flavor == 'Coverage'
-        env:
-          RPUU_DST: ${{ env.RPUU_DST }}
-        run: |
-          set -xe
-          rsync -vvrLcW --preallocate --delete --compress --compress-level=1 --stats --progress rsync://raw.pixls.us/data-unique/ ${RPUU_DST}/
-          cd ${RPUU_DST} && sha1sum -c --strict filelist.sha1
+          key: ${{ inputs.rpuu-cache-key }}
+          fail-on-cache-miss: true
       - name: Fetch/Checkout CodeChecker git repo (for clang static analysis)
         timeout-minutes: 1
-        if: inputs.flavor == 'ClangStaticAnalysis'
+        if: inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'ClangCTUStaticAnalysis'
         uses: actions/checkout@v4
         with:
           repository: 'Ericsson/codechecker'
@@ -219,7 +203,7 @@ jobs:
           fetch-depth: '1'
       - name: Install CodeChecker (for clang static analysis)
         timeout-minutes: 1
-        if: inputs.flavor == 'ClangStaticAnalysis'
+        if: inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'ClangCTUStaticAnalysis'
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
@@ -278,7 +262,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           RPUU_DST: ${{ env.RPUU_DST }}
-          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=${{ inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'SonarCloudStaticAnalysis' }} -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.flavor == 'Coverage' }}
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.enable-sample-based-testing }}
           FLAVOR: ${{ inputs.flavor }}
           TARGET: configure
         run: |
@@ -286,9 +270,6 @@ jobs:
           cmake -E make_directory "${BUILD_DIR}"
           cmake -E make_directory "${INSTALL_PREFIX}"
           export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}"
-          if [ "$FLAVOR" = "ClangTidy" -o "$FLAVOR" = "ClangStaticAnalysis" -o "$FLAVOR" = "CodeQLAnalysis" -o "$FLAVOR" = "SonarCloudStaticAnalysis" ]; then
-            export ECO="${ECO} -DCMAKE_C_FLAGS_RELWITHDEBINFO=-UNDEBUG -DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-UNDEBUG"
-          fi
           "${SRC_DIR}/.ci/ci-script.sh"
       - name: Build
         timeout-minutes: ${{ inputs.flavor != 'ClangTidy' && (inputs.flavor != 'CodeQLAnalysis' && 7 || 12) || 25 }}
@@ -296,6 +277,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: build
         run: |
           set -xe
@@ -306,6 +288,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test
         run: |
           set -xe
@@ -318,6 +301,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage
         run: |
           set -xe
@@ -330,6 +314,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test_benchmarks
         run: |
           set -xe
@@ -342,6 +327,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage_benchmarks
         run: |
           set -xe
@@ -350,11 +336,12 @@ jobs:
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
       - name: Test (integration)
         timeout-minutes: ${{ inputs.flavor != 'Coverage' && 1 || 31 }}
-        if: inputs.flavor == 'Coverage'
+        if: inputs.enable-sample-based-testing
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test_integration
           OMP_NUM_THREADS: 1
         run: |
@@ -362,12 +349,13 @@ jobs:
           "${SRC_DIR}/.ci/ci-script.sh"
       - name: Collect source coverage data (integration)
         timeout-minutes: 1
-        if: inputs.flavor == 'Coverage'
+        if: inputs.flavor == 'Coverage' && inputs.enable-sample-based-testing
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/linux
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage_integration
         run: |
           set -xe
@@ -388,6 +376,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: install
         run: |
           set -xe
@@ -420,7 +409,7 @@ jobs:
           path: ${{ github.workspace }}/codechecker_report.tar.xz
       - name: Perform clang static analysis (CTU mode)
         timeout-minutes: 25
-        if: inputs.flavor == 'ClangStaticAnalysis'
+        if: inputs.flavor == 'ClangCTUStaticAnalysis'
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build

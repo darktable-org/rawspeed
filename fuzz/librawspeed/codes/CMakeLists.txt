@@ -1,1 +1,2 @@
 add_subdirectory(PrefixCodeDecoder)
+add_subdirectory(PrefixCodeEncoder)

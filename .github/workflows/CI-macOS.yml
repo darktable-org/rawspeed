@@ -73,9 +73,6 @@ jobs:
           TARGET: configure
         run: |
           set -xe
-          if [[ "$MACOSX_DEPLOYMENT_TARGET" == "10.7" ]]; then
-            export CXXFLAGS="$CXXFLAGS -stdlib=libc++"
-          fi
           cmake -E make_directory "${BUILD_DIR}"
           cmake -E make_directory "${INSTALL_PREFIX}"
           "${SRC_DIR}/.ci/ci-script.sh"
@@ -85,6 +82,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: build
         run: |
           set -xe
@@ -95,6 +93,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test
         run: |
           set -xe
@@ -107,6 +106,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage
         run: |
           set -xe
@@ -119,6 +119,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: test_benchmarks
         run: |
           set -xe
@@ -131,6 +132,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/macOS
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: coverage_benchmarks
         run: |
           set -xe
@@ -151,6 +153,7 @@ jobs:
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
           TARGET: install
         run: |
           set -xe

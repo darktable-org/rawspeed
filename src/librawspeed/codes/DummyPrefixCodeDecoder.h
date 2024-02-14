@@ -21,10 +21,10 @@
 #pragma once
 
 #include "adt/Invariant.h"
+#include "bitstreams/BitStreamer.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/HuffmanCode.h"
 #include "codes/PrefixCode.h"
-#include "io/BitStreamer.h"
 
 namespace rawspeed {
 class Buffer;

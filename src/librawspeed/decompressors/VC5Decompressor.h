@@ -25,6 +25,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Optional.h"
+#include "bitstreams/BitStreamerMSB.h"
 #include "codes/AbstractPrefixCode.h"
 #include "codes/PrefixCodeLUTDecoder.h"
 #include "codes/PrefixCodeVectorDecoder.h"
@@ -32,7 +33,6 @@
 #include "common/RawImage.h"
 #include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"
-#include "io/BitStreamerMSB.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstdint>

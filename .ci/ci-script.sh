@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# it is supposed to be run by travis-ci
+# it is supposed to be run by ci
 # expects a few env variables to be set:
 #   BUILD_DIR - the working directory, where to build
 #   INSTALL_DIR - the installation prefix.
@@ -11,16 +11,23 @@
 
 set -ex
 
-CMAKE_BUILD_TYPE="RelWithDebInfo"
+CMAKE_BUILD_TYPE="ReleaseWithAsserts"
 GENERATOR="Ninja"
 VERBOSE="-v"
 KEEPGOING="-k0"
 
 case "$FLAVOR" in
+  "Release")
+    CMAKE_BUILD_TYPE="Release"
+    ;;
+  "ReleaseWithAsserts" | "ClangTidy" | "ClangStaticAnalysis" | "ClangCTUStaticAnalysis" | "CodeQLAnalysis" | "SonarCloudStaticAnalysis")
+    CMAKE_BUILD_TYPE="ReleaseWithAsserts"
+    ;;
   "Coverage")
     CMAKE_BUILD_TYPE="Coverage"
     ;;
   *)
+    exit 1
     ;;
 esac
 
@@ -73,7 +80,9 @@ target_test_benchmarks()
 
 target_test_integration()
 {
-  cmake --build "$BUILD_DIR" --target gcov-clean
+  if [ "$FLAVOR" = "Coverage" ]; then
+    cmake --build "$BUILD_DIR" --target gcov-clean
+  fi
   cmake --build "$BUILD_DIR" --target rstest-check
 }
 

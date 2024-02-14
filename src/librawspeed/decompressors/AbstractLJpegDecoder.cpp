@@ -104,6 +104,8 @@ void AbstractLJpegDecoder::decodeSOI() {
         ThrowRDE("Did not find SOF marker before SOS.");
       parseSOS(data);
       FoundMarkers.SOS = true;
+      if (erratumImplicitEOIMarkerAfterScan())
+        return;
       break;
     case JpegMarker::DQT:
       ThrowRDE("Not a valid RAW file.");

@@ -1,6 +1,8 @@
-message(STATUS "Trying to query CPU L1d cache line size")
+if(DEFINED RAWSPEED_CACHELINESIZE)
+  return()
+endif()
 
-unset(RAWSPEED_CACHELINESIZE)
+message(STATUS "Trying to query CPU L1d cache line size")
 
 if(BINARY_PACKAGE_BUILD)
   message(STATUS "Performing binary package build, using hardcoded value.")
@@ -28,5 +30,5 @@ if(NOT DEFINED RAWSPEED_CACHELINESIZE)
   set(RAWSPEED_CACHELINESIZE 64)
 endif()
 
+set(RAWSPEED_CACHELINESIZE ${RAWSPEED_CACHELINESIZE} CACHE INTERNAL "")
 message(STATUS "Deciding that the CPU L1d cache line size is ${RAWSPEED_CACHELINESIZE} bytes")
-set(RAWSPEED_CACHELINESIZE ${RAWSPEED_CACHELINESIZE} PARENT_SCOPE)

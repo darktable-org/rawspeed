@@ -17420,6 +17420,16 @@
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="CFV-50c">Hasselblad CFV-50c</Alias>
+			<Alias id="CFV-50c">CFV-50c/Flash Sync</Alias>
+			<Alias id="CFV-50c">CFV-50c/SWC</Alias>
+			<Alias id="CFV-50c">CFV-50c/200</Alias>
+			<Alias id="CFV-50c">CFV-50c/500</Alias>
+			<Alias id="CFV-50c">CFV-50c/Schneider</Alias>
+			<Alias id="CFV-50c">CFV-50c/LensCtrl S</Alias>
+			<Alias id="CFV-50c">CFV-50c/Winder CW</Alias>
+			<Alias id="CFV-50c">CFV-50c/ELD</Alias>
+			<Alias id="CFV-50c">CFV-50c/ELX</Alias>
+			<Alias id="CFV-50c">CFV-50c/Pinhole</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -17501,6 +17511,8 @@
 		<Sensor black="4267" white="65535"/>
 		<Aliases>
 			<Alias id="X2D 100C">Hasselblad X2D 100C</Alias>
+			<Alias id="CFV 100C">Hasselblad CFV 100C</Alias>
+			<Alias id="CFV 100C">CFV 100C/907X</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -17579,8 +17591,11 @@
 	<Camera make="PENTAX" model="PENTAX Q7" mode="dng">
 		<ID make="Pentax" model="Q7">PENTAX Q7</ID>
 	</Camera>
-	<Camera make="PENTAX" model="PENTAX Q10" mode="dng" supported="no-samples">
+	<Camera make="PENTAX" model="PENTAX Q10" mode="dng">
 		<ID make="Pentax" model="Q10">PENTAX Q10</ID>
+	</Camera>
+	<Camera make="PENTAX" model="PENTAX Q-S1" mode="dng">
+		<ID make="Pentax" model="Q-S1">PENTAX Q-S1</ID>
 	</Camera>
 	<Camera make="PENTAX RICOH IMAGING" model="PENTAX MX-1" mode="dng">
 		<ID make="Pentax" model="MX-1">PENTAX MX-1</ID>

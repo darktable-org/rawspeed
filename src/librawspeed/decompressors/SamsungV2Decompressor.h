@@ -20,8 +20,8 @@
 
 #pragma once
 
+#include "bitstreams/BitStreamerMSB32.h"
 #include "decompressors/AbstractSamsungDecompressor.h"
-#include "io/BitStreamerMSB32.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstdint>

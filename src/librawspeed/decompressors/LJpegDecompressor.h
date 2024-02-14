@@ -23,9 +23,9 @@
 
 #include "adt/Array1DRef.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreamerJPEG.h"
 #include "codes/PrefixCodeDecoder.h"
 #include "common/RawImage.h"
-#include "io/BitStreamerJPEG.h"
 #include "io/ByteStream.h"
 #include <array>
 #include <cstddef>

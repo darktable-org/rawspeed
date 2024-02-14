@@ -95,6 +95,13 @@ protected:
   bool fixDng16Bug = false; // DNG v1.0.x compatibility
   bool fullDecodeHT = true; // FullDecode Huffman
 
+  // Certain non-standard-complaint LJpeg's (old Hasselblad cameras) might not
+  // end with an EOI marker. This erratum considers an implicit EOI marker
+  // to be present after the (first) full Scan.
+  [[nodiscard]] virtual bool erratumImplicitEOIMarkerAfterScan() const {
+    return false;
+  }
+
   void decodeSOI();
   void parseSOF(ByteStream data, SOFInfo* i);
   void parseSOS(ByteStream data);
