@@ -15,7 +15,9 @@
 #
 ################################################################################
 
-set -e
+set -ex
+
+ln -f -s /usr/local/bin/lld /usr/bin/ld
 
 if [[ $SANITIZER = *undefined* ]]; then
   CFLAGS="$CFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
@@ -31,9 +33,6 @@ cd "$WORK"
 mkdir build
 cd build
 
-# Temporarily use gold for linking because of BFD breakage (see
-# https://github.com/google/oss-fuzz/pull/2781).
-ln -f -s /usr/bin/gold /usr/bin/ld
 cmake \
   -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
   -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
