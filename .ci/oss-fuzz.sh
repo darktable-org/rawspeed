@@ -67,3 +67,6 @@ cmake \
   "$SRC/librawspeed/"
 
 cmake --build . -- -j$(nproc) all && cmake --build . -- -j$(nproc) install
+
+du -hcs .
+du -hcs "$OUT"
