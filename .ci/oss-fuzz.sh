@@ -17,6 +17,9 @@
 
 set -ex
 
+apt-get install -y ninja-build
+export CMAKE_GENERATOR=Ninja
+
 ln -f -s /usr/local/bin/lld /usr/bin/ld
 
 if [[ $SANITIZER = *undefined* ]]; then
@@ -34,7 +37,7 @@ mkdir build
 cd build
 
 cmake \
-  -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
+  -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
   -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
   -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
   -DBUILD_TESTING=OFF -DBUILD_TOOLS=OFF -DBUILD_BENCHMARKING=OFF \
