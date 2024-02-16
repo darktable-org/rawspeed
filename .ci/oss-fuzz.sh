@@ -15,7 +15,32 @@
 #
 ################################################################################
 
-set -e
+set -ex
+
+apt-get install -y ninja-build
+export CMAKE_GENERATOR=Ninja
+
+ln -f -s /usr/local/bin/lld /usr/bin/ld
+
+cd "$SRC"
+
+wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
+tar -xf llvm-project-16.0.6.src.tar.xz llvm-project-16.0.6.src/{runtimes,cmake,llvm/cmake,libcxx,libcxxabi}/
+LIBCXX_BUILD="$SRC/llvm-project-16.0.6.build"
+mkdir "$LIBCXX_BUILD"
+cmake -S llvm-project-16.0.6.src/runtimes/ -B "$LIBCXX_BUILD" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DLLVM_INCLUDE_TESTS=OFF \
+      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
+      -DLIBCXX_ENABLE_SHARED=OFF \
+      -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
+      -DLIBCXXABI_ENABLE_SHARED=OFF \
+      -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
+      -DLIBCXXABI_ADDITIONAL_COMPILE_FLAGS="-fno-sanitize=vptr"
+cmake --build "$LIBCXX_BUILD" -- -j$(nproc) cxx cxxabi
+
+CXXFLAGS="$CXXFLAGS -nostdinc++ -nostdlib++ -isystem $LIBCXX_BUILD/include -isystem $LIBCXX_BUILD/include/c++/v1 -L$LIBCXX_BUILD/lib -lc++ -lc++abi"
 
 if [[ $SANITIZER = *undefined* ]]; then
   CFLAGS="$CFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
@@ -31,11 +56,8 @@ cd "$WORK"
 mkdir build
 cd build
 
-# Temporarily use gold for linking because of BFD breakage (see
-# https://github.com/google/oss-fuzz/pull/2781).
-ln -f -s /usr/bin/gold /usr/bin/ld
 cmake \
-  -G"Unix Makefiles" -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
+  -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
   -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
   -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
   -DBUILD_TESTING=OFF -DBUILD_TOOLS=OFF -DBUILD_BENCHMARKING=OFF \
@@ -44,4 +66,7 @@ cmake \
   -DCMAKE_INSTALL_PREFIX:PATH="$OUT" -DCMAKE_INSTALL_BINDIR:PATH="$OUT" \
   "$SRC/librawspeed/"
 
-make -j$(nproc) all && make -j$(nproc) install
+cmake --build . -- -j$(nproc) all && cmake --build . -- -j$(nproc) install
+
+du -hcs .
+du -hcs "$OUT"
