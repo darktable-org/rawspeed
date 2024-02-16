@@ -195,8 +195,9 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # LLVM16, native
-          - { os: macos-12, family: XCode, version: 14.2, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM14, native
+          - { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # AArch64, LLVM16, native
+          - { os: macos-13, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # x86_64,  LLVM16, native
+          - { os: macos-12, family: XCode, version: 14.2, deployment_target: 12.5, CC: cc, CXX: c++ } # x86_64,  LLVM14, native
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
@@ -212,9 +213,9 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - { os: macos-14, family: XCode, version: 15.2, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM16, "backdeploy"
-          - { os: macos-14, family: XCode, version: 14.3, deployment_target: 13.0, CC: cc, CXX: c++ } # LLVM15, native
-          # - { os: macos-14, family: XCode, version: 14.3, deployment_target: 12.5, CC: cc, CXX: c++ } # LLVM15, "backdeploy"
+          - { os: macos-14, family: XCode, version: 15.2, deployment_target: 12.5, CC: cc, CXX: c++ } # x86_64, LLVM16, "backdeploy"
+          - { os: macos-14, family: XCode, version: 14.3, deployment_target: 13.0, CC: cc, CXX: c++ } # x86_64, LLVM15, native
+          # - { os: macos-14, family: XCode, version: 14.3, deployment_target: 12.5, CC: cc, CXX: c++ } # x86_64, LLVM15, "backdeploy"
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
