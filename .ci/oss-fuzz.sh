@@ -43,4 +43,4 @@ cmake \
   -DCMAKE_INSTALL_PREFIX:PATH="$OUT" -DCMAKE_INSTALL_BINDIR:PATH="$OUT" \
   "$SRC/librawspeed/"
 
-make -j$(nproc) all && make -j$(nproc) install
+cmake --build . -- -j$(nproc) all && cmake --build . -- -j$(nproc) install
