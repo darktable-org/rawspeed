@@ -50,10 +50,17 @@ SET(CMAKE_MODULE_LINKER_FLAGS
     "${CMAKE_MODULE_LINKER_FLAGS} ${linkerflags}"
     )
 
+if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(LIST -fforce-emit-vtables -fwhole-program-vtables -fstrict-vtable-pointers)
+    add_compile_options("$<$<COMPILE_LANGUAGE:C,CXX>:${LIST}>")
+  endif()
+endif()
+
 if(RAWSPEED_ENABLE_LTO)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     include(llvm-toolchain)
-    set(lto_compile "-flto=thin -fforce-emit-vtables -fwhole-program-vtables -fstrict-vtable-pointers")
+    set(lto_compile "-flto=thin")
     set(lto_link "-flto=thin -fuse-ld=\"${LLVMLLD_EXECUTABLE}\" ${LLVMLLD_INCREMENTAL_LDFLAGS}")
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     include(gcc-toolchain)
