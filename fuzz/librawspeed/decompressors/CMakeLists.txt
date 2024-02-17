@@ -39,7 +39,7 @@ foreach(decompressor ${DECOMPRESSORS})
 endforeach()
 
 
-function(add_specialized_fuzzer Name PrefixCodeDecoderImpl)
+macro(add_specialized_fuzzer Name PrefixCodeDecoderImpl)
   set(fuzzer "${Name}Fuzzer-${PrefixCodeDecoderImpl}")
 
   rawspeed_add_executable(${fuzzer} ${Name}.cpp)
@@ -52,7 +52,7 @@ function(add_specialized_fuzzer Name PrefixCodeDecoderImpl)
   add_fuzz_target(${fuzzer})
 
   add_dependencies(PrefixCodeDecoderFuzzers ${fuzzer})
-endfunction()
+endmacro()
 
 add_specialized_fuzzer("Cr2Decompressor" PrefixCodeDecoder)
 add_specialized_fuzzer("Cr2Decompressor" DummyPrefixCodeDecoder)
