@@ -173,6 +173,7 @@ BitStreamerJPEG::fillCache(Array1DRef<const std::byte> input) {
     // claiming that we have consumed all the remaining bytes of the buffer.
     return getRemainingSize();
   }
+  invariant(p >= 5);
   return p;
 }
 
