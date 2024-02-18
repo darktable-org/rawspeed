@@ -183,7 +183,7 @@ int8_t GetGradient(const fuji_compressed_params& p, int cur_val) {
   if (cur_val < 0)
     grad *= -1;
 
-  return lossless_cast<int8_t>(grad);
+  return implicit_cast<int8_t>(grad);
 }
 
 fuji_compressed_params::fuji_compressed_params(
@@ -624,7 +624,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].even;
           int sample = func_even(c[comp], col, grad_even[grad], row, i, comp);
-          lines(c[comp], 1 + 2 * col + 0) = lossless_cast<uint16_t>(sample);
+          lines(c[comp], 1 + 2 * col + 0) = implicit_cast<uint16_t>(sample);
           ++col;
         }
       }
@@ -633,7 +633,7 @@ fuji_compressed_block::fuji_decode_block(T func_even,
         for (int comp = 0; comp != 2; comp++) {
           int& col = pos[comp].odd;
           int sample = fuji_decode_sample_odd(c[comp], col, grad_odd[grad]);
-          lines(c[comp], 1 + 2 * col + 1) = lossless_cast<uint16_t>(sample);
+          lines(c[comp], 1 + 2 * col + 1) = implicit_cast<uint16_t>(sample);
           ++col;
         }
       }
@@ -902,7 +902,7 @@ void FujiDecompressor::decompress() const {
   FujiDecompressorImpl impl(
       mRaw,
       Array1DRef<const Array1DRef<const uint8_t>>(
-          strips.data(), lossless_cast<Buffer::size_type>(strips.size())),
+          strips.data(), implicit_cast<Buffer::size_type>(strips.size())),
       header);
   impl.decompress();
 }

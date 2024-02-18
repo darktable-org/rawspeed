@@ -136,7 +136,7 @@ public:
     }
 #endif
 
-    num_coords = lossless_cast<int>(control_points.size());
+    num_coords = implicit_cast<int>(control_points.size());
     num_segments = num_coords - 1;
 
     xCp.resize(num_coords);
@@ -171,7 +171,7 @@ public:
               interpolated, double(std::numeric_limits<value_type>::max()));
         }
 
-        curve[x] = lossy_cast<T>(interpolated);
+        curve[x] = implicit_cast<T>(interpolated);
       }
     }
 

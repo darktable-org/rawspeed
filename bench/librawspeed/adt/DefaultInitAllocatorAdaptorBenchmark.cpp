@@ -32,14 +32,14 @@ namespace {
 
 template <typename Allocator> void construct(benchmark::State& state) {
   std::vector<Type, Allocator> vec(
-      rawspeed::lossless_cast<size_t>(state.range(0)));
+      rawspeed::implicit_cast<size_t>(state.range(0)));
   benchmark::DoNotOptimize(vec);
 }
 
 template <typename Allocator>
 void construct_with_zeroinit(benchmark::State& state) {
   std::vector<Type, Allocator> vec(
-      rawspeed::lossless_cast<size_t>(state.range(0)), Type(0));
+      rawspeed::implicit_cast<size_t>(state.range(0)), Type(0));
   benchmark::DoNotOptimize(vec);
 }
 
@@ -53,7 +53,7 @@ void BM_std_vector(benchmark::State& state, Worker worker) {
 
   const auto AllocSize = sizeof(Type) * state.range(0);
   state.counters["Allocation,bytes"] = benchmark::Counter(
-      rawspeed::lossless_cast<double>(AllocSize), benchmark::Counter::kDefaults,
+      rawspeed::implicit_cast<double>(AllocSize), benchmark::Counter::kDefaults,
       benchmark::Counter::kIs1024);
   state.SetComplexityN(AllocSize);
   state.SetBytesProcessed(AllocSize * state.iterations());

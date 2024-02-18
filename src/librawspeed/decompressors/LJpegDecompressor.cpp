@@ -126,7 +126,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
-          lossless_cast<int>(roundUpDivision(tileRequiredWidth, frame.cps));
+          implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.cps));
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
       static_cast<int64_t>(frame.cps) * frame.dim.x <
           static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
@@ -243,7 +243,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  const auto numRestartIntervals = lossless_cast<int>(
+  const auto numRestartIntervals = implicit_cast<int>(
       roundUpDivision(imgFrame.dim.y, numRowsPerRestartInterval));
   invariant(numRestartIntervals >= 0);
   invariant(numRestartIntervals != 0);

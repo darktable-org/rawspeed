@@ -105,7 +105,7 @@ public:
          codeLen <= Base::maxCodeLength(); codeLen++) {
       if (!Base::code.nCodesPerLength[codeLen])
         continue;
-      codeOffsetOL[codeLen] = lossless_cast<typename Traits::CodeTy>(
+      codeOffsetOL[codeLen] = implicit_cast<typename Traits::CodeTy>(
           Base::code.symbols[numCodesSoFar].code - numCodesSoFar);
       assert(codeOffsetOL[codeLen] != MaxCodeValue);
       numCodesSoFar += Base::code.nCodesPerLength[codeLen];
@@ -144,7 +144,7 @@ protected:
             partial.code > maxCodeOL[partial.code_len])) {
       uint32_t temp = bs.getBitsNoFill(1);
       partial.code =
-          lossless_cast<typename Traits::CodeTy>((partial.code << 1) | temp);
+          implicit_cast<typename Traits::CodeTy>((partial.code << 1) | temp);
       partial.code_len++;
     }
 

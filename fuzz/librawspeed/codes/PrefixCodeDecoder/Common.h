@@ -89,7 +89,7 @@ createHuffmanCode(rawspeed::ByteStream& bs) {
     const auto codesBuf = getCodeValues<CodeTag>(codeValuesStream, count);
     hc.setCodeValues(rawspeed::Array1DRef<const typename Traits::CodeValueTy>(
         codesBuf.data(),
-        rawspeed::lossless_cast<rawspeed::Buffer::size_type>(codesBuf.size())));
+        rawspeed::implicit_cast<rawspeed::Buffer::size_type>(codesBuf.size())));
   }
 
   return hc;

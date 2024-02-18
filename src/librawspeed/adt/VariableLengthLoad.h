@@ -55,18 +55,18 @@ template <typename T>
   requires std::is_unsigned_v<T> && CanZExt<T>
 inline T logicalRightShiftSafe(T val, int shAmt) {
   invariant(shAmt >= 0);
-  shAmt = std::min(shAmt, lossless_cast<int>(bitwidth<T>()));
+  shAmt = std::min(shAmt, implicit_cast<int>(bitwidth<T>()));
   using WideT = typename zext<T>::type;
   auto valWide = static_cast<WideT>(val);
   valWide >>= shAmt;
-  return lossless_cast<T>(valWide);
+  return implicit_cast<T>(valWide);
 }
 
 template <typename T>
   requires std::is_unsigned_v<T> && (!CanZExt<T>)
 inline T logicalRightShiftSafe(T val, int shAmt) {
   invariant(shAmt >= 0);
-  if (shAmt >= lossless_cast<int>(bitwidth<T>()))
+  if (shAmt >= implicit_cast<int>(bitwidth<T>()))
     return 0;
   val >>= shAmt;
   return val;

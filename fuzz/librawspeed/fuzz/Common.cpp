@@ -62,7 +62,7 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream& bs) {
   rawspeed::ColorFilterArray cfa;
   cfa.setSize(cfaSize);
   (void)bs.check(
-      rawspeed::lossless_cast<rawspeed::Buffer::size_type>(cfaSize.area()), 4);
+      rawspeed::implicit_cast<rawspeed::Buffer::size_type>(cfaSize.area()), 4);
 
   for (auto x = 0; x < cfaWidth; x++) {
     for (auto y = 0; y < cfaHeight; y++) {

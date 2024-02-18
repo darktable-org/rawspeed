@@ -192,8 +192,8 @@ TEST_P(BitVacuumerMSB32Test, Dissolution) {
     return;
 
   auto bs = BitStreamerMSB32(Array1DRef(
-      expectedOutput.data(), lossless_cast<int>(expectedOutput.size())));
-  for (int i = 0; i != lossless_cast<int>(recepie.size()); ++i) {
+      expectedOutput.data(), implicit_cast<int>(expectedOutput.size())));
+  for (int i = 0; i != implicit_cast<int>(recepie.size()); ++i) {
     const auto [expectedVal, len] = recepie[i];
     bs.fill(32);
     const auto actualVal = len != 0 ? bs.getBitsNoFill(len) : 0;

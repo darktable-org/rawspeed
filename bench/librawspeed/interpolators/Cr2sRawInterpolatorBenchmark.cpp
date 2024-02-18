@@ -50,10 +50,10 @@ inline void BM_Cr2sRawInterpolator(benchmark::State& state) {
   iPoint2D interpolatedDims = areaToRectangle(state.range(0), {3, 2});
 
   interpolatedDims.x =
-      rawspeed::lossless_cast<int>(roundUp(interpolatedDims.x, 6));
+      rawspeed::implicit_cast<int>(roundUp(interpolatedDims.x, 6));
   if constexpr (subSampling.y == 2)
     interpolatedDims.x =
-        rawspeed::lossless_cast<int>(roundUp(interpolatedDims.x, 4));
+        rawspeed::implicit_cast<int>(roundUp(interpolatedDims.x, 4));
 
   iPoint2D subsampledDim = interpolatedDims;
   subsampledDim.x /= subSampling.x;

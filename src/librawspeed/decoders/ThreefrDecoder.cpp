@@ -119,13 +119,13 @@ void ThreefrDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   if (mRootIFD->hasEntryRecursive(TiffTag::BLACKLEVEL)) {
     const TiffEntry* bl = mRootIFD->getEntryRecursive(TiffTag::BLACKLEVEL);
     if (bl->count == 1)
-      mRaw->blackLevel = lossy_cast<int>(bl->getFloat());
+      mRaw->blackLevel = implicit_cast<int>(bl->getFloat());
   }
 
   if (mRootIFD->hasEntryRecursive(TiffTag::WHITELEVEL)) {
     const TiffEntry* wl = mRootIFD->getEntryRecursive(TiffTag::WHITELEVEL);
     if (wl->count == 1)
-      mRaw->whitePoint = lossy_cast<int>(wl->getFloat());
+      mRaw->whitePoint = implicit_cast<int>(wl->getFloat());
   }
 
   // Fetch the white balance

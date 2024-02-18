@@ -90,24 +90,24 @@ inline void __attribute__((always_inline))
 pana_cs6_page_decoder<12>::fillBuffer(ByteStream bs_) noexcept {
   BitStreamerLSB bs(bs_.peekRemainingBuffer().getAsArray1DRef());
   bs.fill(32);
-  pixelbuffer[17] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[16] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[15] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[14] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[13] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[12] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[11] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[10] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[9] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[8] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[7] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[6] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[5] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[4] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[3] = lossless_cast<uint16_t>(bs.getBits(8));
-  pixelbuffer[2] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[1] = lossless_cast<uint16_t>(bs.getBits(12));
-  pixelbuffer[0] = lossless_cast<uint16_t>(bs.getBits(12));
+  pixelbuffer[17] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[16] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[15] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[14] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[13] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[12] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[11] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[10] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[9] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[8] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[7] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[6] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[5] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[4] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[3] = implicit_cast<uint16_t>(bs.getBits(8));
+  pixelbuffer[2] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[1] = implicit_cast<uint16_t>(bs.getBits(12));
+  pixelbuffer[0] = implicit_cast<uint16_t>(bs.getBits(12));
 }
 
 template <>
@@ -116,20 +116,20 @@ pana_cs6_page_decoder<14>::fillBuffer(ByteStream bs_) noexcept {
   BitStreamerLSB bs(bs_.peekRemainingBuffer().getAsArray1DRef());
   bs.fill(32);
   bs.skipBitsNoFill(4);
-  pixelbuffer[13] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[12] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[11] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[10] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[9] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[8] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[7] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[6] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[5] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[4] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[3] = lossless_cast<uint16_t>(bs.getBits(10));
-  pixelbuffer[2] = lossless_cast<uint16_t>(bs.getBits(2));
-  pixelbuffer[1] = lossless_cast<uint16_t>(bs.getBits(14));
-  pixelbuffer[0] = lossless_cast<uint16_t>(bs.getBits(14));
+  pixelbuffer[13] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[12] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[11] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[10] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[9] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[8] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[7] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[6] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[5] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[4] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[3] = implicit_cast<uint16_t>(bs.getBits(10));
+  pixelbuffer[2] = implicit_cast<uint16_t>(bs.getBits(2));
+  pixelbuffer[1] = implicit_cast<uint16_t>(bs.getBits(14));
+  pixelbuffer[0] = implicit_cast<uint16_t>(bs.getBits(14));
 }
 
 } // namespace
@@ -169,7 +169,7 @@ PanasonicV6Decompressor::PanasonicV6Decompressor(RawImage img,
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
-  input = input_.peekStream(lossless_cast<Buffer::size_type>(numBlocks),
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(numBlocks),
                             dsc->BytesPerBlock);
 }
 
@@ -206,7 +206,7 @@ PanasonicV6Decompressor::decompressBlock(ByteStream& rowInput, int row,
       if (epixel)
         nonzero[pix % 2] = epixel;
       else
-        epixel = lossless_cast<uint16_t>(nonzero[pix % 2]);
+        epixel = implicit_cast<uint16_t>(nonzero[pix % 2]);
     }
     auto spix = static_cast<unsigned>(static_cast<int>(epixel) - 0xf);
     if (spix <= dsc.SpixCompare)

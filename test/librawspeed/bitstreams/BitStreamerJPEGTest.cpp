@@ -74,7 +74,7 @@ TEST(BitStreamerJPEGTest, 0xFF0x00Is0xFFTest) {
       {0xFF, 0x00, 0b10100100, 0b01000010, 0b00001000, 0b00011111}};
 
   const rawspeed::Array1DRef<const uint8_t> input(
-      data.data(), rawspeed::lossless_cast<int>(data.size()));
+      data.data(), rawspeed::implicit_cast<int>(data.size()));
 
   BitStreamerJPEG p(input);
 
@@ -91,7 +91,7 @@ TEST(BitStreamerJPEGTest, 0xFF0xXXIsTheEndTest) {
         {0xFF, end, 0xFF, 0xFF, 0xFF, 0xFF}};
 
     const rawspeed::Array1DRef<const uint8_t> input(
-        data.data(), rawspeed::lossless_cast<int>(data.size()));
+        data.data(), rawspeed::implicit_cast<int>(data.size()));
 
     BitStreamerJPEG p(input);
 

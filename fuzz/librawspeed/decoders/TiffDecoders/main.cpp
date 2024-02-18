@@ -62,7 +62,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
   try {
     const rawspeed::Buffer buffer(
-        Data, rawspeed::lossless_cast<rawspeed::Buffer::size_type>(Size));
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     auto ifd = rawspeed::TiffParser::parse(nullptr, buffer);
 
     // ATM do not care if this is the appropriate decoder.

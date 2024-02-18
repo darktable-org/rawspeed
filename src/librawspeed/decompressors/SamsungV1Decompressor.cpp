@@ -134,7 +134,7 @@ void SamsungV1Decompressor::decompress() const {
       int value = pred[col & 1];
       if (!isIntN(value, bits))
         ThrowRDE("decoded value out of bounds");
-      out(row, col) = lossless_cast<uint16_t>(value);
+      out(row, col) = implicit_cast<uint16_t>(value);
     }
   }
 }

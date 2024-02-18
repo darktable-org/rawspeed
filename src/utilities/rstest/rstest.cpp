@@ -207,10 +207,10 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   APPEND(&oss, "\n");
 
   APPEND(&oss, "wbCoeffs: %f %f %f %f\n",
-         lossless_cast<double>(r->metadata.wbCoeffs[0]),
-         lossless_cast<double>(r->metadata.wbCoeffs[1]),
-         lossless_cast<double>(r->metadata.wbCoeffs[2]),
-         lossless_cast<double>(r->metadata.wbCoeffs[3]));
+         implicit_cast<double>(r->metadata.wbCoeffs[0]),
+         implicit_cast<double>(r->metadata.wbCoeffs[1]),
+         implicit_cast<double>(r->metadata.wbCoeffs[2]),
+         implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
   APPEND(&oss, "colorMatrix:");
   if (r->metadata.colorMatrix.empty())
@@ -312,7 +312,7 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   const int realLen = len + 1;
   // the first byte after that \n will be aligned
   const auto paddedLen =
-      rawspeed::lossless_cast<int>(roundUp(realLen, dataAlignment));
+      rawspeed::implicit_cast<int>(roundUp(realLen, dataAlignment));
   assert(paddedLen > len);
   assert(rawspeed::isAligned(paddedLen, dataAlignment));
 
@@ -600,7 +600,7 @@ int main(int argc_, char** argv_) {
   }
 
   cout << "Total decoding time: "
-       << rawspeed::lossless_cast<double>(time) / 1000.0 << "s" << '\n'
+       << rawspeed::implicit_cast<double>(time) / 1000.0 << "s" << '\n'
        << '\n';
 
   return results(failedTests, o);

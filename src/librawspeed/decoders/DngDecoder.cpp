@@ -308,13 +308,13 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
 
     assert(tilew > 0);
     const auto tilesX =
-        lossless_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
+        implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
     if (!tilesX)
       ThrowRDE("Zero tiles horizontally");
 
     assert(tileh > 0);
     const auto tilesY =
-        lossless_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
+        implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
     if (!tilesY)
       ThrowRDE("Zero tiles vertically");
 
@@ -374,7 +374,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
 
   if (mRaw->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
-    mRaw->whitePoint = lossless_cast<int>((1UL << *bps) - 1UL);
+    mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
     // 1. We divide by white level to normalize the image,
     //    s.t. the 1.0 becomes the white level.
@@ -837,7 +837,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
-        blackLevelSeparate1D(y * 2 + x) = lossy_cast<int>(value);
+        blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
     }
   } else {
     mRaw->blackLevelSeparate =
@@ -852,7 +852,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
             static_cast<double>(value) > std::numeric_limits<BlackType>::max())
           ThrowRDE("Error decoding black level");
 
-        blackLevelSeparate1D(y * 2 + x) = lossy_cast<int>(value);
+        blackLevelSeparate1D(y * 2 + x) = implicit_cast<int>(value);
       }
     }
   }
@@ -876,7 +876,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
         ThrowRDE("Error decoding black level");
 
       if (__builtin_sadd_overflow(blackLevelSeparate1D(i),
-                                  lossless_cast<int>(value),
+                                  implicit_cast<int>(value),
                                   &blackLevelSeparate1D(i)))
         ThrowRDE("Integer overflow when calculating black level");
     }
@@ -900,7 +900,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
         ThrowRDE("Error decoding black level");
 
       if (__builtin_sadd_overflow(blackLevelSeparate1D(i),
-                                  lossless_cast<int>(value),
+                                  implicit_cast<int>(value),
                                   &blackLevelSeparate1D(i)))
         ThrowRDE("Integer overflow when calculating black level");
     }

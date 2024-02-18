@@ -103,7 +103,7 @@ void RawImageDataFloat::calculateBlackAreas() {
 
   for (int i = 0; i < 4; i++) {
     blackLevelSeparate1D(i) = static_cast<int>(
-        65535.0F * accPixels[i] / lossless_cast<float>(totalpixels));
+        65535.0F * accPixels[i] / implicit_cast<float>(totalpixels));
   }
 
   /* If this is not a CFA image, we do not use separate blacklevels, use average

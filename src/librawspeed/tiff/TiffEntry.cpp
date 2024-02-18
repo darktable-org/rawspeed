@@ -122,7 +122,7 @@ TiffEntryWithData::TiffEntryWithData(TiffIFD* parent_, TiffTag tag_,
     : TiffEntry(parent_, tag_, type_, /*count=*/0, ByteStream()),
       data(mirror.begin(), mirror.end()) {
   setData(ByteStream(DataBuffer(
-      Buffer(data.data(), lossless_cast<Buffer::size_type>(data.size())),
+      Buffer(data.data(), implicit_cast<Buffer::size_type>(data.size())),
       Endianness::little)));
   count = count_;
 }
@@ -271,7 +271,7 @@ float TiffEntry::getFloat(uint32_t index) const {
   switch (type) {
     using enum TiffDataType;
   case DOUBLE:
-    return lossy_cast<float>(data.peek<double>(index));
+    return implicit_cast<float>(data.peek<double>(index));
   case FLOAT:
     return data.peek<float>(index);
   case LONG:

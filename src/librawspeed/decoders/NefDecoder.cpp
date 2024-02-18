@@ -346,10 +346,10 @@ void NefDecoder::readCoolpixSplitRaw(ByteStream input, const iPoint2D& size,
   BitStreamerMSB odd(oddLinesInput);
   for (int row = offset.y; row < size.y;) {
     for (int col = offset.x; col < size.x; ++col)
-      img(row, col) = lossless_cast<uint16_t>(even.getBits(12));
+      img(row, col) = implicit_cast<uint16_t>(even.getBits(12));
     ++row;
     for (int col = offset.x; col < size.x; ++col)
-      img(row, col) = lossless_cast<uint16_t>(odd.getBits(12));
+      img(row, col) = implicit_cast<uint16_t>(odd.getBits(12));
     ++row;
   }
   assert(even.getRemainingSize() == 0 && odd.getRemainingSize() == 0 &&
@@ -593,10 +593,10 @@ void NefDecoder::parseWhiteBalance() const {
       if (offset) {
         bs.skipBytes(offset);
         bs.setByteOrder(Endianness::little);
-        mRaw->metadata.wbCoeffs[0] = 4.0F * lossless_cast<float>(bs.getU32());
-        mRaw->metadata.wbCoeffs[1] = lossless_cast<float>(bs.getU32());
-        mRaw->metadata.wbCoeffs[1] += lossless_cast<float>(bs.getU32());
-        mRaw->metadata.wbCoeffs[2] = 4.0F * lossless_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[0] = 4.0F * implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[1] = implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[1] += implicit_cast<float>(bs.getU32());
+        mRaw->metadata.wbCoeffs[2] = 4.0F * implicit_cast<float>(bs.getU32());
       }
     }
   }
@@ -679,10 +679,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   float wb_b = wb->getFloat(1);
 
   // ((1024/x)*((1<<16)-1)+(1<<9))<=((1<<31)-1), x>0  gives: (0.0312495)
-  if (const auto lower_limit = lossy_cast<float>(13'421'568.0 / 429'496'627.0);
+  if (const auto lower_limit =
+          implicit_cast<float>(13'421'568.0 / 429'496'627.0);
       wb_r < lower_limit || wb_b < lower_limit || wb_r > 10.0F || wb_b > 10.0F)
     ThrowRDE("Whitebalance has bad values (%f, %f)",
-             lossless_cast<double>(wb_r), lossless_cast<double>(wb_b));
+             implicit_cast<double>(wb_r), implicit_cast<double>(wb_b));
 
   mRaw->metadata.wbCoeffs[0] = wb_r;
   mRaw->metadata.wbCoeffs[1] = 1.0F;
@@ -742,43 +743,43 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
       cr2 -= 2048;
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(lossless_cast<double>(y1) +
-                                     1.370705 * lossless_cast<double>(cr)),
+          clampBits(static_cast<int>(implicit_cast<double>(y1) +
+                                     1.370705 * implicit_cast<double>(cr)),
                     12),
           tmpch, &random);
       out(row, col) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(lossless_cast<double>(y1) -
-                                     0.337633 * lossless_cast<double>(cb) -
-                                     0.698001 * lossless_cast<double>(cr)),
+          clampBits(static_cast<int>(implicit_cast<double>(y1) -
+                                     0.337633 * implicit_cast<double>(cb) -
+                                     0.698001 * implicit_cast<double>(cr)),
                     12),
           reinterpret_cast<std::byte*>(&out(row, col + 1)), &random);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(lossless_cast<double>(y1) +
-                                     1.732446 * lossless_cast<double>(cb)),
+          clampBits(static_cast<int>(implicit_cast<double>(y1) +
+                                     1.732446 * implicit_cast<double>(cb)),
                     12),
           tmpch, &random);
       out(row, col + 2) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(lossless_cast<double>(y2) +
-                                     1.370705 * lossless_cast<double>(cr2)),
+          clampBits(static_cast<int>(implicit_cast<double>(y2) +
+                                     1.370705 * implicit_cast<double>(cr2)),
                     12),
           tmpch, &random);
       out(row, col + 3) = clampBits((inv_wb_r * tmp + (1 << 9)) >> 10, 15);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(lossless_cast<double>(y2) -
-                                     0.337633 * lossless_cast<double>(cb2) -
-                                     0.698001 * lossless_cast<double>(cr2)),
+          clampBits(static_cast<int>(implicit_cast<double>(y2) -
+                                     0.337633 * implicit_cast<double>(cb2) -
+                                     0.698001 * implicit_cast<double>(cr2)),
                     12),
           reinterpret_cast<std::byte*>(&out(row, col + 4)), &random);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(lossless_cast<double>(y2) +
-                                     1.732446 * lossless_cast<double>(cb2)),
+          clampBits(static_cast<int>(implicit_cast<double>(y2) +
+                                     1.732446 * implicit_cast<double>(cb2)),
                     12),
           tmpch, &random);
       out(row, col + 5) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);

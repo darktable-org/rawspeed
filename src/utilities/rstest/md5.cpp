@@ -177,7 +177,7 @@ MD5Hasher::state_type md5_hash(const uint8_t* message, size_t len) noexcept {
 std::string hash_to_string(const MD5Hasher::state_type& hash) noexcept {
   std::array<char, 2 * sizeof(hash) + 1> res;
   const Array1DRef<const std::byte> h =
-      Array1DRef(hash.data(), lossless_cast<int>(hash.size()));
+      Array1DRef(hash.data(), implicit_cast<int>(hash.size()));
   for (int i = 0; i < static_cast<int>(sizeof(hash)); ++i)
     snprintf(&res[2 * i], 3, "%02x", static_cast<uint8_t>(h(i)));
   res[32] = 0;

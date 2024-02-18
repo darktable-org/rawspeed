@@ -138,7 +138,7 @@ void OlympusDecompressor::decompressRow(BitStreamerMSB& bits, int row) const {
     int diff = parseCarry(bits, &carry);
     int pred = getPred(out, row, col);
 
-    out(row, col) = lossless_cast<uint16_t>(pred + diff);
+    out(row, col) = implicit_cast<uint16_t>(pred + diff);
   }
 }
 

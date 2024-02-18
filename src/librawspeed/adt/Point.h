@@ -147,7 +147,7 @@ public:
   }
 
   [[nodiscard]] auto area() const {
-    return lossless_cast<unsigned int>(dim.area());
+    return implicit_cast<unsigned int>(dim.area());
   }
 
   void offset(const iPoint2D& offset_) { pos += offset_; }

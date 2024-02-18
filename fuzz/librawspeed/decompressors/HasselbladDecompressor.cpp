@@ -40,7 +40,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
   try {
     const rawspeed::Buffer b(
-        Data, rawspeed::lossless_cast<rawspeed::Buffer::size_type>(Size));
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 

@@ -60,7 +60,7 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(RawImage img,
     ThrowRDE("Insufficient count of input blocks for a given image");
 
   // We only want those blocks we need, no extras.
-  input = input_.peekStream(lossless_cast<Buffer::size_type>(numBlocks),
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(numBlocks),
                             BytesPerBlock);
 }
 
@@ -71,7 +71,7 @@ PanasonicV7Decompressor::decompressBlock(
   invariant(out.size() == PixelsPerBlock);
   BitStreamerLSB pump(block.peekRemainingBuffer().getAsArray1DRef());
   for (int pix = 0; pix < PixelsPerBlock; pix++)
-    out(pix) = lossless_cast<uint16_t>(pump.getBits(BitsPerSample));
+    out(pix) = implicit_cast<uint16_t>(pump.getBits(BitsPerSample));
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.

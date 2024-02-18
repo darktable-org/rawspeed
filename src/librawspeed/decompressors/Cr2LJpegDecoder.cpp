@@ -69,7 +69,7 @@ Buffer::size_type Cr2LJpegDecoder::decodeScan() {
 
     slicing =
         Cr2SliceWidths(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                       /*lastSliceWidth=*/lossless_cast<uint16_t>(slicesWidth));
+                       /*lastSliceWidth=*/implicit_cast<uint16_t>(slicesWidth));
   }
 
   bool isSubSampled = false;
@@ -143,7 +143,7 @@ Buffer::size_type Cr2LJpegDecoder::decodeScan() {
       [&rec, hts = getPrefixCodeDecoders(N_COMP),
        initPred = getInitialPredictors(N_COMP)]()
           -> Cr2Decompressor<PrefixCodeDecoder<>>::PerComponentRecipe {
-        const auto i = lossless_cast<int>(rec.size());
+        const auto i = implicit_cast<int>(rec.size());
         return {*hts[i], initPred[i]};
       });
 

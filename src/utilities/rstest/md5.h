@@ -118,7 +118,7 @@ private:
     invariant(arg.block_length + message.size() <= N);
 
     auto out =
-        Array1DRef(arg.block.data(), lossless_cast<int>(arg.block.size()))
+        Array1DRef(arg.block.data(), implicit_cast<int>(arg.block.size()))
             .getCrop(/*offset=*/arg.block_length, /*size=*/message.size());
     std::copy(message.begin(), message.end(), out.begin());
     arg.block_length += message.size();
@@ -283,10 +283,10 @@ __attribute__((always_inline)) inline MD5& MD5::take(const T* message,
   if (len == 0)
     return *this;
 
-  auto msg = Array1DRef(message, lossless_cast<int>(len));
+  auto msg = Array1DRef(message, implicit_cast<int>(len));
 
   if (!blockIsEmpty()) {
-    auto prefix_size = lossless_cast<int>(
+    auto prefix_size = implicit_cast<int>(
         std::min<size_t>(msg.size(), bytesAvaliableInBlock()));
     auto prefixMsg =
         msg.getCrop(/*offset=*/0, /*size=*/prefix_size).getAsArray1DRef();
@@ -300,7 +300,7 @@ __attribute__((always_inline)) inline MD5& MD5::take(const T* message,
   if (msg.size() == 0)
     return *this;
 
-  const auto numFullBlocks = lossless_cast<int>(
+  const auto numFullBlocks = implicit_cast<int>(
       msg.size() / MD5Hasher::block_size); // Truncating division!
   for (int blockIdx = 0; blockIdx != numFullBlocks; ++blockIdx) {
     auto innerMsg = msg.getCrop(/*offset=*/0, /*size=*/MD5Hasher::block_size)

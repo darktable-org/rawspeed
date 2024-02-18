@@ -95,7 +95,7 @@ std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
   std::string::size_type end = xmp.find("</tiff:" + std::string(tag) + ">");
   if (start == std::string::npos || end == std::string::npos || end <= start)
     ThrowRDE("Couldn't find tag '%s' in the XMP", tag.data());
-  auto startlen = lossless_cast<int>(tag.size() + 7);
+  auto startlen = implicit_cast<int>(tag.size() + 7);
   return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 
@@ -175,11 +175,11 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {
           mRaw->metadata.wbCoeffs[0] =
-              static_cast<float>(tmp[0]) / lossless_cast<float>(tmp[1]);
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[1]);
           mRaw->metadata.wbCoeffs[1] =
-              static_cast<float>(tmp[0]) / lossless_cast<float>(tmp[2]);
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[2]);
           mRaw->metadata.wbCoeffs[2] =
-              static_cast<float>(tmp[0]) / lossless_cast<float>(tmp[3]);
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[3]);
         }
         break;
       }

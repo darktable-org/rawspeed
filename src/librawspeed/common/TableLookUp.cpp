@@ -50,7 +50,7 @@ TableLookUp::TableLookUp(int _ntables, bool _dither)
 void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   assert(!table.empty());
 
-  const auto nfilled = lossless_cast<int>(table.size());
+  const auto nfilled = implicit_cast<int>(table.size());
   if (nfilled > TABLE_MAX_ELTS)
     ThrowRDE("Table lookup with %i entries is unsupported", nfilled);
 
@@ -75,7 +75,7 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     int delta = upper - lower;
     invariant(delta >= 0);
     t(i * 2) = clampBits(center - ((upper - lower + 2) / 4), 16);
-    t(i * 2 + 1) = lossless_cast<uint16_t>(delta);
+    t(i * 2 + 1) = implicit_cast<uint16_t>(delta);
   }
 
   for (int i = nfilled; i < TABLE_MAX_ELTS; i++) {

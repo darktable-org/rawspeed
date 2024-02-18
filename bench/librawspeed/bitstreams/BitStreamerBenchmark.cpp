@@ -73,9 +73,9 @@ inline void BM_BitStreamer(benchmark::State& state, int fillSize, int Step) {
   assert((fillSize == 1) || rawspeed::isAligned(fillSize, 2));
 
   const std::vector<uint8_t> inputStorage(
-      rawspeed::lossless_cast<size_t>(state.range(0)));
+      rawspeed::implicit_cast<size_t>(state.range(0)));
   const rawspeed::Array1DRef<const uint8_t> input(
-      inputStorage.data(), rawspeed::lossless_cast<int>(state.range(0)));
+      inputStorage.data(), rawspeed::implicit_cast<int>(state.range(0)));
 
   int processedBits = 0;
   for (auto _ : state) {
@@ -96,7 +96,7 @@ inline void BM_BitStreamer(benchmark::State& state, int fillSize, int Step) {
   processedBits -= fillSize;
 
   assert(rawspeed::roundUp(8 * input.size(), fillSize) ==
-         rawspeed::lossless_cast<uint64_t>(processedBits));
+         rawspeed::implicit_cast<uint64_t>(processedBits));
 
   state.SetComplexityN(processedBits / 8);
   state.SetItemsProcessed(processedBits * state.iterations());

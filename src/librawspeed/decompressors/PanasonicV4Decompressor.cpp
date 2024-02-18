@@ -80,7 +80,7 @@ PanasonicV4Decompressor::PanasonicV4Decompressor(RawImage img,
   if (bufSize > std::numeric_limits<ByteStream::size_type>::max())
     ThrowRDE("Raw dimensions require input buffer larger than supported");
 
-  input = input_.peekStream(lossless_cast<Buffer::size_type>(bufSize));
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(bufSize));
 
   chopInputIntoBlocks();
 }
@@ -96,7 +96,7 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
   invariant(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
   assert(blocksTotal <= std::numeric_limits<uint32_t>::max());
   assert(blocksTotal <= std::numeric_limits<size_t>::max());
-  blocks.reserve(lossless_cast<size_t>(blocksTotal));
+  blocks.reserve(implicit_cast<size_t>(blocksTotal));
 
   unsigned currPixel = 0;
   std::generate_n(
@@ -207,7 +207,7 @@ inline void PanasonicV4Decompressor::processPixelPacket(
         pred[c] = nonz[c] << 4 | bits.getBits(4);
     }
 
-    out(row, col) = lossless_cast<uint16_t>(pred[c]);
+    out(row, col) = implicit_cast<uint16_t>(pred[c]);
 
     if (zero_is_bad && 0 == pred[c])
       zero_pos->push_back((row << 16) | col);
@@ -248,7 +248,7 @@ void PanasonicV4Decompressor::decompressThread() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (const auto& block :
-       Array1DRef(blocks.data(), lossless_cast<int>(blocks.size()))) {
+       Array1DRef(blocks.data(), implicit_cast<int>(blocks.size()))) {
     try {
       processBlock(block, &zero_pos);
     } catch (...) {

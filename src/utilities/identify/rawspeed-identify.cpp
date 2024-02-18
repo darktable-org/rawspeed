@@ -103,8 +103,8 @@ std::string find_cameras_xml(const char* argv0) {
 using rawspeed::Buffer;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
+using rawspeed::implicit_cast;
 using rawspeed::iPoint2D;
-using rawspeed::lossless_cast;
 using rawspeed::RawImage;
 using rawspeed::RawParser;
 using rawspeed::RawspeedException;
@@ -202,10 +202,10 @@ int main(int argc_, char* argv_[]) { // NOLINT
     fprintf(stdout, "\n");
 
     fprintf(stdout, "wbCoeffs: %f %f %f %f\n",
-            lossless_cast<double>(r->metadata.wbCoeffs[0]),
-            lossless_cast<double>(r->metadata.wbCoeffs[1]),
-            lossless_cast<double>(r->metadata.wbCoeffs[2]),
-            lossless_cast<double>(r->metadata.wbCoeffs[3]));
+            implicit_cast<double>(r->metadata.wbCoeffs[0]),
+            implicit_cast<double>(r->metadata.wbCoeffs[1]),
+            implicit_cast<double>(r->metadata.wbCoeffs[2]),
+            implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
     fprintf(stdout, "isCFA: %d\n", r->isCFA);
     uint32_t filters = r->cfa.getDcrawFilter();

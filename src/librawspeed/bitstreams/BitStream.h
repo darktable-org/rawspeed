@@ -119,7 +119,7 @@ struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
     invariant(count <= MaxGetBits);
     invariant(count != 0);
     invariant(count <= fillLevel);
-    return lossless_cast<uint32_t>(
+    return implicit_cast<uint32_t>(
         extractHighBits(cache, count,
                         /*effectiveBitwidth=*/BitStreamCacheBase::Size));
   }

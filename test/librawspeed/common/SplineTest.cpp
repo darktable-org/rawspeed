@@ -257,7 +257,7 @@ std::vector<T> calculateSteps(int numCp) {
                     if constexpr (std::is_floating_point<T>::value)
                       return x;
                     else
-                      return rawspeed::lossless_cast<T>(std::lround(x));
+                      return rawspeed::implicit_cast<T>(std::lround(x));
                   });
 
   assert(ptsTotal == steps.size());

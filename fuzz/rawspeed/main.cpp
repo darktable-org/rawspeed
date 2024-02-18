@@ -34,7 +34,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
   try {
     const rawspeed::Buffer buffer(
-        Data, rawspeed::lossless_cast<rawspeed::Buffer::size_type>(Size));
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     rawspeed::RawParser parser(buffer);
     auto decoder = parser.getDecoder(/*&metadata*/);
 

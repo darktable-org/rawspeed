@@ -110,7 +110,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
                   [&rec, hts = getPrefixCodeDecoders(N_COMP),
                    initPred = getInitialPredictors(
                        N_COMP)]() -> LJpegDecompressor::PerComponentRecipe {
-                    const auto i = lossless_cast<int>(rec.size());
+                    const auto i = implicit_cast<int>(rec.size());
                     return {*hts[i], initPred[i]};
                   });
 

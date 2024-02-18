@@ -101,7 +101,7 @@ RawImage Cr2Decoder::decodeOldFormat() {
   mRaw->createData();
 
   Cr2SliceWidths slicing(/*numSlices=*/1, /*sliceWidth=don't care*/ 0,
-                         /*lastSliceWidth=*/lossless_cast<uint16_t>(width));
+                         /*lastSliceWidth=*/implicit_cast<uint16_t>(width));
   l.decode(slicing);
   ljpegSamplePrecision = l.getSamplePrecision();
 

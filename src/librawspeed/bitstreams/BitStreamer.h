@@ -61,7 +61,7 @@ template <typename Tag> struct BitStreamerReplenisherBase {
   // as we can and fill rest with zeros.
   std::array<uint8_t, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage = {};
   inline Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
-    return {tmpStorage.data(), lossless_cast<int>(tmpStorage.size())};
+    return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
   }
 };
 

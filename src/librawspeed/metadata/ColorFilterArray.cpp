@@ -64,7 +64,7 @@ void ColorFilterArray::setSize(const iPoint2D& _size) {
   }
   if (size.area() <= 0)
     return;
-  cfa.resize(lossless_cast<size_t>(size.area()));
+  cfa.resize(implicit_cast<size_t>(size.area()));
   fill(cfa.begin(), cfa.end(), CFAColor::UNKNOWN);
 }
 
@@ -101,7 +101,7 @@ void ColorFilterArray::shiftRight(int n) {
   if (n == 0)
     return;
 
-  vector<CFAColor> tmp(lossless_cast<size_t>(size.area()));
+  vector<CFAColor> tmp(implicit_cast<size_t>(size.area()));
   for (int y = 0; y < size.y; ++y) {
     for (int x = 0; x < size.x; ++x) {
       tmp[x + static_cast<size_t>(y) * size.x] = getColorAt(x + n, y);
@@ -119,7 +119,7 @@ void ColorFilterArray::shiftDown(int n) {
   if (n == 0)
     return;
 
-  vector<CFAColor> tmp(lossless_cast<size_t>(size.area()));
+  vector<CFAColor> tmp(implicit_cast<size_t>(size.area()));
   for (int y = 0; y < size.y; ++y) {
     for (int x = 0; x < size.x; ++x) {
       tmp[x + static_cast<size_t>(y) * size.x] = getColorAt(x, y + n);

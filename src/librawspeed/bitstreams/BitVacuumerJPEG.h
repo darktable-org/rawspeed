@@ -58,7 +58,7 @@ class BitVacuumerJPEG final
     constexpr int NumChunksNeeded = Base::chunk_bitwidth / StreamChunkBitwidth;
     static_assert(NumChunksNeeded == 1);
 
-    auto chunk = lossless_cast<typename StreamTraits::ChunkType>(
+    auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
         Base::cache.peek(StreamChunkBitwidth));
     chunk = getByteSwapped<typename StreamTraits::ChunkType>(
         &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
