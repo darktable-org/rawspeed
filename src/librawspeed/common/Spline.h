@@ -171,7 +171,7 @@ public:
               interpolated, double(std::numeric_limits<value_type>::max()));
         }
 
-        curve[x] = lossless_cast<T>(interpolated);
+        curve[x] = lossy_cast<T>(interpolated);
       }
     }
 
