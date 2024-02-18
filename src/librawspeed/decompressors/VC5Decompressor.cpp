@@ -88,7 +88,7 @@ constexpr auto decompand(int16_t val) {
     return std::numeric_limits<int16_t>::max();
   if (c < std::numeric_limits<int16_t>::min())
     return std::numeric_limits<int16_t>::min();
-  return rawspeed::lossless_cast<int16_t>(c);
+  return rawspeed::lossy_cast<int16_t>(c);
 }
 
 #ifndef NDEBUG

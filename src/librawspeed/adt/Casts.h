@@ -63,8 +63,7 @@ template <typename Ttgt, typename Tsrc>
 constexpr RAWSPEED_READNONE Ttgt lossless_cast(Tsrc value) {
   const auto newValue = static_cast<Ttgt>(value);
   const auto roundTrippedValue = static_cast<Tsrc>(newValue);
-  if (!std::is_constant_evaluated())
-    invariant(impl::is_bitwise_identical(roundTrippedValue, value));
+  invariant(impl::is_bitwise_identical(roundTrippedValue, value));
   return newValue;
 }
 
