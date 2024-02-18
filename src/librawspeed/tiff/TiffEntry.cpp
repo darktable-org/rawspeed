@@ -271,7 +271,7 @@ float TiffEntry::getFloat(uint32_t index) const {
   switch (type) {
     using enum TiffDataType;
   case DOUBLE:
-    return lossless_cast<float>(data.peek<double>(index));
+    return lossy_cast<float>(data.peek<double>(index));
   case FLOAT:
     return data.peek<float>(index);
   case LONG:
