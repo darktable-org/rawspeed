@@ -495,7 +495,7 @@ public:
       for (auto j = 1UL; j < polynomial.size(); ++j)
         val += polynomial[j] * pow(lossless_cast<double>(i) / 65536.0,
                                    lossless_cast<double>(j));
-      lookup[i] = lossless_cast<uint16_t>(std::clamp<double>(
+      lookup[i] = lossy_cast<uint16_t>(std::clamp<double>(
           val * 65535.5, std::numeric_limits<uint16_t>::min(),
           std::numeric_limits<uint16_t>::max()));
     }
