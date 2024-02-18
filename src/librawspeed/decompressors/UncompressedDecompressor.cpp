@@ -22,7 +22,6 @@
 
 #include "decompressors/UncompressedDecompressor.h"
 #include "adt/Array2DRef.h"
-#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -39,6 +38,7 @@
 #include "io/Endianness.h"
 #include "io/IOException.h"
 #include <algorithm>
+#include <bit>
 #include <cinttypes>
 #include <cstddef>
 #include <cstdint>
@@ -168,7 +168,7 @@ void UncompressedDecompressor::decodePackedFP(int rows, int row) const {
       uint32_t b = bits.getBits(NarrowFpType::StorageWidth);
       uint32_t f =
           extendBinaryFloatingPoint<NarrowFpType, ieee_754_2008::Binary32>(b);
-      out(row, offset.x + col) = bit_cast<float>(f);
+      out(row, offset.x + col) = std::bit_cast<float>(f);
     }
     bits.skipBytes(skipBytes);
   }

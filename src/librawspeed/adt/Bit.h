@@ -31,17 +31,6 @@
 
 namespace rawspeed {
 
-template <typename T_TO, typename T_FROM>
-  requires(sizeof(T_TO) == sizeof(T_FROM) &&
-           std::is_trivially_constructible_v<T_TO> &&
-           std::is_trivially_copyable_v<T_TO> &&
-           std::is_trivially_copyable_v<T_FROM>)
-inline T_TO bit_cast(const T_FROM& from) noexcept {
-  T_TO to;
-  memcpy(&to, &from, sizeof(T_TO));
-  return to;
-}
-
 // only works for positive values and zero
 template <typename T> constexpr bool RAWSPEED_READNONE isPowerOfTwo(T val) {
   return (val & (~val + 1)) == val;
@@ -53,30 +42,16 @@ constexpr unsigned RAWSPEED_READNONE bitwidth([[maybe_unused]] T unused = {}) {
 }
 
 template <class T>
-  requires std::is_unsigned_v<T>
-constexpr int countl_zero(T x) noexcept {
-  if (x == T(0))
-    return bitwidth<T>();
-  return __builtin_clz(x);
-}
-
-template <class T>
-  requires std::is_unsigned_v<T>
-constexpr int countl_one(T x) noexcept {
-  return countl_zero<T>(~x);
-}
-
-template <class T>
   requires std::unsigned_integral<T>
 unsigned numSignBits(const T v) {
   using SignedT = std::make_signed_t<T>;
-  return static_cast<SignedT>(v) < 0 ? countl_one(v) : countl_zero(v);
+  return static_cast<SignedT>(v) < 0 ? std::countl_one(v) : std::countl_zero(v);
 }
 
 template <class T>
   requires std::unsigned_integral<T>
 unsigned numActiveBits(const T v) {
-  return bitwidth(v) - countl_zero(v);
+  return bitwidth(v) - std::countl_zero(v);
 }
 
 template <class T>
