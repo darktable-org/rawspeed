@@ -133,6 +133,8 @@ BitStreamerJPEG::fillCache(Array1DRef<const std::byte> input) {
 
   size_type p = 0;
   for (size_type i = 0; i < 4; ++i) {
+    const int numBytesNeeded = 4 - i;
+
     // Pre-execute most common case, where next byte is 'normal'/non-FF
     const std::byte c0 = prefetch[p + 0];
     cache.push(std::to_integer<uint8_t>(c0), 8);
@@ -171,7 +173,10 @@ BitStreamerJPEG::fillCache(Array1DRef<const std::byte> input) {
 
     // No further reading from this buffer shall happen. Do signal that by
     // claiming that we have consumed all the remaining bytes of the buffer.
-    return getRemainingSize();
+
+    p = getRemainingSize() + numBytesNeeded;
+    invariant(p >= 6);
+    break;
   }
   invariant(p >= 5);
   return p;
