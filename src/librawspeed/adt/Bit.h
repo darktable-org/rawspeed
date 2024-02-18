@@ -24,9 +24,9 @@
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include <algorithm>
+#include <bit>
 #include <climits>
 #include <cstdint>
-#include <cstring>
 #include <type_traits>
 
 namespace rawspeed {

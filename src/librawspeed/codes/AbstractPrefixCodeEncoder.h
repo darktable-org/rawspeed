@@ -21,8 +21,10 @@
 #pragma once
 
 #include "rawspeedconfig.h"
-#include "adt/Invariant.h"
+#include "adt/Bit.h"
 #include "codes/AbstractPrefixCodeTranscoder.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 

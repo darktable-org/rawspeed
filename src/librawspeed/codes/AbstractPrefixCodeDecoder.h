@@ -24,6 +24,7 @@
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
 #include "codes/AbstractPrefixCodeTranscoder.h"
+#include <cstdint>
 
 namespace rawspeed {
 
