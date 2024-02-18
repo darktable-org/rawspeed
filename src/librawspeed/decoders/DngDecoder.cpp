@@ -837,7 +837,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
     for (int y = 0; y < 2; y++) {
       for (int x = 0; x < 2; x++)
-        blackLevelSeparate1D(y * 2 + x) = lossless_cast<int>(value);
+        blackLevelSeparate1D(y * 2 + x) = lossy_cast<int>(value);
     }
   } else {
     mRaw->blackLevelSeparate =
@@ -852,7 +852,7 @@ bool DngDecoder::decodeBlackLevels(const TiffIFD* raw) const {
             static_cast<double>(value) > std::numeric_limits<BlackType>::max())
           ThrowRDE("Error decoding black level");
 
-        blackLevelSeparate1D(y * 2 + x) = lossless_cast<int>(value);
+        blackLevelSeparate1D(y * 2 + x) = lossy_cast<int>(value);
       }
     }
   }
