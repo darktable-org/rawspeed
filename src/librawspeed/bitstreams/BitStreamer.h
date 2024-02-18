@@ -32,6 +32,7 @@
 #include "io/IOException.h"
 #include <array>
 #include <climits>
+#include <cstddef>
 #include <cstdint>
 
 namespace rawspeed {
@@ -41,14 +42,14 @@ template <typename BIT_STREAM> struct BitStreamerTraits;
 template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
 
-  Array1DRef<const uint8_t> input;
+  Array1DRef<const std::byte> input;
   int pos = 0;
 
   void establishClassInvariants() const noexcept;
 
   BitStreamerReplenisherBase() = delete;
 
-  inline explicit BitStreamerReplenisherBase(Array1DRef<const uint8_t> input_)
+  inline explicit BitStreamerReplenisherBase(Array1DRef<const std::byte> input_)
       : input(input_) {
     if (input.size() < BitStreamerTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
@@ -59,8 +60,9 @@ template <typename Tag> struct BitStreamerReplenisherBase {
   // nearing the end of the input buffer and can not just read
   // BitStreamerTraits<Tag>::MaxProcessBytes from it, but have to read as much
   // as we can and fill rest with zeros.
-  std::array<uint8_t, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage = {};
-  inline Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
+  std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage =
+      {};
+  inline Array1DRef<std::byte> tmp() noexcept RAWSPEED_READONLY {
     return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
   }
 };
@@ -98,7 +100,7 @@ struct BitStreamerForwardSequentialReplenisher final
     Base::pos += numBytes;
   }
 
-  inline Array1DRef<const uint8_t> getInput() {
+  inline Array1DRef<const std::byte> getInput() {
     Base::establishClassInvariants();
 
 #if !defined(DEBUG)
@@ -147,7 +149,7 @@ private:
   // this method can be re-implemented in the concrete BitStreamer template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamerTraits<Tag>::MaxProcessBytes bytes of input.
-  size_type fillCache(Array1DRef<const uint8_t> input) {
+  size_type fillCache(Array1DRef<const std::byte> input) {
     static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
     establishClassInvariants();
     invariant(input.size() == Traits::MaxProcessBytes);
@@ -180,7 +182,7 @@ public:
 
   BitStreamer() = delete;
 
-  inline explicit BitStreamer(Array1DRef<const uint8_t> input)
+  inline explicit BitStreamer(Array1DRef<const std::byte> input)
       : replenisher(input) {
     establishClassInvariants();
   }

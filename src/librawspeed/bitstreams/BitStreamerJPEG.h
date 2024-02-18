@@ -30,6 +30,7 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <numeric>
 
@@ -86,7 +87,7 @@ class BitStreamerJPEG final : public BitStreamer<BitStreamerJPEG> {
 
   friend void Base::fill(int nbits); // Allow it to call our `fillCache()`.
 
-  size_type fillCache(Array1DRef<const uint8_t> input);
+  size_type fillCache(Array1DRef<const std::byte> input);
 
 public:
   using Base::Base;
@@ -100,7 +101,7 @@ public:
 // will contain more than one `0xFF` byte.
 
 inline BitStreamerJPEG::size_type
-BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
+BitStreamerJPEG::fillCache(Array1DRef<const std::byte> input) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
   invariant(input.size() == Traits::MaxProcessBytes);
@@ -108,7 +109,7 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
   constexpr int StreamChunkBitwidth =
       bitwidth<typename StreamTraits::ChunkType>();
 
-  std::array<uint8_t, Traits::MaxProcessBytes> prefetch;
+  std::array<std::byte, Traits::MaxProcessBytes> prefetch;
   std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
               prefetch.begin());
 
@@ -122,26 +123,29 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
-  if (std::accumulate(
-          &prefetch[0], &prefetch[4], bool(true),
-          [](bool b, uint8_t byte) { return b && (byte != 0xFF); })) {
+  if (std::accumulate(&prefetch[0], &prefetch[4], bool(true),
+                      [](bool b, std::byte byte) {
+                        return b && (byte != std::byte{0xFF});
+                      })) {
     cache = speculativeOptimisticCache;
     return 4;
   }
 
   size_type p = 0;
   for (size_type i = 0; i < 4; ++i) {
+    const int numBytesNeeded = 4 - i;
+
     // Pre-execute most common case, where next byte is 'normal'/non-FF
-    const int c0 = prefetch[p + 0];
-    cache.push(c0, 8);
-    if (c0 != 0xFF) {
+    const std::byte c0 = prefetch[p + 0];
+    cache.push(std::to_integer<uint8_t>(c0), 8);
+    if (c0 != std::byte{0xFF}) {
       p += 1;
       continue; // Got normal byte.
     }
 
     // Found FF -> pre-execute case of FF/00, which represents an FF data byte
-    const int c1 = prefetch[p + 1];
-    if (c1 == 0x00) {
+    const std::byte c1 = prefetch[p + 1];
+    if (c1 == std::byte{0x00}) {
       // Got FF/00, where 0x00 is a stuffing byte (that should be ignored),
       // so 0xFF is a normal byte. All good.
       p += 2;
@@ -169,8 +173,12 @@ BitStreamerJPEG::fillCache(Array1DRef<const uint8_t> input) {
 
     // No further reading from this buffer shall happen. Do signal that by
     // claiming that we have consumed all the remaining bytes of the buffer.
-    return getRemainingSize();
+
+    p = getRemainingSize() + numBytesNeeded;
+    invariant(p >= 6);
+    break;
   }
+  invariant(p >= 5);
   return p;
 }
 
