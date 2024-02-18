@@ -31,17 +31,6 @@
 
 namespace rawspeed {
 
-template <typename T_TO, typename T_FROM>
-  requires(sizeof(T_TO) == sizeof(T_FROM) &&
-           std::is_trivially_constructible_v<T_TO> &&
-           std::is_trivially_copyable_v<T_TO> &&
-           std::is_trivially_copyable_v<T_FROM>)
-inline T_TO bit_cast(const T_FROM& from) noexcept {
-  T_TO to;
-  memcpy(&to, &from, sizeof(T_TO));
-  return to;
-}
-
 // only works for positive values and zero
 template <typename T> constexpr bool RAWSPEED_READNONE isPowerOfTwo(T val) {
   return (val & (~val + 1)) == val;

@@ -19,7 +19,7 @@
 */
 
 #include "rawspeedconfig.h" // IWYU pragma: keep
-#include "adt/Bit.h"
+#include <bit>
 
 #ifdef HAVE_ZLIB
 
@@ -124,7 +124,7 @@ inline void decodeFPDeltaRow(Array1DRef<const unsigned char> src,
       __builtin_unreachable();
     }
 
-    out(col) = bit_cast<float>(tmp_expanded);
+    out(col) = std::bit_cast<float>(tmp_expanded);
   }
 }
 
