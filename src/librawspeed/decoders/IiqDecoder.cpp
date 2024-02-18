@@ -464,7 +464,7 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
                   nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
                          : 0;
               !(c & 1)) {
-            auto val = lossless_cast<unsigned>(img(row, col) * mult[c]);
+            auto val = lossy_cast<unsigned>(img(row, col) * mult[c]);
             img(row, col) = lossless_cast<uint16_t>(std::min(val, 0xFFFFU));
           }
           for (int c = 0; c < nc; c += 2)
