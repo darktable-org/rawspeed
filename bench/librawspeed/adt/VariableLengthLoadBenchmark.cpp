@@ -34,8 +34,8 @@ namespace rawspeed {
 
 namespace {
 
-[[maybe_unused]] inline void fixedLengthLoad(Array1DRef<uint8_t> out,
-                                             Array1DRef<const uint8_t> in,
+[[maybe_unused]] inline void fixedLengthLoad(Array1DRef<std::byte> out,
+                                             Array1DRef<const std::byte> in,
                                              int inPos) {
   invariant(out.size() != 0);
   invariant(in.size() != 0);
@@ -51,8 +51,8 @@ namespace {
 
 template <decltype(fixedLengthLoad) Callable>
 [[maybe_unused]] inline void
-fixedLengthLoadOr(rawspeed::Array1DRef<uint8_t> out,
-                  rawspeed::Array1DRef<const uint8_t> in, int inPos) {
+fixedLengthLoadOr(rawspeed::Array1DRef<std::byte> out,
+                  rawspeed::Array1DRef<const std::byte> in, int inPos) {
   invariant(out.size() != 0);
   invariant(in.size() != 0);
   invariant(out.size() <= in.size());
@@ -85,14 +85,14 @@ void BM_Impl(benchmark::State& state) {
   int64_t numBytes = rawspeed::roundUp(state.range(0), bytesPerItem);
   benchmark::DoNotOptimize(numBytes);
 
-  const std::vector<uint8_t> inStorage(
+  const std::vector<std::byte> inStorage(
       rawspeed::implicit_cast<size_t>(numBytes));
 
-  const auto in = rawspeed::Array1DRef<const uint8_t>(
+  const auto in = rawspeed::Array1DRef<const std::byte>(
       inStorage.data(), rawspeed::implicit_cast<int>(numBytes));
 
-  std::array<uint8_t, bytesPerItem> outStorage;
-  auto out = rawspeed::Array1DRef<uint8_t>(
+  std::array<std::byte, bytesPerItem> outStorage;
+  auto out = rawspeed::Array1DRef<std::byte>(
       outStorage.data(), rawspeed::implicit_cast<int>(bytesPerItem));
 
   for (auto _ : state) {
@@ -105,11 +105,11 @@ void BM_Impl(benchmark::State& state) {
   state.SetComplexityN(numBytes);
   state.counters.insert({
       {"Throughput",
-       benchmark::Counter(sizeof(uint8_t) * state.complexity_length_n(),
+       benchmark::Counter(sizeof(std::byte) * state.complexity_length_n(),
                           benchmark::Counter::Flags::kIsIterationInvariantRate,
                           benchmark::Counter::kIs1024)},
       {"Latency",
-       benchmark::Counter(sizeof(uint8_t) * state.complexity_length_n(),
+       benchmark::Counter(sizeof(std::byte) * state.complexity_length_n(),
                           benchmark::Counter::Flags::kIsIterationInvariantRate |
                               benchmark::Counter::Flags::kInvert,
                           benchmark::Counter::kIs1000)},

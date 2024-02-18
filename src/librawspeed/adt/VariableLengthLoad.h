@@ -28,6 +28,7 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <climits>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <type_traits>
@@ -74,8 +75,8 @@ inline T logicalRightShiftSafe(T val, int shAmt) {
 
 template <typename T>
   requires std::is_unsigned_v<T>
-inline void variableLengthLoad(Array1DRef<uint8_t> out,
-                               Array1DRef<const uint8_t> in, int inPos) {
+inline void variableLengthLoad(Array1DRef<std::byte> out,
+                               Array1DRef<const std::byte> in, int inPos) {
   invariant(out.size() == sizeof(T));
 
   int inPosFixup = 0;
@@ -99,8 +100,8 @@ inline void variableLengthLoad(Array1DRef<uint8_t> out,
 
 } // namespace impl
 
-inline void variableLengthLoad(const Array1DRef<uint8_t> out,
-                               Array1DRef<const uint8_t> in, int inPos) {
+inline void variableLengthLoad(const Array1DRef<std::byte> out,
+                               Array1DRef<const std::byte> in, int inPos) {
 
   invariant(out.size() != 0);
   invariant(isPowerOfTwo(out.size()));
@@ -128,13 +129,13 @@ inline void variableLengthLoad(const Array1DRef<uint8_t> out,
 }
 
 inline void variableLengthLoadNaiveViaConditionalLoad(
-    Array1DRef<uint8_t> out, Array1DRef<const uint8_t> in, int inPos) {
+    Array1DRef<std::byte> out, Array1DRef<const std::byte> in, int inPos) {
   invariant(out.size() != 0);
   invariant(in.size() != 0);
   invariant(out.size() <= in.size());
   invariant(inPos >= 0);
 
-  std::fill(out.begin(), out.end(), 0);
+  std::fill(out.begin(), out.end(), std::byte{0x00});
 
   for (int outIndex = 0; outIndex != out.size(); ++outIndex) {
     const int inIndex = inPos + outIndex;
@@ -144,15 +145,15 @@ inline void variableLengthLoadNaiveViaConditionalLoad(
   }
 }
 
-inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<uint8_t> out,
-                                             Array1DRef<const uint8_t> in,
+inline void variableLengthLoadNaiveViaMemcpy(Array1DRef<std::byte> out,
+                                             Array1DRef<const std::byte> in,
                                              int inPos) {
   invariant(out.size() != 0);
   invariant(in.size() != 0);
   invariant(out.size() <= in.size());
   invariant(inPos >= 0);
 
-  std::fill(out.begin(), out.end(), 0);
+  std::fill(out.begin(), out.end(), std::byte{0x00});
 
   inPos = std::min(inPos, in.size());
 
