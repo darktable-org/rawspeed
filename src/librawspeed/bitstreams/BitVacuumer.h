@@ -118,8 +118,7 @@ public:
 
   inline void put(uint32_t bits, int count) {
     invariant(count >= 0);
-    if (count == 0)
-      return; // No-op.
+    // NOTE: count may be zero!
     drain();
     cache.push(bits, count);
   }
