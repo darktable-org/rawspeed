@@ -32,7 +32,7 @@ namespace rawspeed {
 namespace impl {
 
 template <typename T0, typename T1>
-  requires(std::is_same_v<T0, T1> && std::integral<T0>)
+  requires(std::same_as<T0, T1> && std::integral<T0>)
 constexpr RAWSPEED_READNONE bool is_bitwise_identical(const T0& v0,
                                                       const T1& v1) {
   return v0 == v1;
@@ -47,7 +47,7 @@ template <> struct bag_of_bits_type<double> {
 };
 
 template <typename T0, typename T1>
-  requires(std::is_same_v<T0, T1> && std::floating_point<T0>)
+  requires(std::same_as<T0, T1> && std::floating_point<T0>)
 constexpr RAWSPEED_READNONE bool is_bitwise_identical(const T0& v0,
                                                       const T1& v1) {
   using Ti = typename bag_of_bits_type<T0>::value_type;
@@ -57,9 +57,9 @@ constexpr RAWSPEED_READNONE bool is_bitwise_identical(const T0& v0,
 } // namespace impl
 
 template <typename Ttgt, typename Tsrc>
-  requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
-            (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
-           !std::is_same_v<Tsrc, Ttgt>)
+  requires(((std::integral<Tsrc> || std::floating_point<Tsrc>) &&
+            (std::integral<Ttgt> || std::floating_point<Ttgt>)) &&
+           !std::same_as<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt lossless_cast(Tsrc value) {
   const auto newValue = static_cast<Ttgt>(value);
   const auto roundTrippedValue = static_cast<Tsrc>(newValue);
@@ -70,17 +70,17 @@ constexpr RAWSPEED_READNONE Ttgt lossless_cast(Tsrc value) {
 // Sometimes through templates in some template instantiations
 // the types do end up being the same. This is fine.
 template <typename Ttgt, typename Tsrc>
-  requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
-            (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
-           std::is_same_v<Tsrc, Ttgt>)
+  requires(((std::integral<Tsrc> || std::floating_point<Tsrc>) &&
+            (std::integral<Ttgt> || std::floating_point<Ttgt>)) &&
+           std::same_as<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt lossless_cast(Tsrc value) {
   return value;
 }
 
 template <typename Ttgt, typename Tsrc>
-  requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
-            (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
-           !std::is_same_v<Tsrc, Ttgt>)
+  requires(((std::integral<Tsrc> || std::floating_point<Tsrc>) &&
+            (std::integral<Ttgt> || std::floating_point<Ttgt>)) &&
+           !std::same_as<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt lossy_cast(Tsrc value) {
   return static_cast<Ttgt>(value);
 }
@@ -88,9 +88,9 @@ constexpr RAWSPEED_READNONE Ttgt lossy_cast(Tsrc value) {
 // Sometimes through templates in some template instantiations
 // the types do end up being the same. This is fine.
 template <typename Ttgt, typename Tsrc>
-  requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
-            (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
-           std::is_same_v<Tsrc, Ttgt>)
+  requires(((std::integral<Tsrc> || std::floating_point<Tsrc>) &&
+            (std::integral<Ttgt> || std::floating_point<Ttgt>)) &&
+           std::same_as<Tsrc, Ttgt>)
 constexpr RAWSPEED_READNONE Ttgt lossy_cast(Tsrc value) {
   return value;
 }
