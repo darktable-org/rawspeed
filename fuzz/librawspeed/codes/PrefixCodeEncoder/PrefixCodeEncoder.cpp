@@ -119,7 +119,7 @@ void workloop(Array1DRef<const uint8_t> inputSrc, const HT& ht) {
   try {
     auto bsSrc = BitStreamer(inputSrc);
     auto bsRec = BitStreamer(
-        Array1DRef(inputRec.data(), implicit_cast<int>(inputRec.size())));
+        Array1DRef(inputRec.data(), lossless_cast<int>(inputRec.size())));
     for (int i = 0; i != numCodesEncoded; ++i) {
       const auto vSrc = ht.template decode<BitStreamer, IsFullDecode>(bsSrc);
       const auto vRec = ht.template decode<BitStreamer, IsFullDecode>(bsRec);
@@ -204,7 +204,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const Buffer b(Data, implicit_cast<Buffer::size_type>(Size));
+    const Buffer b(Data, lossless_cast<Buffer::size_type>(Size));
     const DataBuffer db(b, Endianness::little);
     ByteStream bs(db);
 

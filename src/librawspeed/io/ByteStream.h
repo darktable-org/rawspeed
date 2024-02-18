@@ -134,10 +134,10 @@ public:
 
   [[nodiscard]] inline bool hasPatternAt(std::string_view pattern,
                                          size_type relPos) const {
-    if (!isValid(pos + relPos, implicit_cast<size_type>(pattern.size())))
+    if (!isValid(pos + relPos, lossless_cast<size_type>(pattern.size())))
       return false;
     auto tmp =
-        getSubView(pos + relPos, implicit_cast<size_type>(pattern.size()));
+        getSubView(pos + relPos, lossless_cast<size_type>(pattern.size()));
     assert(tmp.getSize() == pattern.size());
     return std::equal(tmp.begin(), tmp.end(), pattern.begin());
   }
@@ -191,7 +191,7 @@ public:
   // between (not a copy). If the first byte is zero, stream is incremented one.
   [[nodiscard]] std::string_view getString() {
     std::string_view str = peekString();
-    skipBytes(implicit_cast<Buffer::size_type>(1 + str.size()));
+    skipBytes(lossless_cast<Buffer::size_type>(1 + str.size()));
     return str;
   }
 };

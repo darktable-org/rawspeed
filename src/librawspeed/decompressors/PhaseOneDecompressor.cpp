@@ -125,7 +125,7 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
     int i = len[col & 1];
     if (i == 14) {
       pred[col & 1] = pump.getBitsNoFill(16);
-      out(row, col) = implicit_cast<uint16_t>(pred[col & 1]);
+      out(row, col) = lossless_cast<uint16_t>(pred[col & 1]);
     } else {
       pred[col & 1] +=
           static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
@@ -140,7 +140,7 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
 #pragma omp for schedule(static)
 #endif
   for (const auto& strip :
-       Array1DRef(strips.data(), implicit_cast<int>(strips.size()))) {
+       Array1DRef(strips.data(), lossless_cast<int>(strips.size()))) {
     try {
       decompressStrip(strip);
     } catch (const RawspeedException& err) {

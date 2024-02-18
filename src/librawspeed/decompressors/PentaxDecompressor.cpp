@@ -128,7 +128,7 @@ PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
       }
     }
     invariant(sm_num < 16);
-    codeValues.push_back(implicit_cast<uint8_t>(sm_num));
+    codeValues.push_back(lossless_cast<uint8_t>(sm_num));
     v2[sm_num] = 0xffffffff;
   }
 
@@ -171,7 +171,7 @@ void PentaxDecompressor::decompress(ByteStream data) const {
       int value = pred[col & 1];
       if (!isIntN(value, 16))
         ThrowRDE("decoded value out of bounds at %d:%d", col, row);
-      out(row, col) = implicit_cast<uint16_t>(value);
+      out(row, col) = lossless_cast<uint16_t>(value);
     }
   }
 }

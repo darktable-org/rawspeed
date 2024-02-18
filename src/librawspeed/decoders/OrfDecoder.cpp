@@ -145,13 +145,13 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
   int inputPitchBytes = inputPitchBits / 8;
 
-  const auto numEvenLines = implicit_cast<int>(roundUpDivision(h, 2));
+  const auto numEvenLines = lossless_cast<int>(roundUpDivision(h, 2));
   const auto evenLinesInput = s.getStream(numEvenLines, inputPitchBytes)
                                   .peekRemainingBuffer()
                                   .getAsArray1DRef();
 
   const auto oddLinesInputBegin =
-      implicit_cast<int>(roundUp(evenLinesInput.size(), 1U << 11U));
+      lossless_cast<int>(roundUp(evenLinesInput.size(), 1U << 11U));
   assert(oddLinesInputBegin >= evenLinesInput.size());
   int padding = oddLinesInputBegin - evenLinesInput.size();
   assert(padding >= 0);
@@ -171,7 +171,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     for (int i = 0; i != numEvenLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 2 * i;
-        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
+        out(row, col) = lossless_cast<uint16_t>(bs.getBits(12));
       }
     }
   }
@@ -180,7 +180,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
     for (int i = 0; i != numOddLines; ++i) {
       for (unsigned col = 0; col != w; ++col) {
         int row = 1 + 2 * i;
-        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
+        out(row, col) = lossless_cast<uint16_t>(bs.getBits(12));
       }
     }
   }

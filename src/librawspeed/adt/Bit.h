@@ -94,8 +94,8 @@ constexpr auto RAWSPEED_READNONE clampBits(T value, unsigned int nBits) {
   // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
   // (Well, not really, if we are called from clampBits<signed>, it's ok..).
   invariant(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
-  const auto maxVal = implicit_cast<T>((T(1) << nBits) - T(1));
-  return implicit_cast<uint16_t>(std::clamp(value, T(0), maxVal));
+  const auto maxVal = lossless_cast<T>((T(1) << nBits) - T(1));
+  return lossless_cast<uint16_t>(std::clamp(value, T(0), maxVal));
 }
 
 template <typename T>

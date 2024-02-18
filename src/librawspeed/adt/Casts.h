@@ -29,7 +29,7 @@ template <typename Ttgt, typename Tsrc>
   requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
             (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
            !std::is_same_v<Tsrc, Ttgt>)
-constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
+constexpr RAWSPEED_READNONE Ttgt lossless_cast(Tsrc value) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
@@ -43,7 +43,7 @@ template <typename Ttgt, typename Tsrc>
   requires(((std::is_integral_v<Tsrc> || std::is_floating_point_v<Tsrc>) &&
             (std::is_integral_v<Ttgt> || std::is_floating_point_v<Ttgt>)) &&
            std::is_same_v<Tsrc, Ttgt>)
-constexpr RAWSPEED_READNONE Ttgt implicit_cast(Tsrc value) {
+constexpr RAWSPEED_READNONE Ttgt lossless_cast(Tsrc value) {
   return value;
 }
 

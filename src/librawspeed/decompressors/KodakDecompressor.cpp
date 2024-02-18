@@ -61,7 +61,7 @@ KodakDecompressor::KodakDecompressor(RawImage img, ByteStream bs, int bps_,
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
-  (void)input.check(implicit_cast<Buffer::size_type>(mRaw->dim.area() / 2ULL));
+  (void)input.check(lossless_cast<Buffer::size_type>(mRaw->dim.area() / 2ULL));
 }
 
 KodakDecompressor::segment
@@ -110,7 +110,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = implicit_cast<int16_t>(
+    out[i] = lossless_cast<int16_t>(
         len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff));
   }
 
@@ -138,9 +138,9 @@ void KodakDecompressor::decompress() {
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
-          out(row, col) = implicit_cast<uint16_t>(value);
+          out(row, col) = lossless_cast<uint16_t>(value);
         else {
-          mRaw->setWithLookUp(implicit_cast<uint16_t>(value),
+          mRaw->setWithLookUp(lossless_cast<uint16_t>(value),
                               reinterpret_cast<std::byte*>(&out(row, col)),
                               &random);
         }

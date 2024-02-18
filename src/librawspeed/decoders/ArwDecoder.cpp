@@ -99,7 +99,7 @@ RawImage ArwDecoder::decodeSRF() {
   // "Decrypt" the whole image buffer
   const auto image_data = mFile.getSubView(off, len).getAsArray1DRef();
   std::vector<uint8_t> image_decoded(len);
-  SonyDecrypt(image_data, {image_decoded.data(), implicit_cast<int>(len)},
+  SonyDecrypt(image_data, {image_decoded.data(), lossless_cast<int>(len)},
               len / 4, key);
 
   Buffer di(image_decoded.data(), len);
@@ -153,11 +153,11 @@ std::vector<uint16_t> ArwDecoder::decodeCurve(const TiffIFD* raw) {
     sony_curve[i + 1] = (c->getU16(i) >> 2) & 0xfff;
 
   for (uint32_t i = 0; i < 0x4001; i++)
-    curve[i] = implicit_cast<uint16_t>(i);
+    curve[i] = lossless_cast<uint16_t>(i);
 
   for (uint32_t i = 0; i < 5; i++)
     for (uint32_t j = sony_curve[i] + 1; j <= sony_curve[i + 1]; j++)
-      curve[j] = implicit_cast<uint16_t>(curve[j - 1] + (1 << i));
+      curve[j] = lossless_cast<uint16_t>(curve[j - 1] + (1 << i));
 
   return curve;
 }
@@ -331,13 +331,13 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
 
   assert(tilew > 0);
   const auto tilesX =
-      implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
+      lossless_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
   if (!tilesX)
     ThrowRDE("Zero tiles horizontally");
 
   assert(tileh > 0);
   const auto tilesY =
-      implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
+      lossless_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
   if (!tilesY)
     ThrowRDE("Zero tiles vertically");
 
@@ -362,7 +362,7 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   }
 
   NORangesSet<Buffer> tilesLegality;
-  for (int tile = 0U; tile < implicit_cast<int>(offsets->count); tile++) {
+  for (int tile = 0U; tile < lossless_cast<int>(offsets->count); tile++) {
     const uint32_t offset = offsets->getU32(tile);
     const uint32_t length = counts->getU32(tile);
     if (!tilesLegality.insert(mFile.getSubView(offset, length)))
@@ -385,8 +385,8 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
           ByteStream(
               DataBuffer(mFile.getSubView(offset, length), Endianness::little)),
           mRaw);
-      decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
-                     implicit_cast<uint32_t>(tilew), tileh, false);
+      decoder.decode(lossless_cast<uint32_t>(tileX * tilew), tileY * tileh,
+                     lossless_cast<uint32_t>(tilew), tileh, false);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -617,7 +617,7 @@ void ArwDecoder::GetWB() const {
 
     assert(sony_length != nullptr);
     // The Decryption is done in blocks of 4 bytes.
-    auto len = implicit_cast<uint32_t>(roundDown(sony_length->getU32(), 4));
+    auto len = lossless_cast<uint32_t>(roundDown(sony_length->getU32(), 4));
     if (!len)
       ThrowRDE("No buffer to decrypt?");
 
@@ -633,7 +633,7 @@ void ArwDecoder::GetWB() const {
     std::vector<uint8_t> DecryptedBuffer(DecryptedBufferSize);
 
     SonyDecrypt(EncryptedBuffer,
-                {&DecryptedBuffer[off], implicit_cast<int>(len)}, len / 4, key);
+                {&DecryptedBuffer[off], lossless_cast<int>(len)}, len / 4, key);
 
     NORangesSet<Buffer> ifds_decoded;
     Buffer decIFD(DecryptedBuffer.data(), DecryptedBufferSize);

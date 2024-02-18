@@ -65,7 +65,7 @@ public:
     static_assert(NumChunksNeeded >= 1);
 
     for (int i = 0; i != NumChunksNeeded; ++i) {
-      auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
+      auto chunk = lossless_cast<typename StreamTraits::ChunkType>(
           cache.peek(StreamChunkBitwidth));
       chunk = getByteSwapped<typename StreamTraits::ChunkType>(
           &chunk, StreamTraits::ChunkEndianness != getHostEndianness());

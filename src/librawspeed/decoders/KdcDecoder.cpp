@@ -69,7 +69,7 @@ Buffer KdcDecoder::getInputBuffer() const {
   if (hints.contains("easyshare_offset_hack"))
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
-  return mFile.getSubView(implicit_cast<Buffer::size_type>(off));
+  return mFile.getSubView(lossless_cast<Buffer::size_type>(off));
 }
 
 RawImage KdcDecoder::decodeRawInternal() {

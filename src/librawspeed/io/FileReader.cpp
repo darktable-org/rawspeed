@@ -131,7 +131,7 @@ FileReader::readFile() const {
 #endif // __unix__
 
   return {std::move(dest),
-          Buffer(dest->data(), implicit_cast<Buffer::size_type>(fileSize))};
+          Buffer(dest->data(), lossless_cast<Buffer::size_type>(fileSize))};
 }
 
 } // namespace rawspeed

@@ -120,7 +120,7 @@ public:
     invariant(i >= 0);
     invariant(i < size());
 
-    auto len = implicit_cast<int>(bitLengths.peekByte(i) % 33); // 0-32 bits
+    auto len = lossless_cast<int>(bitLengths.peekByte(i) % 33); // 0-32 bits
     uint32_t val = extractLowBitsSafe(bitVals.peekU32(i), len);
 
     return {val, len};
@@ -166,7 +166,7 @@ void reparseBitstream(Array1DRef<const uint8_t> input, const InputWrapper& w) {
 template <typename flavor> void checkFlavourImpl(const InputWrapper& w) {
   const std::vector<uint8_t> bitstream = produceBitstream<flavor>(w);
   const auto input =
-      Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
+      Array1DRef(bitstream.data(), lossless_cast<int>(bitstream.size()));
   reparseBitstream<flavor>(input, w);
 }
 
@@ -182,7 +182,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const Buffer b(Data, implicit_cast<Buffer::size_type>(Size));
+    const Buffer b(Data, lossless_cast<Buffer::size_type>(Size));
     const DataBuffer db(b, Endianness::little);
     ByteStream bs(db);
 

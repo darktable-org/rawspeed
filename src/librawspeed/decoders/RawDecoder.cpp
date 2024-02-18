@@ -120,13 +120,13 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   mRaw->createData();
 
   // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = implicit_cast<int>((1UL << bitPerPixel) - 1UL);
+  mRaw->whitePoint = lossless_cast<int>((1UL << bitPerPixel) - 1UL);
 
   offY = 0;
   for (const RawSlice& slice : slices) {
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    bitPerPixel = implicit_cast<uint32_t>(
+    bitPerPixel = lossless_cast<uint32_t>(
         (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width));
     const auto inputPitch = width * bitPerPixel / 8;
     if (!inputPitch)
@@ -270,9 +270,9 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
     mRaw->blackLevel = sensor->mBlackLevel;
     mRaw->whitePoint = sensor->mWhiteLevel;
     if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
-      auto cfaArea = implicit_cast<int>(mRaw->cfa.getSize().area());
+      auto cfaArea = lossless_cast<int>(mRaw->cfa.getSize().area());
       if (mRaw->isCFA &&
-          cfaArea <= implicit_cast<int>(sensor->mBlackLevelSeparate.size())) {
+          cfaArea <= lossless_cast<int>(sensor->mBlackLevelSeparate.size())) {
         mRaw->blackLevelSeparate =
             Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
         auto blackLevelSeparate1D =

@@ -79,7 +79,7 @@ SamsungV2Decompressor::getDiff(BitStreamerMSB32& pump, uint32_t len) {
   if (len == 0)
     return 0;
   invariant(len <= 15 && "Difference occupies at most 15 bits.");
-  return implicit_cast<int16_t>(signExtend(pump.getBits(len), len));
+  return lossless_cast<int16_t>(signExtend(pump.getBits(len), len));
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
@@ -127,7 +127,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(8); // reserved
   startpump.getBits(8); // Inc
   startpump.getBits(2); // reserved
-  initVal = implicit_cast<uint16_t>(startpump.getBits(14));
+  initVal = lossless_cast<uint16_t>(startpump.getBits(14));
 
   invariant(startpump.getInputPosition() == headerSize);
 

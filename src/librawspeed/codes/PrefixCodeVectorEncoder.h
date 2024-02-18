@@ -42,7 +42,7 @@ private:
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
     invariant(codeIndex >= 0);
-    const auto numCodeSymbols = implicit_cast<int>(Base::code.symbols.size());
+    const auto numCodeSymbols = lossless_cast<int>(Base::code.symbols.size());
     invariant(codeIndex < numCodeSymbols);
     const typename Base::CodeSymbol& symbol = Base::code.symbols[codeIndex];
     bv.put(symbol.code, symbol.code_len);
@@ -51,7 +51,7 @@ private:
   [[nodiscard]] int
   getCodeIndexOfCodeValue(const typename Traits::CodeValueTy value) const {
     for (int codeIndex = 0;
-         codeIndex != implicit_cast<int>(Base::code.codeValues.size());
+         codeIndex != lossless_cast<int>(Base::code.codeValues.size());
          ++codeIndex) {
       const auto& codeValue = Base::code.codeValues[codeIndex];
       if (codeValue == value)
@@ -97,7 +97,7 @@ public:
     invariant(FULL_DECODE == Base::fullDecode);
 
     if constexpr (!FULL_DECODE)
-      encodeCodeValue(bv, implicit_cast<typename Traits::CodeValueTy>(value));
+      encodeCodeValue(bv, lossless_cast<typename Traits::CodeValueTy>(value));
     else
       encodeDifference(bv, value);
   }

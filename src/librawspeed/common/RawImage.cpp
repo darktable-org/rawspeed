@@ -79,7 +79,7 @@ void RawImageData::createData() {
 
   // want each line to start at 16-byte aligned address
   pitch =
-      implicit_cast<int>(roundUp(static_cast<size_t>(dim.x) * bpp, alignment));
+      lossless_cast<int>(roundUp(static_cast<size_t>(dim.x) * bpp, alignment));
   assert(isAligned(pitch, alignment));
 
 #if defined(DEBUG) || __has_feature(address_sanitizer) ||                      \
@@ -202,7 +202,7 @@ void RawImageData::createBadPixelMap() {
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
   mBadPixelMapPitch =
-      implicit_cast<uint32_t>(roundUp(roundUpDivision(uncropped_dim.x, 8), 16));
+      lossless_cast<uint32_t>(roundUp(roundUpDivision(uncropped_dim.x, 8), 16));
   assert(mBadPixelMap.empty());
   mBadPixelMap.resize(static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y,
                       uint8_t(0));

@@ -44,7 +44,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
   try {
     const rawspeed::Buffer b(
-        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
+        Data, rawspeed::lossless_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
@@ -82,7 +82,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     std::generate_n(std::back_inserter(rec), num_recips,
                     [&rec, hts, initPred]()
                         -> rawspeed::LJpegDecompressor::PerComponentRecipe {
-                      const auto i = rawspeed::implicit_cast<int>(rec.size());
+                      const auto i = rawspeed::lossless_cast<int>(rec.size());
                       return {*hts[i], initPred[i]};
                     });
 

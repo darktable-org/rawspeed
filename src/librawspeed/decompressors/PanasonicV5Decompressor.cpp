@@ -109,7 +109,7 @@ PanasonicV5Decompressor::PanasonicV5Decompressor(RawImage img,
 
   // We only want those blocks we need, no extras.
   input =
-      input_.peekStream(implicit_cast<Buffer::size_type>(numBlocks), BlockSize);
+      input_.peekStream(lossless_cast<Buffer::size_type>(numBlocks), BlockSize);
 
   chopInputIntoBlocks(*dsc);
 }
@@ -122,7 +122,7 @@ void PanasonicV5Decompressor::chopInputIntoBlocks(const PacketDsc& dsc) {
   invariant(numBlocks * BlockSize == input.getRemainSize());
   assert(numBlocks <= std::numeric_limits<uint32_t>::max());
   assert(numBlocks <= std::numeric_limits<size_t>::max());
-  blocks.reserve(implicit_cast<size_t>(numBlocks));
+  blocks.reserve(lossless_cast<size_t>(numBlocks));
 
   const auto pixelsPerBlock = dsc.pixelsPerPacket * PacketsPerBlock;
   invariant((numBlocks - 1U) * pixelsPerBlock < mRaw->dim.area());
@@ -173,7 +173,7 @@ class PanasonicV5Decompressor::ProxyStream {
 
     // And reset the clock.
     input = ByteStream(DataBuffer(
-        Buffer(buf.data(), implicit_cast<Buffer::size_type>(buf.size())),
+        Buffer(buf.data(), lossless_cast<Buffer::size_type>(buf.size())),
         Endianness::little));
     // input.setByteOrder(Endianness::big); // does not seem to matter?!
   }
@@ -200,8 +200,8 @@ inline void PanasonicV5Decompressor::processPixelPacket(BitStreamerLSB& bs,
 
   for (int p = 0; p < dsc.pixelsPerPacket;) {
     bs.fill();
-    for (; bs.getFillLevel() >= implicit_cast<int>(dsc.bps); ++p, ++col)
-      out(row, col) = implicit_cast<uint16_t>(bs.getBitsNoFill(dsc.bps));
+    for (; bs.getFillLevel() >= lossless_cast<int>(dsc.bps); ++p, ++col)
+      out(row, col) = lossless_cast<uint16_t>(bs.getBitsNoFill(dsc.bps));
   }
   bs.skipBitsNoFill(bs.getFillLevel()); // get rid of padding.
 }
@@ -241,7 +241,7 @@ void PanasonicV5Decompressor::decompressInternal() const noexcept {
 #endif
   for (const auto& block :
        Array1DRef(blocks.data(),
-                  implicit_cast<int>(
+                  lossless_cast<int>(
                       blocks.size()))) { // NOLINT(openmp-exception-escape): we
                                          // have checked size already.
     try {
