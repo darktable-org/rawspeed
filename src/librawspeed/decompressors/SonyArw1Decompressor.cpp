@@ -86,7 +86,7 @@ void SonyArw1Decompressor::decompress(ByteStream input) const {
       if (!isIntN(pred, 12))
         ThrowRDE("Error decompressing");
 
-      out(row, col) = implicit_cast<uint16_t>(pred);
+      out(row, col) = lossless_cast<uint16_t>(pred);
     }
   }
 }

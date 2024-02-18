@@ -96,7 +96,7 @@ void BinaryPrefixTree<CodeTag>::add(const CodeSymbol symbol, CodeTy value) {
   for (unsigned bit : symbol.getBitsMSB()) {
     ++partial.code_len;
     partial.code =
-        implicit_cast<typename Traits::CodeTy>((partial.code << 1) | bit);
+        lossless_cast<typename Traits::CodeTy>((partial.code << 1) | bit);
     std::unique_ptr<Node>& bud = newBud;
     if (!bud)
       bud = std::make_unique<Branch>();

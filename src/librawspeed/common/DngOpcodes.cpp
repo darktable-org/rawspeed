@@ -393,8 +393,8 @@ protected:
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
     const iPoint2D numAffected(
-        implicit_cast<int>(roundUpDivision(getRoi().dim.x, colPitch)),
-        implicit_cast<int>(roundUpDivision(getRoi().dim.y, rowPitch)));
+        lossless_cast<int>(roundUpDivision(getRoi().dim.x, colPitch)),
+        lossless_cast<int>(roundUpDivision(getRoi().dim.y, rowPitch)));
     for (int y = 0; y < numAffected.y; ++y) {
       for (int x = 0; x < numAffected.x; ++x) {
         for (auto p = 0U; p < planes; ++p) {
@@ -480,7 +480,7 @@ public:
     vector<double> polynomial;
 
     const auto polynomial_size = bs.getU32() + 1UL;
-    (void)bs.check(implicit_cast<Buffer::size_type>(8UL * polynomial_size));
+    (void)bs.check(lossless_cast<Buffer::size_type>(8UL * polynomial_size));
     if (polynomial_size > 9)
       ThrowRDE("A polynomial with more than 8 degrees not allowed");
 
@@ -493,9 +493,9 @@ public:
     for (auto i = 0UL; i < lookup.size(); ++i) {
       double val = polynomial[0];
       for (auto j = 1UL; j < polynomial.size(); ++j)
-        val += polynomial[j] * pow(implicit_cast<double>(i) / 65536.0,
-                                   implicit_cast<double>(j));
-      lookup[i] = implicit_cast<uint16_t>(std::clamp<double>(
+        val += polynomial[j] * pow(lossless_cast<double>(i) / 65536.0,
+                                   lossless_cast<double>(j));
+      lookup[i] = lossy_cast<uint16_t>(std::clamp<double>(
           val * 65535.5, std::numeric_limits<uint16_t>::min(),
           std::numeric_limits<uint16_t>::max()));
     }
@@ -546,7 +546,7 @@ public:
     for (const auto f : deltaF) {
       if (!valueIsOk(f))
         ThrowRDE("Got float %f which is unacceptable.",
-                 implicit_cast<double>(f));
+                 lossless_cast<double>(f));
       deltaI.emplace_back(static_cast<int>(f2iScale * f));
     }
   }
@@ -580,7 +580,7 @@ protected:
     std::generate_n(std::back_inserter(deltaF), deltaF_count, [&bs]() {
       const auto F = bs.get<float>();
       if (!std::isfinite(F))
-        ThrowRDE("Got bad float %f.", implicit_cast<double>(F));
+        ThrowRDE("Got bad float %f.", lossless_cast<double>(F));
       return F;
     });
   }
@@ -597,7 +597,7 @@ class DngOpcodes::OffsetPerRowOrCol final : public DeltaRowOrCol<S> {
   const double absLimit;
 
   bool valueIsOk(float value) override {
-    return implicit_cast<double>(std::abs(value)) <= absLimit;
+    return lossless_cast<double>(std::abs(value)) <= absLimit;
   }
 
 public:
@@ -605,7 +605,7 @@ public:
                              const iRectangle2D& integrated_subimg_)
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 65535.0F),
         absLimit(double(std::numeric_limits<uint16_t>::max()) /
-                 implicit_cast<double>(this->f2iScale)) {}
+                 lossless_cast<double>(this->f2iScale)) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {
@@ -635,7 +635,7 @@ class DngOpcodes::ScalePerRowOrCol final : public DeltaRowOrCol<S> {
   const double maxLimit;
 
   bool valueIsOk(float value) override {
-    return value >= minLimit && implicit_cast<double>(value) <= maxLimit;
+    return value >= minLimit && lossless_cast<double>(value) <= maxLimit;
   }
 
 public:
@@ -644,7 +644,7 @@ public:
       : DeltaRowOrCol<S>(ri, bs, integrated_subimg_, 1024.0F),
         maxLimit((double(std::numeric_limits<int>::max() - rounding) /
                   double(std::numeric_limits<uint16_t>::max())) /
-                 implicit_cast<double>(this->f2iScale)) {}
+                 lossless_cast<double>(this->f2iScale)) {}
 
   void apply(const RawImage& ri) override {
     if (ri->getDataType() == RawImageType::UINT16) {

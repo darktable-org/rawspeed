@@ -44,11 +44,11 @@ areaToRectangle(uint64_t area, iPoint2D aspect) {
   double sqARatio =
       sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));
 
-  iPoint2D dim(rawspeed::implicit_cast<int>(ceil(sqSide * sqARatio)),
-               rawspeed::implicit_cast<int>(ceil(sqSide / sqARatio)));
+  iPoint2D dim(rawspeed::lossless_cast<int>(ceil(sqSide * sqARatio)),
+               rawspeed::lossless_cast<int>(ceil(sqSide / sqARatio)));
 
-  dim.x = rawspeed::implicit_cast<int>(roundUp(dim.x, aspect.x));
-  dim.y = rawspeed::implicit_cast<int>(roundUp(dim.y, aspect.y));
+  dim.x = rawspeed::lossless_cast<int>(roundUp(dim.x, aspect.x));
+  dim.y = rawspeed::lossless_cast<int>(roundUp(dim.y, aspect.y));
 
   assert(dim.area() >= area);
 

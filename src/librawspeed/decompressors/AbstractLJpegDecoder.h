@@ -114,7 +114,7 @@ protected:
     std::vector<const PrefixCodeDecoder<>*> ht(N_COMP);
     for (int i = 0; i < N_COMP; ++i) {
       const unsigned dcTblNo = frame.compInfo[i].dcTblNo;
-      if (const auto dcTbls = implicit_cast<unsigned>(huff.size());
+      if (const auto dcTbls = lossless_cast<unsigned>(huff.size());
           dcTblNo >= dcTbls) {
         ThrowRDE("Decoding table %u for comp %i does not exist (tables = %u)",
                  dcTblNo, i, dcTbls);

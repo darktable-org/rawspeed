@@ -136,7 +136,7 @@ void DeflateDecompressor::decode(
   int bytesps = bps / 8;
   invariant(bytesps >= 2 && bytesps <= 4);
 
-  auto dstLen = implicit_cast<uLongf>(bytesps * maxDim.area());
+  auto dstLen = lossless_cast<uLongf>(bytesps * maxDim.area());
 
   if (!*uBuffer)
     *uBuffer =

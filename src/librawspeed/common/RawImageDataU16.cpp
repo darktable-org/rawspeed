@@ -190,7 +190,7 @@ void RawImageDataU16::scaleValues(int start_y, int end_y) {
 #else
 
   int depth_values = *whitePoint - (*blackLevelSeparate)(0, 0);
-  float app_scale = 65535.0F / implicit_cast<float>(depth_values);
+  float app_scale = 65535.0F / lossless_cast<float>(depth_values);
 
   // Check SSE2
   if (Cpuid::SSE2() && app_scale < 63) {
@@ -208,7 +208,7 @@ void RawImageDataU16::scaleValues_SSE2(int start_y, int end_y) {
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   int depth_values = *whitePoint - blackLevelSeparate1D(0);
-  float app_scale = 65535.0F / implicit_cast<float>(depth_values);
+  float app_scale = 65535.0F / lossless_cast<float>(depth_values);
 
   // Scale in 30.2 fp
   auto full_scale_fp = static_cast<int>(app_scale * 4.0F);
@@ -349,7 +349,7 @@ void RawImageDataU16::scaleValues_plain(int start_y, int end_y) {
   auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
   int depth_values = *whitePoint - blackLevelSeparate1D(0);
-  float app_scale = 65535.0F / implicit_cast<float>(depth_values);
+  float app_scale = 65535.0F / lossless_cast<float>(depth_values);
 
   // Scale in 30.2 fp
   auto full_scale_fp = static_cast<int>(app_scale * 4.0F);

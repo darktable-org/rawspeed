@@ -130,7 +130,7 @@ protected:
   template <typename Tag, typename TestDataType, typename L>
   void runTest(const TestDataType& data, L gen) {
     const rawspeed::Array1DRef<const uint8_t> input(
-        data.data(), rawspeed::implicit_cast<int>(data.size()));
+        data.data(), rawspeed::lossless_cast<int>(data.size()));
 
     PumpT pump(input);
     BitStreamerPatternTest<T, Tag>::Test(pump, gen);

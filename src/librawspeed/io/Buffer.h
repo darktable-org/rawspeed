@@ -65,10 +65,10 @@ public:
   }
 
   explicit Buffer(const uint8_t* data_, size_type size_)
-      : Buffer(Array1DRef(data_, implicit_cast<int>(size_))) {}
+      : Buffer(Array1DRef(data_, lossless_cast<int>(size_))) {}
 
   [[nodiscard]] Array1DRef<const uint8_t> getAsArray1DRef() const {
-    return {data, implicit_cast<int>(size)};
+    return {data, lossless_cast<int>(size)};
   }
 
   explicit operator Array1DRef<const uint8_t>() const {

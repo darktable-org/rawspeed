@@ -88,7 +88,7 @@ constexpr auto decompand(int16_t val) {
     return std::numeric_limits<int16_t>::max();
   if (c < std::numeric_limits<int16_t>::min())
     return std::numeric_limits<int16_t>::min();
-  return rawspeed::implicit_cast<int16_t>(c);
+  return rawspeed::lossy_cast<int16_t>(c);
 }
 
 #ifndef NDEBUG
@@ -406,12 +406,12 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
 
   // Initialize wavelet sizes.
   for (Channel& channel : channels) {
-    auto waveletWidth = implicit_cast<uint16_t>(mRaw->dim.x);
-    auto waveletHeight = implicit_cast<uint16_t>(mRaw->dim.y);
+    auto waveletWidth = lossless_cast<uint16_t>(mRaw->dim.x);
+    auto waveletHeight = lossless_cast<uint16_t>(mRaw->dim.y);
     for (Wavelet& wavelet : channel.wavelets) {
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
-        *dimension = implicit_cast<uint16_t>(roundUpDivision(*dimension, 2));
+        *dimension = lossless_cast<uint16_t>(roundUpDivision(*dimension, 2));
       wavelet.width = waveletWidth;
       wavelet.height = waveletHeight;
 
@@ -470,7 +470,7 @@ void VC5Decompressor::initVC5LogTable() {
         };
 
         auto normalizeI = [tableSize](auto x) {
-          return implicit_cast<double>(x) / (tableSize - 1.0);
+          return lossless_cast<double>(x) / (tableSize - 1.0);
         };
         auto denormalizeY = [maxVal = std::numeric_limits<uint16_t>::max()](
                                 auto y) { return maxVal * y; };
@@ -662,7 +662,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   const auto bytesTotal = bytesPerChunk * chunksTotal;
   // And clamp the size / verify sufficient input while we are at it.
   // NOTE: this might fail (and should throw, not assert).
-  input = bs.getStream(implicit_cast<Buffer::size_type>(bytesTotal))
+  input = bs.getStream(lossless_cast<Buffer::size_type>(bytesTotal))
               .getAsArray1DRef();
 }
 
@@ -951,7 +951,7 @@ VC5Decompressor::getRLV(const PrefixCodeDecoder& decoder,
   unsigned bitfield = decoder.decodeCodeValue(bits);
 
   unsigned int count = bitfield & ((1U << RLVRunLengthBitWidth) - 1U);
-  auto value = implicit_cast<int16_t>(bitfield >> RLVRunLengthBitWidth);
+  auto value = lossless_cast<int16_t>(bitfield >> RLVRunLengthBitWidth);
 
   if (value != 0 && bits.getBitsNoFill(1))
     value = -value;

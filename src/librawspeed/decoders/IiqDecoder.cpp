@@ -396,7 +396,7 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // later will work as expected
           const uint16_t diff = pixel < black_level
                                     ? pixel
-                                    : implicit_cast<uint16_t>(black_level);
+                                    : lossless_cast<uint16_t>(black_level);
           pixel = curve[pixel - diff] + diff;
         }
       }
@@ -427,8 +427,8 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
   if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
     return;
 
-  auto wide = implicit_cast<int>(roundUpDivision(head[2], head[4]));
-  auto high = implicit_cast<int>(roundUpDivision(head[3], head[5]));
+  auto wide = lossless_cast<int>(roundUpDivision(head[2], head[4]));
+  auto high = lossless_cast<int>(roundUpDivision(head[3], head[5]));
 
   std::vector<float> mrow_storage;
   Array2DRef<float> mrow = Array2DRef<float>::create(
@@ -464,8 +464,8 @@ void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
                   nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
                          : 0;
               !(c & 1)) {
-            auto val = implicit_cast<unsigned>(img(row, col) * mult[c]);
-            img(row, col) = implicit_cast<uint16_t>(std::min(val, 0xFFFFU));
+            auto val = lossy_cast<unsigned>(img(row, col) * mult[c]);
+            img(row, col) = lossless_cast<uint16_t>(std::min(val, 0xFFFFU));
           }
           for (int c = 0; c < nc; c += 2)
             mult[c] += mult[c + 1];
@@ -553,7 +553,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
       }
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
-      img(row, col) = implicit_cast<uint16_t>((three_pixels + 1) / 3);
+      img(row, col) = lossless_cast<uint16_t>((three_pixels + 1) / 3);
     } else {
       /*
        * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
@@ -569,7 +569,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
                        img(row + 2, col + 2) + img(row - 2, col + 2);
       uint32_t horiz = img(row, col - 2) + img(row, col + 2);
       // But this is not just averaging, we bias towards the horizontal pixels.
-      img(row, col) = implicit_cast<uint16_t>(
+      img(row, col) = lossless_cast<uint16_t>(
           std::lround(diags * 0.0732233 + horiz * 0.3535534));
     }
   }

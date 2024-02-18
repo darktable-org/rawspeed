@@ -86,7 +86,7 @@ inline void BM_DeflateDecompressor(benchmark::State& state) {
   const std::vector<uint8_t> cBuf = compressChunk<BPS>(mRaw, &cBufSize);
   assert(cBufSize > 0);
 
-  Buffer buf(cBuf.data(), rawspeed::implicit_cast<Buffer::size_type>(cBufSize));
+  Buffer buf(cBuf.data(), rawspeed::lossless_cast<Buffer::size_type>(cBufSize));
   assert(buf.getSize() == cBufSize);
 
   int predictor = 0;

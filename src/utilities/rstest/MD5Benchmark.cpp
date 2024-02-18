@@ -30,7 +30,7 @@ namespace {
 
 void BM_MD5(benchmark::State& state) {
   // Create a zero-initialized data. Content does not matter for our purpose.
-  std::vector<uint8_t> buf(rawspeed::implicit_cast<size_t>(state.range(0)),
+  std::vector<uint8_t> buf(rawspeed::lossless_cast<size_t>(state.range(0)),
                            uint8_t(0));
 
   for (auto _ : state) {

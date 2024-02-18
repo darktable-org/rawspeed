@@ -145,12 +145,12 @@ float RAWSPEED_READNONE CrwDecoder::canonEv(const int64_t in) {
   val -= frac;
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
-    frac = implicit_cast<int64_t>(32.0F / 3);
+    frac = lossless_cast<int64_t>(32.0F / 3);
   } else if (frac == 0x14) {
-    frac = implicit_cast<int64_t>(64.0F / 3);
+    frac = lossless_cast<int64_t>(64.0F / 3);
   }
-  return copysignf(implicit_cast<float>(val + frac) / 32.0F,
-                   implicit_cast<float>(in));
+  return copysignf(lossless_cast<float>(val + frac) / 32.0F,
+                   lossless_cast<float>(in));
 }
 
 void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -173,7 +173,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (shot_info->type == CiffDataType::SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
       uint16_t iso_index = shot_info->getU16(2);
-      iso = implicit_cast<int>(
+      iso = lossless_cast<int>(
           expf(canonEv(static_cast<int64_t>(iso_index)) * logf(2.0)) * 100.0F /
           32.0F);
     }

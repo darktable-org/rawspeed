@@ -86,14 +86,14 @@ void BM_Impl(benchmark::State& state) {
   benchmark::DoNotOptimize(numBytes);
 
   const std::vector<uint8_t> inStorage(
-      rawspeed::implicit_cast<size_t>(numBytes));
+      rawspeed::lossless_cast<size_t>(numBytes));
 
   const auto in = rawspeed::Array1DRef<const uint8_t>(
-      inStorage.data(), rawspeed::implicit_cast<int>(numBytes));
+      inStorage.data(), rawspeed::lossless_cast<int>(numBytes));
 
   std::array<uint8_t, bytesPerItem> outStorage;
   auto out = rawspeed::Array1DRef<uint8_t>(
-      outStorage.data(), rawspeed::implicit_cast<int>(bytesPerItem));
+      outStorage.data(), rawspeed::lossless_cast<int>(bytesPerItem));
 
   for (auto _ : state) {
     for (int inPos = 0; inPos < numBytes; inPos += bytesPerItem) {

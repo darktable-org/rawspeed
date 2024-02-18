@@ -100,7 +100,7 @@ struct JPEGStuffedByteStreamGenerator final {
   int64_t numBytesGenerated;
 
   [[nodiscard]] Array1DRef<const uint8_t> getInput() const {
-    return {dataStorage.data(), implicit_cast<int>(dataStorage.size())};
+    return {dataStorage.data(), lossless_cast<int>(dataStorage.size())};
   }
 
 #pragma GCC diagnostic push
@@ -113,7 +113,7 @@ struct JPEGStuffedByteStreamGenerator final {
       const int64_t numBytesMax) {
     invariant(numBytesMax > 0);
     const auto expectedOverhead = roundUpDivision(numBytesMax, 100); // <=1%
-    dataStorage.reserve(implicit_cast<size_t>(numBytesMax + expectedOverhead));
+    dataStorage.reserve(lossless_cast<size_t>(numBytesMax + expectedOverhead));
 
     // Here we only need to differentiate between a normal byte,
     // and an 0xFF00 sequence, so clump together non-0xFF frequencies.
@@ -123,8 +123,8 @@ struct JPEGStuffedByteStreamGenerator final {
     constexpr uint64_t ControlSequenceStartWeight = ByteFrequency.back();
 
     std::bernoulli_distribution controlSequenceStartDistribution(
-        implicit_cast<double>(ControlSequenceStartWeight) /
-        implicit_cast<double>(TotalWeight));
+        lossless_cast<double>(ControlSequenceStartWeight) /
+        lossless_cast<double>(TotalWeight));
     std::discrete_distribution<uint8_t> numConsecutive0xFF00Distribution(
         NumConsecutive0xFF00Frequency.begin(),
         NumConsecutive0xFF00Frequency.end());
@@ -159,14 +159,14 @@ struct JPEGUnstuffedByteStreamGenerator final {
   int64_t numBytesGenerated;
 
   [[nodiscard]] Array1DRef<const uint8_t> getInput() const {
-    return {dataStorage.data(), implicit_cast<int>(dataStorage.size())};
+    return {dataStorage.data(), lossless_cast<int>(dataStorage.size())};
   }
 
   __attribute__((noinline)) explicit JPEGUnstuffedByteStreamGenerator(
       const int64_t numBytesMax)
       : numBytesGenerated(numBytesMax) {
     invariant(numBytesGenerated > 0);
-    dataStorage.resize(implicit_cast<size_t>(numBytesGenerated), 0x00);
+    dataStorage.resize(lossless_cast<size_t>(numBytesGenerated), 0x00);
   }
 };
 

@@ -50,14 +50,14 @@ inline void BM_UncompressedDecompressor(benchmark::State& state) {
   auto dim = areaToRectangle(state.range(0));
 
   int inputPitchBits = BPS::value * dim.x;
-  inputPitchBits = rawspeed::implicit_cast<int>(
+  inputPitchBits = rawspeed::lossless_cast<int>(
       rawspeed::roundUp(inputPitchBits, std::lcm(8, BPS::value)));
   assert(inputPitchBits % 8 == 0);
   int inputPitchBytes = inputPitchBits / 8;
   assert(inputPitchBits % BPS::value == 0);
   dim.x = inputPitchBits / BPS::value;
 
-  auto packedLength = rawspeed::implicit_cast<int>(
+  auto packedLength = rawspeed::lossless_cast<int>(
       rawspeed::roundUp(inputPitchBytes * dim.y, 4));
   const std::vector<uint8_t> buf(packedLength);
   const rawspeed::ByteStream bs(rawspeed::DataBuffer(
