@@ -39,7 +39,8 @@ struct JPEGStuffedByteStreamGenerator final {
     return {dataStorage.data(), implicit_cast<int>(dataStorage.size())};
   }
 
-  explicit JPEGStuffedByteStreamGenerator(int64_t numBytesMax);
+  explicit JPEGStuffedByteStreamGenerator(int64_t numBytesMax,
+                                          bool AppendStuffingByte);
 };
 
 struct NonJPEGByteStreamGenerator final {

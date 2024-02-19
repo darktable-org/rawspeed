@@ -91,7 +91,7 @@ constexpr std::array<uint64_t, 4> NumConsecutive0xFF00Frequency = {0, 22513031,
 #pragma GCC diagnostic ignored "-Wstack-usage="
 __attribute__((noinline)) __attribute__((visibility("default")))
 JPEGStuffedByteStreamGenerator::JPEGStuffedByteStreamGenerator(
-    const int64_t numBytesMax) {
+    const int64_t numBytesMax, bool AppendStuffingByte) {
   invariant(numBytesMax > 0);
   const auto expectedOverhead = roundUpDivision(numBytesMax, 100); // <=1%
   dataStorage.reserve(implicit_cast<size_t>(numBytesMax + expectedOverhead));
@@ -123,7 +123,8 @@ JPEGStuffedByteStreamGenerator::JPEGStuffedByteStreamGenerator(
       invariant(len > 0);
       for (int i = 0; i != len; ++i) {
         dataStorage.emplace_back(0xFF);
-        dataStorage.emplace_back(0x00); // This is a no-op stuffing byte.
+        if (AppendStuffingByte)
+          dataStorage.emplace_back(0x00); // This is a no-op stuffing byte.
       }
       numBytesGenerated += len;
     }

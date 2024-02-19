@@ -46,7 +46,7 @@ template <typename T> void BM(benchmark::State& state, bool Stuffed) {
   Optional<NonJPEGByteStreamGenerator> genUnstuffed;
   Optional<Array1DRef<const uint8_t>> input;
   if (Stuffed) {
-    genStuffed.emplace(numBytes);
+    genStuffed.emplace(numBytes, /*AppendStuffingByte=*/true);
     numBytes = genStuffed->numBytesGenerated;
     input = genStuffed->getInput();
   } else {
