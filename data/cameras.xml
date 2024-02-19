@@ -11520,6 +11520,7 @@
 		<Sensor black="142" white="4095"/>
 		<Aliases>
 			<Alias>DC-TZ95</Alias>
+			<Alias>DC-TZ95D</Alias>
 			<Alias>DC-ZS80</Alias>
 		</Aliases>
 		<ColorMatrices>
@@ -11536,6 +11537,7 @@
 		<Sensor black="142" white="4095"/>
 		<Aliases>
 			<Alias>DC-TZ95</Alias>
+			<Alias>DC-TZ95D</Alias>
 			<Alias>DC-ZS80</Alias>
 		</Aliases>
 		<ColorMatrices>
