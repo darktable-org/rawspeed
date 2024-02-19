@@ -1,6 +1,16 @@
+FILE(GLOB RAWSPEED_BENCH_SOURCES
+  "BitStreamJPEGUtils.cpp"
+  "BitStreamJPEGUtils.h"
+)
+
+target_sources(rawspeed_bench PRIVATE
+  ${RAWSPEED_BENCH_SOURCES}
+)
+
+
 FILE(GLOB RAWSPEED_BENCHS_SOURCES
-  "BitStreamerJPEGBenchmark.cpp"
   "BitStreamerBenchmark.cpp"
+  "BitStreamerJPEGBenchmark.cpp"
   "BitVacuumerBenchmark.cpp"
 )
 
