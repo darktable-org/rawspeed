@@ -8,6 +8,7 @@ FILE(GLOB SOURCES
   "Bit.h"
   "BitIterator.h"
   "Casts.h"
+  "CoalescingOutputIterator.h"
   "CroppedArray1DRef.h"
   "CroppedArray2DRef.h"
   "DefaultInitAllocatorAdaptor.h"
