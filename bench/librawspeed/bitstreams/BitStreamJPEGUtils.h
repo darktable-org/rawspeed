@@ -42,7 +42,7 @@ struct JPEGStuffedByteStreamGenerator final {
   explicit JPEGStuffedByteStreamGenerator(int64_t numBytesMax);
 };
 
-struct JPEGUnstuffedByteStreamGenerator final {
+struct NonJPEGByteStreamGenerator final {
   std::vector<uint8_t,
               DefaultInitAllocatorAdaptor<uint8_t, std::allocator<uint8_t>>>
       dataStorage;
@@ -52,7 +52,7 @@ struct JPEGUnstuffedByteStreamGenerator final {
     return {dataStorage.data(), implicit_cast<int>(dataStorage.size())};
   }
 
-  __attribute__((noinline)) explicit JPEGUnstuffedByteStreamGenerator(
+  __attribute__((noinline)) explicit NonJPEGByteStreamGenerator(
       const int64_t numBytesMax)
       : numBytesGenerated(numBytesMax) {
     invariant(numBytesGenerated > 0);

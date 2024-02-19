@@ -43,7 +43,7 @@ template <typename T> void BM(benchmark::State& state, bool Stuffed) {
   assert(numBytes <= std::numeric_limits<int>::max());
 
   Optional<JPEGStuffedByteStreamGenerator> genStuffed;
-  Optional<JPEGUnstuffedByteStreamGenerator> genUnstuffed;
+  Optional<NonJPEGByteStreamGenerator> genUnstuffed;
   Optional<Array1DRef<const uint8_t>> input;
   if (Stuffed) {
     genStuffed.emplace(numBytes);
