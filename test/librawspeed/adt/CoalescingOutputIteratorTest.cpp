@@ -20,6 +20,7 @@
 
 #include "adt/CoalescingOutputIterator.h"
 #include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "common/Common.h"
 #include <algorithm>
 #include <cstddef>
