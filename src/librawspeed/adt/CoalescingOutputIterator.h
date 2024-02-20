@@ -70,7 +70,7 @@ class CoalescingOutputIterator {
 public:
   using iterator_concept = std::output_iterator_tag;
   using value_type = void;
-  using difference_type = void;
+  using difference_type = ptrdiff_t;
   using pointer = void;
   using reference = void;
 
@@ -82,6 +82,28 @@ public:
     requires std::same_as<UnderlyingOutputIterator, std::remove_reference_t<U>>
   inline explicit CoalescingOutputIterator(U&& it_)
       : it(std::forward<U>(it_)) {}
+
+  CoalescingOutputIterator(const CoalescingOutputIterator& other)
+      : it(other.it) {
+    invariant(occupancy == 0);
+    invariant(other.occupancy == 0);
+  }
+  CoalescingOutputIterator(CoalescingOutputIterator&& other) noexcept
+      : CoalescingOutputIterator(
+            static_cast<const CoalescingOutputIterator&>(other)) {}
+
+  CoalescingOutputIterator& operator=(const CoalescingOutputIterator& other) {
+    invariant(occupancy == 0);
+    invariant(other.occupancy == 0);
+    CoalescingOutputIterator tmp(other);
+    std::swap(*this, tmp);
+    return *this;
+  }
+  CoalescingOutputIterator&
+  operator=(CoalescingOutputIterator&& other) noexcept {
+    *this = static_cast<const CoalescingOutputIterator&>(other);
+    return *this;
+  }
 
   inline ~CoalescingOutputIterator() {
     establishClassInvariants();
@@ -101,13 +123,13 @@ public:
     return *this;
   }
 
-  inline const CoalescingOutputIterator& operator++() const {
+  inline CoalescingOutputIterator& operator++() {
     establishClassInvariants();
     return *this;
   }
 
   // NOLINTNEXTLINE(cert-dcl21-cpp)
-  inline CoalescingOutputIterator operator++(int) const {
+  inline CoalescingOutputIterator operator++(int) {
     establishClassInvariants();
     return *this;
   }
