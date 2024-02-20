@@ -34,6 +34,9 @@ template <typename BIT_STREAM> struct BitVacuumerTraits;
 template <typename Derived_, typename OutputIterator_>
   requires std::output_iterator<OutputIterator_, uint8_t>
 class BitVacuumer {
+  static_assert(std::same_as<
+                uint8_t, typename OutputIterator_::container_type::value_type>);
+
 public:
   using Traits = BitVacuumerTraits<Derived_>;
   using StreamTraits = BitStreamTraits<typename Traits::Stream>;
