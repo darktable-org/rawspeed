@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <type_traits>
 #include <vector>
 #include <benchmark/benchmark.h>
 
@@ -35,18 +36,28 @@ namespace rawspeed {
 
 namespace {
 
-template <typename T, typename UnderlyingOutputIterator>
-auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
-  return CoalescingOutputIterator(e);
-}
+template <bool b, typename T> struct C {
+  using coalescing = std::bool_constant<b>;
+  using value_type = T;
+};
+using NoCoalescing = C<false, uint8_t>;
+template <typename T> using CoalesceTo = C<true, T>;
 
-template <typename T, typename UnderlyingOutputIterator>
-  requires std::same_as<T, uint8_t>
+template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
+  requires(!ShouldCoalesce)
 auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
   return e;
 }
 
-template <typename T> void BM_Broadcast(benchmark::State& state) {
+template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
+  requires(ShouldCoalesce)
+auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
+  return CoalescingOutputIterator(e);
+}
+
+template <typename C> void BM_Broadcast(benchmark::State& state) {
+  using T = typename C::value_type;
+
   int64_t numBytes = state.range(0);
   const int bytesPerChunk = sizeof(T);
   const auto numChunks =
@@ -59,7 +70,8 @@ template <typename T> void BM_Broadcast(benchmark::State& state) {
   for (auto _ : state) {
     output.clear();
 
-    auto iter = getMaybeCoalescingOutputIterator<T>(std::back_inserter(output));
+    auto iter = getMaybeCoalescingOutputIterator<C::coalescing::value>(
+        std::back_inserter(output));
     uint8_t value = 0;
     for (int chunkIndex = 0; chunkIndex != numChunks; ++chunkIndex) {
 #if defined(__clang__)
@@ -87,7 +99,9 @@ template <typename T> void BM_Broadcast(benchmark::State& state) {
   });
 }
 
-template <typename T> void BM_Copy(benchmark::State& state) {
+template <typename C> void BM_Copy(benchmark::State& state) {
+  using T = typename C::value_type;
+
   int64_t numBytes = state.range(0);
   const int bytesPerChunk = sizeof(T);
   const auto numChunks =
@@ -107,7 +121,8 @@ template <typename T> void BM_Copy(benchmark::State& state) {
   for (auto _ : state) {
     output.clear();
 
-    auto iter = getMaybeCoalescingOutputIterator<T>(std::back_inserter(output));
+    auto iter = getMaybeCoalescingOutputIterator<C::coalescing::value>(
+        std::back_inserter(output));
     for (int chunkIndex = 0; chunkIndex != numChunks; ++chunkIndex) {
       const auto chunk =
           input.getBlock(bytesPerChunk, chunkIndex).getAsArray1DRef();
@@ -157,13 +172,13 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 // NOLINTNEXTLINE(bugprone-macro-parentheses)
-#define GEN(I, T) BENCHMARK(I<T>)->Apply(CustomArguments)
+#define GEN(I, C) BENCHMARK(I<C>)->Apply(CustomArguments)
 
 #define GEN_T(I)                                                               \
-  GEN(I, uint8_t);                                                             \
-  GEN(I, uint16_t);                                                            \
-  GEN(I, uint32_t);                                                            \
-  GEN(I, uint64_t)
+  GEN(I, NoCoalescing);                                                        \
+  GEN(I, CoalesceTo<uint16_t>);                                                \
+  GEN(I, CoalesceTo<uint32_t>);                                                \
+  GEN(I, CoalesceTo<uint64_t>)
 
 GEN_T(BM_Broadcast);
 GEN_T(BM_Copy);
