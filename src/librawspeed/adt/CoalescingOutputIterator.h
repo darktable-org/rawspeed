@@ -61,12 +61,18 @@ class CoalescingOutputIterator {
     occupancy = 0;
   }
 
+  struct DummyContainerType {
+    using value_type = PartType;
+  };
+
 public:
   using iterator_concept = std::output_iterator_tag;
   using value_type = void;
   using difference_type = void;
   using pointer = void;
   using reference = void;
+
+  using container_type = DummyContainerType;
 
   CoalescingOutputIterator() = delete;
 
