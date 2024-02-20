@@ -42,6 +42,9 @@ struct BitVacuumerTraits<BitVacuumerJPEG<OutputIterator>> final {
 template <typename OutputIterator>
 class BitVacuumerJPEG final
     : public BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator> {
+  static_assert(std::same_as<
+                uint8_t, typename OutputIterator::container_type::value_type>);
+
   using Base = BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator>;
   using StreamTraits = typename Base::StreamTraits;
 
