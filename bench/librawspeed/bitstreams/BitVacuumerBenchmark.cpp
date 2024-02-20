@@ -24,7 +24,6 @@
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Invariant.h"
 #include "bench/Common.h"
-#include "bitstreams/BitVacuumerJPEG.h"
 #include "bitstreams/BitVacuumerLSB.h"
 #include "bitstreams/BitVacuumerMSB.h"
 #include "bitstreams/BitVacuumerMSB16.h"
@@ -52,7 +51,6 @@ struct BitstreamFlavorLSB;
 struct BitstreamFlavorMSB;
 struct BitstreamFlavorMSB16;
 struct BitstreamFlavorMSB32;
-struct BitstreamFlavorJPEG;
 
 template <typename T> struct BitStreamRoundtripTypes final {};
 
@@ -74,11 +72,6 @@ template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB16> final {
 template <> struct BitStreamRoundtripTypes<BitstreamFlavorMSB32> final {
   template <typename OutputIterator>
   using vacuumer = BitVacuumerMSB32<OutputIterator>;
-};
-
-template <> struct BitStreamRoundtripTypes<BitstreamFlavorJPEG> final {
-  template <typename OutputIterator>
-  using vacuumer = BitVacuumerJPEG<OutputIterator>;
 };
 
 struct BitVectorLengthsGenerator final {
@@ -189,7 +182,6 @@ BENCHMARK_TEMPLATE(BM, BitstreamFlavorLSB)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM, BitstreamFlavorMSB)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM, BitstreamFlavorMSB16)->Apply(CustomArguments);
 BENCHMARK_TEMPLATE(BM, BitstreamFlavorMSB32)->Apply(CustomArguments);
-BENCHMARK_TEMPLATE(BM, BitstreamFlavorJPEG)->Apply(CustomArguments);
 
 } // namespace
 

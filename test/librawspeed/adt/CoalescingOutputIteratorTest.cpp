@@ -20,6 +20,7 @@
 
 #include "adt/CoalescingOutputIterator.h"
 #include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "common/Common.h"
 #include <algorithm>
 #include <cstddef>
@@ -78,6 +79,7 @@ TYPED_TEST_P(CoalescingOutputIteratorTest, Exhaustive) {
       outputStorage.reserve(implicit_cast<size_t>(
           roundUpDivision(numInputBytes, sizeof(TypeParam))));
       auto iter = CoalescingOutputIterator(std::back_inserter(outputStorage));
+      static_assert(std::output_iterator<decltype(iter), uint8_t>);
       for (const auto& e : input)
         *iter = e;
     }

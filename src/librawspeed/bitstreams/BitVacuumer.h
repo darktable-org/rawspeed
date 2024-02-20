@@ -34,6 +34,9 @@ template <typename BIT_STREAM> struct BitVacuumerTraits;
 template <typename Derived_, typename OutputIterator_>
   requires std::output_iterator<OutputIterator_, uint8_t>
 class BitVacuumer {
+  static_assert(std::same_as<
+                uint8_t, typename OutputIterator_::container_type::value_type>);
+
 public:
   using Traits = BitVacuumerTraits<Derived_>;
   using StreamTraits = BitStreamTraits<typename Traits::Stream>;
@@ -112,7 +115,9 @@ public:
   BitVacuumer& operator=(const BitVacuumer&) = delete;
   BitVacuumer& operator=(BitVacuumer&&) = delete;
 
-  inline explicit BitVacuumer(OutputIterator output_) : output(output_) {}
+  template <typename U>
+    requires std::same_as<OutputIterator, std::remove_reference_t<U>>
+  inline explicit BitVacuumer(U&& output_) : output(std::forward<U>(output_)) {}
 
   inline ~BitVacuumer() { flush(); }
 

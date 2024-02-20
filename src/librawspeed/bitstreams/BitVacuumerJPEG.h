@@ -27,6 +27,7 @@
 #include "io/Endianness.h"
 #include <cstddef>
 #include <cstdint>
+#include <numeric>
 
 namespace rawspeed {
 
@@ -42,6 +43,9 @@ struct BitVacuumerTraits<BitVacuumerJPEG<OutputIterator>> final {
 template <typename OutputIterator>
 class BitVacuumerJPEG final
     : public BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator> {
+  static_assert(std::same_as<
+                uint8_t, typename OutputIterator::container_type::value_type>);
+
   using Base = BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator>;
   using StreamTraits = typename Base::StreamTraits;
 
@@ -65,6 +69,18 @@ class BitVacuumerJPEG final
     Base::cache.skip(StreamChunkBitwidth);
 
     const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
+
+    // short-cut path for the most common case (no FF marker in the next 4
+    // bytes) this is slightly faster than the else-case alone.
+    if (std::accumulate(bytes.begin(), bytes.end(), bool(true),
+                        [](bool b, std::byte byte) {
+                          return b && (byte != std::byte{0xFF});
+                        })) {
+      for (const auto byte : bytes)
+        *Base::output = static_cast<uint8_t>(byte);
+      return;
+    }
+
     for (const auto byte : bytes) {
       *Base::output = static_cast<uint8_t>(byte);
       if (static_cast<uint8_t>(byte) == 0xFF)
