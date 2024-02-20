@@ -71,8 +71,9 @@ public:
   CoalescingOutputIterator() = delete;
 
   template <typename U>
-    requires std::same_as<U, UnderlyingOutputIterator>
-  inline explicit CoalescingOutputIterator(U it_) : it(it_) {}
+    requires std::same_as<UnderlyingOutputIterator, std::remove_reference_t<U>>
+  inline explicit CoalescingOutputIterator(U&& it_)
+      : it(std::forward<U>(it_)) {}
 
   inline ~CoalescingOutputIterator() {
     establishClassInvariants();
