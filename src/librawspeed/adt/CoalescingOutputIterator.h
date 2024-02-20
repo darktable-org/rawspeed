@@ -50,10 +50,12 @@ class CoalescingOutputIterator {
   inline void establishClassInvariants() const {
     invariant(occupancy >= 0);
     invariant(occupancy <= MaxOccupancy);
+    invariant(occupancy % bitwidth<PartType>() == 0);
   }
 
   inline void maybeOutputCoalescedParts() {
     establishClassInvariants();
+    invariant(occupancy > 0);
     if (occupancy != MaxOccupancy)
       return;
     *it = getLE<CoalescedType>(&cache);
