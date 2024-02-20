@@ -21,6 +21,7 @@
 #include "bitstreams/BitVacuumerJPEG.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/CoalescingOutputIterator.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Optional.h"
 #include "bench/Common.h"
@@ -64,11 +65,18 @@ template <bool b, typename T> struct C {
   using value_type = T;
 };
 using NoCoalescing = C<false, uint8_t>;
+template <typename T> using CoalesceTo = C<true, T>;
 
 template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
   requires(!ShouldCoalesce)
 auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
   return e;
+}
+
+template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
+  requires(ShouldCoalesce)
+auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
+  return CoalescingOutputIterator(e);
 }
 
 template <typename T, typename C>
@@ -168,7 +176,11 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
 #define GEN(A, B, C, D)                                                        \
   BENCHMARK_TEMPLATE2_CAPTURE(BM, A, B, C, D)->Apply(CustomArguments)
 
-#define GEN_T(A, C, D) GEN(A, NoCoalescing, C, D)
+#define GEN_T(A, C, D)                                                         \
+  GEN(A, NoCoalescing, C, D);                                                  \
+  GEN(A, CoalesceTo<uint16_t>, C, D);                                          \
+  GEN(A, CoalesceTo<uint32_t>, C, D);                                          \
+  GEN(A, CoalesceTo<uint64_t>, C, D)
 
 GEN_T(BitstreamFlavorJPEG, Stuffed, true);
 GEN_T(BitstreamFlavorJPEG, Unstuffed, false);
