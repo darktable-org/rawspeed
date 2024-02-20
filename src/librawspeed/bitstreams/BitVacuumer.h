@@ -115,7 +115,9 @@ public:
   BitVacuumer& operator=(const BitVacuumer&) = delete;
   BitVacuumer& operator=(BitVacuumer&&) = delete;
 
-  inline explicit BitVacuumer(OutputIterator output_) : output(output_) {}
+  template <typename U>
+    requires std::same_as<OutputIterator, std::remove_reference_t<U>>
+  inline explicit BitVacuumer(U&& output_) : output(std::forward<U>(output_)) {}
 
   inline ~BitVacuumer() { flush(); }
 
