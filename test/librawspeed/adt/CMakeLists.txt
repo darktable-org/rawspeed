@@ -1,5 +1,6 @@
 FILE(GLOB RAWSPEED_TEST_SOURCES
   "BitTest.cpp"
+  "CoalescingOutputIteratorTest.cpp"
   "NORangesSetTest.cpp"
   "PointTest.cpp"
   "RangeTest.cpp"
