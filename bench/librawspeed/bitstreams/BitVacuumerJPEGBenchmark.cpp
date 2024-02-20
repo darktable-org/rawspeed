@@ -20,15 +20,19 @@
 
 #include "bitstreams/BitVacuumerJPEG.h"
 #include "adt/Array1DRef.h"
+#include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Optional.h"
 #include "bench/Common.h"
 #include "bitstreams/BitStreamJPEGUtils.h"
 #include "bitstreams/BitVacuumerMSB.h"
+#include "common/Common.h"
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <memory>
+#include <type_traits>
 #include <vector>
 #include <benchmark/benchmark.h>
 
@@ -55,7 +59,20 @@ template <> struct BitStreamRoundtripTypes<BitstreamFlavorJPEG> final {
   using vacuumer = BitVacuumerJPEG<OutputIterator>;
 };
 
-template <typename T> void BM(benchmark::State& state, bool Stuffed) {
+template <bool b, typename T> struct C {
+  using coalescing = std::bool_constant<b>;
+  using value_type = T;
+};
+using NoCoalescing = C<false, uint8_t>;
+
+template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
+  requires(!ShouldCoalesce)
+auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
+  return e;
+}
+
+template <typename T, typename C>
+void BM(benchmark::State& state, bool Stuffed) {
   int64_t numBytes = state.range(0);
   assert(numBytes > 0);
   assert(numBytes <= std::numeric_limits<int>::max());
@@ -74,15 +91,19 @@ template <typename T> void BM(benchmark::State& state, bool Stuffed) {
   }
   benchmark::DoNotOptimize(input->begin());
 
-  std::vector<uint8_t,
-              DefaultInitAllocatorAdaptor<uint8_t, std::allocator<uint8_t>>>
+  using OutputChunkType = typename C::value_type;
+  std::vector<OutputChunkType,
+              DefaultInitAllocatorAdaptor<OutputChunkType,
+                                          std::allocator<OutputChunkType>>>
       output;
-  output.reserve(input->size());
+  output.reserve(implicit_cast<size_t>(
+      roundUpDivision(input->size(), sizeof(OutputChunkType))));
 
   for (auto _ : state) {
     output.clear();
 
-    auto bsInserter = std::back_inserter(output);
+    auto bsInserter = getMaybeCoalescingOutputIterator<C::coalescing::value>(
+        std::back_inserter(output));
     using BitVacuumer = typename BitStreamRoundtripTypes<T>::template vacuumer<
         decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);
@@ -131,23 +152,29 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
-#ifndef BENCHMARK_TEMPLATE1_CAPTURE
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BENCHMARK_TEMPLATE1_CAPTURE(func, a, test_case_name, ...)              \
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+#ifndef BENCHMARK_TEMPLATE2_CAPTURE
+#define BENCHMARK_TEMPLATE2_CAPTURE(func, a, b, test_case_name, ...)           \
   BENCHMARK_PRIVATE_DECLARE(func) =                                            \
       (::benchmark::internal::RegisterBenchmarkInternal(                       \
           new ::benchmark::internal::FunctionBenchmark(                        \
-              #func "<" #a ">"                                                 \
+              #func "<" #a "," #b ">"                                          \
                     "/" #test_case_name,                                       \
-              [](::benchmark::State& st) { func<a>(st, __VA_ARGS__); })))
-#endif // BENCHMARK_TEMPLATE1_CAPTURE
+              [](::benchmark::State& st) { func<a, b>(st, __VA_ARGS__); })))
+#endif // BENCHMARK_TEMPLATE2_CAPTURE
 
-BENCHMARK_TEMPLATE1_CAPTURE(BM, BitstreamFlavorJPEG, Stuffed, true)
-    ->Apply(CustomArguments);
-BENCHMARK_TEMPLATE1_CAPTURE(BM, BitstreamFlavorJPEG, Unstuffed, false)
-    ->Apply(CustomArguments);
-BENCHMARK_TEMPLATE1_CAPTURE(BM, BitstreamFlavorMSB, Unstuffed, false)
-    ->Apply(CustomArguments);
+// NOLINTNEXTLINE(bugprone-macro-parentheses)
+#define GEN(A, B, C, D)                                                        \
+  BENCHMARK_TEMPLATE2_CAPTURE(BM, A, B, C, D)->Apply(CustomArguments)
+
+#define GEN_T(A, C, D) GEN(A, NoCoalescing, C, D)
+
+GEN_T(BitstreamFlavorJPEG, Stuffed, true);
+GEN_T(BitstreamFlavorJPEG, Unstuffed, false);
+GEN_T(BitstreamFlavorMSB, Unstuffed, false);
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 } // namespace
 
