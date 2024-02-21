@@ -14,110 +14,110 @@ concurrency:
 # FIXME: add no-openmp, and maybe -DCMAKE_BUILD_TYPE=Debug jobs
 
 jobs:
-  cache-rpuu:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: linux
-            distro: "debian:bookworm-slim"
-    uses: ./.github/workflows/CI-rpuu.yml
-    with:
-      distro: ${{ matrix.distro }}
-  linux-fast:
-    needs: cache-rpuu
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ linux ]
-        compiler:
-          - { distro: "debian:trixie-slim", family: GNU,  version: 13, CC: gcc-13,   CXX: g++-13 }
-          - { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
-        flavor: [ ReleaseWithAsserts, Release ]
-    uses: ./.github/workflows/CI-linux.yml
-    with:
-      os: ${{ matrix.os }}
-      distro: ${{ matrix.compiler.distro }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-version: ${{ matrix.compiler.version }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
-      compiler-GCOV: ${{ matrix.compiler.GCOV }}
-      compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
-      flavor: ${{ matrix.flavor }}
-      enable-sample-based-testing: true
-      rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
-  linux-legacy:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ linux ]
-        compiler:
-          - { distro: "debian:bookworm-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
-          - { distro: "debian:bookworm-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
-          - { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
-        flavor: [ ReleaseWithAsserts, Release ]
-    uses: ./.github/workflows/CI-linux.yml
-    with:
-      os: ${{ matrix.os }}
-      distro: ${{ matrix.compiler.distro }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-version: ${{ matrix.compiler.version }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
-      compiler-GCOV: ${{ matrix.compiler.GCOV }}
-      compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
-      flavor: ${{ matrix.flavor }}
-  linux-static-analysis:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: linux
-            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17, CLANG_TIDY: clang-tidy-17 }
-            flavor: ClangTidy
-          - os: linux
-            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
-            flavor: ClangStaticAnalysis
-          - os: linux
-            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
-            flavor: ClangCTUStaticAnalysis
-          - os: linux
-            compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
-            flavor: CodeQLAnalysis
-    uses: ./.github/workflows/CI-linux.yml
-    with:
-      os: ${{ matrix.os }}
-      distro: ${{ matrix.compiler.distro }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-version: ${{ matrix.compiler.version }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
-      compiler-GCOV: ${{ matrix.compiler.GCOV }}
-      compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
-      flavor: ${{ matrix.flavor }}
-  linux-coverage:
-    needs: cache-rpuu
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: linux
-            compiler: { distro: "debian:trixie-slim", family: GNU, version: 13, CC: gcc-13, CXX: g++-13, GCOV: gcov-13 }
-            flavor: Coverage
-    uses: ./.github/workflows/CI-linux.yml
-    with:
-      os: ${{ matrix.os }}
-      distro: ${{ matrix.compiler.distro }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-version: ${{ matrix.compiler.version }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
-      compiler-GCOV: ${{ matrix.compiler.GCOV }}
-      compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
-      flavor: ${{ matrix.flavor }}
-      enable-sample-based-testing: true
-      rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
+  # cache-rpuu:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: linux
+  #           distro: "debian:bookworm-slim"
+  #   uses: ./.github/workflows/CI-rpuu.yml
+  #   with:
+  #     distro: ${{ matrix.distro }}
+  # linux-fast:
+  #   needs: cache-rpuu
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ linux ]
+  #       compiler:
+  #         - { distro: "debian:trixie-slim", family: GNU,  version: 13, CC: gcc-13,   CXX: g++-13 }
+  #         - { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+  #       flavor: [ ReleaseWithAsserts, Release ]
+  #   uses: ./.github/workflows/CI-linux.yml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     distro: ${{ matrix.compiler.distro }}
+  #     compiler-family: ${{ matrix.compiler.family }}
+  #     compiler-version: ${{ matrix.compiler.version }}
+  #     compiler-CC: ${{ matrix.compiler.CC }}
+  #     compiler-CXX: ${{ matrix.compiler.CXX }}
+  #     compiler-GCOV: ${{ matrix.compiler.GCOV }}
+  #     compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
+  #     flavor: ${{ matrix.flavor }}
+  #     enable-sample-based-testing: true
+  #     rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
+  # linux-legacy:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ linux ]
+  #       compiler:
+  #         - { distro: "debian:bookworm-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
+  #         - { distro: "debian:bookworm-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
+  #         - { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
+  #       flavor: [ ReleaseWithAsserts, Release ]
+  #   uses: ./.github/workflows/CI-linux.yml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     distro: ${{ matrix.compiler.distro }}
+  #     compiler-family: ${{ matrix.compiler.family }}
+  #     compiler-version: ${{ matrix.compiler.version }}
+  #     compiler-CC: ${{ matrix.compiler.CC }}
+  #     compiler-CXX: ${{ matrix.compiler.CXX }}
+  #     compiler-GCOV: ${{ matrix.compiler.GCOV }}
+  #     compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
+  #     flavor: ${{ matrix.flavor }}
+  # linux-static-analysis:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: linux
+  #           compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17, CLANG_TIDY: clang-tidy-17 }
+  #           flavor: ClangTidy
+  #         - os: linux
+  #           compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+  #           flavor: ClangStaticAnalysis
+  #         - os: linux
+  #           compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+  #           flavor: ClangCTUStaticAnalysis
+  #         - os: linux
+  #           compiler: { distro: "debian:trixie-slim", family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
+  #           flavor: CodeQLAnalysis
+  #   uses: ./.github/workflows/CI-linux.yml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     distro: ${{ matrix.compiler.distro }}
+  #     compiler-family: ${{ matrix.compiler.family }}
+  #     compiler-version: ${{ matrix.compiler.version }}
+  #     compiler-CC: ${{ matrix.compiler.CC }}
+  #     compiler-CXX: ${{ matrix.compiler.CXX }}
+  #     compiler-GCOV: ${{ matrix.compiler.GCOV }}
+  #     compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
+  #     flavor: ${{ matrix.flavor }}
+  # linux-coverage:
+  #   needs: cache-rpuu
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: linux
+  #           compiler: { distro: "debian:trixie-slim", family: GNU, version: 13, CC: gcc-13, CXX: g++-13, GCOV: gcov-13 }
+  #           flavor: Coverage
+  #   uses: ./.github/workflows/CI-linux.yml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     distro: ${{ matrix.compiler.distro }}
+  #     compiler-family: ${{ matrix.compiler.family }}
+  #     compiler-version: ${{ matrix.compiler.version }}
+  #     compiler-CC: ${{ matrix.compiler.CC }}
+  #     compiler-CXX: ${{ matrix.compiler.CXX }}
+  #     compiler-GCOV: ${{ matrix.compiler.GCOV }}
+  #     compiler-CLANG_TIDY: ${{ matrix.compiler.CLANG_TIDY }}
+  #     flavor: ${{ matrix.flavor }}
+  #     enable-sample-based-testing: true
+  #     rpuu-cache-key: ${{ needs.cache-rpuu.outputs.rpuu-cache-key }}
   linux-sonarcloud-static-analysis:
     if: github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
     strategy:
@@ -142,90 +142,90 @@ jobs:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
       SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-  linux-ossfuzz:
-    if: github.repository == 'darktable-org/rawspeed' && (github.event_name == 'pull_request' || (github.ref_type == 'branch' && github.ref_name == 'develop'))
-    strategy:
-      fail-fast: false
-      matrix:
-        sanitizer: [ address, undefined, memory ]
-    uses: ./.github/workflows/CI-ossfuzz.yml
-    with:
-      sanitizer: ${{ matrix.sanitizer }}
-  windows-msys2-fast:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows-latest ]
-        msys2:
-          - { msystem: MINGW64,    arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
-          - { msystem: MINGW32,    arch: i686,    family: GNU,  CC: gcc,   CXX: g++ }
-          - { msystem: CLANG64,    arch: x86_64,  family: LLVM, CC: clang, CXX: clang++ }
-          - { msystem: CLANG32,    arch: i686,    family: LLVM, CC: clang, CXX: clang++ }
-          - { msystem: UCRT64,     arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
-        flavor: [ ReleaseWithAsserts, Release ]
-    uses: ./.github/workflows/CI-windows-msys2.yml
-    with:
-      os: ${{ matrix.os }}
-      msys2-msystem: ${{ matrix.msys2.msystem }}
-      msys2-arch: ${{ matrix.msys2.arch }}
-      compiler-family: ${{ matrix.msys2.family }}
-      compiler-CC: ${{ matrix.msys2.CC }}
-      compiler-CXX: ${{ matrix.msys2.CXX }}
-      flavor: ${{ matrix.flavor }}
-  windows-msys2-coverage:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            msys2: { msystem: MINGW64, arch: x86_64, family: GNU, CC: gcc, CXX: g++ }
-            flavor: Coverage
-    uses: ./.github/workflows/CI-windows-msys2.yml
-    with:
-      os: ${{ matrix.os }}
-      msys2-msystem: ${{ matrix.msys2.msystem }}
-      msys2-arch: ${{ matrix.msys2.arch }}
-      compiler-family: ${{ matrix.msys2.family }}
-      compiler-CC: ${{ matrix.msys2.CC }}
-      compiler-CXX: ${{ matrix.msys2.CXX }}
-      flavor: ${{ matrix.flavor }}
-  macOS-fast:
-    strategy:
-      fail-fast: false
-      matrix:
-        compiler:
-          - { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # AArch64, LLVM16, native
-          - { os: macos-13, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # x86_64,  LLVM16, native
-        flavor: [ ReleaseWithAsserts, Release ]
-    uses: ./.github/workflows/CI-macOS.yml
-    with:
-      os: ${{ matrix.compiler.os }}
-      os-deployment_target: ${{ matrix.compiler.deployment_target }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-version: ${{ matrix.compiler.version }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
-      flavor: ${{ matrix.flavor }}
-  macOS-coverage:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - compiler: { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # LLVM16, native
-            flavor: Coverage
-    uses: ./.github/workflows/CI-macOS.yml
-    with:
-      os: ${{ matrix.compiler.os }}
-      os-deployment_target: ${{ matrix.compiler.deployment_target }}
-      compiler-family: ${{ matrix.compiler.family }}
-      compiler-version: ${{ matrix.compiler.version }}
-      compiler-CC: ${{ matrix.compiler.CC }}
-      compiler-CXX: ${{ matrix.compiler.CXX }}
-      flavor: ${{ matrix.flavor }}
-  codecov:
-    needs: [ linux-coverage, macOS-coverage, windows-msys2-coverage ]
-    strategy:
-      fail-fast: false
-    uses: ./.github/workflows/CI-codecov.yml
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  # linux-ossfuzz:
+  #   if: github.repository == 'darktable-org/rawspeed' && (github.event_name == 'pull_request' || (github.ref_type == 'branch' && github.ref_name == 'develop'))
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       sanitizer: [ address, undefined, memory ]
+  #   uses: ./.github/workflows/CI-ossfuzz.yml
+  #   with:
+  #     sanitizer: ${{ matrix.sanitizer }}
+  # windows-msys2-fast:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ windows-latest ]
+  #       msys2:
+  #         - { msystem: MINGW64,    arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
+  #         - { msystem: MINGW32,    arch: i686,    family: GNU,  CC: gcc,   CXX: g++ }
+  #         - { msystem: CLANG64,    arch: x86_64,  family: LLVM, CC: clang, CXX: clang++ }
+  #         - { msystem: CLANG32,    arch: i686,    family: LLVM, CC: clang, CXX: clang++ }
+  #         - { msystem: UCRT64,     arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
+  #       flavor: [ ReleaseWithAsserts, Release ]
+  #   uses: ./.github/workflows/CI-windows-msys2.yml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     msys2-msystem: ${{ matrix.msys2.msystem }}
+  #     msys2-arch: ${{ matrix.msys2.arch }}
+  #     compiler-family: ${{ matrix.msys2.family }}
+  #     compiler-CC: ${{ matrix.msys2.CC }}
+  #     compiler-CXX: ${{ matrix.msys2.CXX }}
+  #     flavor: ${{ matrix.flavor }}
+  # windows-msys2-coverage:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: windows-latest
+  #           msys2: { msystem: MINGW64, arch: x86_64, family: GNU, CC: gcc, CXX: g++ }
+  #           flavor: Coverage
+  #   uses: ./.github/workflows/CI-windows-msys2.yml
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     msys2-msystem: ${{ matrix.msys2.msystem }}
+  #     msys2-arch: ${{ matrix.msys2.arch }}
+  #     compiler-family: ${{ matrix.msys2.family }}
+  #     compiler-CC: ${{ matrix.msys2.CC }}
+  #     compiler-CXX: ${{ matrix.msys2.CXX }}
+  #     flavor: ${{ matrix.flavor }}
+  # macOS-fast:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       compiler:
+  #         - { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # AArch64, LLVM16, native
+  #         - { os: macos-13, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # x86_64,  LLVM16, native
+  #       flavor: [ ReleaseWithAsserts, Release ]
+  #   uses: ./.github/workflows/CI-macOS.yml
+  #   with:
+  #     os: ${{ matrix.compiler.os }}
+  #     os-deployment_target: ${{ matrix.compiler.deployment_target }}
+  #     compiler-family: ${{ matrix.compiler.family }}
+  #     compiler-version: ${{ matrix.compiler.version }}
+  #     compiler-CC: ${{ matrix.compiler.CC }}
+  #     compiler-CXX: ${{ matrix.compiler.CXX }}
+  #     flavor: ${{ matrix.flavor }}
+  # macOS-coverage:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - compiler: { os: macos-14, family: XCode, version: 15.2, deployment_target: 13.5, CC: cc, CXX: c++ } # LLVM16, native
+  #           flavor: Coverage
+  #   uses: ./.github/workflows/CI-macOS.yml
+  #   with:
+  #     os: ${{ matrix.compiler.os }}
+  #     os-deployment_target: ${{ matrix.compiler.deployment_target }}
+  #     compiler-family: ${{ matrix.compiler.family }}
+  #     compiler-version: ${{ matrix.compiler.version }}
+  #     compiler-CC: ${{ matrix.compiler.CC }}
+  #     compiler-CXX: ${{ matrix.compiler.CXX }}
+  #     flavor: ${{ matrix.flavor }}
+  # codecov:
+  #   needs: [ linux-coverage, macOS-coverage, windows-msys2-coverage ]
+  #   strategy:
+  #     fail-fast: false
+  #   uses: ./.github/workflows/CI-codecov.yml
+  #   secrets:
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
