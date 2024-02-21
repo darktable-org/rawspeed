@@ -61,6 +61,26 @@ namespace rawpeed_test {
 
 namespace {
 
+template <typename CoalescedType, typename PartType>
+auto coalesceElts(Array1DRef<const PartType> input) {
+  std::vector<CoalescedType> outputStorage;
+  {
+    outputStorage.reserve(implicit_cast<size_t>(roundUpDivision(
+        sizeof(PartType) * input.size(), sizeof(CoalescedType))));
+    auto subIter = std::back_inserter(outputStorage);
+    auto iter = CoalescingOutputIterator<decltype(subIter), PartType>(subIter);
+    static_assert(std::output_iterator<decltype(iter), PartType>);
+    for (const auto& e : input)
+      *iter = e;
+  }
+  return outputStorage;
+}
+
+template <typename T, typename U> struct TypeSpec {
+  using CoalescedType = T;
+  using PartType = U;
+};
+
 template <typename T>
 class CoalescingOutputIteratorTest : public testing::Test {};
 
@@ -74,15 +94,23 @@ TYPED_TEST_P(CoalescingOutputIteratorTest, Exhaustive) {
     auto input = Array1DRef(inputStorage.data(), numInputBytes);
     std::iota(input.begin(), input.end(), 0);
 
-    std::vector<TypeParam> outputStorage;
-    {
-      outputStorage.reserve(implicit_cast<size_t>(
-          roundUpDivision(numInputBytes, sizeof(TypeParam))));
-      auto iter = CoalescingOutputIterator(std::back_inserter(outputStorage));
-      static_assert(std::output_iterator<decltype(iter), uint8_t>);
-      for (const auto& e : input)
-        *iter = e;
-    }
+    std::vector<typename TypeParam::PartType> intermediateStorage =
+        coalesceElts<typename TypeParam::PartType, uint8_t>(input);
+    auto intermediate =
+        Array1DRef(intermediateStorage.data(),
+                   implicit_cast<int>(intermediateStorage.size()));
+
+    auto intermediateBytes = Array1DRef<std::byte>(intermediate);
+
+    ASSERT_THAT(intermediateBytes, testing::SizeIs(testing::Ge(input.size())));
+    intermediateBytes =
+        intermediateBytes.getBlock(input.size(), /*index=*/0).getAsArray1DRef();
+    ASSERT_THAT(intermediateBytes,
+                testing::ContainerEq(Array1DRef<std::byte>(input)));
+
+    std::vector<typename TypeParam::CoalescedType> outputStorage =
+        coalesceElts<typename TypeParam::CoalescedType,
+                     typename TypeParam::PartType>(intermediate);
 
     auto output = Array1DRef<std::byte>(Array1DRef(
         outputStorage.data(), implicit_cast<int>(outputStorage.size())));
@@ -94,11 +122,20 @@ TYPED_TEST_P(CoalescingOutputIteratorTest, Exhaustive) {
 
 REGISTER_TYPED_TEST_SUITE_P(CoalescingOutputIteratorTest, Exhaustive);
 
-using CoalescedTypes = ::testing::Types<uint16_t, uint32_t, uint64_t>;
+using CoalescedPairTypes =
+    ::testing::Types<TypeSpec<uint8_t, uint8_t>,
+
+                     TypeSpec<uint16_t, uint8_t>, TypeSpec<uint16_t, uint16_t>,
+
+                     TypeSpec<uint32_t, uint8_t>, TypeSpec<uint32_t, uint16_t>,
+                     TypeSpec<uint32_t, uint32_t>,
+
+                     TypeSpec<uint64_t, uint8_t>, TypeSpec<uint64_t, uint16_t>,
+                     TypeSpec<uint64_t, uint32_t>,
+                     TypeSpec<uint64_t, uint64_t>>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(CoalescedTo, CoalescingOutputIteratorTest,
-                               CoalescedTypes);
-
+                               CoalescedPairTypes);
 } // namespace
 
 } // namespace rawpeed_test

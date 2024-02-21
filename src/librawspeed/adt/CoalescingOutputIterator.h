@@ -29,15 +29,13 @@
 
 namespace rawspeed {
 
-template <typename UnderlyingOutputIterator,
+template <typename UnderlyingOutputIterator, typename PartType = uint8_t,
           typename CoalescedType =
-              typename UnderlyingOutputIterator::container_type::value_type,
-          typename PartType = uint8_t>
+              typename UnderlyingOutputIterator::container_type::value_type>
   requires(std::output_iterator<UnderlyingOutputIterator, CoalescedType> &&
            std::unsigned_integral<CoalescedType> &&
            std::unsigned_integral<PartType> &&
-           std::same_as<PartType, uint8_t> &&
-           sizeof(PartType) < sizeof(CoalescedType) &&
+           sizeof(PartType) <= sizeof(CoalescedType) &&
            sizeof(CoalescedType) % sizeof(PartType) == 0)
 class CoalescingOutputIterator {
   UnderlyingOutputIterator it;
@@ -140,7 +138,8 @@ public:
     establishClassInvariants();
     invariant(occupancy < MaxOccupancy);
     invariant(occupancy + bitwidth<U>() <= MaxOccupancy);
-    static_assert(bitwidth<U>() < MaxOccupancy);
+    static_assert(bitwidth<U>() <= MaxOccupancy);
+    part = getLE<U>(&part);
     cache |= static_cast<CoalescedType>(part) << occupancy;
     occupancy += bitwidth<U>();
     invariant(occupancy <= MaxOccupancy);
