@@ -21,6 +21,7 @@
 #include "adt/Bit.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/CoalescingOutputIterator.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Invariant.h"
 #include "bench/Common.h"
@@ -36,6 +37,7 @@
 #include <iterator>
 #include <memory>
 #include <random>
+#include <type_traits>
 #include <vector>
 #include <benchmark/benchmark.h>
 
@@ -112,7 +114,26 @@ struct BitVectorLengthsGenerator final {
 #pragma GCC diagnostic pop
 };
 
-template <typename T> void BM(benchmark::State& state) {
+template <bool b, typename T> struct C {
+  using coalescing = std::bool_constant<b>;
+  using value_type = T;
+};
+using NoCoalescing = C<false, uint8_t>;
+template <typename T> using CoalesceTo = C<true, T>;
+
+template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
+  requires(!ShouldCoalesce)
+auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
+  return e;
+}
+
+template <bool ShouldCoalesce, typename UnderlyingOutputIterator>
+  requires(ShouldCoalesce)
+auto getMaybeCoalescingOutputIterator(UnderlyingOutputIterator e) {
+  return CoalescingOutputIterator(e);
+}
+
+template <typename T, typename C> void BM(benchmark::State& state) {
   int64_t numBytes = state.range(0);
   assert(numBytes > 0);
   assert(numBytes <= std::numeric_limits<int>::max());
@@ -121,16 +142,19 @@ template <typename T> void BM(benchmark::State& state) {
   const Array1DRef<const int8_t> input = gen.getInput();
   benchmark::DoNotOptimize(input.begin());
 
-  std::vector<uint8_t,
-              DefaultInitAllocatorAdaptor<uint8_t, std::allocator<uint8_t>>>
+  using OutputChunkType = typename C::value_type;
+  std::vector<OutputChunkType,
+              DefaultInitAllocatorAdaptor<OutputChunkType,
+                                          std::allocator<OutputChunkType>>>
       output;
-  output.reserve(
-      implicit_cast<size_t>(roundUpDivision(gen.numBitsToProduce, CHAR_BIT)));
+  output.reserve(implicit_cast<size_t>(roundUpDivision(
+      gen.numBitsToProduce, CHAR_BIT * sizeof(OutputChunkType))));
 
   for (auto _ : state) {
     output.clear();
 
-    auto bsInserter = std::back_inserter(output);
+    auto bsInserter = getMaybeCoalescingOutputIterator<C::coalescing::value>(
+        std::back_inserter(output));
     using BitVacuumer = typename BitStreamRoundtripTypes<T>::template vacuumer<
         decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);
@@ -142,7 +166,8 @@ template <typename T> void BM(benchmark::State& state) {
     }
   }
 
-  state.SetComplexityN(sizeof(decltype(output)::value_type) * output.size());
+  state.SetComplexityN(sizeof(typename decltype(output)::value_type) *
+                       output.size());
   state.counters.insert({
       {"Throughput",
        benchmark::Counter(sizeof(uint8_t) * state.complexity_length_n(),
@@ -157,7 +182,7 @@ template <typename T> void BM(benchmark::State& state) {
 }
 
 void CustomArguments(benchmark::internal::Benchmark* b) {
-  b->Unit(benchmark::kMillisecond);
+  b->Unit(benchmark::kMicrosecond);
   b->RangeMultiplier(2);
 
   static constexpr int L1dByteSize = 32U * (1U << 10U);
@@ -178,10 +203,22 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
-BENCHMARK_TEMPLATE(BM, BitstreamFlavorLSB)->Apply(CustomArguments);
-BENCHMARK_TEMPLATE(BM, BitstreamFlavorMSB)->Apply(CustomArguments);
-BENCHMARK_TEMPLATE(BM, BitstreamFlavorMSB16)->Apply(CustomArguments);
-BENCHMARK_TEMPLATE(BM, BitstreamFlavorMSB32)->Apply(CustomArguments);
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+#define GEN(A, B) BENCHMARK_TEMPLATE2(BM, A, B)->Apply(CustomArguments)
+
+#define GEN_T(A)                                                               \
+  GEN(A, NoCoalescing);                                                        \
+  GEN(A, CoalesceTo<uint16_t>);                                                \
+  GEN(A, CoalesceTo<uint32_t>);                                                \
+  GEN(A, CoalesceTo<uint64_t>)
+
+GEN_T(BitstreamFlavorLSB);
+GEN_T(BitstreamFlavorMSB);
+GEN_T(BitstreamFlavorMSB16);
+GEN_T(BitstreamFlavorMSB32);
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 } // namespace
 
