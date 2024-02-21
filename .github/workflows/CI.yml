@@ -140,8 +140,6 @@ jobs:
       flavor: ${{ matrix.flavor }}
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
   # linux-ossfuzz:
   #   if: github.repository == 'darktable-org/rawspeed' && (github.event_name == 'pull_request' || (github.ref_type == 'branch' && github.ref_name == 'develop'))
   #   strategy:

@@ -35,8 +35,6 @@ on:
         type: string
     secrets:
       SONAR_TOKEN:
-      SONAR_PROJECT_KEY:
-      SONAR_ORGANIZATION:
 
 env:
   RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
@@ -450,4 +448,4 @@ jobs:
         run: |
           set -xe
           cd "${SRC_DIR}"
-          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${{ secrets.SONAR_PROJECT_KEY }}" --define sonar.organization="${{ secrets.SONAR_ORGANIZATION }}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.analysisCache.mode=fs --define sonar.cfamily.analysisCache.path="${BUILD_DIR}/sonar-scanner-cache"
+          sonar-scanner --define project.settings="${SRC_DIR}/.ci/sonar-project.properties" --define sonar.host.url="${{ env.SONAR_SERVER_URL }}" --define sonar.projectKey="${SONAR_PROJECT_KEY}" --define sonar.organization="${SONAR_ORGANIZATION}" --define sonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" --define sonar.cfamily.analysisCache.mode=fs --define sonar.cfamily.analysisCache.path="${BUILD_DIR}/sonar-scanner-cache"
