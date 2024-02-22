@@ -75,8 +75,10 @@ public:
       cache.skip(StreamChunkBitwidth);
 
       const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-      for (const auto byte : bytes)
+      for (const auto byte : bytes) {
         *output = static_cast<uint8_t>(byte);
+        ++output;
+      }
     }
   }
 
