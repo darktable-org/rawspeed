@@ -76,15 +76,20 @@ class BitVacuumerJPEG final
                         [](bool b, std::byte byte) {
                           return b && (byte != std::byte{0xFF});
                         })) {
-      for (const auto byte : bytes)
+      for (const auto byte : bytes) {
         *Base::output = static_cast<uint8_t>(byte);
+        ++Base::output;
+      }
       return;
     }
 
     for (const auto byte : bytes) {
       *Base::output = static_cast<uint8_t>(byte);
-      if (static_cast<uint8_t>(byte) == 0xFF)
+      ++Base::output;
+      if (static_cast<uint8_t>(byte) == 0xFF) {
         *Base::output = uint8_t(0x00); // Stuffing byte
+        ++Base::output;
+      }
     }
   }
 
