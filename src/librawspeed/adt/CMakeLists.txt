@@ -16,6 +16,7 @@ FILE(GLOB SOURCES
   "Mutex.h"
   "NORangesSet.h"
   "NotARational.h"
+  "PartitioningOutputIterator.h"
   "Point.h"
   "Range.h"
   "VariableLengthLoad.h"
