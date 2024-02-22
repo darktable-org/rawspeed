@@ -34,9 +34,6 @@ template <typename BIT_STREAM> struct BitVacuumerTraits;
 template <typename Derived_, typename OutputIterator_>
   requires std::output_iterator<OutputIterator_, uint8_t>
 class BitVacuumer {
-  static_assert(std::same_as<
-                uint8_t, typename OutputIterator_::container_type::value_type>);
-
 public:
   using Traits = BitVacuumerTraits<Derived_>;
   using StreamTraits = BitStreamTraits<typename Traits::Stream>;
@@ -71,14 +68,11 @@ public:
       auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
           cache.peek(StreamChunkBitwidth));
       chunk = getByteSwapped<typename StreamTraits::ChunkType>(
-          &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
+          &chunk, StreamTraits::ChunkEndianness != Endianness::little);
       cache.skip(StreamChunkBitwidth);
 
-      const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-      for (const auto byte : bytes) {
-        *output = static_cast<uint8_t>(byte);
-        ++output;
-      }
+      *output = chunk;
+      ++output;
     }
   }
 
