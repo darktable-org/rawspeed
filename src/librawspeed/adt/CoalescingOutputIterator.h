@@ -57,6 +57,7 @@ class CoalescingOutputIterator {
     if (occupancy != MaxOccupancy)
       return;
     *it = getLE<CoalescedType>(&cache);
+    ++it;
     cache = 0;
     occupancy = 0;
   }
