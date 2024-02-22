@@ -10844,6 +10844,12 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S5M2" supported="no">
+		<ID make="Panasonic" model="DC-S5M2">Panasonic DC-S5M2</ID>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S5M2X" supported="no">
+		<ID make="Panasonic" model="DC-S5M2X">Panasonic DC-S5M2X</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DC-S1R">
 		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
 		<Crop x="0" y="0" width="-58" height="0"/>
@@ -11292,6 +11298,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-GH6" supported="no">
+		<ID make="Panasonic" model="DC-GH6">Panasonic DC-GH6</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
 		<Sensor black="148" white="4095"/>
@@ -11313,6 +11322,9 @@
 				<ColorMatrixRow plane="2">-748 1546 5111</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-G9M2" supported="no">
+		<ID make="Panasonic" model="DC-G9M2">Panasonic DC-G9M2</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DC-G95">
 		<ID make="Panasonic" model="DC-G95">Panasonic DC-G95</ID>
