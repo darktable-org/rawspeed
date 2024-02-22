@@ -144,6 +144,14 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 250D" supported="no">
+		<ID make="Canon" model="EOS 250D">Canon EOS 250D</ID>
+		<Aliases>
+			<Alias id="EOS 200D Mark II">Canon EOS 200D II</Alias>
+			<Alias id="EOS Kiss X10">Canon EOS Kiss X10</Alias>
+			<Alias id="EOS Rebel SL3">Canon EOS Rebel SL3</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 300D DIGITAL">
 		<ID make="Canon" model="EOS 300D">Canon EOS 300D</ID>
 		<CFA width="2" height="2">
@@ -577,6 +585,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 90D" supported="no">
+		<ID make="Canon" model="EOS 90D">Canon EOS 90D</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 700D">
 		<ID make="Canon" model="EOS 700D">Canon EOS 700D</ID>
 		<CFA width="2" height="2">
@@ -648,6 +659,13 @@
 				<ColorMatrixRow plane="2">-739 1982 5601</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 850D" supported="no">
+		<ID make="Canon" model="EOS 850D">Canon EOS 850D</ID>
+		<Aliases>
+			<Alias id="EOS Kiss X10i">Canon EOS Kiss X10i</Alias>
+			<Alias id="EOS Rebel T8i">Canon EOS Rebel T8i</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 760D">
 		<ID make="Canon" model="EOS 760D">Canon EOS 760D</ID>
@@ -1542,6 +1560,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M6 Mark II" supported="no">
+		<ID make="Canon" model="EOS M6 Mark II">Canon EOS M6 Mark II</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS M10">
 		<ID make="Canon" model="EOS M10">Canon EOS M10</ID>
 		<CFA width="2" height="2">
@@ -1563,6 +1584,18 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M50" supported="no">
+		<ID make="Canon" model="EOS M50">Canon EOS M50</ID>
+		<Aliases>
+			<Alias id="EOS Kiss M">Canon EOS KISS M</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS M50m2" supported="no">
+		<ID make="Canon" model="EOS M50 Mark II">Canon EOS M50 Mark II</ID>
+		<Aliases>
+			<Alias id="EOS Kiss M2">Canon EOS KISS M2</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS M100">
 		<ID make="Canon" model="EOS M100">Canon EOS M100</ID>
 		<CFA width="2" height="2">
@@ -1583,6 +1616,48 @@
 				<ColorMatrixRow plane="2">-797 2424 7010</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS M200" supported="no">
+		<ID make="Canon" model="EOS M200">Canon EOS M200</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R" supported="no">
+		<ID make="Canon" model="EOS R">Canon EOS R</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS Ra" supported="no">
+		<ID make="Canon" model="EOS Ra">Canon EOS Ra</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS RP" supported="no">
+		<ID make="Canon" model="EOS RP">Canon EOS RP</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R3" supported="no">
+		<ID make="Canon" model="EOS R3">Canon EOS R3</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R5" supported="no">
+		<ID make="Canon" model="EOS R5">Canon EOS R5</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R5 C" supported="no">
+		<ID make="Canon" model="EOS R5 C">Canon EOS R5 C</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R6" supported="no">
+		<ID make="Canon" model="EOS R6">Canon EOS R6</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R6m2" supported="no">
+		<ID make="Canon" model="EOS R6 Mark II">Canon EOS R6 Mark II</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R7" supported="no">
+		<ID make="Canon" model="EOS R7">Canon EOS R7</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R8" supported="no">
+		<ID make="Canon" model="EOS R8">Canon EOS R8</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R10" supported="no">
+		<ID make="Canon" model="EOS R10">Canon EOS R10</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R50" supported="no">
+		<ID make="Canon" model="EOS R50">Canon EOS R50</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R100" supported="no">
+		<ID make="Canon" model="EOS R100">Canon EOS R100</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS-1D" decoder_version="8">
 		<ID make="Canon" model="EOS-1D">Canon EOS-1D</ID>
@@ -1951,6 +2026,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS-1D X Mark III" supported="no">
+		<ID make="Canon" model="EOS-1D X Mark III">Canon EOS-1D X Mark III</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot Pro1">
 		<ID make="Canon" model="PowerShot Pro1">Canon PowerShot Pro1</ID>
 		<CFA width="2" height="2">
@@ -2122,6 +2200,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot G5 X Mark II" supported="no">
+		<ID make="Canon" model="PowerShot G5 X Mark II">Canon PowerShot G5 X Mark II</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G6">
 		<ID make="Canon" model="PowerShot G6">Canon PowerShot G6</ID>
 		<CFA width="2" height="2">
@@ -2185,6 +2266,9 @@
 				<ColorMatrixRow plane="2">-407 1415 5049</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot G7 X Mark III" supported="no">
+		<ID make="Canon" model="PowerShot G7 X Mark III">Canon PowerShot G7 X Mark III</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1 X">
 		<ID make="Canon" model="PowerShot G1 X">Canon PowerShot G1 X</ID>
@@ -2730,6 +2814,9 @@
 				<ColorMatrixRow plane="2">-47 1271 4955</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX70 HS" supported="no">
+		<ID make="Canon" model="PowerShot SX70 HS">Canon PowerShot SX70 HS</ID>
 	</Camera>
 	<Camera make="GoPro" model="FUSION" mode="dng" supported="no-samples">
 		<ID make="GoPro" model="FUSION">GoPro FUSION</ID>
