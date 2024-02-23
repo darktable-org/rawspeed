@@ -57,6 +57,7 @@ class CoalescingOutputIterator {
     if (occupancy != MaxOccupancy)
       return;
     *it = getLE<CoalescedType>(&cache);
+    ++it;
     cache = 0;
     occupancy = 0;
   }
@@ -86,9 +87,12 @@ public:
     invariant(occupancy == 0);
     invariant(other.occupancy == 0);
   }
+
+  // NOLINTBEGIN(performance-move-constructor-init)
   CoalescingOutputIterator(CoalescingOutputIterator&& other) noexcept
       : CoalescingOutputIterator(
             static_cast<const CoalescingOutputIterator&>(other)) {}
+  // NOLINTEND(performance-move-constructor-init)
 
   CoalescingOutputIterator& operator=(const CoalescingOutputIterator& other) {
     invariant(occupancy == 0);

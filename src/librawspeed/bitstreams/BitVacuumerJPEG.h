@@ -43,9 +43,6 @@ struct BitVacuumerTraits<BitVacuumerJPEG<OutputIterator>> final {
 template <typename OutputIterator>
 class BitVacuumerJPEG final
     : public BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator> {
-  static_assert(std::same_as<
-                uint8_t, typename OutputIterator::container_type::value_type>);
-
   using Base = BitVacuumer<BitVacuumerJPEG<OutputIterator>, OutputIterator>;
   using StreamTraits = typename Base::StreamTraits;
 
@@ -64,8 +61,6 @@ class BitVacuumerJPEG final
 
     auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
         Base::cache.peek(StreamChunkBitwidth));
-    chunk = getByteSwapped<typename StreamTraits::ChunkType>(
-        &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
     Base::cache.skip(StreamChunkBitwidth);
 
     const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
@@ -76,15 +71,23 @@ class BitVacuumerJPEG final
                         [](bool b, std::byte byte) {
                           return b && (byte != std::byte{0xFF});
                         })) {
-      for (const auto byte : bytes)
-        *Base::output = static_cast<uint8_t>(byte);
+      chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+          &chunk, StreamTraits::ChunkEndianness != Endianness::little);
+      *Base::output = chunk;
+      ++Base::output;
       return;
     }
 
+    chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+        &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
+
     for (const auto byte : bytes) {
       *Base::output = static_cast<uint8_t>(byte);
-      if (static_cast<uint8_t>(byte) == 0xFF)
+      ++Base::output;
+      if (static_cast<uint8_t>(byte) == 0xFF) {
         *Base::output = uint8_t(0x00); // Stuffing byte
+        ++Base::output;
+      }
     }
   }
 

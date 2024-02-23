@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/PartitioningOutputIterator.h"
 #include "bitstreams/BitStreamer.h"
 #include "bitstreams/BitStreamerJPEG.h"
 #include "bitstreams/BitStreamerLSB.h"
@@ -132,7 +133,7 @@ std::vector<uint8_t> produceBitstream(const InputWrapper& w) {
   std::vector<uint8_t> bitstream;
 
   {
-    auto bsInserter = std::back_inserter(bitstream);
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
     using BitVacuumer = typename BitStreamRoundtripTypes<
         flavor>::template vacuumer<decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);

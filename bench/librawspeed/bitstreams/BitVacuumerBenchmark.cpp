@@ -24,6 +24,7 @@
 #include "adt/CoalescingOutputIterator.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Invariant.h"
+#include "adt/PartitioningOutputIterator.h"
 #include "bench/Common.h"
 #include "bitstreams/BitVacuumerLSB.h"
 #include "bitstreams/BitVacuumerMSB.h"
@@ -153,8 +154,9 @@ template <typename T, typename C> void BM(benchmark::State& state) {
   for (auto _ : state) {
     output.clear();
 
-    auto bsInserter = getMaybeCoalescingOutputIterator<C::coalescing::value>(
-        std::back_inserter(output));
+    auto bsInserter = PartitioningOutputIterator(
+        getMaybeCoalescingOutputIterator<C::coalescing::value>(
+            std::back_inserter(output)));
     using BitVacuumer = typename BitStreamRoundtripTypes<T>::template vacuumer<
         decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);
