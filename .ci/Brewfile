@@ -1,6 +1,6 @@
 brew 'cmake'
 brew 'git'
 brew 'libomp'
-brew 'jpeg'
+brew 'jpeg-turbo'
 brew 'ninja'
 brew 'pugixml'
