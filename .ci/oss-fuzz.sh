@@ -64,7 +64,7 @@ cmake \
   -DCMAKE_BUILD_TYPE=FUZZ -DBUILD_FUZZERS=ON \
   -DLIB_FUZZING_ENGINE:STRING="$LIB_FUZZING_ENGINE" \
   -DCMAKE_INSTALL_PREFIX:PATH="$OUT" -DCMAKE_INSTALL_BINDIR:PATH="$OUT" \
-  "$SRC/librawspeed/"
+  -DTEMPORAIRLY_ALLOW_OLD_TOOCHAIN=ON "$SRC/librawspeed/"
 
 cmake --build . -- -j$(nproc) all && cmake --build . -- -j$(nproc) install
 
