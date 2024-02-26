@@ -41,13 +41,24 @@ jobs:
         with:
           path: 'rawspeed'
           fetch-depth: 1
-      - name: Install Base Dependencies
+      - name: Remove unneeded brew formulas/casks
         timeout-minutes: 2
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
         run: |
           set -xe
+          brew update --quiet
           brew tap Homebrew/bundle
+          cd "${SRC_DIR}/.ci/"
+          brew bundle cleanup --quiet --force
+          brew autoremove --quiet
+          brew cleanup --quiet --prune=all
+      - name: Install/Update Base Dependencies
+        timeout-minutes: 1
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+        run: |
+          set -xe
           cd "${SRC_DIR}/.ci/"
           brew bundle --verbose
       - name: Install Additional Dependencies (Coverage)
