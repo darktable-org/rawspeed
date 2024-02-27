@@ -95,7 +95,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 Buffer::size_type LJpegDecoder::decodeScan() {
   invariant(frame.cps > 0);
 
-  if (predictorMode != 1)
+  if ((predictorMode < 1) || (predictorMode > 7))
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 
   for (uint32_t i = 0; i < frame.cps; i++)
@@ -133,6 +133,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   }
 
   LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec, numRowsPerRestartInterval,
+                      predictorMode,
                       input.peekRemainingBuffer().getAsArray1DRef());
   return d.decode();
 }

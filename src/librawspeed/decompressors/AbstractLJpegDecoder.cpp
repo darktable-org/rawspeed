@@ -208,7 +208,7 @@ void AbstractLJpegDecoder::parseSOS(ByteStream sos) {
 
   // Get predictor, see table H.1 from the JPEG spec
   predictorMode = sos.getByte();
-  // The spec says predictoreMode is in [0..7], but Hasselblad uses '8'.
+  // The spec says predictorMode is in [0..7], but Hasselblad uses '8'.
   if (predictorMode > 8)
     ThrowRDE("Invalid predictor mode.");
 

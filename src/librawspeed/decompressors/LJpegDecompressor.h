@@ -58,6 +58,7 @@ private:
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
   const int numRowsPerRestartInterval;
+  const int predictorMode;
 
   int fullBlocks = 0;
   int trailingPixels = 0;
@@ -77,7 +78,8 @@ private:
 
   template <int N_COMP, bool WeirdWidth>
   __attribute__((always_inline)) inline void decodeRowN(
-      CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+      CroppedArray1DRef<uint16_t> outRow, CroppedArray1DRef<uint16_t> prevRow,
+      std::array<uint16_t, N_COMP> pred, int predMode,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
@@ -87,7 +89,7 @@ private:
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
-                    int numRowsPerRestartInterval_,
+                    int numRowsPerRestartInterval, int predictorMode,
                     Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decode() const;
