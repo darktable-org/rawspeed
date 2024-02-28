@@ -130,6 +130,24 @@ RawImage OrfDecoder::decodeRawInternal() {
     ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
              raw->getEntry(TiffTag::STRIPOFFSETS)->count);
 
+  if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING)) {
+    // Newer cameras process the Image Processing SubIFD in the makernote
+    const TiffEntry* img_entry =
+        mRootIFD->getEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING);
+    // get makernote ifd with containing Buffer
+    NORangesSet<Buffer> ifds;
+
+    TiffRootIFD image_processing(nullptr, &ifds, img_entry->getRootIfdData(),
+                                 img_entry->getU32());
+
+    if (image_processing.hasEntry(static_cast<TiffTag>(0x0611))) {
+      const TiffEntry* validBits =
+          image_processing.getEntry(static_cast<TiffTag>(0x0611));
+      if (validBits->getU16() != 12)
+        ThrowRDE("Only 12-bit images are supported currently.");
+    }
+  }
+
   OlympusDecompressor o(mRaw);
   mRaw->createData();
   o.decompress(input);
