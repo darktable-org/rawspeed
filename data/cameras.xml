@@ -7296,8 +7296,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="OM Digital Solutions" model="OM-1MarkII" supported="unknown-no-samples">
+	<Camera make="OM Digital Solutions" model="OM-1MarkII">
 		<ID make="OM System" model="OM-1 Mark II">OM Digital Solutions OM-1 Mark II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="254" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9090 -3591 -756</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3252 11396 2109</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-318 1059 5606</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="OM Digital Solutions" model="OM-5">
 		<ID make="OM System" model="OM-5">OM Digital Solutions OM-5</ID>
