@@ -58,12 +58,11 @@ OlympusDecompressor::OlympusDecompressor(RawImage img) : mRaw(std::move(img)) {
 
 inline __attribute__((always_inline)) int
 OlympusDecompressor::parseCarry(BitStreamerMSB& bits,
-                                std::array<int, 3>* carry) const {
+                                std::array<int, 3>& carry) const {
   bits.fill();
-  int i = 2 * ((*carry)[2] < 3);
+  int i = 2 * (carry[2] < 3);
   int nbits;
-  for (nbits = 2 + i; static_cast<uint16_t>((*carry)[0]) >> (nbits + i);
-       nbits++)
+  for (nbits = 2 + i; static_cast<uint16_t>(carry[0]) >> (nbits + i); nbits++)
     ;
 
   int b = bits.peekBitsNoFill(15);
@@ -78,10 +77,10 @@ OlympusDecompressor::parseCarry(BitStreamerMSB& bits,
   } else
     bits.skipBitsNoFill(high + 1 + 3);
 
-  (*carry)[0] = (high << nbits) | bits.getBitsNoFill(nbits);
-  int diff = ((*carry)[0] ^ sign) + (*carry)[1];
-  (*carry)[1] = (diff * 3 + (*carry)[1]) >> 5;
-  (*carry)[2] = (*carry)[0] > 16 ? 0 : (*carry)[2] + 1;
+  carry[0] = (high << nbits) | bits.getBitsNoFill(nbits);
+  int diff = (carry[0] ^ sign) + carry[1];
+  carry[1] = (diff * 3 + carry[1]) >> 5;
+  carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
 
   return (diff * 4) | low;
 }
@@ -135,7 +134,7 @@ void OlympusDecompressor::decompressRow(BitStreamerMSB& bits, int row) const {
 
     std::array<int, 3>& carry = acarry[c];
 
-    int diff = parseCarry(bits, &carry);
+    int diff = parseCarry(bits, carry);
     int pred = getPred(out, row, col);
 
     out(row, col) = implicit_cast<uint16_t>(pred + diff);

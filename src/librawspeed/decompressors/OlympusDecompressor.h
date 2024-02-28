@@ -49,7 +49,7 @@ class OlympusDecompressor final : public AbstractDecompressor {
       }};
 
   inline __attribute__((always_inline)) int
-  parseCarry(BitStreamerMSB& bits, std::array<int, 3>* carry) const;
+  parseCarry(BitStreamerMSB& bits, std::array<int, 3>& carry) const;
 
   static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
 
