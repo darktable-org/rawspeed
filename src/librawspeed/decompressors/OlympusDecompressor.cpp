@@ -45,7 +45,7 @@ OlympusDecompressor::OlympusDecompressor(RawImage img) : mRaw(std::move(img)) {
   const uint32_t w = mRaw->dim.x;
   const uint32_t h = mRaw->dim.y;
 
-  if (w == 0 || h == 0 || w % 2 != 0 || w > 10400 || h > 7792)
+  if (w == 0 || h == 0 || w % 2 != 0 || h % 2 != 0 || w > 10400 || h > 7792)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 }
 
