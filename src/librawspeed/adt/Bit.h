@@ -49,9 +49,15 @@ unsigned numSignBits(const T v) {
 }
 
 template <class T>
-  requires std::unsigned_integral<T>
+  requires(std::unsigned_integral<T> && bitwidth<T>() >= bitwidth<uint32_t>())
 unsigned numActiveBits(const T v) {
   return bitwidth(v) - std::countl_zero(v);
+}
+
+template <class T>
+  requires(std::unsigned_integral<T> && bitwidth<T>() < bitwidth<uint32_t>())
+unsigned numActiveBits(const T v) {
+  return numActiveBits(static_cast<uint32_t>(v));
 }
 
 template <class T>
