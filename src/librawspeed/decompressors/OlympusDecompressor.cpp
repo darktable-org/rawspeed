@@ -105,7 +105,8 @@ class OlympusDecompressorImpl final : public AbstractDecompressor {
         return std::min(12, high);
       }};
 
-  static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
+  static __attribute__((always_inline)) int getPred(Array2DRef<uint16_t> out,
+                                                    int row, int col);
 
   void decompressRow(BitStreamerMSB& bits, int row) const;
 
@@ -122,8 +123,9 @@ public:
  * is based on the output of all previous pixel (bar the first four)
  */
 
-inline int OlympusDecompressorImpl::getPred(const Array2DRef<uint16_t> out,
-                                            int row, int col) {
+inline __attribute__((always_inline)) int
+OlympusDecompressorImpl::getPred(const Array2DRef<uint16_t> out, int row,
+                                 int col) {
   auto getLeft = [&]() { return out(row, col - 2); };
   auto getUp = [&]() { return out(row - 2, col); };
   auto getLeftUp = [&]() { return out(row - 2, col - 2); };
