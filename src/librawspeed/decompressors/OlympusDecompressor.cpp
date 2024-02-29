@@ -81,9 +81,11 @@ inline __attribute__((always_inline)) int
 OlympusDecompressorImpl::parseCarry(BitStreamerMSB& bits,
                                     std::array<int, 3>& carry) const {
   bits.fill();
-  int i = 2 * (carry[2] < 3);
+
+  int nbitsBias = (carry[2] < 3) ? 2 : 0;
   int nbits;
-  for (nbits = 2 + i; static_cast<uint16_t>(carry[0]) >> (nbits + i); nbits++)
+  for (nbits = 2 + nbitsBias;
+       static_cast<uint16_t>(carry[0]) >> (nbits + nbitsBias); nbits++)
     ;
 
   int b = bits.peekBitsNoFill(15);
