@@ -20,40 +20,15 @@
 
 #pragma once
 
-#include "adt/Bit.h"
-#include "bitstreams/BitStreamerMSB.h"
 #include "common/RawImage.h"
-#include "common/SimpleLUT.h"
 #include "decompressors/AbstractDecompressor.h"
-#include <algorithm>
-#include <array>
-#include <cstddef>
-#include <cstdint>
 
 namespace rawspeed {
 
 class ByteStream;
-template <class T> class Array2DRef;
 
 class OlympusDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
-
-  // A table to quickly look up "high" value
-  const SimpleLUT<int8_t, 12> bittable{
-      [](size_t i, [[maybe_unused]] unsigned tableSize) {
-        int high;
-        for (high = 0; high < 12; high++)
-          if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
-            break;
-        return std::min(12, high);
-      }};
-
-  inline __attribute__((always_inline)) int
-  parseCarry(BitStreamerMSB& bits, std::array<int, 3>& carry) const;
-
-  static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
-
-  void decompressRow(BitStreamerMSB& bits, int row) const;
 
 public:
   explicit OlympusDecompressor(RawImage img);
