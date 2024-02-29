@@ -62,12 +62,12 @@ inline __attribute__((always_inline)) int
 OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
   bits.fill();
 
-  int nbitsBias = (carry[2] < 3) ? 2 : 0;
-  int nbits = numActiveBits(implicit_cast<uint16_t>(carry[0]));
-  nbits -= nbitsBias;
-  nbits = std::max(nbits, 2 + nbitsBias);
-  assert(nbits >= 2);
-  assert(nbits <= 14);
+  int numLowBitsBias = (carry[2] < 3) ? 2 : 0;
+  int numLowBits = numActiveBits(implicit_cast<uint16_t>(carry[0]));
+  numLowBits -= numLowBitsBias;
+  numLowBits = std::max(numLowBits, 2 + numLowBitsBias);
+  assert(numLowBits >= 2);
+  assert(numLowBits <= 14);
 
   int b = bits.peekBitsNoFill(15);
   int sign = (b >> 14) * -1;
@@ -78,7 +78,7 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
   // Skip bytes used above or read bits
   if (numHighBits == 12) {
     bits.skipBitsNoFill(15);
-    numHighBits = 15 - nbits;
+    numHighBits = 15 - numLowBits;
     assert(numHighBits >= 1);
     assert(numHighBits <= 13);
     highBits = bits.peekBitsNoFill(numHighBits);
@@ -88,7 +88,7 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
     highBits = numHighBits;
   }
 
-  carry[0] = (highBits << nbits) | bits.getBitsNoFill(nbits);
+  carry[0] = (highBits << numLowBits) | bits.getBitsNoFill(numLowBits);
   int diff = (carry[0] ^ sign) + carry[1];
   carry[1] = (diff * 3 + carry[1]) >> 5;
   carry[2] = carry[0] > 16 ? 0 : carry[2] + 1;
