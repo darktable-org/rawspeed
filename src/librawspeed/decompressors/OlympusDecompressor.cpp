@@ -34,6 +34,7 @@
 #include "io/ByteStream.h"
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -86,6 +87,8 @@ OlympusDecompressorImpl::parseCarry(BitStreamerMSB& bits,
   int nbits = numActiveBits(implicit_cast<uint16_t>(carry[0]));
   nbits -= nbitsBias;
   nbits = std::max(nbits, 2 + nbitsBias);
+  assert(nbits >= 2);
+  assert(nbits <= 14);
 
   int b = bits.peekBitsNoFill(15);
   int sign = (b >> 14) * -1;
