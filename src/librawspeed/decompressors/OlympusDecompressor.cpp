@@ -83,10 +83,9 @@ OlympusDecompressorImpl::parseCarry(BitStreamerMSB& bits,
   bits.fill();
 
   int nbitsBias = (carry[2] < 3) ? 2 : 0;
-  int nbits;
-  for (nbits = 2 + nbitsBias;
-       static_cast<uint16_t>(carry[0]) >> (nbits + nbitsBias); nbits++)
-    ;
+  int nbits = numActiveBits(implicit_cast<uint16_t>(carry[0]));
+  nbits -= nbitsBias;
+  nbits = std::max(nbits, 2 + nbitsBias);
 
   int b = bits.peekBitsNoFill(15);
   int sign = (b >> 14) * -1;
