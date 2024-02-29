@@ -42,7 +42,7 @@ jobs:
           path: 'rawspeed'
           fetch-depth: 1
       - name: Remove unneeded brew formulas/casks
-        timeout-minutes: 2
+        timeout-minutes: 3
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
         run: |
