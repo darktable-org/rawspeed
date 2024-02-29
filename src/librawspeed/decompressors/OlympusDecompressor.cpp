@@ -147,23 +147,24 @@ inline int OlympusDecompressorImpl::getPred(const Array2DRef<uint16_t> out,
 
 void OlympusDecompressorImpl::decompressRow(BitStreamerMSB& bits,
                                             int row) const {
-  invariant(mRaw->dim.y > 0);
-  invariant(mRaw->dim.x > 0);
-  invariant(mRaw->dim.x % 2 == 0);
-
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   std::array<std::array<int, 3>, 2> acarry{{}};
 
-  for (int col = 0; col < out.width(); col++) {
-    int c = col & 1;
+  const int numGroups = out.width() / 2;
+  for (int group = 0; group != numGroups; ++group) {
+    for (int c = 0; c != 2; ++c) {
+      const int col = 2 * group + c;
+      std::array<int, 3>& carry = acarry[c];
 
-    std::array<int, 3>& carry = acarry[c];
+      int diff = parseCarry(bits, carry);
+      int pred = getPred(out, row, col);
 
-    int diff = parseCarry(bits, carry);
-    int pred = getPred(out, row, col);
-
-    out(row, col) = implicit_cast<uint16_t>(pred + diff);
+      out(row, col) = implicit_cast<uint16_t>(pred + diff);
+    }
   }
 }
 
