@@ -72,13 +72,14 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
   int b = bits.peekBitsNoFill(15);
   int sign = (b >> 14) * -1;
   int low = (b >> 12) & 3;
-  const int numHighBits = bittable[b & 4095];
+  int numHighBits = bittable[b & 4095];
 
   int highBits;
   // Skip bytes used above or read bits
   if (numHighBits == 12) {
     bits.skipBitsNoFill(15);
-    highBits = bits.getBitsNoFill(16 - nbits) >> 1;
+    numHighBits = 15 - nbits;
+    highBits = bits.getBitsNoFill(numHighBits + 1) >> 1;
   } else {
     bits.skipBitsNoFill(numHighBits + 1 + 3);
     highBits = numHighBits;
