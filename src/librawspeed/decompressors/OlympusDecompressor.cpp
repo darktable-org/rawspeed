@@ -81,7 +81,8 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
     numHighBits = 15 - nbits;
     assert(numHighBits >= 1);
     assert(numHighBits <= 13);
-    highBits = bits.getBitsNoFill(numHighBits + 1) >> 1;
+    highBits = bits.peekBitsNoFill(numHighBits);
+    bits.skipBitsNoFill(1 + numHighBits);
   } else {
     bits.skipBitsNoFill(numHighBits + 1 + 3);
     highBits = numHighBits;
