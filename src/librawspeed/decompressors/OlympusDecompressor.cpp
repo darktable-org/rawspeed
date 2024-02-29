@@ -224,11 +224,10 @@ OlympusDecompressor::OlympusDecompressor(RawImage img) : mRaw(std::move(img)) {
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  const uint32_t w = mRaw->dim.x;
-  const uint32_t h = mRaw->dim.y;
-
-  if (w == 0 || h == 0 || w % 2 != 0 || h % 2 != 0 || w > 10400 || h > 7792)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
+      mRaw->dim.y % 2 != 0 || mRaw->dim.x > 10400 || mRaw->dim.y > 7792)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
 }
 
 void OlympusDecompressor::decompress(ByteStream input) const {
