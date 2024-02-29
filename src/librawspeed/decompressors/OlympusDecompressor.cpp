@@ -45,42 +45,21 @@ namespace rawspeed {
 
 namespace {
 
-class OlympusDecompressorImpl final : public AbstractDecompressor {
-  RawImage mRaw;
+class OlympusDifferenceDecoder final {
+  const SimpleLUT<int8_t, 12>& bittable;
 
-  // A table to quickly look up "high" value
-  const SimpleLUT<int8_t, 12> bittable{
-      [](size_t i, [[maybe_unused]] unsigned tableSize) {
-        int high;
-        for (high = 0; high < 12; high++)
-          if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
-            break;
-        return std::min(12, high);
-      }};
-
-  inline __attribute__((always_inline)) int
-  parseCarry(BitStreamerMSB& bits, std::array<int, 3>& carry) const;
-
-  static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
-
-  void decompressRow(BitStreamerMSB& bits, int row) const;
+  std::array<int, 3> carry{{}};
 
 public:
-  explicit OlympusDecompressorImpl(RawImage img) : mRaw(std::move(img)) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  OlympusDifferenceDecoder(const SimpleLUT<int8_t, 12>& bittable_)
+      : bittable(bittable_) {}
 
-  void decompress(ByteStream input) const;
+  inline __attribute__((always_inline)) int getDiff(BitStreamerMSB& bits);
 };
 
-/* This is probably the slowest decoder of them all.
- * I cannot see any way to effectively speed up the prediction
- * phase, which is by far the slowest part of this algorithm.
- * Also there is no way to multithread this code, since prediction
- * is based on the output of all previous pixel (bar the first four)
- */
-
 inline __attribute__((always_inline)) int
-OlympusDecompressorImpl::parseCarry(BitStreamerMSB& bits,
-                                    std::array<int, 3>& carry) const {
+OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
   bits.fill();
 
   int nbitsBias = (carry[2] < 3) ? 2 : 0;
@@ -109,6 +88,36 @@ OlympusDecompressorImpl::parseCarry(BitStreamerMSB& bits,
 
   return (diff * 4) | low;
 }
+
+class OlympusDecompressorImpl final : public AbstractDecompressor {
+  RawImage mRaw;
+
+  // A table to quickly look up "high" value
+  const SimpleLUT<int8_t, 12> bittable{
+      [](size_t i, [[maybe_unused]] unsigned tableSize) {
+        int high;
+        for (high = 0; high < 12; high++)
+          if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
+            break;
+        return std::min(12, high);
+      }};
+
+  static inline int getPred(Array2DRef<uint16_t> out, int row, int col);
+
+  void decompressRow(BitStreamerMSB& bits, int row) const;
+
+public:
+  explicit OlympusDecompressorImpl(RawImage img) : mRaw(std::move(img)) {}
+
+  void decompress(ByteStream input) const;
+};
+
+/* This is probably the slowest decoder of them all.
+ * I cannot see any way to effectively speed up the prediction
+ * phase, which is by far the slowest part of this algorithm.
+ * Also there is no way to multithread this code, since prediction
+ * is based on the output of all previous pixel (bar the first four)
+ */
 
 inline int OlympusDecompressorImpl::getPred(const Array2DRef<uint16_t> out,
                                             int row, int col) {
@@ -152,15 +161,15 @@ void OlympusDecompressorImpl::decompressRow(BitStreamerMSB& bits,
   invariant(out.width() > 0);
   invariant(out.width() % 2 == 0);
 
-  std::array<std::array<int, 3>, 2> acarry{{}};
+  std::array<OlympusDifferenceDecoder, 2> acarry{bittable, bittable};
 
   const int numGroups = out.width() / 2;
   for (int group = 0; group != numGroups; ++group) {
     for (int c = 0; c != 2; ++c) {
       const int col = 2 * group + c;
-      std::array<int, 3>& carry = acarry[c];
+      OlympusDifferenceDecoder& carry = acarry[c];
 
-      int diff = parseCarry(bits, carry);
+      int diff = carry.getDiff(bits);
       int pred = getPred(out, row, col);
 
       out(row, col) = implicit_cast<uint16_t>(pred + diff);
