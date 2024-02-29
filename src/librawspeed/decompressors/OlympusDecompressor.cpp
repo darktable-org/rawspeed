@@ -190,7 +190,13 @@ void OlympusDecompressorImpl::decompressRow(BitStreamerMSB& bits,
   std::array<OlympusDifferenceDecoder, 2> acarry{bittable, bittable};
 
   const int numGroups = out.width() / 2;
-  for (int group = 0; group != numGroups; ++group) {
+  int group = 0;
+  {
+    // Process first group separately, allows to unswitch predictor calculation.
+    decompressGroup(acarry, bits, row, group);
+    ++group;
+  }
+  for (; group != numGroups; ++group) {
     decompressGroup(acarry, bits, row, group);
   }
 }
