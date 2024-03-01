@@ -105,7 +105,9 @@ void FiffParser::parseData() {
       uint16_t length = bytes.getU16();
       TiffDataType type = TiffDataType::UNDEFINED;
 
-      if (tag == TiffTag::IMAGEWIDTH ||
+      if (tag == TiffTag::FUJI_RAWIMAGEFULLSIZE ||
+          tag == TiffTag::FUJI_RAWIMAGECROPTOPLEFT ||
+          tag == TiffTag::FUJI_RAWIMAGECROPPEDSIZE ||
           tag == TiffTag::FUJIOLDWB) // also 0x121?
         type = TiffDataType::SHORT;
 
