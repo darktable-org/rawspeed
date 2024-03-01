@@ -102,11 +102,7 @@ class OlympusDecompressorImpl final : public AbstractDecompressor {
   // A table to quickly look up "high" value
   const SimpleLUT<int8_t, 12> bittable{
       [](size_t i, [[maybe_unused]] unsigned tableSize) {
-        int high;
-        for (high = 0; high < 12; high++)
-          if (extractHighBits(i, high, /*effectiveBitwidth=*/11) & 1)
-            break;
-        return std::min(12, high);
+        return 12 - numActiveBits(i);
       }};
 
   static __attribute__((always_inline)) int getPred(Array2DRef<uint16_t> out,
