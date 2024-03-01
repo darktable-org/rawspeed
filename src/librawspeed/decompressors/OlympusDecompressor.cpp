@@ -46,14 +46,14 @@ namespace rawspeed {
 namespace {
 
 class OlympusDifferenceDecoder final {
-  const SimpleLUT<int8_t, 12>& bittable;
+  const SimpleLUT<int8_t, 12>& numLZ;
 
   std::array<int, 3> carry{{}};
 
 public:
   // NOLINTNEXTLINE(google-explicit-constructor)
-  OlympusDifferenceDecoder(const SimpleLUT<int8_t, 12>& bittable_)
-      : bittable(bittable_) {}
+  OlympusDifferenceDecoder(const SimpleLUT<int8_t, 12>& numLZ_)
+      : numLZ(numLZ_) {}
 
   inline __attribute__((always_inline)) int getDiff(BitStreamerMSB& bits);
 };
@@ -72,20 +72,20 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
   int b = bits.peekBitsNoFill(15);
   int sign = (b >> 14) * -1;
   int low = (b >> 12) & 3;
-  int numHighBits = bittable[b & 4095];
+  int numLeadingZeros = numLZ[b & 4095];
 
   int highBits;
   // Skip bytes used above or read bits
-  if (numHighBits == 12) {
+  if (numLeadingZeros == 12) {
     bits.skipBitsNoFill(15);
-    numHighBits = 15 - numLowBits;
+    int numHighBits = 15 - numLowBits;
     assert(numHighBits >= 1);
     assert(numHighBits <= 13);
     highBits = bits.peekBitsNoFill(numHighBits);
     bits.skipBitsNoFill(1 + numHighBits);
   } else {
-    bits.skipBitsNoFill(numHighBits + 1 + 3);
-    highBits = numHighBits;
+    bits.skipBitsNoFill(numLeadingZeros + 1 + 3);
+    highBits = numLeadingZeros;
   }
 
   carry[0] = (highBits << numLowBits) | bits.getBitsNoFill(numLowBits);
@@ -99,8 +99,8 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
 class OlympusDecompressorImpl final : public AbstractDecompressor {
   RawImage mRaw;
 
-  // A table to quickly look up "high" value
-  const SimpleLUT<int8_t, 12> bittable{
+  // A table to quickly look up the number of leading zeros in a value.
+  const SimpleLUT<int8_t, 12> numLZ{
       [](size_t i, [[maybe_unused]] unsigned tableSize) {
         return 12 - numActiveBits(i);
       }};
@@ -187,7 +187,7 @@ void OlympusDecompressorImpl::decompressRow(BitStreamerMSB& bits,
   invariant(out.width() > 0);
   invariant(out.width() % 2 == 0);
 
-  std::array<OlympusDifferenceDecoder, 2> acarry{bittable, bittable};
+  std::array<OlympusDifferenceDecoder, 2> acarry{numLZ, numLZ};
 
   const int numGroups = out.width() / 2;
   int group = 0;
