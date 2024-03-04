@@ -15420,7 +15420,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-12"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15440,7 +15439,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-12"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15659,7 +15657,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15679,7 +15676,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15742,7 +15738,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15762,7 +15757,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15782,7 +15776,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-78" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15802,7 +15795,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-78" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16064,7 +16056,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16084,7 +16075,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16104,7 +16094,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16124,7 +16113,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16144,7 +16132,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-90" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16164,7 +16151,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-90" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16244,7 +16230,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="8" width="-134" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16264,7 +16249,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="8" width="-134" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16284,7 +16268,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="0"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16304,7 +16287,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="0"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16324,7 +16306,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16344,7 +16325,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16424,7 +16404,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16444,7 +16423,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16464,7 +16442,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16484,7 +16461,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
