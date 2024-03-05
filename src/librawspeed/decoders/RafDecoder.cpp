@@ -329,8 +329,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = (sum + 2) >> 2;
   }
 
-  const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
-  if (sensor->mWhiteLevel > 0) {
+  if (const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
+      sensor && sensor->mWhiteLevel > 0) {
     mRaw->blackLevel = sensor->mBlackLevel;
     mRaw->whitePoint = sensor->mWhiteLevel;
   }
