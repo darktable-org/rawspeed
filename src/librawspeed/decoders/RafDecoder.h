@@ -45,6 +45,7 @@ public:
   void applyCorrections(const Camera* cam);
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
+  iRectangle2D getDefaultCrop() override;
   static bool isRAF(Buffer input);
 
 protected:
