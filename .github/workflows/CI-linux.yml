@@ -217,7 +217,7 @@ jobs:
       - name: Initialize CodeQL (for CodeQL static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'CodeQLAnalysis'
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: cpp
       - name: Set up JDK 11 (for SonarCloud static analysis)
@@ -436,7 +436,7 @@ jobs:
       - name: Perform CodeQL static analysis
         timeout-minutes: 11
         if: inputs.flavor == 'CodeQLAnalysis'
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
       - name: Perform SonarCloud static analysis
         timeout-minutes: 6
         if: inputs.flavor == 'SonarCloudStaticAnalysis'
