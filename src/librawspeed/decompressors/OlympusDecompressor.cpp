@@ -76,16 +76,16 @@ OlympusDifferenceDecoder::getDiff(BitStreamerMSB& bits) {
 
   int highBits;
   // Skip bytes used above or read bits
-  if (numLeadingZeros == 12) {
+  if (numLeadingZeros != 12) [[likely]] { // Happens in 99.9% of cases.
+    bits.skipBitsNoFill(numLeadingZeros + 1 + 3);
+    highBits = numLeadingZeros;
+  } else {
     bits.skipBitsNoFill(15);
     int numHighBits = 15 - numLowBits;
     assert(numHighBits >= 1);
     assert(numHighBits <= 13);
     highBits = bits.peekBitsNoFill(numHighBits);
     bits.skipBitsNoFill(1 + numHighBits);
-  } else {
-    bits.skipBitsNoFill(numLeadingZeros + 1 + 3);
-    highBits = numLeadingZeros;
   }
 
   carry[0] = (highBits << numLowBits) | bits.getBitsNoFill(numLowBits);
