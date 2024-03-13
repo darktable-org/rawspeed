@@ -7,6 +7,15 @@ on:
       distro:
         required: true
         type: string
+      arch:
+        required: true
+        type: string
+      triple:
+        required: true
+        type: string
+      suffix:
+        required: true
+        type: string
       compiler-family:
         required: true
         type: string
@@ -47,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_SCANNER_VERSION: 5.0.1.3006
-    name: ${{ inputs.distro }}.${{ inputs.compiler-family }}${{ inputs.compiler-version }}.${{ inputs.flavor }}
+    name: ${{ inputs.distro }}.${{ inputs.arch }}.${{ inputs.compiler-family }}${{ inputs.compiler-version }}.${{ inputs.flavor }}
     container:
       image: ${{ inputs.distro }}
       options: --tmpfs /tmp:exec --tmpfs /__w/${{ github.event.repository.name }}/${{ github.event.repository.name }}:exec
@@ -79,6 +88,8 @@ jobs:
           tee /etc/apt/apt.conf.d/80fixmissing > /dev/null <<EOT
           APT::Get::Fix-Missing "true";
           EOT
+          rm -rf /var/lib/apt/lists/*
+          if [ "${{ inputs.arch }}" = "amd64" ] || [ "${{ inputs.arch }}" = "arm64" ] || [ "${{ inputs.arch }}" = "i386" ]; then
           rm -rf /etc/apt/sources.list*
           if [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
           tee /etc/apt/sources.list > /dev/null <<EOT
@@ -95,6 +106,9 @@ jobs:
           deb http://debian-archive.trafficmanager.net/debian bookworm-backports main
           EOT
           fi
+          fi
+          dpkg --add-architecture ${{ inputs.arch }}
+          apt-get update
       - name: Update base packages
         timeout-minutes: 1
         env:
@@ -103,10 +117,16 @@ jobs:
           FLAVOR: ${{ inputs.flavor }}
         run: |
           set -xe
-          rm -rf /var/lib/apt/lists/*
-          apt-get update
           apt-get install eatmydata
           eatmydata apt-get upgrade
+      - name: Enable running cross-compiled binaries
+        timeout-minutes: 1
+        if: inputs.arch != 'amd64'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          set -xe
+          eatmydata apt-get install binfmt-support qemu-user-static
       - name: Install necessary packages
         timeout-minutes: 1
         env:
@@ -117,18 +137,18 @@ jobs:
         run: |
           set -xe
           eatmydata apt-get install ca-certificates \
-                                    cmake \
                                     git \
-                                    googletest \
-                                    libjpeg-dev \
-                                    libpugixml-dev \
-                                    libxml2-utils \
+                                    cmake \
                                     ninja-build \
-                                    zlib1g-dev
+                                    libxml2-utils \
+                                    googletest:all \
+                                    libjpeg-dev:${{ inputs.arch }} \
+                                    libpugixml-dev:${{ inputs.arch }} \
+                                    zlib1g-dev:${{ inputs.arch }}
           if [ "$COMPILER_FAMILY" = "GNU" ]; then
-            eatmydata apt-get install g++-${{ inputs.compiler-version }} \
-                                      gcc \
-                                      gcc-${{ inputs.compiler-version }}
+            eatmydata apt-get install binutils${{ inputs.suffix }} \
+                                      g++-${{ inputs.compiler-version }}${{ inputs.suffix }} \
+                                      gcc-${{ inputs.compiler-version }}${{ inputs.suffix }}
           fi
           if [ "$COMPILER_FAMILY" = "LLVM" ]; then
             eatmydata apt-get install clang-${{ inputs.compiler-version }} \
@@ -146,34 +166,41 @@ jobs:
             apt-get update
             eatmydata apt-get install rawspeed-clang-tidy-module
           fi
-          if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
-            eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
-                                      curl \
-                                      libxml2-dev \
-                                      libxslt1-dev \
-                                      make \
-                                      python3-dev \
-                                      python3-lxml \
-                                      python3-pip-whl \
-                                      python3-portalocker \
-                                      python3-psutil \
-                                      python3-venv \
-                                      python3-virtualenv \
-                                      python3-wheel \
-                                      python3-yaml \
-                                      xz-utils
-          fi
-          eatmydata apt-get clean
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
-          if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
-            ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/clang
-            ln -s /usr/bin/${{ inputs.compiler-CXX }} /usr/local/bin/clang++
-            ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/gcc
-            ln -s /usr/bin/${{ inputs.compiler-CXX }} /usr/local/bin/g++
-            ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/x86_64-linux-gnu-gcc
-            ln -s /usr/bin/${{ inputs.compiler-CXX }} /usr/local/bin/x86_64-linux-gnu-g++
-          fi
           ln -s /usr/bin/ld.gold /usr/bin/ld
+      - name: Install packages needed for CodeChecker (for clang static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'ClangStaticAnalysis' || inputs.flavor == 'ClangCTUStaticAnalysis'
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          set -xe
+          eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
+                                    curl \
+                                    libxml2-dev \
+                                    libxslt1-dev \
+                                    make \
+                                    python3-dev \
+                                    python3-lxml \
+                                    python3-pip-whl \
+                                    python3-portalocker \
+                                    python3-psutil \
+                                    python3-venv \
+                                    python3-virtualenv \
+                                    python3-wheel \
+                                    python3-yaml \
+                                    xz-utils
+      - name: Install packages needed for sonar-scanner (for SonarCloud static analysis)
+        timeout-minutes: 1
+        if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
+        run: |
+          set -xe
+          eatmydata apt-get install curl unzip
+      - name: Drop apt caches
+        timeout-minutes: 1
+        run: |
+          set -xe
+          eatmydata apt-get clean
       - name: Configure git
         timeout-minutes: 1
         run: |
@@ -234,10 +261,6 @@ jobs:
           SONAR_SCANNER_DOWNLOAD_URL: https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
         run: |
           set -xe
-          rm -rf /var/lib/apt/lists/*
-          eatmydata apt-get update
-          eatmydata apt-get install curl unzip
-          eatmydata apt-get clean
           mkdir -p $HOME/.sonar
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
@@ -262,7 +285,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
           RPUU_DST: ${{ env.RPUU_DST }}
-          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.enable-sample-based-testing }}
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON -DUSE_CLANG_TIDY=${{ inputs.flavor == 'ClangTidy' }} -DRAWSPEED_ENABLE_SAMPLE_BASED_TESTING=${{ inputs.enable-sample-based-testing }} -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR="${{ inputs.arch }}" -DCMAKE_C_COMPILER="${{ inputs.compiler-CC }}" -DCMAKE_C_COMPILER_TARGET="${{ inputs.triple }}" -DCMAKE_CXX_COMPILER="${{ inputs.compiler-CXX }}" -DCMAKE_CXX_COMPILER_TARGET="${{ inputs.triple }}"
           FLAVOR: ${{ inputs.flavor }}
           TARGET: configure
         run: |
