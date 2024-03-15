@@ -87,14 +87,16 @@ TEST(HuffmanCodeCodeSymbolTest, Equality) {
 
 #ifndef NDEBUG
 TEST(CodeSymbolDeathTest, CodeSymbolLength) {
-  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(0, 0); },
-               "code_len > 0");
-  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(1, 0); },
-               "code_len > 0");
-  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(0, 17); },
-               "code_len <= Traits::MaxCodeLenghtBits");
-  ASSERT_DEATH({ HuffmanCode<BaselineCodeTag>::CodeSymbol(1, 17); },
-               "code_len <= Traits::MaxCodeLenghtBits");
+  ASSERT_DEATH(
+      { HuffmanCode<BaselineCodeTag>::CodeSymbol(0, 0); }, "code_len > 0");
+  ASSERT_DEATH(
+      { HuffmanCode<BaselineCodeTag>::CodeSymbol(1, 0); }, "code_len > 0");
+  ASSERT_DEATH(
+      { HuffmanCode<BaselineCodeTag>::CodeSymbol(0, 17); },
+      "code_len <= Traits::MaxCodeLenghtBits");
+  ASSERT_DEATH(
+      { HuffmanCode<BaselineCodeTag>::CodeSymbol(1, 17); },
+      "code_len <= Traits::MaxCodeLenghtBits");
 }
 
 using CodeSymbolType = std::tuple<int, int, bool>;
@@ -323,8 +325,9 @@ TEST(HuffmanCodeDeathTest, setNCodesPerLengthRequires16Lengths) {
     HuffmanCode<BaselineCodeTag> hc;
 
     if (b.getSize() != 16) {
-      ASSERT_DEATH({ hc.setNCodesPerLength(b); },
-                   "data.getSize\\(\\) == Traits::MaxCodeLenghtBits");
+      ASSERT_DEATH(
+          { hc.setNCodesPerLength(b); },
+          "data.getSize\\(\\) == Traits::MaxCodeLenghtBits");
     } else {
       ASSERT_EXIT(
           {
@@ -425,9 +428,9 @@ TEST(HuffmanCodeDeathTest, setCodeValuesRequiresCount) {
           v.data(),
           rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
       if (cnt != count) {
-        ASSERT_DEATH({ ht.setCodeValues(bv); },
-                     "static_cast<unsigned>\\(data.size\\(\\)"
-                     "\\) == maxCodesCount\\(\\)");
+        ASSERT_DEATH(
+            { ht.setCodeValues(bv); }, "static_cast<unsigned>\\(data.size\\(\\)"
+                                       "\\) == maxCodesCount\\(\\)");
       } else {
         ASSERT_EXIT(
             {
@@ -445,8 +448,8 @@ TEST(HuffmanCodeDeathTest, setCodeValuesRequiresLessThan162) {
   std::vector<uint8_t> v(163, 0);
   rawspeed::Array1DRef<const uint8_t> bv(
       v.data(), rawspeed::implicit_cast<rawspeed::Buffer::size_type>(v.size()));
-  ASSERT_DEATH({ ht.setCodeValues(bv); },
-               "data.size\\(\\) <= Traits::MaxNumCodeValues");
+  ASSERT_DEATH(
+      { ht.setCodeValues(bv); }, "data.size\\(\\) <= Traits::MaxNumCodeValues");
 }
 #endif
 

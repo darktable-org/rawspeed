@@ -110,8 +110,8 @@ public:
 
 // CTAD deduction guide
 template <typename T>
-explicit Array2DRef(Array1DRef<T> data, int width, int height, int pitch)
-    -> Array2DRef<T>;
+explicit Array2DRef(Array1DRef<T> data, int width, int height,
+                    int pitch) -> Array2DRef<T>;
 
 // CTAD deduction guide
 template <typename T>

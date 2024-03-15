@@ -86,8 +86,8 @@ public:
 
 // CTAD deduction guide
 template <typename T>
-CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts)
-    -> CroppedArray1DRef<T>;
+CroppedArray1DRef(Array1DRef<T> base, int offset,
+                  int numElts) -> CroppedArray1DRef<T>;
 
 template <class T>
 __attribute__((always_inline)) inline void
