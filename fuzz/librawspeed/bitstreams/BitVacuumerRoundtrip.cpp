@@ -106,17 +106,17 @@ public:
   InputWrapper& operator=(const InputWrapper&) = delete;
   InputWrapper& operator=(InputWrapper&&) = delete;
 
-  inline InputWrapper(ByteStream bitLengths_, ByteStream bitVals_)
+  InputWrapper(ByteStream bitLengths_, ByteStream bitVals_)
       : bitLengths(bitLengths_), bitVals(bitVals_) {
     invariant(size() >= 0);
   }
 
-  [[nodiscard]] inline int size() const RAWSPEED_READNONE {
+  [[nodiscard]] int size() const RAWSPEED_READNONE {
     invariant(bitVals.getSize() == 4 * bitLengths.getSize());
     return bitLengths.getSize();
   }
 
-  [[nodiscard]] inline std::pair<uint32_t, int>
+  [[nodiscard]] std::pair<uint32_t, int>
   operator[](int i) const RAWSPEED_READNONE {
     invariant(i >= 0);
     invariant(i < size());

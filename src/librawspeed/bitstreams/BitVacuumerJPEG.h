@@ -48,7 +48,7 @@ class BitVacuumerJPEG final
 
   friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
-  inline void drainImpl() {
+  void drainImpl() {
     invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
     invariant(Base::chunk_bitwidth == 32);
 

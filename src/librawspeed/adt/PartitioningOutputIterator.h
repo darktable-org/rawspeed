@@ -45,20 +45,19 @@ public:
 
   template <typename U>
     requires std::same_as<UnderlyingOutputIterator, std::remove_reference_t<U>>
-  inline explicit PartitioningOutputIterator(U&& it_)
-      : it(std::forward<U>(it_)) {}
+  explicit PartitioningOutputIterator(U&& it_) : it(std::forward<U>(it_)) {}
 
-  [[nodiscard]] inline PartitioningOutputIterator& operator*() { return *this; }
+  [[nodiscard]] PartitioningOutputIterator& operator*() { return *this; }
 
-  inline PartitioningOutputIterator& operator++() { return *this; }
+  PartitioningOutputIterator& operator++() { return *this; }
 
   // NOLINTNEXTLINE(cert-dcl21-cpp)
-  inline PartitioningOutputIterator operator++(int) { return *this; }
+  PartitioningOutputIterator operator++(int) { return *this; }
 
   template <typename U>
     requires(std::unsigned_integral<U> && sizeof(U) >= sizeof(PartType) &&
              sizeof(U) % sizeof(PartType) == 0)
-  inline PartitioningOutputIterator& operator=(U coalesced) {
+  PartitioningOutputIterator& operator=(U coalesced) {
     // NOLINTNEXTLINE(bugprone-sizeof-expression)
     constexpr int NumParts = sizeof(U) / sizeof(PartType);
     for (int i = 0; i != NumParts; ++i) {

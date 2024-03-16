@@ -170,7 +170,7 @@ public:
       return s0 == s1;
     }
 
-    inline bool RAWSPEED_READONLY operator==(const CodeSymbol& other) const {
+    bool RAWSPEED_READONLY operator==(const CodeSymbol& other) const {
       return code == other.code && code_len == other.code_len;
     }
   };

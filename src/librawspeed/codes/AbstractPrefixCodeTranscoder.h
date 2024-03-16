@@ -58,11 +58,11 @@ protected:
   bool fullDecode = true;
   bool fixDNGBug16 = false;
 
-  [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodeLength() const {
+  [[nodiscard]] size_t RAWSPEED_READONLY maxCodeLength() const {
     return code.nCodesPerLength.size() - 1;
   }
 
-  [[nodiscard]] inline size_t RAWSPEED_READONLY __attribute__((pure))
+  [[nodiscard]] size_t RAWSPEED_READONLY __attribute__((pure))
   maxCodePlusDiffLength() const {
     return maxCodeLength() + *(std::max_element(code.Base::codeValues.cbegin(),
                                                 code.Base::codeValues.cend()));

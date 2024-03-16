@@ -44,7 +44,7 @@ public:
     Base::setup(fullDecode_, fixDNGBug16_);
   }
 
-  inline static std::pair<uint32_t, uint8_t>
+  static std::pair<uint32_t, uint8_t>
       RAWSPEED_READNONE reduce(int32_t extendedDiff) {
     if (extendedDiff >= 0) {
       auto diff = static_cast<uint32_t>(extendedDiff);

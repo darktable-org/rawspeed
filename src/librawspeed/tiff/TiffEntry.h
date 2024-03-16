@@ -104,26 +104,24 @@ public:
   [[nodiscard]] float getFloat(uint32_t index = 0) const;
   [[nodiscard]] std::string getString() const;
 
-  [[nodiscard]] inline std::vector<uint16_t>
-  getU16Array(uint32_t count_) const {
+  [[nodiscard]] std::vector<uint16_t> getU16Array(uint32_t count_) const {
     return getArray<uint16_t, &TiffEntry::getU16>(count_);
   }
 
-  [[nodiscard]] inline std::vector<uint32_t>
-  getU32Array(uint32_t count_) const {
+  [[nodiscard]] std::vector<uint32_t> getU32Array(uint32_t count_) const {
     return getArray<uint32_t, &TiffEntry::getU32>(count_);
   }
 
-  [[nodiscard]] inline std::vector<float> getFloatArray(uint32_t count_) const {
+  [[nodiscard]] std::vector<float> getFloatArray(uint32_t count_) const {
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
-  [[nodiscard]] inline std::vector<NotARational<uint32_t>>
+  [[nodiscard]] std::vector<NotARational<uint32_t>>
   getRationalArray(uint32_t count_) const {
     return getArray<NotARational<uint32_t>, &TiffEntry::getRational>(count_);
   }
 
-  [[nodiscard]] inline std::vector<NotARational<int32_t>>
+  [[nodiscard]] std::vector<NotARational<int32_t>>
   getSRationalArray(uint32_t count_) const {
     return getArray<NotARational<int>, &TiffEntry::getSRational>(count_);
   }

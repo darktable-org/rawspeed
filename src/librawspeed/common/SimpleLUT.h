@@ -60,7 +60,7 @@ public:
     assert(table.size() == fullTableSize);
   }
 
-  inline value_type operator[](int x) const {
+  value_type operator[](int x) const {
     unsigned clampedX = clampBits(x, TableBitWidth);
     return table[clampedX];
   }
