@@ -228,7 +228,7 @@ void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
 
 namespace {
 
-enum class ColorDataFormat {
+enum class ColorDataFormat : uint8_t {
   ColorData1,
   ColorData2,
   ColorData3,

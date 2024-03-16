@@ -21,11 +21,12 @@
 
 #pragma once
 
+#include <cstdint>
 #include <initializer_list>
 
 namespace rawspeed {
 
-enum class CiffTag {
+enum class CiffTag : uint16_t {
   NULL_TAG = 0x0000,
   MAKEMODEL = 0x080a,
   SHOTINFO = 0x102a,

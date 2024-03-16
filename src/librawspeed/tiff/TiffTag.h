@@ -25,9 +25,11 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace rawspeed {
 
-enum class TiffTag {
+enum class TiffTag : uint16_t {
   INTEROPERABILITYINDEX = 0x0001,
   INTEROPERABILITYVERSION = 0x0002,
   CANONSHOTINFO = 0x0004,

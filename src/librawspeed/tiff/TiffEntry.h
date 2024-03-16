@@ -42,7 +42,7 @@ class Buffer;
  *
  * Note: RATIONALs are the ratio of two 32-bit integer values.
  */
-enum class TiffDataType {
+enum class TiffDataType : uint8_t {
   NOTYPE = 0,     /* placeholder */
   BYTE = 1,       /* 8-bit unsigned integer */
   ASCII = 2,      /* 8-bit bytes w/ last byte null */

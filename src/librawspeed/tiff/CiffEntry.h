@@ -40,7 +40,7 @@ template <typename T> class NORangesSet;
 /*
  * Tag data type information.
  */
-enum class CiffDataType {
+enum class CiffDataType : uint16_t {
   BYTE = 0x0000,  /* 8-bit unsigned integer */
   ASCII = 0x0800, /* 8-bit bytes w/ last byte null */
   SHORT = 0x1000, /* 16-bit unsigned integer */

@@ -70,7 +70,7 @@ struct int_pair final {
   int value2;
 };
 
-enum xt_lines {
+enum xt_lines : uint8_t {
   R0 = 0,
   R1,
   R2,

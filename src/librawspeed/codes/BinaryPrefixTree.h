@@ -41,7 +41,7 @@ public:
   struct Leaf;
 
   struct Node {
-    enum class Type { Branch, Leaf };
+    enum class Type : uint8_t { Branch, Leaf };
 
     explicit virtual operator Type() const = 0;
 

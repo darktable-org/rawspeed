@@ -51,11 +51,11 @@ namespace rawspeed {
 class RawImage;
 class RawImageData;
 
-enum class RawImageType { UINT16, F32 };
+enum class RawImageType : uint8_t { UINT16, F32 };
 
 class RawImageWorker final {
 public:
-  enum class RawImageWorkerTask {
+  enum class RawImageWorkerTask : uint16_t {
     SCALE_VALUES = 1,
     FIX_BAD_PIXELS = 2,
     APPLY_LOOKUP = 3 | 0x1000,
