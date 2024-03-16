@@ -757,9 +757,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
           reinterpret_cast<std::byte*>(&out(row, col + 1)), &random);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(implicit_cast<double>(y1) +
-                                     1.732446 * implicit_cast<double>(cb)),
-                    12),
+          clampBits(
+              static_cast<int>(implicit_cast<double>(y1) +
+                               1.732446 // NOLINT(modernize-use-std-numbers)
+                                   * implicit_cast<double>(cb)),
+              12),
           tmpch, &random);
       out(row, col + 2) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
 
@@ -778,9 +780,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
           reinterpret_cast<std::byte*>(&out(row, col + 4)), &random);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(implicit_cast<double>(y2) +
-                                     1.732446 * implicit_cast<double>(cb2)),
-                    12),
+          clampBits(
+              static_cast<int>(implicit_cast<double>(y2) +
+                               1.732446 // NOLINT(modernize-use-std-numbers)
+                                   * implicit_cast<double>(cb2)),
+              12),
           tmpch, &random);
       out(row, col + 5) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
     }

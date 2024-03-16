@@ -119,7 +119,6 @@ Checks: >
   -readability-implicit-bool-conversion,
   -readability-inconsistent-declaration-parameter-name,
   -readability-magic-numbers,
-  -modernize-use-std-numbers,
   -readability-avoid-nested-conditional-operator,
 
   -rawspeed-std-array-no-operator-at
