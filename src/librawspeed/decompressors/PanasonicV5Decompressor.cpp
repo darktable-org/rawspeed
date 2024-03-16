@@ -240,10 +240,7 @@ void PanasonicV5Decompressor::decompressInternal() const noexcept {
     schedule(static) default(none)
 #endif
   for (const auto& block :
-       Array1DRef(blocks.data(),
-                  implicit_cast<int>(
-                      blocks.size()))) { // NOLINT(openmp-exception-escape): we
-                                         // have checked size already.
+       Array1DRef(blocks.data(), implicit_cast<int>(blocks.size()))) {
     try {
       processBlock<dsc>(block);
     } catch (...) {

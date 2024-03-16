@@ -127,7 +127,6 @@ inline void CustomArgs(benchmark::internal::Benchmark* b) {
 
   b->RangeMultiplier(2);
   // FIXME: appears to not like 1GPix+ buffers
-  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
   if constexpr ((true)) {
     b->Arg(128 << 20);
   } else {

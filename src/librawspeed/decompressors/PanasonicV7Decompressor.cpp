@@ -65,7 +65,6 @@ PanasonicV7Decompressor::PanasonicV7Decompressor(RawImage img,
 }
 
 inline void __attribute__((always_inline))
-// NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 PanasonicV7Decompressor::decompressBlock(
     ByteStream block, CroppedArray1DRef<uint16_t> out) noexcept {
   invariant(out.size() == PixelsPerBlock);
@@ -74,7 +73,6 @@ PanasonicV7Decompressor::decompressBlock(
     out(pix) = implicit_cast<uint16_t>(pump.getBits(BitsPerSample));
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
 void PanasonicV7Decompressor::decompressRow(int row) const noexcept {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   Array1DRef<uint16_t> outRow = out[row];
@@ -95,9 +93,7 @@ void PanasonicV7Decompressor::decompress() const {
 #pragma omp parallel for num_threads(rawspeed_get_number_of_processor_cores()) \
     schedule(static) default(none)
 #endif
-  for (int row = 0; row < mRaw->dim.y;
-       ++row) { // NOLINT(openmp-exception-escape): we know no exceptions will
-                // be thrown.
+  for (int row = 0; row < mRaw->dim.y; ++row) {
     try {
       decompressRow(row);
     } catch (...) {
