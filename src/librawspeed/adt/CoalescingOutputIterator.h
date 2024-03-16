@@ -24,8 +24,10 @@
 #include "adt/Invariant.h"
 #include "io/Endianness.h"
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <type_traits>
 
 namespace rawspeed {
 
@@ -45,13 +47,13 @@ class CoalescingOutputIterator {
 
   static constexpr int MaxOccupancy = bitwidth<CoalescedType>();
 
-  inline void establishClassInvariants() const {
+  void establishClassInvariants() const {
     invariant(occupancy >= 0);
     invariant(occupancy <= MaxOccupancy);
     invariant(occupancy % bitwidth<PartType>() == 0);
   }
 
-  inline void maybeOutputCoalescedParts() {
+  void maybeOutputCoalescedParts() {
     establishClassInvariants();
     invariant(occupancy > 0);
     if (occupancy != MaxOccupancy)
@@ -79,8 +81,7 @@ public:
 
   template <typename U>
     requires std::same_as<UnderlyingOutputIterator, std::remove_reference_t<U>>
-  inline explicit CoalescingOutputIterator(U&& it_)
-      : it(std::forward<U>(it_)) {}
+  explicit CoalescingOutputIterator(U&& it_) : it(std::forward<U>(it_)) {}
 
   CoalescingOutputIterator(const CoalescingOutputIterator& other)
       : it(other.it) {
@@ -107,7 +108,7 @@ public:
     return *this;
   }
 
-  inline ~CoalescingOutputIterator() {
+  ~CoalescingOutputIterator() {
     establishClassInvariants();
     if (occupancy == 0)
       return;
@@ -120,25 +121,25 @@ public:
     invariant(occupancy == 0);
   }
 
-  [[nodiscard]] inline CoalescingOutputIterator& operator*() {
+  [[nodiscard]] CoalescingOutputIterator& operator*() {
     establishClassInvariants();
     return *this;
   }
 
-  inline CoalescingOutputIterator& operator++() {
+  CoalescingOutputIterator& operator++() {
     establishClassInvariants();
     return *this;
   }
 
   // NOLINTNEXTLINE(cert-dcl21-cpp)
-  inline CoalescingOutputIterator operator++(int) {
+  CoalescingOutputIterator operator++(int) {
     establishClassInvariants();
     return *this;
   }
 
   template <typename U>
     requires std::same_as<U, PartType>
-  inline CoalescingOutputIterator& operator=(U part) {
+  CoalescingOutputIterator& operator=(U part) {
     establishClassInvariants();
     invariant(occupancy < MaxOccupancy);
     invariant(occupancy + bitwidth<U>() <= MaxOccupancy);

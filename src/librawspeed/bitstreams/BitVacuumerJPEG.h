@@ -48,7 +48,7 @@ class BitVacuumerJPEG final
 
   friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
-  inline void drainImpl() {
+  void drainImpl() {
     invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
     invariant(Base::chunk_bitwidth == 32);
 
@@ -67,7 +67,7 @@ class BitVacuumerJPEG final
 
     // short-cut path for the most common case (no FF marker in the next 4
     // bytes) this is slightly faster than the else-case alone.
-    if (std::accumulate(bytes.begin(), bytes.end(), bool(true),
+    if (std::accumulate(bytes.begin(), bytes.end(), true,
                         [](bool b, std::byte byte) {
                           return b && (byte != std::byte{0xFF});
                         })) {

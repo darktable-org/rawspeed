@@ -48,7 +48,7 @@ public:
   HuffmanCode() = default;
 
 protected:
-  [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodeLength() const {
+  [[nodiscard]] size_t RAWSPEED_READONLY maxCodeLength() const {
     return nCodesPerLength.size() - 1;
   }
 
@@ -58,7 +58,7 @@ protected:
   // (there are always 0 codes of length 0)
   std::vector<unsigned int> nCodesPerLength; // index is length of code
 
-  [[nodiscard]] inline unsigned int RAWSPEED_READONLY maxCodesCount() const {
+  [[nodiscard]] unsigned int RAWSPEED_READONLY maxCodesCount() const {
     return std::accumulate(nCodesPerLength.begin(), nCodesPerLength.end(), 0U);
   }
 

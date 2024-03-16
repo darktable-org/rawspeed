@@ -37,7 +37,7 @@ public:
 
 private:
   template <typename BIT_VACUUMER>
-  inline void encodeCodeValueImpl(BIT_VACUUMER& bv, int codeIndex) const {
+  void encodeCodeValueImpl(BIT_VACUUMER& bv, int codeIndex) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
@@ -66,8 +66,8 @@ public:
   }
 
   template <typename BIT_VACUUMER>
-  inline void encodeCodeValue(BIT_VACUUMER& bv,
-                              typename Traits::CodeValueTy codeValue) const {
+  void encodeCodeValue(BIT_VACUUMER& bv,
+                       typename Traits::CodeValueTy codeValue) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
@@ -77,7 +77,7 @@ public:
   }
 
   template <typename BIT_VACUUMER>
-  inline void encodeDifference(BIT_VACUUMER& bv, int value) const {
+  void encodeDifference(BIT_VACUUMER& bv, int value) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
@@ -90,7 +90,7 @@ public:
   }
 
   template <typename BIT_VACUUMER, bool FULL_DECODE>
-  inline void encode(BIT_VACUUMER& bv, int value) const {
+  void encode(BIT_VACUUMER& bv, int value) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");

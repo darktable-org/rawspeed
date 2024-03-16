@@ -51,7 +51,11 @@ class ByteStream;
 // NOLINTNEXTLINE(google-build-namespaces)
 namespace {
 
-enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
+enum class TileSequenceStatus : uint8_t {
+  ContinuesColumn,
+  BeginsNewColumn,
+  Invalid
+};
 
 inline TileSequenceStatus
 evaluateConsecutiveTiles(const iRectangle2D& rect,

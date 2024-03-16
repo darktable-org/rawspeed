@@ -30,6 +30,7 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -123,7 +124,7 @@ BitStreamerJPEG::fillCache(Array1DRef<const std::byte> input) {
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
-  if (std::accumulate(&prefetch[0], &prefetch[4], bool(true),
+  if (std::accumulate(&prefetch[0], &prefetch[4], true,
                       [](bool b, std::byte byte) {
                         return b && (byte != std::byte{0xFF});
                       })) {

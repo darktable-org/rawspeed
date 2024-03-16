@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
 #include "io/Endianness.h"
-#include <cstddef>
+#include <concepts>
 #include <cstdint>
+#include <iterator>
+#include <type_traits>
 
 namespace rawspeed {
 
@@ -53,7 +54,7 @@ public:
   using chunk_type = uint32_t;
   static constexpr int chunk_bitwidth = 32;
 
-  inline void drainImpl() {
+  void drainImpl() {
     invariant(cache.fillLevel >= chunk_bitwidth);
     static_assert(chunk_bitwidth == 32);
 
@@ -76,7 +77,7 @@ public:
     }
   }
 
-  inline void drain() {
+  void drain() {
     invariant(!flushed);
 
     if (cache.fillLevel < chunk_bitwidth)
@@ -86,7 +87,7 @@ public:
     invariant(cache.fillLevel < chunk_bitwidth);
   }
 
-  inline void flush() {
+  void flush() {
     drain();
 
     if (cache.fillLevel == 0) {
@@ -113,11 +114,11 @@ public:
 
   template <typename U>
     requires std::same_as<OutputIterator, std::remove_reference_t<U>>
-  inline explicit BitVacuumer(U&& output_) : output(std::forward<U>(output_)) {}
+  explicit BitVacuumer(U&& output_) : output(std::forward<U>(output_)) {}
 
-  inline ~BitVacuumer() { flush(); }
+  ~BitVacuumer() { flush(); }
 
-  inline void put(uint32_t bits, int count) {
+  void put(uint32_t bits, int count) {
     invariant(count >= 0);
     // NOTE: count may be zero!
     drain();

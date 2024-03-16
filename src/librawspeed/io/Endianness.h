@@ -28,7 +28,11 @@
 
 namespace rawspeed {
 
-enum class Endianness { little = 0xDEAD, big = 0xBEEF, unknown = 0x0BAD };
+enum class Endianness : uint16_t {
+  little = 0xDEAD,
+  big = 0xBEEF,
+  unknown = 0x0BAD
+};
 
 inline Endianness getHostEndiannessRuntime() {
   uint16_t testvar = 0xfeff;

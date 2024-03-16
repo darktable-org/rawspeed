@@ -23,8 +23,10 @@
 #include "adt/Casts.h"
 #include "common/Common.h"
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <numeric>
 #include <ostream>
 #include <vector>

@@ -35,6 +35,7 @@
 #include "adt/CroppedArray1DRef.h" // IWYU pragma: keep
 #include "adt/Invariant.h"
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -88,14 +89,13 @@ template <int N> class BufferCoalescer final {
 
 public:
   template <typename ArgTy>
-  inline void take_block_impl(ArgTy& arg,
-                              Array1DRef<const uint8_t> message) const = delete;
+  void take_block_impl(ArgTy& arg,
+                       Array1DRef<const uint8_t> message) const = delete;
 
 private:
   template <typename ArgTy>
     requires std::same_as<ArgTy, NoBuffer>
-  inline void take_block_impl(NoBuffer& arg,
-                              Array1DRef<const uint8_t> message) {
+  void take_block_impl(NoBuffer& arg, Array1DRef<const uint8_t> message) {
     invariant(message.size() != 0);
 
     if (message.size() == N) {
@@ -110,8 +110,8 @@ private:
 
   template <typename ArgTy>
     requires std::same_as<ArgTy, CoalescingBuffer>
-  inline void take_block_impl(CoalescingBuffer& arg,
-                              Array1DRef<const uint8_t> message) const {
+  void take_block_impl(CoalescingBuffer& arg,
+                       Array1DRef<const uint8_t> message) const {
     invariant(message.size() != 0);
     invariant(message.size() < N);
 
@@ -124,13 +124,12 @@ private:
     arg.block_length += message.size();
   }
 
-  [[nodiscard]] __attribute__((always_inline)) inline int
-  length() const noexcept {
+  [[nodiscard]] __attribute__((always_inline)) int length() const noexcept {
     return std::visit([](const auto& arg) { return arg.block_length; }, state);
   }
 
 public:
-  [[nodiscard]] __attribute__((always_inline)) inline int
+  [[nodiscard]] __attribute__((always_inline)) int
   bytesAvaliable() const noexcept {
     return N - length();
   }
@@ -145,7 +144,7 @@ public:
 
   void reset() noexcept { state = NoBuffer(); }
 
-  __attribute__((always_inline)) inline void
+  __attribute__((always_inline)) void
   take_block(Array1DRef<const uint8_t> message) noexcept {
     invariant(message.size() != 0);
     invariant(message.size() <= N);

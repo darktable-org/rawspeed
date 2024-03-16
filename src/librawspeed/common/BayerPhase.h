@@ -28,6 +28,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <iterator>
 #include <utility>
@@ -45,7 +46,7 @@ namespace rawspeed {
 //  ..GBGBGB..
 //  ..........
 // and there are only 4 flavours of the 2x2 pattern, since position is mod-2:
-enum class BayerPhase : int {
+enum class BayerPhase : uint8_t {
   // The top-left pixel of the image is red pixel.
   RGGB = 0b00, // 0
   // The top-left pixel of the image is green pixel in a green/red row.

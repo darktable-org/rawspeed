@@ -37,6 +37,7 @@ Checks: >
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-c-copy-assignment-signature,
   -cppcoreguidelines-explicit-virtual-functions,
+  -cppcoreguidelines-macro-to-enum,
   -cppcoreguidelines-noexcept-destructor,
   -cppcoreguidelines-noexcept-move-operations,
   -cppcoreguidelines-noexcept-swap,
@@ -118,11 +119,11 @@ Checks: >
   -readability-implicit-bool-conversion,
   -readability-inconsistent-declaration-parameter-name,
   -readability-magic-numbers,
+  -readability-avoid-nested-conditional-operator,
 
   -rawspeed-std-array-no-operator-at
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: false
 InheritParentConfig: false
 User:            lebedevri
 CheckOptions:

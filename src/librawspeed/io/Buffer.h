@@ -104,20 +104,17 @@ public:
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
-  [[nodiscard]] inline T get(bool inNativeByteOrder, size_type offset,
-                             size_type index = 0) const {
+  [[nodiscard]] T get(bool inNativeByteOrder, size_type offset,
+                      size_type index = 0) const {
     const Buffer buf =
         getSubView(offset + index * static_cast<size_type>(sizeof(T)),
                    static_cast<size_type>(sizeof(T)));
     return getByteSwapped<T>(buf.begin(), !inNativeByteOrder);
   }
 
-  [[nodiscard]] inline size_type RAWSPEED_READONLY getSize() const {
-    return size;
-  }
+  [[nodiscard]] size_type RAWSPEED_READONLY getSize() const { return size; }
 
-  [[nodiscard]] inline bool isValid(size_type offset,
-                                    size_type count = 1) const {
+  [[nodiscard]] bool isValid(size_type offset, size_type count = 1) const {
     return static_cast<uint64_t>(offset) + count <=
            static_cast<uint64_t>(getSize());
   }
@@ -147,16 +144,16 @@ public:
   // get memory of type T from byte offset 'offset + sizeof(T)*index' and swap
   // byte order if required
   template <typename T>
-  [[nodiscard]] inline T get(size_type offset, size_type index = 0) const {
+  [[nodiscard]] T get(size_type offset, size_type index = 0) const {
     assert(Endianness::unknown != endianness);
     assert(Endianness::little == endianness || Endianness::big == endianness);
 
     return Buffer::get<T>(getHostEndianness() == endianness, offset, index);
   }
 
-  [[nodiscard]] inline Endianness getByteOrder() const { return endianness; }
+  [[nodiscard]] Endianness getByteOrder() const { return endianness; }
 
-  inline Endianness setByteOrder(Endianness endianness_) {
+  Endianness setByteOrder(Endianness endianness_) {
     std::swap(endianness, endianness_);
     return endianness_;
   }

@@ -67,7 +67,7 @@ private:
                         uint32_t split_col) const;
   void CorrectQuadrantMultipliersCombined(ByteStream data, uint32_t split_row,
                                           uint32_t split_col) const;
-  enum class IiqCorr;
+  enum class IiqCorr : uint8_t;
   void PhaseOneFlatField(ByteStream data, IiqCorr corr) const;
   void correctSensorDefects(ByteStream data) const;
   void correctBadColumn(uint16_t col) const;

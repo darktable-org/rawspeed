@@ -64,11 +64,11 @@ public:
   template <typename T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  inline CroppedArray1DRef( // NOLINT(google-explicit-constructor)
+  CroppedArray1DRef( // NOLINT(google-explicit-constructor)
       CroppedArray1DRef<T2> RHS)
       : CroppedArray1DRef(RHS.base, RHS.offset, RHS.numElts) {}
 
-  [[nodiscard]] inline Array1DRef<T> getAsArray1DRef() const {
+  [[nodiscard]] Array1DRef<T> getAsArray1DRef() const {
     return {begin(), size()};
   }
 
@@ -86,8 +86,8 @@ public:
 
 // CTAD deduction guide
 template <typename T>
-CroppedArray1DRef(Array1DRef<T> base, int offset, int numElts)
-    -> CroppedArray1DRef<T>;
+CroppedArray1DRef(Array1DRef<T> base, int offset,
+                  int numElts) -> CroppedArray1DRef<T>;
 
 template <class T>
 __attribute__((always_inline)) inline void

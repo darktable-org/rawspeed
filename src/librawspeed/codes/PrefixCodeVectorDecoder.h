@@ -48,7 +48,7 @@ private:
 
 protected:
   template <typename BIT_STREAM>
-  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
+  std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   finishReadingPartialSymbol(BIT_STREAM& bs,
                              typename Base::CodeSymbol partial) const {
     static_assert(
@@ -78,7 +78,7 @@ protected:
   }
 
   template <typename BIT_STREAM>
-  inline std::pair<typename Base::CodeSymbol, int /*codeValue*/>
+  std::pair<typename Base::CodeSymbol, int /*codeValue*/>
   readSymbol(BIT_STREAM& bs) const {
     // Start from completely unknown symbol.
     typename Base::CodeSymbol partial;
@@ -104,7 +104,7 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
+  typename Traits::CodeValueTy decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
@@ -112,8 +112,7 @@ public:
     return decode<BIT_STREAM, false>(bs);
   }
 
-  template <typename BIT_STREAM>
-  inline int decodeDifference(BIT_STREAM& bs) const {
+  template <typename BIT_STREAM> int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
@@ -126,7 +125,7 @@ public:
   // one to return the fully decoded diff.
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
-  inline int decode(BIT_STREAM& bs) const {
+  int decode(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");

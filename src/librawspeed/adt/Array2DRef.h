@@ -78,7 +78,7 @@ public:
   template <typename T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  inline Array2DRef(Array2DRef<T2> RHS) // NOLINT(google-explicit-constructor)
+  Array2DRef(Array2DRef<T2> RHS) // NOLINT(google-explicit-constructor)
       : Array2DRef(RHS.data, RHS._width, RHS._height, RHS._pitch) {}
 
   // Const-preserving conversion from Array2DRef<T> to Array2DRef<std::byte>.
@@ -87,13 +87,13 @@ public:
         !(std::is_const_v<T2> && !std::is_const_v<T>) &&
         !(std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>) &&
         std::is_same_v<std::remove_const_t<T>, std::byte>)
-  inline Array2DRef(Array2DRef<T2> RHS) // NOLINT(google-explicit-constructor)
+  Array2DRef(Array2DRef<T2> RHS) // NOLINT(google-explicit-constructor)
       : Array2DRef(RHS.data, sizeof(T2) * RHS._width, RHS._height,
                    sizeof(T2) * RHS._pitch) {}
 
   template <typename AllocatorType =
                 typename std::vector<cvless_value_type>::allocator_type>
-  inline static Array2DRef<T>
+  static Array2DRef<T>
   create(std::vector<cvless_value_type, AllocatorType>& storage, int width,
          int height) {
     using VectorTy = std::remove_reference_t<decltype(storage)>;
@@ -110,8 +110,8 @@ public:
 
 // CTAD deduction guide
 template <typename T>
-explicit Array2DRef(Array1DRef<T> data, int width, int height, int pitch)
-    -> Array2DRef<T>;
+explicit Array2DRef(Array1DRef<T> data, int width, int height,
+                    int pitch) -> Array2DRef<T>;
 
 // CTAD deduction guide
 template <typename T>

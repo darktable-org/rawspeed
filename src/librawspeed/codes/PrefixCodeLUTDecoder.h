@@ -148,8 +148,7 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline __attribute__((always_inline)) int
-  decodeCodeValue(BIT_STREAM& bs) const {
+  __attribute__((always_inline)) int decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
@@ -158,8 +157,7 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline __attribute__((always_inline)) int
-  decodeDifference(BIT_STREAM& bs) const {
+  __attribute__((always_inline)) int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
@@ -172,7 +170,7 @@ public:
   // one to return the fully decoded diff.
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
-  inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
+  __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");

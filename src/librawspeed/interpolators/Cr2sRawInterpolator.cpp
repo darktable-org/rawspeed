@@ -39,16 +39,14 @@ struct Cr2sRawInterpolator::YCbCr final {
   int Cb = 0;
   int Cr = 0;
 
-  inline static void LoadY(YCbCr* p,
-                           const CroppedArray1DRef<const uint16_t> in) {
+  static void LoadY(YCbCr* p, const CroppedArray1DRef<const uint16_t> in) {
     invariant(p);
     invariant(in.size() == 1);
 
     p->Y = in(0);
   }
 
-  inline static void LoadCbCr(YCbCr* p,
-                              const CroppedArray1DRef<const uint16_t> in) {
+  static void LoadCbCr(YCbCr* p, const CroppedArray1DRef<const uint16_t> in) {
     invariant(p);
     invariant(in.size() == 2);
 
@@ -56,7 +54,7 @@ struct Cr2sRawInterpolator::YCbCr final {
     p->Cr = in(1);
   }
 
-  inline static void CopyCbCr(YCbCr* p, const YCbCr& pSrc) {
+  static void CopyCbCr(YCbCr* p, const YCbCr& pSrc) {
     invariant(p);
 
     p->Cb = pSrc.Cb;
@@ -65,30 +63,30 @@ struct Cr2sRawInterpolator::YCbCr final {
 
   YCbCr() = default;
 
-  inline void signExtend() {
+  void signExtend() {
     Cb -= 16384;
     Cr -= 16384;
   }
 
-  inline void applyHue(int hue_) {
+  void applyHue(int hue_) {
     Cb += hue_;
     Cr += hue_;
   }
 
-  inline void process(int hue_) {
+  void process(int hue_) {
     signExtend();
     applyHue(hue_);
   }
 
-  inline void interpolateCbCr(const YCbCr& p0, const YCbCr& p2) {
+  void interpolateCbCr(const YCbCr& p0, const YCbCr& p2) {
     // Y is already good, need to interpolate Cb and Cr
     // FIXME: dcraw does +1 before >> 1
     Cb = (p0.Cb + p2.Cb) >> 1;
     Cr = (p0.Cr + p2.Cr) >> 1;
   }
 
-  inline void interpolateCbCr(const YCbCr& p0, const YCbCr& p1, const YCbCr& p2,
-                              const YCbCr& p3) {
+  void interpolateCbCr(const YCbCr& p0, const YCbCr& p1, const YCbCr& p2,
+                       const YCbCr& p3) {
     // Y is already good, need to interpolate Cb and Cr
     // FIXME: dcraw does +1 before >> 1
     Cb = (p0.Cb + p1.Cb + p2.Cb + p3.Cb) >> 2;

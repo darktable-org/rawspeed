@@ -49,7 +49,7 @@ template <typename Tag> struct BitStreamerReplenisherBase {
 
   BitStreamerReplenisherBase() = delete;
 
-  inline explicit BitStreamerReplenisherBase(Array1DRef<const std::byte> input_)
+  explicit BitStreamerReplenisherBase(Array1DRef<const std::byte> input_)
       : input(input_) {
     if (input.size() < BitStreamerTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
@@ -62,7 +62,7 @@ template <typename Tag> struct BitStreamerReplenisherBase {
   // as we can and fill rest with zeros.
   std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage =
       {};
-  inline Array1DRef<std::byte> tmp() noexcept RAWSPEED_READONLY {
+  Array1DRef<std::byte> tmp() noexcept RAWSPEED_READONLY {
     return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
   }
 };
@@ -85,22 +85,22 @@ struct BitStreamerForwardSequentialReplenisher final
 
   BitStreamerForwardSequentialReplenisher() = delete;
 
-  [[nodiscard]] inline typename Base::size_type getPos() const {
+  [[nodiscard]] typename Base::size_type getPos() const {
     Base::establishClassInvariants();
     return Base::pos;
   }
-  [[nodiscard]] inline typename Base::size_type getRemainingSize() const {
+  [[nodiscard]] typename Base::size_type getRemainingSize() const {
     Base::establishClassInvariants();
     return Base::input.size() - getPos();
   }
-  inline void markNumBytesAsConsumed(typename Base::size_type numBytes) {
+  void markNumBytesAsConsumed(typename Base::size_type numBytes) {
     Base::establishClassInvariants();
     invariant(numBytes >= 0);
     invariant(numBytes != 0);
     Base::pos += numBytes;
   }
 
-  inline Array1DRef<const std::byte> getInput() {
+  Array1DRef<const std::byte> getInput() {
     Base::establishClassInvariants();
 
 #if !defined(DEBUG)
@@ -182,12 +182,11 @@ public:
 
   BitStreamer() = delete;
 
-  inline explicit BitStreamer(Array1DRef<const std::byte> input)
-      : replenisher(input) {
+  explicit BitStreamer(Array1DRef<const std::byte> input) : replenisher(input) {
     establishClassInvariants();
   }
 
-  inline void fill(int nbits = Cache::MaxGetBits) {
+  void fill(int nbits = Cache::MaxGetBits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -202,28 +201,28 @@ public:
   }
 
   // these methods might be specialized by implementations that support it
-  [[nodiscard]] inline size_type RAWSPEED_READONLY getInputPosition() const {
+  [[nodiscard]] size_type RAWSPEED_READONLY getInputPosition() const {
     establishClassInvariants();
     return replenisher.getPos();
   }
 
   // these methods might be specialized by implementations that support it
-  [[nodiscard]] inline size_type getStreamPosition() const {
+  [[nodiscard]] size_type getStreamPosition() const {
     establishClassInvariants();
     return getInputPosition() - (cache.fillLevel >> 3);
   }
 
-  [[nodiscard]] inline size_type getRemainingSize() const {
+  [[nodiscard]] size_type getRemainingSize() const {
     establishClassInvariants();
     return replenisher.getRemainingSize();
   }
 
-  [[nodiscard]] inline size_type RAWSPEED_READONLY getFillLevel() const {
+  [[nodiscard]] size_type RAWSPEED_READONLY getFillLevel() const {
     establishClassInvariants();
     return cache.fillLevel;
   }
 
-  inline uint32_t RAWSPEED_READONLY peekBitsNoFill(int nbits) {
+  uint32_t RAWSPEED_READONLY peekBitsNoFill(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -231,7 +230,7 @@ public:
     return cache.peek(nbits);
   }
 
-  inline void skipBitsNoFill(int nbits) {
+  void skipBitsNoFill(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     // `nbits` could be zero.
@@ -239,7 +238,7 @@ public:
     cache.skip(nbits);
   }
 
-  inline uint32_t getBitsNoFill(int nbits) {
+  uint32_t getBitsNoFill(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -249,7 +248,7 @@ public:
     return ret;
   }
 
-  inline uint32_t peekBits(int nbits) {
+  uint32_t peekBits(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -258,13 +257,13 @@ public:
     return peekBitsNoFill(nbits);
   }
 
-  inline void skipBits(int nbits) {
+  void skipBits(int nbits) {
     establishClassInvariants();
     fill(nbits);
     skipBitsNoFill(nbits);
   }
 
-  inline uint32_t getBits(int nbits) {
+  uint32_t getBits(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -275,7 +274,7 @@ public:
 
   // This may be used to skip arbitrarily large number of *bytes*,
   // not limited by the fill level.
-  inline void skipBytes(int nbytes) {
+  void skipBytes(int nbytes) {
     establishClassInvariants();
     int remainingBitsToSkip = 8 * nbytes;
     for (; remainingBitsToSkip >= Cache::MaxGetBits;

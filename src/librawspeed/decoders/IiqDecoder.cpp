@@ -117,7 +117,7 @@ IiqDecoder::computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
 
 namespace {
 
-enum class IIQFormat {
+enum class IIQFormat : uint8_t {
   RAW_1,
   RAW_2,
   IIQ_L,
@@ -149,7 +149,7 @@ Optional<IIQFormat> getAsIIQFormat(uint32_t v) {
 
 } // namespace
 
-enum class IiqDecoder::IiqCorr { LUMA, CHROMA };
+enum class IiqDecoder::IiqCorr : uint8_t { LUMA, CHROMA };
 
 RawImage IiqDecoder::decodeRawInternal() {
   const Buffer buf(mFile.getSubView(8));
