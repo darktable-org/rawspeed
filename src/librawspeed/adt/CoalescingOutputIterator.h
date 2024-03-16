@@ -24,8 +24,10 @@
 #include "adt/Invariant.h"
 #include "io/Endianness.h"
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <type_traits>
 
 namespace rawspeed {
 

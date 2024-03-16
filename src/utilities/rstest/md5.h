@@ -35,6 +35,7 @@
 #include "adt/CroppedArray1DRef.h" // IWYU pragma: keep
 #include "adt/Invariant.h"
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>

@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
 #include "io/Endianness.h"
-#include <cstddef>
+#include <concepts>
 #include <cstdint>
+#include <iterator>
+#include <type_traits>
 
 namespace rawspeed {
 

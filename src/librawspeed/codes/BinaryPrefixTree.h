@@ -24,6 +24,7 @@
 #include "codes/AbstractPrefixCode.h"
 #include <array>
 #include <cassert>
+#include <cstdint>
 #include <functional>
 #include <initializer_list> // IWYU pragma: keep
 #include <memory>

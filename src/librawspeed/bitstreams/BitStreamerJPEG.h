@@ -30,6 +30,7 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>

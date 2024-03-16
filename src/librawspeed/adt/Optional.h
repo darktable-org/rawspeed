@@ -22,6 +22,7 @@
 
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
+#include <concepts>
 #include <optional> // IWYU pragma: export
 
 namespace rawspeed {
