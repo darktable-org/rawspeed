@@ -110,7 +110,8 @@ using rawspeed::RawParser;
 using rawspeed::RawspeedException;
 using rawspeed::identify::find_cameras_xml;
 
-int main(int argc_, char* argv_[]) { // NOLINT
+// NOLINTNEXTLINE(readability-function-size)
+int main(int argc_, char* argv_[]) {
   auto argv = rawspeed::Array1DRef(argv_, argc_);
 
   if (argv.size() != 2) {

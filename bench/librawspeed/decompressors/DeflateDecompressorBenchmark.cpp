@@ -105,7 +105,8 @@ inline void BM_DeflateDecompressor(benchmark::State& state) {
     break;
   }
 
-  std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
+  // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+  std::unique_ptr<unsigned char[]> uBuffer;
 
   for (auto _ : state) {
     DeflateDecompressor d(buf, mRaw, predictor, BPS::value);

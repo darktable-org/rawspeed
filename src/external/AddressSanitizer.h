@@ -63,7 +63,8 @@ inline void ASan::UnPoisonMemoryRegion(const volatile void* addr, size_t size) {
   __asan_unpoison_memory_region(addr, size);
 }
 inline bool ASan::RegionIsPoisoned(const volatile void* addr, size_t size) {
-  auto* beg = const_cast<void*>(addr); // NOLINT
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+  auto* beg = const_cast<void*>(addr);
   return nullptr != __asan_region_is_poisoned(beg, size);
 }
 #else
