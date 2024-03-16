@@ -67,7 +67,7 @@ class BitVacuumerJPEG final
 
     // short-cut path for the most common case (no FF marker in the next 4
     // bytes) this is slightly faster than the else-case alone.
-    if (std::accumulate(bytes.begin(), bytes.end(), bool(true),
+    if (std::accumulate(bytes.begin(), bytes.end(), true,
                         [](bool b, std::byte byte) {
                           return b && (byte != std::byte{0xFF});
                         })) {
