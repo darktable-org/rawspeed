@@ -112,7 +112,6 @@ Checks: >
   -misc-unused-parameters,
   -misc-unused-using-decls,
   -modernize-use-trailing-return-type,
-  -openmp-exception-escape,
   -portability-simd-intrinsics,
   -readability-container-data-pointer,
   -readability-identifier-length,
