@@ -112,14 +112,12 @@ Checks: >
   -misc-unused-parameters,
   -misc-unused-using-decls,
   -modernize-use-trailing-return-type,
-  -openmp-exception-escape,
   -portability-simd-intrinsics,
   -readability-container-data-pointer,
   -readability-identifier-length,
   -readability-implicit-bool-conversion,
   -readability-inconsistent-declaration-parameter-name,
   -readability-magic-numbers,
-  -readability-avoid-nested-conditional-operator,
 
   -rawspeed-std-array-no-operator-at
 WarningsAsErrors: '*'

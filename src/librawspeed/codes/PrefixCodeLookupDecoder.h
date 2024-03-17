@@ -81,7 +81,6 @@ public:
 
   PrefixCodeLookupDecoder(PrefixCode<CodeTag>) = delete;
   PrefixCodeLookupDecoder(const PrefixCode<CodeTag>&) = delete;
-  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
   PrefixCodeLookupDecoder(PrefixCode<CodeTag>&&) = delete;
 
 protected:

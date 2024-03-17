@@ -81,7 +81,6 @@ TiffEntry::TiffEntry(TiffIFD* parent_, ByteStream& bs)
                    TiffTag::MAKERNOTE_ALT, TiffTag::FUJI_RAW_IFD,
                    TiffTag::SUBIFDS, TiffTag::EXIFIFDPOINTER})) {
       // preserve offset for SUB_IFD/EXIF/MAKER_NOTE data
-      // NOLINTNEXTLINE(readability-simplify-boolean-expr)
       if constexpr ((false)) {
         // limit access to range from 0 to data_offset+byte_size
         data = bs.getSubStream(data_offset, byte_size);

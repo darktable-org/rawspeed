@@ -343,7 +343,6 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
       __builtin_unreachable();
     }
   case ColorData6:
-    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (*colorDataVersion) {
     case 10:
       return {{479, 484}};

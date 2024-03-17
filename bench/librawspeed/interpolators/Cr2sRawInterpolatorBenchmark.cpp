@@ -95,7 +95,6 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
   if constexpr ((true)) {
     b->Arg(2 * 3 * 2 * 1'000'000);
   } else {

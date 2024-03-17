@@ -85,7 +85,6 @@ inline void CustomArguments(benchmark::internal::Benchmark* b) {
   }
 
   b->RangeMultiplier(2);
-  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
   if constexpr ((false)) {
     b->Arg(MaxPixelsOptimal);
   } else {

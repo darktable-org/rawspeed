@@ -130,7 +130,8 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
 
 #ifdef HAVE_ZLIB
 template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
-  std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
+  // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+  std::unique_ptr<unsigned char[]> uBuffer;
 
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)

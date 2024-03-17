@@ -105,7 +105,8 @@ inline void BM_DeflateDecompressor(benchmark::State& state) {
     break;
   }
 
-  std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
+  // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+  std::unique_ptr<unsigned char[]> uBuffer;
 
   for (auto _ : state) {
     DeflateDecompressor d(buf, mRaw, predictor, BPS::value);
@@ -127,7 +128,6 @@ inline void CustomArgs(benchmark::internal::Benchmark* b) {
 
   b->RangeMultiplier(2);
   // FIXME: appears to not like 1GPix+ buffers
-  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
   if constexpr ((true)) {
     b->Arg(128 << 20);
   } else {

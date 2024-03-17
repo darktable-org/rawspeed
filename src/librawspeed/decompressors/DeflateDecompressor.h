@@ -42,8 +42,9 @@ class DeflateDecompressor final : public AbstractDecompressor {
 public:
   DeflateDecompressor(Buffer bs, RawImage img, int predictor, int bps_);
 
-  void decode(std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
-              iPoint2D maxDim, iPoint2D dim, iPoint2D off);
+  // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+  void decode(std::unique_ptr<unsigned char[]>* uBuffer, iPoint2D maxDim,
+              iPoint2D dim, iPoint2D off);
 };
 
 } // namespace rawspeed

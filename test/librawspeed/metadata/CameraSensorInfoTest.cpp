@@ -120,7 +120,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig); // NOLINT(foo): trying to test the copy
+    CameraSensorInfo Info(InfoOrig);
   });
 
   ASSERT_NO_THROW({
@@ -146,7 +146,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
   {
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig); // NOLINT
+    CameraSensorInfo Info(InfoOrig);
 
     checkHelper(Info);
     checkHelper(Info, InfoOrig);

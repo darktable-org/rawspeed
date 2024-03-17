@@ -96,7 +96,6 @@ void CustomArguments(benchmark::internal::Benchmark* b) {
     return;
   }
 
-  // NOLINTNEXTLINE(readability-simplify-boolean-expr)
   if constexpr ((true)) {
     b->Arg(MaxBytesOptimal);
   } else {
