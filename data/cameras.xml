@@ -7397,7 +7397,19 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ28" mode="4:3">
 		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
-		<Crop x="0" y="0" width="3668" height="2754"/>
+		<Crop x="0" y="0" width="-62" height="0"/>
+		<Sensor black="15" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10109 -3488 -993</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5412 12812 2916</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1305 2140 5543</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ28" mode="3:2">
+		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
+		<Crop x="0" y="0" width="-62" height="-2"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -7409,7 +7421,7 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ28" mode="16:9">
 		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
-		<Crop x="0" y="0" width="3668" height="2754"/>
+		<Crop x="0" y="0" width="-62" height="-4"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -7421,7 +7433,7 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ28">
 		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
-		<Crop x="0" y="0" width="-56" height="-4"/>
+		<Crop x="0" y="0" width="-62" height="0"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
