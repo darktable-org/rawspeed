@@ -53,10 +53,12 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
                                      int numRowsPerRestartInterval_,
+                                     int predictorMode_,
                                      Array1DRef<const uint8_t> input_)
     : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)),
-      numRowsPerRestartInterval(numRowsPerRestartInterval_) {
+      numRowsPerRestartInterval(numRowsPerRestartInterval_),
+      predictorMode(predictorMode_) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -100,7 +102,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
     ThrowRDE("Unsupported number of components: %u", frame.cps);
 
   if (rec.size() != static_cast<unsigned>(frame.cps))
-    ThrowRDE("Must have exactly one recepie per component");
+    ThrowRDE("Must have exactly one recipe per component");
 
   for (const auto& recip : rec) {
     if (!recip.ht.isFullDecode())
@@ -136,7 +138,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   }
 
   if (numRowsPerRestartInterval < 1)
-    ThrowRDE("Number of rows per restart interval must be positives");
+    ThrowRDE("Number of rows per restart interval must be positive");
 
   // How many full pixel blocks will we produce?
   fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!
@@ -169,7 +171,8 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 
 template <int N_COMP, bool WeirdWidth>
 void LJpegDecompressor::decodeRowN(
-    CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+    CroppedArray1DRef<uint16_t> outRow, CroppedArray1DRef<uint16_t> prevRow,
+    std::array<uint16_t, N_COMP> pred, int predMode,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
   // FIXME: predictor may have value outside of the uint16_t.
@@ -179,10 +182,39 @@ void LJpegDecompressor::decodeRowN(
   // For x, we first process all full pixel blocks within the image buffer ...
   for (; col < N_COMP * fullBlocks; col += N_COMP) {
     for (int i = 0; i != N_COMP; ++i) {
-      pred[i] =
+      outRow(col + i) =
           uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
                                  .decodeDifference(bs));
-      outRow(col + i) = pred[i];
+      if (col < N_COMP * (fullBlocks - 1)) {
+        int32_t predA = outRow(col + i);
+        int32_t predB = predMode > 1 ? prevRow(col + N_COMP + i) : 0;
+        int32_t predC = predMode > 1 ? prevRow(col + i) : 0;
+        switch (predMode) {
+        case 1:
+          pred[i] = predA;
+          break;
+        case 2:
+          pred[i] = predB;
+          break;
+        case 3:
+          pred[i] = predC;
+          break;
+        case 4:
+          pred[i] = predA + predB - predC;
+          break;
+        case 5:
+          pred[i] = predA + ((predB - predC) >> 1);
+          break;
+        case 6:
+          pred[i] = predB + ((predA - predC) >> 1);
+          break;
+        case 7:
+          pred[i] = (predA + predB) >> 1;
+          break;
+        default:
+          __builtin_unreachable();
+        }
+      }
     }
   }
 
@@ -197,10 +229,38 @@ void LJpegDecompressor::decodeRowN(
     invariant(trailingPixels < N_COMP);
     int c = 0;
     for (; c < trailingPixels; ++c) {
-      pred[c] =
+      // Continue predictor update skipped at last full block
+      int32_t predA = outRow(col - N_COMP + c);
+      int32_t predB = predMode > 1 ? prevRow(col + c) : 0;
+      int32_t predC = predMode > 1 ? prevRow(col - N_COMP + c) : 0;
+      switch (predMode) {
+      case 1:
+        pred[c] = predA;
+        break;
+      case 2:
+        pred[c] = predB;
+        break;
+      case 3:
+        pred[c] = predC;
+        break;
+      case 4:
+        pred[c] = predA + predB - predC;
+        break;
+      case 5:
+        pred[c] = predA + ((predB - predC) >> 1);
+        break;
+      case 6:
+        pred[c] = predB + ((predA - predC) >> 1);
+        break;
+      case 7:
+        pred[c] = (predA + predB) >> 1;
+        break;
+      default:
+        __builtin_unreachable();
+      }
+      outRow(col + c) =
           uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                                  .decodeDifference(bs));
-      outRow(col + c) = pred[c];
     }
     // Discard the rest of the block.
     invariant(c < N_COMP);
@@ -251,8 +311,9 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   ByteStream inputStream(DataBuffer(input, Endianness::little));
   for (int restartIntervalIndex = 0;
        restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
-    auto pred = getInitialPreds<N_COMP>();
-    auto predNext = Array1DRef(pred.data(), pred.size());
+    auto predInit = getInitialPreds<N_COMP>();
+    auto predNext = Array1DRef(predInit.data(), predInit.size());
+    std::array<uint16_t, N_COMP> pred;
 
     if (restartIntervalIndex != 0) {
       auto marker = peekMarker(inputStream);
@@ -283,14 +344,17 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
       }
 
       auto outRow = img[row];
+      auto prevRow = row > 0 ? img[row - 1] : img[row];
       copy_n(predNext.begin(), N_COMP, pred.data());
       // the predictor for the next line is the start of this line
       predNext = outRow
                      .getBlock(/*size=*/N_COMP,
                                /*index=*/0)
                      .getAsArray1DRef();
+      // the predictor mode is always horizontal on the first line
+      int predMode = row == 0 ? 1 : predictorMode;
 
-      decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
+      decodeRowN<N_COMP, WeirdWidth>(outRow, prevRow, pred, predMode, ht, bs);
     }
 
     inputStream.skipBytes(bs.getStreamPosition());
