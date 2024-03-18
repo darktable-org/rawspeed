@@ -385,8 +385,14 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
           ByteStream(
               DataBuffer(mFile.getSubView(offset, length), Endianness::little)),
           mRaw);
-      decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
-                     implicit_cast<uint32_t>(tilew), tileh, false);
+      auto offsetX = implicit_cast<uint32_t>(tileX * tilew);
+      auto offsetY = tileY * tileh;
+      auto tileWidth = implicit_cast<uint32_t>(tilew);
+      auto tileHeight = tileh;
+      auto maxDim = iPoint2D{implicit_cast<int>(tileWidth),
+                             implicit_cast<int>(tileHeight)};
+      decoder.decode(offsetX, offsetY, tileWidth, tileHeight, maxDim,
+                     /*fixDng16Bug=*/false);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {

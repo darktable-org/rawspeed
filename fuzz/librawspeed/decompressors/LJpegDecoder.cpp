@@ -47,11 +47,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto offsetY = bs.getU32();
     const auto width = bs.getU32();
     const auto height = bs.getU32();
+    const auto maxWidth = bs.getU32();
+    const auto maxHeight = bs.getU32();
     const auto fixDng16Bug = bs.getU32();
 
     rawspeed::LJpegDecoder j(bs, mRaw);
     mRaw->createData();
-    j.decode(offsetX, offsetY, width, height, fixDng16Bug);
+    j.decode(offsetX, offsetY, width, height,
+             rawspeed::iPoint2D(maxWidth, maxHeight), fixDng16Bug);
 
     // we can not check that all the image was initialized, because normally
     // LJpegDecoder decodes just some one tile/slice.
