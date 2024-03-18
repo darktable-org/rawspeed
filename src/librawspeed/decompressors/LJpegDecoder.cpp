@@ -63,7 +63,8 @@ LJpegDecoder::LJpegDecoder(ByteStream bs, const RawImage& img)
 }
 
 void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
-                          uint32_t height, bool fixDng16Bug_) {
+                          uint32_t height, iPoint2D maxDim_,
+                          bool fixDng16Bug_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -82,10 +83,17 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
   if (width == 0 || height == 0)
     return; // We do not need anything from this tile.
 
+  if (!maxDim_.hasPositiveArea() ||
+      implicit_cast<unsigned>(maxDim_.x) < width ||
+      implicit_cast<unsigned>(maxDim_.y) < height)
+    ThrowRDE("Requested tile is larger than tile's maximal dimensions");
+
   offX = offsetX;
   offY = offsetY;
   w = width;
   h = height;
+
+  maxDim = maxDim_;
 
   fixDng16Bug = fixDng16Bug_;
 
@@ -119,6 +127,10 @@ Buffer::size_type LJpegDecoder::decodeScan() {
       {static_cast<int>(w), static_cast<int>(h)}};
   const LJpegDecompressor::Frame jpegFrame = {N_COMP,
                                               iPoint2D(frame.w, frame.h)};
+
+  if (iPoint2D(mRaw->getCpp() * maxDim.x, maxDim.y) !=
+      iPoint2D(N_COMP * frame.w, frame.h))
+    ThrowRDE("LJpeg frame does not match maximal tile size");
 
   int numRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
