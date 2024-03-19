@@ -135,6 +135,15 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   if (maxRes.x % jpegFrame.dim.x != 0 || maxRes.y % jpegFrame.dim.y != 0)
     ThrowRDE("Maximal output tile size is not a multiple of LJpeg frame size");
 
+  auto MCUSize =
+      iPoint2D{maxRes.x / jpegFrame.dim.x, maxRes.y / jpegFrame.dim.y};
+  if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
+    ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
+
+  if (iPoint2D{1, 1} != MCUSize && iPoint2D{2, 1} != MCUSize &&
+      iPoint2D{3, 1} != MCUSize && iPoint2D{4, 1} != MCUSize)
+    ThrowRDE("Unexpected MCU size: {%i, %i}", MCUSize.x, MCUSize.y);
+
   int numRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
     // Restart interval not enabled, so all of the rows
