@@ -128,9 +128,9 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   const LJpegDecompressor::Frame jpegFrame = {N_COMP,
                                               iPoint2D(frame.w, frame.h)};
 
-  if (iPoint2D(mRaw->getCpp() * maxDim.x, maxDim.y) !=
-      iPoint2D(N_COMP * frame.w, frame.h))
-    ThrowRDE("LJpeg frame does not match maximal tile size");
+  auto maxRes = iPoint2D(mRaw->getCpp() * maxDim.x, maxDim.y);
+  if (maxRes.area() != N_COMP * jpegFrame.dim.area())
+    ThrowRDE("LJpeg frame area does not match maximal tile area");
 
   int numRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
