@@ -37,7 +37,6 @@
 #include "io/Endianness.h"
 #include <algorithm>
 #include <array>
-#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -99,7 +98,6 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (iPoint2D{1, 1} != frame.mcu && iPoint2D{2, 1} != frame.mcu &&
       iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu)
     ThrowRDE("Unexpected MCU size: {%i, %i}", frame.mcu.x, frame.mcu.y);
-  cps = implicit_cast<int>(frame.mcu.area()); // FIXME;
 
   if (rec.size() != static_cast<unsigned>(frame.mcu.area()))
     ThrowRDE("Must have exactly one recepie per component");
@@ -109,39 +107,42 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  // We assume that the tile width requires at least one frame column.
-  if (imgFrame.dim.x < cps)
-    ThrowRDE("Tile width is smaller than the frame cps");
+  if (numRowsPerRestartInterval < 1)
+    ThrowRDE("Number of rows per restart interval must be positives");
 
-  if (static_cast<int64_t>(cps) * frame.dim.x > std::numeric_limits<int>::max())
+  if (static_cast<int64_t>(frame.mcu.x) * frame.dim.x >
+          std::numeric_limits<int>::max() ||
+      static_cast<int64_t>(frame.mcu.y) * frame.dim.y >
+          std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
 
-  invariant(mRaw->dim.x > imgFrame.pos.x);
-  if ((static_cast<int>(mRaw->getCpp()) * (mRaw->dim.x - imgFrame.pos.x)) < cps)
-    ThrowRDE("Got less pixels than the components per sample");
+  if (static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x >
+      std::numeric_limits<int>::max())
+    ThrowRDE("Img frame is too big");
 
-  // How many output pixels are we expected to produce, as per DNG tiling?
+  if (imgFrame.dim.x < frame.mcu.x || imgFrame.dim.y < frame.mcu.y)
+    ThrowRDE("Tile size is smaller than a single frame MCU");
+
   const int tileRequiredWidth =
       static_cast<int>(mRaw->getCpp()) * imgFrame.dim.x;
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
-          implicit_cast<int>(roundUpDivision(tileRequiredWidth, cps));
-      frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
-      static_cast<int64_t>(cps) * frame.dim.x <
-          static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
-    ThrowRDE("LJpeg frame (%" PRIu64 ", %u) is smaller than expected (%u, %u)",
-             static_cast<int64_t>(cps) * frame.dim.x, frame.dim.y,
+          implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.mcu.x));
+      frame.dim.x < blocksToConsume ||
+      frame.mcu.y * frame.dim.y < imgFrame.dim.y ||
+      frame.mcu.x * frame.dim.x < tileRequiredWidth) {
+    ThrowRDE("LJpeg frame (%d, %d) is smaller than expected (%u, %u)",
+             frame.mcu.x * frame.dim.x, frame.mcu.y * frame.dim.y,
              tileRequiredWidth, imgFrame.dim.y);
   }
 
-  if (numRowsPerRestartInterval < 1)
-    ThrowRDE("Number of rows per restart interval must be positives");
-
   // How many full pixel blocks will we produce?
-  fullBlocks = tileRequiredWidth / cps; // Truncating division!
+  fullBlocks = tileRequiredWidth / frame.mcu.x; // Truncating division!
   // Do we need to also produce part of a block?
-  trailingPixels = tileRequiredWidth % cps;
+  trailingPixels = tileRequiredWidth % frame.mcu.x;
+
+  cps = implicit_cast<int>(frame.mcu.area()); // FIXME;
 }
 
 template <int N_COMP, size_t... I>
