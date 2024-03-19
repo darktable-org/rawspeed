@@ -53,6 +53,7 @@ public:
   using value_type = T;
   using cvless_value_type = std::remove_cv_t<value_type>;
 
+  [[nodiscard]] int RAWSPEED_READONLY pitch() const;
   [[nodiscard]] int RAWSPEED_READONLY width() const;
   [[nodiscard]] int RAWSPEED_READONLY height() const;
 
@@ -152,6 +153,12 @@ template <class T>
 inline Array2DRef<T>::Array2DRef(T* data_, const int width_, const int height_)
     : Array2DRef(data_, width_, height_, /*pitch=*/width_) {
   establishClassInvariants();
+}
+
+template <class T>
+__attribute__((always_inline)) inline int Array2DRef<T>::pitch() const {
+  establishClassInvariants();
+  return _pitch;
 }
 
 template <class T>

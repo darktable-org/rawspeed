@@ -76,6 +76,11 @@ public:
       : CroppedArray2DRef(RHS.base, RHS.offsetCols, RHS.offsetRows,
                           RHS.croppedWidth, RHS.croppedHeight) {}
 
+  [[nodiscard]] Array2DRef<T> getAsArray2DRef() const {
+    establishClassInvariants();
+    return {operator[](0).begin(), croppedWidth, croppedHeight, base.pitch()};
+  }
+
   CroppedArray1DRef<T> operator[](int row) const;
 
   T& operator()(int row, int col) const;

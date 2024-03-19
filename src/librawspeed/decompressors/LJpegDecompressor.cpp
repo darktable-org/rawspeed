@@ -169,7 +169,7 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
 
 template <int N_COMP, bool WeirdWidth>
 void LJpegDecompressor::decodeRowN(
-    CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+    Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
   // FIXME: predictor may have value outside of the uint16_t.
@@ -226,9 +226,11 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(mRaw->dim.x >= N_COMP);
   invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
 
-  const CroppedArray2DRef img(mRaw->getU16DataAsUncroppedArray2DRef(),
-                              mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
-                              mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y);
+  const auto img =
+      CroppedArray2DRef(mRaw->getU16DataAsUncroppedArray2DRef(),
+                        mRaw->getCpp() * imgFrame.pos.x, imgFrame.pos.y,
+                        mRaw->getCpp() * imgFrame.dim.x, imgFrame.dim.y)
+          .getAsArray2DRef();
 
   const auto ht = getPrefixCodeDecoders<N_COMP>();
 

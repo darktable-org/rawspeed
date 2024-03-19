@@ -77,7 +77,7 @@ private:
 
   template <int N_COMP, bool WeirdWidth>
   __attribute__((always_inline)) inline void decodeRowN(
-      CroppedArray1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+      Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
