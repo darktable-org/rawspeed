@@ -167,7 +167,7 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
   return preds;
 }
 
-template <int N_COMP, bool WeirdWidth>
+template <int N_COMP>
 void LJpegDecompressor::decodeRowN(
     Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
@@ -187,10 +187,7 @@ void LJpegDecompressor::decodeRowN(
   }
 
   // Sometimes we also need to consume one more block, and produce part of it.
-  if /*constexpr*/ (WeirdWidth) {
-    // FIXME: evaluate i-cache implications due to this being compile-time.
-    static_assert(N_COMP > 1 || !WeirdWidth,
-                  "can't want part of 1-pixel-wide block");
+  if (trailingPixels != 0) {
     // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
     // We may end up needing just part of last N_COMP pixels.
     invariant(trailingPixels > 0);
@@ -218,8 +215,7 @@ void LJpegDecompressor::decodeRowN(
 }
 
 // N_COMP == number of components (2, 3 or 4)
-template <int N_COMP, bool WeirdWidth>
-ByteStream::size_type LJpegDecompressor::decodeN() const {
+template <int N_COMP> ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
 
@@ -292,7 +288,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                /*index=*/0)
                      .getAsArray1DRef();
 
-      decodeRowN<N_COMP, WeirdWidth>(outRow, pred, ht, bs);
+      decodeRowN<N_COMP>(outRow, pred, ht, bs);
     }
 
     inputStream.skipBytes(bs.getStreamPosition());
@@ -302,34 +298,17 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
 }
 
 ByteStream::size_type LJpegDecompressor::decode() const {
-  if (trailingPixels == 0) {
-    switch (frame.cps) {
-    case 1:
-      return decodeN<1>();
-    case 2:
-      return decodeN<2>();
-    case 3:
-      return decodeN<3>();
-    case 4:
-      return decodeN<4>();
-    default:
-      __builtin_unreachable();
-    }
-  } else /* trailingPixels != 0 */ {
-    // FIXME: using different function just for one tile likely causes
-    // i-cache misses and whatnot. Need to check how not splitting it into
-    // two different functions affects performance of the normal case.
-    switch (frame.cps) {
-    // Naturally can't happen for CPS=1.
-    case 2:
-      return decodeN<2, /*WeirdWidth=*/true>();
-    case 3:
-      return decodeN<3, /*WeirdWidth=*/true>();
-    case 4:
-      return decodeN<4, /*WeirdWidth=*/true>();
-    default:
-      __builtin_unreachable();
-    }
+  switch (frame.cps) {
+  case 1:
+    return decodeN<1>();
+  case 2:
+    return decodeN<2>();
+  case 3:
+    return decodeN<3>();
+  case 4:
+    return decodeN<4>();
+  default:
+    __builtin_unreachable();
   }
 }
 
