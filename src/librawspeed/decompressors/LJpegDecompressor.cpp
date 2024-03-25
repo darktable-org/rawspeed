@@ -261,8 +261,9 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
-  const auto numRestartIntervals = implicit_cast<int>(
-      roundUpDivision(imgFrame.dim.y, numLJpegRowsPerRestartInterval));
+  invariant(imgFrame.dim.y % frame.mcu.y == 0);
+  const auto numRestartIntervals = implicit_cast<int>(roundUpDivision(
+      imgFrame.dim.y / frame.mcu.y, numLJpegRowsPerRestartInterval));
   invariant(numRestartIntervals >= 0);
   invariant(numRestartIntervals != 0);
 
