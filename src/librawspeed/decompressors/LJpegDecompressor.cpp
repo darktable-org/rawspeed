@@ -286,11 +286,11 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
 
     BitStreamerJPEG bs(inputStream.peekRemainingBuffer().getAsArray1DRef());
 
-    for (int rowOfRestartInterval = 0;
-         rowOfRestartInterval != numLJpegRowsPerRestartInterval;
-         ++rowOfRestartInterval) {
+    for (int ljpegRowOfRestartInterval = 0;
+         ljpegRowOfRestartInterval != numLJpegRowsPerRestartInterval;
+         ++ljpegRowOfRestartInterval) {
       const int row = numLJpegRowsPerRestartInterval * restartIntervalIndex +
-                      rowOfRestartInterval;
+                      ljpegRowOfRestartInterval;
       invariant(row >= 0);
       invariant(row <= imgFrame.dim.y);
 
