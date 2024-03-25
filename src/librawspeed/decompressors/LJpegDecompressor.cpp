@@ -123,6 +123,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (imgFrame.dim.x < frame.mcu.x || imgFrame.dim.y < frame.mcu.y)
     ThrowRDE("Tile size is smaller than a single frame MCU");
 
+  if (imgFrame.dim.y % frame.mcu.y != 0)
+    ThrowRDE("Output row count is not a multiple of MCU row count");
+
   const int tileRequiredWidth =
       static_cast<int>(mRaw->getCpp()) * imgFrame.dim.x;
 
