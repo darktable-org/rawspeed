@@ -75,14 +75,13 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP, bool WeirdWidth>
+  template <int N_COMP>
   __attribute__((always_inline)) inline void decodeRowN(
       Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
-  template <int N_COMP, bool WeirdWidth = false>
-  [[nodiscard]] ByteStream::size_type decodeN() const;
+  template <int N_COMP> [[nodiscard]] ByteStream::size_type decodeN() const;
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
