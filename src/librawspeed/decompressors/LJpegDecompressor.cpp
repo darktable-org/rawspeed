@@ -96,12 +96,12 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (imgFrame.pos.y + imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile overflows image vertically");
 
-  cps = frame.cps;
+  if (iPoint2D{1, 1} != frame.mcu && iPoint2D{2, 1} != frame.mcu &&
+      iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu)
+    ThrowRDE("Unexpected MCU size: {%i, %i}", frame.mcu.x, frame.mcu.y);
+  cps = implicit_cast<int>(frame.mcu.area()); // FIXME;
 
-  if (cps < 1 || cps > 4)
-    ThrowRDE("Unsupported number of components: %u", cps);
-
-  if (rec.size() != static_cast<unsigned>(cps))
+  if (rec.size() != static_cast<unsigned>(frame.mcu.area()))
     ThrowRDE("Must have exactly one recepie per component");
 
   for (const auto& recip : rec) {

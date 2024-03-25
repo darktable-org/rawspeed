@@ -138,11 +138,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
     ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
 
-  if (iPoint2D{1, 1} != MCUSize && iPoint2D{2, 1} != MCUSize &&
-      iPoint2D{3, 1} != MCUSize && iPoint2D{4, 1} != MCUSize)
-    ThrowRDE("Unexpected MCU size: {%i, %i}", MCUSize.x, MCUSize.y);
-
-  const LJpegDecompressor::Frame jpegFrame = {N_COMP, jpegFrameDim};
+  const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
 
   int numRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {

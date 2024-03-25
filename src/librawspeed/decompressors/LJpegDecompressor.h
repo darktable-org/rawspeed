@@ -41,7 +41,7 @@ namespace rawspeed {
 class LJpegDecompressor final {
 public:
   struct Frame final {
-    const int cps;
+    const iPoint2D mcu;
     const iPoint2D dim;
   };
   struct PerComponentRecipe final {
