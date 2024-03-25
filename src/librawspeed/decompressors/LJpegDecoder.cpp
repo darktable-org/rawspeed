@@ -132,6 +132,9 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   if (maxRes.area() != N_COMP * jpegFrame.dim.area())
     ThrowRDE("LJpeg frame area does not match maximal tile area");
 
+  if (maxRes.x % jpegFrame.dim.x != 0 || maxRes.y % jpegFrame.dim.y != 0)
+    ThrowRDE("Maximal output tile size is not a multiple of LJpeg frame size");
+
   int numRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
     // Restart interval not enabled, so all of the rows
