@@ -140,19 +140,20 @@ Buffer::size_type LJpegDecoder::decodeScan() {
 
   const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
 
-  int numRowsPerRestartInterval;
+  int numLJpegRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
     // Restart interval not enabled, so all of the rows
     // are contained in the first (implicit) restart interval.
-    numRowsPerRestartInterval = jpegFrameDim.y;
+    numLJpegRowsPerRestartInterval = jpegFrameDim.y;
   } else {
     const int numMCUsPerRow = jpegFrameDim.x;
     if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
       ThrowRDE("Restart interval is not a multiple of frame row size");
-    numRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
+    numLJpegRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
   }
 
-  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec, numRowsPerRestartInterval,
+  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec,
+                      numLJpegRowsPerRestartInterval,
                       input.peekRemainingBuffer().getAsArray1DRef());
   return d.decode();
 }

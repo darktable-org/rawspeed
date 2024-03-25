@@ -51,11 +51,11 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     int numRowsPerRestartInterval_,
+                                     int numLJpegRowsPerRestartInterval_,
                                      Array1DRef<const uint8_t> input_)
     : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)),
-      numRowsPerRestartInterval(numRowsPerRestartInterval_) {
+      numLJpegRowsPerRestartInterval(numLJpegRowsPerRestartInterval_) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -107,7 +107,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       ThrowRDE("Huffman table is not of a full decoding variety");
   }
 
-  if (numRowsPerRestartInterval < 1)
+  if (numLJpegRowsPerRestartInterval < 1)
     ThrowRDE("Number of rows per restart interval must be positives");
 
   if (static_cast<int64_t>(frame.mcu.x) * frame.dim.x >
@@ -262,7 +262,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
   const auto numRestartIntervals = implicit_cast<int>(
-      roundUpDivision(imgFrame.dim.y, numRowsPerRestartInterval));
+      roundUpDivision(imgFrame.dim.y, numLJpegRowsPerRestartInterval));
   invariant(numRestartIntervals >= 0);
   invariant(numRestartIntervals != 0);
 
@@ -287,9 +287,9 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
     BitStreamerJPEG bs(inputStream.peekRemainingBuffer().getAsArray1DRef());
 
     for (int rowOfRestartInterval = 0;
-         rowOfRestartInterval != numRowsPerRestartInterval;
+         rowOfRestartInterval != numLJpegRowsPerRestartInterval;
          ++rowOfRestartInterval) {
-      const int row = numRowsPerRestartInterval * restartIntervalIndex +
+      const int row = numLJpegRowsPerRestartInterval * restartIntervalIndex +
                       rowOfRestartInterval;
       invariant(row >= 0);
       invariant(row <= imgFrame.dim.y);

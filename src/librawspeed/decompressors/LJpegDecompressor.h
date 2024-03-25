@@ -57,7 +57,7 @@ private:
 
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
-  const int numRowsPerRestartInterval;
+  const int numLJpegRowsPerRestartInterval;
 
   int cps = 0;
   int fullBlocks = 0;
@@ -88,7 +88,7 @@ private:
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
-                    int numRowsPerRestartInterval_,
+                    int numLJpegRowsPerRestartInterval_,
                     Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decode() const;
