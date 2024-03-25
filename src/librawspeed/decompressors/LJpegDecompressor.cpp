@@ -290,19 +290,19 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
     for (int ljpegRowOfRestartInterval = 0;
          ljpegRowOfRestartInterval != numLJpegRowsPerRestartInterval;
          ++ljpegRowOfRestartInterval) {
-      const int ljpegRow =
-          numLJpegRowsPerRestartInterval * restartIntervalIndex +
-          ljpegRowOfRestartInterval;
-      invariant(ljpegRow >= 0);
-      invariant(ljpegRow <= imgFrame.dim.y);
+      const int row =
+          frame.mcu.y * (numLJpegRowsPerRestartInterval * restartIntervalIndex +
+                         ljpegRowOfRestartInterval);
+      invariant(row >= 0);
+      invariant(row <= imgFrame.dim.y);
 
       // For y, we can simply stop decoding when we reached the border.
-      if (ljpegRow == imgFrame.dim.y) {
+      if (row == imgFrame.dim.y) {
         invariant((restartIntervalIndex + 1) == numRestartIntervals);
         break;
       }
 
-      auto outRow = img[ljpegRow];
+      auto outRow = img[row];
       copy_n(predNext.begin(), N_COMP, pred.data());
       // the predictor for the next line is the start of this line
       predNext = outRow
