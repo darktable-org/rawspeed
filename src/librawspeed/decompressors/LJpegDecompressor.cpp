@@ -178,11 +178,13 @@ constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
 
 } // namespace
 
-template <int N_COMP>
+template <const iPoint2D& MCUSize, int N_COMP>
 void LJpegDecompressor::decodeRowN(
     Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
+  invariant(MCUSize.area() == N_COMP);
+
   // FIXME: predictor may have value outside of the uint16_t.
   // https://github.com/darktable-org/rawspeed/issues/175
 
@@ -306,7 +308,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                /*index=*/0)
                      .getAsArray1DRef();
 
-      decodeRowN<N_COMP>(outRow, pred, ht, bs);
+      decodeRowN<MCU, N_COMP>(outRow, pred, ht, bs);
     }
 
     inputStream.skipBytes(bs.getStreamPosition());
