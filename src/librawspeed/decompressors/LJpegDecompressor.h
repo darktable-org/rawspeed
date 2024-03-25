@@ -59,6 +59,7 @@ private:
   const std::vector<PerComponentRecipe> rec;
   const int numRowsPerRestartInterval;
 
+  int cps = 0;
   int fullBlocks = 0;
   int trailingPixels = 0;
 

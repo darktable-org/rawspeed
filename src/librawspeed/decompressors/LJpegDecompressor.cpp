@@ -96,10 +96,12 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (imgFrame.pos.y + imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile overflows image vertically");
 
-  if (frame.cps < 1 || frame.cps > 4)
-    ThrowRDE("Unsupported number of components: %u", frame.cps);
+  cps = frame.cps;
 
-  if (rec.size() != static_cast<unsigned>(frame.cps))
+  if (cps < 1 || cps > 4)
+    ThrowRDE("Unsupported number of components: %u", cps);
+
+  if (rec.size() != static_cast<unsigned>(cps))
     ThrowRDE("Must have exactly one recepie per component");
 
   for (const auto& recip : rec) {
@@ -108,16 +110,14 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   }
 
   // We assume that the tile width requires at least one frame column.
-  if (imgFrame.dim.x < frame.cps)
+  if (imgFrame.dim.x < cps)
     ThrowRDE("Tile width is smaller than the frame cps");
 
-  if (static_cast<int64_t>(frame.cps) * frame.dim.x >
-      std::numeric_limits<int>::max())
+  if (static_cast<int64_t>(cps) * frame.dim.x > std::numeric_limits<int>::max())
     ThrowRDE("LJpeg frame is too big");
 
   invariant(mRaw->dim.x > imgFrame.pos.x);
-  if ((static_cast<int>(mRaw->getCpp()) * (mRaw->dim.x - imgFrame.pos.x)) <
-      frame.cps)
+  if ((static_cast<int>(mRaw->getCpp()) * (mRaw->dim.x - imgFrame.pos.x)) < cps)
     ThrowRDE("Got less pixels than the components per sample");
 
   // How many output pixels are we expected to produce, as per DNG tiling?
@@ -126,12 +126,12 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
 
   // How many full pixel blocks do we need to consume for that?
   if (const auto blocksToConsume =
-          implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.cps));
+          implicit_cast<int>(roundUpDivision(tileRequiredWidth, cps));
       frame.dim.x < blocksToConsume || frame.dim.y < imgFrame.dim.y ||
-      static_cast<int64_t>(frame.cps) * frame.dim.x <
+      static_cast<int64_t>(cps) * frame.dim.x <
           static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x) {
     ThrowRDE("LJpeg frame (%" PRIu64 ", %u) is smaller than expected (%u, %u)",
-             static_cast<int64_t>(frame.cps) * frame.dim.x, frame.dim.y,
+             static_cast<int64_t>(cps) * frame.dim.x, frame.dim.y,
              tileRequiredWidth, imgFrame.dim.y);
   }
 
@@ -139,9 +139,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
     ThrowRDE("Number of rows per restart interval must be positives");
 
   // How many full pixel blocks will we produce?
-  fullBlocks = tileRequiredWidth / frame.cps; // Truncating division!
+  fullBlocks = tileRequiredWidth / cps; // Truncating division!
   // Do we need to also produce part of a block?
-  trailingPixels = tileRequiredWidth % frame.cps;
+  trailingPixels = tileRequiredWidth % cps;
 }
 
 template <int N_COMP, size_t... I>
@@ -235,7 +235,7 @@ template <int N_COMP> ByteStream::size_type LJpegDecompressor::decodeN() const {
   // the raw image buffer. The excessive content has to be ignored.
 
   invariant(frame.dim.y >= imgFrame.dim.y);
-  invariant(static_cast<int64_t>(frame.cps) * frame.dim.x >=
+  invariant(static_cast<int64_t>(cps) * frame.dim.x >=
             static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x);
 
   invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
@@ -298,7 +298,7 @@ template <int N_COMP> ByteStream::size_type LJpegDecompressor::decodeN() const {
 }
 
 ByteStream::size_type LJpegDecompressor::decode() const {
-  switch (frame.cps) {
+  switch (cps) {
   case 1:
     return decodeN<1>();
   case 2:
