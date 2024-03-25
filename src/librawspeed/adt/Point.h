@@ -56,7 +56,7 @@ public:
     return *this;
   }
 
-  constexpr bool operator==(const iPoint2D& rhs) const {
+  constexpr bool RAWSPEED_READONLY operator==(const iPoint2D& rhs) const {
     return x == rhs.x && y == rhs.y;
   }
 

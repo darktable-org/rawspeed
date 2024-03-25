@@ -171,6 +171,13 @@ std::array<uint16_t, N_COMP> LJpegDecompressor::getInitialPreds() const {
   return preds;
 }
 
+namespace {
+
+template <int MCUWidth, int MCUHeight>
+constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
+
+} // namespace
+
 template <int N_COMP>
 void LJpegDecompressor::decodeRowN(
     Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
@@ -219,7 +226,14 @@ void LJpegDecompressor::decodeRowN(
 }
 
 // N_COMP == number of components (2, 3 or 4)
-template <int N_COMP> ByteStream::size_type LJpegDecompressor::decodeN() const {
+template <const iPoint2D& MCU>
+ByteStream::size_type LJpegDecompressor::decodeN() const {
+  invariant(MCU == this->frame.mcu);
+
+  invariant(MCU.hasPositiveArea());
+  // FIXME: workarounding lack of constexpr std::abs() :(
+  constexpr int N_COMP = MCU.x * MCU.y;
+
   invariant(mRaw->getCpp() > 0);
   invariant(N_COMP > 0);
 
@@ -302,18 +316,31 @@ template <int N_COMP> ByteStream::size_type LJpegDecompressor::decodeN() const {
 }
 
 ByteStream::size_type LJpegDecompressor::decode() const {
-  switch (cps) {
+  switch (frame.mcu.area()) {
   case 1:
-    return decodeN<1>();
+    if (frame.mcu == MCU<1, 1>) {
+      return decodeN<MCU<1, 1>>();
+    }
+    break;
   case 2:
-    return decodeN<2>();
+    if (frame.mcu == MCU<2, 1>) {
+      return decodeN<MCU<2, 1>>();
+    }
+    break;
   case 3:
-    return decodeN<3>();
+    if (frame.mcu == MCU<3, 1>) {
+      return decodeN<MCU<3, 1>>();
+    }
+    break;
   case 4:
-    return decodeN<4>();
+    if (frame.mcu == MCU<4, 1>) {
+      return decodeN<MCU<4, 1>>();
+    }
+    break;
   default:
     __builtin_unreachable();
   }
+  __builtin_unreachable();
 }
 
 } // namespace rawspeed

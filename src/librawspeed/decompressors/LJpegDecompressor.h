@@ -82,7 +82,8 @@ private:
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
-  template <int N_COMP> [[nodiscard]] ByteStream::size_type decodeN() const;
+  template <const iPoint2D& MCUSize>
+  [[nodiscard]] ByteStream::size_type decodeN() const;
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
