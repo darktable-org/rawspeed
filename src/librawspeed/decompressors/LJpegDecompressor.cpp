@@ -129,10 +129,10 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   const int tileRequiredWidth =
       static_cast<int>(mRaw->getCpp()) * imgFrame.dim.x;
 
-  // How many full pixel blocks do we need to consume for that?
-  if (const auto blocksToConsume =
+  // How many full pixel MCUs do we need to consume for that?
+  if (const auto mcusToConsume =
           implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.mcu.x));
-      frame.dim.x < blocksToConsume ||
+      frame.dim.x < mcusToConsume ||
       frame.mcu.y * frame.dim.y < imgFrame.dim.y ||
       frame.mcu.x * frame.dim.x < tileRequiredWidth) {
     ThrowRDE("LJpeg frame (%d, %d) is smaller than expected (%u, %u)",
@@ -140,9 +140,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
              tileRequiredWidth, imgFrame.dim.y);
   }
 
-  // How many full pixel blocks will we produce?
+  // How many full pixel MCUs will we produce?
   numFullMCUs = tileRequiredWidth / frame.mcu.x; // Truncating division!
-  // Do we need to also produce part of a block?
+  // Do we need to also produce part of a MCU?
   trailingPixels = tileRequiredWidth % frame.mcu.x;
 
   cps = implicit_cast<int>(frame.mcu.area()); // FIXME;
@@ -189,7 +189,7 @@ void LJpegDecompressor::decodeRowN(
   // https://github.com/darktable-org/rawspeed/issues/175
 
   int mcuIdx = 0;
-  // For x, we first process all full pixel blocks within the image buffer ...
+  // For x, we first process all full pixel MCUs within the image buffer ...
   for (; mcuIdx < numFullMCUs; ++mcuIdx) {
     for (int i = 0; i != N_COMP; ++i) {
       pred[i] =
@@ -199,7 +199,7 @@ void LJpegDecompressor::decodeRowN(
     }
   }
 
-  // Sometimes we also need to consume one more block, and produce part of it.
+  // Sometimes we also need to consume one more MCU, and produce part of it.
   if (trailingPixels != 0) {
     // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
     // We may end up needing just part of last N_COMP pixels.
@@ -212,12 +212,12 @@ void LJpegDecompressor::decodeRowN(
                                  .decodeDifference(bs));
       outRow(N_COMP * mcuIdx + c) = pred[c];
     }
-    // Discard the rest of the block.
+    // Discard the rest of the MCU.
     invariant(c < N_COMP);
     for (; c < N_COMP; ++c) {
       (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
     }
-    ++mcuIdx; // We did just process one more block.
+    ++mcuIdx; // We did just process one more MCU.
   }
 
   // ... and discard the rest.
