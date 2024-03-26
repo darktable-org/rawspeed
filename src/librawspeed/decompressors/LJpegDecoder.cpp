@@ -33,6 +33,7 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <vector>
 
 using std::copy_n;
@@ -127,7 +128,12 @@ Buffer::size_type LJpegDecoder::decodeScan() {
       {static_cast<int>(w), static_cast<int>(h)}};
   const auto jpegFrameDim = iPoint2D(frame.w, frame.h);
 
-  auto maxRes = iPoint2D(mRaw->getCpp() * maxDim.x, maxDim.y);
+  if (implicit_cast<int64_t>(maxDim.x) * implicit_cast<int>(mRaw->getCpp()) >
+      std::numeric_limits<int>::max())
+    ThrowRDE("Maximal output tile is too large");
+
+  auto maxRes =
+      iPoint2D(implicit_cast<int>(mRaw->getCpp()) * maxDim.x, maxDim.y);
   if (maxRes.area() != N_COMP * jpegFrameDim.area())
     ThrowRDE("LJpeg frame area does not match maximal tile area");
 
