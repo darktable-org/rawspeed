@@ -194,15 +194,19 @@ void LJpegDecompressor::decodeRowN(
   int mcuIdx = 0;
   // For x, we first process all full pixel MCUs within the image buffer ...
   for (; mcuIdx < numFullMCUs; ++mcuIdx) {
+    const auto outTile = CroppedArray2DRef(outStripe,
+                                           /*offsetCols=*/MCUSize.x * mcuIdx,
+                                           /*offsetRows=*/0,
+                                           /*croppedWidth=*/MCUSize.x,
+                                           /*croppedHeight=*/MCUSize.y)
+                             .getAsArray2DRef();
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
         int c = MCUSize.x * MCURow + MCUСol;
         pred[c] =
             uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                                    .decodeDifference(bs));
-        int stripeRow = MCURow;
-        int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
-        outStripe(stripeRow, stripeCol) = pred[c];
+        outTile(MCURow, MCUСol) = pred[c];
       }
     }
   }
