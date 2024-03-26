@@ -55,7 +55,7 @@ public:
   OlympusDifferenceDecoder(const SimpleLUT<int8_t, 12>& numLZ_)
       : numLZ(numLZ_) {}
 
-  inline __attribute__((always_inline)) int getDiff(BitStreamerMSB& bits);
+  int getDiff(BitStreamerMSB& bits);
 };
 
 inline __attribute__((always_inline)) int
