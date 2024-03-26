@@ -93,7 +93,7 @@ class BitStreamerJPEG final : public BitStreamer<BitStreamerJPEG> {
 public:
   using Base::Base;
 
-  [[nodiscard]] inline size_type getStreamPosition() const;
+  [[nodiscard]] size_type getStreamPosition() const;
 };
 
 // NOTE: on average, probability of encountering an `0xFF` byte
