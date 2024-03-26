@@ -141,7 +141,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   }
 
   // How many full pixel blocks will we produce?
-  fullBlocks = tileRequiredWidth / frame.mcu.x; // Truncating division!
+  numFullMCUs = tileRequiredWidth / frame.mcu.x; // Truncating division!
   // Do we need to also produce part of a block?
   trailingPixels = tileRequiredWidth % frame.mcu.x;
 
@@ -190,7 +190,7 @@ void LJpegDecompressor::decodeRowN(
 
   int col = 0;
   // For x, we first process all full pixel blocks within the image buffer ...
-  for (; col < N_COMP * fullBlocks; col += N_COMP) {
+  for (; col < N_COMP * numFullMCUs; col += N_COMP) {
     for (int i = 0; i != N_COMP; ++i) {
       pred[i] =
           uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))

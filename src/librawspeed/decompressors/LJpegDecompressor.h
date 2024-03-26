@@ -60,7 +60,7 @@ private:
   const int numLJpegRowsPerRestartInterval;
 
   int cps = 0;
-  int fullBlocks = 0;
+  int numFullMCUs = 0;
   int trailingPixels = 0;
 
   template <int N_COMP, size_t... I>
