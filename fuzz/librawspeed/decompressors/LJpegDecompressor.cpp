@@ -50,11 +50,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const int N_COMP = bs.getI32();
+    const int MCU_w = bs.getI32();
+    const int MCU_h = bs.getI32();
     const int frame_w = bs.getI32();
     const int frame_h = bs.getI32();
     const rawspeed::LJpegDecompressor::Frame frame{
-        N_COMP, rawspeed::iPoint2D(frame_w, frame_h)};
+        rawspeed::iPoint2D(MCU_w, MCU_h), rawspeed::iPoint2D(frame_w, frame_h)};
 
     const unsigned num_recips = bs.getU32();
 
@@ -86,11 +87,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
                       return {*hts[i], initPred[i]};
                     });
 
-    const int numRowsPerRestartInterval = bs.getI32();
+    const int numLJpegRowsPerRestartInterval = bs.getI32();
 
     rawspeed::LJpegDecompressor d(
         mRaw, rawspeed::iRectangle2D(mRaw->dim.x, mRaw->dim.y), frame, rec,
-        numRowsPerRestartInterval,
+        numLJpegRowsPerRestartInterval,
         bs.getSubStream(/*offset=*/0).peekRemainingBuffer().getAsArray1DRef());
     mRaw->createData();
     (void)d.decode();

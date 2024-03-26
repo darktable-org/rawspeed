@@ -41,7 +41,7 @@ namespace rawspeed {
 class LJpegDecompressor final {
 public:
   struct Frame final {
-    const int cps;
+    const iPoint2D mcu;
     const iPoint2D dim;
   };
   struct PerComponentRecipe final {
@@ -57,9 +57,10 @@ private:
 
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
-  const int numRowsPerRestartInterval;
+  const int numLJpegRowsPerRestartInterval;
 
-  int fullBlocks = 0;
+  int cps = 0;
+  int numFullMCUs = 0;
   int trailingPixels = 0;
 
   template <int N_COMP, size_t... I>
@@ -75,18 +76,19 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <int N_COMP>
+  template <const iPoint2D& MCUSize, int N_COMP>
   __attribute__((always_inline)) inline void decodeRowN(
-      Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+      Array2DRef<uint16_t> outStripe, std::array<uint16_t, N_COMP> pred,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
-  template <int N_COMP> [[nodiscard]] ByteStream::size_type decodeN() const;
+  template <const iPoint2D& MCUSize>
+  [[nodiscard]] __attribute__((noinline)) ByteStream::size_type decodeN() const;
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
-                    int numRowsPerRestartInterval_,
+                    int numLJpegRowsPerRestartInterval_,
                     Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decode() const;

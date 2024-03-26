@@ -125,26 +125,35 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   const iRectangle2D imgFrame = {
       {static_cast<int>(offX), static_cast<int>(offY)},
       {static_cast<int>(w), static_cast<int>(h)}};
-  const LJpegDecompressor::Frame jpegFrame = {N_COMP,
-                                              iPoint2D(frame.w, frame.h)};
+  const auto jpegFrameDim = iPoint2D(frame.w, frame.h);
 
-  if (iPoint2D(mRaw->getCpp() * maxDim.x, maxDim.y) !=
-      iPoint2D(N_COMP * frame.w, frame.h))
-    ThrowRDE("LJpeg frame does not match maximal tile size");
+  auto maxRes = iPoint2D(mRaw->getCpp() * maxDim.x, maxDim.y);
+  if (maxRes.area() != N_COMP * jpegFrameDim.area())
+    ThrowRDE("LJpeg frame area does not match maximal tile area");
 
-  int numRowsPerRestartInterval;
+  if (maxRes.x % jpegFrameDim.x != 0 || maxRes.y % jpegFrameDim.y != 0)
+    ThrowRDE("Maximal output tile size is not a multiple of LJpeg frame size");
+
+  auto MCUSize = iPoint2D{maxRes.x / jpegFrameDim.x, maxRes.y / jpegFrameDim.y};
+  if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
+    ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
+
+  const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
+
+  int numLJpegRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
     // Restart interval not enabled, so all of the rows
     // are contained in the first (implicit) restart interval.
-    numRowsPerRestartInterval = jpegFrame.dim.y;
+    numLJpegRowsPerRestartInterval = jpegFrameDim.y;
   } else {
-    const int numMCUsPerRow = jpegFrame.dim.x;
+    const int numMCUsPerRow = jpegFrameDim.x;
     if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
       ThrowRDE("Restart interval is not a multiple of frame row size");
-    numRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
+    numLJpegRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
   }
 
-  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec, numRowsPerRestartInterval,
+  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec,
+                      numLJpegRowsPerRestartInterval,
                       input.peekRemainingBuffer().getAsArray1DRef());
   return d.decode();
 }
