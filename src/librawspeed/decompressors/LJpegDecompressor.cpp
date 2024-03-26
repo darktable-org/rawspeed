@@ -188,14 +188,14 @@ void LJpegDecompressor::decodeRowN(
   // FIXME: predictor may have value outside of the uint16_t.
   // https://github.com/darktable-org/rawspeed/issues/175
 
-  int col = 0;
+  int mcuIdx = 0;
   // For x, we first process all full pixel blocks within the image buffer ...
-  for (; col < N_COMP * numFullMCUs; col += N_COMP) {
+  for (; mcuIdx < numFullMCUs; ++mcuIdx) {
     for (int i = 0; i != N_COMP; ++i) {
       pred[i] =
           uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
                                  .decodeDifference(bs));
-      outRow(col + i) = pred[i];
+      outRow(N_COMP * mcuIdx + i) = pred[i];
     }
   }
 
@@ -210,18 +210,18 @@ void LJpegDecompressor::decodeRowN(
       pred[c] =
           uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                                  .decodeDifference(bs));
-      outRow(col + c) = pred[c];
+      outRow(N_COMP * mcuIdx + c) = pred[c];
     }
     // Discard the rest of the block.
     invariant(c < N_COMP);
     for (; c < N_COMP; ++c) {
       (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
     }
-    col += N_COMP; // We did just process one more block.
+    ++mcuIdx; // We did just process one more block.
   }
 
   // ... and discard the rest.
-  for (; col < N_COMP * frame.dim.x; col += N_COMP) {
+  for (; mcuIdx < frame.dim.x; ++mcuIdx) {
     for (int i = 0; i != N_COMP; ++i)
       (static_cast<const PrefixCodeDecoder<>&>(ht[i])).decodeDifference(bs);
   }
