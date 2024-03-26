@@ -83,7 +83,7 @@ private:
       BitStreamerJPEG& bs) const;
 
   template <const iPoint2D& MCUSize>
-  [[nodiscard]] ByteStream::size_type decodeN() const;
+  [[nodiscard]] __attribute__((noinline)) ByteStream::size_type decodeN() const;
 
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
