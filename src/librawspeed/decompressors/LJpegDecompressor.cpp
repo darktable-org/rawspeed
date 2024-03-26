@@ -194,11 +194,16 @@ void LJpegDecompressor::decodeRowN(
   int mcuIdx = 0;
   // For x, we first process all full pixel MCUs within the image buffer ...
   for (; mcuIdx < numFullMCUs; ++mcuIdx) {
-    for (int i = 0; i != N_COMP; ++i) {
-      pred[i] =
-          uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
-                                 .decodeDifference(bs));
-      outStripe(0, N_COMP * mcuIdx + i) = pred[i];
+    for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
+      for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
+        int c = MCUSize.x * MCURow + MCUСol;
+        pred[c] =
+            uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                                   .decodeDifference(bs));
+        int stripeRow = MCURow;
+        int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
+        outStripe(stripeRow, stripeCol) = pred[c];
+      }
     }
   }
 
@@ -208,17 +213,20 @@ void LJpegDecompressor::decodeRowN(
     // We may end up needing just part of last N_COMP pixels.
     invariant(trailingPixels > 0);
     invariant(trailingPixels < N_COMP);
-    int c = 0;
-    for (; c < trailingPixels; ++c) {
-      pred[c] =
-          uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                                 .decodeDifference(bs));
-      outStripe(0, N_COMP * mcuIdx + c) = pred[c];
-    }
-    // Discard the rest of the MCU.
-    invariant(c < N_COMP);
-    for (; c < N_COMP; ++c) {
-      (static_cast<const PrefixCodeDecoder<>&>(ht[c])).decodeDifference(bs);
+    invariant(N_COMP > 1 && "can't want part of 1-pixel-wide block");
+    // Some rather esoteric DNG's have odd dimensions, e.g. width % 2 = 1.
+    // We may end up needing just part of last N_COMP pixels.
+    for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
+      for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
+        int c = MCUSize.x * MCURow + MCUСol;
+        pred[c] =
+            uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                                   .decodeDifference(bs));
+        int stripeRow = MCURow;
+        int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
+        if (stripeCol < outStripe.width())
+          outStripe(stripeRow, stripeCol) = pred[c];
+      }
     }
     ++mcuIdx; // We did just process one more MCU.
   }
