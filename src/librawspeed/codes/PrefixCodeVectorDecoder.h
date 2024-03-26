@@ -108,7 +108,7 @@ public:
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(!Base::fullDecode);
+    invariant(!Base::isFullDecode());
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -116,7 +116,7 @@ public:
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(Base::fullDecode);
+    invariant(Base::isFullDecode());
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -129,7 +129,7 @@ public:
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::isFullDecode());
 
     bs.fill(32);
 

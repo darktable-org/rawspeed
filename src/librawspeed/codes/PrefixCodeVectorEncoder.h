@@ -71,7 +71,7 @@ public:
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
-    invariant(!Base::fullDecode);
+    invariant(!Base::isFullDecode());
     int codeIndex = getCodeIndexOfCodeValue(codeValue);
     encodeCodeValueImpl(bv, codeIndex);
   }
@@ -81,7 +81,7 @@ public:
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
-    invariant(Base::fullDecode);
+    invariant(Base::isFullDecode());
     auto [diff, diffLen] = Base::reduce(value);
     int codeIndex = getCodeIndexOfCodeValue(diffLen);
     encodeCodeValueImpl(bv, codeIndex);
@@ -94,7 +94,7 @@ public:
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
-    invariant(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::isFullDecode());
 
     if constexpr (!FULL_DECODE)
       encodeCodeValue(bv, implicit_cast<typename Traits::CodeValueTy>(value));
