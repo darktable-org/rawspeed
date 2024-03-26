@@ -54,7 +54,6 @@ private:
   RawImage decodeSRF();
   void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
   void DecodeLJpeg(const TiffIFD* raw);
-  void PostProcessLJpeg();
   void DecodeUncompressed(const TiffIFD* raw) const;
   static void SonyDecrypt(Array1DRef<const uint8_t> ibuf,
                           Array1DRef<uint8_t> obuf, int len, uint32_t key);
