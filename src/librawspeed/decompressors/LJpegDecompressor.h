@@ -78,7 +78,7 @@ private:
 
   template <const iPoint2D& MCUSize, int N_COMP>
   __attribute__((always_inline)) inline void decodeRowN(
-      Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+      Array2DRef<uint16_t> outStripe, std::array<uint16_t, N_COMP> pred,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 

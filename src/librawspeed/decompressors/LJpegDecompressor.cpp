@@ -21,6 +21,7 @@
 
 #include "decompressors/LJpegDecompressor.h"
 #include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
@@ -180,10 +181,12 @@ constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
 
 template <const iPoint2D& MCUSize, int N_COMP>
 void LJpegDecompressor::decodeRowN(
-    Array1DRef<uint16_t> outRow, std::array<uint16_t, N_COMP> pred,
+    Array2DRef<uint16_t> outStripe, std::array<uint16_t, N_COMP> pred,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
   invariant(MCUSize.area() == N_COMP);
+  invariant(outStripe.width() >= MCUSize.x);
+  invariant(outStripe.height() == MCUSize.y);
 
   // FIXME: predictor may have value outside of the uint16_t.
   // https://github.com/darktable-org/rawspeed/issues/175
@@ -195,7 +198,7 @@ void LJpegDecompressor::decodeRowN(
       pred[i] =
           uint16_t(pred[i] + (static_cast<const PrefixCodeDecoder<>&>(ht[i]))
                                  .decodeDifference(bs));
-      outRow(N_COMP * mcuIdx + i) = pred[i];
+      outStripe(0, N_COMP * mcuIdx + i) = pred[i];
     }
   }
 
@@ -210,7 +213,7 @@ void LJpegDecompressor::decodeRowN(
       pred[c] =
           uint16_t(pred[c] + (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                                  .decodeDifference(bs));
-      outRow(N_COMP * mcuIdx + c) = pred[c];
+      outStripe(0, N_COMP * mcuIdx + c) = pred[c];
     }
     // Discard the rest of the MCU.
     invariant(c < N_COMP);
@@ -302,15 +305,21 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
         break;
       }
 
-      auto outRow = img[row];
+      const auto outStripe = CroppedArray2DRef(img,
+                                               /*offsetCols=*/0,
+                                               /*offsetRows=*/row,
+                                               /*croppedWidth=*/img.width(),
+                                               /*croppedHeight=*/frame.mcu.y)
+                                 .getAsArray2DRef();
+
       copy_n(predNext.begin(), N_COMP, pred.data());
       // the predictor for the next line is the start of this line
-      predNext = outRow
+      predNext = outStripe[0]
                      .getBlock(/*size=*/N_COMP,
                                /*index=*/0)
                      .getAsArray1DRef();
 
-      decodeRowN<MCU, N_COMP>(outRow, pred, ht, bs);
+      decodeRowN<MCU, N_COMP>(outStripe, pred, ht, bs);
     }
 
     inputStream.skipBytes(bs.getStreamPosition());
