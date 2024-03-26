@@ -97,7 +97,8 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
     ThrowRDE("Tile overflows image vertically");
 
   if (iPoint2D{1, 1} != frame.mcu && iPoint2D{2, 1} != frame.mcu &&
-      iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu)
+      iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu &&
+      iPoint2D{2, 2} != frame.mcu)
     ThrowRDE("Unexpected MCU size: {%i, %i}", frame.mcu.x, frame.mcu.y);
 
   if (rec.size() != static_cast<unsigned>(frame.mcu.area()))
@@ -367,6 +368,9 @@ ByteStream::size_type LJpegDecompressor::decode() const {
   case 4:
     if (frame.mcu == MCU<4, 1>) {
       return decodeN<MCU<4, 1>>();
+    }
+    if (frame.mcu == MCU<2, 2>) {
+      return decodeN<MCU<2, 2>>();
     }
     break;
   default:
