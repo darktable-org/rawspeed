@@ -95,7 +95,8 @@ public:
 private:
   template <typename ArgTy>
     requires std::same_as<ArgTy, NoBuffer>
-  void take_block_impl(NoBuffer& arg, Array1DRef<const uint8_t> message) {
+  void take_block_impl(NoBuffer& /*unused*/,
+                       Array1DRef<const uint8_t> message) {
     invariant(message.size() != 0);
 
     if (message.size() == N) {
