@@ -269,7 +269,6 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
 
-  invariant(frame.dim.y >= imgFrame.dim.y);
   invariant(static_cast<int64_t>(cps) * frame.dim.x >=
             static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x);
 
