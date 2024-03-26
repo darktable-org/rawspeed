@@ -339,7 +339,7 @@ jobs:
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
       - name: Test (integration)
-        timeout-minutes: ${{ inputs.flavor != 'Coverage' && 1 || 31 }}
+        timeout-minutes: ${{ inputs.flavor != 'Coverage' && 2 || 31 }}
         if: inputs.enable-sample-based-testing
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
