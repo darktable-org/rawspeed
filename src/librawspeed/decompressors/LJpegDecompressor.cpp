@@ -282,7 +282,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   for (int restartIntervalIndex = 0;
        restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
     auto pred = getInitialPreds<N_COMP>();
-    auto predNext = Array1DRef(pred.data(), pred.size());
+    auto predNext = Array2DRef(pred.data(), MCU.x, MCU.y);
 
     if (restartIntervalIndex != 0) {
       auto marker = peekMarker(inputStream);
@@ -313,6 +313,13 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
         break;
       }
 
+      for (int MCURow = 0; MCURow != MCU.y; ++MCURow) {
+        for (int MCUСol = 0; MCUСol != MCU.x; ++MCUСol) {
+          int c = MCU.x * MCURow + MCUСol;
+          pred[c] = predNext(MCURow, MCUСol);
+        }
+      }
+
       const auto outStripe = CroppedArray2DRef(img,
                                                /*offsetCols=*/0,
                                                /*offsetRows=*/row,
@@ -320,12 +327,13 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                                /*croppedHeight=*/frame.mcu.y)
                                  .getAsArray2DRef();
 
-      copy_n(predNext.begin(), N_COMP, pred.data());
       // the predictor for the next line is the start of this line
-      predNext = outStripe[0]
-                     .getBlock(/*size=*/N_COMP,
-                               /*index=*/0)
-                     .getAsArray1DRef();
+      predNext = CroppedArray2DRef(outStripe,
+                                   /*offsetCols=*/0,
+                                   /*offsetRows=*/0,
+                                   /*croppedWidth=*/MCU.x,
+                                   /*croppedHeight=*/MCU.y)
+                     .getAsArray2DRef();
 
       decodeRowN<MCU, N_COMP>(outStripe, pred, ht, bs);
     }
