@@ -59,7 +59,6 @@ private:
   const std::vector<PerComponentRecipe> rec;
   const int numLJpegRowsPerRestartInterval;
 
-  int cps = 0;
   int numFullMCUs = 0;
   int trailingPixels = 0;
 

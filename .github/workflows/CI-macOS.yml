@@ -32,7 +32,7 @@ env:
 jobs:
   macOS:
     name: ${{ inputs.compiler-family }}.${{ inputs.compiler-version }}.targeting.OSX.${{ inputs.os-deployment_target }}.${{ inputs.flavor }}
-    timeout-minutes: 9
+    timeout-minutes: 11
     runs-on: ${{ inputs.os }}
     steps:
       - name: Fetch/Checkout RawSpeed git repo

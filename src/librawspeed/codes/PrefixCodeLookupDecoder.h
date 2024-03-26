@@ -117,7 +117,7 @@ public:
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(!Base::fullDecode);
+    invariant(!Base::isFullDecode());
     return decode<BIT_STREAM, false>(bs);
   }
 
@@ -125,7 +125,7 @@ public:
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(Base::fullDecode);
+    invariant(Base::isFullDecode());
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -181,7 +181,7 @@ public:
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
   int decode(BIT_STREAM& bs) const {
-    invariant(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::isFullDecode());
     bs.fill(32);
 
     typename Base::CodeSymbol symbol;

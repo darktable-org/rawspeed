@@ -146,8 +146,6 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   numFullMCUs = tileRequiredWidth / frame.mcu.x; // Truncating division!
   // Do we need to also produce part of a MCU?
   trailingPixels = tileRequiredWidth % frame.mcu.x;
-
-  cps = implicit_cast<int>(frame.mcu.area()); // FIXME;
 }
 
 template <int N_COMP, size_t... I>
@@ -253,10 +251,6 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   constexpr int N_COMP = MCU.x * MCU.y;
 
   invariant(mRaw->getCpp() > 0);
-  invariant(N_COMP > 0);
-
-  invariant(mRaw->dim.x >= N_COMP);
-  invariant((mRaw->getCpp() * (mRaw->dim.x - imgFrame.pos.x)) >= N_COMP);
 
   const auto img =
       CroppedArray2DRef(mRaw->getU16DataAsUncroppedArray2DRef(),
@@ -269,12 +263,6 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   // A recoded DNG might be split up into tiles of self contained LJpeg blobs.
   // The tiles at the bottom and the right may extend beyond the dimension of
   // the raw image buffer. The excessive content has to be ignored.
-
-  invariant(static_cast<int64_t>(cps) * frame.dim.x >=
-            static_cast<int64_t>(mRaw->getCpp()) * imgFrame.dim.x);
-
-  invariant(imgFrame.pos.y + imgFrame.dim.y <= mRaw->dim.y);
-  invariant(imgFrame.pos.x + imgFrame.dim.x <= mRaw->dim.x);
 
   invariant(imgFrame.dim.y % frame.mcu.y == 0);
   const auto numRestartIntervals = implicit_cast<int>(roundUpDivision(

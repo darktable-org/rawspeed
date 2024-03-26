@@ -56,7 +56,7 @@ public:
     invariant(diff_l >= 0 && diff_l <= 16);
 
     if (diff_l == 16) {
-      if (Base::fixDNGBug16)
+      if (Base::handleDNGBug16())
         bs.skipBitsNoFill(16);
       return -32768;
     }
