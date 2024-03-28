@@ -155,7 +155,8 @@ private:
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
   template <int N_COMP, int X_S_F, int Y_S_F>
-  [[nodiscard]] ByteStream::size_type decompressN_X_Y() const;
+  [[nodiscard]] __attribute__((noinline)) ByteStream::size_type
+  decompressN_X_Y() const;
 
   [[nodiscard]] iterator_range<Cr2SliceIterator> getSlices() const;
   [[nodiscard]] iterator_range<Cr2OutputTileIterator> getAllOutputTiles() const;
