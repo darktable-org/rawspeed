@@ -96,6 +96,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (imgFrame.pos.y + imgFrame.dim.y > mRaw->dim.y)
     ThrowRDE("Tile overflows image vertically");
 
+  if (!frame.dim.hasPositiveArea())
+    ThrowRDE("Frame has zero size");
+
   if (iPoint2D{1, 1} != frame.mcu && iPoint2D{2, 1} != frame.mcu &&
       iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu &&
       iPoint2D{2, 2} != frame.mcu)
