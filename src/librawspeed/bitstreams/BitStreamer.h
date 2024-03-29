@@ -107,7 +107,7 @@ struct BitStreamerForwardSequentialReplenisher final
     // Do we have BitStreamerTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
     if (getPos() + BitStreamerTraits<Tag>::MaxProcessBytes <=
-        Base::input.size()) {
+        Base::input.size()) [[likely]] {
       return Base::input
           .getCrop(getPos(), BitStreamerTraits<Tag>::MaxProcessBytes)
           .getAsArray1DRef();
@@ -119,8 +119,8 @@ struct BitStreamerForwardSequentialReplenisher final
 
     // Note that in order to keep all fill-level invariants we must allow to
     // over-read past-the-end a bit.
-    if (getPos() >
-        Base::input.size() + 2 * BitStreamerTraits<Tag>::MaxProcessBytes)
+    if (getPos() > Base::input.size() +
+                       2 * BitStreamerTraits<Tag>::MaxProcessBytes) [[unlikely]]
       ThrowIOE("Buffer overflow read in BitStreamer");
 
     variableLengthLoadNaiveViaMemcpy(Base::tmp(), Base::input, getPos());
