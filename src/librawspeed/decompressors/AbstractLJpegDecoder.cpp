@@ -55,7 +55,7 @@ AbstractLJpegDecoder::AbstractLJpegDecoder(ByteStream bs, RawImage img)
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (mRaw->dim.x > 19440 || mRaw->dim.y > 6304) {
+  if (mRaw->dim.x > 19440 || mRaw->dim.y > 8842) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
