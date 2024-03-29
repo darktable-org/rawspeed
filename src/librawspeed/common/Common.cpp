@@ -28,7 +28,7 @@ namespace rawspeed {
 
 #if defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION) && !defined(_DEBUG)
 
-void RAWSPEED_READNONE writeLog(DEBUG_PRIO priority, const char* format, ...) {
+void writeLog(DEBUG_PRIO priority, const char* format, ...) {
   // When fuzzing, any output is really undesirable.
 }
 
