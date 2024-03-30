@@ -88,7 +88,9 @@ class BitStreamerJPEG final : public BitStreamer<BitStreamerJPEG> {
 
   friend void Base::fill(int nbits); // Allow it to call our `fillCache()`.
 
-  size_type fillCache(Array1DRef<const std::byte> input);
+  size_type fillCache(
+      std::array<std::byte, BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes>
+          input);
 
 public:
   using Base::Base;
@@ -101,10 +103,13 @@ public:
 // an `0xFF` byte, and out of *those* blocks, only ~0.77% (1 in ~131)
 // will contain more than one `0xFF` byte.
 
-inline BitStreamerJPEG::size_type
-BitStreamerJPEG::fillCache(Array1DRef<const std::byte> input) {
+inline BitStreamerJPEG::size_type BitStreamerJPEG::fillCache(
+    std::array<std::byte, BitStreamerTraits<BitStreamerJPEG>::MaxProcessBytes>
+        inputStorage) {
   static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
   establishClassInvariants();
+  auto input = Array1DRef<std::byte>(inputStorage.data(),
+                                     implicit_cast<int>(inputStorage.size()));
   invariant(input.size() == Traits::MaxProcessBytes);
 
   constexpr int StreamChunkBitwidth =
