@@ -96,7 +96,6 @@ struct BitStreamerForwardSequentialReplenisher final
     auto tmp = Array1DRef<std::byte>(tmpStorage.data(),
                                      implicit_cast<int>(tmpStorage.size()));
 
-#if !defined(DEBUG)
     // Do we have BitStreamerTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
     if (getPos() + BitStreamerTraits<Tag>::MaxProcessBytes <=
@@ -109,7 +108,6 @@ struct BitStreamerForwardSequentialReplenisher final
              BitStreamerTraits<Tag>::MaxProcessBytes);
       return tmpStorage;
     }
-#endif
 
     // We have to use intermediate buffer, either because the input is running
     // out of bytes, or because we want to enforce bounds checking.
