@@ -54,17 +54,6 @@ template <typename Tag> struct BitStreamerReplenisherBase {
     if (input.size() < BitStreamerTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
   }
-
-  // A temporary intermediate buffer that may be used by fill() method either
-  // in debug build to enforce lack of out-of-bounds reads, or when we are
-  // nearing the end of the input buffer and can not just read
-  // BitStreamerTraits<Tag>::MaxProcessBytes from it, but have to read as much
-  // as we can and fill rest with zeros.
-  std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage =
-      {};
-  Array1DRef<std::byte> tmp() noexcept RAWSPEED_READONLY {
-    return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
-  }
 };
 
 template <typename Tag>
@@ -100,19 +89,25 @@ struct BitStreamerForwardSequentialReplenisher final
     Base::pos += numBytes;
   }
 
-  Array1DRef<const std::byte> getInput() {
+  std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> getInput() {
     Base::establishClassInvariants();
 
-#if !defined(DEBUG)
+    std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage;
+    auto tmp = Array1DRef<std::byte>(tmpStorage.data(),
+                                     implicit_cast<int>(tmpStorage.size()));
+
     // Do we have BitStreamerTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
     if (getPos() + BitStreamerTraits<Tag>::MaxProcessBytes <=
         Base::input.size()) [[likely]] {
-      return Base::input
-          .getCrop(getPos(), BitStreamerTraits<Tag>::MaxProcessBytes)
-          .getAsArray1DRef();
+      auto currInput =
+          Base::input.getCrop(getPos(), BitStreamerTraits<Tag>::MaxProcessBytes)
+              .getAsArray1DRef();
+      invariant(currInput.size() == tmp.size());
+      memcpy(tmp.begin(), currInput.begin(),
+             BitStreamerTraits<Tag>::MaxProcessBytes);
+      return tmpStorage;
     }
-#endif
 
     // We have to use intermediate buffer, either because the input is running
     // out of bytes, or because we want to enforce bounds checking.
@@ -123,9 +118,9 @@ struct BitStreamerForwardSequentialReplenisher final
                        2 * BitStreamerTraits<Tag>::MaxProcessBytes) [[unlikely]]
       ThrowIOE("Buffer overflow read in BitStreamer");
 
-    variableLengthLoadNaiveViaMemcpy(Base::tmp(), Base::input, getPos());
+    variableLengthLoadNaiveViaMemcpy(tmp, Base::input, getPos());
 
-    return Base::tmp();
+    return tmpStorage;
   }
 };
 
@@ -149,9 +144,13 @@ private:
   // this method can be re-implemented in the concrete BitStreamer template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamerTraits<Tag>::MaxProcessBytes bytes of input.
-  size_type fillCache(Array1DRef<const std::byte> input) {
+  size_type
+  fillCache(std::array<std::byte, BitStreamerTraits<Derived>::MaxProcessBytes>
+                inputStorage) {
     static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
     establishClassInvariants();
+    auto input = Array1DRef<std::byte>(inputStorage.data(),
+                                       implicit_cast<int>(inputStorage.size()));
     invariant(input.size() == Traits::MaxProcessBytes);
 
     constexpr int StreamChunkBitwidth =
