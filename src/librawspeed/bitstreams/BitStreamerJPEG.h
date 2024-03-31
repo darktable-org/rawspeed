@@ -115,24 +115,18 @@ inline BitStreamerJPEG::size_type BitStreamerJPEG::fillCache(
   constexpr int StreamChunkBitwidth =
       bitwidth<typename StreamTraits::ChunkType>();
 
-  std::array<std::byte, Traits::MaxProcessBytes> prefetch;
-  std::copy_n(input.getCrop(0, sizeof(uint64_t)).begin(), prefetch.size(),
-              prefetch.begin());
-
   auto speculativeOptimisticCache = cache;
   auto speculativeOptimisticChunk =
       getByteSwapped<typename StreamTraits::ChunkType>(
-          prefetch.data(),
-          StreamTraits::ChunkEndianness != getHostEndianness());
+          input.begin(), StreamTraits::ChunkEndianness != getHostEndianness());
   speculativeOptimisticCache.push(speculativeOptimisticChunk,
                                   StreamChunkBitwidth);
 
   // short-cut path for the most common case (no FF marker in the next 4 bytes)
   // this is slightly faster than the else-case alone.
-  if (std::accumulate(&prefetch[0], &prefetch[4], true,
-                      [](bool b, std::byte byte) {
-                        return b && (byte != std::byte{0xFF});
-                      })) {
+  if (std::accumulate(&input(0), &input(4), true, [](bool b, std::byte byte) {
+        return b && (byte != std::byte{0xFF});
+      })) {
     cache = speculativeOptimisticCache;
     return 4;
   }
@@ -142,7 +136,7 @@ inline BitStreamerJPEG::size_type BitStreamerJPEG::fillCache(
     const int numBytesNeeded = 4 - i;
 
     // Pre-execute most common case, where next byte is 'normal'/non-FF
-    const std::byte c0 = prefetch[p + 0];
+    const std::byte c0 = input(p + 0);
     cache.push(std::to_integer<uint8_t>(c0), 8);
     if (c0 != std::byte{0xFF}) {
       p += 1;
@@ -150,7 +144,7 @@ inline BitStreamerJPEG::size_type BitStreamerJPEG::fillCache(
     }
 
     // Found FF -> pre-execute case of FF/00, which represents an FF data byte
-    const std::byte c1 = prefetch[p + 1];
+    const std::byte c1 = input(p + 1);
     if (c1 == std::byte{0x00}) {
       // Got FF/00, where 0x00 is a stuffing byte (that should be ignored),
       // so 0xFF is a normal byte. All good.
