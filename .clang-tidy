@@ -37,6 +37,7 @@ Checks: >
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-c-copy-assignment-signature,
   -cppcoreguidelines-explicit-virtual-functions,
+  -cppcoreguidelines-macro-to-enum,
   -cppcoreguidelines-noexcept-destructor,
   -cppcoreguidelines-noexcept-move-operations,
   -cppcoreguidelines-noexcept-swap,
@@ -111,7 +112,6 @@ Checks: >
   -misc-unused-parameters,
   -misc-unused-using-decls,
   -modernize-use-trailing-return-type,
-  -openmp-exception-escape,
   -portability-simd-intrinsics,
   -readability-container-data-pointer,
   -readability-identifier-length,
@@ -122,7 +122,6 @@ Checks: >
   -rawspeed-std-array-no-operator-at
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: false
 InheritParentConfig: false
 User:            lebedevri
 CheckOptions:

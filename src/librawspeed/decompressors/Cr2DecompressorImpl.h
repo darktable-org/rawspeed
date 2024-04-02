@@ -21,6 +21,7 @@
 */
 
 #include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Invariant.h"
 #include "adt/Optional.h"
@@ -50,7 +51,11 @@ class ByteStream;
 // NOLINTNEXTLINE(google-build-namespaces)
 namespace {
 
-enum class TileSequenceStatus { ContinuesColumn, BeginsNewColumn, Invalid };
+enum class TileSequenceStatus : uint8_t {
+  ContinuesColumn,
+  BeginsNewColumn,
+  Invalid
+};
 
 inline TileSequenceStatus
 evaluateConsecutiveTiles(const iRectangle2D& rect,

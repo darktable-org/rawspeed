@@ -33,6 +33,9 @@
 namespace rawspeed {
 
 template <typename CodeTag> class AbstractPrefixCodeTranscoder {
+  bool fullDecode = true;
+  bool fixDNGBug16 = false;
+
 public:
   using Tag = CodeTag;
   using Parent = AbstractPrefixCode<CodeTag>;
@@ -55,14 +58,11 @@ public:
   }
 
 protected:
-  bool fullDecode = true;
-  bool fixDNGBug16 = false;
-
-  [[nodiscard]] inline size_t RAWSPEED_READONLY maxCodeLength() const {
+  [[nodiscard]] size_t RAWSPEED_READONLY maxCodeLength() const {
     return code.nCodesPerLength.size() - 1;
   }
 
-  [[nodiscard]] inline size_t RAWSPEED_READONLY __attribute__((pure))
+  [[nodiscard]] size_t RAWSPEED_READONLY __attribute__((pure))
   maxCodePlusDiffLength() const {
     return maxCodeLength() + *(std::max_element(code.Base::codeValues.cbegin(),
                                                 code.Base::codeValues.cend()));
@@ -84,8 +84,12 @@ protected:
   }
 
 public:
-  [[nodiscard]] bool isFullDecode() const { return fullDecode; }
-  [[nodiscard]] bool handleDNGBug16() const { return fixDNGBug16; }
+  [[nodiscard]] bool RAWSPEED_READONLY isFullDecode() const {
+    return fullDecode;
+  }
+  [[nodiscard]] bool RAWSPEED_READONLY handleDNGBug16() const {
+    return fixDNGBug16;
+  }
 
   bool operator==(const AbstractPrefixCodeTranscoder& other) const {
     return code.symbols == other.code.symbols &&

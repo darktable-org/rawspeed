@@ -43,10 +43,8 @@ class PanasonicV6Decompressor final : public AbstractDecompressor {
 
   template <const BlockDsc& dsc>
   inline void __attribute__((always_inline))
-  // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   decompressBlock(ByteStream& rowInput, int row, int col) const noexcept;
 
-  // NOLINTNEXTLINE(bugprone-exception-escape): no exceptions will be thrown.
   template <const BlockDsc& dsc> void decompressRow(int row) const noexcept;
 
   template <const BlockDsc& dsc> void decompressInternal() const noexcept;

@@ -33,6 +33,7 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <vector>
 
 using std::copy_n;
@@ -55,7 +56,7 @@ LJpegDecoder::LJpegDecoder(ByteStream bs, const RawImage& img)
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
   // Yeah, sure, here it would be just dumb to leave this for production :)
-  if (mRaw->dim.x > 7424 || mRaw->dim.y > 5552) {
+  if (mRaw->dim.x > 9728 || mRaw->dim.y > 6656) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
   }
@@ -63,7 +64,8 @@ LJpegDecoder::LJpegDecoder(ByteStream bs, const RawImage& img)
 }
 
 void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
-                          uint32_t height, bool fixDng16Bug_) {
+                          uint32_t height, iPoint2D maxDim_,
+                          bool fixDng16Bug_) {
   if (offsetX >= static_cast<unsigned>(mRaw->dim.x))
     ThrowRDE("X offset outside of image");
   if (offsetY >= static_cast<unsigned>(mRaw->dim.y))
@@ -82,10 +84,17 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
   if (width == 0 || height == 0)
     return; // We do not need anything from this tile.
 
+  if (!maxDim_.hasPositiveArea() ||
+      implicit_cast<unsigned>(maxDim_.x) < width ||
+      implicit_cast<unsigned>(maxDim_.y) < height)
+    ThrowRDE("Requested tile is larger than tile's maximal dimensions");
+
   offX = offsetX;
   offY = offsetY;
   w = width;
   h = height;
+
+  maxDim = maxDim_;
 
   fixDng16Bug = fixDng16Bug_;
 
@@ -117,22 +126,40 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   const iRectangle2D imgFrame = {
       {static_cast<int>(offX), static_cast<int>(offY)},
       {static_cast<int>(w), static_cast<int>(h)}};
-  const LJpegDecompressor::Frame jpegFrame = {N_COMP,
-                                              iPoint2D(frame.w, frame.h)};
+  const auto jpegFrameDim = iPoint2D(frame.w, frame.h);
 
-  int numRowsPerRestartInterval;
+  if (implicit_cast<int64_t>(maxDim.x) * implicit_cast<int>(mRaw->getCpp()) >
+      std::numeric_limits<int>::max())
+    ThrowRDE("Maximal output tile is too large");
+
+  auto maxRes =
+      iPoint2D(implicit_cast<int>(mRaw->getCpp()) * maxDim.x, maxDim.y);
+  if (maxRes.area() != N_COMP * jpegFrameDim.area())
+    ThrowRDE("LJpeg frame area does not match maximal tile area");
+
+  if (maxRes.x % jpegFrameDim.x != 0 || maxRes.y % jpegFrameDim.y != 0)
+    ThrowRDE("Maximal output tile size is not a multiple of LJpeg frame size");
+
+  auto MCUSize = iPoint2D{maxRes.x / jpegFrameDim.x, maxRes.y / jpegFrameDim.y};
+  if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
+    ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
+
+  const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
+
+  int numLJpegRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
     // Restart interval not enabled, so all of the rows
     // are contained in the first (implicit) restart interval.
-    numRowsPerRestartInterval = jpegFrame.dim.y;
+    numLJpegRowsPerRestartInterval = jpegFrameDim.y;
   } else {
-    const int numMCUsPerRow = jpegFrame.dim.x;
+    const int numMCUsPerRow = jpegFrameDim.x;
     if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
       ThrowRDE("Restart interval is not a multiple of frame row size");
-    numRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
+    numLJpegRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
   }
 
-  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec, numRowsPerRestartInterval,
+  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec,
+                      numLJpegRowsPerRestartInterval,
                       input.peekRemainingBuffer().getAsArray1DRef());
   return d.decode();
 }

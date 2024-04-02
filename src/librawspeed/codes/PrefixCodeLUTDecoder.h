@@ -114,20 +114,20 @@ public:
         if (!(c < decodeLookup.size()))
           ThrowRDE("Corrupt Huffman");
 
-        if (!FlagMask || !Base::fullDecode || code_l > LookupDepth ||
+        if (!FlagMask || !Base::isFullDecode() || code_l > LookupDepth ||
             (code_l + diff_l > LookupDepth && diff_l != 16)) {
           // lookup bit depth is too small to fit both the encoded length
           // and the final difference value.
           // -> store only the length and do a normal sign extension later
-          invariant(!Base::fullDecode || diff_l > 0);
+          invariant(!Base::isFullDecode() || diff_l > 0);
           decodeLookup[c] = diff_l << PayloadShift | code_l;
 
-          if (!Base::fullDecode)
+          if (!Base::isFullDecode())
             decodeLookup[c] |= FlagMask;
         } else {
           // Lookup bit depth is sufficient to encode the final value.
           decodeLookup[c] = FlagMask | code_l;
-          if (diff_l != 16 || Base::fixDNGBug16)
+          if (diff_l != 16 || Base::handleDNGBug16())
             decodeLookup[c] += diff_l;
 
           if (diff_l) {
@@ -148,22 +148,20 @@ public:
   }
 
   template <typename BIT_STREAM>
-  inline __attribute__((always_inline)) int
-  decodeCodeValue(BIT_STREAM& bs) const {
+  __attribute__((always_inline)) int decodeCodeValue(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(!Base::fullDecode);
+    invariant(!Base::isFullDecode());
     return decode<BIT_STREAM, false>(bs);
   }
 
   template <typename BIT_STREAM>
-  inline __attribute__((always_inline)) int
-  decodeDifference(BIT_STREAM& bs) const {
+  __attribute__((always_inline)) int decodeDifference(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(Base::fullDecode);
+    invariant(Base::isFullDecode());
     return decode<BIT_STREAM, true>(bs);
   }
 
@@ -172,11 +170,11 @@ public:
   // one to return the fully decoded diff.
   // All ifs depending on this bool will be optimized out by the compiler
   template <typename BIT_STREAM, bool FULL_DECODE>
-  inline __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
+  __attribute__((always_inline)) int decode(BIT_STREAM& bs) const {
     static_assert(
         BitStreamerTraits<BIT_STREAM>::canUseWithPrefixCodeDecoder,
         "This BitStreamer specialization is not marked as usable here");
-    invariant(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::isFullDecode());
     bs.fill(32);
 
     typename Base::CodeSymbol partial;

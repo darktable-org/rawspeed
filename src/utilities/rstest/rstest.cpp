@@ -22,12 +22,12 @@
 #include "adt/AlignedAllocator.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
-#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/NotARational.h"
 #include "md5.h"
 #include <array>
+#include <bit>
 #include <cassert>
 #include <chrono>
 #include <cstdarg>
@@ -340,7 +340,7 @@ void writePFM(const RawImage& raw, const std::string& fn) {
 
     // PFM can have any endianness, let's write little-endian
     for (int x = 0; x < width; ++x)
-      img(row_in, x) = bit_cast<float>(getU32LE(&img(row_in, x)));
+      img(row_in, x) = std::bit_cast<float>(getU32LE(&img(row_in, x)));
 
     fwrite(&img(row_in, 0), sizeof(decltype(img)::value_type), width, f.get());
   }

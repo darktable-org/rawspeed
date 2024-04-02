@@ -54,8 +54,7 @@ struct BitMSBIterator final {
     invariant(bitIdx >= -1);
     return *this;
   }
-  friend inline bool operator==(const BitMSBIterator& a,
-                                const BitMSBIterator& b) {
+  friend bool operator==(const BitMSBIterator& a, const BitMSBIterator& b) {
     invariant(a.bitsPat == b.bitsPat && "Comparing unrelated iterators.");
     return a.bitIdx == b.bitIdx;
   }

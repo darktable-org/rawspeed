@@ -44,7 +44,7 @@ namespace rawspeed {
 // in contact and Loring von Palleske (Samsung) for pointing to the open-source
 // code of Samsung's DNG converter at http://opensource.samsung.com/
 
-enum struct SamsungV2Decompressor::OptFlags : uint32_t {
+enum struct SamsungV2Decompressor::OptFlags : uint8_t {
   NONE = 0U,       // no flags
   SKIP = 1U << 0U, // Skip checking if we need differences from previous line
   MV = 1U << 1U,   // Simplify motion vector definition

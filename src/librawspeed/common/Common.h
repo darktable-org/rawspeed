@@ -199,7 +199,7 @@ inline std::array<T, N> to_array(const std::vector<T>& v) {
   return a;
 }
 
-enum class BitOrder {
+enum class BitOrder : uint8_t {
   LSB,   /* Memory order */
   MSB,   /* Input is added to stack byte by byte, and output is lifted
                      from top */

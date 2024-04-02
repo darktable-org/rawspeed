@@ -21,6 +21,7 @@
 #include "bitstreams/BitVacuumerMSB.h"
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
+#include "adt/PartitioningOutputIterator.h"
 #include "bitstreams/BitStreamerMSB.h"
 #include <cstdint>
 #include <iterator>
@@ -171,7 +172,7 @@ ResultType synthesizeBitstream(const RecepieType& recepie) {
   ResultType bitstream;
 
   {
-    auto bsInserter = std::back_inserter(bitstream);
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
     using BitVacuumer = BitVacuumerMSB<decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);
 

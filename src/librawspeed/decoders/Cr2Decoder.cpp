@@ -228,7 +228,7 @@ void Cr2Decoder::checkSupportInternal(const CameraMetaData* meta) {
 
 namespace {
 
-enum class ColorDataFormat {
+enum class ColorDataFormat : uint8_t {
   ColorData1,
   ColorData2,
   ColorData3,
@@ -343,7 +343,6 @@ getBlackAndWhiteLevelOffsetsInColorData(ColorDataFormat f,
       __builtin_unreachable();
     }
   case ColorData6:
-    // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (*colorDataVersion) {
     case 10:
       return {{479, 484}};

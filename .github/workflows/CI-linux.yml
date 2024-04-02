@@ -80,7 +80,11 @@ jobs:
           APT::Get::Fix-Missing "true";
           EOT
           rm -rf /etc/apt/sources.list*
-          if [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
+          if [ "${{ inputs.distro }}" = "debian:unstable-slim" ]; then
+          tee /etc/apt/sources.list > /dev/null <<EOT
+          deb http://debian-archive.trafficmanager.net/debian unstable main
+          EOT
+          elif [ "${{ inputs.distro }}" = "debian:trixie-slim" ]; then
           tee /etc/apt/sources.list > /dev/null <<EOT
           deb http://debian-archive.trafficmanager.net/debian trixie main
           deb http://debian-archive.trafficmanager.net/debian trixie-updates main
@@ -104,9 +108,9 @@ jobs:
         run: |
           set -xe
           rm -rf /var/lib/apt/lists/*
-          apt-get update
-          apt-get install eatmydata
-          eatmydata apt-get upgrade
+          apt update
+          apt install eatmydata
+          eatmydata apt upgrade
       - name: Install necessary packages
         timeout-minutes: 1
         env:
@@ -116,7 +120,7 @@ jobs:
           ENABLE_SAMPLE_BASED_TESTING: ${{ inputs.enable-sample-based-testing }}
         run: |
           set -xe
-          eatmydata apt-get install ca-certificates \
+          eatmydata apt install ca-certificates \
                                     cmake \
                                     git \
                                     googletest \
@@ -126,28 +130,28 @@ jobs:
                                     ninja-build \
                                     zlib1g-dev
           if [ "$COMPILER_FAMILY" = "GNU" ]; then
-            eatmydata apt-get install g++-${{ inputs.compiler-version }} \
+            eatmydata apt install g++-${{ inputs.compiler-version }} \
                                       gcc \
                                       gcc-${{ inputs.compiler-version }}
           fi
           if [ "$COMPILER_FAMILY" = "LLVM" ]; then
-            eatmydata apt-get install clang-${{ inputs.compiler-version }} \
+            eatmydata apt install clang-${{ inputs.compiler-version }} \
                                       libomp-${{ inputs.compiler-version }}-dev
           fi
           if [ "$ENABLE_SAMPLE_BASED_TESTING" = "true" ]; then
-            eatmydata apt-get install zstd
+            eatmydata apt install zstd
           fi
           if [ "$FLAVOR" = "ClangTidy" ]; then
-            eatmydata apt-get install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
+            eatmydata apt install clang-format-${{ inputs.compiler-version }} clang-tidy-${{ inputs.compiler-version }}
 
-            eatmydata apt-get install curl gpg
-            echo 'deb https://mirror.aardsoft.fi/opensuse/repositories/graphics:/darktable:/master/Debian_Testing/ /' | tee /etc/apt/sources.list
-            curl -fsSL https://download.opensuse.org/repositories/graphics:darktable:master/Debian_Testing/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/graphics_darktable_master.gpg > /dev/null
-            apt-get update
-            eatmydata apt-get install rawspeed-clang-tidy-module
+            eatmydata apt install curl gpg
+            echo 'deb https://ftp.gwdg.de//pub/opensuse/repositories/graphics%3A/darktable%3A/master/Debian_Unstable/ /' | tee /etc/apt/sources.list
+            curl -fsSL https://download.opensuse.org/repositories/graphics:darktable:master/Debian_Unstable/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/graphics_darktable_master.gpg > /dev/null
+            apt update
+            eatmydata apt install rawspeed-clang-tidy-module
           fi
           if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
-            eatmydata apt-get install clang-tools-${{ inputs.compiler-version }} \
+            eatmydata apt install clang-tools-${{ inputs.compiler-version }} \
                                       curl \
                                       libxml2-dev \
                                       libxslt1-dev \
@@ -163,7 +167,7 @@ jobs:
                                       python3-yaml \
                                       xz-utils
           fi
-          eatmydata apt-get clean
+          eatmydata apt clean
           dpkg-divert --add --rename --divert /usr/bin/ld.original /usr/bin/ld
           if [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ]; then
             ln -s /usr/bin/${{ inputs.compiler-CC  }} /usr/local/bin/clang
@@ -217,7 +221,7 @@ jobs:
       - name: Initialize CodeQL (for CodeQL static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'CodeQLAnalysis'
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: cpp
       - name: Set up JDK 11 (for SonarCloud static analysis)
@@ -235,9 +239,9 @@ jobs:
         run: |
           set -xe
           rm -rf /var/lib/apt/lists/*
-          eatmydata apt-get update
-          eatmydata apt-get install curl unzip
-          eatmydata apt-get clean
+          eatmydata apt update
+          eatmydata apt install curl unzip
+          eatmydata apt clean
           mkdir -p $HOME/.sonar
           curl -sSLo $HOME/.sonar/sonar-scanner.zip ${{ env.SONAR_SCANNER_DOWNLOAD_URL }}
           unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
@@ -335,7 +339,7 @@ jobs:
           mkdir -p "${COVERAGE_REPORT_PREFIX}"
           mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
       - name: Test (integration)
-        timeout-minutes: ${{ inputs.flavor != 'Coverage' && 1 || 31 }}
+        timeout-minutes: ${{ inputs.flavor != 'Coverage' && 2 || 31 }}
         if: inputs.enable-sample-based-testing
         env:
           SRC_DIR: ${{ github.workspace }}/rawspeed
@@ -436,7 +440,7 @@ jobs:
       - name: Perform CodeQL static analysis
         timeout-minutes: 11
         if: inputs.flavor == 'CodeQLAnalysis'
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
       - name: Perform SonarCloud static analysis
         timeout-minutes: 6
         if: inputs.flavor == 'SonarCloudStaticAnalysis'

@@ -27,6 +27,7 @@
 #include "io/Endianness.h"
 #include <cstddef>
 #include <cstdint>
+#include <numeric>
 
 namespace rawspeed {
 
@@ -47,7 +48,7 @@ class BitVacuumerJPEG final
 
   friend void Base::drain(); // Allow it to actually call `drainImpl()`.
 
-  inline void drainImpl() {
+  void drainImpl() {
     invariant(Base::cache.fillLevel >= Base::chunk_bitwidth);
     invariant(Base::chunk_bitwidth == 32);
 
@@ -60,15 +61,33 @@ class BitVacuumerJPEG final
 
     auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
         Base::cache.peek(StreamChunkBitwidth));
-    chunk = getByteSwapped<typename StreamTraits::ChunkType>(
-        &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
     Base::cache.skip(StreamChunkBitwidth);
 
     const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
+
+    // short-cut path for the most common case (no FF marker in the next 4
+    // bytes) this is slightly faster than the else-case alone.
+    if (std::accumulate(bytes.begin(), bytes.end(), true,
+                        [](bool b, std::byte byte) {
+                          return b && (byte != std::byte{0xFF});
+                        })) {
+      chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+          &chunk, StreamTraits::ChunkEndianness != Endianness::little);
+      *Base::output = chunk;
+      ++Base::output;
+      return;
+    }
+
+    chunk = getByteSwapped<typename StreamTraits::ChunkType>(
+        &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
+
     for (const auto byte : bytes) {
       *Base::output = static_cast<uint8_t>(byte);
-      if (static_cast<uint8_t>(byte) == 0xFF)
+      ++Base::output;
+      if (static_cast<uint8_t>(byte) == 0xFF) {
         *Base::output = uint8_t(0x00); // Stuffing byte
+        ++Base::output;
+      }
     }
   }
 

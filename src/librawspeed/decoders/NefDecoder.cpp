@@ -757,9 +757,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
           reinterpret_cast<std::byte*>(&out(row, col + 1)), &random);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(implicit_cast<double>(y1) +
-                                     1.732446 * implicit_cast<double>(cb)),
-                    12),
+          clampBits(
+              static_cast<int>(implicit_cast<double>(y1) +
+                               1.732446 // NOLINT(modernize-use-std-numbers)
+                                   * implicit_cast<double>(cb)),
+              12),
           tmpch, &random);
       out(row, col + 2) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
 
@@ -778,9 +780,11 @@ void NefDecoder::DecodeNikonSNef(ByteStream input) const {
           reinterpret_cast<std::byte*>(&out(row, col + 4)), &random);
 
       mRaw->setWithLookUp(
-          clampBits(static_cast<int>(implicit_cast<double>(y2) +
-                                     1.732446 * implicit_cast<double>(cb2)),
-                    12),
+          clampBits(
+              static_cast<int>(implicit_cast<double>(y2) +
+                               1.732446 // NOLINT(modernize-use-std-numbers)
+                                   * implicit_cast<double>(cb2)),
+              12),
           tmpch, &random);
       out(row, col + 5) = clampBits((inv_wb_b * tmp + (1 << 9)) >> 10, 15);
     }
@@ -826,10 +830,16 @@ std::vector<uint16_t> NefDecoder::gammaCurve(double pwr, double ts, int imax) {
     const double r = static_cast<double>(i) / imax;
     if (r >= 1)
       continue;
-    auto v =
-        (r < g[2] ? r / g[1]
-                  : (std::abs(g[0]) > 0 ? pow((r + g[4]) / (1 + g[4]), 1 / g[0])
-                                        : exp((r - 1) / g[2])));
+    double v;
+    if (r < g[2]) {
+      v = r / g[1];
+    } else {
+      if (std::abs(g[0]) > 0) {
+        v = pow((r + g[4]) / (1 + g[4]), 1 / g[0]);
+      } else {
+        v = exp((r - 1) / g[2]);
+      }
+    }
     curve[i] = static_cast<uint16_t>(0x10000 * v);
   }
 

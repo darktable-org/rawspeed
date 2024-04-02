@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include "adt/Array1DRef.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
 #include "io/Endianness.h"
-#include <cstddef>
+#include <concepts>
 #include <cstdint>
+#include <iterator>
+#include <type_traits>
 
 namespace rawspeed {
 
@@ -53,7 +54,7 @@ public:
   using chunk_type = uint32_t;
   static constexpr int chunk_bitwidth = 32;
 
-  inline void drainImpl() {
+  void drainImpl() {
     invariant(cache.fillLevel >= chunk_bitwidth);
     static_assert(chunk_bitwidth == 32);
 
@@ -68,16 +69,15 @@ public:
       auto chunk = implicit_cast<typename StreamTraits::ChunkType>(
           cache.peek(StreamChunkBitwidth));
       chunk = getByteSwapped<typename StreamTraits::ChunkType>(
-          &chunk, StreamTraits::ChunkEndianness != getHostEndianness());
+          &chunk, StreamTraits::ChunkEndianness != Endianness::little);
       cache.skip(StreamChunkBitwidth);
 
-      const auto bytes = Array1DRef<const std::byte>(Array1DRef(&chunk, 1));
-      for (const auto byte : bytes)
-        *output = static_cast<uint8_t>(byte);
+      *output = chunk;
+      ++output;
     }
   }
 
-  inline void drain() {
+  void drain() {
     invariant(!flushed);
 
     if (cache.fillLevel < chunk_bitwidth)
@@ -87,7 +87,7 @@ public:
     invariant(cache.fillLevel < chunk_bitwidth);
   }
 
-  inline void flush() {
+  void flush() {
     drain();
 
     if (cache.fillLevel == 0) {
@@ -112,14 +112,15 @@ public:
   BitVacuumer& operator=(const BitVacuumer&) = delete;
   BitVacuumer& operator=(BitVacuumer&&) = delete;
 
-  inline explicit BitVacuumer(OutputIterator output_) : output(output_) {}
+  template <typename U>
+    requires std::same_as<OutputIterator, std::remove_reference_t<U>>
+  explicit BitVacuumer(U&& output_) : output(std::forward<U>(output_)) {}
 
-  inline ~BitVacuumer() { flush(); }
+  ~BitVacuumer() { flush(); }
 
-  inline void put(uint32_t bits, int count) {
+  void put(uint32_t bits, int count) {
     invariant(count >= 0);
-    if (count == 0)
-      return; // No-op.
+    // NOTE: count may be zero!
     drain();
     cache.push(bits, count);
   }

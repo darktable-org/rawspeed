@@ -116,7 +116,8 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
     try {
       LJpegDecoder d(e.bs, mRaw);
-      d.decode(e.offX, e.offY, e.width, e.height, mFixLjpeg);
+      d.decode(e.offX, e.offY, e.width, e.height,
+               iPoint2D(e.dsc.tileW, e.dsc.tileH), mFixLjpeg);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -130,7 +131,8 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
 
 #ifdef HAVE_ZLIB
 template <> void AbstractDngDecompressor::decompressThread<8>() const noexcept {
-  std::unique_ptr<unsigned char[]> uBuffer; // NOLINT
+  // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+  std::unique_ptr<unsigned char[]> uBuffer;
 
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)

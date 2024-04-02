@@ -1,4 +1,5 @@
 FILE(GLOB RAWSPEED_BENCHS_SOURCES
+  "CoalescingOutputIteratorBenchmark.cpp"
   "DefaultInitAllocatorAdaptorBenchmark.cpp"
   "VariableLengthLoadBenchmark.cpp"
 )

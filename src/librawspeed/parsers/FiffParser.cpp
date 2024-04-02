@@ -103,11 +103,21 @@ void FiffParser::parseData() {
     for (uint32_t i = 0; i < entries; i++) {
       auto tag = static_cast<TiffTag>(bytes.getU16());
       uint16_t length = bytes.getU16();
-      TiffDataType type = TiffDataType::UNDEFINED;
 
-      if (tag == TiffTag::IMAGEWIDTH ||
-          tag == TiffTag::FUJIOLDWB) // also 0x121?
+      TiffDataType type;
+      switch (tag) {
+        using enum TiffTag;
+      case TiffTag::FUJI_RAWIMAGEFULLSIZE:
+      case TiffTag::FUJI_RAWIMAGECROPTOPLEFT:
+      case TiffTag::FUJI_RAWIMAGECROPPEDSIZE:
+      case TiffTag::FUJIOLDWB:
+        // also 0x121?
         type = TiffDataType::SHORT;
+        break;
+      default:
+        type = TiffDataType::UNDEFINED;
+        break;
+      }
 
       uint32_t count = type == TiffDataType::SHORT ? length / 2 : length;
       subIFD->add(std::make_unique<TiffEntry>(

@@ -37,7 +37,7 @@ public:
 
 private:
   template <typename BIT_VACUUMER>
-  inline void encodeCodeValueImpl(BIT_VACUUMER& bv, int codeIndex) const {
+  void encodeCodeValueImpl(BIT_VACUUMER& bv, int codeIndex) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
@@ -66,22 +66,22 @@ public:
   }
 
   template <typename BIT_VACUUMER>
-  inline void encodeCodeValue(BIT_VACUUMER& bv,
-                              typename Traits::CodeValueTy codeValue) const {
+  void encodeCodeValue(BIT_VACUUMER& bv,
+                       typename Traits::CodeValueTy codeValue) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
-    invariant(!Base::fullDecode);
+    invariant(!Base::isFullDecode());
     int codeIndex = getCodeIndexOfCodeValue(codeValue);
     encodeCodeValueImpl(bv, codeIndex);
   }
 
   template <typename BIT_VACUUMER>
-  inline void encodeDifference(BIT_VACUUMER& bv, int value) const {
+  void encodeDifference(BIT_VACUUMER& bv, int value) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
-    invariant(Base::fullDecode);
+    invariant(Base::isFullDecode());
     auto [diff, diffLen] = Base::reduce(value);
     int codeIndex = getCodeIndexOfCodeValue(diffLen);
     encodeCodeValueImpl(bv, codeIndex);
@@ -90,11 +90,11 @@ public:
   }
 
   template <typename BIT_VACUUMER, bool FULL_DECODE>
-  inline void encode(BIT_VACUUMER& bv, int value) const {
+  void encode(BIT_VACUUMER& bv, int value) const {
     static_assert(
         BitVacuumerTraits<BIT_VACUUMER>::canUseWithPrefixCodeEncoder,
         "This BitVacuumer specialization is not marked as usable here");
-    invariant(FULL_DECODE == Base::fullDecode);
+    invariant(FULL_DECODE == Base::isFullDecode());
 
     if constexpr (!FULL_DECODE)
       encodeCodeValue(bv, implicit_cast<typename Traits::CodeValueTy>(value));

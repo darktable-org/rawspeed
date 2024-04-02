@@ -24,6 +24,7 @@
 #include "rawspeedconfig.h"
 #include "adt/Invariant.h"
 #include "codes/AbstractPrefixCodeTranscoder.h"
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -40,8 +41,8 @@ public:
   using Base::Base;
 
   template <typename BIT_STREAM, bool FULL_DECODE>
-  inline int processSymbol(BIT_STREAM& bs, CodeSymbol symbol,
-                           typename Traits::CodeValueTy codeValue) const {
+  int processSymbol(BIT_STREAM& bs, CodeSymbol symbol,
+                    typename Traits::CodeValueTy codeValue) const {
     invariant(symbol.code_len >= 0 &&
               symbol.code_len <= Traits::MaxCodeLenghtBits);
 
@@ -55,7 +56,7 @@ public:
     invariant(diff_l >= 0 && diff_l <= 16);
 
     if (diff_l == 16) {
-      if (Base::fixDNGBug16)
+      if (Base::handleDNGBug16())
         bs.skipBitsNoFill(16);
       return -32768;
     }
@@ -66,7 +67,7 @@ public:
 
   // Figure F.12 – Extending the sign bit of a decoded value in V
   // WARNING: this is *not* your normal 2's complement sign extension!
-  inline static int RAWSPEED_READNONE extend(uint32_t diff, uint32_t len) {
+  static int RAWSPEED_READNONE extend(uint32_t diff, uint32_t len) {
     invariant(len > 0);
     auto ret = static_cast<int32_t>(diff);
     if ((diff & (1 << (len - 1))) == 0)

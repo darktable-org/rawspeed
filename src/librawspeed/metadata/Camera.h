@@ -76,7 +76,7 @@ public:
 
 class Camera final {
 public:
-  enum class SupportStatus {
+  enum class SupportStatus : uint8_t {
     SupportedNoSamples, // Tentatively supported, no RPU samples.
     Supported,          // Claimed as supported (explicitly).
     Unknown,            // Placeholder camera, support is unknown.

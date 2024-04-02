@@ -56,17 +56,17 @@ BitStreamCacheBase::establishClassInvariants() const noexcept {
 }
 
 struct BitStreamCacheLeftInRightOut final : BitStreamCacheBase {
-  inline void push(uint64_t bits, int count) noexcept {
+  void push(uint64_t bits, int count) noexcept {
     establishClassInvariants();
     invariant(count >= 0);
-    invariant(count != 0);
+    // NOTE: count may be zero!
     invariant(count <= Size);
     invariant(count + fillLevel <= Size);
     cache |= bits << fillLevel;
     fillLevel += count;
   }
 
-  [[nodiscard]] inline uint32_t peek(int count) const noexcept {
+  [[nodiscard]] uint32_t peek(int count) const noexcept {
     establishClassInvariants();
     invariant(count >= 0);
     invariant(count <= MaxGetBits);
@@ -76,7 +76,7 @@ struct BitStreamCacheLeftInRightOut final : BitStreamCacheBase {
     return extractLowBits(static_cast<uint32_t>(cache), count);
   }
 
-  inline void skip(int count) noexcept {
+  void skip(int count) noexcept {
     establishClassInvariants();
     invariant(count >= 0);
     // `count` *could* be larger than `MaxGetBits`.
@@ -89,10 +89,10 @@ struct BitStreamCacheLeftInRightOut final : BitStreamCacheBase {
 };
 
 struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
-  inline void push(uint64_t bits, int count) noexcept {
+  void push(uint64_t bits, int count) noexcept {
     establishClassInvariants();
     invariant(count >= 0);
-    invariant(count != 0);
+    // NOTE: count may be zero!
     invariant(count <= Size);
     invariant(count + fillLevel <= Size);
     // If the maximal size of the cache is BitStreamCacheBase::Size, and we
@@ -106,13 +106,16 @@ struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
     // how many unfilled bits of a gap will there be in the middle of a cache?
     const int emptyBitsGap = vacantBits - count;
     invariant(emptyBitsGap >= 0);
-    invariant(emptyBitsGap < Size);
-    // So just shift the new bits so that there is no gap in the middle.
-    cache |= bits << emptyBitsGap;
+    invariant(emptyBitsGap <= Size);
+    if (count != 0) {
+      invariant(emptyBitsGap < Size);
+      // So just shift the new bits so that there is no gap in the middle.
+      cache |= bits << emptyBitsGap;
+    }
     fillLevel += count;
   }
 
-  [[nodiscard]] inline auto peek(int count) const noexcept {
+  [[nodiscard]] auto peek(int count) const noexcept {
     establishClassInvariants();
     invariant(count >= 0);
     invariant(count <= Size);
@@ -124,7 +127,7 @@ struct BitStreamCacheRightInLeftOut final : BitStreamCacheBase {
                         /*effectiveBitwidth=*/BitStreamCacheBase::Size));
   }
 
-  inline void skip(int count) noexcept {
+  void skip(int count) noexcept {
     establishClassInvariants();
     invariant(count >= 0);
     // `count` *could* be larger than `MaxGetBits`.

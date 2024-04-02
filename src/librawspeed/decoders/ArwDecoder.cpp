@@ -20,7 +20,6 @@
 */
 
 #include "decoders/ArwDecoder.h"
-#include "MemorySanitizer.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
@@ -318,16 +317,13 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
       width > 9728 || height > 6656)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  mRaw->dim = iPoint2D(2 * width, height / 2);
+  mRaw->dim = iPoint2D(width, height);
 
   auto tilew = uint64_t(raw->getEntry(TiffTag::TILEWIDTH)->getU32());
   uint32_t tileh = raw->getEntry(TiffTag::TILELENGTH)->getU32();
 
   if (tilew <= 0 || tileh <= 0 || tileh % 2 != 0)
     ThrowRDE("Invalid tile size: (%" PRIu64 ", %u)", tilew, tileh);
-
-  tileh /= 2;
-  tilew *= 2;
 
   assert(tilew > 0);
   const auto tilesX =
@@ -385,8 +381,14 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
           ByteStream(
               DataBuffer(mFile.getSubView(offset, length), Endianness::little)),
           mRaw);
-      decoder.decode(implicit_cast<uint32_t>(tileX * tilew), tileY * tileh,
-                     implicit_cast<uint32_t>(tilew), tileh, false);
+      auto offsetX = implicit_cast<uint32_t>(tileX * tilew);
+      auto offsetY = tileY * tileh;
+      auto tileWidth = implicit_cast<uint32_t>(tilew);
+      auto tileHeight = tileh;
+      auto maxDim = iPoint2D{implicit_cast<int>(tileWidth),
+                             implicit_cast<int>(tileHeight)};
+      decoder.decode(offsetX, offsetY, tileWidth, tileHeight, maxDim,
+                     /*fixDng16Bug=*/false);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
     } catch (const IOException& err) {
@@ -403,46 +405,9 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
              firstErr.c_str());
   }
 
-  PostProcessLJpeg();
-
   const TiffEntry* size_entry = raw->getEntry(TiffTag::SONYRAWIMAGESIZE);
   iRectangle2D crop(0, 0, size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
-}
-
-void ArwDecoder::PostProcessLJpeg() {
-  MSan::CheckMemIsInitialized(mRaw->getByteDataAsUncroppedArray2DRef());
-  RawImage nonInterleavedRaw = mRaw;
-
-  invariant(nonInterleavedRaw->dim.x % 4 == 0);
-  iPoint2D interleavedDims = {nonInterleavedRaw->dim.x / 2,
-                              2 * nonInterleavedRaw->dim.y};
-  mRaw = RawImage::create(interleavedDims, RawImageType::UINT16, 1);
-
-  const Array2DRef<const uint16_t> in =
-      nonInterleavedRaw->getU16DataAsUncroppedArray2DRef();
-  const Array2DRef<uint16_t> out = mRaw->getU16DataAsUncroppedArray2DRef();
-
-#ifdef HAVE_OPENMP
-#pragma omp parallel for schedule(static) default(none) firstprivate(in, out)
-#endif
-  for (int inRow = 0; inRow < in.height(); ++inRow) {
-    static constexpr iPoint2D inMCUSize = {4, 1};
-    static constexpr iPoint2D outMCUSize = {2, 2};
-
-    invariant(in.width() % inMCUSize.x == 0);
-    for (int MCUIdx = 0, numMCUsPerRow = in.width() / inMCUSize.x;
-         MCUIdx < numMCUsPerRow; ++MCUIdx) {
-      for (int outMCURow = 0; outMCURow != outMCUSize.y; ++outMCURow) {
-        for (int outMCUСol = 0; outMCUСol != outMCUSize.x; ++outMCUСol) {
-          out(outMCUSize.y * inRow + outMCURow,
-              outMCUSize.x * MCUIdx + outMCUСol) =
-              in(inRow,
-                 MCUIdx * inMCUSize.x + outMCUSize.x * outMCURow + outMCUСol);
-        }
-      }
-    }
-  }
 }
 
 void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,

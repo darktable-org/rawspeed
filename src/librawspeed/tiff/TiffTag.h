@@ -25,9 +25,11 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace rawspeed {
 
-enum class TiffTag {
+enum class TiffTag : uint16_t {
   INTEROPERABILITYINDEX = 0x0001,
   INTEROPERABILITYVERSION = 0x0002,
   CANONSHOTINFO = 0x0004,
@@ -41,6 +43,7 @@ enum class TiffTag {
   MAKERNOTE_ALT = 0x2e,
 
   IMAGEWIDTH = 0x0100,
+  FUJI_RAWIMAGEFULLSIZE = 0x0100,
   IMAGELENGTH = 0x0101,
   BITSPERSAMPLE = 0x0102,
   COMPRESSION = 0x0103,
@@ -50,7 +53,9 @@ enum class TiffTag {
   IMAGEDESCRIPTION = 0x010E,
   MAKE = 0x010F,
   MODEL = 0x0110,
+  FUJI_RAWIMAGECROPTOPLEFT = 0x0110,
   STRIPOFFSETS = 0x0111,
+  FUJI_RAWIMAGECROPPEDSIZE = 0x0111,
   ORIENTATION = 0x0112,
   SAMPLESPERPIXEL = 0x0115,
   ROWSPERSTRIP = 0x0116,
@@ -245,6 +250,8 @@ enum class TiffTag {
   // THE XMP SPEC DECLARES THAT XMP DATA SHOULD LIVE 0x2BC WHEN
   // EMBEDDED IN TIFF IMAGES.
   XMP = 0x02BC,
+  // Fujifilm unique tag within proprietary directory
+  FUJI_RAFDATA = 0xC000,
   // Canon tag for uncompressed RGB preview
   CANON_UNCOMPRESSED = 0xC5D9,
 

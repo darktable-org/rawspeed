@@ -75,8 +75,8 @@ RawImage RafDecoder::decodeRawInternal() {
   if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)) {
     height = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)->getU32();
     width = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLWIDTH)->getU32();
-  } else if (raw->hasEntry(TiffTag::IMAGEWIDTH)) {
-    const TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
+  } else if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEFULLSIZE)) {
+    const TiffEntry* e = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLSIZE);
     height = e->getU16(0);
     width = e->getU16(1);
   } else
@@ -206,17 +206,23 @@ void RafDecoder::applyCorrections(const Camera* cam) {
   iPoint2D crop_offset(0, 0);
 
   if (applyCrop) {
-    new_size = cam->cropSize;
-    crop_offset = cam->cropPos;
+    if (cam->cropAvailable) {
+      new_size = cam->cropSize;
+      crop_offset = cam->cropPos;
+    } else {
+      const iRectangle2D vendor_crop = getDefaultCrop();
+      new_size = vendor_crop.dim;
+      crop_offset = vendor_crop.pos;
+    }
     bool double_width = hints.contains("double_width_unpacked");
     // If crop size is negative, use relative cropping
     if (new_size.x <= 0) {
       new_size.x =
-          mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
+          mRaw->dim.x / (double_width ? 2 : 1) - crop_offset.x + new_size.x;
     } else
       new_size.x /= (double_width ? 2 : 1);
     if (new_size.y <= 0)
-      new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+      new_size.y = mRaw->dim.y - crop_offset.y + new_size.y;
   }
 
   bool rotate = hints.contains("fuji_rotate");
@@ -329,8 +335,8 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->blackLevel = (sum + 2) >> 2;
   }
 
-  const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
-  if (sensor->mWhiteLevel > 0) {
+  if (const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
+      sensor && sensor->mWhiteLevel > 0) {
     mRaw->blackLevel = sensor->mBlackLevel;
     mRaw->whitePoint = sensor->mWhiteLevel;
   }
@@ -394,6 +400,26 @@ int RafDecoder::isCompressed() const {
   // anything in the diff between exiv2/exiftool dumps of {un,}compressed raws.
   // Maybe we are supposed to check for valid FujiDecompressor::FujiHeader ?
   return count * 8 / (width * height) < bps;
+}
+
+iRectangle2D RafDecoder::getDefaultCrop() {
+  // Crop tags alias baseline TIFF tags, but are in the Fujifilm proprietary
+  // directory that can be identified by a different unique tag.
+  if (const auto* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_RAFDATA);
+      raw->hasEntry(TiffTag::FUJI_RAWIMAGECROPTOPLEFT) &&
+      raw->hasEntry(TiffTag::FUJI_RAWIMAGECROPPEDSIZE)) {
+    const auto* pos = raw->getEntry(TiffTag::FUJI_RAWIMAGECROPTOPLEFT);
+    const uint16_t topBorder = pos->getU16(0);
+    const uint16_t leftBorder = pos->getU16(1);
+    const auto* dim = raw->getEntry(TiffTag::FUJI_RAWIMAGECROPPEDSIZE);
+    const uint16_t height = dim->getU16(0);
+    const uint16_t width = dim->getU16(1);
+    return {leftBorder, topBorder, width, height};
+  }
+  ThrowRDE("Cannot figure out vendor crop. Required entries were not found: "
+           "%X, %X",
+           static_cast<unsigned int>(TiffTag::FUJI_RAWIMAGECROPTOPLEFT),
+           static_cast<unsigned int>(TiffTag::FUJI_RAWIMAGECROPPEDSIZE));
 }
 
 } // namespace rawspeed

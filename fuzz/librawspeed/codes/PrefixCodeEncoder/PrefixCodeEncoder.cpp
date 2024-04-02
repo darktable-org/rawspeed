@@ -21,6 +21,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Optional.h"
+#include "adt/PartitioningOutputIterator.h"
 #include "bitstreams/BitStreamerJPEG.h"
 #include "bitstreams/BitStreamerMSB.h"
 #include "bitstreams/BitStreamerMSB32.h"
@@ -88,7 +89,7 @@ void workloop(Array1DRef<const uint8_t> inputSrc, const HT& ht) {
   {
     auto bsSrc = BitStreamer(inputSrc);
 
-    auto bsInserter = std::back_inserter(inputRec);
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(inputRec));
     using BitVacuumer = typename BitStreamRoundtripTypes<
         flavor>::template vacuumer<decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);

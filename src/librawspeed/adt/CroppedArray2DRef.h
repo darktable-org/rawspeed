@@ -60,7 +60,7 @@ public:
 
   // Conversion from Array2DRef<T> to CroppedArray2DRef<T>.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  inline CroppedArray2DRef(Array2DRef<T> RHS)
+  CroppedArray2DRef(Array2DRef<T> RHS)
       : CroppedArray2DRef(RHS, /*offsetCols=*/0, /*offsetRows=*/0, RHS.width(),
                           RHS.height()) {}
 
@@ -71,10 +71,15 @@ public:
   template <class T2>
     requires(!std::is_const_v<T2> && std::is_const_v<T> &&
              std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>>)
-  inline CroppedArray2DRef( // NOLINT(google-explicit-constructor)
+  CroppedArray2DRef( // NOLINT(google-explicit-constructor)
       CroppedArray2DRef<T2> RHS)
       : CroppedArray2DRef(RHS.base, RHS.offsetCols, RHS.offsetRows,
                           RHS.croppedWidth, RHS.croppedHeight) {}
+
+  [[nodiscard]] Array2DRef<T> getAsArray2DRef() const {
+    establishClassInvariants();
+    return {operator[](0).begin(), croppedWidth, croppedHeight, base.pitch()};
+  }
 
   CroppedArray1DRef<T> operator[](int row) const;
 

@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "adt/PartitioningOutputIterator.h"
 #include "bitstreams/BitStreamer.h"
 #include "bitstreams/BitStreamerJPEG.h"
 #include "bitstreams/BitStreamerLSB.h"
@@ -105,17 +106,17 @@ public:
   InputWrapper& operator=(const InputWrapper&) = delete;
   InputWrapper& operator=(InputWrapper&&) = delete;
 
-  inline InputWrapper(ByteStream bitLengths_, ByteStream bitVals_)
+  InputWrapper(ByteStream bitLengths_, ByteStream bitVals_)
       : bitLengths(bitLengths_), bitVals(bitVals_) {
     invariant(size() >= 0);
   }
 
-  [[nodiscard]] inline int size() const RAWSPEED_READNONE {
+  [[nodiscard]] int size() const RAWSPEED_READNONE {
     invariant(bitVals.getSize() == 4 * bitLengths.getSize());
     return bitLengths.getSize();
   }
 
-  [[nodiscard]] inline std::pair<uint32_t, int>
+  [[nodiscard]] std::pair<uint32_t, int>
   operator[](int i) const RAWSPEED_READNONE {
     invariant(i >= 0);
     invariant(i < size());
@@ -132,7 +133,7 @@ std::vector<uint8_t> produceBitstream(const InputWrapper& w) {
   std::vector<uint8_t> bitstream;
 
   {
-    auto bsInserter = std::back_inserter(bitstream);
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
     using BitVacuumer = typename BitStreamRoundtripTypes<
         flavor>::template vacuumer<decltype(bsInserter)>;
     auto bv = BitVacuumer(bsInserter);

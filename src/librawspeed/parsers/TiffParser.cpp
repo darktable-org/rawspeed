@@ -81,7 +81,18 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, Buffer data) {
 
   for (uint32_t IFDOffset = bs.getU32(); IFDOffset;
        IFDOffset = root->getSubIFDs().back()->getNextIFD()) {
-    root->add(std::make_unique<TiffIFD>(root.get(), &ifds, bs, IFDOffset));
+    std::unique_ptr<TiffIFD> subIFD;
+    try {
+      subIFD = std::make_unique<TiffIFD>(root.get(), &ifds, bs, IFDOffset);
+    } catch (const TiffParserException&) {
+      // This IFD may fail to parse, in which case exit the loop,
+      // because the offset to the next IFD is last 4 bytes of an IFD,
+      // and we didn't get them because the IFD failed to parse.
+      // BUT: don't discard the IFD's that did succeed to parse!
+      break;
+    }
+    assert(subIFD.get());
+    root->add(std::move(subIFD));
   }
 
   return root;

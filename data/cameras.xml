@@ -144,6 +144,14 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 250D" supported="no">
+		<ID make="Canon" model="EOS 250D">Canon EOS 250D</ID>
+		<Aliases>
+			<Alias id="EOS 200D Mark II">Canon EOS 200D II</Alias>
+			<Alias id="EOS Kiss X10">Canon EOS Kiss X10</Alias>
+			<Alias id="EOS Rebel SL3">Canon EOS Rebel SL3</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 300D DIGITAL">
 		<ID make="Canon" model="EOS 300D">Canon EOS 300D</ID>
 		<CFA width="2" height="2">
@@ -577,6 +585,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS 90D" supported="no">
+		<ID make="Canon" model="EOS 90D">Canon EOS 90D</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS 700D">
 		<ID make="Canon" model="EOS 700D">Canon EOS 700D</ID>
 		<CFA width="2" height="2">
@@ -648,6 +659,13 @@
 				<ColorMatrixRow plane="2">-739 1982 5601</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS 850D" supported="no">
+		<ID make="Canon" model="EOS 850D">Canon EOS 850D</ID>
+		<Aliases>
+			<Alias id="EOS Kiss X10i">Canon EOS Kiss X10i</Alias>
+			<Alias id="EOS Rebel T8i">Canon EOS Rebel T8i</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS 760D">
 		<ID make="Canon" model="EOS 760D">Canon EOS 760D</ID>
@@ -1542,6 +1560,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M6 Mark II" supported="no">
+		<ID make="Canon" model="EOS M6 Mark II">Canon EOS M6 Mark II</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS M10">
 		<ID make="Canon" model="EOS M10">Canon EOS M10</ID>
 		<CFA width="2" height="2">
@@ -1563,6 +1584,18 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS M50" supported="no">
+		<ID make="Canon" model="EOS M50">Canon EOS M50</ID>
+		<Aliases>
+			<Alias id="EOS Kiss M">Canon EOS KISS M</Alias>
+		</Aliases>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS M50m2" supported="no">
+		<ID make="Canon" model="EOS M50 Mark II">Canon EOS M50 Mark II</ID>
+		<Aliases>
+			<Alias id="EOS Kiss M2">Canon EOS KISS M2</Alias>
+		</Aliases>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS M100">
 		<ID make="Canon" model="EOS M100">Canon EOS M100</ID>
 		<CFA width="2" height="2">
@@ -1583,6 +1616,48 @@
 				<ColorMatrixRow plane="2">-797 2424 7010</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS M200" supported="no">
+		<ID make="Canon" model="EOS M200">Canon EOS M200</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R" supported="no">
+		<ID make="Canon" model="EOS R">Canon EOS R</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS Ra" supported="no">
+		<ID make="Canon" model="EOS Ra">Canon EOS Ra</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS RP" supported="no">
+		<ID make="Canon" model="EOS RP">Canon EOS RP</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R3" supported="no">
+		<ID make="Canon" model="EOS R3">Canon EOS R3</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R5" supported="no">
+		<ID make="Canon" model="EOS R5">Canon EOS R5</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R5 C" supported="no">
+		<ID make="Canon" model="EOS R5 C">Canon EOS R5 C</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R6" supported="no">
+		<ID make="Canon" model="EOS R6">Canon EOS R6</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R6m2" supported="no">
+		<ID make="Canon" model="EOS R6 Mark II">Canon EOS R6 Mark II</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R7" supported="no">
+		<ID make="Canon" model="EOS R7">Canon EOS R7</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R8" supported="no">
+		<ID make="Canon" model="EOS R8">Canon EOS R8</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R10" supported="no">
+		<ID make="Canon" model="EOS R10">Canon EOS R10</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R50" supported="no">
+		<ID make="Canon" model="EOS R50">Canon EOS R50</ID>
+	</Camera>
+	<Camera make="Canon" model="Canon EOS R100" supported="no">
+		<ID make="Canon" model="EOS R100">Canon EOS R100</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon EOS-1D" decoder_version="8">
 		<ID make="Canon" model="EOS-1D">Canon EOS-1D</ID>
@@ -1951,6 +2026,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS-1D X Mark III" supported="no">
+		<ID make="Canon" model="EOS-1D X Mark III">Canon EOS-1D X Mark III</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot Pro1">
 		<ID make="Canon" model="PowerShot Pro1">Canon PowerShot Pro1</ID>
 		<CFA width="2" height="2">
@@ -2122,6 +2200,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Canon" model="Canon PowerShot G5 X Mark II" supported="no">
+		<ID make="Canon" model="PowerShot G5 X Mark II">Canon PowerShot G5 X Mark II</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G6">
 		<ID make="Canon" model="PowerShot G6">Canon PowerShot G6</ID>
 		<CFA width="2" height="2">
@@ -2185,6 +2266,9 @@
 				<ColorMatrixRow plane="2">-407 1415 5049</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot G7 X Mark III" supported="no">
+		<ID make="Canon" model="PowerShot G7 X Mark III">Canon PowerShot G7 X Mark III</ID>
 	</Camera>
 	<Camera make="Canon" model="Canon PowerShot G1 X">
 		<ID make="Canon" model="PowerShot G1 X">Canon PowerShot G1 X</ID>
@@ -2730,6 +2814,9 @@
 				<ColorMatrixRow plane="2">-47 1271 4955</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Canon" model="Canon PowerShot SX70 HS" supported="no">
+		<ID make="Canon" model="PowerShot SX70 HS">Canon PowerShot SX70 HS</ID>
 	</Camera>
 	<Camera make="GoPro" model="FUSION" mode="dng" supported="no-samples">
 		<ID make="GoPro" model="FUSION">GoPro FUSION</ID>
@@ -7209,8 +7296,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="OM Digital Solutions" model="OM-1MarkII" supported="unknown-no-samples">
+	<Camera make="OM Digital Solutions" model="OM-1MarkII">
 		<ID make="OM System" model="OM-1 Mark II">OM Digital Solutions OM-1 Mark II</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="254" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9090 -3591 -756</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3252 11396 2109</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-318 1059 5606</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="OM Digital Solutions" model="OM-5">
 		<ID make="OM System" model="OM-5">OM Digital Solutions OM-5</ID>
@@ -7295,7 +7397,19 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ28" mode="4:3">
 		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
-		<Crop x="0" y="0" width="3668" height="2754"/>
+		<Crop x="0" y="0" width="-62" height="0"/>
+		<Sensor black="15" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10109 -3488 -993</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-5412 12812 2916</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1305 2140 5543</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FZ28" mode="3:2">
+		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
+		<Crop x="0" y="0" width="-62" height="-2"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -7307,7 +7421,7 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ28" mode="16:9">
 		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
-		<Crop x="0" y="0" width="3668" height="2754"/>
+		<Crop x="0" y="0" width="-62" height="-4"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -7319,7 +7433,7 @@
 	</Camera>
 	<Camera make="Panasonic" model="DMC-FZ28">
 		<ID make="Panasonic" model="DMC-FZ28">Panasonic DMC-FZ28</ID>
-		<Crop x="0" y="0" width="-56" height="-4"/>
+		<Crop x="0" y="0" width="-62" height="0"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -10844,6 +10958,12 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S5M2" supported="no">
+		<ID make="Panasonic" model="DC-S5M2">Panasonic DC-S5M2</ID>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S5M2X" supported="no">
+		<ID make="Panasonic" model="DC-S5M2X">Panasonic DC-S5M2X</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DC-S1R">
 		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
 		<Crop x="0" y="0" width="-58" height="0"/>
@@ -11292,6 +11412,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-GH6" supported="no">
+		<ID make="Panasonic" model="DC-GH6">Panasonic DC-GH6</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
 		<ID make="Panasonic" model="DC-G9">Panasonic DC-G9</ID>
 		<Sensor black="148" white="4095"/>
@@ -11313,6 +11436,9 @@
 				<ColorMatrixRow plane="2">-748 1546 5111</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-G9M2" supported="no">
+		<ID make="Panasonic" model="DC-G9M2">Panasonic DC-G9M2</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DC-G95">
 		<ID make="Panasonic" model="DC-G95">Panasonic DC-G95</ID>
@@ -11520,6 +11646,7 @@
 		<Sensor black="142" white="4095"/>
 		<Aliases>
 			<Alias>DC-TZ95</Alias>
+			<Alias>DC-TZ95D</Alias>
 			<Alias>DC-ZS80</Alias>
 		</Aliases>
 		<ColorMatrices>
@@ -11536,6 +11663,7 @@
 		<Sensor black="142" white="4095"/>
 		<Aliases>
 			<Alias>DC-TZ95</Alias>
+			<Alias>DC-TZ95D</Alias>
 			<Alias>DC-ZS80</Alias>
 		</Aliases>
 		<ColorMatrices>
@@ -13999,8 +14127,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SONY" model="ILCE-9M3" supported="unknown-no-samples">
+	<Camera make="SONY" model="ILCE-9M3">
 		<ID make="Sony" model="ILCE-9M3">Sony ILCE-9M3</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9811 -3908 -752</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3704 11577 2417</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-73 950 5980</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="SONY" model="DSC-RX1">
 		<ID make="Sony" model="DSC-RX1">Sony DSC-RX1</ID>
@@ -15304,7 +15447,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-12"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15324,7 +15466,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-12"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15543,7 +15684,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15563,13 +15703,50 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">13426 -6334 -1177</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4244 12136 2371</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-580 1303 5980</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X100VI">
+		<ID make="Fujifilm" model="X100VI">Fujifilm X100VI</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Sensor black="1023" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11809 -5358 -1141</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4248 12164 2343</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-514 1097 5848</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X100VI" mode="compressed">
+		<ID make="Fujifilm" model="X100VI">Fujifilm X100VI</ID>
+		<CFA2 width="6" height="6">
+			<ColorRow y="0">GGRGGB</ColorRow>
+			<ColorRow y="1">GGBGGR</ColorRow>
+			<ColorRow y="2">BRGRBG</ColorRow>
+			<ColorRow y="3">GGBGGR</ColorRow>
+			<ColorRow y="4">GGRGGB</ColorRow>
+			<ColorRow y="5">RBGBRG</ColorRow>
+		</CFA2>
+		<Sensor black="1023" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11809 -5358 -1141</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4248 12164 2343</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-514 1097 5848</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -15623,7 +15800,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15643,7 +15819,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15663,7 +15838,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-78" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15683,7 +15857,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-78" height="-12"/>
 		<Sensor black="1024" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15945,7 +16118,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15965,7 +16137,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -15985,7 +16156,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16005,7 +16175,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16025,7 +16194,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-90" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16045,7 +16213,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-90" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16125,7 +16292,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="8" width="-134" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16145,7 +16311,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="8" width="-134" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16165,7 +16330,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="0"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16185,7 +16349,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="6" width="-132" height="0"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16205,7 +16368,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16225,7 +16387,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-120" height="-12"/>
 		<Sensor black="1020" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16305,7 +16466,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16325,7 +16485,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-132" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16345,7 +16504,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16365,7 +16523,6 @@
 			<ColorRow y="4">GGRGGB</ColorRow>
 			<ColorRow y="5">RBGBRG</ColorRow>
 		</CFA2>
-		<Crop x="0" y="12" width="-138" height="-6"/>
 		<Sensor black="1022" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -16885,6 +17042,24 @@
 		</CFA>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="15000"/>
+	</Camera>
+	<Camera make="Phase One A/S" model="P25+">
+		<ID make="Phase One" model="P25+">Phase One P25+</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">GREEN</Color>
+			<Color x="1" y="0">BLUE</Color>
+			<Color x="0" y="1">RED</Color>
+			<Color x="1" y="1">GREEN</Color>
+		</CFA>
+		<Crop x="34" y="24" width="-12" height="-12"/>
+		<Sensor black="0" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">2905 732 -237</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8135 16626 1476</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-3038 4253 7517</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Phase One A/S" model="P30">
 		<ID make="Phase One" model="P30">Phase One P30</ID>
@@ -17695,6 +17870,9 @@
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA SL2-S" mode="dng">
 		<ID make="Leica" model="SL2-S">LEICA SL2-S</ID>
+	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA SL3" mode="dng">
+		<ID make="Leica" model="SL3">LEICA SL3</ID>
 	</Camera>
 	<Camera make="LEICA CAMERA AG" model="LEICA CL" mode="dng">
 		<ID make="Leica" model="CL">LEICA CL</ID>

@@ -21,14 +21,18 @@
 
 #pragma once
 
-#include "adt/Bit.h"
+#include <bit>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
 
 namespace rawspeed {
 
-enum class Endianness { little = 0xDEAD, big = 0xBEEF, unknown = 0x0BAD };
+enum class Endianness : uint16_t {
+  little = 0xDEAD,
+  big = 0xBEEF,
+  unknown = 0x0BAD
+};
 
 inline Endianness getHostEndiannessRuntime() {
   uint16_t testvar = 0xfeff;
@@ -83,14 +87,14 @@ inline uint64_t getByteSwapped(uint64_t v) { return BSWAP64(v); }
 // the float/double versions use two memcpy which guarantee strict aliasing
 // and are compiled into the same assembly as the popular union trick.
 inline float getByteSwapped(float f) {
-  auto i = bit_cast<uint32_t>(f);
+  auto i = std::bit_cast<uint32_t>(f);
   i = getByteSwapped(i);
-  return bit_cast<float>(i);
+  return std::bit_cast<float>(i);
 }
 inline double getByteSwapped(double d) {
-  auto i = bit_cast<uint64_t>(d);
+  auto i = std::bit_cast<uint64_t>(d);
   i = getByteSwapped(i);
-  return bit_cast<double>(i);
+  return std::bit_cast<double>(i);
 }
 
 template <typename T> inline T getByteSwapped(const void* data, bool bswap) {

@@ -19,7 +19,7 @@
 */
 
 #include "rawspeedconfig.h" // IWYU pragma: keep
-#include "adt/Bit.h"
+#include <bit>
 
 #ifdef HAVE_ZLIB
 
@@ -39,6 +39,7 @@
 #include <array>
 #include <climits>
 #include <cstdint>
+#include <memory>
 #include <utility>
 #include <zconf.h>
 #include <zlib.h>
@@ -124,23 +125,24 @@ inline void decodeFPDeltaRow(Array1DRef<const unsigned char> src,
       __builtin_unreachable();
     }
 
-    out(col) = bit_cast<float>(tmp_expanded);
+    out(col) = std::bit_cast<float>(tmp_expanded);
   }
 }
 
 } // namespace
 
-void DeflateDecompressor::decode(
-    std::unique_ptr<unsigned char[]>* uBuffer, // NOLINT
-    iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
+// NOLINTNEXTLINE(modernize-avoid-c-arrays)
+void DeflateDecompressor::decode(std::unique_ptr<unsigned char[]>* uBuffer,
+                                 iPoint2D maxDim, iPoint2D dim, iPoint2D off) {
   int bytesps = bps / 8;
   invariant(bytesps >= 2 && bytesps <= 4);
 
   auto dstLen = implicit_cast<uLongf>(bytesps * maxDim.area());
 
-  if (!*uBuffer)
-    *uBuffer =
-        std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]); // NOLINT
+  if (!*uBuffer) {
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    *uBuffer = std::unique_ptr<unsigned char[]>(new unsigned char[dstLen]);
+  }
 
   Array2DRef<unsigned char> tmp(uBuffer->get(), bytesps * maxDim.x, maxDim.y);
 

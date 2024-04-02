@@ -46,7 +46,7 @@ namespace {
 
 /* Read JPEG image from a memory segment */
 
-void init_source(j_decompress_ptr cinfo) {
+void init_source(j_decompress_ptr /*cinfo*/) {
   // No action needed.
 }
 
@@ -71,7 +71,7 @@ void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
   }
 }
 
-void term_source(j_decompress_ptr cinfo) {
+void term_source(j_decompress_ptr /*cinfo*/) {
   // No action needed.
 }
 

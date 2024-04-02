@@ -26,7 +26,6 @@
 #include "MemorySanitizer.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
-#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/CroppedArray2DRef.h"
 #include "adt/Invariant.h"
@@ -44,6 +43,7 @@
 #include "metadata/ColorFilterArray.h"
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -70,7 +70,7 @@ struct int_pair final {
   int value2;
 };
 
-enum xt_lines {
+enum xt_lines : uint8_t {
   R0 = 0,
   R1,
   R2,
@@ -412,7 +412,7 @@ inline int fuji_compressed_block::fuji_zerobits(BitStreamerMSB& pump) {
     constexpr int batchSize = 32;
     pump.fill(batchSize);
     uint32_t batch = pump.peekBitsNoFill(batchSize);
-    int numZerosInThisBatch = countl_zero(batch);
+    int numZerosInThisBatch = std::countl_zero(batch);
     count += numZerosInThisBatch;
     bool allZeroes = numZerosInThisBatch == batchSize;
     int numBitsToSkip = numZerosInThisBatch;
@@ -433,8 +433,8 @@ int RAWSPEED_READNONE fuji_compressed_block::bitDiff(int value1, int value2) {
   invariant(value1 >= 0);
   invariant(value2 > 0);
 
-  int lz1 = countl_zero(static_cast<unsigned>(value1));
-  int lz2 = countl_zero(static_cast<unsigned>(value2));
+  int lz1 = std::countl_zero(static_cast<unsigned>(value1));
+  int lz2 = std::countl_zero(static_cast<unsigned>(value2));
   int decBits = std::max(lz2 - lz1, 0);
   if ((value2 << decBits) < value1)
     ++decBits;

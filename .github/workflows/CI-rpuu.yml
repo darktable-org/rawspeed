@@ -65,9 +65,9 @@ jobs:
         run: |
           set -xe
           rm -rf /var/lib/apt/lists/*
-          apt-get update
-          apt-get install eatmydata
-          eatmydata apt-get upgrade
+          apt update
+          apt install eatmydata
+          eatmydata apt upgrade
       - name: Install necessary packages
         timeout-minutes: 1
         env:
@@ -76,7 +76,7 @@ jobs:
           FLAVOR: ${{ inputs.flavor }}
         run: |
           set -xe
-          eatmydata apt-get install rsync zstd
+          eatmydata apt install rsync zstd
       - name: Fetch raw.pixls.us masterset digest
         timeout-minutes: 1
         env:

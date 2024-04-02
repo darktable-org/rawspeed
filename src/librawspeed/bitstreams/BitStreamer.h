@@ -32,6 +32,7 @@
 #include "io/IOException.h"
 #include <array>
 #include <climits>
+#include <cstddef>
 #include <cstdint>
 
 namespace rawspeed {
@@ -41,27 +42,17 @@ template <typename BIT_STREAM> struct BitStreamerTraits;
 template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
 
-  Array1DRef<const uint8_t> input;
+  Array1DRef<const std::byte> input;
   int pos = 0;
 
   void establishClassInvariants() const noexcept;
 
   BitStreamerReplenisherBase() = delete;
 
-  inline explicit BitStreamerReplenisherBase(Array1DRef<const uint8_t> input_)
+  explicit BitStreamerReplenisherBase(Array1DRef<const std::byte> input_)
       : input(input_) {
     if (input.size() < BitStreamerTraits<Tag>::MaxProcessBytes)
       ThrowIOE("Bit stream size is smaller than MaxProcessBytes");
-  }
-
-  // A temporary intermediate buffer that may be used by fill() method either
-  // in debug build to enforce lack of out-of-bounds reads, or when we are
-  // nearing the end of the input buffer and can not just read
-  // BitStreamerTraits<Tag>::MaxProcessBytes from it, but have to read as much
-  // as we can and fill rest with zeros.
-  std::array<uint8_t, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage = {};
-  inline Array1DRef<uint8_t> tmp() noexcept RAWSPEED_READONLY {
-    return {tmpStorage.data(), implicit_cast<int>(tmpStorage.size())};
   }
 };
 
@@ -83,47 +74,53 @@ struct BitStreamerForwardSequentialReplenisher final
 
   BitStreamerForwardSequentialReplenisher() = delete;
 
-  [[nodiscard]] inline typename Base::size_type getPos() const {
+  [[nodiscard]] typename Base::size_type getPos() const {
     Base::establishClassInvariants();
     return Base::pos;
   }
-  [[nodiscard]] inline typename Base::size_type getRemainingSize() const {
+  [[nodiscard]] typename Base::size_type getRemainingSize() const {
     Base::establishClassInvariants();
     return Base::input.size() - getPos();
   }
-  inline void markNumBytesAsConsumed(typename Base::size_type numBytes) {
+  void markNumBytesAsConsumed(typename Base::size_type numBytes) {
     Base::establishClassInvariants();
     invariant(numBytes >= 0);
     invariant(numBytes != 0);
     Base::pos += numBytes;
   }
 
-  inline Array1DRef<const uint8_t> getInput() {
+  std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> getInput() {
     Base::establishClassInvariants();
 
-#if !defined(DEBUG)
+    std::array<std::byte, BitStreamerTraits<Tag>::MaxProcessBytes> tmpStorage;
+    auto tmp = Array1DRef<std::byte>(tmpStorage.data(),
+                                     implicit_cast<int>(tmpStorage.size()));
+
     // Do we have BitStreamerTraits<Tag>::MaxProcessBytes or more bytes left in
     // the input buffer? If so, then we can just read from said buffer.
     if (getPos() + BitStreamerTraits<Tag>::MaxProcessBytes <=
-        Base::input.size()) {
-      return Base::input
-          .getCrop(getPos(), BitStreamerTraits<Tag>::MaxProcessBytes)
-          .getAsArray1DRef();
+        Base::input.size()) [[likely]] {
+      auto currInput =
+          Base::input.getCrop(getPos(), BitStreamerTraits<Tag>::MaxProcessBytes)
+              .getAsArray1DRef();
+      invariant(currInput.size() == tmp.size());
+      memcpy(tmp.begin(), currInput.begin(),
+             BitStreamerTraits<Tag>::MaxProcessBytes);
+      return tmpStorage;
     }
-#endif
 
     // We have to use intermediate buffer, either because the input is running
     // out of bytes, or because we want to enforce bounds checking.
 
     // Note that in order to keep all fill-level invariants we must allow to
     // over-read past-the-end a bit.
-    if (getPos() >
-        Base::input.size() + 2 * BitStreamerTraits<Tag>::MaxProcessBytes)
+    if (getPos() > Base::input.size() +
+                       2 * BitStreamerTraits<Tag>::MaxProcessBytes) [[unlikely]]
       ThrowIOE("Buffer overflow read in BitStreamer");
 
-    variableLengthLoadNaiveViaMemcpy(Base::tmp(), Base::input, getPos());
+    variableLengthLoadNaiveViaMemcpy(tmp, Base::input, getPos());
 
-    return Base::tmp();
+    return tmpStorage;
   }
 };
 
@@ -147,9 +144,13 @@ private:
   // this method can be re-implemented in the concrete BitStreamer template
   // specializations. It will return the number of bytes processed. It needs
   // to process up to BitStreamerTraits<Tag>::MaxProcessBytes bytes of input.
-  size_type fillCache(Array1DRef<const uint8_t> input) {
+  size_type
+  fillCache(std::array<std::byte, BitStreamerTraits<Derived>::MaxProcessBytes>
+                inputStorage) {
     static_assert(BitStreamCacheBase::MaxGetBits >= 32, "check implementation");
     establishClassInvariants();
+    auto input = Array1DRef<std::byte>(inputStorage.data(),
+                                       implicit_cast<int>(inputStorage.size()));
     invariant(input.size() == Traits::MaxProcessBytes);
 
     constexpr int StreamChunkBitwidth =
@@ -180,12 +181,11 @@ public:
 
   BitStreamer() = delete;
 
-  inline explicit BitStreamer(Array1DRef<const uint8_t> input)
-      : replenisher(input) {
+  explicit BitStreamer(Array1DRef<const std::byte> input) : replenisher(input) {
     establishClassInvariants();
   }
 
-  inline void fill(int nbits = Cache::MaxGetBits) {
+  void fill(int nbits = Cache::MaxGetBits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -200,28 +200,28 @@ public:
   }
 
   // these methods might be specialized by implementations that support it
-  [[nodiscard]] inline size_type RAWSPEED_READONLY getInputPosition() const {
+  [[nodiscard]] size_type RAWSPEED_READONLY getInputPosition() const {
     establishClassInvariants();
     return replenisher.getPos();
   }
 
   // these methods might be specialized by implementations that support it
-  [[nodiscard]] inline size_type getStreamPosition() const {
+  [[nodiscard]] size_type getStreamPosition() const {
     establishClassInvariants();
     return getInputPosition() - (cache.fillLevel >> 3);
   }
 
-  [[nodiscard]] inline size_type getRemainingSize() const {
+  [[nodiscard]] size_type getRemainingSize() const {
     establishClassInvariants();
     return replenisher.getRemainingSize();
   }
 
-  [[nodiscard]] inline size_type RAWSPEED_READONLY getFillLevel() const {
+  [[nodiscard]] size_type RAWSPEED_READONLY getFillLevel() const {
     establishClassInvariants();
     return cache.fillLevel;
   }
 
-  inline uint32_t RAWSPEED_READONLY peekBitsNoFill(int nbits) {
+  uint32_t RAWSPEED_READONLY peekBitsNoFill(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -229,7 +229,7 @@ public:
     return cache.peek(nbits);
   }
 
-  inline void skipBitsNoFill(int nbits) {
+  void skipBitsNoFill(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     // `nbits` could be zero.
@@ -237,7 +237,7 @@ public:
     cache.skip(nbits);
   }
 
-  inline uint32_t getBitsNoFill(int nbits) {
+  uint32_t getBitsNoFill(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -247,7 +247,7 @@ public:
     return ret;
   }
 
-  inline uint32_t peekBits(int nbits) {
+  uint32_t peekBits(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -256,13 +256,13 @@ public:
     return peekBitsNoFill(nbits);
   }
 
-  inline void skipBits(int nbits) {
+  void skipBits(int nbits) {
     establishClassInvariants();
     fill(nbits);
     skipBitsNoFill(nbits);
   }
 
-  inline uint32_t getBits(int nbits) {
+  uint32_t getBits(int nbits) {
     establishClassInvariants();
     invariant(nbits >= 0);
     invariant(nbits != 0);
@@ -273,7 +273,7 @@ public:
 
   // This may be used to skip arbitrarily large number of *bytes*,
   // not limited by the fill level.
-  inline void skipBytes(int nbytes) {
+  void skipBytes(int nbytes) {
     establishClassInvariants();
     int remainingBitsToSkip = 8 * nbytes;
     for (; remainingBitsToSkip >= Cache::MaxGetBits;
