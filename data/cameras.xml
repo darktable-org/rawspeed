@@ -14370,6 +14370,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SONY" model="ILX-LR1" supported="unknown-no-samples">
+		<ID make="Sony" model="ILX-LR1">Sony ILX-LR1</ID>
+	</Camera>
 	<Camera make="SONY" model="SLT-A99">
 		<ID make="Sony" model="SLT-A99">Sony SLT-A99</ID>
 		<CFA width="2" height="2">
