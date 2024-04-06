@@ -80,7 +80,7 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
       break;
 
     case MAKERNOTE:
-    case MAKERNOTE_ALT:
+    // case MAKERNOTE_ALT:
       add(parseMakerNote(ifds, t.get()));
       break;
 
@@ -194,6 +194,8 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
     setup(true, 16);
   } else if (bs.hasPrefix("EPSON")) {
     setup(false, 8);
+  } else if (bs.hasPrefix("Apple iOS")) {
+    setup(true, 14, 12, "Apple makernote");
   } else if (bs.hasPatternAt("Exif", 6)) {
     // TODO: for none of the rawsamples.ch files from Panasonic is this true,
     // instead their MakerNote start with "Panasonic" Panasonic has the word
