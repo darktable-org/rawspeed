@@ -42,6 +42,9 @@ template <typename BIT_STREAM> struct BitStreamerTraits;
 template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
 
+  using Traits = BitStreamerTraits<Tag>;
+  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+
   Array1DRef<const std::byte> input;
   int pos = 0;
 
@@ -62,6 +65,7 @@ BitStreamerReplenisherBase<Tag>::establishClassInvariants() const noexcept {
   input.establishClassInvariants();
   invariant(input.size() >= BitStreamerTraits<Tag>::MaxProcessBytes);
   invariant(pos >= 0);
+  invariant(pos % StreamTraits::MinLoadStepByteMultiple == 0);
   // `pos` *could* be out-of-bounds of `input`.
 }
 
@@ -69,6 +73,8 @@ template <typename Tag>
 struct BitStreamerForwardSequentialReplenisher final
     : public BitStreamerReplenisherBase<Tag> {
   using Base = BitStreamerReplenisherBase<Tag>;
+  using Traits = BitStreamerTraits<Tag>;
+  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
 
   using Base::BitStreamerReplenisherBase;
 
@@ -86,6 +92,7 @@ struct BitStreamerForwardSequentialReplenisher final
     Base::establishClassInvariants();
     invariant(numBytes >= 0);
     invariant(numBytes != 0);
+    invariant(numBytes % StreamTraits::MinLoadStepByteMultiple == 0);
     Base::pos += numBytes;
   }
 
