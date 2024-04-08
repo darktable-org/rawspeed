@@ -199,6 +199,54 @@ TEST_P(BitVacuumerMSB16Test, Dissolution) {
   }
 }
 
+TEST(BitVacuumerMSB16Test, LoadPos) {
+  std::vector<uint8_t> bitstream;
+
+  constexpr int numByteElts = 64;
+
+  {
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
+    using BitVacuumer = BitVacuumerMSB16<decltype(bsInserter)>;
+    auto bv = BitVacuumer(bsInserter);
+
+    for (int e = 0; e != numByteElts; ++e)
+      bv.put(e, 8);
+  }
+
+  auto fullInput =
+      Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
+
+  using BitStreamer = BitStreamerMSB16;
+  using BitStreamerTraits = BitStreamer::Traits;
+  using BitStreamTraits = BitStreamer::StreamTraits;
+
+  for (int fillLevel : {8, 32}) {
+    for (int baseLoadPosStep = 1;
+         baseLoadPosStep <= 2 * BitStreamTraits::MinLoadStepByteMultiple;
+         ++baseLoadPosStep) {
+      for (int baseLoadPos = 0;
+           baseLoadPos <= numByteElts - BitStreamerTraits::MaxProcessBytes;
+           baseLoadPos += baseLoadPosStep) {
+        auto input =
+            fullInput.getCrop(baseLoadPos, fullInput.size() - baseLoadPos)
+                .getAsArray1DRef();
+        auto bs = BitStreamer(input);
+        for (int i = 0; i != input.size(); ++i) {
+          const auto expectedVal = baseLoadPos + i;
+          bs.fill(fillLevel);
+          const auto actualVal = bs.getBitsNoFill(8);
+          if (baseLoadPosStep % BitStreamTraits::MinLoadStepByteMultiple == 0 ||
+              baseLoadPos % BitStreamTraits::MinLoadStepByteMultiple == 0) {
+            ASSERT_THAT(actualVal, expectedVal);
+          } else {
+            ASSERT_NE(actualVal, expectedVal);
+          }
+        }
+      }
+    }
+  }
+}
+
 } // namespace
 
 } // namespace rawspeed

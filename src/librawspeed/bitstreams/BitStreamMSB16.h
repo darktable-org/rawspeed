@@ -38,6 +38,8 @@ template <> struct BitStreamTraits<BitStreamMSB16> final {
   using ChunkType = uint16_t;
 
   static constexpr Endianness ChunkEndianness = Endianness::little;
+
+  static constexpr int MinLoadStepByteMultiple = 2;
 };
 
 } // namespace rawspeed
