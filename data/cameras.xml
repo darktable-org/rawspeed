@@ -7371,9 +7371,9 @@
 	<Camera make="Panasonic" model="DMC-CM10" supported="unknown-no-samples">
 		<ID make="Panasonic" model="DMC-CM10">Panasonic DMC-CM10</ID>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-FX150" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-FX150">
 		<ID make="Panasonic" model="DMC-FX150">Panasonic DMC-FX150</ID>
-		<Crop x="0" y="0" width="4429" height="3324"/>
+		<Crop x="0" y="0" width="-80" height="-6"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -7383,9 +7383,33 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DMC-FX150" mode="4:3" supported="no-samples">
+	<Camera make="Panasonic" model="DMC-FX150" mode="4:3">
 		<ID make="Panasonic" model="DMC-FX150">Panasonic DMC-FX150</ID>
-		<Crop x="0" y="0" width="4429" height="3324"/>
+		<Crop x="0" y="0" width="-80" height="-6"/>
+		<Sensor black="15" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9082 -2907 -925</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-6119 13377 3058</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1797 2641 5609</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FX150" mode="3:2">
+		<ID make="Panasonic" model="DMC-FX150">Panasonic DMC-FX150</ID>
+		<Crop x="0" y="0" width="-80" height="-6"/>
+		<Sensor black="15" white="3986"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9082 -2907 -925</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-6119 13377 3058</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1797 2641 5609</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DMC-FX150" mode="16:9">
+		<ID make="Panasonic" model="DMC-FX150">Panasonic DMC-FX150</ID>
+		<Crop x="0" y="0" width="-80" height="-4"/>
 		<Sensor black="15" white="3986"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
