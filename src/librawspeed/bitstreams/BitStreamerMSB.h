@@ -29,7 +29,7 @@ namespace rawspeed {
 class BitStreamerMSB;
 
 template <> struct BitStreamerTraits<BitStreamerMSB> final {
-  using Stream = BitStreamMSB;
+  static constexpr BitOrder Tag = BitOrder::MSB;
 
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 

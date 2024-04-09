@@ -28,9 +28,9 @@
 
 namespace rawspeed {
 
-class BitStreamJPEG;
+template <> struct BitStreamTraits<BitOrder::JPEG> final {
+  static constexpr BitOrder Tag = BitOrder::JPEG;
 
-template <> struct BitStreamTraits<BitStreamJPEG> final {
   using StreamFlow = BitStreamCacheRightInLeftOut;
 
   static constexpr bool FixedSizeChunks = false; // Stuffing byte...

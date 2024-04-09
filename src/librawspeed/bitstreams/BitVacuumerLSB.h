@@ -29,7 +29,7 @@ template <typename OutputIterator> class BitVacuumerLSB;
 
 template <typename OutputIterator>
 struct BitVacuumerTraits<BitVacuumerLSB<OutputIterator>> final {
-  using Stream = BitStreamLSB;
+  static constexpr BitOrder Tag = BitOrder::LSB;
 };
 
 template <typename OutputIterator>

@@ -68,7 +68,7 @@ public:
 class BitStreamerJPEG;
 
 template <> struct BitStreamerTraits<BitStreamerJPEG> final {
-  using Stream = BitStreamJPEG;
+  static constexpr BitOrder Tag = BitOrder::JPEG;
 
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 

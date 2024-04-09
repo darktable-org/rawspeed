@@ -43,7 +43,7 @@ template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
 
   using Traits = BitStreamerTraits<Tag>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   Array1DRef<const std::byte> input;
   int pos = 0;
@@ -74,7 +74,7 @@ struct BitStreamerForwardSequentialReplenisher final
     : public BitStreamerReplenisherBase<Tag> {
   using Base = BitStreamerReplenisherBase<Tag>;
   using Traits = BitStreamerTraits<Tag>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Base::BitStreamerReplenisherBase;
 
@@ -138,7 +138,7 @@ class BitStreamer {
 public:
   using size_type = int32_t;
   using Traits = BitStreamerTraits<Derived>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Cache = typename StreamTraits::StreamFlow;
 

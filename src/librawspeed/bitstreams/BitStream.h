@@ -25,11 +25,12 @@
 #include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
+#include "bitstreams/BitStreams.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-template <typename BIT_STREAM> struct BitStreamTraits;
+template <BitOrder bo> struct BitStreamTraits;
 
 // simple 64-bit wide cache implementation that acts like a FiFo.
 // There are two variants:
