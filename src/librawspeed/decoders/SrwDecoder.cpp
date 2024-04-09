@@ -21,7 +21,7 @@
 
 #include "decoders/SrwDecoder.h"
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/SamsungV0Decompressor.h"
 #include "decompressors/SamsungV1Decompressor.h"

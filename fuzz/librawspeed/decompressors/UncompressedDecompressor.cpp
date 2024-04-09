@@ -22,7 +22,7 @@
 #include "MemorySanitizer.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
 #include "fuzz/Common.h"

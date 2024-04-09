@@ -22,7 +22,7 @@
 #pragma once
 
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "io/Buffer.h"
 #include "metadata/Camera.h"

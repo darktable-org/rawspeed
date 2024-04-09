@@ -2,7 +2,7 @@
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
-    Copyright (C) 2014 Pedro Côrte-Real
+    Copyright (C) 2024 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,37 +21,16 @@
 
 #pragma once
 
-#include "bitstreams/BitStreams.h"
-#include "common/RawImage.h"
-#include "decoders/RawDecoder.h"
 #include <cstdint>
 
 namespace rawspeed {
 
-class Buffer;
-class Camera;
-class CameraMetaData;
-
-class NakedDecoder final : public RawDecoder {
-  const Camera* cam;
-
-  uint32_t width{0};
-  uint32_t height{0};
-  uint32_t filesize{0};
-  uint32_t bits{0};
-  uint32_t offset{0};
-  BitOrder bo{BitOrder::MSB16};
-
-  void parseHints();
-
-public:
-  NakedDecoder(Buffer file, const Camera* c);
-  RawImage decodeRawInternal() override;
-  void checkSupportInternal(const CameraMetaData* meta) override;
-  void decodeMetaDataInternal(const CameraMetaData* meta) override;
-
-private:
-  [[nodiscard]] int getDecoderVersion() const override { return 0; }
+enum class BitOrder : uint8_t {
+  LSB,   /* Memory order */
+  MSB,   /* Input is added to stack byte by byte, and output is lifted
+              from top */
+  MSB16, /* Same as above, but 16 bits at the time */
+  MSB32, /* Same as above, but 32 bits at the time */
 };
 
 } // namespace rawspeed

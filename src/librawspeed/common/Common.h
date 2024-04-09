@@ -199,12 +199,4 @@ inline std::array<T, N> to_array(const std::vector<T>& v) {
   return a;
 }
 
-enum class BitOrder : uint8_t {
-  LSB,   /* Memory order */
-  MSB,   /* Input is added to stack byte by byte, and output is lifted
-                     from top */
-  MSB16, /* Same as above, but 16 bits at the time */
-  MSB32, /* Same as above, but 32 bits at the time */
-};
-
 } // namespace rawspeed

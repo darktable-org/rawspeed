@@ -26,6 +26,7 @@
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "bitstreams/BitStreamerMSB.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"

@@ -22,7 +22,7 @@
 #include "decoders/NakedDecoder.h"
 #include "adt/Optional.h"
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
 #include "decoders/RawDecoderException.h"

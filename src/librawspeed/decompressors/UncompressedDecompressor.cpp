@@ -29,6 +29,7 @@
 #include "bitstreams/BitStreamerMSB.h"
 #include "bitstreams/BitStreamerMSB16.h"
 #include "bitstreams/BitStreamerMSB32.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/FloatingPoint.h"
 #include "common/RawImage.h"

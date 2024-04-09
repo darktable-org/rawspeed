@@ -15,6 +15,7 @@ FILE(GLOB SOURCES
   "BitStreamerMSB.h"
   "BitStreamerMSB16.h"
   "BitStreamerMSB32.h"
+  "BitStreams.h"
   "BitVacuumer.h"
   "BitVacuumerJPEG.h"
   "BitVacuumerLSB.h"
