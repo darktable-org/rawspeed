@@ -31,6 +31,7 @@ enum class BitOrder : uint8_t {
               from top */
   MSB16, /* Same as above, but 16 bits at the time */
   MSB32, /* Same as above, but 32 bits at the time */
+  JPEG,  /* Same as MSB, but 0xFF byte is followed by an 0x00 stuffing byte */
 };
 
 } // namespace rawspeed
