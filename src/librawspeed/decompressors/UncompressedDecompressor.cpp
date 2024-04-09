@@ -116,6 +116,16 @@ UncompressedDecompressor::UncompressedDecompressor(
   if (inputPitchBytes < 1)
     ThrowRDE("Input pitch is non-positive");
 
+  switch (order) {
+  case BitOrder::LSB:
+  case BitOrder::MSB:
+  case BitOrder::MSB16:
+  case BitOrder::MSB32:
+    break;
+  case BitOrder::JPEG:
+    ThrowRDE("JPEG bit order not supported.");
+  }
+
   uint32_t w = size.x;
   uint32_t h = size.y;
   uint32_t cpp = mRaw->getCpp();
