@@ -278,11 +278,11 @@ public:
     return getBitsNoFill(nbits);
   }
 
-  // This may be used to skip arbitrarily large number of *bytes*,
+  // This may be used to skip arbitrarily large number of *bits*,
   // not limited by the fill level.
-  void skipBytes(int nbytes) {
+  void skipManyBits(int nbits) {
     establishClassInvariants();
-    int remainingBitsToSkip = 8 * nbytes;
+    int remainingBitsToSkip = nbits;
     for (; remainingBitsToSkip >= Cache::MaxGetBits;
          remainingBitsToSkip -= Cache::MaxGetBits) {
       fill(Cache::MaxGetBits);
@@ -292,6 +292,14 @@ public:
       fill(remainingBitsToSkip);
       skipBitsNoFill(remainingBitsToSkip);
     }
+  }
+
+  // This may be used to skip arbitrarily large number of *bytes*,
+  // not limited by the fill level.
+  void skipBytes(int nbytes) {
+    establishClassInvariants();
+    int nbits = 8 * nbytes;
+    skipManyBits(nbits);
   }
 };
 
