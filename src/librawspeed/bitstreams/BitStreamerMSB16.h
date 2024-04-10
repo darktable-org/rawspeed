@@ -29,7 +29,7 @@ namespace rawspeed {
 class BitStreamerMSB16;
 
 template <> struct BitStreamerTraits<BitStreamerMSB16> final {
-  using Stream = BitStreamMSB16;
+  static constexpr BitOrder Tag = BitOrder::MSB16;
 
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;

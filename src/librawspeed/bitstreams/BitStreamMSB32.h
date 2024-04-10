@@ -28,9 +28,9 @@
 
 namespace rawspeed {
 
-class BitStreamMSB32;
+template <> struct BitStreamTraits<BitOrder::MSB32> final {
+  static constexpr BitOrder Tag = BitOrder::MSB32;
 
-template <> struct BitStreamTraits<BitStreamMSB32> final {
   using StreamFlow = BitStreamCacheRightInLeftOut;
 
   static constexpr bool FixedSizeChunks = true;

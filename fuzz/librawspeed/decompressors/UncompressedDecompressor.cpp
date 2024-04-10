@@ -22,7 +22,7 @@
 #include "MemorySanitizer.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
 #include "fuzz/Common.h"
@@ -54,6 +54,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       case static_cast<int>(rawspeed::BitOrder::MSB):
       case static_cast<int>(rawspeed::BitOrder::MSB16):
       case static_cast<int>(rawspeed::BitOrder::MSB32):
+      case static_cast<int>(rawspeed::BitOrder::JPEG):
         return rawspeed::BitOrder(val);
       default:
         ThrowRSE("Unknown bit order: %u", val);

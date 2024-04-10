@@ -26,6 +26,7 @@
 #include "adt/Invariant.h"
 #include "adt/NORangesSet.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"

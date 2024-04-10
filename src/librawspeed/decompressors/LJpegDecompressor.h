@@ -22,6 +22,7 @@
 #pragma once
 
 #include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
 #include "adt/Point.h"
 #include "bitstreams/BitStreamerJPEG.h"
 #include "codes/PrefixCodeDecoder.h"

@@ -43,7 +43,7 @@ template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
 
   using Traits = BitStreamerTraits<Tag>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   Array1DRef<const std::byte> input;
   int pos = 0;
@@ -74,7 +74,7 @@ struct BitStreamerForwardSequentialReplenisher final
     : public BitStreamerReplenisherBase<Tag> {
   using Base = BitStreamerReplenisherBase<Tag>;
   using Traits = BitStreamerTraits<Tag>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Base::BitStreamerReplenisherBase;
 
@@ -138,7 +138,7 @@ class BitStreamer {
 public:
   using size_type = int32_t;
   using Traits = BitStreamerTraits<Derived>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Cache = typename StreamTraits::StreamFlow;
 
@@ -278,11 +278,11 @@ public:
     return getBitsNoFill(nbits);
   }
 
-  // This may be used to skip arbitrarily large number of *bytes*,
+  // This may be used to skip arbitrarily large number of *bits*,
   // not limited by the fill level.
-  void skipBytes(int nbytes) {
+  void skipManyBits(int nbits) {
     establishClassInvariants();
-    int remainingBitsToSkip = 8 * nbytes;
+    int remainingBitsToSkip = nbits;
     for (; remainingBitsToSkip >= Cache::MaxGetBits;
          remainingBitsToSkip -= Cache::MaxGetBits) {
       fill(Cache::MaxGetBits);
@@ -292,6 +292,14 @@ public:
       fill(remainingBitsToSkip);
       skipBitsNoFill(remainingBitsToSkip);
     }
+  }
+
+  // This may be used to skip arbitrarily large number of *bytes*,
+  // not limited by the fill level.
+  void skipBytes(int nbytes) {
+    establishClassInvariants();
+    int nbits = 8 * nbytes;
+    skipManyBits(nbits);
   }
 };
 

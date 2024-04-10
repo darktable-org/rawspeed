@@ -29,7 +29,7 @@ namespace rawspeed {
 class BitStreamerLSB;
 
 template <> struct BitStreamerTraits<BitStreamerLSB> final {
-  using Stream = BitStreamLSB;
+  static constexpr BitOrder Tag = BitOrder::LSB;
 
   // How many bytes can we read from the input per each fillCache(), at most?
   static constexpr int MaxProcessBytes = 4;

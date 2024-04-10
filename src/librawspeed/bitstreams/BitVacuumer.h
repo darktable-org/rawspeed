@@ -37,7 +37,7 @@ template <typename Derived_, typename OutputIterator_>
 class BitVacuumer {
 public:
   using Traits = BitVacuumerTraits<Derived_>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Cache = typename StreamTraits::StreamFlow;
 

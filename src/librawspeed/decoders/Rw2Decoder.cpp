@@ -23,6 +23,7 @@
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"

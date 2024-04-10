@@ -1,6 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
+    Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2024 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
@@ -20,25 +21,17 @@
 
 #pragma once
 
-#include "bitstreams/BitStreamLSB.h"
-#include "bitstreams/BitVacuumer.h"
+#include <cstdint>
 
 namespace rawspeed {
 
-template <typename OutputIterator> class BitVacuumerLSB;
-
-template <typename OutputIterator>
-struct BitVacuumerTraits<BitVacuumerLSB<OutputIterator>> final {
-  static constexpr BitOrder Tag = BitOrder::LSB;
-};
-
-template <typename OutputIterator>
-class BitVacuumerLSB final
-    : public BitVacuumer<BitVacuumerLSB<OutputIterator>, OutputIterator> {
-  using Base = BitVacuumer<BitVacuumerLSB<OutputIterator>, OutputIterator>;
-
-public:
-  using Base::Base;
+enum class BitOrder : uint8_t {
+  LSB,   /* Memory order */
+  MSB,   /* Input is added to stack byte by byte, and output is lifted
+              from top */
+  MSB16, /* Same as above, but 16 bits at the time */
+  MSB32, /* Same as above, but 32 bits at the time */
+  JPEG,  /* Same as MSB, but 0xFF byte is followed by an 0x00 stuffing byte */
 };
 
 } // namespace rawspeed

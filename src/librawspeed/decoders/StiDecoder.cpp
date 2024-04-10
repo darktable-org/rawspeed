@@ -20,7 +20,7 @@
 
 #include "decoders/StiDecoder.h"
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/HasselbladLJpegDecoder.h"

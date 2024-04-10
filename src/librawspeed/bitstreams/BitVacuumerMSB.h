@@ -29,7 +29,7 @@ template <typename OutputIterator> class BitVacuumerMSB;
 
 template <typename OutputIterator>
 struct BitVacuumerTraits<BitVacuumerMSB<OutputIterator>> final {
-  using Stream = BitStreamMSB;
+  static constexpr BitOrder Tag = BitOrder::MSB;
 
   static constexpr bool canUseWithPrefixCodeEncoder = true;
 };

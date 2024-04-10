@@ -25,6 +25,7 @@
 #include "adt/Array2DRef.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decompressors/UncompressedDecompressor.h"

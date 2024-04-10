@@ -23,7 +23,7 @@
 #pragma once
 
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "decompressors/AbstractDecompressor.h"
 #include "io/ByteStream.h"
