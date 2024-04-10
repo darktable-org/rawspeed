@@ -8,6 +8,7 @@ FILE(GLOB SOURCES
   "BitStreamMSB.h"
   "BitStreamMSB16.h"
   "BitStreamMSB32.h"
+  "BitStreamPosition.h"
   "BitStreamer.cpp"
   "BitStreamer.h"
   "BitStreamerJPEG.h"
