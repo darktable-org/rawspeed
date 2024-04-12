@@ -136,6 +136,12 @@ constexpr uint64_t RAWSPEED_READNONE roundUp(uint64_t value,
   return roundToMultiple(value, multiple, /*roundDown=*/false);
 }
 
+constexpr uint64_t RAWSPEED_READNONE roundUpDivision(uint64_t value,
+                                                     uint64_t div) {
+  invariant(div != 0);
+  return roundUp(value, div) / div;
+}
+
 constexpr uint64_t RAWSPEED_READNONE roundUpDivisionSafe(uint64_t value,
                                                          uint64_t div) {
   return (value != 0) ? (1 + ((value - 1) / div)) : 0;

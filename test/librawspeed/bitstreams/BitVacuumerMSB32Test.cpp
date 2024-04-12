@@ -313,7 +313,7 @@ TEST(BitVacuumerMSB32Test, DependencyBreaking) {
     }
 
     for (int i = 0; i != numBytesRemaining; ++i) {
-      const auto expectedVal = roundUpDivisionSafe(numBitsToSkip, CHAR_BIT) + i;
+      const auto expectedVal = roundUpDivision(numBitsToSkip, CHAR_BIT) + i;
       ASSERT_THAT(bsRef.getBits(8), expectedVal);
       ASSERT_THAT(bsRebased.getBits(8), expectedVal);
     }
@@ -368,7 +368,7 @@ TEST(BitVacuumerMSB32Test, ReloadCache) {
     }
 
     for (int i = 0; i != numBytesRemaining; ++i) {
-      const auto expectedVal = roundUpDivisionSafe(numBitsToSkip, CHAR_BIT) + i;
+      const auto expectedVal = roundUpDivision(numBitsToSkip, CHAR_BIT) + i;
       ASSERT_THAT(bsRef.getBits(8), expectedVal);
     }
   }
