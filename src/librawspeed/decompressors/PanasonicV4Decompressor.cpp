@@ -91,7 +91,8 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
   };
 
   // If section_split_offset == 0, last block may not be full.
-  const auto blocksTotal = roundUpDivision(input.getRemainSize(), BlockSize);
+  const auto blocksTotal =
+      roundUpDivisionSafe(input.getRemainSize(), BlockSize);
   invariant(blocksTotal > 0);
   invariant(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
   assert(blocksTotal <= std::numeric_limits<uint32_t>::max());

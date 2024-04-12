@@ -93,7 +93,7 @@ __attribute__((noinline)) __attribute__((visibility("default")))
 JPEGStuffedByteStreamGenerator::JPEGStuffedByteStreamGenerator(
     const int64_t numBytesMax, bool AppendStuffingByte) {
   invariant(numBytesMax > 0);
-  const auto expectedOverhead = roundUpDivision(numBytesMax, 100); // <=1%
+  const auto expectedOverhead = roundUpDivisionSafe(numBytesMax, 100); // <=1%
   dataStorage.reserve(implicit_cast<size_t>(numBytesMax + expectedOverhead));
 
   // Here we only need to differentiate between a normal byte,

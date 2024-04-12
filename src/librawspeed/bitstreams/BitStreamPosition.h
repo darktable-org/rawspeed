@@ -49,7 +49,7 @@ ByteStreamPosition<bo> getAsByteStreamPosition(BitStreamPosition<bo> state) {
   invariant(state.fillLevel >= 0);
 
   auto numBytesRemainingInCache =
-      implicit_cast<int>(roundUpDivision(state.fillLevel, CHAR_BIT));
+      implicit_cast<int>(roundUpDivisionSafe(state.fillLevel, CHAR_BIT));
   invariant(numBytesRemainingInCache >= 0);
   invariant(numBytesRemainingInCache <= state.pos);
 

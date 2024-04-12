@@ -55,8 +55,8 @@ struct DngTilingDescription final {
 
   DngTilingDescription(const iPoint2D& dim_, uint32_t tileW_, uint32_t tileH_)
       : dim(dim_), tileW(tileW_), tileH(tileH_),
-        tilesX(implicit_cast<uint32_t>(roundUpDivision(dim.x, tileW))),
-        tilesY(implicit_cast<uint32_t>(roundUpDivision(dim.y, tileH))),
+        tilesX(implicit_cast<uint32_t>(roundUpDivisionSafe(dim.x, tileW))),
+        tilesY(implicit_cast<uint32_t>(roundUpDivisionSafe(dim.y, tileH))),
         numTiles(tilesX * tilesY) {
     invariant(dim.area() > 0);
     invariant(tileW > 0);

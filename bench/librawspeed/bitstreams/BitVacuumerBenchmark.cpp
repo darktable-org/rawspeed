@@ -103,7 +103,7 @@ struct BitVectorLengthsGenerator final {
     std::random_device rd;
     std::mt19937_64 gen(rd());
 
-    for (int64_t numBits = 0; implicit_cast<int64_t>(roundUpDivision(
+    for (int64_t numBits = 0; implicit_cast<int64_t>(roundUpDivisionSafe(
                                   numBits, CHAR_BIT)) < maxBytes;) {
       int len = dist(gen);
       numBitsToProduce += len;
@@ -148,7 +148,7 @@ template <typename T, typename C> void BM(benchmark::State& state) {
               DefaultInitAllocatorAdaptor<OutputChunkType,
                                           std::allocator<OutputChunkType>>>
       output;
-  output.reserve(implicit_cast<size_t>(roundUpDivision(
+  output.reserve(implicit_cast<size_t>(roundUpDivisionSafe(
       gen.numBitsToProduce, CHAR_BIT * sizeof(OutputChunkType))));
 
   for (auto _ : state) {

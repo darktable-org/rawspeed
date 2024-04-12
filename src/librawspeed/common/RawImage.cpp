@@ -201,8 +201,8 @@ void RawImageData::subFrame(iRectangle2D crop) {
 void RawImageData::createBadPixelMap() {
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
-  mBadPixelMapPitch =
-      implicit_cast<uint32_t>(roundUp(roundUpDivision(uncropped_dim.x, 8), 16));
+  mBadPixelMapPitch = implicit_cast<uint32_t>(
+      roundUp(roundUpDivisionSafe(uncropped_dim.x, 8), 16));
   assert(mBadPixelMap.empty());
   mBadPixelMap.resize(static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y,
                       uint8_t(0));

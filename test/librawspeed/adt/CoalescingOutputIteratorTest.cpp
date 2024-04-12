@@ -67,7 +67,7 @@ template <typename CoalescedType, typename PartType>
 auto coalesceElts(Array1DRef<const PartType> input) {
   std::vector<CoalescedType> outputStorage;
   {
-    outputStorage.reserve(implicit_cast<size_t>(roundUpDivision(
+    outputStorage.reserve(implicit_cast<size_t>(roundUpDivisionSafe(
         sizeof(PartType) * input.size(), sizeof(CoalescedType))));
     auto subIter = std::back_inserter(outputStorage);
     auto iter = CoalescingOutputIterator<decltype(subIter), PartType>(subIter);

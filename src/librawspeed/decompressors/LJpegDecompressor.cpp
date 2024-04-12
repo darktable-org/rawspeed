@@ -135,8 +135,8 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       static_cast<int>(mRaw->getCpp()) * imgFrame.dim.x;
 
   // How many full pixel MCUs do we need to consume for that?
-  if (const auto mcusToConsume =
-          implicit_cast<int>(roundUpDivision(tileRequiredWidth, frame.mcu.x));
+  if (const auto mcusToConsume = implicit_cast<int>(
+          roundUpDivisionSafe(tileRequiredWidth, frame.mcu.x));
       frame.dim.x < mcusToConsume ||
       frame.mcu.y * frame.dim.y < imgFrame.dim.y ||
       frame.mcu.x * frame.dim.x < tileRequiredWidth) {
@@ -274,7 +274,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
   // the raw image buffer. The excessive content has to be ignored.
 
   invariant(imgFrame.dim.y % frame.mcu.y == 0);
-  const auto numRestartIntervals = implicit_cast<int>(roundUpDivision(
+  const auto numRestartIntervals = implicit_cast<int>(roundUpDivisionSafe(
       imgFrame.dim.y / frame.mcu.y, numLJpegRowsPerRestartInterval));
   invariant(numRestartIntervals >= 0);
   invariant(numRestartIntervals != 0);
