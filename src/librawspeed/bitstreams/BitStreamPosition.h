@@ -67,6 +67,8 @@ ByteStreamPosition<bo> getAsByteStreamPosition(BitStreamPosition<bo> state) {
   res.bytePos = state.pos - numBytesToBacktrack;
   invariant(numBitsToBacktrack >= state.fillLevel);
   res.numBitsToSkip = numBitsToBacktrack - state.fillLevel;
+  invariant(res.numBitsToSkip >= 0);
+  invariant(res.numBitsToSkip < CHAR_BIT * MinByteStepMultiple);
 
   invariant(res.bytePos >= 0);
   invariant(res.bytePos <= state.pos);
