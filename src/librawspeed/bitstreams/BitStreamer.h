@@ -204,6 +204,7 @@ public:
     const auto input = replenisher.getInput();
     const auto numBytes = static_cast<Derived*>(this)->fillCache(input);
     replenisher.markNumBytesAsConsumed(numBytes);
+    invariant(cache.fillLevel >= nbits);
   }
 
   // these methods might be specialized by implementations that support it
