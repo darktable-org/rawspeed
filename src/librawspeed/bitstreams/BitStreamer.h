@@ -28,6 +28,7 @@
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamPosition.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
 #include <array>
@@ -190,6 +191,22 @@ public:
 
   explicit BitStreamer(Array1DRef<const std::byte> input) : replenisher(input) {
     establishClassInvariants();
+  }
+
+  void reload() {
+    establishClassInvariants();
+
+    BitStreamPosition<Traits::Tag> state;
+    state.pos = getInputPosition();
+    state.fillLevel = getFillLevel();
+    const auto bsPos = getAsByteStreamPosition(state);
+
+    auto replacement = BitStreamer(replenisher.input);
+    if (bsPos.bytePos != 0)
+      replacement.replenisher.markNumBytesAsConsumed(bsPos.bytePos);
+    if (bsPos.numBitsToSkip != 0)
+      replacement.skipBits(bsPos.numBitsToSkip);
+    *this = std::move(replacement);
   }
 
   void fill(int nbits = Cache::MaxGetBits) {

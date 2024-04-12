@@ -320,6 +320,60 @@ TEST(BitVacuumerMSB32Test, DependencyBreaking) {
   }
 }
 
+TEST(BitVacuumerMSB32Test, ReloadCache) {
+  std::vector<uint8_t> bitstream;
+
+  using BitStreamer = BitStreamerMSB32;
+  using BitStreamerTraits = BitStreamer::Traits;
+
+  constexpr int numByteElts = 256;
+
+  {
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
+    using BitVacuumer = BitVacuumerMSB32<decltype(bsInserter)>;
+    auto bv = BitVacuumer(bsInserter);
+
+    for (int e = 0; e != numByteElts + BitStreamerTraits::MaxProcessBytes; ++e)
+      bv.put(e, 8);
+  }
+  constexpr int numBitsTotal = CHAR_BIT * numByteElts;
+
+  auto fullInput =
+      Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
+
+  for (int numBitsToSkip = 0; numBitsToSkip <= numBitsTotal; ++numBitsToSkip) {
+    auto bsRef = BitStreamer(fullInput);
+    bsRef.fill();
+
+    for (int i = 0; i != numBitsToSkip / 8; ++i) {
+      const auto expectedVal = i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+    }
+    if ((numBitsToSkip % 8) != 0) {
+      const auto expectedVal = extractHighBits<unsigned>(
+          numBitsToSkip / CHAR_BIT, numBitsToSkip % 8, CHAR_BIT);
+      ASSERT_THAT(bsRef.getBits(numBitsToSkip % 8), expectedVal);
+    }
+
+    bsRef.reload();
+
+    const int numBitsRemaining = numBitsTotal - numBitsToSkip;
+
+    int numSubByteBitsRemaining = numBitsRemaining % CHAR_BIT;
+    int numBytesRemaining = numBitsRemaining / CHAR_BIT;
+    if (numSubByteBitsRemaining != 0) {
+      const auto expectedVal = extractLowBits<unsigned>(
+          numBitsToSkip / CHAR_BIT, numSubByteBitsRemaining);
+      ASSERT_THAT(bsRef.getBits(numSubByteBitsRemaining), expectedVal);
+    }
+
+    for (int i = 0; i != numBytesRemaining; ++i) {
+      const auto expectedVal = roundUpDivision(numBitsToSkip, CHAR_BIT) + i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+    }
+  }
+}
+
 } // namespace
 
 } // namespace rawspeed
