@@ -276,10 +276,20 @@ TEST(BitVacuumerLSBTest, DependencyBreaking) {
       Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
 
   for (int numBitsToSkip = 0; numBitsToSkip <= numBitsTotal; ++numBitsToSkip) {
-    const int numBitsRemaining = numBitsTotal - numBitsToSkip;
     auto bsRef = BitStreamer(fullInput);
     bsRef.fill();
-    bsRef.skipManyBits(numBitsToSkip);
+
+    for (int i = 0; i != numBitsToSkip / 8; ++i) {
+      const auto expectedVal = i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+    }
+    if ((numBitsToSkip % 8) != 0) {
+      const auto expectedVal =
+          extractLowBits<unsigned>(numBitsToSkip / CHAR_BIT, numBitsToSkip % 8);
+      ASSERT_THAT(bsRef.getBits(numBitsToSkip % 8), expectedVal);
+    }
+
+    const int numBitsRemaining = numBitsTotal - numBitsToSkip;
 
     BitStreamPosition<BitStreamerTraits::Tag> state;
     state.pos = bsRef.getInputPosition();
