@@ -204,8 +204,12 @@ public:
     auto replacement = BitStreamer(replenisher.input);
     if (bsPos.bytePos != 0)
       replacement.replenisher.markNumBytesAsConsumed(bsPos.bytePos);
-    replacement.fill();
+    replacement.fill(Cache::MaxGetBits);
     replacement.skipBitsNoFill(bsPos.numBitsToSkip);
+    invariant(
+        replacement.getFillLevel() >
+        (Cache::MaxGetBits -
+         CHAR_BIT * BitStreamTraits<Traits::Tag>::MinLoadStepByteMultiple));
     *this = std::move(replacement);
   }
 
