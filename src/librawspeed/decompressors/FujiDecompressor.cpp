@@ -927,7 +927,7 @@ FujiDecompressor::FujiHeader::operator bool() const {
        raw_rounded_width % block_size ||
        raw_rounded_width - raw_width >= block_size || blocks_in_row > 0x10 ||
        blocks_in_row == 0 || blocks_in_row != raw_rounded_width / block_size ||
-       blocks_in_row != roundUpDivision(raw_width, block_size) ||
+       blocks_in_row != roundUpDivisionSafe(raw_width, block_size) ||
        total_lines > 0x800 || total_lines == 0 ||
        total_lines != raw_height / FujiStrip::lineHeight() ||
        (raw_bits != 12 && raw_bits != 14 && raw_bits != 16) ||

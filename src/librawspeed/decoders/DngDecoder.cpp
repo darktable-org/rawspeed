@@ -308,13 +308,13 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
 
     assert(tilew > 0);
     const auto tilesX =
-        implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
+        implicit_cast<uint32_t>(roundUpDivisionSafe(mRaw->dim.x, tilew));
     if (!tilesX)
       ThrowRDE("Zero tiles horizontally");
 
     assert(tileh > 0);
     const auto tilesY =
-        implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
+        implicit_cast<uint32_t>(roundUpDivisionSafe(mRaw->dim.y, tileh));
     if (!tilesY)
       ThrowRDE("Zero tiles vertically");
 
@@ -350,7 +350,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
                            : mRaw->dim.y;
 
   if (yPerSlice == 0 ||
-      roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+      roundUpDivisionSafe(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
   }

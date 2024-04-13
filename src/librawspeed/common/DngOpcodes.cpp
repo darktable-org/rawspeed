@@ -393,8 +393,8 @@ protected:
     int cpp = ri->getCpp();
     const iRectangle2D& ROI = getRoi();
     const iPoint2D numAffected(
-        implicit_cast<int>(roundUpDivision(getRoi().dim.x, colPitch)),
-        implicit_cast<int>(roundUpDivision(getRoi().dim.y, rowPitch)));
+        implicit_cast<int>(roundUpDivisionSafe(getRoi().dim.x, colPitch)),
+        implicit_cast<int>(roundUpDivisionSafe(getRoi().dim.y, rowPitch)));
     for (int y = 0; y < numAffected.y; ++y) {
       for (int x = 0; x < numAffected.x; ++x) {
         for (auto p = 0U; p < planes; ++p) {
@@ -568,7 +568,7 @@ protected:
     // See PixelOpcode::applyOP(). We will access deltaF/deltaI up to (excl.)
     // either ROI.getWidth() or ROI.getHeight() index. Thus, we need to have
     // either ROI.getRight() or ROI.getBottom() elements in there.
-    if (const auto expectedSize = roundUpDivision(
+    if (const auto expectedSize = roundUpDivisionSafe(
             S::select(getRoi().getWidth(), getRoi().getHeight()),
             S::select(getPitch().x, getPitch().y));
         expectedSize != deltaF_count) {

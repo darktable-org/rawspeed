@@ -106,7 +106,7 @@ void BM(benchmark::State& state, bool Stuffed) {
                                           std::allocator<OutputChunkType>>>
       output;
   output.reserve(implicit_cast<size_t>(
-      roundUpDivision(input->size(), sizeof(OutputChunkType))));
+      roundUpDivisionSafe(input->size(), sizeof(OutputChunkType))));
 
   for (auto _ : state) {
     output.clear();

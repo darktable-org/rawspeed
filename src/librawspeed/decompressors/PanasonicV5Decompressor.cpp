@@ -98,7 +98,7 @@ PanasonicV5Decompressor::PanasonicV5Decompressor(RawImage img,
   invariant(numPackets > 0);
 
   // And how many blocks that would be? Last block may not be full, pad it.
-  numBlocks = roundUpDivision(numPackets, PacketsPerBlock);
+  numBlocks = roundUpDivisionSafe(numPackets, PacketsPerBlock);
   invariant(numBlocks > 0);
 
   // Does the input contain enough blocks?

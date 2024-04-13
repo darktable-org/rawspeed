@@ -81,7 +81,7 @@ struct BitStreamCacheLeftInRightOut final : BitStreamCacheBase {
     establishClassInvariants();
     invariant(count >= 0);
     // `count` *could* be larger than `MaxGetBits`.
-    invariant(count != 0);
+    // `count` could be zero.
     invariant(count <= Size);
     invariant(count <= fillLevel);
     cache >>= count;

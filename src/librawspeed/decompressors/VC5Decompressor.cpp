@@ -208,8 +208,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::reconstructPass(
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #ifdef HAVE_OPENMP
 #pragma omp taskloop default(none) firstprivate(dst, process)                  \
-    num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(),        \
-                                  numChannels))
+    num_tasks(roundUpDivisionSafe(rawspeed_get_number_of_processor_cores(),    \
+                                      numChannels))
 #endif
   for (int row = 0; row < dst.height() / 2; ++row) {
 #pragma GCC diagnostic pop
@@ -267,9 +267,8 @@ VC5Decompressor::BandData VC5Decompressor::Wavelet::combineLowHighPass(
 #pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #ifdef HAVE_OPENMP
 #pragma omp taskloop if (finalWavelet) default(none)                           \
-    firstprivate(dst, process)                                                 \
-    num_tasks(roundUpDivision(rawspeed_get_number_of_processor_cores(), 2))    \
-    mergeable
+    firstprivate(dst, process) num_tasks(roundUpDivisionSafe(                  \
+            rawspeed_get_number_of_processor_cores(), 2)) mergeable
 #endif
   for (int row = 0; row < dst.height(); ++row) {
 #pragma GCC diagnostic pop
@@ -411,7 +410,8 @@ VC5Decompressor::VC5Decompressor(ByteStream bs, const RawImage& img)
     for (Wavelet& wavelet : channel.wavelets) {
       // Pad dimensions as necessary and divide them by two for the next wavelet
       for (auto* dimension : {&waveletWidth, &waveletHeight})
-        *dimension = implicit_cast<uint16_t>(roundUpDivision(*dimension, 2));
+        *dimension =
+            implicit_cast<uint16_t>(roundUpDivisionSafe(*dimension, 2));
       wavelet.width = waveletWidth;
       wavelet.height = waveletHeight;
 
@@ -658,7 +658,7 @@ VC5Decompressor::Wavelet::LowPassBand::LowPassBand(Wavelet& wavelet_,
   const auto bitsTotal = waveletArea * lowpassPrecision;
   constexpr int bytesPerChunk = 8; // FIXME: or is it 4?
   constexpr int bitsPerChunk = 8 * bytesPerChunk;
-  const auto chunksTotal = roundUpDivision(bitsTotal, bitsPerChunk);
+  const auto chunksTotal = roundUpDivisionSafe(bitsTotal, bitsPerChunk);
   const auto bytesTotal = bytesPerChunk * chunksTotal;
   // And clamp the size / verify sufficient input while we are at it.
   // NOTE: this might fail (and should throw, not assert).

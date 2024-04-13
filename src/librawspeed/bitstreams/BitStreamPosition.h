@@ -48,13 +48,9 @@ ByteStreamPosition<bo> getAsByteStreamPosition(BitStreamPosition<bo> state) {
   invariant(state.pos % MinByteStepMultiple == 0);
   invariant(state.fillLevel >= 0);
 
-  auto numBytesRemainingInCache =
-      implicit_cast<int>(roundUpDivision(state.fillLevel, CHAR_BIT));
-  invariant(numBytesRemainingInCache >= 0);
-  invariant(numBytesRemainingInCache <= state.pos);
-
   auto numBytesToBacktrack = implicit_cast<int>(
-      roundUp(numBytesRemainingInCache, MinByteStepMultiple));
+      MinByteStepMultiple *
+      roundUpDivision(state.fillLevel, CHAR_BIT * MinByteStepMultiple));
   invariant(numBytesToBacktrack >= 0);
   invariant(numBytesToBacktrack <= state.pos);
   invariant(numBytesToBacktrack % MinByteStepMultiple == 0);
@@ -67,6 +63,8 @@ ByteStreamPosition<bo> getAsByteStreamPosition(BitStreamPosition<bo> state) {
   res.bytePos = state.pos - numBytesToBacktrack;
   invariant(numBitsToBacktrack >= state.fillLevel);
   res.numBitsToSkip = numBitsToBacktrack - state.fillLevel;
+  invariant(res.numBitsToSkip >= 0);
+  invariant(res.numBitsToSkip < CHAR_BIT * MinByteStepMultiple);
 
   invariant(res.bytePos >= 0);
   invariant(res.bytePos <= state.pos);
