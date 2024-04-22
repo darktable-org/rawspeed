@@ -2818,7 +2818,7 @@
 	<Camera make="Canon" model="Canon PowerShot SX70 HS" supported="no">
 		<ID make="Canon" model="PowerShot SX70 HS">Canon PowerShot SX70 HS</ID>
 	</Camera>
-	<Camera make="GoPro" model="FUSION" mode="dng" supported="no-samples">
+	<Camera make="GoPro" model="FUSION" mode="dng">
 		<ID make="GoPro" model="FUSION">GoPro FUSION</ID>
 	</Camera>
 	<Camera make="GoPro" model="HERO5 Black" mode="dng">
