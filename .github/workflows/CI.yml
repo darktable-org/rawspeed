@@ -56,7 +56,6 @@ jobs:
           - { distro: "debian:bookworm-slim", family: GNU,  version: 12, CC: gcc-12,   CXX: g++-12 }
           - { distro: "debian:trixie-slim",   family: LLVM, version: 17, CC: clang-17, CXX: clang++-17 }
           - { distro: "debian:bookworm-slim", family: LLVM, version: 16, CC: clang-16, CXX: clang++-16 }
-          - { distro: "debian:bookworm-slim", family: LLVM, version: 15, CC: clang-15, CXX: clang++-15 }
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-linux.yml
     with:
