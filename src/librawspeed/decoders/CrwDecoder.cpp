@@ -20,25 +20,34 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "decoders/CrwDecoder.h"
-#include "common/Point.h"                  // for iPoint2D
-#include "decoders/RawDecoderException.h"  // for ThrowException, ThrowRDE
-#include "decompressors/CrwDecompressor.h" // for CrwDecompressor
-#include "io/Buffer.h"                     // for Buffer
-#include "metadata/Camera.h"               // for Hints
-#include "metadata/ColorFilterArray.h"     // for CFAColor, CFAColor::GREEN
-#include "tiff/CiffEntry.h"                // for CiffEntry, CiffDataType
-#include "tiff/CiffIFD.h"                  // for CiffIFD
-#include "tiff/CiffTag.h"                  // for CiffTag, CiffTag::MAKEMODEL
-#include <array>                           // for array
-#include <cassert>                         // for assert
-#include <cmath>                           // for abs, copysignf, expf, logf
-#include <cstdlib>                         // for abs, size_t
-#include <cstring>                         // for memcmp
-#include <memory>                          // for unique_ptr, allocator
-#include <string>                          // for string
-#include <utility>                         // for move
-#include <vector>                          // for vector
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/CrwDecompressor.h"
+#include "io/Buffer.h"
+#include "metadata/Camera.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/CiffEntry.h"
+#include "tiff/CiffIFD.h"
+#include "tiff/CiffTag.h"
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 using std::vector;
 
@@ -48,16 +57,15 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-bool CrwDecoder::isCRW(const Buffer& input) {
+bool CrwDecoder::isCRW(Buffer input) {
   static const std::array<char, 8> magic = {
       {'H', 'E', 'A', 'P', 'C', 'C', 'D', 'R'}};
   static const size_t magic_offset = 6;
-  const unsigned char* data = input.getData(magic_offset, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(magic_offset, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
-CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD,
-                       const Buffer& file)
+CrwDecoder::CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file)
     : RawDecoder(file), mRootIFD(std::move(rootIFD)) {}
 
 RawImage CrwDecoder::decodeRawInternal() {
@@ -76,6 +84,10 @@ RawImage CrwDecoder::decodeRawInternal() {
   uint32_t height = sensorInfo->getU16(2);
   mRaw->dim = iPoint2D(width, height);
 
+  if (width == 0 || height == 0 || width % 4 != 0 || width > 4104 ||
+      height > 3048 || (height * width) % 64 != 0)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
   const CiffEntry* decTable =
       mRootIFD->getEntryRecursive(CiffTag::DECODERTABLE);
   if (!decTable || decTable->type != CiffDataType::LONG)
@@ -84,9 +96,26 @@ RawImage CrwDecoder::decodeRawInternal() {
   assert(decTable != nullptr);
   uint32_t dec_table = decTable->getU32();
 
-  bool lowbits = ! hints.has("no_decompressed_lowbits");
+  bool lowbits = !hints.contains("no_decompressed_lowbits");
 
-  CrwDecompressor c(mRaw, dec_table, lowbits, rawData->getData());
+  ByteStream rawInput = rawData->getData();
+
+  Optional<Array1DRef<const uint8_t>> lowbitInput;
+  if (lowbits) {
+    // If there are low bits, the first part (size is calculable) is low bits
+    // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
+    const int lBlocks = 1 * height * width / 4;
+    invariant(lBlocks > 0);
+    lowbitInput = rawInput.getStream(lBlocks);
+  }
+
+  // We always ignore next 514 bytes of 'padding'. No idea what is in there.
+  rawInput.skipBytes(514);
+
+  Array1DRef<const uint8_t> input =
+      rawInput.peekRemainingBuffer().getAsArray1DRef();
+
+  CrwDecompressor c(mRaw, dec_table, input, lowbitInput);
   mRaw->createData();
   c.decompress();
 
@@ -108,7 +137,7 @@ void CrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 // based on exiftool's Image::ExifTool::Canon::CanonEv
-float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
+float RAWSPEED_READNONE CrwDecoder::canonEv(const int64_t in) {
   // remove sign
   int64_t val = abs(in);
   // remove fraction
@@ -116,12 +145,12 @@ float __attribute__((const)) CrwDecoder::canonEv(const int64_t in) {
   val -= frac;
   // convert 1/3 (0x0c) and 2/3 (0x14) codes
   if (frac == 0x0c) {
-    frac = 32.0F / 3;
+    frac = implicit_cast<int64_t>(32.0F / 3);
+  } else if (frac == 0x14) {
+    frac = implicit_cast<int64_t>(64.0F / 3);
   }
-  else if (frac == 0x14) {
-    frac = 64.0F / 3;
-  }
-  return copysignf((val + frac) / 32.0F, in);
+  return copysignf(implicit_cast<float>(val + frac) / 32.0F,
+                   implicit_cast<float>(in));
 }
 
 void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -144,13 +173,14 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     if (shot_info->type == CiffDataType::SHORT && shot_info->count >= 2) {
       // os << exp(canonEv(value.toLong()) * log(2.0)) * 100.0 / 32.0;
       uint16_t iso_index = shot_info->getU16(2);
-      iso = expf(canonEv(static_cast<int64_t>(iso_index)) * logf(2.0)) *
-            100.0F / 32.0F;
+      iso = implicit_cast<int>(
+          expf(canonEv(static_cast<int64_t>(iso_index)) * logf(2.0)) * 100.0F /
+          32.0F);
     }
   }
 
   // Fetch the white balance
-  try{
+  try {
     if (mRootIFD->hasEntryRecursive(static_cast<CiffTag>(0x0032))) {
       const CiffEntry* wb =
           mRootIFD->getEntryRecursive(static_cast<CiffTag>(0x0032));
@@ -175,7 +205,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         int offset = hints.get("wb_offset", 120);
 
         std::array<uint16_t, 2> key = {{0x410, 0x45f3}};
-        if (! hints.has("wb_mangle"))
+        if (!hints.contains("wb_mangle"))
           key[0] = key[1] = 0;
 
         offset /= 2;
@@ -215,7 +245,7 @@ void CrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
       /* CANON EOS D60, CANON EOS 10D, CANON EOS 300D */
       if (wb_index > 9)
         ThrowRDE("Invalid white balance index");
-      int wb_offset = 1 + ("0134567028"[wb_index]-'0') * 4;
+      int wb_offset = 1 + (std::string_view("0134567028")[wb_index] - '0') * 4;
       mRaw->metadata.wbCoeffs[0] = wb_data->getU16(wb_offset + 0);
       mRaw->metadata.wbCoeffs[1] = wb_data->getU16(wb_offset + 1);
       mRaw->metadata.wbCoeffs[2] = wb_data->getU16(wb_offset + 3);

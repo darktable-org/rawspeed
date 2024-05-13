@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/Common.h" // for clampBits
-#include <algorithm>       // for generate_n, max
-#include <cassert>         // for assert
-#include <functional>      // for function
-#include <iterator>        // for back_inserter
-#include <type_traits>     // for enable_if
-#include <vector>          // for vector
+#include "adt/Bit.h"
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <iterator>
+#include <type_traits>
+#include <vector>
 
 namespace rawspeed {
 
@@ -41,24 +41,26 @@ private:
   std::vector<value_type> table;
 
 public:
-  template <
-      typename F,
-      typename = std::enable_if<std::is_convertible_v<
-          F, std::function<value_type(typename decltype(table)::size_type,
-                                      typename decltype(table)::size_type)>>>>
-  explicit SimpleLUT(F&& f) {
+  template <typename F>
+    requires(
+        !std::is_same_v<SimpleLUT, typename std::remove_cv_t<
+                                       typename std::remove_reference_t<F>>> &&
+        std::is_convertible_v<
+            F, std::function<value_type(typename decltype(table)::size_type,
+                                        typename decltype(table)::size_type)>>)
+  explicit SimpleLUT(F f) {
     const auto fullTableSize = 1U << TableBitWidth;
     table.reserve(fullTableSize);
     std::generate_n(std::back_inserter(table), fullTableSize,
-                    [&f, table = &table]() {
+                    [&f, table_ = &table]() {
                       // which row [0..fullTableSize) are we filling?
-                      const auto i = table->size();
+                      const auto i = table_->size();
                       return f(i, fullTableSize);
                     });
     assert(table.size() == fullTableSize);
   }
 
-  inline value_type operator[](int x) const {
+  value_type operator[](int x) const {
     unsigned clampedX = clampBits(x, TableBitWidth);
     return table[clampedX];
   }

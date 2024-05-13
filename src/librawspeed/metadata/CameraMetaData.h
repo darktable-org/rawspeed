@@ -20,19 +20,19 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"  // for HAVE_PUGIXML
-#include "metadata/Camera.h" // for Camera (ptr only)
-#include <cstdint>           // for uint32_t
-#include <map>               // for map
-#include <memory>            // for unique_ptr
-#include <string>            // for operator<, string
-#include <string_view>       // for string_view
-#include <tuple>             // for tie, operator<, tuple
+#include "rawspeedconfig.h"
+#include "metadata/Camera.h"
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <tuple>
 
 namespace rawspeed {
 class Camera;
 
-struct CameraId {
+struct CameraId final {
   std::string make;
   std::string model;
   std::string mode;
@@ -67,10 +67,9 @@ public:
   [[nodiscard]] bool hasCamera(const std::string& make,
                                const std::string& model,
                                const std::string& mode) const;
-  [[nodiscard]] const Camera* __attribute__((pure))
+  [[nodiscard]] const Camera* RAWSPEED_READONLY
   getChdkCamera(uint32_t filesize) const;
-  [[nodiscard]] bool __attribute__((pure))
-  hasChdkCamera(uint32_t filesize) const;
+  [[nodiscard]] bool RAWSPEED_READONLY hasChdkCamera(uint32_t filesize) const;
   void disableMake(std::string_view make) const;
   void disableCamera(std::string_view make, std::string_view model) const;
 

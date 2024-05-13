@@ -18,11 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
-#include "common/Common.h"  // for rawspeed_get_number_of_processor_cores
+#include "rawspeedconfig.h"
+#include "common/Common.h"
 
 #ifdef HAVE_OPENMP
-#include <omp.h> // for omp_get_max_threads
+#include <omp.h>
 #endif
 
 // define this function, it is only declared in rawspeed:
@@ -32,7 +32,7 @@ rawspeed_get_number_of_processor_cores() {
   return omp_get_max_threads();
 }
 #else
-extern "C" int __attribute__((const, visibility("default")))
+extern "C" int RAWSPEED_READNONE __attribute__((visibility("default")))
 rawspeed_get_number_of_processor_cores() {
   return 1;
 }

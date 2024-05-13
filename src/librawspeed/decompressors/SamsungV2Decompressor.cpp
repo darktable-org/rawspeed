@@ -21,17 +21,20 @@
 */
 
 #include "decompressors/SamsungV2Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for clampBits, signExtend
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for fill_n
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t, int32_t
-#include <type_traits>                    // for underlying_type_t
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB32.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <type_traits>
 
 namespace rawspeed {
 
@@ -41,7 +44,7 @@ namespace rawspeed {
 // in contact and Loring von Palleske (Samsung) for pointing to the open-source
 // code of Samsung's DNG converter at http://opensource.samsung.com/
 
-enum struct SamsungV2Decompressor::OptFlags : uint32_t {
+enum struct SamsungV2Decompressor::OptFlags : uint8_t {
   NONE = 0U,       // no flags
   SKIP = 1U << 0U, // Skip checking if we need differences from previous line
   MV = 1U << 1U,   // Simplify motion vector definition
@@ -72,16 +75,15 @@ constexpr bool operator&(SamsungV2Decompressor::OptFlags lhs,
 }
 
 inline __attribute__((always_inline)) int16_t
-SamsungV2Decompressor::getDiff(BitPumpMSB32& pump, uint32_t len) {
+SamsungV2Decompressor::getDiff(BitStreamerMSB32& pump, uint32_t len) {
   if (len == 0)
     return 0;
-  assert(len <= 15 && "Difference occupies at most 15 bits.");
-  return signExtend(pump.getBits(len), len);
+  invariant(len <= 15 && "Difference occupies at most 15 bits.");
+  return implicit_cast<int16_t>(signExtend(pump.getBits(len), len));
 }
 
 SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
-                                             const ByteStream& bs,
-                                             unsigned bits)
+                                             ByteStream bs, unsigned bits)
     : AbstractSamsungDecompressor(image) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -98,7 +100,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   static constexpr const auto headerSize = 16;
   (void)bs.check(headerSize);
 
-  BitPumpMSB32 startpump(bs);
+  BitStreamerMSB32 startpump(bs.peekRemainingBuffer().getAsArray1DRef());
 
   // Process the initial metadata bits, we only really use initVal, width and
   // height (the last two match the TIFF values anyway)
@@ -125,9 +127,9 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
   startpump.getBits(8); // reserved
   startpump.getBits(8); // Inc
   startpump.getBits(2); // reserved
-  initVal = startpump.getBits(14);
+  initVal = implicit_cast<uint16_t>(startpump.getBits(14));
 
-  assert(startpump.getInputPosition() == headerSize);
+  invariant(startpump.getInputPosition() == headerSize);
 
   if (width == 0 || height == 0 || width % 16 != 0 || width > 6496 ||
       height > 4336)
@@ -148,7 +150,7 @@ SamsungV2Decompressor::SamsungV2Decompressor(const RawImage& image,
 // the actual difference bits
 
 inline __attribute__((always_inline)) std::array<uint16_t, 16>
-SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32& pump, int row,
+SamsungV2Decompressor::prepareBaselineValues(BitStreamerMSB32& pump, int row,
                                              int col) {
   const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
 
@@ -226,7 +228,7 @@ SamsungV2Decompressor::prepareBaselineValues(BitPumpMSB32& pump, int row,
 }
 
 inline __attribute__((always_inline)) std::array<uint32_t, 4>
-SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32& pump, int row) {
+SamsungV2Decompressor::decodeDiffLengths(BitStreamerMSB32& pump, int row) {
   if (!(optflags & OptFlags::SKIP) && pump.getBits(1))
     return {};
 
@@ -273,7 +275,7 @@ SamsungV2Decompressor::decodeDiffLengths(BitPumpMSB32& pump, int row) {
 }
 
 inline __attribute__((always_inline)) std::array<int, 16>
-SamsungV2Decompressor::decodeDifferences(BitPumpMSB32& pump, int row) {
+SamsungV2Decompressor::decodeDifferences(BitStreamerMSB32& pump, int row) {
   // Figure out how many difference bits we have to read for each pixel
   const std::array<uint32_t, 4> diffBits = decodeDiffLengths(pump, row);
 
@@ -310,7 +312,7 @@ SamsungV2Decompressor::decodeDifferences(BitPumpMSB32& pump, int row) {
 }
 
 inline __attribute__((always_inline)) void
-SamsungV2Decompressor::processBlock(BitPumpMSB32& pump, int row, int col) {
+SamsungV2Decompressor::processBlock(BitStreamerMSB32& pump, int row, int col) {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   const std::array<uint16_t, 16> baseline =
@@ -329,7 +331,7 @@ void SamsungV2Decompressor::decompressRow(int row) {
   if (const auto line_offset = data.getPosition(); (line_offset & 0xf) != 0)
     data.skipBytes(16 - (line_offset & 0xf));
 
-  BitPumpMSB32 pump(data);
+  BitStreamerMSB32 pump(data.peekRemainingBuffer().getAsArray1DRef());
 
   // Initialize the motion and diff modes at the start of the line
   motion = 7;
@@ -339,8 +341,8 @@ void SamsungV2Decompressor::decompressRow(int row) {
   for (auto& i : diffBitsMode)
     i[0] = i[1] = (row == 0 || row == 1) ? 7 : 4;
 
-  assert(width >= 16);
-  assert(width % 16 == 0);
+  invariant(width >= 16);
+  invariant(width % 16 == 0);
   for (int col = 0; col < width; col += 16)
     processBlock(pump, row, col);
 

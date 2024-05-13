@@ -20,31 +20,31 @@
 */
 
 #include "decoders/SrwDecoder.h"
-#include "common/Common.h"                       // for BitOrder, BitOrder:...
-#include "common/Point.h"                        // for iPoint2D
-#include "decoders/RawDecoderException.h"        // for ThrowException, Thr...
-#include "decompressors/SamsungV0Decompressor.h" // for SamsungV0Decompressor
-#include "decompressors/SamsungV1Decompressor.h" // for SamsungV1Decompressor
-#include "decompressors/SamsungV2Decompressor.h" // for SamsungV2Decompressor
-#include "io/Buffer.h"                           // for Buffer, DataBuffer
-#include "io/ByteStream.h"                       // for ByteStream
-#include "io/Endianness.h"                       // for Endianness, Endiann...
-#include "metadata/Camera.h"                     // for Hints
-#include "metadata/CameraMetaData.h"             // for CameraMetaData
-#include "tiff/TiffEntry.h"                      // for TiffEntry, TiffData...
-#include "tiff/TiffIFD.h"                        // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                        // for TiffTag, TiffTag::S...
-#include <array>                                 // for array
-#include <cstdint>                               // for uint32_t
-#include <memory>                                // for unique_ptr
-#include <sstream>                               // for operator<<, ostring...
-#include <string>                                // for string, allocator
-#include <vector>                                // for vector
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/SamsungV0Decompressor.h"
+#include "decompressors/SamsungV1Decompressor.h"
+#include "decompressors/SamsungV2Decompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 
 bool SrwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -62,7 +62,8 @@ RawImage SrwDecoder::decodeRawInternal() {
   if (12 != bits && 14 != bits)
     ThrowRDE("Unsupported bits per sample");
 
-  if (32769 != compression && 32770 != compression && 32772 != compression && 32773 != compression)
+  if (32769 != compression && 32770 != compression && 32772 != compression &&
+      32773 != compression)
     ThrowRDE("Unsupported compression");
 
   if (uint32_t nslices = raw->getEntry(TiffTag::STRIPOFFSETS)->count;
@@ -81,8 +82,7 @@ RawImage SrwDecoder::decodeRawInternal() {
   const uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
   mRaw->dim = iPoint2D(width, height);
 
-  if (32770 == compression)
-  {
+  if (32770 == compression) {
     const TiffEntry* sliceOffsets = raw->getEntry(static_cast<TiffTag>(40976));
     if (sliceOffsets->type != TiffDataType::LONG || sliceOffsets->count != 1)
       ThrowRDE("Entry 40976 is corrupt");
@@ -104,8 +104,7 @@ RawImage SrwDecoder::decodeRawInternal() {
 
     return mRaw;
   }
-  if (32772 == compression)
-  {
+  if (32772 == compression) {
     uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
@@ -119,8 +118,7 @@ RawImage SrwDecoder::decodeRawInternal() {
 
     return mRaw;
   }
-  if (32773 == compression)
-  {
+  if (32773 == compression) {
     uint32_t offset = raw->getEntry(TiffTag::STRIPOFFSETS)->getU32();
     uint32_t count = raw->getEntry(TiffTag::STRIPBYTECOUNTS)->getU32();
     const ByteStream bs(
@@ -177,9 +175,12 @@ void SrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb_black =
         mRootIFD->getEntryRecursive(TiffTag::SAMSUNG_WB_RGGBLEVELSBLACK);
     if (wb_levels->count == 4 && wb_black->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb_levels->getFloat(0) - wb_black->getFloat(0);
-      mRaw->metadata.wbCoeffs[1] = wb_levels->getFloat(1) - wb_black->getFloat(1);
-      mRaw->metadata.wbCoeffs[2] = wb_levels->getFloat(3) - wb_black->getFloat(3);
+      mRaw->metadata.wbCoeffs[0] =
+          wb_levels->getFloat(0) - wb_black->getFloat(0);
+      mRaw->metadata.wbCoeffs[1] =
+          wb_levels->getFloat(1) - wb_black->getFloat(1);
+      mRaw->metadata.wbCoeffs[2] =
+          wb_levels->getFloat(3) - wb_black->getFloat(3);
     }
   }
 }

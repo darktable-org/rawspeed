@@ -20,20 +20,25 @@
 */
 
 #include "metadata/Camera.h"
-#include "common/Common.h"                    // for splitString
-#include "common/Point.h"                     // for iPoint2D
-#include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
-#include <algorithm>                          // for max, fill, transform
-#include <cctype>                             // for tolower
-#include <cstdio>                             // for size_t
-#include <map>                                // for map
-#include <stdexcept>                          // for out_of_range
-#include <string>                             // for string, operator==
-#include <string_view>                        // for operator==, basic_stri...
-#include <vector>                             // for vector
+#include "adt/Point.h"
+#include "metadata/CameraMetadataException.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include <cassert>
+#include <cstdint>
+#include <map>
+#include <string>
+#include <vector>
 
 #ifdef HAVE_PUGIXML
-#include <pugixml.hpp> // for xml_node, xml_attribute
+#include "adt/NotARational.h"
+#include "adt/Optional.h"
+#include "common/Common.h"
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <pugixml.hpp>
+#include <string_view>
 
 using pugi::xml_node;
 #endif
@@ -45,12 +50,13 @@ using std::map;
 namespace rawspeed {
 
 #ifdef HAVE_PUGIXML
-Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
+Camera::Camera(const pugi::xml_node& camera) {
   make = canonical_make = camera.attribute("make").as_string();
   if (make.empty())
     ThrowCME(R"("make" attribute not found.)");
 
-  model = canonical_model = canonical_alias = camera.attribute("model").as_string();
+  model = canonical_model = canonical_alias =
+      camera.attribute("model").as_string();
   // chdk cameras seem to have an empty model?
   if (!camera.attribute("model")) // (model.empty())
     ThrowCME(R"("model" attribute not found.)");
@@ -59,12 +65,17 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 
   supportStatus = [&camera]() {
     const std::string_view v = camera.attribute("supported").as_string("yes");
+    using enum Camera::SupportStatus;
     if (v == "yes")
-      return Camera::SupportStatus::Supported;
+      return Supported;
     if (v == "no")
-      return Camera::SupportStatus::Unsupported;
+      return Unsupported;
     if (v == "no-samples")
-      return Camera::SupportStatus::NoSamples;
+      return SupportedNoSamples;
+    if (v == "unknown")
+      return Unknown;
+    if (v == "unknown-no-samples")
+      return UnknownNoSamples;
     ThrowCME("Attribute 'supported' has unknown value.");
   }();
   mode = camera.attribute("mode").as_string("");
@@ -76,7 +87,7 @@ Camera::Camera(const pugi::xml_node& camera) : cfa(iPoint2D(0, 0)) {
 }
 #endif
 
-Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
+Camera::Camera(const Camera* camera, uint32_t alias_num) {
   if (alias_num >= camera->aliases.size())
     ThrowCME("Internal error, alias number out of range specified.");
 
@@ -88,92 +99,138 @@ Camera::Camera(const Camera* camera, uint32_t alias_num) : cfa(iPoint2D(0, 0)) {
 }
 
 #ifdef HAVE_PUGIXML
-static std::string name(const xml_node& a) { return a.name(); }
-#endif
 
-const map<char, CFAColor> Camera::char2enum = {
-    {'g', CFAColor::GREEN},  {'r', CFAColor::RED},
-    {'b', CFAColor::BLUE},   {'f', CFAColor::FUJI_GREEN},
-    {'c', CFAColor::CYAN},   {'m', CFAColor::MAGENTA},
-    {'y', CFAColor::YELLOW},
-};
+namespace {
 
-const map<std::string, CFAColor, std::less<>> Camera::str2enum = {
-    {"GREEN", CFAColor::GREEN},   {"RED", CFAColor::RED},
-    {"BLUE", CFAColor::BLUE},     {"FUJI_GREEN", CFAColor::FUJI_GREEN},
-    {"CYAN", CFAColor::CYAN},     {"MAGENTA", CFAColor::MAGENTA},
-    {"YELLOW", CFAColor::YELLOW},
-};
+std::string name(const xml_node& a) { return a.name(); }
 
-#ifdef HAVE_PUGIXML
-void Camera::parseCFA(const xml_node &cur) {
+Optional<CFAColor> getAsCFAColor(char c) {
+  switch (c) {
+    using enum CFAColor;
+  case 'g':
+    return GREEN;
+  case 'r':
+    return RED;
+  case 'b':
+    return BLUE;
+  case 'f':
+    return FUJI_GREEN;
+  case 'c':
+    return CYAN;
+  case 'm':
+    return MAGENTA;
+  case 'y':
+    return YELLOW;
+  default:
+    return std::nullopt;
+  }
+}
+
+Optional<CFAColor> getAsCFAColor(std::string_view c) {
+  using enum CFAColor;
+  if (c == "GREEN")
+    return GREEN;
+  if (c == "RED")
+    return RED;
+  if (c == "BLUE")
+    return BLUE;
+  if (c == "FUJI_GREEN")
+    return FUJI_GREEN;
+  if (c == "CYAN")
+    return CYAN;
+  if (c == "MAGENTA")
+    return MAGENTA;
+  if (c == "YELLOW")
+    return YELLOW;
+  return std::nullopt;
+}
+
+} // namespace
+
+void Camera::parseColorRow(const xml_node& c) {
+  if (name(c) != "ColorRow")
+    ThrowCME("Not an ColorRow node!");
+
+  int y = c.attribute("y").as_int(-1);
+  if (y < 0 || y >= cfa.getSize().y) {
+    ThrowCME("Invalid y coordinate in CFA array of camera %s %s", make.c_str(),
+             model.c_str());
+  }
+  std::string key = c.child_value();
+  if (static_cast<int>(key.size()) != cfa.getSize().x) {
+    ThrowCME("Invalid number of colors in definition for row %d in "
+             "camera %s %s. Expected %d, found %zu.",
+             y, make.c_str(), model.c_str(), cfa.getSize().x, key.size());
+  }
+  for (size_t x = 0; x < key.size(); ++x) {
+    auto c1 = key[x];
+
+    auto c2 = getAsCFAColor(static_cast<char>(tolower(c1)));
+    if (!c2)
+      ThrowCME("Invalid color in CFA array of camera %s %s: %c", make.c_str(),
+               model.c_str(), c1);
+
+    cfa.setColorAt(iPoint2D(static_cast<int>(x), y), *c2);
+  }
+}
+
+void Camera::parseColor(const xml_node& c) {
+  if (name(c) != "Color")
+    ThrowCME("Not an Color node!");
+
+  int x = c.attribute("x").as_int(-1);
+  if (x < 0 || x >= cfa.getSize().x) {
+    ThrowCME("Invalid x coordinate in CFA array of camera %s %s", make.c_str(),
+             model.c_str());
+  }
+
+  int y = c.attribute("y").as_int(-1);
+  if (y < 0 || y >= cfa.getSize().y) {
+    ThrowCME("Invalid y coordinate in CFA array of camera %s %s", make.c_str(),
+             model.c_str());
+  }
+
+  const auto* c1 = c.child_value();
+
+  auto c2 = getAsCFAColor(c1);
+  if (!c2)
+    ThrowCME("Invalid color in CFA array of camera %s %s: %s", make.c_str(),
+             model.c_str(), c1);
+
+  cfa.setColorAt(iPoint2D(x, y), *c2);
+}
+
+void Camera::parseCFA(const xml_node& cur) {
   if (name(cur) != "CFA" && name(cur) != "CFA2")
     ThrowCME("Not an CFA/CFA2 node!");
 
   cfa.setSize(iPoint2D(cur.attribute("width").as_int(0),
                        cur.attribute("height").as_int(0)));
   for (xml_node c : cur.children()) {
-      if (name(c) == "ColorRow") {
-        int y = c.attribute("y").as_int(-1);
-        if (y < 0 || y >= cfa.getSize().y) {
-          ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
-                   make.c_str(), model.c_str());
-        }
-        std::string key = c.child_value();
-        if (static_cast<int>(key.size()) != cfa.getSize().x) {
-          ThrowCME("Invalid number of colors in definition for row %d in "
-                   "camera %s %s. Expected %d, found %zu.",
-                   y, make.c_str(), model.c_str(), cfa.getSize().x, key.size());
-        }
-        for (size_t x = 0; x < key.size(); ++x) {
-          auto c1 = key[x];
-          CFAColor c2;
-
-          try {
-            c2 = char2enum.at(static_cast<char>(tolower(c1)));
-          } catch (const std::out_of_range&) {
-            ThrowCME("Invalid color in CFA array of camera %s %s: %c",
-                     make.c_str(), model.c_str(), c1);
-          }
-
-          cfa.setColorAt(iPoint2D(static_cast<int>(x), y), c2);
-        }
-      } else if (name(c) == "Color") {
-        int x = c.attribute("x").as_int(-1);
-        if (x < 0 || x >= cfa.getSize().x) {
-          ThrowCME("Invalid x coordinate in CFA array of camera %s %s",
-                   make.c_str(), model.c_str());
-        }
-
-        int y = c.attribute("y").as_int(-1);
-        if (y < 0 || y >= cfa.getSize().y) {
-          ThrowCME("Invalid y coordinate in CFA array of camera %s %s",
-                   make.c_str(), model.c_str());
-        }
-
-        const auto* c1 = c.child_value();
-        CFAColor c2;
-
-        try {
-          c2 = str2enum.at(c1);
-        } catch (const std::out_of_range&) {
-          ThrowCME("Invalid color in CFA array of camera %s %s: %s",
-                   make.c_str(), model.c_str(), c1);
-        }
-
-        cfa.setColorAt(iPoint2D(x, y), c2);
-      }
+    if (name(c) == "ColorRow") {
+      parseColorRow(c);
+    } else if (name(c) == "Color") {
+      parseColor(c);
+    }
   }
 }
 
-void Camera::parseCrop(const xml_node &cur) {
+void Camera::parseCrop(const xml_node& cur) {
   if (name(cur) != "Crop")
     ThrowCME("Not an Crop node!");
 
-  cropSize.x = cur.attribute("width").as_int(0);
-  cropSize.y = cur.attribute("height").as_int(0);
-  cropPos.x = cur.attribute("x").as_int(0);
-  cropPos.y = cur.attribute("y").as_int(0);
+  const auto widthAttr = cur.attribute("width");
+  const auto heightAttr = cur.attribute("height");
+  const auto xAttr = cur.attribute("x");
+  const auto yAttr = cur.attribute("y");
+
+  cropSize.x = widthAttr.as_int(0);
+  cropSize.y = heightAttr.as_int(0);
+  cropPos.x = xAttr.as_int(0);
+  cropPos.y = yAttr.as_int(0);
+
+  cropAvailable = !(widthAttr.empty() && heightAttr.empty() && xAttr.empty() &&
+                    yAttr.empty());
 
   if (cropPos.x < 0)
     ThrowCME("Negative X axis crop specified in camera %s %s", make.c_str(),
@@ -183,7 +240,7 @@ void Camera::parseCrop(const xml_node &cur) {
              model.c_str());
 }
 
-void Camera::parseBlackAreas(const xml_node &cur) {
+void Camera::parseBlackAreas(const xml_node& cur) {
 
   if (name(cur) != "BlackAreas")
     ThrowCME("Not an BlackAreas node!");
@@ -224,7 +281,7 @@ void Camera::parseBlackAreas(const xml_node &cur) {
   }
 }
 
-void Camera::parseAliases(const xml_node &cur) {
+void Camera::parseAliases(const xml_node& cur) {
   if (name(cur) != "Aliases")
     ThrowCME("Not an Aliases node!");
 
@@ -235,7 +292,7 @@ void Camera::parseAliases(const xml_node &cur) {
   }
 }
 
-void Camera::parseHints(const xml_node &cur) {
+void Camera::parseHints(const xml_node& cur) {
   if (name(cur) != "Hints")
     ThrowCME("Not an Hints node!");
 
@@ -251,7 +308,7 @@ void Camera::parseHints(const xml_node &cur) {
   }
 }
 
-void Camera::parseID(const xml_node &cur) {
+void Camera::parseID(const xml_node& cur) {
   if (name(cur) != "ID")
     ThrowCME("Not an ID node!");
 
@@ -268,7 +325,7 @@ void Camera::parseID(const xml_node &cur) {
   canonical_id = cur.child_value();
 }
 
-void Camera::parseSensor(const xml_node &cur) {
+void Camera::parseSensor(const xml_node& cur) {
   if (name(cur) != "Sensor")
     ThrowCME("Not an Sensor node!");
 
@@ -337,7 +394,7 @@ void Camera::parseColorMatrices(const xml_node& cur) {
     parseColorMatrix(ColorMatrix);
 }
 
-void Camera::parseCameraChild(const xml_node &cur) {
+void Camera::parseCameraChild(const xml_node& cur) {
   if (name(cur) == "CFA" || name(cur) == "CFA2") {
     parseCFA(cur);
   } else if (name(cur) == "Crop") {
@@ -359,10 +416,8 @@ void Camera::parseCameraChild(const xml_node &cur) {
 #endif
 
 const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
-  if (sensorInfo.empty()) {
-    ThrowCME("Camera '%s' '%s', mode '%s' has no <Sensor> entries.",
-             make.c_str(), model.c_str(), mode.c_str());
-  }
+  if (sensorInfo.empty())
+    return nullptr;
 
   // If only one, just return that
   if (sensorInfo.size() == 1)
@@ -373,6 +428,7 @@ const CameraSensorInfo* Camera::getSensorInfo(int iso) const {
     if (i.isIsoWithin(iso))
       candidates.push_back(&i);
   }
+  assert(!candidates.empty());
 
   if (candidates.size() == 1)
     return candidates.front();

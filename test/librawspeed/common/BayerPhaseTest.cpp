@@ -19,18 +19,15 @@
 */
 
 #include "common/BayerPhase.h"
-#include <algorithm>     // for fill, min, copy, equal, fill_n, max
-#include <array>         // for array
-#include <cassert>       // for assert
-#include <cstddef>       // for size_t
-#include <cstdint>       // for uint8_t, uint16_t
-#include <gtest/gtest.h> // for ParamIteratorInterface, ParamGeneratorInt...
-#include <limits>        // for numeric_limits
-#include <memory>        // for allocator, make_unique, unique_ptr
-#include <string>        // for basic_string, string, operator==
-#include <tuple>         // for make_tuple, get, tuple
-#include <type_traits>   // for __strip_reference_wrapper<>::__type
-#include <vector>        // for vector, vector<>::iterator, vector<>::val...
+#include "adt/Optional.h"
+#include "metadata/ColorFilterArray.h"
+#include <array>
+#include <cassert>
+#include <map>
+#include <ostream>
+#include <tuple>
+#include <utility>
+#include <gtest/gtest.h>
 
 using rawspeed::BayerPhase;
 using rawspeed::CFAColor;
@@ -102,11 +99,11 @@ protected:
   }
 
   std::array<CFAColor, 4> in;
-  std::optional<BayerPhase> expected;
+  rawspeed::Optional<BayerPhase> expected;
   ColorFilterArray cfa;
 };
 
-INSTANTIATE_TEST_CASE_P(All2x2CFAs, BayerPhaseFromCFATest, AllPossible2x2CFAs);
+INSTANTIATE_TEST_SUITE_P(All2x2CFAs, BayerPhaseFromCFATest, AllPossible2x2CFAs);
 TEST_P(BayerPhaseFromCFATest, getAsBayerPhaseTest) {
   EXPECT_EQ(expected, rawspeed::getAsBayerPhase(cfa));
 }
@@ -125,12 +122,12 @@ protected:
     assert(in.has_value());
   }
 
-  std::optional<BayerPhase> in;
+  rawspeed::Optional<BayerPhase> in;
   std::array<CFAColor, 4> expected;
 };
 
-INSTANTIATE_TEST_CASE_P(AllBayerPhases, BayerPhaseToCFATest,
-                        AllKnownBayerPhases);
+INSTANTIATE_TEST_SUITE_P(AllBayerPhases, BayerPhaseToCFATest,
+                         AllKnownBayerPhases);
 TEST_P(BayerPhaseToCFATest, getAsCFAColorsTest) {
   EXPECT_EQ(expected, rawspeed::getAsCFAColors(*in));
 }
@@ -147,8 +144,8 @@ protected:
   BayerPhase src;
   BayerPhase tgt;
 };
-INSTANTIATE_TEST_CASE_P(AllBayerPhaseShifts, BayerPhaseShifTest,
-                        AllPossibleBayerPhaseShifts);
+INSTANTIATE_TEST_SUITE_P(AllBayerPhaseShifts, BayerPhaseShifTest,
+                         AllPossibleBayerPhaseShifts);
 
 struct AbstractElement {};
 

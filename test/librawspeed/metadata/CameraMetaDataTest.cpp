@@ -19,12 +19,12 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h"          // for HAVE_PUGIXML, RAWSPEED_SOURCE_DIR
-#include "metadata/Camera.h"         // for Camera
-#include "metadata/CameraMetaData.h" // for CameraMetaData
-#include <gtest/gtest.h>             // for Test, Message, TestPartResult
-#include <memory>                    // for allocator, unique_ptr
-#include <string>                    // for string, basic_string
+#include "rawspeedconfig.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include <memory>
+#include <string>
+#include <gtest/gtest.h>
 
 using rawspeed::CameraMetaData;
 using std::unique_ptr;
@@ -36,7 +36,7 @@ namespace rawspeed_test {
 static const std::string camfile(RAWSPEED_SOURCE_DIR "/data/cameras.xml");
 
 TEST(CameraMetaDataTest, CompileTimeCanInherit) {
-  struct MyCameraMetaData : public CameraMetaData {};
+  struct MyCameraMetaData final : public CameraMetaData {};
 }
 
 TEST(CameraMetaDataTest, CamerasXml) {

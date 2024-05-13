@@ -21,33 +21,33 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <utility>                        // for move
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <utility>
 
 namespace rawspeed {
 
 class Buffer;
 class Camera;
-class Camera;
 class CameraMetaData;
 
-class RafDecoder final : public AbstractTiffDecoder
-{
+class RafDecoder final : public AbstractTiffDecoder {
   bool alt_layout = false;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  RafDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  RafDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void applyCorrections(const Camera* cam);
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
-  static bool isRAF(const Buffer& input);
+  iRectangle2D getDefaultCrop() override;
+  static bool isRAF(Buffer input);
 
 protected:
   [[nodiscard]] int getDecoderVersion() const override { return 1; }

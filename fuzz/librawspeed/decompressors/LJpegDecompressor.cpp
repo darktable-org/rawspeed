@@ -1,7 +1,7 @@
 /*
     RawSpeed - RAW file decoder.
 
-    Copyright (C) 2017 Roman Lebedev
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,16 +18,24 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/LJpegDecompressor.h" // for LJpegDecompressor
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for RawspeedException
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h" // for Endianness, Endianness::little
-#include <cassert>         // for assert
-#include <cstdint>         // for uint8_t
-#include <cstdio>          // for size_t
+#include "decompressors/LJpegDecompressor.h"
+#include "MemorySanitizer.h"
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "codes/PrefixCodeDecoder/Common.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <vector>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -35,25 +43,62 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
     rawspeed::RawImage mRaw(CreateRawImage(bs));
 
-    const auto offsetX = bs.getU32();
-    const auto offsetY = bs.getU32();
-    const auto width = bs.getU32();
-    const auto height = bs.getU32();
-    const auto fixDng16Bug = bs.getU32();
+    const int MCU_w = bs.getI32();
+    const int MCU_h = bs.getI32();
+    const int frame_w = bs.getI32();
+    const int frame_h = bs.getI32();
+    const rawspeed::LJpegDecompressor::Frame frame{
+        rawspeed::iPoint2D(MCU_w, MCU_h), rawspeed::iPoint2D(frame_w, frame_h)};
 
-    rawspeed::LJpegDecompressor j(bs, mRaw);
+    const unsigned num_recips = bs.getU32();
+
+    const unsigned num_unique_hts = bs.getU32();
+    std::vector<rawspeed::PrefixCodeDecoder<>> uniqueHts;
+    std::generate_n(std::back_inserter(uniqueHts), num_unique_hts, [&bs]() {
+      return createPrefixCodeDecoder<rawspeed::PrefixCodeDecoder<>>(bs);
+    });
+
+    std::vector<const rawspeed::PrefixCodeDecoder<>*> hts;
+    std::generate_n(std::back_inserter(hts), num_recips, [&bs, &uniqueHts]() {
+      if (unsigned uniq_ht_idx = bs.getU32(); uniq_ht_idx < uniqueHts.size())
+        return &uniqueHts[uniq_ht_idx];
+      ThrowRSE("Unknown unique huffman table");
+    });
+
+    (void)bs.check(num_recips, sizeof(uint16_t));
+    std::vector<uint16_t> initPred;
+    initPred.reserve(num_recips);
+    std::generate_n(std::back_inserter(initPred), num_recips,
+                    [&bs]() { return bs.get<uint16_t>(); });
+
+    std::vector<rawspeed::LJpegDecompressor::PerComponentRecipe> rec;
+    rec.reserve(num_recips);
+    std::generate_n(std::back_inserter(rec), num_recips,
+                    [&rec, hts, initPred]()
+                        -> rawspeed::LJpegDecompressor::PerComponentRecipe {
+                      const auto i = rawspeed::implicit_cast<int>(rec.size());
+                      return {*hts[i], initPred[i]};
+                    });
+
+    const int numLJpegRowsPerRestartInterval = bs.getI32();
+
+    rawspeed::LJpegDecompressor d(
+        mRaw, rawspeed::iRectangle2D(mRaw->dim.x, mRaw->dim.y), frame, rec,
+        numLJpegRowsPerRestartInterval,
+        bs.getSubStream(/*offset=*/0).peekRemainingBuffer().getAsArray1DRef());
     mRaw->createData();
-    j.decode(offsetX, offsetY, width, height, fixDng16Bug);
+    (void)d.decode();
 
-    // we can not check that all the image was initialized, because normally
-    // LJpegDecompressor decodes just some one tile/slice.
-  } catch (const rawspeed::RawspeedException&) {
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

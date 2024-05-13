@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.22) # FIXME: 3.24.2 / 3.25
 
 project(llvm-openmp-download NONE)
 
@@ -32,14 +32,29 @@ else()
   else()
     message(WARNING "Did not find LLVM OpenMP runtime library sources! Fetching from web...")
     ExternalProject_Add(
+      llvm-cmake
+      URL               https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/cmake-17.0.6.src.tar.xz
+      URL_HASH          SHA512=b2c5e404ca36542d44e1a7f2801bbcecbcf5f1e8c63b793bb2308228483406bdfe002720aadb913c0228cd2bbe5998465eaadc4a49fad6a5eb6ff907fa5fd45a
+      PREFIX            "${CMAKE_BINARY_DIR}/llvm-cmake"
+      STAMP_DIR         "stamp"
+      DOWNLOAD_DIR      "download"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/src/cmake"
+      BINARY_DIR        "build"
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND     ""
+      INSTALL_COMMAND   ""
+      TEST_COMMAND      ""
+    )
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/src/openmp")
+    ExternalProject_Add(
       llvm-openmp
-      URL               https://releases.llvm.org/7.0.0/openmp-7.0.0.src.tar.xz
-      URL_HASH          SHA512=bda383d62c822db41504d7774974809cd2af042b03a0b4ca450cc1478c5977682f5c646734801c1b7a16233141d62359c17e87e1435c48a222e159a8763f8857
-      PREFIX            "${CMAKE_BINARY_DIR}"
-      STAMP_DIR         "${CMAKE_BINARY_DIR}/stamp"
-      DOWNLOAD_DIR      "${CMAKE_BINARY_DIR}/download"
-      SOURCE_DIR        "${CMAKE_BINARY_DIR}/src"
-      BINARY_DIR        "${CMAKE_BINARY_DIR}/build"
+      URL               https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/openmp-17.0.6.src.tar.xz
+      URL_HASH          SHA512=836c48db873e3da64835913c2c1d80efaebdfc7061f153acc7b478ea0d73b9c546a09d70dd1465e3e92684947c4a9cb197886b29cbd42418a778faa56b08cc5e
+      PREFIX            "${CMAKE_BINARY_DIR}/llvm-openmp"
+      STAMP_DIR         "stamp"
+      DOWNLOAD_DIR      "download"
+      SOURCE_DIR        "${CMAKE_BINARY_DIR}/src/openmp"
+      BINARY_DIR        "build"
       CONFIGURE_COMMAND ""
       BUILD_COMMAND     ""
       INSTALL_COMMAND   ""

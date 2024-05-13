@@ -21,27 +21,32 @@
 
 #pragma once
 
-#include "AddressSanitizer.h" // for ASan
-#include "common/Common.h"    // for roundUp
-#include "common/Memory.h"    // for alignedMalloc
-#include "io/Buffer.h"        // for Buffer::size_type, DataBuffer, Buffer
-#include "io/IOException.h"   // for ThrowException, ThrowIOE
-#include <cassert>            // for assert
-#include <cstdint>            // for uint8_t, uint16_t, int32_t, uint32_t
-#include <cstring>            // for memchr, memcmp, memcpy
-#include <limits>             // for numeric_limits
+#include "rawspeedconfig.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "io/Buffer.h"
+#include "io/IOException.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <iterator>
+#include <limits>
+#include <string_view>
+
+#ifndef NDEBUG
+#include "AddressSanitizer.h"
+#endif
 
 namespace rawspeed {
 
-class ByteStream : public DataBuffer
-{
-protected:
-  size_type pos = 0; // position of stream in bytes (this is next byte to deliver)
+class ByteStream final : public DataBuffer {
+  size_type pos =
+      0; // position of stream in bytes (this is next byte to deliver)
 
 public:
   ByteStream() = default;
 
-  explicit ByteStream(const DataBuffer& buffer) : DataBuffer(buffer) {}
+  explicit ByteStream(DataBuffer buffer) : DataBuffer(buffer) {}
 
   // return ByteStream that starts at given offset
   // i.e. this->data + offset == getSubStream(offset).data
@@ -54,152 +59,139 @@ public:
     return ByteStream(DataBuffer(getSubView(offset), getByteOrder()));
   }
 
-  [[nodiscard]] inline size_type check(size_type bytes) const {
-    if (static_cast<uint64_t>(pos) + bytes > size)
+  [[nodiscard]] size_type check(size_type bytes) const {
+    if (!isValid(pos, bytes))
       ThrowIOE("Out of bounds access in ByteStream");
-    assert(!ASan::RegionIsPoisoned(data + pos, bytes));
+    [[maybe_unused]] Buffer tmp = getSubView(pos, bytes);
+    assert(tmp.getSize() == bytes);
+    assert(!ASan::RegionIsPoisoned(tmp.begin(), tmp.getSize()));
     return bytes;
   }
 
-  [[nodiscard]] inline size_type check(size_type nmemb, size_type size_) const {
+  [[nodiscard]] size_type check(size_type nmemb, size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
       ThrowIOE("Integer overflow when calculating stream length");
     return check(nmemb * size_);
   }
 
-  [[nodiscard]] inline size_type getPosition() const {
-    assert(size >= pos);
+  [[nodiscard]] size_type getPosition() const {
+    invariant(getSize() >= pos);
     (void)check(0);
     return pos;
   }
-  inline void setPosition(size_type newPos) {
+  void setPosition(size_type newPos) {
     pos = newPos;
     (void)check(0);
   }
-  [[nodiscard]] inline size_type getRemainSize() const {
-    assert(size >= pos);
+  [[nodiscard]] size_type RAWSPEED_READONLY getRemainSize() const {
+    invariant(getSize() >= pos);
     (void)check(0);
-    return size - pos;
+    return getSize() - pos;
   }
-  [[nodiscard]] inline const uint8_t* peekData(size_type count) const {
-    return Buffer::getData(pos, count);
+  [[nodiscard]] const uint8_t* peekData(size_type count) const {
+    return Buffer::getSubView(pos, count).begin();
   }
-  inline const uint8_t* getData(size_type count) {
-    const uint8_t* ret = Buffer::getData(pos, count);
+  const uint8_t* getData(size_type count) {
+    const uint8_t* ret = peekData(count);
     pos += count;
     return ret;
   }
-  inline Buffer getBuffer(size_type size_) {
-    Buffer ret = getSubView(pos, size_);
+  [[nodiscard]] Buffer peekBuffer(size_type size_) const {
+    return getSubView(pos, size_);
+  }
+  Buffer getBuffer(size_type size_) {
+    Buffer ret = peekBuffer(size_);
     pos += size_;
     return ret;
   }
-  [[nodiscard]] inline ByteStream peekStream(size_type size_) const {
+  [[nodiscard]] Buffer peekRemainingBuffer() const {
+    return getSubView(pos, getRemainSize());
+  }
+  [[nodiscard]] ByteStream peekStream(size_type size_) const {
     return getSubStream(pos, size_);
   }
-  [[nodiscard]] inline ByteStream peekStream(size_type nmemb,
-                                             size_type size_) const {
+  [[nodiscard]] ByteStream peekStream(size_type nmemb, size_type size_) const {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
       ThrowIOE("Integer overflow when calculating stream length");
     return peekStream(nmemb * size_);
   }
-  inline ByteStream getStream(size_type size_) {
+  ByteStream getStream(size_type size_) {
     ByteStream ret = peekStream(size_);
     pos += size_;
     return ret;
   }
-  inline ByteStream getStream(size_type nmemb, size_type size_) {
+  ByteStream getStream(size_type nmemb, size_type size_) {
     if (size_ && nmemb > std::numeric_limits<size_type>::max() / size_)
       ThrowIOE("Integer overflow when calculating stream length");
     return getStream(nmemb * size_);
   }
 
-  [[nodiscard]] inline uint8_t peekByte(size_type i = 0) const {
-    assert(data);
-    (void)check(i + 1);
-    return data[pos+i];
-  }
-
-  inline void skipBytes(size_type nbytes) { pos += check(nbytes); }
-  inline void skipBytes(size_type nmemb, size_type size_) {
+  void skipBytes(size_type nbytes) { pos += check(nbytes); }
+  void skipBytes(size_type nmemb, size_type size_) {
     pos += check(nmemb, size_);
   }
 
-  inline bool hasPatternAt(const char *pattern, size_type size_,
-                           size_type relPos) const {
-    assert(data);
-    if (!isValid(pos + relPos, size_))
+  [[nodiscard]] bool hasPatternAt(std::string_view pattern,
+                                  size_type relPos) const {
+    if (!isValid(pos + relPos, implicit_cast<size_type>(pattern.size())))
       return false;
-    return memcmp(&data[pos + relPos], pattern, size_) == 0;
+    auto tmp =
+        getSubView(pos + relPos, implicit_cast<size_type>(pattern.size()));
+    assert(tmp.getSize() == pattern.size());
+    return std::equal(tmp.begin(), tmp.end(), pattern.begin());
   }
 
-  inline bool hasPrefix(const char *prefix, size_type size_) const {
-    return hasPatternAt(prefix, size_, 0);
+  [[nodiscard]] bool hasPrefix(std::string_view prefix) const {
+    return hasPatternAt(prefix, /*relPos=*/0);
   }
 
-  inline bool skipPrefix(const char *prefix, size_type size_) {
-    bool has_prefix = hasPrefix(prefix, size_);
+  bool skipPrefix(std::string_view prefix) {
+    bool has_prefix = hasPrefix(prefix);
     if (has_prefix)
-      pos += size_;
+      pos += prefix.size();
     return has_prefix;
   }
 
-  inline uint8_t getByte() {
-    assert(data);
-    (void)check(1);
-    return data[pos++];
-  }
-
-  template <typename T>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] inline T
-  peek(size_type i = 0) const {
+  template <typename T> [[nodiscard]] T peek(size_type i = 0) const {
     return DataBuffer::get<T>(pos, i);
   }
-
-  [[nodiscard]] inline uint16_t peekU16() const { return peek<uint16_t>(); }
-
-  template<typename T> inline T get() {
+  template <typename T> T get() {
     auto ret = peek<T>();
     pos += sizeof(T);
     return ret;
   }
 
-  inline uint16_t getU16() { return get<uint16_t>(); }
-  inline int32_t getI32() { return get<int32_t>(); }
-  inline uint32_t getU32() { return get<uint32_t>(); }
-  inline float getFloat() { return get<float>(); }
+  [[nodiscard]] uint8_t peekByte(size_type i = 0) const {
+    return peek<uint8_t>(i);
+  }
+  uint8_t getByte() { return get<uint8_t>(); }
 
-  [[nodiscard]] const char* peekString() const {
-    assert(data);
-    if (memchr(peekData(getRemainSize()), 0, getRemainSize()) == nullptr)
+  [[nodiscard]] uint16_t peekU16() const { return peek<uint16_t>(); }
+
+  [[nodiscard]] uint32_t peekU32(size_type i = 0) const {
+    return peek<uint32_t>(i);
+  }
+
+  uint16_t getU16() { return get<uint16_t>(); }
+  int32_t getI32() { return get<int32_t>(); }
+  uint32_t getU32() { return get<uint32_t>(); }
+  float getFloat() { return get<float>(); }
+
+  [[nodiscard]] std::string_view peekString() const {
+    Buffer tmp = peekBuffer(getRemainSize());
+    const auto* termIter = std::find(tmp.begin(), tmp.end(), '\0');
+    if (termIter == tmp.end())
       ThrowIOE("String is not null-terminated");
-    return reinterpret_cast<const char*>(&data[pos]);
+    std::string_view::size_type strlen = std::distance(tmp.begin(), termIter);
+    return {reinterpret_cast<const char*>(tmp.begin()), strlen};
   }
 
-  // Increments the stream to after the next zero byte and returns the bytes in between (not a copy).
-  // If the first byte is zero, stream is incremented one.
-  const char* getString() {
-    assert(data);
-    size_type start = pos;
-    bool isNullTerminator = false;
-    do {
-      (void)check(1);
-      isNullTerminator = (data[pos] == '\0');
-      pos++;
-    } while (!isNullTerminator);
-    return reinterpret_cast<const char*>(&data[start]);
-  }
-
-  // special factory function to set up internal buffer with copy of passed data.
-  // only necessary to create 'fake' TiffEntries (see e.g. RAF)
-  static ByteStream createCopy(const void* data_, size_type size_) {
-    ByteStream bs;
-    auto* new_data = alignedMalloc<uint8_t, 8>(roundUp(size_, 8));
-    memcpy(new_data, data_, size_);
-    bs.data = new_data;
-    bs.size = size_;
-    bs.isOwner = true;
-    return bs; // hint: copy elision or move will happen
+  // Increments the stream to after the next zero byte and returns the bytes in
+  // between (not a copy). If the first byte is zero, stream is incremented one.
+  [[nodiscard]] std::string_view getString() {
+    std::string_view str = peekString();
+    skipBytes(implicit_cast<Buffer::size_type>(1 + str.size()));
+    return str;
   }
 };
 

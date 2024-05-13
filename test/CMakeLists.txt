@@ -4,6 +4,9 @@ set (DISABLED_WARNING_FLAGS
   "suggest-attribute=const"
   "suggest-override"
   "used-but-marked-unused"
+  "global-constructors"
+  "exit-time-destructors"
+  "weak-vtables"
 )
 
 foreach(warning ${DISABLED_WARNING_FLAGS})
@@ -21,10 +24,4 @@ if(NOT RAWSPEED_SPECIAL_BUILD)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wlarger-than=${MAX_MEANINGFUL_SIZE})
 endif()
 
-set(CMAKE_CXX_CLANG_TIDY_SAVE "${CMAKE_CXX_CLANG_TIDY}")
-
-unset(CMAKE_CXX_CLANG_TIDY)
-
 add_subdirectory(librawspeed)
-
-set(CMAKE_CXX_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY_SAVE}")

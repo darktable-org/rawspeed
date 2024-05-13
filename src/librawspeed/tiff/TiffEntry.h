@@ -1,4 +1,4 @@
-/*
+﻿/*
     RawSpeed - RAW file decoder.
 
     Copyright (C) 2009-2014 Klaus Post
@@ -22,26 +22,27 @@
 
 #pragma once
 
-#include "common/NotARational.h" // for NotARational
-#include "io/ByteStream.h"       // for ByteStream
-#include "tiff/TiffTag.h"        // for TiffTag
-#include <algorithm>             // for fill_n
-#include <array>                 // for array
-#include <cstdint>               // for uint32_t, uint16_t, int16_t, int32_t
-#include <string>                // for string
-#include <vector>                // for vector
+#include "rawspeedconfig.h"
+#include "adt/NotARational.h"
+#include "io/ByteStream.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 
 class DataBuffer;
 class TiffIFD;
+class Buffer;
 
 /*
  * Tag data type information.
  *
  * Note: RATIONALs are the ratio of two 32-bit integer values.
  */
-enum class TiffDataType {
+enum class TiffDataType : uint8_t {
   NOTYPE = 0,     /* placeholder */
   BYTE = 1,       /* 8-bit unsigned integer */
   ASCII = 2,      /* 8-bit bytes w/ last byte null */
@@ -58,21 +59,24 @@ enum class TiffDataType {
   OFFSET = 13,    /* 32-bit unsigned offset used for IFD and other offsets */
 };
 
-class TiffEntry
-{
+class TiffEntry {
   TiffIFD* parent;
   ByteStream data;
+
+  virtual void anchor() const;
 
   friend class TiffIFD;
 
   template <typename T, T (TiffEntry::*getter)(uint32_t index) const>
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] std::vector<T>
-  getArray(uint32_t count_) const {
+  [[nodiscard]] std::vector<T> getArray(uint32_t count_) const {
     std::vector<T> res(count_);
     for (uint32_t i = 0; i < count_; ++i)
       res[i] = (this->*getter)(i);
     return res;
   }
+
+protected:
+  void setData(ByteStream data_);
 
 public:
   TiffTag tag;
@@ -80,54 +84,64 @@ public:
   uint32_t count;
 
   TiffEntry(TiffIFD* parent, TiffTag tag, TiffDataType type, uint32_t count,
-            ByteStream&& data);
+            ByteStream data);
   TiffEntry(TiffIFD* parent, ByteStream& bs);
 
-  [[nodiscard]] bool __attribute__((pure)) isFloat() const;
-  [[nodiscard]] bool __attribute__((pure)) isRational() const;
-  [[nodiscard]] bool __attribute__((pure)) isSRational() const;
-  [[nodiscard]] bool __attribute__((pure)) isInt() const;
-  [[nodiscard]] bool __attribute__((pure)) isString() const;
+  virtual ~TiffEntry() = default;
+
+  [[nodiscard]] bool RAWSPEED_READONLY isFloat() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isRational() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isSRational() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isInt() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isString() const;
   [[nodiscard]] uint8_t getByte(uint32_t index = 0) const;
   [[nodiscard]] uint32_t getU32(uint32_t index = 0) const;
   [[nodiscard]] int32_t getI32(uint32_t index = 0) const;
   [[nodiscard]] uint16_t getU16(uint32_t index = 0) const;
   [[nodiscard]] int16_t getI16(uint32_t index = 0) const;
-  [[nodiscard]] NotARational<unsigned> getRational(uint32_t index = 0) const;
-  [[nodiscard]] NotARational<int> getSRational(uint32_t index = 0) const;
+  [[nodiscard]] NotARational<uint32_t> getRational(uint32_t index = 0) const;
+  [[nodiscard]] NotARational<int32_t> getSRational(uint32_t index = 0) const;
   [[nodiscard]] float getFloat(uint32_t index = 0) const;
   [[nodiscard]] std::string getString() const;
 
-  [[nodiscard]] inline std::vector<uint16_t>
-  getU16Array(uint32_t count_) const {
+  [[nodiscard]] std::vector<uint16_t> getU16Array(uint32_t count_) const {
     return getArray<uint16_t, &TiffEntry::getU16>(count_);
   }
 
-  [[nodiscard]] inline std::vector<uint32_t>
-  getU32Array(uint32_t count_) const {
+  [[nodiscard]] std::vector<uint32_t> getU32Array(uint32_t count_) const {
     return getArray<uint32_t, &TiffEntry::getU32>(count_);
   }
 
-  [[nodiscard]] inline std::vector<float> getFloatArray(uint32_t count_) const {
+  [[nodiscard]] std::vector<float> getFloatArray(uint32_t count_) const {
     return getArray<float, &TiffEntry::getFloat>(count_);
   }
 
-  [[nodiscard]] inline std::vector<NotARational<unsigned>>
+  [[nodiscard]] std::vector<NotARational<uint32_t>>
   getRationalArray(uint32_t count_) const {
-    return getArray<NotARational<unsigned>, &TiffEntry::getRational>(count_);
+    return getArray<NotARational<uint32_t>, &TiffEntry::getRational>(count_);
   }
 
-  [[nodiscard]] inline std::vector<NotARational<int>>
+  [[nodiscard]] std::vector<NotARational<int32_t>>
   getSRationalArray(uint32_t count_) const {
     return getArray<NotARational<int>, &TiffEntry::getSRational>(count_);
   }
 
   [[nodiscard]] ByteStream getData() const { return data; }
 
-  [[nodiscard]] const DataBuffer& getRootIfdData() const;
+  [[nodiscard]] DataBuffer getRootIfdData() const;
 
 protected:
   static const std::array<uint32_t, 14> datashifts;
+};
+
+class TiffEntryWithData final : public TiffEntry {
+  const std::vector<uint8_t> data;
+
+  void anchor() const override;
+
+public:
+  TiffEntryWithData(TiffIFD* parent, TiffTag tag, TiffDataType type,
+                    uint32_t count, Buffer mirror);
 };
 
 } // namespace rawspeed

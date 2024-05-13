@@ -19,17 +19,16 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include <algorithm>                   // for copy, generate, fill_n, max
-#include <cstdlib>                     // for rand, srand
-#include <gmock/gmock.h>               // for InitGoogleMock
-#include <gtest/gtest.h>               // for ParamIteratorInterface, Message
-#include <iostream>                    // for operator<<, basic_ostream::op...
-#include <limits>                      // for numeric_limits
-#include <memory>                      // for unique_ptr, allocator
-#include <string>                      // for basic_string, string
-#include <tuple>                       // for get, tuple
-#include <vector>                      // for vector
+#include "metadata/CameraSensorInfo.h"
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <limits>
+#include <memory>
+#include <tuple>
+#include <vector>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using rawspeed::CameraSensorInfo;
 using std::unique_ptr;
@@ -42,15 +41,21 @@ class CameraSensorInfoTestDumb
     : public ::testing::TestWithParam<std::tuple<int, int>> {
 protected:
   CameraSensorInfoTestDumb()
-      : mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
-        mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
+      : mBlackLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
+        mWhiteLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
         mBlackLevelSeparate({
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand()  // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand()  // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
         }) {}
-  virtual void SetUp() override {
+  virtual void SetUp() final {
     mMinIso = std::get<0>(GetParam());
     mMaxIso = std::get<1>(GetParam());
   }
@@ -78,10 +83,10 @@ protected:
   std::vector<int> mBlackLevelSeparate;
 };
 
-INSTANTIATE_TEST_CASE_P(MinMax, CameraSensorInfoTestDumb,
-                        testing::Combine(testing::ValuesIn(ISOList), // min iso
-                                         testing::ValuesIn(ISOList)  // max iso
-                                         ));
+INSTANTIATE_TEST_SUITE_P(MinMax, CameraSensorInfoTestDumb,
+                         testing::Combine(testing::ValuesIn(ISOList), // min iso
+                                          testing::ValuesIn(ISOList)  // max iso
+                                          ));
 
 TEST_P(CameraSensorInfoTestDumb, Constructor) {
   ASSERT_NO_THROW({
@@ -115,7 +120,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig); // NOLINT trying to test the copy
+    CameraSensorInfo Info(InfoOrig);
   });
 
   ASSERT_NO_THROW({
@@ -141,7 +146,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentConstructorGetters) {
   {
     const CameraSensorInfo InfoOrig(mBlackLevel, mWhiteLevel, mMinIso, mMaxIso,
                                     mBlackLevelSeparate);
-    CameraSensorInfo Info(InfoOrig); // NOLINT
+    CameraSensorInfo Info(InfoOrig);
 
     checkHelper(Info);
     checkHelper(Info, InfoOrig);
@@ -224,7 +229,7 @@ TEST_P(CameraSensorInfoTestDumb, AssignmentGetters) {
 
 // --------------------------------------------------------
 
-struct IsoExpectationsT {
+struct IsoExpectationsT final {
   int mMinIso;
   int Iso;
   int mMaxIso;
@@ -262,15 +267,21 @@ class CameraSensorInfoTest : public ::testing::TestWithParam<IsoExpectationsT> {
 protected:
   CameraSensorInfoTest()
       : data(IsoExpectationsT{-1, -1, -1, false, false}),
-        mBlackLevel(std::rand()), // NOLINT do not need crypto-level randomness
-        mWhiteLevel(std::rand()), // NOLINT do not need crypto-level randomness
+        mBlackLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
+        mWhiteLevel(std::rand()), // NOLINT(cert-msc50-cpp): do not need
+                                  // crypto-level randomness
         mBlackLevelSeparate({
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand(), // NOLINT do not need crypto-level randomness
-            std::rand()  // NOLINT do not need crypto-level randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand(), // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
+            std::rand()  // NOLINT(cert-msc50-cpp): do not need crypto-level
+                         // randomness
         }) {}
-  virtual void SetUp() override { data = GetParam(); }
+  virtual void SetUp() final { data = GetParam(); }
 
   IsoExpectationsT data;
 
@@ -279,8 +290,8 @@ protected:
   std::vector<int> mBlackLevelSeparate;
 };
 
-INSTANTIATE_TEST_CASE_P(Expectations, CameraSensorInfoTest,
-                        testing::ValuesIn(CameraSensorIsoInfos));
+INSTANTIATE_TEST_SUITE_P(Expectations, CameraSensorInfoTest,
+                         testing::ValuesIn(CameraSensorIsoInfos));
 
 TEST_P(CameraSensorInfoTest, IsDefault) {
   CameraSensorInfo Info(mBlackLevel, mWhiteLevel, data.mMinIso, data.mMaxIso,

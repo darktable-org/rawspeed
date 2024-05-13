@@ -28,22 +28,28 @@
  */
 
 #include "md5.h"
-#include <cstdint> // for uint32_t, uint8_t
-#include <cstdio>  // for size_t, snprintf
-#include <cstring> // for memset, memcpy
-#include <string>  // for allocator, string
+#include "adt/Array1DRef.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <string>
 
 namespace rawspeed::md5 {
 
-// hashes 64 bytes at once
-static void md5_compress(md5_state* state, const uint8_t* block);
+__attribute__((noinline)) MD5Hasher::state_type
+MD5Hasher::compress(state_type state,
+                    Array1DRef<const uint8_t> block) noexcept {
+  invariant(block.size() == MD5Hasher::block_size);
 
-static void md5_compress(md5_state* state, const uint8_t* block) {
   std::array<uint32_t, 16> schedule = {{}};
 
-  auto LOADSCHEDULE = [&block, &schedule](int i) {
+  auto LOADSCHEDULE = [block, &schedule](int i) {
     for (int k = 3; k >= 0; k--)
-      schedule[i] |= uint32_t(block[4 * i + k]) << (8 * k);
+      schedule[i] |= uint32_t(block(4 * i + k)) << (8 * k);
   };
 
   for (int i = 0; i < 16; i++)
@@ -80,10 +86,13 @@ static void md5_compress(md5_state* state, const uint8_t* block) {
     ROUND_TAIL(a, b, c ^ (b | ~d), k, s, t);
   };
 
-  uint32_t a = (*state)[0];
-  uint32_t b = (*state)[1];
-  uint32_t c = (*state)[2];
-  uint32_t d = (*state)[3];
+  std::array<uint32_t, 4> tmp;
+  for (int i = 0; i != 4; ++i)
+    tmp[i] = state[i];
+  uint32_t& a = tmp[0];
+  uint32_t& b = tmp[1];
+  uint32_t& c = tmp[2];
+  uint32_t& d = tmp[3];
 
   ROUND0(a, b, c, d, 0, 7, 0xD76AA478);
   ROUND0(d, a, b, c, 1, 12, 0xE8C7B756);
@@ -150,57 +159,29 @@ static void md5_compress(md5_state* state, const uint8_t* block) {
   ROUND3(c, d, a, b, 2, 15, 0x2AD7D2BB);
   ROUND3(b, c, d, a, 9, 21, 0xEB86D391);
 
-  (*state)[0] = uint32_t(0UL + (*state)[0] + a);
-  (*state)[1] = uint32_t(0UL + (*state)[1] + b);
-  (*state)[2] = uint32_t(0UL + (*state)[2] + c);
-  (*state)[3] = uint32_t(0UL + (*state)[3] + d);
+  for (int i = 0; i != 4; ++i)
+    state[i] = uint32_t(uint64_t(0) + state[i] + tmp[i]);
+
+  return state;
 }
 
 /* Full message hasher */
+MD5Hasher::state_type md5_hash(const uint8_t* message, size_t len) noexcept {
+  MD5 hasher;
 
-void md5_hash(const uint8_t* message, size_t len, md5_state* hash) {
-  *hash = md5_init;
+  hasher.take(message, len);
 
-  size_t i;
-  for (i = 0; len - i >= 64; i += 64)
-    md5_compress(hash, &message[i]);
-
-  std::array<uint8_t, 64> block;
-  size_t rem = len - i;
-  memcpy(block.data(), &message[i], rem);
-
-  block[rem] = 0x80;
-  rem++;
-  if (64 - rem >= 8)
-    memset(&block[rem], 0, 56 - rem);
-  else {
-    memset(&block[rem], 0, 64 - rem);
-    md5_compress(hash, block.data());
-    memset(block.data(), 0, 56);
-  }
-
-  block[64 - 8] = static_cast<uint8_t>((len & 0x1FU) << 3);
-  len >>= 5;
-  for (i = 1; i < 8; i++) {
-    block[64 - 8 + i] = static_cast<uint8_t>(len);
-    len >>= 8;
-  }
-  md5_compress(hash, block.data());
+  return hasher.flush();
 }
 
-std::string hash_to_string(const md5_state& hash) {
+std::string hash_to_string(const MD5Hasher::state_type& hash) noexcept {
   std::array<char, 2 * sizeof(hash) + 1> res;
-  const auto* h = reinterpret_cast<const uint8_t*>(&hash[0]);
+  const Array1DRef<const std::byte> h =
+      Array1DRef(hash.data(), implicit_cast<int>(hash.size()));
   for (int i = 0; i < static_cast<int>(sizeof(hash)); ++i)
-    snprintf(&res[2 * i], 3, "%02x", h[i]);
+    snprintf(&res[2 * i], 3, "%02x", static_cast<uint8_t>(h(i)));
   res[32] = 0;
   return res.data();
-}
-
-std::string md5_hash(const uint8_t* message, size_t len) {
-  md5_state hash;
-  md5_hash(message, len, &hash);
-  return hash_to_string(hash);
 }
 
 } // namespace rawspeed::md5

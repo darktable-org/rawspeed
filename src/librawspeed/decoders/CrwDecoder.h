@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
-#include "tiff/CiffIFD.h"        // for CiffIFD
-#include <cstdint>               // for int64_t
-#include <memory>                // for unique_ptr
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include "tiff/CiffIFD.h"
+#include <cstdint>
+#include <memory>
 
 namespace rawspeed {
 
@@ -36,11 +36,11 @@ class CrwDecoder final : public RawDecoder {
   std::unique_ptr<const CiffIFD> mRootIFD;
 
 public:
-  CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, const Buffer& file);
+  CrwDecoder(std::unique_ptr<const CiffIFD> rootIFD, Buffer file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  static bool isCRW(const Buffer& input);
+  static bool isCRW(Buffer input);
 
 private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }

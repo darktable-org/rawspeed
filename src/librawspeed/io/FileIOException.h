@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"               // for RAWSPEED_NOINLINE, RAWSPEE...
-
 // IWYU pragma: begin_exports
-#include "common/RawspeedException.h"     // for ThrowExceptionHelper
-#include "decoders/RawDecoderException.h" // for RawDecoderException
+#include "common/RawspeedException.h"
+#include "decoders/RawDecoderException.h"
 // IWYU pragma: end_exports
 
 namespace rawspeed {
 
 class FileIOException final : public RawDecoderException {
+  void anchor() const override;
+
 public:
   using RawDecoderException::RawDecoderException;
 };

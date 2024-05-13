@@ -20,28 +20,29 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h"
 #include "decompressors/PhaseOneDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImageData, RawImage
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpMSB32.h"              // for BitPumpMSB32
-#include <algorithm>                      // for sort, fill_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for int32_t, uint16_t
-#include <memory>                         // for allocator_traits<>::value_...
-#include <string>                         // for string
-#include <utility>                        // for move
-#include <vector>                         // for vector<>::iterator, vector
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB32.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
-PhaseOneDecompressor::PhaseOneDecompressor(const RawImage& img,
+PhaseOneDecompressor::PhaseOneDecompressor(RawImage img,
                                            std::vector<PhaseOneStrip>&& strips_)
-    : mRaw(img), strips(std::move(strips_)) {
+    : mRaw(std::move(img)), strips(std::move(strips_)) {
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type");
 
@@ -84,22 +85,22 @@ void PhaseOneDecompressor::prepareStrips() {
 void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
-  assert(out.width > 0);
-  assert(out.width % 2 == 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 2 == 0);
 
   static constexpr std::array<const int, 10> length = {8,  7, 6,  9,  11,
                                                        10, 5, 12, 14, 13};
 
-  BitPumpMSB32 pump(strip.bs);
+  BitStreamerMSB32 pump(strip.bs.peekRemainingBuffer().getAsArray1DRef());
 
   std::array<int32_t, 2> pred;
   pred.fill(0);
   std::array<int, 2> len;
   const int row = strip.n;
-  for (int col = 0; col < out.width; col++) {
+  for (int col = 0; col < out.width(); col++) {
     pump.fill(32);
     if (static_cast<unsigned>(col) >=
-        (out.width & ~7U)) // last 'width % 8' pixels.
+        (out.width() & ~7U)) // last 'width % 8' pixels.
       len[0] = len[1] = 14;
     else if ((col & 7) == 0) {
       for (int& i : len) {
@@ -115,16 +116,17 @@ void PhaseOneDecompressor::decompressStrip(const PhaseOneStrip& strip) const {
           }
         }
 
-        assert((col == 0 && j > 0) || col != 0);
+        invariant((col == 0 && j > 0) || col != 0);
         if (j > 0)
           i = length[2 * (j - 1) + pump.getBitsNoFill(1)];
       }
     }
 
     int i = len[col & 1];
-    if (i == 14)
-      out(row, col) = pred[col & 1] = pump.getBitsNoFill(16);
-    else {
+    if (i == 14) {
+      pred[col & 1] = pump.getBitsNoFill(16);
+      out(row, col) = implicit_cast<uint16_t>(pred[col & 1]);
+    } else {
       pred[col & 1] +=
           static_cast<signed>(pump.getBitsNoFill(i)) + 1 - (1 << (i - 1));
       // FIXME: is the truncation the right solution here?
@@ -137,12 +139,16 @@ void PhaseOneDecompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto strip = strips.cbegin(); strip < strips.cend(); ++strip) {
+  for (const auto& strip :
+       Array1DRef(strips.data(), implicit_cast<int>(strips.size()))) {
     try {
-      decompressStrip(*strip);
+      decompressStrip(strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }

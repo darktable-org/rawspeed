@@ -26,16 +26,33 @@
 /* #undef WITH_SSE2 */
 #endif
 
-static constexpr const auto RAWSPEED_CACHELINESIZE = @RAWSPEED_CACHELINESIZE@ULL;
-static_assert(RAWSPEED_CACHELINESIZE > 0 && ((RAWSPEED_CACHELINESIZE & (RAWSPEED_CACHELINESIZE - 1)) == 0), "Expected to know CPU L1d cache line size.");
+// NOLINTNEXTLINE(google-runtime-int)
+static constexpr unsigned long long RAWSPEED_CACHELINESIZE =
+    ${RAWSPEED_CACHELINESIZE};
+static_assert(RAWSPEED_CACHELINESIZE > 0 &&
+                  ((RAWSPEED_CACHELINESIZE & (RAWSPEED_CACHELINESIZE - 1)) ==
+                   0),
+              "Expected to know CPU L1d cache line size.");
 
-static constexpr const auto RAWSPEED_PAGESIZE = @RAWSPEED_PAGESIZE@ULL;
-static_assert(RAWSPEED_PAGESIZE > 0 && ((RAWSPEED_PAGESIZE & (RAWSPEED_PAGESIZE - 1)) == 0), "Expected to know (minimal) CPU page size.");
-static_assert(RAWSPEED_PAGESIZE >= RAWSPEED_CACHELINESIZE, "Expected that (minimal) CPU page size is not smaller than (minimal) CPU page size.");
+// NOLINTNEXTLINE(google-runtime-int)
+static constexpr unsigned long long RAWSPEED_PAGESIZE = ${RAWSPEED_PAGESIZE};
+static_assert(RAWSPEED_PAGESIZE > 0 &&
+                  ((RAWSPEED_PAGESIZE & (RAWSPEED_PAGESIZE - 1)) == 0),
+              "Expected to know (minimal) CPU page size.");
+static_assert(RAWSPEED_PAGESIZE >= RAWSPEED_CACHELINESIZE,
+              "Expected that (minimal) CPU page size is not smaller than "
+              "(minimal) CPU page size.");
 
-static constexpr const auto RAWSPEED_LARGEPAGESIZE = @RAWSPEED_LARGEPAGESIZE@ULL;
-static_assert(RAWSPEED_LARGEPAGESIZE > 0 && ((RAWSPEED_LARGEPAGESIZE & (RAWSPEED_LARGEPAGESIZE - 1)) == 0), "Expected to know CPU page size.");
-static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE, "Expected that CPU large page size is not smaller than (minimal) CPU page size.");
+// NOLINTNEXTLINE(google-runtime-int)
+static constexpr unsigned long long RAWSPEED_LARGEPAGESIZE =
+    ${RAWSPEED_LARGEPAGESIZE};
+static_assert(RAWSPEED_LARGEPAGESIZE > 0 &&
+                  ((RAWSPEED_LARGEPAGESIZE & (RAWSPEED_LARGEPAGESIZE - 1)) ==
+                   0),
+              "Expected to know CPU page size.");
+static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE,
+              "Expected that CPU large page size is not smaller than (minimal) "
+              "CPU page size.");
 
 #cmakedefine HAVE_PUGIXML
 
@@ -50,12 +67,6 @@ static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE, "Expected that CPU la
 
 #cmakedefine HAVE_CXX_THREAD_LOCAL
 #cmakedefine HAVE_GCC_THREAD_LOCAL
-
-// which aligned memory allocation function is available?
-// only the first one found will be enabled
-#cmakedefine HAVE_ALIGNED_ALLOC
-#cmakedefine HAVE_POSIX_MEMALIGN
-#cmakedefine HAVE_ALIGNED_MALLOC
 
 #cmakedefine RAWSPEED_STANDALONE_BUILD
 #ifdef RAWSPEED_STANDALONE_BUILD
@@ -75,3 +86,5 @@ static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE, "Expected that CPU la
 
 #define RAWSPEED_UNLIKELY_FUNCTION __attribute__((cold))
 #define RAWSPEED_NOINLINE __attribute__((noinline))
+#define RAWSPEED_READONLY __attribute__((pure))
+#define RAWSPEED_READNONE __attribute__((const))

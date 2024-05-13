@@ -21,10 +21,12 @@
 
 #pragma once
 
-#include "common/RawImage.h"            // for RawImage
-#include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
-#include "tiff/TiffIFD.h"               // for TiffRootIFD (ptr only), Tiff...
-#include <utility>                      // for move
+#include "rawspeedconfig.h"
+#include "common/RawImage.h"
+#include "decoders/SimpleTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <utility>
 
 namespace rawspeed {
 
@@ -35,9 +37,9 @@ class DcsDecoder final : public SimpleTiffDecoder {
   void checkImageDimensions() override;
 
 public:
-  static bool __attribute__((pure))
-  isAppropriateDecoder(const TiffRootIFD* rootIFD, const Buffer& file);
-  DcsDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool RAWSPEED_READONLY isAppropriateDecoder(const TiffRootIFD* rootIFD,
+                                                     Buffer file);
+  DcsDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

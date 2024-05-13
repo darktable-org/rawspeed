@@ -20,16 +20,23 @@
 
 #pragma once
 
-#include <algorithm>        // for max, clamp
-#include <array>            // for array
-#include <cassert>          // for assert
-#include <climits>          // for CHAR_BIT
-#include <cstdint>          // for uint8_t, uintptr_t, uint16_t
-#include <cstring>          // for size_t, memcpy
-#include <initializer_list> // for initializer_list
-#include <string>           // for string, basic_string, allocator
-#include <type_traits>      // for enable_if_t, is_trivially_copyable, make...
-#include <vector>           // for vector
+#include "rawspeedconfig.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Invariant.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <initializer_list>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
 extern "C" int rawspeed_get_number_of_processor_cores();
 
@@ -45,137 +52,115 @@ enum class DEBUG_PRIO {
 void writeLog(DEBUG_PRIO priority, const char* format, ...)
     __attribute__((format(printf, 2, 3)));
 
-inline void copyPixels(uint8_t* dest, int dstPitch, const uint8_t* src,
-                       int srcPitch, int rowSize, int height) {
-  if (height == 1 || (dstPitch == srcPitch && srcPitch == rowSize))
-    memcpy(dest, src, static_cast<size_t>(rowSize) * height);
-  else {
-    for (int y = height; y > 0; --y) {
-      memcpy(dest, src, rowSize);
-      dest += dstPitch;
-      src += srcPitch;
-    }
+inline void copyPixelsImpl(Array1DRef<std::byte> dest,
+                           Array1DRef<const std::byte> src) {
+  invariant(src.size() == dest.size());
+  std::copy(src.begin(), src.end(), dest.begin());
+}
+
+inline void copyPixelsImpl(Array2DRef<std::byte> dest,
+                           Array2DRef<const std::byte> src) {
+  invariant(src.width() > 0);
+  invariant(src.height() > 0);
+  invariant(dest.width() > 0);
+  invariant(dest.height() > 0);
+  invariant(src.height() == dest.height());
+  invariant(src.width() == dest.width());
+  if (auto [destAsStrip, srcAsStrip] =
+          std::make_tuple(dest.getAsArray1DRef(), src.getAsArray1DRef());
+      destAsStrip && srcAsStrip) {
+    copyPixelsImpl(*destAsStrip, *srcAsStrip);
+    return;
   }
+  for (int row = 0; row != src.height(); ++row)
+    copyPixelsImpl(dest[row], src[row]);
 }
 
-template <
-    typename T_TO, typename T_FROM,
-    typename = std::enable_if_t<sizeof(T_TO) == sizeof(T_FROM)>,
-    typename = std::enable_if_t<std::is_trivially_constructible<T_TO>::value>,
-    typename = std::enable_if_t<std::is_trivially_copyable<T_TO>::value>,
-    typename = std::enable_if_t<std::is_trivially_copyable<T_FROM>::value>>
-inline T_TO bit_cast(const T_FROM& from) noexcept {
-  T_TO to;
-  memcpy(&to, &from, sizeof(T_TO));
-  return to;
+inline void copyPixels(std::byte* destPtr, int dstPitch,
+                       const std::byte* srcPtr, int srcPitch, int rowSize,
+                       int height) {
+  invariant(destPtr);
+  invariant(dstPitch > 0);
+  invariant(srcPtr);
+  invariant(srcPitch > 0);
+  invariant(rowSize > 0);
+  invariant(height > 0);
+  invariant(rowSize <= srcPitch);
+  invariant(rowSize <= dstPitch);
+  auto dest = Array2DRef(destPtr, rowSize, height, dstPitch);
+  auto src = Array2DRef(srcPtr, rowSize, height, srcPitch);
+  copyPixelsImpl(dest, src);
 }
 
-// only works for positive values and zero
-template <typename T> constexpr bool isPowerOfTwo(T val) {
-  return (val & (~val+1)) == val;
+template <typename T>
+  requires std::is_pointer_v<T>
+constexpr uint64_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                           uint64_t multiple) {
+  if (multiple == 0)
+    return 0;
+  static_assert(bitwidth<uintptr_t>() >= bitwidth<T>(),
+                "uintptr_t can not represent all pointer values?");
+  return reinterpret_cast<uintptr_t>(value) % multiple;
 }
 
-constexpr size_t __attribute__((const))
-roundToMultiple(size_t value, size_t multiple, bool roundDown) {
-  if ((multiple == 0) || (value % multiple == 0))
+template <typename T>
+  requires std::is_integral_v<T>
+constexpr uint64_t RAWSPEED_READNONE getMisalignmentOffset(T value,
+                                                           uint64_t multiple) {
+  if (multiple == 0)
+    return 0;
+  return value % multiple;
+}
+
+template <typename T>
+constexpr T RAWSPEED_READNONE roundToMultiple(T value, uint64_t multiple,
+                                              bool roundDown) {
+  uint64_t offset = getMisalignmentOffset(value, multiple);
+  if (offset == 0)
     return value;
   // Drop remainder.
-  size_t roundedDown = value - (value % multiple);
+  T roundedDown = value - offset;
   if (roundDown) // If we were rounding down, then that's it.
     return roundedDown;
   // Else, just add one multiple.
   return roundedDown + multiple;
 }
 
-constexpr size_t __attribute__((const))
-roundDown(size_t value, size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE roundDown(uint64_t value,
+                                               uint64_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/true);
 }
 
-constexpr size_t __attribute__((const)) roundUp(size_t value, size_t multiple) {
+constexpr uint64_t RAWSPEED_READNONE roundUp(uint64_t value,
+                                             uint64_t multiple) {
   return roundToMultiple(value, multiple, /*roundDown=*/false);
 }
 
-constexpr size_t __attribute__((const))
-roundUpDivision(size_t value, size_t div) {
+constexpr uint64_t RAWSPEED_READNONE roundUpDivision(uint64_t value,
+                                                     uint64_t div) {
+  invariant(div != 0);
+  return roundUp(value, div) / div;
+}
+
+constexpr uint64_t RAWSPEED_READNONE roundUpDivisionSafe(uint64_t value,
+                                                         uint64_t div) {
   return (value != 0) ? (1 + ((value - 1) / div)) : 0;
 }
 
 template <class T>
-constexpr __attribute__((const)) bool isAligned(
-    T value, size_t multiple,
-    typename std::enable_if_t<std::is_pointer_v<T>>* /*unused*/ = nullptr) {
-  return (multiple == 0) ||
-         (reinterpret_cast<std::uintptr_t>(value) % multiple == 0);
-}
-
-template <class T>
-constexpr __attribute__((const)) bool isAligned(
-    T value, size_t multiple,
-    typename std::enable_if_t<!std::is_pointer_v<T>>* /*unused*/ = nullptr) {
-  return (multiple == 0) ||
-         (static_cast<std::uintptr_t>(value) % multiple == 0);
+constexpr RAWSPEED_READNONE bool isAligned(T value, size_t multiple) {
+  return (multiple == 0) || (getMisalignmentOffset(value, multiple) == 0);
 }
 
 template <typename T, typename T2>
-bool __attribute__((pure))
-isIn(const T value, const std::initializer_list<T2>& list) {
+bool RAWSPEED_READONLY isIn(const T value,
+                            const std::initializer_list<T2>& list) {
   return std::any_of(list.begin(), list.end(),
                      [value](const T2& t) { return t == value; });
 }
 
-template <class T> constexpr unsigned bitwidth([[maybe_unused]] T unused = {}) {
-  return CHAR_BIT * sizeof(T);
-}
-
-// Clamps the given value to the range 0 .. 2^n-1, with n <= 16
-template <typename T>
-constexpr uint16_t __attribute__((const)) clampBits(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
-  // We expect to produce uint16_t.
-  assert(nBits <= 16);
-  // Check that the clamp is not a no-op. Not of uint16_t to 16 bits e.g.
-  // (Well, not really, if we are called from clampBits<signed>, it's ok..).
-  assert(bitwidth<T>() > nBits); // If nBits >= bitwidth, then shift is UB.
-  const T maxVal = (T(1) << nBits) - T(1);
-  return std::clamp(value, T(0), maxVal);
-}
-
-template <typename T>
-constexpr bool __attribute__((const)) isIntN(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_arithmetic_v<T>>* /*unused*/ = nullptr) {
-  assert(nBits < bitwidth<T>() && "Check must not be tautological.");
-  using UnsignedT = std::make_unsigned_t<T>;
-  const auto highBits = static_cast<UnsignedT>(value) >> nBits;
-  return highBits == 0;
-}
-
-template <class T>
-constexpr __attribute__((const)) T extractHighBits(
-    T value, unsigned nBits, unsigned effectiveBitwidth = bitwidth<T>(),
-    typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
-  assert(effectiveBitwidth <= bitwidth<T>());
-  assert(nBits <= effectiveBitwidth);
-  auto numLowBitsToSkip = effectiveBitwidth - nBits;
-  assert(numLowBitsToSkip < bitwidth<T>());
-  return value >> numLowBitsToSkip;
-}
-
-template <typename T>
-constexpr typename std::make_signed_t<T> __attribute__((const)) signExtend(
-    T value, unsigned int nBits,
-    typename std::enable_if_t<std::is_unsigned_v<T>>* /*unused*/ = nullptr) {
-  assert(nBits != 0 && "Only valid for non-zero bit count.");
-  const T SpareSignBits = bitwidth<T>() - nBits;
-  using SignedT = std::make_signed_t<T>;
-  return static_cast<SignedT>(value << SpareSignBits) >> SpareSignBits;
-}
-
 // Trim both leading and trailing spaces from the string
-inline std::string trimSpaces(const std::string& str)
-{
+inline std::string trimSpaces(std::string_view str) {
   // Find the first character position after excluding leading blank spaces
   size_t startpos = str.find_first_not_of(" \t");
 
@@ -186,29 +171,27 @@ inline std::string trimSpaces(const std::string& str)
   if ((startpos == std::string::npos) || (endpos == std::string::npos))
     return "";
 
-  return str.substr(startpos, endpos - startpos + 1);
+  str = str.substr(startpos, endpos - startpos + 1);
+  return {str.begin(), str.end()};
 }
 
 inline std::vector<std::string> splitString(const std::string& input,
-                                            char c = ' ')
-{
+                                            char c = ' ') {
   std::vector<std::string> result;
-  const char* str = input.c_str();
 
-  while (true) {
-    const char* begin = str;
+  std::string_view str = input;
+  while (!str.empty()) {
+    std::string_view::size_type pos = str.find_first_of(c);
 
-    while (*str != c && *str != '\0')
-      str++;
+    if (pos == std::string_view::npos)
+      pos = str.size();
 
-    if (begin != str)
-      result.emplace_back(begin, str);
+    auto substr = str.substr(/*pos=*/0, /*n=*/pos);
 
-    const bool isNullTerminator = (*str == '\0');
-    str++;
+    if (!substr.empty())
+      result.emplace_back(substr);
 
-    if (isNullTerminator)
-      break;
+    str.remove_prefix(std::min(str.size(), 1 + substr.size()));
   }
 
   return result;
@@ -221,13 +204,5 @@ inline std::array<T, N> to_array(const std::vector<T>& v) {
   std::move(v.begin(), v.end(), a.begin());
   return a;
 }
-
-enum class BitOrder {
-  LSB,   /* Memory order */
-  MSB,   /* Input is added to stack byte by byte, and output is lifted
-                     from top */
-  MSB16, /* Same as above, but 16 bits at the time */
-  MSB32, /* Same as above, but 32 bits at the time */
-};
 
 } // namespace rawspeed

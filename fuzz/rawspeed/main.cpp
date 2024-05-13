@@ -18,10 +18,11 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h" // for RawDecoder, RawParser, Buffer, CameraMetaData
-#include <cstddef>        // for size_t
-#include <cstdint>        // for uint8_t
-#include <memory>         // for unique_ptr
+#include "RawSpeed-API.h"
+#include "adt/Casts.h"
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 
 static const rawspeed::CameraMetaData metadata{};
 
@@ -32,7 +33,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   // "/data/cameras.xml");
 
   try {
-    const rawspeed::Buffer buffer(Data, Size);
+    const rawspeed::Buffer buffer(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     rawspeed::RawParser parser(buffer);
     auto decoder = parser.getDecoder(/*&metadata*/);
 

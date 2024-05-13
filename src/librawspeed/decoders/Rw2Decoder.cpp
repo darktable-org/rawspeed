@@ -20,26 +20,31 @@
 */
 
 #include "decoders/Rw2Decoder.h"
-#include "common/Common.h"                          // for writeLog, DEBUG_...
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/PanasonicV4Decompressor.h"  // for PanasonicV4Decom...
-#include "decompressors/PanasonicV5Decompressor.h"  // for PanasonicV5Decom...
-#include "decompressors/PanasonicV6Decompressor.h"  // for PanasonicV6Decom...
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "metadata/ColorFilterArray.h"              // for CFAColor, CFACol...
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cmath>                                    // for fabs
-#include <cstdint>                                  // for uint32_t, uint16_t
-#include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, operator==
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/PanasonicV4Decompressor.h"
+#include "decompressors/PanasonicV5Decompressor.h"
+#include "decompressors/PanasonicV6Decompressor.h"
+#include "decompressors/PanasonicV7Decompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 using std::fabs;
 
@@ -48,7 +53,7 @@ namespace rawspeed {
 class CameraMetaData;
 
 bool Rw2Decoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -63,7 +68,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
   bool isOldPanasonic =
       !mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET);
 
-  if (! isOldPanasonic)
+  if (!isOldPanasonic)
     raw = mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET);
   else
     raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
@@ -88,24 +93,28 @@ RawImage Rw2Decoder::decodeRawInternal() {
 
     uint32_t size = mFile.getSize() - offset;
 
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-        mRaw);
-
-    if (size >= width*height*2) {
+    if (size >= width * height * 2) {
       // It's completely unpacked little-endian
+      UncompressedDecompressor u(
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+          mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 16 * width / 8,
+          16, BitOrder::LSB);
       mRaw->createData();
-      u.decodeRawUnpacked<12, Endianness::little>(width, height);
-    } else if (size >= width*height*3/2) {
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
+    } else if (size >= width * height * 3 / 2) {
       // It's a packed format
+      UncompressedDecompressor u(
+          ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+          mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
+          (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::LSB);
       mRaw->createData();
-      u.decode12BitRaw<Endianness::little, false, true>(width, height);
+      u.decode12BitRawWithControl<Endianness::little>();
     } else {
       uint32_t section_split_offset = 0;
       PanasonicV4Decompressor p(
           mRaw,
           ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-          hints.has("zero_is_not_bad"), section_split_offset);
+          hints.contains("zero_is_not_bad"), section_split_offset);
       mRaw->createData();
       p.decompress();
     }
@@ -130,7 +139,7 @@ RawImage Rw2Decoder::decodeRawInternal() {
                 raw->getEntry(TiffTag::PANASONIC_RAWFORMAT)->getU16()) {
     case 4: {
       uint32_t section_split_offset = 0x1FF8;
-      PanasonicV4Decompressor p(mRaw, bs, hints.has("zero_is_not_bad"),
+      PanasonicV4Decompressor p(mRaw, bs, hints.contains("zero_is_not_bad"),
                                 section_split_offset);
       mRaw->createData();
       p.decompress();
@@ -143,9 +152,22 @@ RawImage Rw2Decoder::decodeRawInternal() {
       return mRaw;
     }
     case 6: {
-      PanasonicV6Decompressor v6(mRaw, bs);
+      if (bitsPerSample != 14 && bitsPerSample != 12)
+        ThrowRDE("Version %i: unexpected bits per sample: %i", version,
+                 bitsPerSample);
+
+      PanasonicV6Decompressor v6(mRaw, bs, bitsPerSample);
       mRaw->createData();
       v6.decompress();
+      return mRaw;
+    }
+    case 7: {
+      if (bitsPerSample != 14)
+        ThrowRDE("Version %i: unexpected bits per sample: %i", version,
+                 bitsPerSample);
+      PanasonicV7Decompressor v7(mRaw, bs);
+      mRaw->createData();
+      v7.decompress();
       return mRaw;
     }
     default:
@@ -174,25 +196,28 @@ void Rw2Decoder::parseCFA() const {
   }
 
   switch (auto i = CFA->getU16()) {
+    using enum CFAColor;
   case 1:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::RED, CFAColor::GREEN,
-                     CFAColor::GREEN, CFAColor::BLUE);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), RED, GREEN, GREEN, BLUE);
     break;
   case 2:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::RED,
-                     CFAColor::BLUE, CFAColor::GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), GREEN, RED, BLUE, GREEN);
     break;
   case 3:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::GREEN, CFAColor::BLUE,
-                     CFAColor::RED, CFAColor::GREEN);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), GREEN, BLUE, RED, GREEN);
     break;
   case 4:
-    mRaw->cfa.setCFA(iPoint2D(2, 2), CFAColor::BLUE, CFAColor::GREEN,
-                     CFAColor::GREEN, CFAColor::RED);
+    mRaw->cfa.setCFA(iPoint2D(2, 2), BLUE, GREEN, GREEN, RED);
     break;
   default:
     ThrowRDE("Unexpected CFA pattern: %u", i);
   }
+}
+
+const TiffIFD* Rw2Decoder::getRaw() const {
+  return mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET)
+             ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
+             : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
 }
 
 void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
@@ -212,10 +237,7 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     setMetaData(meta, id, "", iso);
   }
 
-  const TiffIFD* raw =
-      mRootIFD->hasEntryRecursive(TiffTag::PANASONIC_STRIPOFFSET)
-          ? mRootIFD->getIFDWithTag(TiffTag::PANASONIC_STRIPOFFSET)
-          : mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
+  const TiffIFD* raw = getRaw();
 
   // Read blacklevels
   if (raw->hasEntry(static_cast<TiffTag>(0x1c)) &&
@@ -246,19 +268,22 @@ void Rw2Decoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const int blackGreen = getBlack(static_cast<TiffTag>(0x1d));
     const int blackBlue = getBlack(static_cast<TiffTag>(0x1e));
 
-    for(int i = 0; i < 2; i++) {
-      for(int j = 0; j < 2; j++) {
+    mRaw->blackLevelSeparate =
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
         const int k = i + 2 * j;
         const CFAColor c = mRaw->cfa.getColorAt(i, j);
         switch (c) {
         case CFAColor::RED:
-          mRaw->blackLevelSeparate[k] = blackRed;
+          blackLevelSeparate1D(k) = blackRed;
           break;
         case CFAColor::GREEN:
-          mRaw->blackLevelSeparate[k] = blackGreen;
+          blackLevelSeparate1D(k) = blackGreen;
           break;
         case CFAColor::BLUE:
-          mRaw->blackLevelSeparate[k] = blackBlue;
+          blackLevelSeparate1D(k) = blackBlue;
           break;
         default:
           ThrowRDE("Unexpected CFA color %s.",
@@ -302,22 +327,48 @@ std::string Rw2Decoder::guessMode() const {
   float t = fabs(ratio - 3.0F / 2.0F);
   if (t < min_diff) {
     closest_match = "3:2";
-    min_diff  = t;
+    min_diff = t;
   }
 
   t = fabs(ratio - 4.0F / 3.0F);
   if (t < min_diff) {
-    closest_match =  "4:3";
-    min_diff  = t;
+    closest_match = "4:3";
+    min_diff = t;
   }
 
   t = fabs(ratio - 1.0F);
   if (t < min_diff) {
     closest_match = "1:1";
-    min_diff  = t;
+    min_diff = t;
   }
   writeLog(DEBUG_PRIO::EXTRA, "Mode guess: '%s'", closest_match.c_str());
   return closest_match;
+}
+
+rawspeed::iRectangle2D Rw2Decoder::getDefaultCrop() {
+  if (const TiffIFD* raw = getRaw();
+      raw->hasEntry(TiffTag::PANASONIC_SENSORLEFTBORDER) &&
+      raw->hasEntry(TiffTag::PANASONIC_SENSORTOPBORDER) &&
+      raw->hasEntry(TiffTag::PANASONIC_SENSORRIGHTBORDER) &&
+      raw->hasEntry(TiffTag::PANASONIC_SENSORBOTTOMBORDER)) {
+    const uint16_t leftBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORLEFTBORDER)->getU16();
+    const uint16_t topBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORTOPBORDER)->getU16();
+    const uint16_t rightBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORRIGHTBORDER)->getU16();
+    const uint16_t bottomBorder =
+        raw->getEntry(TiffTag::PANASONIC_SENSORBOTTOMBORDER)->getU16();
+    const uint16_t width = rightBorder - leftBorder;
+    const uint16_t height = bottomBorder - topBorder;
+    return {leftBorder, topBorder, width, height};
+  }
+  ThrowRDE("Cannot figure out vendor crop. Required entries were not found: "
+           "%X, %X, %X, %X",
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORLEFTBORDER),
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORTOPBORDER),
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORRIGHTBORDER),
+           static_cast<unsigned int>(TiffTag::PANASONIC_SENSORBOTTOMBORDER));
 }
 
 } // namespace rawspeed

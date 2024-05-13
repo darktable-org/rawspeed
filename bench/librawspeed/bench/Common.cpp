@@ -18,26 +18,37 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "bench/Common.h"
-#include "common/Common.h" // for roundUp
-#include "common/Point.h"  // for iPoint2D
-#include <cassert>         // for assert
-#include <cmath>           // for ceil, sqrt
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
 
 using rawspeed::iPoint2D;
 using rawspeed::roundUp;
 using std::sqrt;
 
-iPoint2D __attribute__((const, visibility("default")))
-areaToRectangle(size_t area, iPoint2D aspect) {
+bool RAWSPEED_READNONE __attribute__((visibility("default")))
+benchmarkDryRun() {
+  // NOLINTNEXTLINE(concurrency-mt-unsafe)
+  return std::getenv("RAWSPEED_BENCHMARK_DRYRUN") != nullptr;
+}
+
+iPoint2D RAWSPEED_READNONE __attribute__((visibility("default")))
+areaToRectangle(uint64_t area, iPoint2D aspect) {
   double sqSide = sqrt(area);
   double sqARatio =
       sqrt(static_cast<double>(aspect.x) / static_cast<double>(aspect.y));
 
-  iPoint2D dim(ceil(sqSide * sqARatio), ceil(sqSide / sqARatio));
+  iPoint2D dim(rawspeed::implicit_cast<int>(ceil(sqSide * sqARatio)),
+               rawspeed::implicit_cast<int>(ceil(sqSide / sqARatio)));
 
-  dim.x = roundUp(dim.x, aspect.x);
-  dim.y = roundUp(dim.y, aspect.y);
+  dim.x = rawspeed::implicit_cast<int>(roundUp(dim.x, aspect.x));
+  dim.y = rawspeed::implicit_cast<int>(roundUp(dim.y, aspect.y));
 
   assert(dim.area() >= area);
 

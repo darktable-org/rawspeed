@@ -22,44 +22,48 @@
 */
 
 #include "decoders/IiqDecoder.h"
-#include "common/Array2DRef.h"                  // for Array2DRef
-#include "common/Mutex.h"                       // for MutexLocker
-#include "common/Point.h"                       // for iPoint2D
-#include "common/Spline.h"                      // for Spline, Spline<>::va...
-#include "decoders/RawDecoder.h"                // for RawDecoder::(anonymous)
-#include "decoders/RawDecoderException.h"       // for ThrowException, Thro...
-#include "decompressors/PhaseOneDecompressor.h" // for PhaseOneStrip, Phase...
-#include "io/Buffer.h"                          // for Buffer, DataBuffer
-#include "io/ByteStream.h"                      // for ByteStream
-#include "io/Endianness.h"                      // for Endianness, Endianne...
-#include "metadata/Camera.h"                    // for Camera
-#include "metadata/CameraMetaData.h"            // for CameraMetaData
-#include "metadata/ColorFilterArray.h"          // for ColorFilterArray
-#include "tiff/TiffIFD.h"                       // for TiffID, TiffRootIFD
-#include <algorithm>                            // for max, adjacent_find
-#include <array>                                // for array, array<>::valu...
-#include <cassert>                              // for assert
-#include <cinttypes>                            // for PRIu64
-#include <cmath>                                // for lround, abs
-#include <cstdlib>                              // for abs
-#include <functional>                           // for greater_equal
-#include <iterator>                             // for advance, next, begin
-#include <memory>                               // for unique_ptr
-#include <string>                               // for operator==, string
-#include <utility>                              // for move
-#include <vector>                               // for vector, allocator
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Mutex.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "common/Spline.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/PhaseOneDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffIFD.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cinttypes>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
-bool IiqDecoder::isAppropriateDecoder(const Buffer& file) {
+bool IiqDecoder::isAppropriateDecoder(Buffer file) {
   const DataBuffer db(file, Endianness::little);
 
   // The IIQ magic. Is present for all IIQ raws.
   return db.get<uint32_t>(8) == 0x49494949;
 }
 
-bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -69,8 +73,8 @@ bool IiqDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
 // FIXME: this is very close to SamsungV0Decompressor::computeStripes()
 std::vector<PhaseOneStrip>
-IiqDecoder::computeSripes(const Buffer& raw_data,
-                          std::vector<IiqOffset> offsets, uint32_t height) {
+IiqDecoder::computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
+                          uint32_t height) {
   assert(height > 0);
   assert(offsets.size() == (1 + height));
 
@@ -111,6 +115,42 @@ IiqDecoder::computeSripes(const Buffer& raw_data,
   return slices;
 }
 
+namespace {
+
+enum class IIQFormat : uint8_t {
+  RAW_1,
+  RAW_2,
+  IIQ_L,
+  IIQ_S,
+  IIQ_Sv2,
+  IIQ_L16
+
+};
+
+Optional<IIQFormat> getAsIIQFormat(uint32_t v) {
+  switch (v) {
+    using enum IIQFormat;
+  case 1:
+    return RAW_1;
+  case 2:
+    return RAW_2;
+  case 3:
+    return IIQ_L;
+  case 5:
+    return IIQ_S;
+  case 6:
+    return IIQ_Sv2;
+  case 8:
+    return IIQ_L16;
+  default:
+    return std::nullopt;
+  }
+}
+
+} // namespace
+
+enum class IiqDecoder::IiqCorr : uint8_t { LUMA, CHROMA };
+
 RawImage IiqDecoder::decodeRawInternal() {
   const Buffer buf(mFile.getSubView(8));
   const DataBuffer db(buf, Endianness::little);
@@ -138,7 +178,8 @@ RawImage IiqDecoder::decodeRawInternal() {
   uint32_t split_row = 0;
   uint32_t split_col = 0;
 
-  Buffer raw_data;
+  Optional<IIQFormat> format;
+  Optional<Buffer> raw_data;
   ByteStream block_offsets;
   ByteStream wb;
   ByteStream correction_meta_data;
@@ -159,6 +200,13 @@ RawImage IiqDecoder::decodeRawInternal() {
     case 0x109:
       height = data;
       break;
+    case 0x10e: // RawFormat
+      if (format)
+        ThrowRDE("Duplicate RawFormat tag.");
+      format = getAsIIQFormat(data);
+      if (!format || *format != IIQFormat::IIQ_L)
+        ThrowRDE("Unsupported RawFormat: %u", data);
+      break;
     case 0x10f:
       raw_data = bs.getSubView(data, len);
       break;
@@ -170,6 +218,7 @@ RawImage IiqDecoder::decodeRawInternal() {
       block_offsets = bs.getSubStream(data, len);
       break;
     case 0x21d:
+      // 16-bit black level adapted to 14-bit raw data (IIQFormat::IIQ_L)
       black_level = data >> 2;
       break;
     case 0x222:
@@ -188,6 +237,12 @@ RawImage IiqDecoder::decodeRawInternal() {
   if (width == 0 || height == 0 || width > 11976 || height > 8854)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  if (!format)
+    ThrowRDE("Unspecified RawFormat");
+
+  if (!raw_data)
+    ThrowRDE("No raw data found");
+
   if (split_col > width || split_row > height)
     ThrowRDE("Invalid sensor quadrant split values (%u, %u)", split_row,
              split_col);
@@ -202,10 +257,10 @@ RawImage IiqDecoder::decodeRawInternal() {
 
   // to simplify slice size calculation, we insert a dummy offset,
   // which will be used much like end()
-  offsets.emplace_back(height, raw_data.getSize());
+  offsets.emplace_back(height, raw_data->getSize());
 
   std::vector<PhaseOneStrip> strips(
-      computeSripes(raw_data, std::move(offsets), height));
+      computeSripes(*raw_data, std::move(offsets), height));
 
   mRaw->dim = iPoint2D(width, height);
 
@@ -223,7 +278,7 @@ RawImage IiqDecoder::decodeRawInternal() {
 }
 
 void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
-                                  uint32_t split_col) {
+                                  uint32_t split_col) const {
   meta_data.skipBytes(8);
   const uint32_t bytes_to_entries = meta_data.getU32();
   meta_data.setPosition(bytes_to_entries);
@@ -248,6 +303,12 @@ void IiqDecoder::CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
         ThrowRDE("Second sensor defects entry seen. Unexpected.");
       correctSensorDefects(meta_data.getSubStream(offset, len));
       SensorDefectsSeen = true;
+      break;
+    case 0x40b: // Chroma calibration
+      PhaseOneFlatField(meta_data.getSubStream(offset, len), IiqCorr::CHROMA);
+      break;
+    case 0x410: // Luma calibration
+      PhaseOneFlatField(meta_data.getSubStream(offset, len), IiqCorr::LUMA);
       break;
     case 0x431:
       if (QuadrantMultipliersSeen)
@@ -319,9 +380,9 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
       const std::vector<uint16_t> curve = s.calculateCurve();
 
       int row_start = quadRow == 0 ? 0 : split_row;
-      int row_end = quadRow == 0 ? split_row : img.height;
+      int row_end = quadRow == 0 ? split_row : img.height();
       int col_start = quadCol == 0 ? 0 : split_col;
-      int col_end = quadCol == 0 ? split_col : img.width;
+      int col_end = quadCol == 0 ? split_col : img.width();
 
       for (int row = row_start; row < row_end; row++) {
         for (int col = col_start; col < col_end; col++) {
@@ -333,10 +394,86 @@ void IiqDecoder::CorrectQuadrantMultipliersCombined(ByteStream data,
           // appropriate amount before indexing into the curve and
           // then add it back so that subtracting the black level
           // later will work as expected
-          const uint16_t diff = pixel < black_level ? pixel : black_level;
+          const uint16_t diff = pixel < black_level
+                                    ? pixel
+                                    : implicit_cast<uint16_t>(black_level);
           pixel = curve[pixel - diff] + diff;
         }
       }
+    }
+  }
+}
+
+// Luma and chroma calibration to eliminate remaining paneling artefacts,
+// needed in addition to CorrectQuadrantMultipliersCombined().
+// -- Based on phase_one_flat_field() in dcraw.c by Dave Coffin
+void IiqDecoder::PhaseOneFlatField(ByteStream data, IiqCorr corr) const {
+  const Array2DRef<uint16_t> img(mRaw->getU16DataAsUncroppedArray2DRef());
+
+  int nc = [corr]() {
+    switch (corr) {
+    case IiqCorr::LUMA:
+      return 2;
+    case IiqCorr::CHROMA:
+      return 4;
+    }
+    ThrowRDE("Unsupported IIQ correction");
+  }();
+
+  std::array<uint16_t, 8> head;
+  for (int i = 0; i < 8; i++)
+    head[i] = data.getU16();
+
+  if (head[2] == 0 || head[3] == 0 || head[4] == 0 || head[5] == 0)
+    return;
+
+  auto wide = implicit_cast<int>(roundUpDivisionSafe(head[2], head[4]));
+  auto high = implicit_cast<int>(roundUpDivisionSafe(head[3], head[5]));
+
+  std::vector<float> mrow_storage;
+  Array2DRef<float> mrow = Array2DRef<float>::create(
+      mrow_storage, /*width=*/wide * nc, /*height=*/1);
+  mrow = Array2DRef<float>(mrow_storage.data(), /*width=*/nc, /*height=*/wide);
+
+  for (int y = 0; y < high; y++) {
+    for (int x = 0; x < wide; x++) {
+      for (int c = 0; c < nc; c += 2) {
+        float num = data.getU16() / 32768.0F;
+        if (y == 0)
+          mrow(x, c) = num;
+        else
+          mrow(x, c + 1) = (num - mrow(x, c)) / head[5];
+      }
+    }
+    if (y == 0)
+      continue;
+    for (int rend = head[1] + y * head[5], row = rend - head[5];
+         row < mRaw->dim.y && row < rend && row < (head[1] + head[3] - head[5]);
+         row++) {
+      for (int x = 1; x < wide; x++) {
+        std::array<float, 4> mult;
+        for (int c = 0; c < nc; c += 2) {
+          mult[c] = mrow(x - 1, c);
+          mult[c + 1] = (mrow(x, c) - mult[c]) / head[4];
+        }
+        for (int cend = head[0] + x * head[4], col = cend - head[4];
+             col < mRaw->dim.x && col < cend &&
+             col < head[0] + head[2] - head[4];
+             col++) {
+          if (int c =
+                  nc > 2 ? static_cast<unsigned>(mRaw->cfa.getColorAt(row, col))
+                         : 0;
+              !(c & 1)) {
+            auto val = implicit_cast<unsigned>(img(row, col) * mult[c]);
+            img(row, col) = implicit_cast<uint16_t>(std::min(val, 0xFFFFU));
+          }
+          for (int c = 0; c < nc; c += 2)
+            mult[c] += mult[c + 1];
+        }
+      }
+      for (int x = 0; x < wide; x++)
+        for (int c = 0; c < nc; c += 2)
+          mrow(x, c) += mrow(x, c + 1);
     }
   }
 }
@@ -416,7 +553,7 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
       }
       const int three_pixels = sum - val[max];
       // This is `std::lround(three_pixels / 3.0)`, but without FP.
-      img(row, col) = (three_pixels + 1) / 3;
+      img(row, col) = implicit_cast<uint16_t>((three_pixels + 1) / 3);
     } else {
       /*
        * Do non-green pixels. Let's pretend we are in "R" pixel, in the middle:
@@ -432,7 +569,8 @@ void IiqDecoder::correctBadColumn(const uint16_t col) const {
                        img(row + 2, col + 2) + img(row - 2, col + 2);
       uint32_t horiz = img(row, col - 2) + img(row, col + 2);
       // But this is not just averaging, we bias towards the horizontal pixels.
-      img(row, col) = std::lround(diags * 0.0732233 + horiz * 0.3535534);
+      img(row, col) = implicit_cast<uint16_t>(
+          std::lround(diags * 0.0732233 + horiz * 0.3535534));
     }
   }
 }

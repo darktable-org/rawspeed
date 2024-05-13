@@ -20,8 +20,11 @@
 
 #pragma once
 
-#include "common/Point.h" // for iPoint2D
-#include <cstddef>        // for size_t
+#include "rawspeedconfig.h"
+#include "adt/Point.h"
+#include <cstdint>
 
-rawspeed::iPoint2D __attribute__((const))
-areaToRectangle(size_t area, rawspeed::iPoint2D aspect = {2, 2});
+bool RAWSPEED_READNONE benchmarkDryRun();
+
+rawspeed::iPoint2D RAWSPEED_READNONE
+areaToRectangle(uint64_t area, rawspeed::iPoint2D aspect = {2, 2});

@@ -21,29 +21,33 @@
 */
 
 #include "decoders/MrwDecoder.h"
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for DataBuffer, Buffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParser.h"                     // for TiffParser
-#include "tiff/TiffIFD.h"                           // for TiffRootIFDOwner
-#include <cassert>                                  // for assert
-#include <cstring>                                  // for memcmp
-#include <memory>                                   // for allocator, uniqu...
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "parsers/TiffParser.h"
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <memory>
 
 namespace rawspeed {
 
 class CameraMetaData;
 
-MrwDecoder::MrwDecoder(const Buffer& file) : RawDecoder(file) { parseHeader(); }
+MrwDecoder::MrwDecoder(Buffer file) : RawDecoder(file) { parseHeader(); }
 
-int MrwDecoder::isMRW(const Buffer& input) {
+int MrwDecoder::isMRW(Buffer input) {
   static const std::array<char, 4> magic = {{0x00, 'M', 'R', 'M'}};
-  const unsigned char* data = input.getData(0, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(0, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
 void MrwDecoder::parseHeader() {
@@ -79,7 +83,7 @@ void MrwDecoder::parseHeader() {
     const auto origPos = bs.getPosition();
 
     switch (tag) {
-    case 0x505244: {            // PRD
+    case 0x505244: { // PRD
       foundPRD = true;
       bs.skipBytes(8);          // Version Number
       raw_height = bs.getU16(); // CCD Size Y
@@ -90,8 +94,8 @@ void MrwDecoder::parseHeader() {
                  raw_height);
       }
 
-      bs.skipBytes(2);          // Image Size Y
-      bs.skipBytes(2);          // Image Size X
+      bs.skipBytes(2); // Image Size Y
+      bs.skipBytes(2); // Image Size X
 
       bpp = bs.getByte(); // DataSize
       if (12 != bpp && 16 != bpp)
@@ -153,16 +157,23 @@ void MrwDecoder::parseHeader() {
 
 RawImage MrwDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(raw_width, raw_height);
-  mRaw->createData();
 
   DataBuffer db(imageData, Endianness::big);
   ByteStream bs(db);
-  UncompressedDecompressor u(bs, mRaw);
 
-  if (packed)
-    u.decode12BitRaw<Endianness::big>(raw_width, raw_height);
-  else
-    u.decodeRawUnpacked<12, Endianness::big>(raw_width, raw_height);
+  if (packed) {
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(raw_width, raw_height)),
+        12 * raw_width / 8, 12, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  } else {
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(raw_width, raw_height)),
+        2 * raw_width, 16, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
+  }
 
   return mRaw;
 }
@@ -176,7 +187,7 @@ void MrwDecoder::checkSupportInternal(const CameraMetaData* meta) {
 }
 
 void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
-  //Default
+  // Default
   int iso = 0;
 
   if (!rootIFD)
@@ -185,7 +196,7 @@ void MrwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   auto id = rootIFD->getID();
   setMetaData(meta, id.make, id.model, "", iso);
 
-  if (hints.has("swapped_wb")) {
+  if (hints.contains("swapped_wb")) {
     mRaw->metadata.wbCoeffs[0] = wb_coeffs[2];
     mRaw->metadata.wbCoeffs[1] = wb_coeffs[0];
     mRaw->metadata.wbCoeffs[2] = wb_coeffs[1];

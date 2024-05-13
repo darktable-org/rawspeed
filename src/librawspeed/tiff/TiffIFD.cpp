@@ -21,24 +21,34 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/TiffIFD.h"
-#include "common/Common.h"            // for trimSpaces
-#include "common/NORangesSet.h"       // for NORangesSet
-#include "common/RawspeedException.h" // for ThrowException, RawspeedException
-#include "io/IOException.h"           // for IOException
-#include "tiff/TiffEntry.h"           // for TiffEntry
-#include "tiff/TiffTag.h"             // for TiffTag, TiffTag::MAKE, TiffTa...
-#include <algorithm>                  // for copy, max
-#include <cassert>                    // for assert
-#include <map>                        // for map, operator!=, operator==
-#include <memory>                     // for unique_ptr, make_unique, alloc...
-#include <string>                     // for string, operator==, basic_string
-#include <utility>                    // for move, pair
-#include <vector>                     // for vector<>::iterator, vector
+#include "adt/NORangesSet.h"
+#include "common/Common.h"
+#include "common/RawspeedException.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffTag.h"
+#include <cassert>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 using std::vector;
 
 namespace rawspeed {
+
+void TiffIFD::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
   assert(ifds);
@@ -58,7 +68,8 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
 
   try {
     switch (t->tag) {
-    case TiffTag::DNGPRIVATEDATA:
+      using enum TiffTag;
+    case DNGPRIVATEDATA:
       // These are arbitrarily 'rebased', to preserve the offsets, but as it is
       // implemented right now, that could trigger UB (pointer arithmetics,
       // creating pointer to unowned memory, etc). And since this is not even
@@ -68,14 +79,14 @@ void TiffIFD::parseIFDEntry(NORangesSet<Buffer>* ifds, ByteStream& bs) {
       add(std::move(t));
       break;
 
-    case TiffTag::MAKERNOTE:
-    case TiffTag::MAKERNOTE_ALT:
+    case MAKERNOTE:
+    case MAKERNOTE_ALT:
       add(parseMakerNote(ifds, t.get()));
       break;
 
-    case TiffTag::FUJI_RAW_IFD:
-    case TiffTag::SUBIFDS:
-    case TiffTag::EXIFIFDPOINTER:
+    case FUJI_RAW_IFD:
+    case SUBIFDS:
+    case EXIFIFDPOINTER:
       for (uint32_t j = 0; j < t->count; j++)
         add(std::make_unique<TiffIFD>(this, ifds, bs, t->getU32(j)));
       break;
@@ -97,8 +108,8 @@ TiffIFD::TiffIFD(TiffIFD* parent_) : parent(parent_) {
   recursivelyIncrementSubIFDCount();
 }
 
-TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-                 const DataBuffer& data, uint32_t offset)
+TiffIFD::TiffIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds, DataBuffer data,
+                 uint32_t offset)
     : TiffIFD(parent_) {
   // see TiffParser::parse: UINT32_MAX is used to mark the "virtual" top level
   // TiffRootIFD in a tiff file
@@ -136,21 +147,22 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
   // we can not go all the way to the top first because this partial tree
   // is not yet added to the TiffRootIFD.
   const TiffIFD* p = this;
-  const TiffEntry* makeEntry;
-  do {
+  const TiffEntry* makeEntry = nullptr;
+  while (p && !makeEntry) {
     makeEntry = p->getEntryRecursive(TiffTag::MAKE);
     p = p->parent;
-  } while (!makeEntry && p);
+  }
   std::string make =
       makeEntry != nullptr ? trimSpaces(makeEntry->getString()) : "";
 
   ByteStream bs = t->getData();
 
-  // helper function for easy setup of ByteStream buffer for the different maker note types
-  // 'rebase' means position 0 of new stream equals current position
+  // helper function for easy setup of ByteStream buffer for the different maker
+  // note types 'rebase' means position 0 of new stream equals current position
   // 'newPosition' is the position where the IFD starts
-  // 'byteOrderOffset' is the position where the 2 magic bytes (II/MM) may be found
-  // 'context' is a string providing error information in case the byte order parsing should fail
+  // 'byteOrderOffset' is the position where the 2 magic bytes (II/MM) may be
+  // found 'context' is a string providing error information in case the byte
+  // order parsing should fail
   auto setup = [&bs](bool rebase, uint32_t newPosition,
                      uint32_t byteOrderOffset = 0,
                      const char* context = nullptr) {
@@ -161,40 +173,48 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
     bs.skipBytes(newPosition);
   };
 
-  if (bs.hasPrefix("AOC\0", 4)) {
+  if (bs.hasPrefix(std::string_view("AOC\0", 4))) {
     setup(false, 6, 4, "Pentax makernote");
-  } else if (bs.hasPrefix("PENTAX", 6)) {
+  } else if (bs.hasPrefix("PENTAX")) {
     setup(true, 10, 8, "Pentax makernote");
-  } else if (bs.hasPrefix("FUJIFILM\x0c\x00\x00\x00", 12)) {
+  } else if (bs.hasPrefix(std::string_view("FUJIFILM\x0c\x00\x00\x00", 12))) {
     bs.setByteOrder(Endianness::little);
     setup(true, 12);
-  } else if (bs.hasPrefix("Nikon\x00\x02", 7)) {
+  } else if (bs.hasPrefix(std::string_view("Nikon\x00\x02", 7))) {
     // this is Nikon type 3 maker note format
     // TODO: implement Nikon type 1 maker note format
     // see http://www.ozhiker.com/electronics/pjmt/jpeg_info/nikon_mn.html
     bs.skipBytes(10);
     setup(true, 8, 0, "Nikon makernote");
-  } else if (bs.hasPrefix("OLYMPUS", 7)) { // new Olympus
+  } else if (bs.hasPrefix("OLYMPUS")) { // new Olympus
     setup(true, 12);
-  } else if (bs.hasPrefix("OLYMP", 5)) {   // old Olympus
+  } else if (bs.hasPrefix("OLYMP")) { // old Olympus
     setup(true, 8);
-  } else if (bs.hasPrefix("EPSON", 5)) {
+  } else if (bs.hasPrefix("OM SYSTEM")) { // ex Olympus
+    setup(true, 16);
+  } else if (bs.hasPrefix("EPSON")) {
     setup(false, 8);
-  } else if (bs.hasPatternAt("Exif", 4, 6)) {
-    // TODO: for none of the rawsamples.ch files from Panasonic is this true, instead their MakerNote start with "Panasonic"
-    // Panasonic has the word Exif at byte 6, a complete Tiff header starts at byte 12
-    // This TIFF is 0 offset based
+  } else if (bs.hasPrefix("Apple iOS")) {
+    setup(true, 14, 12, "Apple makernote");
+  } else if (bs.hasPatternAt("Exif", 6)) {
+    // TODO: for none of the rawsamples.ch files from Panasonic is this true,
+    // instead their MakerNote start with "Panasonic" Panasonic has the word
+    // Exif at byte 6, a complete Tiff header starts at byte 12 This TIFF is 0
+    // offset based
     setup(false, 20, 12, "Panosonic makernote");
   } else if (make == "SAMSUNG") {
-    // Samsung has no identification in its MakerNote but starts with the IFD right away
+    // Samsung has no identification in its MakerNote but starts with the IFD
+    // right away
     setup(true, 0);
   } else {
-    // cerr << "default MakerNote from " << make << endl; // Canon, Nikon (type 2), Sony, Minolta, Ricoh, Leica, Hasselblad, etc.
+    // cerr << "default MakerNote from " << make << endl; // Canon, Nikon (type
+    // 2), Sony, Minolta, Ricoh, Leica, Hasselblad, etc.
 
-    // At least one MAKE has not been handled explicitly and starts its MakerNote with an endian prefix: Kodak
-    if (bs.skipPrefix("II", 2)) {
+    // At least one MAKE has not been handled explicitly and starts its
+    // MakerNote with an endian prefix: Kodak
+    if (bs.skipPrefix("II")) {
       bs.setByteOrder(Endianness::little);
-    } else if (bs.skipPrefix("MM", 2)) {
+    } else if (bs.skipPrefix("MM")) {
       bs.setByteOrder(Endianness::big);
     }
   }
@@ -205,7 +225,7 @@ TiffRootIFDOwner TiffIFD::parseMakerNote(NORangesSet<Buffer>* ifds,
 
 std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
   vector<const TiffIFD*> matchingIFDs;
-  if (entries.find(tag) != entries.end()) {
+  if (entries.contains(tag)) {
     matchingIFDs.push_back(this);
   }
   for (const auto& i : subIFDs) {
@@ -218,17 +238,17 @@ std::vector<const TiffIFD*> TiffIFD::getIFDsWithTag(TiffTag tag) const {
 const TiffIFD* TiffIFD::getIFDWithTag(TiffTag tag, uint32_t index) const {
   auto ifds = getIFDsWithTag(tag);
   if (index >= ifds.size())
-    ThrowTPE("failed to find %u ifs with tag 0x%04x", index + 1,
+    ThrowTPE("failed to find %u ifd with tag 0x%04x", index + 1,
              static_cast<unsigned>(tag));
   return ifds[index];
 }
 
-TiffEntry* __attribute__((pure)) TiffIFD::getEntryRecursive(TiffTag tag) const {
+TiffEntry* RAWSPEED_READONLY TiffIFD::getEntryRecursive(TiffTag tag) const {
   if (auto i = entries.find(tag); i != entries.end()) {
     return i->second.get();
   }
   for (const auto& j : subIFDs) {
-    TiffEntry *entry = j->getEntryRecursive(tag);
+    TiffEntry* entry = j->getEntryRecursive(tag);
     if (entry)
       return entry;
   }
@@ -297,8 +317,12 @@ TiffEntry* TiffIFD::getEntry(TiffTag tag) const {
   return i->second.get();
 }
 
-TiffID TiffRootIFD::getID() const
-{
+void TiffRootIFD::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
+TiffID TiffRootIFD::getID() const {
   TiffID id;
   const auto* makeE = getEntryRecursive(TiffTag::MAKE);
   const auto* modelE = getEntryRecursive(TiffTag::MODEL);

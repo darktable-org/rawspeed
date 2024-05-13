@@ -21,27 +21,27 @@
 
 #pragma once
 
-#include "common/Common.h"   // for BitOrder
-#include "common/RawImage.h" // for RawImage
-#include "metadata/Camera.h" // for Hints
-#include <cstdint>           // for uint32_t
-#include <string>            // for string
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include "metadata/Camera.h"
+#include <cstdint>
+#include <string>
 
 namespace rawspeed {
 
-class Buffer;
 class CameraMetaData;
 class TiffIFD;
 
-class RawDecoder
-{
+class RawDecoder {
 public:
   /* Construct decoder instance - Buffer is a filemap of the file to be decoded
    */
   /* The Buffer is not owned by this class, will not be deleted, and must remain
    */
   /* valid while this object exists */
-  explicit RawDecoder(const Buffer& file);
+  explicit RawDecoder(Buffer file);
   virtual ~RawDecoder() = default;
 
   /* Check if the decoder can decode the image from this camera */
@@ -66,38 +66,43 @@ public:
 
   /* Allows access to the root IFD structure */
   /* If image isn't TIFF based NULL will be returned */
-  virtual TiffIFD *getRootIFD() { return nullptr; }
+  virtual TiffIFD* getRootIFD() { return nullptr; }
 
   /* The decoded image - undefined if image has not or could not be decoded. */
-  /* Remember this is automatically refcounted, so a reference is retained until this class is destroyed */
-  RawImage mRaw;
+  /* Remember this is automatically refcounted, so a reference is retained until
+   * this class is destroyed */
+  RawImage mRaw = RawImage::create();
 
-  /* You can set this if you do not want Rawspeed to attempt to decode images, */
-  /* where it does not have reliable information about CFA, cropping, black and white point */
-  /* It is pretty safe to leave this disabled (default behaviour), but if you do not want to */
+  /* You can set this if you do not want Rawspeed to attempt to decode images,
+   */
+  /* where it does not have reliable information about CFA, cropping, black and
+   * white point */
+  /* It is pretty safe to leave this disabled (default behaviour), but if you do
+   * not want to */
   /* support unknown cameras, you can enable this */
-  /* DNGs are always attempted to be decoded, so this variable has no effect on DNGs */
-  bool failOnUnknown;
+  /* DNGs are always attempted to be decoded, so this variable has no effect on
+   * DNGs */
+  bool failOnUnknown{false};
 
   /* Set how to handle bad pixels. */
   /* If you disable this parameter, no bad pixel interpolation will be done */
-  bool interpolateBadPixels;
+  bool interpolateBadPixels{true};
 
   /* Apply stage 1 DNG opcodes. */
   /* This usually maps out bad pixels, etc */
-  bool applyStage1DngOpcodes;
+  bool applyStage1DngOpcodes{true};
 
   /* Apply crop - if false uncropped image is delivered */
-  bool applyCrop;
+  bool applyCrop{true};
 
   /* This will skip all corrections, and deliver the raw data */
   /* This will skip any compression curves or other things that */
   /* is needed to get the correct values */
   /* Only enable if you are sure that is what you want */
-  bool uncorrectedRawValues;
+  bool uncorrectedRawValues{false};
 
   /* Should Fuji images be rotated? */
-  bool fujiRotate;
+  bool fujiRotate{true};
 
   struct {
     /* Should Quadrant Multipliers be applied to the IIQ raws? */
@@ -120,9 +125,8 @@ protected:
   virtual void decodeMetaDataInternal(const CameraMetaData* meta) = 0;
   virtual void checkSupportInternal(const CameraMetaData* meta) = 0;
 
-  /* Ask for sample submission, if makes sense */
-  static void askForSamples(const CameraMetaData* meta, const std::string& make,
-                            const std::string& model, const std::string& mode);
+  bool handleCameraSupport(const CameraMetaData* meta, const std::string& make,
+                           const std::string& model, const std::string& mode);
 
   /* Check the camera and mode against the camera database. */
   /* A RawDecoderException will be thrown if the camera isn't supported */
@@ -130,27 +134,36 @@ protected:
   bool checkCameraSupported(const CameraMetaData* meta, const std::string& make,
                             const std::string& model, const std::string& mode);
 
-  /* Helper function for decodeMetaData(), that find the camera in the CameraMetaData DB */
-  /* and sets common settings such as crop, black- white level, and sets CFA information */
+  /* Helper function for decodeMetaData(), that find the camera in the
+   * CameraMetaData DB */
+  /* and sets common settings such as crop, black- white level, and sets CFA
+   * information */
   virtual void setMetaData(const CameraMetaData* meta, const std::string& make,
                            const std::string& model, const std::string& mode,
                            int iso_speed = 0);
+
+  /* Shall return a crop area if none is specified in the camera database
+   * entry. final this to apply camera vendor defaults (where available). */
+  virtual iRectangle2D getDefaultCrop();
 
   /* Generic decompressor for uncompressed images */
   /* order: Order of the bits - see Common.h for possibilities. */
   void decodeUncompressed(const TiffIFD* rawIFD, BitOrder order) const;
 
   /* The Raw input file to be decoded */
-  const Buffer& mFile;
+  Buffer mFile;
 
   /* Decoder version */
-  /* This can be used to avoid newer version of an xml file to indicate that a file */
+  /* This can be used to avoid newer version of an xml file to indicate that a
+   * file */
   /* can be decoded, when a specific version of the code is needed */
-  /* Higher number in camera xml file: Files for this camera will not be decoded */
+  /* Higher number in camera xml file: Files for this camera will not be decoded
+   */
   /* Higher number in code than xml: Image will be decoded. */
   [[nodiscard]] virtual int getDecoderVersion() const = 0;
 
-  /* Hints set for the camera after checkCameraSupported has been called from the implementation*/
+  /* Hints set for the camera after checkCameraSupported has been called from
+   * the implementation*/
   Hints hints;
 
   struct RawSlice;

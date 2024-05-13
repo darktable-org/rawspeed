@@ -20,20 +20,19 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"            // for HAVE_PUGIXML
-#include "common/NotARational.h"       // for NotARational
-#include "common/Point.h"              // for iPoint2D
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/CameraSensorInfo.h" // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h" // for CFAColor, ColorFilterArray
-#include <algorithm>                   // for copy
-#include <cstdint>                     // for uint32_t
-#include <functional>                  // for less
-#include <map>                         // for map, operator!=, _Rb_tree_con...
-#include <sstream>                     // for basic_istream::operator>>
-#include <string>                      // for string, basic_string, operator<
-#include <utility>                     // for pair
-#include <vector>                      // for vector
+#include "rawspeedconfig.h"
+#include "adt/NotARational.h"
+#include "adt/Point.h"
+#include "metadata/BlackArea.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #ifdef HAVE_PUGIXML
 
@@ -45,18 +44,16 @@ class xml_node;
 
 namespace rawspeed {
 
-class Hints
-{
+class Hints final {
   std::map<std::string, std::string, std::less<>> data;
 
 public:
-  void add(const std::string& key, const std::string& value)
-  {
+  void add(const std::string& key, const std::string& value) {
     data.try_emplace(key, value);
   }
 
-  [[nodiscard]] bool has(const std::string& key) const {
-    return data.find(key) != data.end();
+  [[nodiscard]] bool contains(const std::string& key) const {
+    return data.contains(key);
   }
 
   template <typename T>
@@ -77,13 +74,15 @@ public:
   }
 };
 
-class Camera
-{
+class Camera final {
 public:
-  enum class SupportStatus {
-    Unsupported,
-    Supported,
-    NoSamples,
+  enum class SupportStatus : uint8_t {
+    SupportedNoSamples, // Tentatively supported, no RPU samples.
+    Supported,          // Claimed as supported (explicitly).
+    Unknown,            // Placeholder camera, support is unknown.
+    UnknownCamera,      // Not found in database.
+    UnknownNoSamples, // Placeholder camera, no RPU samples, support is unknown.
+    Unsupported,      // Claimed as unsupported (explicitly).
   };
 
 #ifdef HAVE_PUGIXML
@@ -110,23 +109,27 @@ public:
   int decoderVersion;
   Hints hints;
   std::vector<NotARational<int>> color_matrix;
-
-protected:
-  static const std::map<char, CFAColor> char2enum;
-  static const std::map<std::string, CFAColor, std::less<>> str2enum;
+  /*
+    Signals if there's a proper crop info available in the database entry.
+    This flag can be used to decide whether to figure out the crop based on
+    the camera vendor specs.
+  */
+  bool cropAvailable = false;
 
 #ifdef HAVE_PUGIXML
-  void parseCFA(const pugi::xml_node &node);
-  void parseCrop(const pugi::xml_node &node);
-  void parseBlackAreas(const pugi::xml_node &node);
-  void parseAliases(const pugi::xml_node &node);
-  void parseHints(const pugi::xml_node &node);
-  void parseID(const pugi::xml_node &node);
-  void parseSensor(const pugi::xml_node &node);
+  void parseColorRow(const pugi::xml_node& node);
+  void parseColor(const pugi::xml_node& node);
+  void parseCFA(const pugi::xml_node& node);
+  void parseCrop(const pugi::xml_node& node);
+  void parseBlackAreas(const pugi::xml_node& node);
+  void parseAliases(const pugi::xml_node& node);
+  void parseHints(const pugi::xml_node& node);
+  void parseID(const pugi::xml_node& node);
+  void parseSensor(const pugi::xml_node& node);
   void parseColorMatrix(const pugi::xml_node& node);
   void parseColorMatrices(const pugi::xml_node& node);
 
-  void parseCameraChild(const pugi::xml_node &node);
+  void parseCameraChild(const pugi::xml_node& node);
 #endif
 };
 

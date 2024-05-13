@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include "common/RawImage.h"            // for RawImage
-#include "decoders/SimpleTiffDecoder.h" // for SimpleTiffDecoder
-#include "tiff/TiffIFD.h"               // for TiffRootIFD (ptr only), Tiff...
-#include <utility>                      // for move
+#include "common/RawImage.h"
+#include "decoders/SimpleTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <utility>
 
 namespace rawspeed {
 
@@ -35,9 +36,8 @@ class MefDecoder final : public SimpleTiffDecoder {
   void checkImageDimensions() override;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  MefDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  MefDecoder(TiffRootIFDOwner&& root, Buffer file)
       : SimpleTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;

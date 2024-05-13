@@ -21,12 +21,13 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <cstdint>                        // for uint32_t, uint16_t
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
@@ -36,7 +37,7 @@ class CameraMetaData;
 struct PhaseOneStrip;
 
 class IiqDecoder final : public AbstractTiffDecoder {
-  struct IiqOffset {
+  struct IiqOffset final {
     uint32_t n;
     uint32_t offset;
 
@@ -45,15 +46,14 @@ class IiqDecoder final : public AbstractTiffDecoder {
   };
 
   static std::vector<PhaseOneStrip>
-  computeSripes(const Buffer& raw_data, std::vector<IiqOffset> offsets,
+  computeSripes(Buffer raw_data, std::vector<IiqOffset> offsets,
                 uint32_t height);
 
 public:
-  static bool isAppropriateDecoder(const Buffer& file);
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
+  static bool isAppropriateDecoder(Buffer file);
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
 
-  IiqDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
+  IiqDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
       : AbstractTiffDecoder(std::move(rootIFD), file) {}
 
   RawImage decodeRawInternal() override;
@@ -64,9 +64,11 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   uint32_t black_level = 0;
   void CorrectPhaseOneC(ByteStream meta_data, uint32_t split_row,
-                        uint32_t split_col);
+                        uint32_t split_col) const;
   void CorrectQuadrantMultipliersCombined(ByteStream data, uint32_t split_row,
                                           uint32_t split_col) const;
+  enum class IiqCorr : uint8_t;
+  void PhaseOneFlatField(ByteStream data, IiqCorr corr) const;
   void correctSensorDefects(ByteStream data) const;
   void correctBadColumn(uint16_t col) const;
   void handleBadPixel(uint16_t col, uint16_t row) const;

@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "parsers/RawParser.h" // for RawParser
-#include "tiff/TiffIFD.h"      // for TiffRootIFDOwner
-#include <memory>              // for unique_ptr
+#include "parsers/RawParser.h"
+#include "tiff/TiffIFD.h"
+#include <memory>
 
 namespace rawspeed {
 
@@ -34,7 +34,7 @@ class FiffParser final : public RawParser {
   TiffRootIFDOwner rootIFD;
 
 public:
-  explicit FiffParser(const Buffer& input);
+  explicit FiffParser(Buffer input);
 
   void parseData();
   std::unique_ptr<RawDecoder>

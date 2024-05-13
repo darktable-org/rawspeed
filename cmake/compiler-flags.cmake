@@ -1,33 +1,25 @@
-include(CheckCXXCompilerFlag)
 include(CpuMarch)
-include(CheckCXXCompilerFlagAndEnableIt)
 
-# yes, need to keep both the CMAKE_CXX_FLAGS and CMAKE_CXX_STANDARD.
-# with just the CMAKE_CXX_STANDARD, try_compile() breaks:
-#   https://gitlab.kitware.com/cmake/cmake/issues/16456
-# with just the CMAKE_CXX_FLAGS, 'bundled' pugixml breaks tests
-#   https://github.com/darktable-org/rawspeed/issues/112#issuecomment-321517003
-
-message(STATUS "Checking for -std=c++17 support")
-CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
-if(NOT COMPILER_SUPPORTS_CXX17)
-  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++17 support. Please use a different C++ compiler.")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-  message(STATUS "Checking for -std=c++17 support - works")
-endif()
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Workaround cmake-3.28 referencing (non-existant) `@foo.modmap`
+# in compilation commands.
+set(CMAKE_CXX_SCAN_FOR_MODULES NO)
+set(CMAKE_CXX_MODULE_MAP_FORMAT "")
 
 include(debug-info)
 
 if(RAWSPEED_RELEASE_BUILD)
-  # want assertions in all but Release build type.
+  # No assertions in Release build type.
   add_definitions(-DNDEBUG)
-elseif(NOT (RAWSPEED_RELWITHDEBINFO_BUILD OR RAWSPEED_FUZZ_BUILD))
-  # if not Release/RelWithDebInfo/Fuzz build, enable extra debug mode
+elseif(RAWSPEED_RELEASEWITHASSERTS_BUILD)
+  # Assertions in ReleaseWithAsserts build type.
+  add_definitions(-UNDEBUG)
+elseif(NOT (RAWSPEED_FUZZ_BUILD))
+  # if not Release/ReleaseWithAsserts/Fuzz build, enable extra debug mode
+  add_definitions(-UNDEBUG)
   add_definitions(-DDEBUG)
 
   # all this does not work with integer sanitizer
@@ -222,8 +214,8 @@ MARK_AS_ADVANCED(
     CMAKE_SHARED_LINKER_FLAGS_TSAN
     CMAKE_SHARED_MODULE_FLAGS_TSAN )
 
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O2")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O2")
+set(CMAKE_C_FLAGS_RELEASEWITHASSERTS "${CMAKE_C_FLAGS_RELEASEWITHASSERTS} -O3")
+set(CMAKE_CXX_FLAGS_RELEASEWITHASSERTS "${CMAKE_CXX_FLAGS_RELEASEWITHASSERTS} -O3")
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")

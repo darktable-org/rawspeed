@@ -19,18 +19,20 @@
 */
 
 #include "common/DngOpcodes.h"
-#include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Point.h"              // for iPoint2D, iRectangle2D
-#include "common/RawImage.h"           // for RawImage, RawImageData, RawIm...
-#include "fuzz/Common.h"               // for CreateCFA, CreateRawImage
-#include "io/Buffer.h"                 // for Buffer, DataBuffer
-#include "io/ByteStream.h"             // for ByteStream
-#include "io/Endianness.h"             // for Endianness, Endianness::little
-#include "io/IOException.h"            // for ThrowException, RawspeedExcep...
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <cassert>                     // for assert
-#include <cstdint>                     // for uint16_t, uint8_t
-#include <cstdio>                      // for size_t
+#include "MemorySanitizer.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/IOException.h"
+#include "metadata/ColorFilterArray.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -38,7 +40,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
@@ -58,8 +61,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       rawspeed::Array2DRef<uint16_t> img =
           mRaw->getU16DataAsUncroppedArray2DRef();
       const uint16_t fill = bs.getU16();
-      for (auto row = 0; row < img.height; ++row) {
-        for (auto col = 0; col < img.width; ++col) {
+      for (auto row = 0; row < img.height(); ++row) {
+        for (auto col = 0; col < img.width(); ++col) {
           img(row, col) = fill;
         }
       }
@@ -68,8 +71,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     case rawspeed::RawImageType::F32: {
       rawspeed::Array2DRef<float> img = mRaw->getF32DataAsUncroppedArray2DRef();
       const float fill = bs.getFloat();
-      for (auto row = 0; row < img.height; ++row) {
-        for (auto col = 0; col < img.width; ++col) {
+      for (auto row = 0; row < img.height(); ++row) {
+        for (auto col = 0; col < img.width(); ++col) {
           img(row, col) = fill;
         }
       }
@@ -91,10 +94,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     rawspeed::DngOpcodes codes(mRaw, bs.getSubStream(/*offset=*/0));
     codes.applyOpCodes(mRaw);
-    mRaw->checkMemIsInitialized();
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
 
     mRaw->transferBadPixelsToMap();
-  } catch (const rawspeed::RawspeedException&) {
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

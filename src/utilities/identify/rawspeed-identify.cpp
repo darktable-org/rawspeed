@@ -17,30 +17,23 @@
     along with darktable.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "RawSpeed-API.h"      // for RawImage, RawImageData, iPoint2D, Cam...
-#include "common/Array2DRef.h" // for Array2DRef
-#include <array>               // for array
-#include <cstddef>             // for byte, size_t
-#include <cstdint>             // for uint16_t, uint32_t
-#include <cstdio>              // for fprintf, stdout, stderr
-#include <memory>              // for unique_ptr, allocator, make_unique
-#include <string>              // for string, operator+, basic_string
-#include <sys/stat.h>          // for stat
-#include <vector>              // for vector
-
-#ifdef _WIN32
-#ifndef NOMINMAX
-#define NOMINMAX // do not want the min()/max() macros!
-#endif
-
-#include <Windows.h>
-#endif
+#include "RawSpeed-API.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <memory>
+#include <string>
+#include <sys/stat.h>
+#include <vector>
 
 namespace rawspeed::identify {
 
 std::string find_cameras_xml(const char* argv0);
 
-std::string find_cameras_xml(const char *argv0) {
+std::string find_cameras_xml(const char* argv0) {
   struct stat statbuf;
 
 #ifdef RS_CAMERAS_XML_PATH
@@ -110,20 +103,23 @@ std::string find_cameras_xml(const char *argv0) {
 using rawspeed::Buffer;
 using rawspeed::CameraMetaData;
 using rawspeed::FileReader;
+using rawspeed::implicit_cast;
 using rawspeed::iPoint2D;
 using rawspeed::RawImage;
 using rawspeed::RawParser;
 using rawspeed::RawspeedException;
 using rawspeed::identify::find_cameras_xml;
 
-int main(int argc, char* argv[]) { // NOLINT
+// NOLINTNEXTLINE(readability-function-size)
+int main(int argc_, char* argv_[]) {
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
 
-  if (argc != 2) {
+  if (argv.size() != 2) {
     fprintf(stderr, "Usage: darktable-rs-identify <file>\n");
     return 0;
   }
 
-  const std::string camfile = find_cameras_xml(argv[0]);
+  const std::string camfile = find_cameras_xml(argv(0));
   if (camfile.empty()) {
     // fprintf(stderr, "ERROR: Couldn't find cameras.xml\n");
     return 2;
@@ -144,31 +140,13 @@ int main(int argc, char* argv[]) { // NOLINT
       return 2;
     }
 
-#ifndef _WIN32
-    char* imageFileName = argv[1];
-#else
-    // turn the locale ANSI encoded string into UTF-8 so that FileReader can
-    // turn it into UTF-16 later
-    int size = MultiByteToWideChar(CP_ACP, 0, argv[1], -1, nullptr, 0);
-    std::wstring wImageFileName;
-    wImageFileName.resize(size);
-    MultiByteToWideChar(CP_ACP, 0, argv[1], -1, &wImageFileName[0], size);
-    size = WideCharToMultiByte(CP_UTF8, 0, &wImageFileName[0], -1, nullptr, 0,
-                               nullptr, nullptr);
-    std::string _imageFileName;
-    _imageFileName.resize(size);
-    char* imageFileName = &_imageFileName[0];
-    WideCharToMultiByte(CP_UTF8, 0, &wImageFileName[0], -1, imageFileName, size,
-                        nullptr, nullptr);
-#endif
+    fprintf(stderr, "Loading file: \"%s\"\n", argv(1));
 
-    fprintf(stderr, "Loading file: \"%s\"\n", imageFileName);
+    FileReader f(argv(1));
 
-    FileReader f(imageFileName);
+    auto [storage, buf] = f.readFile();
 
-    std::unique_ptr<const Buffer> m(f.readFile());
-
-    RawParser t(*m);
+    RawParser t(buf);
 
     auto d(t.getDecoder(meta.get()));
 
@@ -198,28 +176,45 @@ int main(int argc, char* argv[]) { // NOLINT
     d->decodeMetaData(meta.get());
     r = d->mRaw;
 
-    const auto errors = r->getErrors();
-    for (const auto& error : errors)
+    for (const auto errors = r->getErrors(); const auto& error : errors)
       fprintf(stderr, "WARNING: [rawspeed] %s\n", error.c_str());
 
     fprintf(stdout, "blackLevel: %d\n", r->blackLevel);
-    fprintf(stdout, "whitePoint: %d\n", r->whitePoint);
 
-    fprintf(stdout, "blackLevelSeparate: %d %d %d %d\n",
-            r->blackLevelSeparate[0], r->blackLevelSeparate[1],
-            r->blackLevelSeparate[2], r->blackLevelSeparate[3]);
+    fprintf(stdout, "whitePoint: ");
+    if (!r->whitePoint)
+      fprintf(stdout, "unknown");
+    else
+      fprintf(stdout, "%d", *r->whitePoint);
+    fprintf(stdout, "\n");
 
-    fprintf(stdout, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-            r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-            r->metadata.wbCoeffs[3]);
+    fprintf(stdout, "blackLevelSeparate: ");
+    if (!r->blackLevelSeparate) {
+      fprintf(stdout, "none");
+    } else {
+      fprintf(stdout, "(%i x %i)", r->blackLevelSeparate->width(),
+              r->blackLevelSeparate->height());
+      if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
+          blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
+        for (auto l : *blackLevelSeparate1D)
+          fprintf(stdout, " %d", l);
+      }
+    }
+    fprintf(stdout, "\n");
+
+    fprintf(stdout, "wbCoeffs: %f %f %f %f\n",
+            implicit_cast<double>(r->metadata.wbCoeffs[0]),
+            implicit_cast<double>(r->metadata.wbCoeffs[1]),
+            implicit_cast<double>(r->metadata.wbCoeffs[2]),
+            implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
     fprintf(stdout, "isCFA: %d\n", r->isCFA);
     uint32_t filters = r->cfa.getDcrawFilter();
-    fprintf(stdout, "filters: %d (0x%x)\n", filters, filters);
+    fprintf(stdout, "filters: %u (0x%x)\n", filters, filters);
     const uint32_t bpp = r->getBpp();
-    fprintf(stdout, "bpp: %d\n", bpp);
+    fprintf(stdout, "bpp: %u\n", bpp);
     const uint32_t cpp = r->getCpp();
-    fprintf(stdout, "cpp: %d\n", cpp);
+    fprintf(stdout, "cpp: %u\n", cpp);
     fprintf(stdout, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
     // dimensions of uncropped image
@@ -237,9 +232,10 @@ int main(int argc, char* argv[]) { // NOLINT
     fprintf(stdout, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
     fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
-    double sum = 0.0F;
+    double sum = 0.0;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp) schedule(static) reduction(+ : sum)
+#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, bpp)    \
+    schedule(static) reduction(+ : sum)
 #endif
     for (int y = 0; y < dimUncropped.y; ++y) {
       const rawspeed::Array2DRef<std::byte> img =
@@ -252,10 +248,11 @@ int main(int argc, char* argv[]) { // NOLINT
             sum / static_cast<double>(dimUncropped.y * dimUncropped.x * bpp));
 
     if (r->getDataType() == rawspeed::RawImageType::F32) {
-      sum = 0.0F;
+      sum = 0.0;
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
+#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp)    \
+    schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
         const rawspeed::Array2DRef<float> img =
@@ -268,10 +265,11 @@ int main(int argc, char* argv[]) { // NOLINT
       fprintf(stdout, "Image float avg: %lf\n",
               sum / static_cast<double>(dimUncropped.y * dimUncropped.x));
     } else if (r->getDataType() == rawspeed::RawImageType::UINT16) {
-      sum = 0.0F;
+      sum = 0.0;
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp) schedule(static) reduction(+ : sum)
+#pragma omp parallel for default(none) firstprivate(dimUncropped, raw, cpp)    \
+    schedule(static) reduction(+ : sum)
 #endif
       for (int y = 0; y < dimUncropped.y; ++y) {
         const rawspeed::Array2DRef<uint16_t> img =

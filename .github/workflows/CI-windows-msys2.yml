@@ -1,0 +1,173 @@
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      msys2-msystem:
+        required: true
+        type: string
+      msys2-arch:
+        required: true
+        type: string
+      compiler-family:
+        required: true
+        type: string
+      compiler-CC:
+        required: true
+        type: string
+      compiler-CXX:
+        required: true
+        type: string
+      flavor:
+        required: true
+        type: string
+      ECO:
+        type: string
+
+env:
+  RPUU_DST: ${{ github.workspace }}/raw-camera-samples/raw.pixls.us-unique
+  COVERAGE_REPORT_PREFIX: rawspeed-coverage # relative to the workspace!
+
+jobs:
+  windows-msys2:
+    name: ${{ inputs.msys2-msystem }}.${{ inputs.compiler-family }}.${{ inputs.flavor }}
+    timeout-minutes: 16
+    runs-on: ${{ inputs.os }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Fetch/Checkout RawSpeed git repo
+        timeout-minutes: 2
+        uses: actions/checkout@v4
+        with:
+          path: 'rawspeed'
+          fetch-depth: 1
+      - name: Install Base Dependencies
+        timeout-minutes: 3
+        uses: msys2/setup-msys2@v2
+        with:
+          cache: false
+          msystem: ${{ inputs.msys2-msystem }}
+          update: false
+          install: >-
+            git
+            base-devel
+          pacboy: >-
+            cc:p
+            gcc-libs:p
+            omp:p
+            cmake:p
+            ninja:p
+            libxml2:p
+            pugixml:p
+            libjpeg-turbo:p
+            zlib:p
+      - name: Install Additional Dependencies (Coverage)
+        if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        uses: msys2/setup-msys2@v2
+        with:
+          cache: false
+          msystem: ${{ inputs.msys2-msystem }}
+          pacboy: >-
+            zstd:p
+      - name: Configure
+        timeout-minutes: 3
+        env:
+          CC: ${{ inputs.compiler-CC }}
+          CXX: ${{ inputs.compiler-CXX }}
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          ECO: ${{ inputs.ECO }} -DALLOW_DOWNLOADING_GOOGLETEST=ON -DALLOW_DOWNLOADING_GOOGLEBENCHMARK=ON
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: configure
+        run: |
+          set -xe
+          cmake -E make_directory "${BUILD_DIR}"
+          cmake -E make_directory "${INSTALL_PREFIX}"
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Build
+        timeout-minutes: 13
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: build
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Test (unit tests)
+        timeout-minutes: 1
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: test
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Collect source coverage data (unit tests)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: coverage
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-unittest" "${COVERAGE_REPORT_PREFIX}/unittests"
+      - name: Test (benchmarks)
+        timeout-minutes: 1
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: test_benchmarks
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+      - name: Collect source coverage data (benchmarks)
+        timeout-minutes: 1
+        if: inputs.flavor == 'Coverage'
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          COVERAGE_REPORT_PREFIX: ${{ github.workspace }}/${{ env.COVERAGE_REPORT_PREFIX }}/windows
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: coverage_benchmarks
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh
+          mkdir -p "${COVERAGE_REPORT_PREFIX}"
+          mv "${BUILD_DIR}/gcov-reports-benchmarks" "${COVERAGE_REPORT_PREFIX}/benchmarks"
+      - if: inputs.flavor == 'Coverage'
+        timeout-minutes: 1
+        name: Cache code coverage (windows reports)
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.COVERAGE_REPORT_PREFIX }}/windows # relative path!
+          key: coverage-${{ github.sha }}-windows
+          enableCrossOsArchive: true
+      - name: Install
+        timeout-minutes: 1
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+          BUILD_DIR: ${{ github.workspace }}/rawspeed-build
+          INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
+          FLAVOR: ${{ inputs.flavor }}
+          TARGET: install
+        run: |
+          set -xe
+          $(cygpath ${SRC_DIR})/.ci/ci-script.sh

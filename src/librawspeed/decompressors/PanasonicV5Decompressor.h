@@ -21,15 +21,13 @@
 
 #pragma once
 
-#include "common/Point.h"                       // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/BitPumpLSB.h"                      // for BitPumpLSB
-#include "io/ByteStream.h"                      // for ByteStream
-#include <cstddef>                              // for size_t
-#include <cstdint>                              // for uint32_t
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerLSB.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
@@ -70,9 +68,9 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
 
   const uint32_t bps;
 
-  size_t numBlocks;
+  uint64_t numBlocks;
 
-  struct Block {
+  struct Block final {
     ByteStream bs;
     iPoint2D beginCoord;
     // The rectangle is an incorrect representation. All the rows
@@ -80,8 +78,8 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
     iPoint2D endCoord;
 
     Block() = default;
-    Block(ByteStream&& bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
-        : bs(std::move(bs_)), beginCoord(beginCoord_), endCoord(endCoord_) {}
+    Block(ByteStream bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : bs(bs_), beginCoord(beginCoord_), endCoord(endCoord_) {}
   };
 
   // If really wanted, this vector could be avoided,
@@ -91,15 +89,14 @@ class PanasonicV5Decompressor final : public AbstractDecompressor {
   void chopInputIntoBlocks(const PacketDsc& dsc);
 
   template <const PacketDsc& dsc>
-  inline void processPixelPacket(BitPumpLSB& bs, int row, int col) const;
+  inline void processPixelPacket(BitStreamerLSB& bs, int row, int col) const;
 
   template <const PacketDsc& dsc> void processBlock(const Block& block) const;
 
   template <const PacketDsc& dsc> void decompressInternal() const noexcept;
 
 public:
-  PanasonicV5Decompressor(const RawImage& img, const ByteStream& input_,
-                          uint32_t bps_);
+  PanasonicV5Decompressor(RawImage img, ByteStream input_, uint32_t bps_);
 
   void decompress() const noexcept;
 };

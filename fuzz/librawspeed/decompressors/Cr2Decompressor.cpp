@@ -18,36 +18,40 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef HuffmanTableImpl
-#error HuffmanTableImpl must be defined to one of rawspeeds huffman tables
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include <cstddef>
+#include <tuple>
+#include <vector>
+#ifndef PrefixCodeDecoderImpl
+#error PrefixCodeDecoderImpl must be defined to one of rawspeeds huffman tables
 #endif
 
+#include "MemorySanitizer.h"
+#include "codes/DummyPrefixCodeDecoder.h"
+#include "codes/PrefixCodeDecoder/Common.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
 #include "decompressors/Cr2Decompressor.h"
-#include "HuffmanTable/Common.h"             // for createHuffmanTable
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for ThrowException, Rawsp...
-#include "decompressors/DummyHuffmanTable.h" // for DummyHuffmanTable
-#include "decompressors/HuffmanTable.h"      // for HuffmanTable
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h"                   // for Endianness, Endiannes...
-#include <algorithm>                         // for generate_n, copy
-#include <cassert>                           // for assert
-#include <cstdint>                           // for uint16_t, uint8_t
-#include <initializer_list>                  // for initializer_list
-#include <iterator>                          // for back_insert_iterator
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <iterator>
 
-#ifdef WITH_DummyHuffmanTable
-#include "decompressors/Cr2DecompressorImpl.h" // for Cr2Decompressor::Cr2D...
+#ifdef WITH_DummyPrefixCodeDecoder
+#include "decompressors/Cr2DecompressorImpl.h"
 
 namespace rawspeed {
 
-template class Cr2Decompressor<DummyHuffmanTable>;
+template class Cr2Decompressor<DummyPrefixCodeDecoder<>>;
 
 } // namespace rawspeed
 
-#endif // WITH_DummyHuffmanTable
+#endif // WITH_DummyPrefixCodeDecoder
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -55,7 +59,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
@@ -76,17 +81,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto sliceWidth = bs.get<slice_type>();
     const auto lastSliceWidth = bs.get<slice_type>();
 
-    const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
+    const rawspeed::Cr2SliceWidths slicing(numSlices, sliceWidth,
+                                           lastSliceWidth);
 
     const unsigned num_recips = bs.getU32();
 
     const unsigned num_unique_hts = bs.getU32();
-    std::vector<rawspeed::HuffmanTableImpl> uniqueHts;
+    std::vector<rawspeed::PrefixCodeDecoderImpl<>> uniqueHts;
     std::generate_n(std::back_inserter(uniqueHts), num_unique_hts, [&bs]() {
-      return createHuffmanTable<rawspeed::HuffmanTableImpl>(bs);
+      return createPrefixCodeDecoder<rawspeed::PrefixCodeDecoderImpl<>>(bs);
     });
 
-    std::vector<const rawspeed::HuffmanTableImpl*> hts;
+    std::vector<const rawspeed::PrefixCodeDecoderImpl<>*> hts;
     std::generate_n(std::back_inserter(hts), num_recips, [&bs, &uniqueHts]() {
       if (unsigned uniq_ht_idx = bs.getU32(); uniq_ht_idx < uniqueHts.size())
         return &uniqueHts[uniq_ht_idx];
@@ -100,24 +106,27 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
                     [&bs]() { return bs.get<uint16_t>(); });
 
     std::vector<rawspeed::Cr2Decompressor<
-        rawspeed::HuffmanTableImpl>::PerComponentRecipe>
+        rawspeed::PrefixCodeDecoderImpl<>>::PerComponentRecipe>
         rec;
     rec.reserve(num_recips);
-    std::generate_n(std::back_inserter(rec), num_recips,
-                    [&rec, hts, initPred]()
-                        -> rawspeed::Cr2Decompressor<
-                            rawspeed::HuffmanTableImpl>::PerComponentRecipe {
-                      const int i = rec.size();
-                      return {*hts[i], initPred[i]};
-                    });
+    std::generate_n(
+        std::back_inserter(rec), num_recips,
+        [&rec, hts, initPred]()
+            -> rawspeed::Cr2Decompressor<
+                rawspeed::PrefixCodeDecoderImpl<>>::PerComponentRecipe {
+          const auto i = rawspeed::implicit_cast<int>(rec.size());
+          return {*hts[i], initPred[i]};
+        });
 
-    rawspeed::Cr2Decompressor<rawspeed::HuffmanTableImpl> d(
-        mRaw, format, frame, slicing, rec, bs.getSubStream(/*offset=*/0));
+    rawspeed::Cr2Decompressor<rawspeed::PrefixCodeDecoderImpl<>> d(
+        mRaw, format, frame, slicing, rec,
+        bs.getSubStream(/*offset=*/0).peekRemainingBuffer().getAsArray1DRef());
     mRaw->createData();
-    d.decompress();
+    (void)d.decompress();
 
-    mRaw->checkMemIsInitialized();
-  } catch (const rawspeed::RawspeedException&) {
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

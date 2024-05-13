@@ -20,23 +20,26 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h"
 #include "decompressors/SonyArw2Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for rawspeed_get_number_of_pro...
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImageData, RawImage
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/BitPumpLSB.h"                // for BitPumpLSB
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t, uint8_t
-#include <string>                         // for string, allocator
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerLSB.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/ByteStream.h"
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <utility>
 
 namespace rawspeed {
 
-SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
-                                           const ByteStream& input_)
-    : mRaw(img) {
+SonyArw2Decompressor::SonyArw2Decompressor(RawImage img, ByteStream input_)
+    : mRaw(std::move(img)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -52,22 +55,22 @@ SonyArw2Decompressor::SonyArw2Decompressor(const RawImage& img,
 
 void SonyArw2Decompressor::decompressRow(int row) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.width % 32 == 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 32 == 0);
 
   // Allow compiler to devirtualize the calls below.
   auto& rawdata = reinterpret_cast<RawImageDataU16&>(*mRaw);
 
   ByteStream rowBs = input;
-  rowBs.skipBytes(row * out.width);
-  rowBs = rowBs.peekStream(out.width);
+  rowBs.skipBytes(row * out.width());
+  rowBs = rowBs.peekStream(out.width());
 
-  BitPumpLSB bits(rowBs);
+  BitStreamerLSB bits(rowBs.peekRemainingBuffer().getAsArray1DRef());
 
   uint32_t random = bits.peekBits(24);
 
   // Each loop iteration processes 16 pixels, consuming 128 bits of input.
-  for (int col = 0; col < out.width; col += ((col & 1) != 0) ? 31 : 1) {
+  for (int col = 0; col < out.width(); col += ((col & 1) != 0) ? 31 : 1) {
     // 30 bits.
     int _max = bits.getBits(11);
     int _min = bits.getBits(11);
@@ -100,15 +103,16 @@ void SonyArw2Decompressor::decompressRow(int row) const {
         }
       }
       rawdata.setWithLookUp(
-          p << 1, reinterpret_cast<uint8_t*>(&out(row, col + i * 2)), &random);
+          implicit_cast<uint16_t>(p << 1),
+          reinterpret_cast<std::byte*>(&out(row, col + i * 2)), &random);
     }
   }
 }
 
 void SonyArw2Decompressor::decompressThread() const noexcept {
-  assert(mRaw->dim.x > 0);
-  assert(mRaw->dim.x % 32 == 0);
-  assert(mRaw->dim.y > 0);
+  invariant(mRaw->dim.x > 0);
+  invariant(mRaw->dim.x % 32 == 0);
+  invariant(mRaw->dim.y > 0);
 
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
@@ -122,6 +126,9 @@ void SonyArw2Decompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp cancel for
 #endif
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 }

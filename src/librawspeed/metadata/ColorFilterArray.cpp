@@ -19,32 +19,34 @@
 */
 
 #include "metadata/ColorFilterArray.h"
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include <algorithm>                      // for copy, fill_n, fill, max
-#include <cassert>                        // for assert
-#include <cinttypes>                      // for PRId64
-#include <cmath>                          // for abs
-#include <cstdarg>                        // for va_arg, va_end, va_list
-#include <cstdlib>                        // for abs, size_t
-#include <map>                            // for map
-#include <stdexcept>                      // for out_of_range
-#include <string>                         // for string, basic_string
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "decoders/RawDecoderException.h"
+#include <algorithm>
+#include <cassert>
+#include <cinttypes>
+#include <cstdarg>
+#include <cstdint>
+#include <cstdlib>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 using std::vector;
 
-using std::out_of_range;
 using std::map;
+using std::out_of_range;
 
 namespace rawspeed {
 
-ColorFilterArray::ColorFilterArray(const iPoint2D &_size) {
-  setSize(_size);
-}
+ColorFilterArray::ColorFilterArray(const iPoint2D& _size) { setSize(_size); }
 
-void ColorFilterArray::setSize(const iPoint2D& _size)
-{
+void ColorFilterArray::setSize(const iPoint2D& _size) {
   if (_size == iPoint2D(0, 0))
     return;
 
@@ -62,24 +64,23 @@ void ColorFilterArray::setSize(const iPoint2D& _size)
   }
   if (size.area() <= 0)
     return;
-  cfa.resize(size.area());
+  cfa.resize(implicit_cast<size_t>(size.area()));
   fill(cfa.begin(), cfa.end(), CFAColor::UNKNOWN);
 }
 
-CFAColor ColorFilterArray::getColorAt( int x, int y ) const
-{
+CFAColor ColorFilterArray::getColorAt(int x, int y) const {
   if (cfa.empty())
     ThrowRDE("No CFA size set");
 
   // calculate the positive modulo [0 .. size-1]
+  invariant(size.hasPositiveArea());
   x = (x % size.x + size.x) % size.x;
   y = (y % size.y + size.y) % size.y;
 
   return cfa[x + static_cast<size_t>(y) * size.x];
 }
 
-void ColorFilterArray::setCFA( iPoint2D in_size, ... )
-{
+void ColorFilterArray::setCFA(iPoint2D in_size, ...) {
   if (in_size != size) {
     setSize(in_size);
   }
@@ -88,7 +89,7 @@ void ColorFilterArray::setCFA( iPoint2D in_size, ... )
   for (auto i = 0UL; i < size.area(); i++) {
     cfa[i] = static_cast<CFAColor>(va_arg(arguments, int));
   }
-  va_end (arguments);
+  va_end(arguments);
 }
 
 void ColorFilterArray::shiftRight(int n) {
@@ -100,7 +101,7 @@ void ColorFilterArray::shiftRight(int n) {
   if (n == 0)
     return;
 
-  vector<CFAColor> tmp(size.area());
+  vector<CFAColor> tmp(implicit_cast<size_t>(size.area()));
   for (int y = 0; y < size.y; ++y) {
     for (int x = 0; x < size.x; ++x) {
       tmp[x + static_cast<size_t>(y) * size.x] = getColorAt(x + n, y);
@@ -118,7 +119,7 @@ void ColorFilterArray::shiftDown(int n) {
   if (n == 0)
     return;
 
-  vector<CFAColor> tmp(size.area());
+  vector<CFAColor> tmp(implicit_cast<size_t>(size.area()));
   for (int y = 0; y < size.y; ++y) {
     for (int x = 0; x < size.x; ++x) {
       tmp[x + static_cast<size_t>(y) * size.x] = getColorAt(x, y + n);
@@ -131,7 +132,7 @@ std::string ColorFilterArray::asString() const {
   std::string dst;
   for (int y = 0; y < size.y; y++) {
     for (int x = 0; x < size.x; x++) {
-      dst += colorToString(getColorAt(x,y));
+      dst += colorToString(getColorAt(x, y));
       dst += (x == size.x - 1) ? "\n" : ",";
     }
   }
@@ -167,19 +168,41 @@ uint32_t ColorFilterArray::shiftDcrawFilter(uint32_t filter, int x, int y) {
   return filter;
 }
 
-const map<CFAColor, std::string> ColorFilterArray::color2String = {
-    {CFAColor::RED, "RED"},         {CFAColor::GREEN, "GREEN"},
-    {CFAColor::BLUE, "BLUE"},       {CFAColor::CYAN, "CYAN"},
-    {CFAColor::MAGENTA, "MAGENTA"}, {CFAColor::YELLOW, "YELLOW"},
-    {CFAColor::WHITE, "WHITE"},     {CFAColor::FUJI_GREEN, "FUJIGREEN"},
-    {CFAColor::UNKNOWN, "UNKNOWN"}};
+namespace {
+
+Optional<std::string_view> getColorAsString(CFAColor c) {
+  switch (c) {
+    using enum CFAColor;
+  case RED:
+    return "RED";
+  case GREEN:
+    return "GREEN";
+  case BLUE:
+    return "BLUE";
+  case CYAN:
+    return "CYAN";
+  case MAGENTA:
+    return "MAGENTA";
+  case YELLOW:
+    return "YELLOW";
+  case WHITE:
+    return "WHITE";
+  case FUJI_GREEN:
+    return "FUJIGREEN";
+  case UNKNOWN:
+    return "UNKNOWN";
+  default:
+    return std::nullopt;
+  }
+}
+
+} // namespace
 
 std::string ColorFilterArray::colorToString(CFAColor c) {
-  try {
-    return color2String.at(c);
-  } catch (const std::out_of_range&) {
+  auto s = getColorAsString(c);
+  if (!s)
     ThrowRDE("Unsupported CFA Color: %u", static_cast<unsigned>(c));
-  }
+  return std::string(*s);
 }
 
 void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
@@ -190,29 +213,33 @@ void ColorFilterArray::setColorAt(iPoint2D pos, CFAColor c) {
   cfa[pos.x + static_cast<size_t>(pos.y) * size.x] = c;
 }
 
-static uint32_t toDcrawColor(CFAColor c) {
+namespace {
+uint32_t toDcrawColor(CFAColor c) {
   switch (c) {
-  case CFAColor::FUJI_GREEN:
-  case CFAColor::RED:
+    using enum CFAColor;
+  case FUJI_GREEN:
+  case RED:
     return 0;
-  case CFAColor::MAGENTA:
-  case CFAColor::GREEN:
+  case MAGENTA:
+  case GREEN:
     return 1;
-  case CFAColor::CYAN:
-  case CFAColor::BLUE:
+  case CYAN:
+  case BLUE:
     return 2;
-  case CFAColor::YELLOW:
-  case CFAColor::WHITE:
+  case YELLOW:
+  case WHITE:
     return 3;
-  case CFAColor::UNKNOWN:
-  case CFAColor::END:
+  case UNKNOWN:
+  case END:
     throw out_of_range(ColorFilterArray::colorToString(c));
   }
   __builtin_unreachable();
 }
 
+} // namespace
+
 uint32_t ColorFilterArray::getDcrawFilter() const {
-  //dcraw magic
+  // dcraw magic
   if (size.x == 6 && size.y == 6)
     return 9;
 
@@ -229,7 +256,7 @@ uint32_t ColorFilterArray::getDcrawFilter() const {
     for (int y = 0; y < 8; y++) {
       uint32_t c = toDcrawColor(getColorAt(x, y));
       int g = (x >> 1) * 8;
-      ret |= c << ((x&1)*2 + y*4 + g);
+      ret |= c << ((x & 1) * 2 + y * 4 + g);
     }
   }
 

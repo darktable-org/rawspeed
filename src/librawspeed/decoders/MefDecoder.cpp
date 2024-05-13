@@ -20,17 +20,22 @@
 */
 
 #include "decoders/MefDecoder.h"
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include <string>                                   // for operator==, string
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decoders/SimpleTiffDecoder.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "tiff/TiffIFD.h"
+#include <string>
 
 namespace rawspeed {
 
 bool MefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -48,9 +53,11 @@ RawImage MefDecoder::decodeRawInternal() {
   SimpleTiffDecoder::prepareForRawDecoding();
 
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw);
-
-  u.decode12BitRaw<Endianness::big>(width, height);
+      ByteStream(DataBuffer(mFile.getSubView(off), Endianness::little)), mRaw,
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 12 * width / 8, 12,
+      BitOrder::MSB);
+  mRaw->createData();
+  u.readUncompressedRaw();
 
   return mRaw;
 }

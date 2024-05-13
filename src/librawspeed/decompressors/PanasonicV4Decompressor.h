@@ -20,13 +20,12 @@
 
 #pragma once
 
-#include "common/Point.h"                       // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include <cstdint>                              // for uint32_t
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
@@ -55,7 +54,7 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
   //   I.e. these two parts need to be swapped around.
   uint32_t section_split_offset;
 
-  struct Block {
+  struct Block final {
     ByteStream bs;
     iPoint2D beginCoord;
     // The rectangle is an incorrect representation. All the rows
@@ -63,8 +62,8 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
     iPoint2D endCoord;
 
     Block() = default;
-    Block(ByteStream&& bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
-        : bs(std::move(bs_)), beginCoord(beginCoord_), endCoord(endCoord_) {}
+    Block(ByteStream bs_, iPoint2D beginCoord_, iPoint2D endCoord_)
+        : bs(bs_), beginCoord(beginCoord_), endCoord(endCoord_) {}
   };
 
   // If really wanted, this vector could be avoided,
@@ -77,14 +76,14 @@ class PanasonicV4Decompressor final : public AbstractDecompressor {
   processPixelPacket(ProxyStream& bits, int row, int col,
                      std::vector<uint32_t>* zero_pos) const noexcept;
 
-  void processBlock(const Block& block, std::vector<uint32_t>* zero_pos) const
-      noexcept;
+  void processBlock(const Block& block,
+                    std::vector<uint32_t>* zero_pos) const noexcept;
 
   void decompressThread() const noexcept;
 
 public:
-  PanasonicV4Decompressor(const RawImage& img, const ByteStream& input_,
-                          bool zero_is_not_bad, uint32_t section_split_offset_);
+  PanasonicV4Decompressor(RawImage img, ByteStream input_, bool zero_is_not_bad,
+                          uint32_t section_split_offset_);
 
   void decompress() const noexcept;
 };

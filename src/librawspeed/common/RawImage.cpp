@@ -18,51 +18,52 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h"
 #include "common/RawImage.h"
-#include "MemorySanitizer.h"              // for MSan
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/IOException.h"               // for IOException
-#include "parsers/TiffParserException.h"  // for TiffParserException
-#include <algorithm>                      // for min, fill_n
-#include <cassert>                        // for assert
-#include <cstring>                        // for memset
-#include <limits>                         // for numeric_limits
-#include <memory>                         // for unique_ptr, allocator, mak...
-#include <utility>                        // for move, swap
+#include "adt/Casts.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/TableLookUp.h"
+#include "decoders/RawDecoderException.h"
+#include "io/IOException.h"
+#include "parsers/TiffParserException.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#ifdef DEBUG
+#include "adt/Array2DRef.h"
+#endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-#include "AddressSanitizer.h" // for ASan::...
+#include "AddressSanitizer.h"
 #endif
 
 namespace rawspeed {
 
-RawImageData::RawImageData() : cfa(iPoint2D(0, 0)) {
-  blackLevelSeparate.fill(-1);
+void RawImageData::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
 }
 
 RawImageData::RawImageData(RawImageType type, const iPoint2D& _dim, int _bpc,
                            int _cpp)
-    : dim(_dim), isCFA(_cpp == 1), cfa(iPoint2D(0, 0)), dataType(type),
-      cpp(_cpp) {
+    : dim(_dim), isCFA(_cpp == 1), dataType(type), cpp(_cpp) {
   assert(_bpc > 0);
 
   if (cpp > std::numeric_limits<decltype(cpp)>::max() / _bpc)
     ThrowRDE("Components-per-pixel is too large.");
 
   bpp = _bpc * _cpp;
-  blackLevelSeparate.fill(-1);
   createData();
 }
-
-RawImageData::~RawImageData() {
-  assert(dataRefCount == 0);
-  mOffset = iPoint2D(0, 0);
-
-  destroyData();
-}
-
 
 void RawImageData::createData() {
   static constexpr const auto alignment = 16;
@@ -77,7 +78,8 @@ void RawImageData::createData() {
     ThrowRDE("Duplicate data allocation in createData.");
 
   // want each line to start at 16-byte aligned address
-  pitch = roundUp(static_cast<size_t>(dim.x) * bpp, alignment);
+  pitch =
+      implicit_cast<int>(roundUp(static_cast<size_t>(dim.x) * bpp, alignment));
   assert(isAligned(pitch, alignment));
 
 #if defined(DEBUG) || __has_feature(address_sanitizer) ||                      \
@@ -94,21 +96,12 @@ void RawImageData::createData() {
   assert(padding > 0);
 #endif
 
-  data = alignedMallocArray<uint8_t, alignment>(dim.y, pitch);
-
-  if (!data)
-    ThrowRDE("Memory Allocation failed.");
+  data.resize(static_cast<size_t>(pitch) * dim.y);
 
   uncropped_dim = dim;
 
 #ifndef NDEBUG
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
-
-  if (dim.y > 1) {
-    // padding is the size of the area after last pixel of line n
-    // and before the first pixel of line n+1
-    assert(&img(0, img.width - 1) + 1 + padding == &img(1, 0));
-  }
 
   for (int j = 0; j < dim.y; j++) {
     // each line is indeed 16-byte aligned
@@ -120,18 +113,18 @@ void RawImageData::createData() {
 }
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::poisonPadding() const {
+void RawImageData::poisonPadding() {
   if (padding <= 0)
     return;
 
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
     // and now poison the padding.
-    ASan::PoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
+    ASan::PoisonMemoryRegion(img[j].end(), padding);
   }
 }
 #else
-void RawImageData::poisonPadding() const {
+void RawImageData::poisonPadding() {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
@@ -139,54 +132,23 @@ void RawImageData::poisonPadding() const {
 #endif
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
-void RawImageData::unpoisonPadding() const {
+void RawImageData::unpoisonPadding() {
   if (padding <= 0)
     return;
 
   const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
   for (int j = 0; j < uncropped_dim.y; j++) {
     // and now unpoison the padding.
-    ASan::UnPoisonMemoryRegion(&img(j, img.width - 1) + 1, padding);
+    ASan::UnPoisonMemoryRegion(img[j].end(), padding);
   }
 }
 #else
-void RawImageData::unpoisonPadding() const {
+void RawImageData::unpoisonPadding() {
   // if we are building without ASAN, then there is no need/way to poison.
   // however, i think it is better to have such an empty function rather
   // than making this whole function not exist in ASAN-less builds
 }
 #endif
-
-void RawImageData::checkRowIsInitialized(int row) const {
-  const Array2DRef<std::byte> img = getByteDataAsUncroppedArray2DRef();
-
-  // and check that image line is initialized.
-  // do note that we are avoiding padding here.
-  MSan::CheckMemIsInitialized(reinterpret_cast<const uint8_t*>(&img(row, 0)),
-                              img.width);
-}
-
-#if __has_feature(memory_sanitizer) || defined(__SANITIZE_MEMORY__)
-void RawImageData::checkMemIsInitialized() const {
-  for (int j = 0; j < uncropped_dim.y; j++)
-    checkRowIsInitialized(j);
-}
-#else
-void RawImageData::checkMemIsInitialized() const {
-  // While we could use the same version for non-MSAN build, even though it
-  // does not do anything, i don't think it will be fully optimized away,
-  // the getDataUncropped() call may still be there. To be re-evaluated.
-}
-#endif
-
-void RawImageData::destroyData() {
-  if (data)
-    alignedFree(data);
-  if (mBadPixelMap)
-    alignedFree(mBadPixelMap);
-  data = nullptr;
-  mBadPixelMap = nullptr;
-}
 
 void RawImageData::setCpp(uint32_t val) {
   if (isAllocated())
@@ -202,15 +164,18 @@ void RawImageData::setCpp(uint32_t val) {
   bpp *= val;
 }
 
-iPoint2D __attribute__((pure)) rawspeed::RawImageData::getUncroppedDim() const {
+iPoint2D RAWSPEED_READONLY rawspeed::RawImageData::getUncroppedDim() const {
   return uncropped_dim;
 }
 
-iPoint2D __attribute__((pure)) RawImageData::getCropOffset() const {
+iPoint2D RAWSPEED_READONLY RawImageData::getCropOffset() const {
   return mOffset;
 }
 
 void RawImageData::subFrame(iRectangle2D crop) {
+  if (!crop.hasPositiveArea())
+    ThrowRDE("No positive crop area");
+
   if (!crop.dim.isThisInside(dim - crop.pos)) {
     writeLog(DEBUG_PRIO::WARNING, "WARNING: RawImageData::subFrame - Attempted "
                                   "to create new subframe larger than original "
@@ -233,50 +198,22 @@ void RawImageData::subFrame(iRectangle2D crop) {
   dim = crop.dim;
 }
 
-void RawImageData::createBadPixelMap()
-{
+void RawImageData::createBadPixelMap() {
   if (!isAllocated())
     ThrowRDE("(internal) Bad pixel map cannot be allocated before image.");
-  mBadPixelMapPitch = roundUp(roundUpDivision(uncropped_dim.x, 8), 16);
-  mBadPixelMap =
-      alignedMallocArray<uint8_t, 16>(uncropped_dim.y, mBadPixelMapPitch);
-  memset(mBadPixelMap, 0,
-         static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y);
-  if (!mBadPixelMap)
-    ThrowRDE("Memory Allocation failed.");
+  mBadPixelMapPitch = implicit_cast<uint32_t>(
+      roundUp(roundUpDivisionSafe(uncropped_dim.x, 8), 16));
+  assert(mBadPixelMap.empty());
+  mBadPixelMap.resize(static_cast<size_t>(mBadPixelMapPitch) * uncropped_dim.y,
+                      uint8_t(0));
 }
 
-RawImage::RawImage(RawImageData* p) : p_(p) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
-}
-
-RawImage::RawImage(const RawImage& p) : p_(p.p_) {
-  MutexLocker guard(&p_->mymutex);
-  ++p_->dataRefCount;
-}
-
-RawImage::~RawImage() {
-  p_->mymutex.Lock();
-
-  --p_->dataRefCount;
-
-  if (p_->dataRefCount == 0) {
-    p_->mymutex.Unlock();
-    delete p_;
-    return;
-  }
-
-  p_->mymutex.Unlock();
-}
-
-void RawImageData::transferBadPixelsToMap()
-{
+void RawImageData::transferBadPixelsToMap() {
   MutexLocker guard(&mBadPixelMutex);
   if (mBadPixelPositions.empty())
     return;
 
-  if (!mBadPixelMap)
+  if (mBadPixelMap.empty())
     createBadPixelMap();
 
   for (unsigned int pos : mBadPixelPositions) {
@@ -286,33 +223,22 @@ void RawImageData::transferBadPixelsToMap()
     assert(pos_x < static_cast<uint16_t>(uncropped_dim.x));
     assert(pos_y < static_cast<uint16_t>(uncropped_dim.y));
 
-    mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x&7);
+    mBadPixelMap[mBadPixelMapPitch * pos_y + (pos_x >> 3)] |= 1 << (pos_x & 7);
   }
   mBadPixelPositions.clear();
 }
 
-void RawImageData::fixBadPixels()
-{
-#if !defined (EMULATE_DCRAW_BAD_PIXELS)
+void RawImageData::fixBadPixels() {
+#if !defined(EMULATE_DCRAW_BAD_PIXELS)
 
   /* Transfer if not already done */
   transferBadPixelsToMap();
 
-#if 0 // For testing purposes
-  if (!mBadPixelMap)
-    createBadPixelMap();
-  for (int y = 400; y < 700; y++){
-    for (int x = 1200; x < 1700; x++) {
-      mBadPixelMap[mBadPixelMapPitch * y + (x >> 3)] |= 1 << (x&7);
-    }
-  }
-#endif
-
   /* Process bad pixels, if any */
-  if (mBadPixelMap)
+  if (!mBadPixelMap.empty())
     startWorker(RawImageWorker::RawImageWorkerTask::FIX_BAD_PIXELS, false);
 
-#else  // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
+#else // EMULATE_DCRAW_BAD_PIXELS - not recommended, testing purposes only
 
   for (vector<uint32_t>::iterator i = mBadPixelPositions.begin();
        i != mBadPixelPositions.end(); ++i) {
@@ -339,7 +265,6 @@ void RawImageData::fixBadPixels()
     }
   }
 #endif
-
 }
 
 void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
@@ -359,7 +284,7 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
 #ifdef HAVE_OPENMP
 #pragma omp parallel for default(none)                                         \
     firstprivate(threads, y_per_thread, height, task) num_threads(threads)     \
-        schedule(static)
+    schedule(static)
 #endif
   for (int i = 0; i < threads; i++) {
     int y_offset = std::min(i * y_per_thread, height);
@@ -372,18 +297,22 @@ void RawImageData::startWorker(const RawImageWorker::RawImageWorkerTask task,
 void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   int gw = (uncropped_dim.x + 15) / 32;
 
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
+
   for (int y = start_y; y < end_y; y++) {
-    const auto* bad_map =
-        reinterpret_cast<const uint32_t*>(&mBadPixelMap[y * mBadPixelMapPitch]);
     for (int x = 0; x < gw; x++) {
+      const auto block = bad[y].getBlock(32 / 8, x);
+
       // Test if there is a bad pixel within these 32 pixels
-      if (bad_map[x] == 0)
+      if (std::all_of(block.begin(), block.end(),
+                      [](const auto& val) { return val == 0; }))
         continue;
-      const auto* bad = reinterpret_cast<const uint8_t*>(&bad_map[x]);
+
       // Go through each pixel
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 8; j++) {
-          if (1 != ((bad[i] >> j) & 1))
+          if (1 != ((block(i) >> j) & 1))
             continue;
 
           fixBadPixel(x * 32 + i * 8 + j, y, 0);
@@ -393,8 +322,8 @@ void RawImageData::fixBadPixelsThread(int start_y, int end_y) {
   }
 }
 
-void RawImageData::clearArea(iRectangle2D area) const {
-  area = area.getOverlap(iRectangle2D(iPoint2D(0,0), dim));
+void RawImageData::clearArea(iRectangle2D area) {
+  area = area.getOverlap(iRectangle2D(iPoint2D(0, 0), dim));
 
   if (area.area() <= 0)
     return;
@@ -407,25 +336,6 @@ void RawImageData::clearArea(iRectangle2D area) const {
   }
 }
 
-RawImage& RawImage::operator=(RawImage&& rhs) noexcept {
-  if (this == &rhs)
-    return *this;
-
-  std::swap(p_, rhs.p_);
-
-  return *this;
-}
-
-RawImage& RawImage::operator=(const RawImage& rhs) noexcept {
-  if (this == &rhs)
-    return *this;
-
-  RawImage tmp(rhs);
-  *this = std::move(tmp);
-
-  return *this;
-}
-
 RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
                                int _start_y, int _end_y) noexcept
     : data(_img), task(_task), start_y(_start_y), end_y(_end_y) {
@@ -434,15 +344,15 @@ RawImageWorker::RawImageWorker(RawImageData* _img, RawImageWorkerTask _task,
 
 void RawImageWorker::performTask() noexcept {
   try {
-    switch(task)
-    {
-    case RawImageWorkerTask::SCALE_VALUES:
+    switch (task) {
+      using enum RawImageWorkerTask;
+    case SCALE_VALUES:
       data->scaleValues(start_y, end_y);
       break;
-    case RawImageWorkerTask::FIX_BAD_PIXELS:
+    case FIX_BAD_PIXELS:
       data->fixBadPixelsThread(start_y, end_y);
       break;
-    case RawImageWorkerTask::APPLY_LOOKUP:
+    case APPLY_LOOKUP:
       data->doLookup(start_y, end_y);
       break;
     default:
@@ -454,6 +364,9 @@ void RawImageWorker::performTask() noexcept {
     data->setError(e.what());
   } catch (const IOException& e) {
     data->setError(e.what());
+  } catch (...) {
+    // We should not get any other exception type here.
+    __builtin_unreachable();
   }
 }
 

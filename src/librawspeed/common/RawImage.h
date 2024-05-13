@@ -20,37 +20,42 @@
 
 #pragma once
 
-#include "rawspeedconfig.h"            // for WITH_SSE2
-#include "ThreadSafetyAnalysis.h"      // for GUARDED_BY, REQUIRES
-#include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Common.h"             // for writeLog, DEBUG_PRIO, DEBUG_P...
-#include "common/CroppedArray2DRef.h"  // for CroppedArray2DRef
-#include "common/ErrorLog.h"           // for ErrorLog
-#include "common/Mutex.h"              // for Mutex
-#include "common/NotARational.h"       // for NotARational
-#include "common/Point.h"              // for iPoint2D, iRectangle2D (ptr o...
-#include "common/TableLookUp.h"        // for TableLookUp
-#include "metadata/BlackArea.h"        // for BlackArea
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
-#include <array>                       // for array
-#include <cassert>                     // for assert
-#include <cmath>                       // for NAN
-#include <cstddef>                     // for byte
-#include <cstdint>                     // for uint32_t, uint16_t, uint8_t
-#include <memory>                      // for unique_ptr, operator==, defau...
-#include <string>                      // for string
-#include <vector>                      // for vector
+#include "rawspeedconfig.h"
+#include "ThreadSafetyAnalysis.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/Mutex.h"
+#include "adt/NotARational.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/ErrorLog.h"
+#include "common/TableLookUp.h"
+#include "metadata/BlackArea.h"
+#include "metadata/ColorFilterArray.h"
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
 class RawImage;
 class RawImageData;
 
-enum class RawImageType { UINT16, F32 };
+enum class RawImageType : uint8_t { UINT16, F32 };
 
-class RawImageWorker {
+class RawImageWorker final {
 public:
-  enum class RawImageWorkerTask {
+  enum class RawImageWorkerTask : uint16_t {
     SCALE_VALUES = 1,
     FIX_BAD_PIXELS = 2,
     APPLY_LOOKUP = 3 | 0x1000,
@@ -70,7 +75,7 @@ public:
                  int end_y) noexcept;
 };
 
-class ImageMetaData {
+class ImageMetaData final {
 public:
   // Aspect ratio of the pixels, usually 1 but some cameras need scaling
   // <1 means the image needs to be stretched vertically, (0.5 means 2x)
@@ -104,41 +109,39 @@ public:
 };
 
 class RawImageData : public ErrorLog {
+  virtual void anchor() const;
+
   friend class RawImageWorker;
+
 public:
-  virtual ~RawImageData();
-  [[nodiscard]] uint32_t getCpp() const { return cpp; }
-  [[nodiscard]] uint32_t getBpp() const { return bpp; }
+  virtual ~RawImageData() = default;
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getCpp() const { return cpp; }
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getBpp() const { return bpp; }
   void setCpp(uint32_t val);
   void createData();
-  void poisonPadding() const;
-  void unpoisonPadding() const;
-  void checkRowIsInitialized(int row) const;
-  void checkMemIsInitialized() const;
-  void destroyData();
+  void poisonPadding();
+  void unpoisonPadding();
 
   [[nodiscard]] rawspeed::RawImageType getDataType() const { return dataType; }
 
-  [[nodiscard]] Array2DRef<uint16_t>
-  getU16DataAsUncroppedArray2DRef() const noexcept;
+  [[nodiscard]] Array2DRef<uint16_t> getU16DataAsUncroppedArray2DRef() noexcept;
   [[nodiscard]] CroppedArray2DRef<uint16_t>
-  getU16DataAsCroppedArray2DRef() const noexcept;
-  [[nodiscard]] Array2DRef<float>
-  getF32DataAsUncroppedArray2DRef() const noexcept;
+  getU16DataAsCroppedArray2DRef() noexcept;
+  [[nodiscard]] Array2DRef<float> getF32DataAsUncroppedArray2DRef() noexcept;
   [[nodiscard]] CroppedArray2DRef<float>
-  getF32DataAsCroppedArray2DRef() const noexcept;
+  getF32DataAsCroppedArray2DRef() noexcept;
 
   // WARNING: this is most certainly not what you want!
   [[nodiscard]] Array2DRef<std::byte>
-  getByteDataAsUncroppedArray2DRef() const noexcept;
+  getByteDataAsUncroppedArray2DRef() noexcept;
 
   void subFrame(iRectangle2D cropped);
-  void clearArea(iRectangle2D area) const;
-  [[nodiscard]] iPoint2D __attribute__((pure)) getUncroppedDim() const;
-  [[nodiscard]] iPoint2D __attribute__((pure)) getCropOffset() const;
+  void clearArea(iRectangle2D area);
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getUncroppedDim() const;
+  [[nodiscard]] iPoint2D RAWSPEED_READONLY getCropOffset() const;
   virtual void scaleBlackWhite() = 0;
   virtual void calculateBlackAreas() = 0;
-  virtual void setWithLookUp(uint16_t value, uint8_t* dst,
+  virtual void setWithLookUp(uint16_t value, std::byte* dst,
                              uint32_t* random) = 0;
   void sixteenBitLookup();
   void transferBadPixelsToMap() REQUIRES(!mBadPixelMutex);
@@ -146,7 +149,7 @@ public:
   void setTable(const std::vector<uint16_t>& table_, bool dither);
   void setTable(std::unique_ptr<TableLookUp> t);
 
-  [[nodiscard]] bool isAllocated() const { return !!data; }
+  [[nodiscard]] bool isAllocated() const { return !data.empty(); }
   void createBadPixelMap();
   iPoint2D dim;
   int pitch = 0;
@@ -158,15 +161,23 @@ public:
   bool isCFA{true};
   ColorFilterArray cfa;
   int blackLevel = -1;
-  std::array<int, 4> blackLevelSeparate;
-  int whitePoint = 65536;
+  std::array<int, 4> blackLevelSeparateStorage;
+  Optional<Array2DRef<int>> blackLevelSeparate;
+
+  // A white level of the image, if known.
+  // NOTE: it is always correct to divide the pixel by `float(whiteLevel)`,
+  //       to normalize the image.
+  // NOTE: for floating-point images, the white level is never non-integral,
+  //       and thus >= 1.0f
+  Optional<int> whitePoint;
+
   std::vector<BlackArea> blackAreas;
 
   /* Vector containing the positions of bad pixels */
   /* Format is x | (y << 16), so maximum pixel position is 65535 */
   // Positions of zeroes that must be interpolated
   std::vector<uint32_t> mBadPixelPositions GUARDED_BY(mBadPixelMutex);
-  uint8_t* mBadPixelMap = nullptr;
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> mBadPixelMap;
   uint32_t mBadPixelMapPitch = 0;
   bool mDitherScale =
       true; // Should upscaling be done with dither to minimize banding?
@@ -175,33 +186,34 @@ public:
   Mutex mBadPixelMutex; // Mutex for 'mBadPixelPositions, must be used if more
                         // than 1 thread is accessing vector
 
-private:
-  uint32_t dataRefCount GUARDED_BY(mymutex) = 0;
-
 protected:
   RawImageType dataType;
-  RawImageData();
+  RawImageData() = default;
   RawImageData(RawImageType type, const iPoint2D& dim, int bpp, int cpp = 1);
   virtual void scaleValues(int start_y, int end_y) = 0;
   virtual void doLookup(int start_y, int end_y) = 0;
   virtual void fixBadPixel(uint32_t x, uint32_t y, int component = 0) = 0;
   void fixBadPixelsThread(int start_y, int end_y);
-  void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped );
-  uint8_t* data = nullptr;
+  void startWorker(RawImageWorker::RawImageWorkerTask task, bool cropped);
+  std::vector<uint8_t, DefaultInitAllocatorAdaptor<
+                           uint8_t, AlignedAllocator<uint8_t, 16>>>
+      data;
   int cpp = 1; // Components per pixel
   int bpp = 0; // Bytes per pixel.
   friend class RawImage;
   iPoint2D mOffset;
   iPoint2D uncropped_dim;
   std::unique_ptr<TableLookUp> table;
-  Mutex mymutex;
 };
 
 class RawImageDataU16 final : public RawImageData {
 public:
+  RawImageDataU16();
+  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
+
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues_plain(int start_y, int end_y);
@@ -212,118 +224,115 @@ private:
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   void doLookup(int start_y, int end_y) override;
 
-  RawImageDataU16();
-  explicit RawImageDataU16(const iPoint2D& dim_, uint32_t cpp_ = 1);
   friend class RawImage;
 };
 
 class RawImageDataFloat final : public RawImageData {
 public:
+  RawImageDataFloat();
+  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
+
   void scaleBlackWhite() override;
   void calculateBlackAreas() override;
-  void setWithLookUp(uint16_t value, uint8_t* dst, uint32_t* random) override;
+  void setWithLookUp(uint16_t value, std::byte* dst, uint32_t* random) override;
 
 private:
   void scaleValues(int start_y, int end_y) override;
   void fixBadPixel(uint32_t x, uint32_t y, int component = 0) override;
   [[noreturn]] void doLookup(int start_y, int end_y) override;
-  RawImageDataFloat();
-  explicit RawImageDataFloat(const iPoint2D& dim_, uint32_t cpp_ = 1);
+
   friend class RawImage;
 };
 
- class RawImage {
- public:
-   static RawImage create(RawImageType type = RawImageType::UINT16);
-   static RawImage create(const iPoint2D& dim,
-                          RawImageType type = RawImageType::UINT16,
-                          uint32_t componentsPerPixel = 1);
-   RawImageData* operator->() const { return p_; }
-   RawImageData& operator*() const { return *p_; }
-   explicit RawImage(RawImageData* p); // p must not be NULL
-   ~RawImage();
-   RawImage(const RawImage& p);
-   RawImage& operator=(const RawImage& p) noexcept;
-   RawImage& operator=(RawImage&& p) noexcept;
+class RawImage final {
+public:
+  static RawImage create(RawImageType type = RawImageType::UINT16);
+  static RawImage create(const iPoint2D& dim,
+                         RawImageType type = RawImageType::UINT16,
+                         uint32_t componentsPerPixel = 1);
+  RawImageData* RAWSPEED_READONLY operator->() const { return &*p_; }
+  RawImageData& RAWSPEED_READONLY operator*() const { return *p_; }
 
-   RawImageData* get() { return p_; }
- private:
-   RawImageData* p_;    // p_ is never NULL
- };
+  explicit RawImage(RawImageData* p) = delete;
+  explicit RawImage(std::shared_ptr<RawImageData> p) : p_(std::move(p)) {}
 
-inline RawImage RawImage::create(RawImageType type)  {
-  switch (type)
-  {
+  RawImageData* get() { return &*p_; }
+
+private:
+  std::shared_ptr<RawImageData> p_; // p_ is never NULL
+};
+
+inline RawImage RawImage::create(RawImageType type) {
+  switch (type) {
   case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16());
+    return RawImage(std::make_shared<RawImageDataU16>());
   case RawImageType::F32:
-    return RawImage(new RawImageDataFloat());
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
+    return RawImage(std::make_shared<RawImageDataFloat>());
   }
+  writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
+  __builtin_unreachable();
 }
 
 inline RawImage RawImage::create(const iPoint2D& dim, RawImageType type,
                                  uint32_t componentsPerPixel) {
   switch (type) {
   case RawImageType::UINT16:
-    return RawImage(new RawImageDataU16(dim, componentsPerPixel));
+    return RawImage(std::make_shared<RawImageDataU16>(dim, componentsPerPixel));
   case RawImageType::F32:
-    return RawImage(new RawImageDataFloat(dim, componentsPerPixel));
-  default:
-    writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
-    __builtin_unreachable();
+    return RawImage(
+        std::make_shared<RawImageDataFloat>(dim, componentsPerPixel));
   }
+  writeLog(DEBUG_PRIO::ERROR, "RawImage::create: Unknown Image type!");
+  __builtin_unreachable();
 }
 
 inline Array2DRef<uint16_t>
-RawImageData::getU16DataAsUncroppedArray2DRef() const noexcept {
+RawImageData::getU16DataAsUncroppedArray2DRef() noexcept {
   assert(dataType == RawImageType::UINT16 &&
          "Attempting to access floating-point buffer as uint16_t.");
-  assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<uint16_t*>(data), cpp * uncropped_dim.x,
+  assert(!data.empty() && "Data not yet allocated.");
+  return {reinterpret_cast<uint16_t*>(data.data()), cpp * uncropped_dim.x,
           uncropped_dim.y, static_cast<int>(pitch / sizeof(uint16_t))};
 }
 
 inline CroppedArray2DRef<uint16_t>
-RawImageData::getU16DataAsCroppedArray2DRef() const noexcept {
+RawImageData::getU16DataAsCroppedArray2DRef() noexcept {
   return {getU16DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
 }
 
 inline Array2DRef<float>
-RawImageData::getF32DataAsUncroppedArray2DRef() const noexcept {
+RawImageData::getF32DataAsUncroppedArray2DRef() noexcept {
   assert(dataType == RawImageType::F32 &&
          "Attempting to access integer buffer as float.");
-  assert(data && "Data not yet allocated.");
-  return {reinterpret_cast<float*>(data), cpp * uncropped_dim.x,
+  assert(!data.empty() && "Data not yet allocated.");
+  return {reinterpret_cast<float*>(data.data()), cpp * uncropped_dim.x,
           uncropped_dim.y, static_cast<int>(pitch / sizeof(float))};
 }
 
 inline CroppedArray2DRef<float>
-RawImageData::getF32DataAsCroppedArray2DRef() const noexcept {
+RawImageData::getF32DataAsCroppedArray2DRef() noexcept {
   return {getF32DataAsUncroppedArray2DRef(), cpp * mOffset.x, mOffset.y,
           cpp * dim.x, dim.y};
 }
 
 inline Array2DRef<std::byte>
-RawImageData::getByteDataAsUncroppedArray2DRef() const noexcept {
+RawImageData::getByteDataAsUncroppedArray2DRef() noexcept {
   switch (dataType) {
   case RawImageType::UINT16:
     return getU16DataAsUncroppedArray2DRef();
   case RawImageType::F32:
     return getF32DataAsUncroppedArray2DRef();
-  default:
-    __builtin_unreachable();
   }
+  __builtin_unreachable();
 }
 
 // setWithLookUp will set a single pixel by using the lookup table if supplied,
-// You must supply the destination where the value should be written, and a pointer to
-// a value that will be used to store a random counter that can be reused between calls.
-// this needs to be inline to speed up tight decompressor loops
-inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
+// You must supply the destination where the value should be written, and a
+// pointer to a value that will be used to store a random counter that can be
+// reused between calls. this needs to be inline to speed up tight decompressor
+// loops
+inline void RawImageDataU16::setWithLookUp(uint16_t value, std::byte* dst,
                                            uint32_t* random) {
   auto* dest = reinterpret_cast<uint16_t*>(dst);
   if (table == nullptr) {
@@ -331,15 +340,13 @@ inline void RawImageDataU16::setWithLookUp(uint16_t value, uint8_t* dst,
     return;
   }
   if (table->dither) {
-    const auto* t = reinterpret_cast<const uint32_t*>(table->tables.data());
-    uint32_t lookup = t[value];
-    uint32_t base = lookup & 0xffff;
-    uint32_t delta = lookup >> 16;
+    uint32_t base = table->tables[2 * value + 0];
+    uint32_t delta = table->tables[2 * value + 1];
     uint32_t r = *random;
 
     uint32_t pix = base + ((delta * (r & 2047) + 1024) >> 12);
-    *random = 15700 *(r & 65535) + (r >> 16);
-    *dest = pix;
+    *random = 15700 * (r & 65535) + (r >> 16);
+    *dest = implicit_cast<uint16_t>(pix);
     return;
   }
   *dest = table->tables[value];

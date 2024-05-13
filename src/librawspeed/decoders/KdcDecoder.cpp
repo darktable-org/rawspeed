@@ -20,29 +20,32 @@
 */
 
 #include "decoders/KdcDecoder.h"
-#include "common/NORangesSet.h"                     // for NORangesSet
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Hints
-#include "parsers/TiffParserException.h"            // for ThrowException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t, uint64_t
-#include <limits>                                   // for numeric_limits
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
+#include "adt/Casts.h"
+#include "adt/NORangesSet.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 
 bool KdcDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -63,22 +66,10 @@ Buffer KdcDecoder::getInputBuffer() const {
     ThrowRDE("Offset is too large.");
 
   // Offset hardcoding gotten from dcraw
-  if (hints.has("easyshare_offset_hack"))
+  if (hints.contains("easyshare_offset_hack"))
     off = off < 0x15000 ? 0x15000 : 0x17000;
 
-  if (off > mFile.getSize())
-    ThrowRDE("offset is out of bounds");
-
-  const auto area = mRaw->dim.area();
-  if (area > std::numeric_limits<decltype(area)>::max() / 12) // round down
-    ThrowRDE("Image dimensions are way too large, potential for overflow");
-
-  const auto bits = 12 * area;
-  if (bits % 8 != 0)
-    ThrowRDE("Bad combination of image dims and bpp, bit count %% 8 != 0");
-  const auto bytes = bits / 8;
-
-  return mFile.getSubView(off, bytes);
+  return mFile.getSubView(implicit_cast<Buffer::size_type>(off));
 }
 
 RawImage KdcDecoder::decodeRawInternal() {
@@ -112,14 +103,18 @@ RawImage KdcDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
+  if (!mRaw->dim.hasPositiveArea() || !(mRaw->dim <= iPoint2D(4304, 3221)))
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+             mRaw->dim.y);
+
   const Buffer inputBuffer = KdcDecoder::getInputBuffer();
 
-  mRaw->createData();
-
   UncompressedDecompressor u(
-      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw);
-
-  u.decode12BitRaw<Endianness::big>(width, height);
+      ByteStream(DataBuffer(inputBuffer, Endianness::little)), mRaw,
+      iRectangle2D({0, 0}, iPoint2D(width, height)), 12 * width / 8, 12,
+      BitOrder::MSB);
+  mRaw->createData();
+  u.readUncompressedRaw();
 
   return mRaw;
 }

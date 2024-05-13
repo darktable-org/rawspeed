@@ -21,34 +21,36 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <string>                         // for string
-#include <utility>                        // for move
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <string>
+#include <utility>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
 
-class Rw2Decoder final : public AbstractTiffDecoder
-{
+class Rw2Decoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  Rw2Decoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  Rw2Decoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
   void checkSupportInternal(const CameraMetaData* meta) override;
+  iRectangle2D getDefaultCrop() override;
 
 protected:
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
 
 private:
   void parseCFA() const;
+  [[nodiscard]] const TiffIFD* getRaw() const;
   [[nodiscard]] std::string guessMode() const;
 };
 

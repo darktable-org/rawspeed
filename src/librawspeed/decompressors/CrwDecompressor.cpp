@@ -21,27 +21,33 @@
 */
 
 #include "decompressors/CrwDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for isIntN
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable, HuffmanTableLUT
-#include "io/BitPumpJPEG.h"               // for BitPumpJPEG, BitStream<>::...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint8_t, int16_t
-#include <tuple>                          // for array
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerJPEG.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include <array>
+#include <cstdint>
+#include <utility>
 
 using std::array;
 
 namespace rawspeed {
 
-CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
-                                 bool lowbits_, ByteStream rawData)
-    : mRaw(img), lowbits(lowbits_) {
+CrwDecompressor::CrwDecompressor(
+    RawImage img, uint32_t dec_table, Array1DRef<const uint8_t> input_,
+    Optional<Array1DRef<const uint8_t>> lowbitInput_)
+    : mRaw(std::move(img)), mHuff(initHuffTables(dec_table)), input(input_),
+      lowbitInput(lowbitInput_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -53,32 +59,28 @@ CrwDecompressor::CrwDecompressor(const RawImage& img, uint32_t dec_table,
       height > 3048 || (height * width) % 64 != 0)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
-  if (lowbits) {
+  if (lowbitInput) {
     // If there are low bits, the first part (size is calculable) is low bits
     // Each block is 4 pairs of 2 bits, so we have 1 block per 4 pixels
-    const unsigned lBlocks = 1 * height * width / 4;
-    assert(lBlocks > 0);
-    lowbitInput = rawData.getStream(lBlocks);
+    const int lBlocks = 1 * height * width / 4;
+    invariant(lBlocks > 0);
+    if (lowbitInput->size() < lBlocks)
+      ThrowRDE("Unsufficient number of low bit blocks");
+    lowbitInput =
+        lowbitInput->getCrop(/*offset=*/0, /*size*/ lBlocks).getAsArray1DRef();
   }
-
-  // We always ignore next 514 bytes of 'padding'. No idea what is in there.
-  rawData.skipBytes(514);
-
-  // Rest is the high bits.
-  rawInput = rawData.getStream(rawData.getRemainSize());
-
-  mHuff = initHuffTables(dec_table);
 }
 
-HuffmanTable CrwDecompressor::makeDecoder(const uint8_t* ncpl,
-                                          const uint8_t* values) {
-  assert(ncpl);
+PrefixCodeDecoder<> CrwDecompressor::makeDecoder(const uint8_t* ncpl,
+                                                 const uint8_t* values) {
+  invariant(ncpl);
 
-  HuffmanTable ht;
-  auto count = ht.setNCodesPerLength(Buffer(ncpl, 16));
-  ht.setCodeValues(Buffer(values, count));
+  HuffmanCode<BaselineCodeTag> hc;
+  auto count = hc.setNCodesPerLength(Buffer(ncpl, 16));
+  hc.setCodeValues(Array1DRef<const uint8_t>(values, count));
+
+  PrefixCodeDecoder<> ht(std::move(hc));
   ht.setup(/*fullDecode_=*/false, false);
-
   return ht;
 }
 
@@ -153,7 +155,7 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
          0xf2, 0xb1, 0xe4, 0xd1, 0x83, 0x63, 0xea, 0xc3, 0xe2, 0x82, 0xf1, 0xa3,
          0xc2, 0xa1, 0xc1, 0xe3, 0xa2, 0xe1, 0xff, 0xff}}};
 
-  std::array<HuffmanTable, 2> mHuff = {
+  std::array<PrefixCodeDecoder<>, 2> mHuff = {
       {makeDecoder(first_tree_ncpl[table].data(),
                    first_tree_codevalues[table].data()),
        makeDecoder(second_tree_ncpl[table].data(),
@@ -164,17 +166,18 @@ CrwDecompressor::crw_hts CrwDecompressor::initHuffTables(uint32_t table) {
 
 inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
                                          const crw_hts& mHuff,
-                                         BitPumpJPEG& bs) {
-  assert(diffBuf);
+                                         BitStreamerJPEG& bs) {
+  invariant(diffBuf);
 
   // decode the block
   for (int i = 0; i < 64;) {
     bs.fill(32);
 
-    const uint8_t codeValue = mHuff[i > 0].decodeCodeValue(bs);
+    const auto codeValue =
+        implicit_cast<uint8_t>(mHuff[i > 0].decodeCodeValue(bs));
     const int len = codeValue & 0b1111;
     const int index = codeValue >> 4;
-    assert(len >= 0 && index >= 0);
+    invariant(len >= 0 && index >= 0);
 
     if (len == 0 && index == 0 && i)
       break;
@@ -196,9 +199,9 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
     if (i >= 64)
       break;
 
-    diff = HuffmanTable::extend(diff, len);
+    diff = PrefixCodeDecoder<>::extend(diff, len);
 
-    (*diffBuf)[i] = diff;
+    (*diffBuf)[i] = implicit_cast<int16_t>(diff);
     ++i;
   }
 }
@@ -206,18 +209,18 @@ inline void CrwDecompressor::decodeBlock(std::array<int16_t, 64>* diffBuf,
 // FIXME: this function is horrible.
 void CrwDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.width % 4 == 0);
-  assert(out.height > 0);
+  invariant(out.width() > 0);
+  invariant(out.width() % 4 == 0);
+  invariant(out.height() > 0);
 
   {
     // Each block encodes 64 pixels
 
-    assert((out.height * out.width) % 64 == 0);
-    const unsigned hBlocks = out.height * out.width / 64;
-    assert(hBlocks > 0);
+    invariant((out.height() * out.width()) % 64 == 0);
+    const unsigned hBlocks = out.height() * out.width() / 64;
+    invariant(hBlocks > 0);
 
-    BitPumpJPEG bs(rawInput);
+    BitStreamerJPEG bs(input);
 
     int carry = 0;
     std::array<int, 2> base = {512, 512}; // starting predictors
@@ -235,7 +238,7 @@ void CrwDecompressor::decompress() {
       carry = diffBuf[0];
 
       for (uint32_t k = 0; k < 64; ++k) {
-        if (col == out.width) {
+        if (col == out.width()) {
           // new line. sadly, does not always happen when k == 0.
           col = 0;
           row++;
@@ -247,19 +250,22 @@ void CrwDecompressor::decompress() {
         if (!isIntN(base[k & 1], 10))
           ThrowRDE("Error decompressing");
 
-        out(row, col) = base[k & 1];
+        out(row, col) = implicit_cast<uint16_t>(base[k & 1]);
         ++col;
       }
     }
-    assert(row == (out.height - 1));
-    assert(col == out.width);
+    invariant(row == (out.height() - 1));
+    invariant(col == out.width());
   }
 
   // Add the uncompressed 2 low bits to the decoded 8 high bits
-  if (lowbits) {
-    for (int row = 0; row < out.height; row++) {
-      for (int col = 0; col < out.width; /* NOTE: col += 4 */) {
-        const uint8_t c = lowbitInput.getByte();
+  if (lowbitInput) {
+    Array2DRef lowbits(*lowbitInput, out.width() / 4, out.height(),
+                       out.width() / 4);
+    for (int row = 0; row < out.height(); row++) {
+      for (int col = 0; col < out.width(); /* NOTE: col += 4 */) {
+        invariant(col % 4 == 0);
+        const uint8_t c = lowbits(row, col / 4);
         // LSB-packed: p3 << 6 | p2 << 4 | p1 << 2 | p0 << 0
 
         // We have read 8 bits, which is 4 pairs of 2 bits. So process 4 pixels.
@@ -267,9 +273,9 @@ void CrwDecompressor::decompress() {
           uint16_t& pixel = out(row, col);
 
           uint16_t low = (c >> (2 * p)) & 0b11;
-          uint16_t val = (pixel << 2) | low;
+          auto val = implicit_cast<uint16_t>((pixel << 2) | low);
 
-          if (out.width == 2672 && val < 512)
+          if (out.width() == 2672 && val < 512)
             val += 2; // No idea why this is needed
 
           pixel = val;

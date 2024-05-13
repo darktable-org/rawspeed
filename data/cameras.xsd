@@ -22,11 +22,13 @@
       <xs:minLength value="2"/>
       <xs:maxLength value="10"/>
       <xs:enumeration value="Canon"/>
+      <xs:enumeration value="Contax"/>
       <xs:enumeration value="Epson"/>
       <xs:enumeration value="Fujifilm"/>
       <xs:enumeration value="GITUP"/>
       <xs:enumeration value="GoPro"/>
       <xs:enumeration value="Hasselblad"/>
+      <xs:enumeration value="ImBack"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="LG"/>
       <xs:enumeration value="Leaf"/>
@@ -36,6 +38,7 @@
       <xs:enumeration value="Nikon"/>
       <xs:enumeration value="Nokia"/>
       <xs:enumeration value="Olympus"/>
+      <xs:enumeration value="OM System"/>
       <xs:enumeration value="OnePlus"/>
       <xs:enumeration value="Panasonic"/>
       <xs:enumeration value="Paralenz"/>
@@ -192,10 +195,7 @@
   </xs:simpleType>
   <xs:complexType name="CFA2Type">
     <xs:sequence>
-      <xs:choice>
-        <xs:element type="ColorRowType" name="ColorRow" minOccurs="2" maxOccurs="2"/>
-        <xs:element type="ColorRowType" name="ColorRow" minOccurs="6" maxOccurs="6"/>
-      </xs:choice>
+      <xs:element type="ColorRowType" name="ColorRow" minOccurs="2" maxOccurs="6"/>
     </xs:sequence>
     <xs:attribute type="CFA2TypeWidthType" name="width" use="required"/>
     <xs:attribute type="CFA2TypeHeightType" name="height" use="required"/>
@@ -285,7 +285,7 @@
   </xs:complexType>
   <xs:simpleType name="AliasTypeType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z0-9 \-,]{4,27}"/>
+      <xs:pattern value="[a-zA-Z0-9 \-,/]{4,27}"/>
       <xs:minLength value="4"/>
       <xs:maxLength value="27"/>
     </xs:restriction>
@@ -306,7 +306,7 @@
   </xs:complexType>
   <xs:complexType name="AliasesType">
     <xs:sequence>
-      <xs:element type="AliasType" name="Alias" minOccurs="1" maxOccurs="5"/>
+      <xs:element type="AliasType" name="Alias" minOccurs="1" maxOccurs="11"/>
     </xs:sequence>
   </xs:complexType>
   <xs:simpleType name="HintTypeNameType">
@@ -425,10 +425,12 @@
       <xs:enumeration value="Generic"/>
       <xs:enumeration value="GoPro"/>
       <xs:enumeration value="Hasselblad"/>
+      <xs:enumeration value="ImBack"/>
       <xs:enumeration value="KODAK"/>
       <xs:enumeration value="KONICA MINOLTA"/>
       <xs:enumeration value="Kodak"/>
       <xs:enumeration value="Konica Minolta Camera, Inc."/>
+      <xs:enumeration value="KYOCERA"/>
       <xs:enumeration value="LEICA CAMERA AG"/>
       <xs:enumeration value="LEICA"/>
       <xs:enumeration value="LG Mobile"/>
@@ -448,6 +450,8 @@
       <xs:enumeration value="OLYMPUS IMAGING CORP."/>
       <xs:enumeration value="OLYMPUS OPTICAL CO.,LTD"/>
       <xs:enumeration value="Olympus"/>
+      <xs:enumeration value="OM Digital Solutions"/>
+      <xs:enumeration value="OM System"/>
       <xs:enumeration value="OnePlus"/>
       <xs:enumeration value="PENTAX Corporation"/>
       <xs:enumeration value="PENTAX RICOH IMAGING"/>
@@ -468,6 +472,7 @@
       <xs:enumeration value="SONY"/>
       <xs:enumeration value="ST Micro"/>
       <xs:enumeration value="Samsung"/>
+      <xs:enumeration value="Sinar AG"/>
       <xs:enumeration value="Sinar Photography AG"/>
       <xs:enumeration value="Sinar"/>
       <xs:enumeration value="Sjcam"/>
@@ -511,11 +516,13 @@
   </xs:simpleType>
   <xs:simpleType name="CameraTypeSupportedType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="(no|no-samples)"/>
+      <xs:pattern value="(no|no-samples|unknown|unknown-no-samples)"/>
       <xs:minLength value="2"/>
-      <xs:maxLength value="10"/>
+      <xs:maxLength value="18"/>
       <xs:enumeration value="no"/>
       <xs:enumeration value="no-samples"/>
+      <xs:enumeration value="unknown"/>
+      <xs:enumeration value="unknown-no-samples"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="CameraType">

@@ -21,30 +21,37 @@
 */
 
 #include "decompressors/KodakDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for extractHighBits, isIntN
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for min
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <utility>                        // for move
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <utility>
+
+#if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
+#include <sanitizer/asan_interface.h>
+#endif
 
 namespace rawspeed {
 
-KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
-                                     int bps_, bool uncorrectedRawValues_)
-    : mRaw(img), input(std::move(bs)), bps(bps_),
+KodakDecompressor::KodakDecompressor(RawImage img, ByteStream bs, int bps_,
+                                     bool uncorrectedRawValues_)
+    : mRaw(std::move(img)), input(bs), bps(bps_),
       uncorrectedRawValues(uncorrectedRawValues_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 4 != 0 ||
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 4 != 0 ||
       mRaw->dim.x > 4516 || mRaw->dim.y > 3012)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
@@ -54,14 +61,14 @@ KodakDecompressor::KodakDecompressor(const RawImage& img, ByteStream bs,
 
   // Lower estimate: this decompressor requires *at least* half a byte
   // per output pixel
-  (void)input.check(mRaw->dim.area() / 2ULL);
+  (void)input.check(implicit_cast<Buffer::size_type>(mRaw->dim.area() / 2ULL));
 }
 
 KodakDecompressor::segment
 KodakDecompressor::decodeSegment(const uint32_t bsize) {
-  assert(bsize > 0);
-  assert(bsize % 4 == 0);
-  assert(bsize <= segment_size);
+  invariant(bsize > 0);
+  invariant(bsize % 4 == 0);
+  invariant(bsize <= segment_size);
 
   segment out;
   static_assert(out.size() == segment_size, "Wrong segment size");
@@ -69,7 +76,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
   // We are to produce only bsize pixels.
   __sanitizer_annotate_contiguous_container(out.begin(), out.end(), out.end(),
-                                            out.begin() + bsize);
+                                            &out[bsize]);
 #endif
 
   std::array<uint8_t, 2 * segment_size> blen;
@@ -88,7 +95,7 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
   }
   for (uint32_t i = 0; i < bsize; i++) {
     uint32_t len = blen[i];
-    assert(len < 16);
+    invariant(len < 16);
 
     if (bits < len) {
       for (uint32_t j = 0; j < 32; j += 8) {
@@ -103,7 +110,8 @@ KodakDecompressor::decodeSegment(const uint32_t bsize) {
     bitbuf >>= len;
     bits -= len;
 
-    out[i] = len != 0 ? HuffmanTable::extend(diff, len) : int(diff);
+    out[i] = implicit_cast<int16_t>(
+        len != 0 ? PrefixCodeDecoder<>::extend(diff, len) : int(diff));
   }
 
   return out;
@@ -113,8 +121,8 @@ void KodakDecompressor::decompress() {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   uint32_t random = 0;
-  for (int row = 0; row < out.height; row++) {
-    for (int col = 0; col < out.width;) {
+  for (int row = 0; row < out.height(); row++) {
+    for (int col = 0; col < out.width();) {
       const int len = std::min(segment_size, mRaw->dim.x - col);
 
       const segment buf = decodeSegment(len);
@@ -130,10 +138,12 @@ void KodakDecompressor::decompress() {
           ThrowRDE("Value out of bounds %d (bps = %i)", value, bps);
 
         if (uncorrectedRawValues)
-          out(row, col) = value;
-        else
-          mRaw->setWithLookUp(value, reinterpret_cast<uint8_t*>(&out(row, col)),
+          out(row, col) = implicit_cast<uint16_t>(value);
+        else {
+          mRaw->setWithLookUp(implicit_cast<uint16_t>(value),
+                              reinterpret_cast<std::byte*>(&out(row, col)),
                               &random);
+        }
       }
     }
   }

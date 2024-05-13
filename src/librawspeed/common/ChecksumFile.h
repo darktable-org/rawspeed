@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <string> // for string, allocator
-#include <vector> // for vector
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 
-struct ChecksumFileEntry {
+struct ChecksumFileEntry final {
   std::string FullFileName;
   std::string RelFileName;
 };

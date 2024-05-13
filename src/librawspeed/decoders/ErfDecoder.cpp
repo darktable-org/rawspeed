@@ -20,24 +20,28 @@
 */
 
 #include "decoders/ErfDecoder.h"
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decoders/SimpleTiffDecoder.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 
 class CameraMetaData;
 
 bool ErfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -56,9 +60,11 @@ RawImage ErfDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)),
+      (12 * width / 8) + ((width + 2) / 10), 12, BitOrder::MSB);
+  mRaw->createData();
 
-  u.decode12BitRaw<Endianness::big, false, true>(width, height);
+  u.decode12BitRawWithControl<Endianness::big>();
 
   return mRaw;
 }

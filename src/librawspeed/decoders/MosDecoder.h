@@ -21,23 +21,21 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <string>                         // for string
-#include <string_view>                    // for string_view
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "tiff/TiffIFD.h"
+#include <string>
+#include <string_view>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
 
-class MosDecoder final : public AbstractTiffDecoder
-{
+class MosDecoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);
 
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;

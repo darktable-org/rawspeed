@@ -20,38 +20,38 @@
 */
 
 #include "decoders/RawDecoder.h"
-#include "common/Common.h"                          // for writeLog, roundU...
-#include "common/NotARational.h"                    // for NotARational
-#include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "io/FileIOException.h"                     // for ThrowException
-#include "io/IOException.h"                         // for IOException
-#include "metadata/BlackArea.h"                     // for BlackArea
-#include "metadata/Camera.h"                        // for Camera, Camera::...
-#include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
-#include "parsers/TiffParserException.h"            // for TiffParserException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffIFD
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <algorithm>                                // for copy, max
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <string>                                   // for string, allocator
-#include <vector>                                   // for vector
+#include "MemorySanitizer.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "io/FileIOException.h"
+#include "io/IOException.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <cassert>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 using std::vector;
 
 namespace rawspeed {
 
-RawDecoder::RawDecoder(const Buffer& file)
-    : mRaw(RawImage::create()), failOnUnknown(false),
-      interpolateBadPixels(true), applyStage1DngOpcodes(true), applyCrop(true),
-      uncorrectedRawValues(false), fujiRotate(true), mFile(file) {}
+RawDecoder::RawDecoder(Buffer file) : mFile(file) {}
 
 void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
                                     BitOrder order) const {
@@ -74,7 +74,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   }
 
   if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
-      roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+      roundUpDivisionSafe(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
   }
@@ -121,39 +121,84 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   mRaw->createData();
 
   // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = (1UL << bitPerPixel) - 1UL;
+  mRaw->whitePoint = implicit_cast<int>((1UL << bitPerPixel) - 1UL);
 
   offY = 0;
   for (const RawSlice& slice : slices) {
-    UncompressedDecompressor u(
-        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
-                              Endianness::little)),
-        mRaw);
     iPoint2D size(width, slice.h);
     iPoint2D pos(0, offY);
-    bitPerPixel = (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width);
+    bitPerPixel = implicit_cast<uint32_t>(
+        (static_cast<uint64_t>(slice.count) * 8U) / (slice.h * width));
     const auto inputPitch = width * bitPerPixel / 8;
     if (!inputPitch)
       ThrowRDE("Bad input pitch. Can not decode anything.");
 
-    u.readUncompressedRaw(size, pos, inputPitch, bitPerPixel, order);
+    UncompressedDecompressor u(
+        ByteStream(DataBuffer(mFile.getSubView(slice.offset, slice.count),
+                              Endianness::little)),
+        mRaw, iRectangle2D(pos, size), inputPitch, bitPerPixel, order);
+    u.readUncompressedRaw();
 
     offY += slice.h;
   }
 }
 
-void RawDecoder::askForSamples([[maybe_unused]] const CameraMetaData* meta,
-                               const std::string& make,
-                               const std::string& model,
-                               const std::string& mode) {
-  if ("dng" == mode)
-    return;
+bool RawDecoder::handleCameraSupport(const CameraMetaData* meta,
+                                     const std::string& make,
+                                     const std::string& model,
+                                     const std::string& mode) {
+  Camera::SupportStatus supportStatus = Camera::SupportStatus::UnknownCamera;
+  const Camera* cam = meta->getCamera(make, model, mode);
+  if (cam)
+    supportStatus = cam->supportStatus;
 
-  writeLog(DEBUG_PRIO::WARNING,
-           "Unable to find camera in database: '%s' '%s' "
-           "'%s'\nPlease consider providing samples on "
-           "<https://raw.pixls.us/>, thanks!",
-           make.c_str(), model.c_str(), mode.c_str());
+  // Sample beggary block.
+  switch (supportStatus) {
+    using enum Camera::SupportStatus;
+  case UnknownCamera:
+    if ("dng" != mode) {
+      noSamples = true;
+      writeLog(DEBUG_PRIO::WARNING,
+               "Unable to find camera in database: '%s' '%s' '%s'\nPlease "
+               "consider providing samples on <https://raw.pixls.us/>, thanks!",
+               make.c_str(), model.c_str(), mode.c_str());
+    }
+    break;
+  case UnknownNoSamples:
+  case SupportedNoSamples:
+    noSamples = true;
+    writeLog(DEBUG_PRIO::WARNING,
+             "Camera support status is unknown: '%s' '%s' '%s'\n"
+             "Please consider providing samples on <https://raw.pixls.us/> "
+             "if you wish for the support to not be discontinued, thanks!",
+             make.c_str(), model.c_str(), mode.c_str());
+    break; // WYSIWYG.
+  case Supported:
+  case Unknown:
+  case Unsupported:
+    break; // All these imply existence of a sample on RPU.
+  }
+
+  // Actual support handling.
+  switch (supportStatus) {
+    using enum Camera::SupportStatus;
+  case Supported:
+  case SupportedNoSamples:
+    return true; // Explicitly supported.
+  case Unsupported:
+    ThrowRDE("Camera not supported (explicit). Sorry.");
+  case UnknownCamera:
+  case UnknownNoSamples:
+  case Unknown:
+    if (failOnUnknown) {
+      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to "
+               "guess. Sorry.",
+               make.c_str(), model.c_str(), mode.c_str());
+    }
+    return cam; // Might be implicitly supported.
+  }
+
+  return true;
 }
 
 bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
@@ -162,34 +207,16 @@ bool RawDecoder::checkCameraSupported(const CameraMetaData* meta,
                                       const std::string& mode) {
   mRaw->metadata.make = make;
   mRaw->metadata.model = model;
-  const Camera* cam = meta->getCamera(make, model, mode);
-  if (!cam) {
-    askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown)
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
-
-    // Assume the camera can be decoded, but return false, so decoders can see that we are unsure.
+  if (!handleCameraSupport(meta, make, model, mode))
     return false;
-  }
 
-  switch (cam->supportStatus) {
-  case Camera::SupportStatus::Supported:
-    break; // Yay us!
-  case Camera::SupportStatus::Unsupported:
-    ThrowRDE("Camera not supported (explicit). Sorry.");
-  case Camera::SupportStatus::NoSamples:
-    noSamples = true;
-    writeLog(DEBUG_PRIO::WARNING,
-             "Camera support status is unknown: '%s' '%s' '%s'\n"
-             "Please consider providing samples on <https://raw.pixls.us/> "
-             "if you wish for the support to not be discontinued, thanks!",
-             make.c_str(), model.c_str(), mode.c_str());
-    break; // WYSIWYG.
-  }
+  const Camera* cam = meta->getCamera(make, model, mode);
+  assert(cam);
 
   if (cam->decoderVersion > getDecoderVersion())
-    ThrowRDE("Camera not supported in this version. Update RawSpeed for support.");
+    ThrowRDE(
+        "Camera not supported in this version. Update RawSpeed for support.");
 
   hints = cam->hints;
   return true;
@@ -199,17 +226,14 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
                              const std::string& make, const std::string& model,
                              const std::string& mode, int iso_speed) {
   mRaw->metadata.isoSpeed = iso_speed;
-  const Camera* cam = meta->getCamera(make, model, mode);
-  if (!cam) {
-    askForSamples(meta, make, model, mode);
 
-    if (failOnUnknown)
-      ThrowRDE("Camera '%s' '%s', mode '%s' not supported, and not allowed to guess. Sorry.", make.c_str(), model.c_str(), mode.c_str());
-
+  if (!handleCameraSupport(meta, make, model, mode))
     return;
-  }
 
-  // Only override CFA with the data from cameras.xml if it actually contained
+  const Camera* cam = meta->getCamera(make, model, mode);
+  assert(cam);
+
+  // Only final CFA with the data from cameras.xml if it actually contained
   // the CFA.
   if (cam->cfa.getSize().area() > 0)
     mRaw->cfa = cam->cfa;
@@ -226,31 +250,46 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   mRaw->metadata.mode = mode;
 
   if (applyCrop) {
-    iPoint2D new_size = cam->cropSize;
+    if (cam->cropAvailable) {
+      iPoint2D new_size = cam->cropSize;
 
-    // If crop size is negative, use relative cropping
-    if (new_size.x <= 0)
-      new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
+      // If crop size is negative, use relative cropping
+      if (new_size.x <= 0)
+        new_size.x = mRaw->dim.x - cam->cropPos.x + new_size.x;
 
-    if (new_size.y <= 0)
-      new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+      if (new_size.y <= 0)
+        new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
 
-    mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
+      mRaw->subFrame(iRectangle2D(cam->cropPos, new_size));
+    } else {
+      mRaw->subFrame(getDefaultCrop());
+    }
   }
 
-  const CameraSensorInfo *sensor = cam->getSensorInfo(iso_speed);
-  mRaw->blackLevel = sensor->mBlackLevel;
-  mRaw->whitePoint = sensor->mWhiteLevel;
   mRaw->blackAreas = cam->blackAreas;
-  if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
-    auto cfaArea = mRaw->cfa.getSize().area();
-    if (mRaw->isCFA && cfaArea <= sensor->mBlackLevelSeparate.size()) {
-      for (auto i = 0UL; i < cfaArea; i++) {
-        mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
-      }
-    } else if (!mRaw->isCFA && mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
-      for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
-        mRaw->blackLevelSeparate[i] = sensor->mBlackLevelSeparate[i];
+  if (const CameraSensorInfo* sensor = cam->getSensorInfo(iso_speed)) {
+    mRaw->blackLevel = sensor->mBlackLevel;
+    mRaw->whitePoint = sensor->mWhiteLevel;
+    if (mRaw->blackAreas.empty() && !sensor->mBlackLevelSeparate.empty()) {
+      auto cfaArea = implicit_cast<int>(mRaw->cfa.getSize().area());
+      if (mRaw->isCFA &&
+          cfaArea <= implicit_cast<int>(sensor->mBlackLevelSeparate.size())) {
+        mRaw->blackLevelSeparate =
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+        auto blackLevelSeparate1D =
+            *mRaw->blackLevelSeparate->getAsArray1DRef();
+        for (int i = 0; i < cfaArea; i++) {
+          blackLevelSeparate1D(i) = sensor->mBlackLevelSeparate[i];
+        }
+      } else if (!mRaw->isCFA &&
+                 mRaw->getCpp() <= sensor->mBlackLevelSeparate.size()) {
+        mRaw->blackLevelSeparate =
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+        auto blackLevelSeparate1D =
+            *mRaw->blackLevelSeparate->getAsArray1DRef();
+        for (uint32_t i = 0; i < mRaw->getCpp(); i++) {
+          blackLevelSeparate1D(i) = sensor->mBlackLevelSeparate[i];
+        }
       }
     }
   }
@@ -258,31 +297,36 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
   // Allow overriding individual blacklevels. Values are in CFA order
   // (the same order as the in the CFA tag)
   // A hint could be:
-  // <Hint name="override_cfa_black" value="10,20,30,20"/>
-  std::string cfa_black = hints.get("override_cfa_black", std::string());
+  // <Hint name="final_cfa_black" value="10,20,30,20"/>
+  std::string cfa_black = hints.get("final_cfa_black", std::string());
   if (!cfa_black.empty()) {
     vector<std::string> v = splitString(cfa_black, ',');
     if (v.size() != 4) {
       mRaw->setError("Expected 4 values '10,20,30,20' as values for "
-                     "override_cfa_black hint.");
+                     "final_cfa_black hint.");
     } else {
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; i++) {
-        mRaw->blackLevelSeparate[i] = stoi(v[i]);
+        blackLevelSeparate1D(i) = stoi(v[i]);
       }
     }
   }
 }
 
+rawspeed::iRectangle2D RawDecoder::getDefaultCrop() {
+  return {mRaw->dim.x, mRaw->dim.y};
+}
+
 rawspeed::RawImage RawDecoder::decodeRaw() {
   try {
     RawImage raw = decodeRawInternal();
-    raw->checkMemIsInitialized();
+    MSan::CheckMemIsInitialized(raw->getByteDataAsUncroppedArray2DRef());
 
     raw->metadata.pixelAspectRatio =
         hints.get("pixel_aspect_ratio", raw->metadata.pixelAspectRatio);
     if (interpolateBadPixels) {
       raw->fixBadPixels();
-      raw->checkMemIsInitialized();
+      MSan::CheckMemIsInitialized(raw->getByteDataAsUncroppedArray2DRef());
     }
 
     return raw;

@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "common/RawImage.h"           // for RawImage
-#include "metadata/ColorFilterArray.h" // for ColorFilterArray
+#include "common/RawImage.h"
+#include "metadata/ColorFilterArray.h"
 
 namespace rawspeed {
 class ByteStream;

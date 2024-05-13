@@ -20,17 +20,20 @@
 */
 
 #include "decoders/NakedDecoder.h"
-#include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "metadata/Camera.h"                        // for Camera, Hints
-#include <map>                                      // for map
-#include <stdexcept>                                // for out_of_range
-#include <string>                                   // for string, basic_st...
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include <map>
+#include <string>
+#include <string_view>
 
 using std::map;
 
@@ -38,15 +41,25 @@ namespace rawspeed {
 
 class CameraMetaData;
 
-NakedDecoder::NakedDecoder(const Buffer& file, const Camera* c)
+NakedDecoder::NakedDecoder(Buffer file, const Camera* c)
     : RawDecoder(file), cam(c) {}
 
-const map<std::string, BitOrder, std::less<>> NakedDecoder::order2enum = {
-    {"plain", BitOrder::LSB},
-    {"jpeg", BitOrder::MSB},
-    {"jpeg16", BitOrder::MSB16},
-    {"jpeg32", BitOrder::MSB32},
-};
+namespace {
+
+Optional<BitOrder> getAsBitOrder(std::string_view s) {
+  using enum BitOrder;
+  if (s == "plain")
+    return LSB;
+  if (s == "jpeg")
+    return MSB;
+  if (s == "jpeg16")
+    return MSB16;
+  if (s == "jpeg32")
+    return MSB32;
+  return std::nullopt;
+}
+
+} // namespace
 
 void NakedDecoder::parseHints() {
   const auto& cHints = cam->hints;
@@ -54,7 +67,7 @@ void NakedDecoder::parseHints() {
   const auto& model = cam->model.c_str();
 
   auto parseHint = [&cHints, &make, &model](const std::string& name) {
-    if (!cHints.has(name))
+    if (!cHints.contains(name))
       ThrowRDE("%s %s: couldn't find %s", make, model, name.c_str());
 
     return cHints.get(name, 0U);
@@ -71,17 +84,16 @@ void NakedDecoder::parseHints() {
   if (filesize == 0 || offset >= filesize)
     ThrowRDE("%s %s: no image data found", make, model);
 
-  bits = cHints.get("bits", (filesize-offset)*8/width/height);
+  bits = cHints.get("bits", (filesize - offset) * 8 / width / height);
   if (bits == 0)
     ThrowRDE("%s %s: image bpp is invalid: %u", make, model, bits);
 
   auto order = cHints.get("order", std::string());
   if (!order.empty()) {
-    try {
-      bo = order2enum.at(order);
-    } catch (const std::out_of_range&) {
+    auto bo_ = getAsBitOrder(order);
+    if (!bo_)
       ThrowRDE("%s %s: unknown order: %s", make, model, order.c_str());
-    }
+    bo = *bo_;
   }
 }
 
@@ -89,14 +101,14 @@ RawImage NakedDecoder::decodeRawInternal() {
   parseHints();
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
-
-  UncompressedDecompressor u(
-      ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
-      mRaw);
 
   iPoint2D pos(0, 0);
-  u.readUncompressedRaw(mRaw->dim, pos, width * bits / 8, bits, bo);
+  UncompressedDecompressor u(
+      ByteStream(DataBuffer(mFile.getSubView(offset), Endianness::little)),
+      mRaw, iRectangle2D(pos, mRaw->dim), width * bits / 8, bits, bo);
+  mRaw->createData();
+
+  u.readUncompressedRaw();
 
   return mRaw;
 }

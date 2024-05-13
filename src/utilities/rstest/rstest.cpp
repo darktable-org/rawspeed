@@ -18,35 +18,38 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "RawSpeed-API.h"        // for RawImage, RawImageData, ImageMetaData
-#include "common/Array2DRef.h"   // for Array2DRef, Array2DRef<>::value_type
-#include "common/NotARational.h" // for NotARational
-#include "md5.h"                 // for md5_state, md5_hash, hash_to_string
-#include <algorithm>             // for fill, copy, fill_n, max
-#include <array>                 // for array
-#include <cassert>               // for assert
-#include <chrono>                // for milliseconds, steady_clock, duratio...
-#include <cstdarg>               // for va_end, va_list, va_start
-#include <cstddef>               // for size_t, byte
-#include <cstdint>               // for uint16_t, uint8_t, uint32_t
-#include <cstdio>                // for fclose, fprintf, fopen, fwrite, vsn...
-#include <cstdlib>               // for system
-#include <fstream>               // for operator<<, basic_ostream, endl
-#include <functional>            // for less
-#include <iostream>              // for cout, cerr
-#include <iterator>              // for istreambuf_iterator, operator!=
-#include <map>                   // for map, operator!=, _Rb_tree_const_ite...
-#include <memory>                // for allocator, unique_ptr
-#include <sstream>               // for basic_ostringstream
-#include <string>                // for string, operator+, basic_string
-#include <string_view>           // for operator!=, string_view
-#include <type_traits>           // for __type_identity_t
-#include <utility>               // for tuple_element<>::type
-#include <vector>                // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
+#include "RawSpeed-API.h"
+#include "adt/AlignedAllocator.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
+#include "adt/NotARational.h"
+#include "md5.h"
+#include <array>
+#include <bit>
+#include <cassert>
+#include <chrono>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-#include <iomanip> // for operator<<, setw
+#include <iomanip>
 #endif
 
 using std::chrono::steady_clock;
@@ -62,7 +65,6 @@ using rawspeed::RawspeedException;
 using rawspeed::roundUp;
 using std::cerr;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::istreambuf_iterator;
 using std::map;
@@ -71,9 +73,9 @@ using std::ostringstream;
 using std::vector;
 
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-using std::setw;
-using std::left;
 using std::internal;
+using std::left;
+using std::setw;
 #endif
 
 namespace rawspeed::rstest {
@@ -83,32 +85,39 @@ std::string img_hash(const rawspeed::RawImage& r);
 void writePPM(const rawspeed::RawImage& raw, const std::string& fn);
 void writePFM(const rawspeed::RawImage& raw, const std::string& fn);
 
-md5::md5_state imgDataHash(const rawspeed::RawImage& raw);
+md5::MD5Hasher::state_type imgDataHash(const rawspeed::RawImage& raw);
 
 void writeImage(const rawspeed::RawImage& raw, const std::string& fn);
 
-struct options {
+struct options final {
   bool create;
   bool force;
   bool dump;
 };
 
-size_t process(const std::string& filename,
-               const rawspeed::CameraMetaData* metadata, const options& o);
+int64_t process(const std::string& filename,
+                const rawspeed::CameraMetaData* metadata, const options& o);
 
 class RstestHashMismatch final : public rawspeed::RawspeedException {
+  void anchor() const override;
+
 public:
-  size_t time;
+  int64_t time;
 
   explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
-  RstestHashMismatch(const char* msg, size_t time_)
+  RstestHashMismatch(const char* msg, int64_t time_)
       : RawspeedException(msg), time(time_) {}
 };
 
-struct Timer {
+void RstestHashMismatch::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
+struct Timer final {
   mutable std::chrono::steady_clock::time_point start =
       std::chrono::steady_clock::now();
-  size_t operator()() const {
+  int64_t operator()() const {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                   std::chrono::steady_clock::now() - start)
                   .count();
@@ -119,22 +128,19 @@ struct Timer {
 
 // yes, this is not cool. but i see no way to compute the hash of the
 // full image, without duplicating image, and copying excluding padding
-md5::md5_state imgDataHash(const RawImage& raw) {
+md5::MD5Hasher::state_type imgDataHash(const RawImage& raw) {
   const rawspeed::Array2DRef<std::byte> img =
       raw->getByteDataAsUncroppedArray2DRef();
 
-  md5::md5_state ret = md5::md5_init;
+  vector<md5::MD5Hasher::state_type> line_hashes(img.height());
 
-  vector<md5::md5_state> line_hashes;
-  line_hashes.resize(img.height, md5::md5_init);
-
-  for (int j = 0; j < img.height; j++) {
-    md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)), img.width,
-                  &line_hashes[j]);
+  for (int j = 0; j < img.height(); j++) {
+    line_hashes[j] = md5::md5_hash(reinterpret_cast<const uint8_t*>(&img(j, 0)),
+                                   img.width());
   }
 
-  md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
-                sizeof(line_hashes[0]) * line_hashes.size(), &ret);
+  auto ret = md5::md5_hash(reinterpret_cast<const uint8_t*>(&line_hashes[0]),
+                           sizeof(line_hashes[0]) * line_hashes.size());
 
   return ret;
 }
@@ -146,7 +152,9 @@ md5::md5_state imgDataHash(const RawImage& raw) {
 #pragma GCC diagnostic ignored "-Wframe-larger-than="
 #pragma GCC diagnostic ignored "-Wstack-usage="
 
-static void __attribute__((format(printf, 2, 3)))
+namespace {
+
+void __attribute__((format(printf, 2, 3)))
 APPEND(ostringstream* oss, const char* format, ...) {
   std::array<char, 1024> line;
 
@@ -157,6 +165,8 @@ APPEND(ostringstream* oss, const char* format, ...) {
 
   *oss << line.data();
 }
+
+} // namespace
 
 std::string img_hash(const RawImage& r, bool noSamples) {
   ostringstream oss;
@@ -174,15 +184,33 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "isoSpeed: %d\n", r->metadata.isoSpeed);
   APPEND(&oss, "blackLevel: %d\n", r->blackLevel);
-  APPEND(&oss, "whitePoint: %d\n", r->whitePoint);
 
-  APPEND(&oss, "blackLevelSeparate: %d %d %d %d\n", r->blackLevelSeparate[0],
-         r->blackLevelSeparate[1], r->blackLevelSeparate[2],
-         r->blackLevelSeparate[3]);
+  APPEND(&oss, "whitePoint: ");
+  if (!r->whitePoint)
+    APPEND(&oss, "unknown");
+  else
+    APPEND(&oss, "%d", *r->whitePoint);
+  APPEND(&oss, "\n");
 
-  APPEND(&oss, "wbCoeffs: %f %f %f %f\n", r->metadata.wbCoeffs[0],
-         r->metadata.wbCoeffs[1], r->metadata.wbCoeffs[2],
-         r->metadata.wbCoeffs[3]);
+  APPEND(&oss, "blackLevelSeparate: ");
+  if (!r->blackLevelSeparate) {
+    APPEND(&oss, "none");
+  } else {
+    APPEND(&oss, "(%i x %i)", r->blackLevelSeparate->width(),
+           r->blackLevelSeparate->height());
+    if (auto blackLevelSeparate1D = r->blackLevelSeparate->getAsArray1DRef();
+        blackLevelSeparate1D && blackLevelSeparate1D->size() != 0) {
+      for (auto l : *blackLevelSeparate1D)
+        APPEND(&oss, " %d", l);
+    }
+  }
+  APPEND(&oss, "\n");
+
+  APPEND(&oss, "wbCoeffs: %f %f %f %f\n",
+         implicit_cast<double>(r->metadata.wbCoeffs[0]),
+         implicit_cast<double>(r->metadata.wbCoeffs[1]),
+         implicit_cast<double>(r->metadata.wbCoeffs[2]),
+         implicit_cast<double>(r->metadata.wbCoeffs[3]));
 
   APPEND(&oss, "colorMatrix:");
   if (r->metadata.colorMatrix.empty())
@@ -229,21 +257,21 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "\n");
 
-  rawspeed::md5::md5_state hash_of_line_hashes = imgDataHash(r);
+  rawspeed::md5::MD5Hasher::state_type hash_of_line_hashes = imgDataHash(r);
   APPEND(&oss, "md5sum of per-line md5sums: %s\n",
          rawspeed::md5::hash_to_string(hash_of_line_hashes).c_str());
 
-  const auto errors = r->getErrors();
-  for (const std::string& e : errors)
+  for (const auto errors = r->getErrors(); const std::string& e : errors)
     APPEND(&oss, "WARNING: [rawspeed] %s\n", e.c_str());
 
   return oss.str();
 }
 
-using file_ptr = std::unique_ptr<FILE, decltype(&fclose)>;
+auto fclose = [](std::FILE* fp) { std::fclose(fp); };
+using file_ptr = std::unique_ptr<FILE, decltype(fclose)>;
 
 void writePPM(const RawImage& raw, const std::string& fn) {
-  file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), &fclose);
+  file_ptr f(fopen((fn + ".ppm").c_str(), "wb"), fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
@@ -267,7 +295,7 @@ void writePPM(const RawImage& raw, const std::string& fn) {
 }
 
 void writePFM(const RawImage& raw, const std::string& fn) {
-  file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), &fclose);
+  file_ptr f(fopen((fn + ".pfm").c_str(), "wb"), fclose);
 
   const iPoint2D dimUncropped = raw->getUncroppedDim();
   int width = dimUncropped.x;
@@ -283,7 +311,8 @@ void writePFM(const RawImage& raw, const std::string& fn) {
   // regardless of padding, we need to write \n separator
   const int realLen = len + 1;
   // the first byte after that \n will be aligned
-  const int paddedLen = roundUp(realLen, dataAlignment);
+  const auto paddedLen =
+      rawspeed::implicit_cast<int>(roundUp(realLen, dataAlignment));
   assert(paddedLen > len);
   assert(rawspeed::isAligned(paddedLen, dataAlignment));
 
@@ -311,7 +340,7 @@ void writePFM(const RawImage& raw, const std::string& fn) {
 
     // PFM can have any endianness, let's write little-endian
     for (int x = 0; x < width; ++x)
-      img(row_in, x) = bit_cast<float>(getU32LE(&img(row_in, x)));
+      img(row_in, x) = std::bit_cast<float>(getU32LE(&img(row_in, x)));
 
     fwrite(&img(row_in, 0), sizeof(decltype(img)::value_type), width, f.get());
   }
@@ -321,17 +350,16 @@ void writeImage(const RawImage& raw, const std::string& fn) {
   switch (raw->getDataType()) {
   case RawImageType::UINT16:
     writePPM(raw, fn);
-    break;
+    return;
   case RawImageType::F32:
     writePFM(raw, fn);
-    break;
-  default:
-    __builtin_unreachable();
+    return;
   }
+  __builtin_unreachable();
 }
 
-size_t process(const std::string& filename, const CameraMetaData* metadata,
-               const options& o) {
+int64_t process(const std::string& filename, const CameraMetaData* metadata,
+                const options& o) {
 
   const std::string hashfile(filename + ".hash");
 
@@ -345,7 +373,7 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #pragma omp critical(io)
 #endif
     cout << left << setw(55) << filename << ": hash "
-         << (o.create ? "exists" : "missing") << ", skipping" << endl;
+         << (o.create ? "exists" : "missing") << ", skipping" << '\n';
 #endif
     return 0;
   }
@@ -355,17 +383,21 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #ifdef HAVE_OPENMP
 #pragma omp critical(io)
 #endif
-  cout << left << setw(55) << filename << ": starting decoding ... " << endl;
+  cout << left << setw(55) << filename << ": starting decoding ... " << '\n';
 #endif
 
   FileReader reader(filename.c_str());
 
-  auto map(reader.readFile());
-  // Buffer& map = readFile( argv[1] );
+  std::unique_ptr<std::vector<
+      uint8_t, rawspeed::DefaultInitAllocatorAdaptor<
+                   uint8_t, rawspeed::AlignedAllocator<uint8_t, 16>>>>
+      storage;
+  rawspeed::Buffer buf;
+  std::tie(storage, buf) = reader.readFile();
 
   Timer t;
 
-  RawParser parser(*map);
+  RawParser parser(buf);
   auto decoder(parser.getDecoder(metadata));
   // RawDecoder* decoder = parseRaw( map );
 
@@ -384,8 +416,8 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 #pragma omp critical(io)
 #endif
   cout << left << setw(55) << filename << ": " << internal << setw(3)
-       << map->getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
-       << endl;
+       << buf.getSize() / 1000000 << " MB / " << setw(4) << time << " ms"
+       << '\n';
 #endif
 
   if (o.create) {
@@ -419,15 +451,16 @@ size_t process(const std::string& filename, const CameraMetaData* metadata,
 
 #pragma GCC diagnostic pop
 
-static int
-results(const map<std::string, std::string, std::less<>>& failedTests,
-        const options& o) {
+namespace {
+
+int results(const map<std::string, std::string, std::less<>>& failedTests,
+            const options& o) {
   if (failedTests.empty()) {
     cout << "All good, ";
     if (!o.create)
-      cout << "no tests failed!" << endl;
+      cout << "no tests failed!" << '\n';
     else
-      cout << "all hashes created!" << endl;
+      cout << "all hashes created!" << '\n';
     return 0;
   }
 
@@ -465,12 +498,12 @@ results(const map<std::string, std::string, std::less<>>& failedTests,
   return 1;
 }
 
-static int usage(const char* progname) {
+int usage(const char* progname) {
   cout << "usage: " << progname << R"(
   [-h] print this help
   [-c] for each file: decode, compute hash and store it.
        If hash exists, it does not recompute it, unless option -f is set!
-  [-f] if -c is set, then it will override the existing hashes.
+  [-f] if -c is set, then it will final the existing hashes.
        If -c is not set, and the hash does not exist, then just decode,
        but do not write the hash!
   [-d] store decoded image as PPM
@@ -491,30 +524,34 @@ static int usage(const char* progname) {
   return 0;
 }
 
+} // namespace
+
 } // namespace rawspeed::rstest
 
-using rawspeed::rstest::usage;
 using rawspeed::rstest::options;
 using rawspeed::rstest::process;
 using rawspeed::rstest::results;
+using rawspeed::rstest::usage;
 
-int main(int argc, char **argv) {
-  int remaining_argc = argc;
+int main(int argc_, char** argv_) {
+  auto argv = rawspeed::Array1DRef(argv_, argc_);
 
-  auto hasFlag = [argc, &remaining_argc, argv](std::string_view flag) {
+  int remaining_argc = argv.size();
+
+  auto hasFlag = [&remaining_argc, argv](std::string_view flag) {
     bool found = false;
-    for (int i = 1; i < argc; ++i) {
-      if (!argv[i] || argv[i] != flag)
+    for (int i = 1; i < argv.size(); ++i) {
+      if (!argv(i) || argv(i) != flag)
         continue;
       found = true;
-      argv[i] = nullptr;
+      argv(i) = nullptr;
       remaining_argc--;
     }
     return found;
   };
 
-  if (1 == argc || hasFlag("-h"))
-    return usage(argv[0]);
+  if (1 == argv.size() || hasFlag("-h"))
+    return usage(argv(0));
 
   options o;
   o.create = hasFlag("-c");
@@ -527,20 +564,20 @@ int main(int argc, char **argv) {
   const CameraMetaData metadata{};
 #endif
 
-  size_t time = 0;
+  int64_t time = 0;
   map<std::string, std::string, std::less<>> failedTests;
 #ifdef HAVE_OPENMP
-#pragma omp parallel for default(none) firstprivate(argc, argv, o)             \
-    shared(metadata) shared(cerr, failedTests) schedule(dynamic, 1)            \
+#pragma omp parallel for default(none) firstprivate(argv, o) shared(metadata)  \
+    shared(cerr, failedTests) schedule(dynamic, 1)                             \
     reduction(+ : time) if (remaining_argc > 2)
 #endif
-  for (int i = 1; i < argc; ++i) {
-    if (!argv[i])
+  for (int i = 1; i < argv.size(); ++i) {
+    if (!argv(i))
       continue;
 
     try {
       try {
-        time += process(argv[i], &metadata, o);
+        time += process(argv(i), &metadata, o);
       } catch (const rawspeed::rstest::RstestHashMismatch& e) {
         time += e.time;
         throw;
@@ -550,16 +587,21 @@ int main(int argc, char **argv) {
 #pragma omp critical(io)
 #endif
       {
-        std::string msg = std::string(argv[i]) + " failed: " + e.what();
+        std::string msg = std::string(argv(i)) + " failed: " + e.what();
 #if !defined(__has_feature) || !__has_feature(thread_sanitizer)
-        cerr << msg << endl;
+        cerr << msg << '\n';
 #endif
-        failedTests.try_emplace(argv[i], msg);
+        failedTests.try_emplace(argv(i), msg);
       }
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
     }
   }
 
-  cout << "Total decoding time: " << time / 1000.0 << "s" << endl << endl;
+  cout << "Total decoding time: "
+       << rawspeed::implicit_cast<double>(time) / 1000.0 << "s" << '\n'
+       << '\n';
 
   return results(failedTests, o);
 }

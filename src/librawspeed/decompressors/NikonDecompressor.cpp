@@ -19,20 +19,28 @@
 */
 
 #include "decompressors/NikonDecompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for extractHighBits, clampBits
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB, BitStream<>::f...
-#include "io/Buffer.h"                    // for Buffer
-#include "io/ByteStream.h"                // for ByteStream
-#include <algorithm>                      // for max
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t, uint32_t, int16_t
-#include <cstdio>                         // for size_t
-#include <vector>                         // for vector
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
@@ -68,11 +76,11 @@ const std::array<uint32_t, 32> bitMask = {
      0x000000ff, 0x0000007f, 0x0000003f, 0x0000001f, 0x0000000f, 0x00000007,
      0x00000003, 0x00000001}};
 
-class NikonLASDecompressor {
+class NikonLASDecompressor final {
   bool mUseBigtable = true;
   bool mDNGCompatible = false;
 
-  struct HuffmanTable {
+  struct PrefixCodeDecoder final {
     /*
      * These two fields directly represent the contents of a JPEG DHT
      * marker
@@ -93,15 +101,15 @@ class NikonLASDecompressor {
     std::vector<int> bigTable;
     bool initialized;
   };
-  HuffmanTable dctbl1;
+  PrefixCodeDecoder dctbl1;
 
-  void createHuffmanTable() {
+  void createPrefixCodeDecoder() {
     int p;
     int i;
     int l;
     int lastp;
     int si;
-    std::array<char, 257> huffsize;
+    std::array<int8_t, 257> huffsize;
     std::array<uint16_t, 257> huffcode;
     uint16_t code;
     int size;
@@ -116,10 +124,10 @@ class NikonLASDecompressor {
     p = 0;
     for (l = 1; l <= 16; l++) {
       for (i = 1; i <= static_cast<int>(dctbl1.bits[l]); i++) {
-        huffsize[p] = static_cast<char>(l);
+        huffsize[p] = static_cast<int8_t>(l);
         ++p;
         if (p > 256)
-          ThrowRDE("LJpegDecompressor::createHuffmanTable: Code length too "
+          ThrowRDE("LJpegDecoder::createPrefixCodeDecoder: Code length too "
                    "long. Corrupt data.");
       }
     }
@@ -142,7 +150,8 @@ class NikonLASDecompressor {
       code <<= 1;
       si++;
       if (p > 256)
-        ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
+        ThrowRDE(
+            "createPrefixCodeDecoder: Code length too long. Corrupt data.");
     }
 
     /*
@@ -153,7 +162,7 @@ class NikonLASDecompressor {
     p = 0;
     for (l = 1; l <= 16; l++) {
       if (dctbl1.bits[l]) {
-        dctbl1.valptr[l] = p;
+        dctbl1.valptr[l] = implicit_cast<int16_t>(p);
         dctbl1.mincode[l] = huffcode[p];
         p += dctbl1.bits[l];
         dctbl1.maxcode[l] = huffcode[p - 1];
@@ -163,7 +172,8 @@ class NikonLASDecompressor {
         dctbl1.maxcode[l] = -1;
       }
       if (p > 256)
-        ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
+        ThrowRDE(
+            "createPrefixCodeDecoder: Code length too long. Corrupt data.");
     }
 
     /*
@@ -191,7 +201,8 @@ class NikonLASDecompressor {
           ul = ll;
         }
         if (ul > 256 || ll > ul)
-          ThrowRDE("createHuffmanTable: Code length too long. Corrupt data.");
+          ThrowRDE(
+              "createPrefixCodeDecoder: Code length too long. Corrupt data.");
         for (i = ll; i <= ul; i++) {
           dctbl1.numbits[i] = size | (value << 4);
         }
@@ -224,8 +235,8 @@ class NikonLASDecompressor {
 
     dctbl1.bigTable.resize(size);
     for (uint32_t i = 0; i < size; i++) {
-      uint16_t input = i << 2; // Calculate input value
-      int code = input >> 8;   // Get 8 bits
+      auto input = implicit_cast<uint16_t>(i << 2); // Calculate input value
+      int code = input >> 8;                        // Get 8 bits
       uint32_t val = dctbl1.numbits[code];
       l = val & 15;
       if (l) {
@@ -275,7 +286,7 @@ class NikonLASDecompressor {
   }
 
 public:
-  uint32_t setNCodesPerLength(const Buffer& data) {
+  uint32_t setNCodesPerLength(Buffer data) {
     uint32_t acc = 0;
     for (uint32_t i = 0; i < 16; i++) {
       dctbl1.bits[i + 1] = data[i];
@@ -285,14 +296,14 @@ public:
     return acc;
   }
 
-  void setCodeValues(const Buffer& data) {
-    for (uint32_t i = 0; i < data.getSize(); i++)
-      dctbl1.huffval[i] = data[i];
+  void setCodeValues(Array1DRef<const uint8_t> data) {
+    for (int i = 0; i < data.size(); i++)
+      dctbl1.huffval[i] = data(i);
   }
 
   void setup([[maybe_unused]] bool fullDecode_,
              [[maybe_unused]] bool fixDNGBug16_) {
-    createHuffmanTable();
+    createPrefixCodeDecoder();
   }
 
   /*
@@ -307,11 +318,11 @@ public:
    * Next coded symbol
    *
    * Side effects:
-   * Bitstream is parsed.
+   * Bitstreamer is parsed.
    *
    *--------------------------------------------------------------
    */
-  int decodeDifference(BitPumpMSB& bits) {
+  int decodeDifference(BitStreamerMSB& bits) {
     int rv;
     int l;
     int temp;
@@ -384,12 +395,12 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
   assert(curve.size() > 1);
 
   for (size_t i = 0; i < curve.size(); i++)
-    curve[i] = i;
+    curve[i] = implicit_cast<uint16_t>(i);
 
   uint32_t step = 0;
   uint32_t csize = metadata.getU16();
   if (csize > 1)
-    step = curve.size() / (csize - 1);
+    step = implicit_cast<uint32_t>(curve.size() / (csize - 1));
 
   if (v0 == 68 && (v1 == 32 || v1 == 64) && step > 0) {
     if ((csize - 1) * step != curve.size() - 1)
@@ -400,7 +411,7 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
     for (size_t i = 0; i < curve.size() - 1; i++) {
       const uint32_t b_scale = i % step;
 
-      const uint32_t a_pos = i - b_scale;
+      const auto a_pos = implicit_cast<uint32_t>(i - b_scale);
       const uint32_t b_pos = a_pos + step;
       assert(a_pos < curve.size());
       assert(b_pos > 0);
@@ -408,7 +419,8 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
       assert(a_pos < b_pos);
 
       const uint32_t a_scale = step - b_scale;
-      curve[i] = (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step;
+      curve[i] = implicit_cast<uint16_t>(
+          (a_scale * curve[a_pos] + b_scale * curve[b_pos]) / step);
     }
 
     metadata.setPosition(562);
@@ -433,23 +445,39 @@ std::vector<uint16_t> NikonDecompressor::createCurve(ByteStream& metadata,
 }
 
 template <typename Huffman>
-Huffman NikonDecompressor::createHuffmanTable(uint32_t huffSelect) {
+Huffman NikonDecompressor::createPrefixCodeDecoder(uint32_t huffSelect) {
   Huffman ht;
   uint32_t count =
       ht.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
-  ht.setCodeValues(Buffer(nikon_tree[huffSelect][1].data(), count));
+  ht.setCodeValues(
+      Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
   ht.setup(true, false);
   return ht;
 }
 
-NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
+template <>
+PrefixCodeDecoder<>
+NikonDecompressor::createPrefixCodeDecoder<PrefixCodeDecoder<>>(
+    uint32_t huffSelect) {
+  HuffmanCode<BaselineCodeTag> hc;
+  uint32_t count =
+      hc.setNCodesPerLength(Buffer(nikon_tree[huffSelect][0].data(), 16));
+  hc.setCodeValues(
+      Array1DRef<const uint8_t>(nikon_tree[huffSelect][1].data(), count));
+
+  PrefixCodeDecoder<> ht(std::move(hc));
+  ht.setup(true, false);
+  return ht;
+}
+
+NikonDecompressor::NikonDecompressor(RawImage raw, ByteStream metadata,
                                      uint32_t bitsPS_)
-    : mRaw(raw), bitsPS(bitsPS_) {
+    : mRaw(std::move(raw)), bitsPS(bitsPS_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
 
-  if (mRaw->dim.x == 0 || mRaw->dim.y == 0 || mRaw->dim.x % 2 != 0 ||
+  if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
       mRaw->dim.x > 8288 || mRaw->dim.y > 5520)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
              mRaw->dim.y);
@@ -488,43 +516,44 @@ NikonDecompressor::NikonDecompressor(const RawImage& raw, ByteStream metadata,
 }
 
 template <typename Huffman>
-void NikonDecompressor::decompress(BitPumpMSB& bits, int start_y, int end_y) {
-  auto ht = createHuffmanTable<Huffman>(huffSelect);
+void NikonDecompressor::decompress(BitStreamerMSB& bits, int start_y,
+                                   int end_y) {
+  auto ht = createPrefixCodeDecoder<Huffman>(huffSelect);
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
 
   // allow gcc to devirtualize the calls below
   auto* rawdata = reinterpret_cast<RawImageDataU16*>(mRaw.get());
 
-  assert(out.width % 2 == 0);
-  assert(out.width >= 2);
+  invariant(out.width() % 2 == 0);
+  invariant(out.width() >= 2);
   for (int row = start_y; row < end_y; row++) {
     std::array<int, 2> pred = pUp[row & 1];
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       pred[col & 1] += ht.decodeDifference(bits);
       if (col < 2)
         pUp[row & 1][col & 1] = pred[col & 1];
       rawdata->setWithLookUp(clampBits(pred[col & 1], 15),
-                             reinterpret_cast<uint8_t*>(&out(row, col)),
+                             reinterpret_cast<std::byte*>(&out(row, col)),
                              &random);
     }
   }
 }
 
-void NikonDecompressor::decompress(const ByteStream& data,
+void NikonDecompressor::decompress(Array1DRef<const uint8_t> input,
                                    bool uncorrectedRawValues) {
   RawImageCurveGuard curveHandler(&mRaw, curve, uncorrectedRawValues);
 
-  BitPumpMSB bits(data);
+  BitStreamerMSB bits(input);
 
   random = bits.peekBits(24);
 
-  assert(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
+  invariant(split == 0 || split < static_cast<unsigned>(mRaw->dim.y));
 
   if (!split) {
-    decompress<HuffmanTable>(bits, 0, mRaw->dim.y);
+    decompress<PrefixCodeDecoder<>>(bits, 0, mRaw->dim.y);
   } else {
-    decompress<HuffmanTable>(bits, 0, split);
+    decompress<PrefixCodeDecoder<>>(bits, 0, split);
     huffSelect += 1;
     decompress<NikonLASDecompressor>(bits, split, mRaw->dim.y);
   }

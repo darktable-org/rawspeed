@@ -1,0 +1,27 @@
+---
+Checks: >
+  -bugprone-macro-parentheses,
+  -bugprone-suspicious-memory-comparison,
+  -cert-msc51-cpp,
+  -concurrency-mt-unsafe,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-rvalue-reference-param-not-moved,
+  -google-global-names-in-headers,
+  -misc-definitions-in-headers,
+  -misc-use-anonymous-namespace,
+  -modernize-avoid-c-arrays,
+  -modernize-type-traits,
+  -modernize-use-nodiscard,
+  -modernize-use-override,
+  -performance-avoid-endl,
+  -performance-move-const-arg,
+  -performance-unnecessary-copy-initialization,
+  -readability-convert-member-functions-to-static,
+  -readability-function-cognitive-complexity,
+  -readability-function-size,
+  -readability-isolate-declaration,
+  -readability-make-member-function-const,
+  -readability-suspicious-call-argument,
+  -readability-uppercase-literal-suffix,
+InheritParentConfig: true
+...

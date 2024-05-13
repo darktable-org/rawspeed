@@ -21,12 +21,12 @@
 
 #pragma once
 
-#include "rawspeedconfig.h" // for RAWSPEED_NOINLINE, RAWSPEED_UNLIKELY_FUN...
-#include "common/Common.h"  // for writeLog, DEBUG_PRIO, DEBUG_PRIO::EXTRA
-#include <array>            // for array
-#include <cstdarg>          // for va_end, va_list, va_start
-#include <cstdio>           // for vsnprintf, size_t
-#include <stdexcept>        // for runtime_error
+#include "rawspeedconfig.h"
+#include "common/Common.h"
+#include <array>
+#include <cstdarg>
+#include <cstdio>
+#include <stdexcept>
 
 namespace rawspeed {
 
@@ -54,11 +54,12 @@ template <typename T>
 }
 
 class RawspeedException : public std::runtime_error {
-private:
   static void RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
   log(const char* msg) {
     writeLog(DEBUG_PRIO::EXTRA, "EXCEPTION: %s", msg);
   }
+
+  virtual void anchor() const;
 
 public:
   explicit RAWSPEED_UNLIKELY_FUNCTION RAWSPEED_NOINLINE
@@ -81,11 +82,13 @@ public:
 #ifndef DEBUG
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
   rawspeed::ThrowException<CLASS>("%s, line " STR(__LINE__) ": " fmt,          \
-                                  __PRETTY_FUNCTION__, ##__VA_ARGS__)
+                                  __PRETTY_FUNCTION__ __VA_OPT__(, )           \
+                                      __VA_ARGS__)
 #else
 #define ThrowExceptionHelper(CLASS, fmt, ...)                                  \
   rawspeed::ThrowException<CLASS>(__FILE__ ":" STR(__LINE__) ": %s: " fmt,     \
-                                  __PRETTY_FUNCTION__, ##__VA_ARGS__)
+                                  __PRETTY_FUNCTION__ __VA_OPT__(, )           \
+                                      __VA_ARGS__)
 #endif
 
 #define ThrowRSE(...)                                                          \

@@ -19,11 +19,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "metadata/BlackArea.h" // for BlackArea
-#include <gtest/gtest.h>        // for ParamIteratorInterface, Message, Tes...
-#include <memory>               // for unique_ptr, allocator
-#include <string>               // for basic_string
-#include <tuple>                // for get, tuple
+#include "metadata/BlackArea.h"
+#include <memory>
+#include <tuple>
+#include <gtest/gtest.h>
 
 using rawspeed::BlackArea;
 using std::unique_ptr;
@@ -34,7 +33,7 @@ class BlackAreaTest
     : public ::testing::TestWithParam<std::tuple<int, int, bool>> {
 protected:
   BlackAreaTest() = default;
-  virtual void SetUp() override {
+  virtual void SetUp() final {
     offset = std::get<0>(GetParam());
     size = std::get<1>(GetParam());
     isVertical = std::get<2>(GetParam());
@@ -57,11 +56,12 @@ protected:
   bool isVertical{false}; // Otherwise horizontal
 };
 
-INSTANTIATE_TEST_CASE_P(BlackAreas, BlackAreaTest,
-                        testing::Combine(testing::Range(0, 1000, 250), // offset
-                                         testing::Range(0, 1000, 250), // size
-                                         testing::Bool() // isVertical
-                                         ));
+INSTANTIATE_TEST_SUITE_P(BlackAreas, BlackAreaTest,
+                         testing::Combine(testing::Range(0, 1000,
+                                                         250), // offset
+                                          testing::Range(0, 1000, 250), // size
+                                          testing::Bool() // isVertical
+                                          ));
 
 TEST_P(BlackAreaTest, Constructor) {
   ASSERT_NO_THROW({ BlackArea Area(offset, size, isVertical); });
@@ -88,7 +88,7 @@ TEST_P(BlackAreaTest, Getters) {
 TEST_P(BlackAreaTest, AssignmentConstructor) {
   ASSERT_NO_THROW({
     const BlackArea AreaOrig(offset, size, isVertical);
-    BlackArea Area(AreaOrig); // NOLINT trying to test the copy
+    BlackArea Area(AreaOrig);
     checkHelper(AreaOrig);
     checkHelper(Area);
   });

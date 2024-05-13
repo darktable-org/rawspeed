@@ -1,5 +1,5 @@
 FILE(GLOB RAWSPEED_BENCHS_SOURCES
-  "DefaultInitAllocatorAdaptorBenchmark.cpp"
+  "CommonBenchmark.cpp"
 )
 
 foreach(SRC ${RAWSPEED_BENCHS_SOURCES})

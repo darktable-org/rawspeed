@@ -20,31 +20,40 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/CiffEntry.h"
-#include "common/NORangesSet.h"          // for NORangesSet
-#include "io/Buffer.h"                   // for Buffer, operator<
-#include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
-#include <algorithm>                     // for max
-#include <string>                        // for string, basic_string, alloc...
-#include <vector>                        // for vector
+#include "adt/Invariant.h"
+#include "adt/NORangesSet.h"
+#include "adt/Optional.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "parsers/CiffParserException.h"
+#include "tiff/CiffTag.h"
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
 
 using std::vector;
 
 namespace rawspeed {
 
-CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream dirEntry) {
+CiffEntry::CiffEntry(ByteStream data_, CiffTag tag_, CiffDataType type_,
+                     uint32_t count_)
+    : data(data_), tag(tag_), type(type_), count(count_) {}
+
+CiffEntry CiffEntry::Create(NORangesSet<Buffer>* valueDatas,
+                            ByteStream valueData, ByteStream dirEntry) {
   uint16_t p = dirEntry.getU16();
 
-  // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
-  tag = static_cast<CiffTag>(p & 0x3fff);
+  const auto tag = static_cast<CiffTag>(p & 0x3fff);
   uint16_t datalocation = (p & 0xc000);
-  // NOLINTNEXTLINE cppcoreguidelines-prefer-member-initializer
-  type = static_cast<CiffDataType>(p & 0x3800);
+  const auto type = static_cast<CiffDataType>(p & 0x3800);
 
   uint32_t data_offset;
   uint32_t bytesize;
+
+  Optional<ByteStream> data;
 
   switch (datalocation) {
   case 0x0000:
@@ -52,7 +61,7 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
     bytesize = dirEntry.getU32();
     data_offset = dirEntry.getU32();
     data = valueData.getSubStream(data_offset, bytesize);
-    if (!valueDatas->insert(data))
+    if (!valueDatas->insert(*data))
       ThrowCPE("Two valueData's overlap. Raw corrupt!");
     break;
   case 0x4000:
@@ -65,46 +74,50 @@ CiffEntry::CiffEntry(NORangesSet<Buffer>* valueDatas,
   default:
     ThrowCPE("Don't understand data location 0x%x", datalocation);
   }
+  invariant(data.has_value());
 
   // Set the number of items using the shift
-  count = bytesize >> getElementShift();
+  uint32_t count = bytesize >> getElementShift(type);
+
+  return {*data, tag, type, count};
 }
 
-uint32_t __attribute__((pure)) CiffEntry::getElementShift() const {
+uint32_t CiffEntry::getElementShift(CiffDataType type) {
   switch (type) {
-  case CiffDataType::SHORT:
+    using enum CiffDataType;
+  case SHORT:
     return 1;
-  case CiffDataType::LONG:
-  case CiffDataType::MIX:
-  case CiffDataType::SUB1:
-  case CiffDataType::SUB2:
+  case LONG:
+  case MIX:
+  case SUB1:
+  case SUB2:
     return 2;
   default:
-    // e.g. CiffDataType::BYTE or CiffDataType::ASCII
+    // e.g. BYTE or ASCII
     return 0;
   }
 }
 
-uint32_t __attribute__((pure)) CiffEntry::getElementSize() const {
+uint32_t RAWSPEED_READONLY CiffEntry::getElementSize() const {
   switch (type) {
-  case CiffDataType::BYTE:
-  case CiffDataType::ASCII:
+    using enum CiffDataType;
+  case BYTE:
+  case ASCII:
     return 1;
-  case CiffDataType::SHORT:
+  case SHORT:
     return 2;
-  case CiffDataType::LONG:
-  case CiffDataType::MIX:
-  case CiffDataType::SUB1:
-  case CiffDataType::SUB2:
+  case LONG:
+  case MIX:
+  case SUB1:
+  case SUB2:
     return 4;
-  default:
-    return 0;
   }
+  __builtin_unreachable();
 }
 
-bool __attribute__((pure)) CiffEntry::isInt() const {
-  return (type == CiffDataType::LONG || type == CiffDataType::SHORT ||
-          type == CiffDataType::BYTE);
+bool RAWSPEED_READONLY CiffEntry::isInt() const {
+  using enum CiffDataType;
+  return (type == LONG || type == SHORT || type == BYTE);
 }
 
 uint32_t CiffEntry::getU32(uint32_t num) const {
@@ -138,7 +151,7 @@ uint8_t CiffEntry::getByte(uint32_t num) const {
   return data.peek<uint8_t>(num);
 }
 
-std::string CiffEntry::getString() const {
+std::string_view CiffEntry::getString() const {
   if (type != CiffDataType::ASCII)
     ThrowCPE("Wrong type 0x%x encountered. Expected Ascii",
              static_cast<unsigned>(type));
@@ -171,7 +184,7 @@ vector<std::string> CiffEntry::getStrings() const {
   return strs;
 }
 
-bool __attribute__((pure)) CiffEntry::isString() const {
+bool RAWSPEED_READONLY CiffEntry::isString() const {
   return (type == CiffDataType::ASCII);
 }
 

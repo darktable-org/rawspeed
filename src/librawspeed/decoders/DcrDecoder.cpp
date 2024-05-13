@@ -20,27 +20,28 @@
 */
 
 #include "decoders/DcrDecoder.h"
-#include "common/NORangesSet.h"              // for NORangesSet
-#include "decoders/RawDecoderException.h"    // for ThrowException, ThrowRDE
-#include "decompressors/KodakDecompressor.h" // for KodakDecompressor
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h"                   // for Endianness, Endianness:...
-#include "tiff/TiffEntry.h"                  // for TiffEntry, TiffDataType
-#include "tiff/TiffIFD.h"                    // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                    // for TiffTag, TiffTag::COMPR...
-#include <array>                             // for array
-#include <cassert>                           // for assert
-#include <cstdint>                           // for uint32_t
-#include <memory>                            // for allocator, unique_ptr
-#include <string>                            // for operator==, string
+#include "adt/NORangesSet.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decoders/SimpleTiffDecoder.h"
+#include "decompressors/KodakDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 
 class CameraMetaData;
 
 bool DcrDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -112,6 +113,7 @@ RawImage DcrDecoder::decodeRawInternal() {
   }();
 
   KodakDecompressor k(mRaw, input, bps, uncorrectedRawValues);
+  mRaw->createData();
   k.decompress();
 
   return mRaw;

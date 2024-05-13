@@ -20,17 +20,18 @@
 
 #pragma once
 
-#include "common/Array2DRef.h"         // for Array2DRef
-#include "common/Point.h"              // for iPoint2D
-#include "metadata/ColorFilterArray.h" // for CFAColor, CFAColor::GREEN
-#include <algorithm>                   // for find_if, equal
-#include <array>                       // for array, operator==
-#include <cassert>                     // for assert
-#include <cmath>                       // for abs
-#include <cstdlib>                     // for abs
-#include <iterator>                    // for distance
-#include <optional>                    // for optional
-#include <utility>                     // for swap
+#include "adt/Array2DRef.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "metadata/ColorFilterArray.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <iterator>
+#include <utility>
 
 namespace rawspeed {
 
@@ -45,7 +46,7 @@ namespace rawspeed {
 //  ..GBGBGB..
 //  ..........
 // and there are only 4 flavours of the 2x2 pattern, since position is mod-2:
-enum class BayerPhase : int {
+enum class BayerPhase : uint8_t {
   // The top-left pixel of the image is red pixel.
   RGGB = 0b00, // 0
   // The top-left pixel of the image is green pixel in a green/red row.
@@ -84,8 +85,8 @@ inline std::array<T, 4> applyPhaseShift(std::array<T, 4> srcData,
 
   std::array<T, 4> tgtData;
   const Array2DRef<T> tgt(tgtData.data(), 2, 2);
-  for (int row = 0; row < tgt.height; ++row) {
-    for (int col = 0; col < tgt.width; ++col) {
+  for (int row = 0; row < tgt.height(); ++row) {
+    for (int col = 0; col < tgt.width(); ++col) {
       tgt(row, col) = src((coordOffset.y + row) % 2, (coordOffset.x + col) % 2);
     }
   }
@@ -95,8 +96,8 @@ inline std::array<T, 4> applyPhaseShift(std::array<T, 4> srcData,
 
 inline std::array<CFAColor, 4> getAsCFAColors(BayerPhase p) {
   const BayerPhase basePhase = BayerPhase::RGGB;
-  const std::array<CFAColor, 4> basePat = {CFAColor::RED, CFAColor::GREEN,
-                                           CFAColor::GREEN, CFAColor::BLUE};
+  using enum CFAColor;
+  const std::array<CFAColor, 4> basePat = {RED, GREEN, GREEN, BLUE};
   return applyPhaseShift(basePat, basePhase, /*tgtPhase=*/p);
 }
 
@@ -114,32 +115,33 @@ inline std::array<T, 4> applyStablePhaseShift(std::array<T, 4> srcData,
   auto is_green = [](const CFAColor& c) { return c == CFAColor::GREEN; };
 
   const std::array<CFAColor, 4> tgtColors = getAsCFAColors(tgtPhase);
-  int green0Idx =
+  auto green0Idx =
       std::distance(tgtColors.begin(),
                     std::find_if(tgtColors.begin(), tgtColors.end(), is_green));
-  int green1Idx = std::distance(std::find_if(tgtColors.rbegin(),
-                                             tgtColors.rend(), is_green),
-                                tgtColors.rend()) -
-                  1;
+  auto green1Idx = std::distance(std::find_if(tgtColors.rbegin(),
+                                              tgtColors.rend(), is_green),
+                                 tgtColors.rend()) -
+                   1;
 
   std::swap(tgtData[green0Idx], tgtData[green1Idx]);
 
   return tgtData;
 }
 
-inline std::optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
+inline Optional<BayerPhase> getAsBayerPhase(const ColorFilterArray& CFA) {
   if (CFA.getSize() != iPoint2D(2, 2))
     return {};
 
   std::array<CFAColor, 4> patData;
   const Array2DRef<CFAColor> pat(patData.data(), 2, 2);
-  for (int row = 0; row < pat.height; ++row) {
-    for (int col = 0; col < pat.width; ++col) {
+  for (int row = 0; row < pat.height(); ++row) {
+    for (int col = 0; col < pat.width(); ++col) {
       pat(row, col) = CFA.getColorAt(col, row);
     }
   }
 
-  for (auto i = (int)BayerPhase::RGGB; i <= (int)BayerPhase::BGGR; ++i) {
+  for (auto i = static_cast<int>(BayerPhase::RGGB);
+       i <= static_cast<int>(BayerPhase::BGGR); ++i) {
     if (auto p = static_cast<BayerPhase>(i); getAsCFAColors(p) == patData)
       return p;
   }

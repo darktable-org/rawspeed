@@ -19,16 +19,17 @@
 */
 
 #include "io/FileWriter.h"
-#include "io/Buffer.h"          // for Buffer
-#include "io/FileIOException.h" // for ThrowException, ThrowFIE
-#include <cstdio>               // for fclose, fopen, fwrite, FILE, size_t
+#include "io/Buffer.h"
+#include "io/FileIOException.h"
+#include <cstdint>
+#include <cstdio>
 
 #if !defined(__unix__) && !defined(__APPLE__)
 #ifndef NOMINMAX
 #define NOMINMAX // do not want the min()/max() macros!
 #endif
 
-#include "io/FileIO.h" // for widenFileName
+#include "io/FileIO.h"
 #include <Windows.h>
 #include <io.h>
 #include <tchar.h>
@@ -36,21 +37,21 @@
 
 namespace rawspeed {
 
-FileWriter::FileWriter(const char *_filename) : mFilename(_filename) {}
+FileWriter::FileWriter(const char* _filename) : mFilename(_filename) {}
 
-void FileWriter::writeFile(const Buffer& filemap, uint32_t size) const {
+void FileWriter::writeFile(Buffer filemap, uint32_t size) const {
   if (size > filemap.getSize())
     size = filemap.getSize();
 #if defined(__unix__) || defined(__APPLE__)
   size_t bytes_written = 0;
-  FILE *file;
+  FILE* file;
 
   file = fopen(mFilename, "wb");
   if (file == nullptr)
     ThrowFIE("Could not open file.");
 
-  const auto* const src = filemap.getData(0, filemap.getSize());
-  bytes_written = fwrite(src, 1, size != 0 ? size : filemap.getSize(), file);
+  bytes_written =
+      fwrite(filemap.begin(), 1, size != 0 ? size : filemap.getSize(), file);
   fclose(file);
   if (size != bytes_written) {
     ThrowFIE("Could not write file.");
@@ -58,7 +59,7 @@ void FileWriter::writeFile(const Buffer& filemap, uint32_t size) const {
 
 #else // __unix__
   auto wFileName = widenFileName(mFilename);
-  HANDLE file_h;  // File handle
+  HANDLE file_h; // File handle
   file_h =
       CreateFileW(wFileName.data(), GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
                   CREATE_ALWAYS, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
@@ -67,8 +68,8 @@ void FileWriter::writeFile(const Buffer& filemap, uint32_t size) const {
   }
 
   DWORD bytes_written;
-  if (!WriteFile(file_h, filemap.getData(0, filemap.getSize()),
-                 size ? size : filemap.getSize(), &bytes_written, nullptr)) {
+  if (!WriteFile(file_h, filemap.begin(), size ? size : filemap.getSize(),
+                 &bytes_written, nullptr)) {
     CloseHandle(file_h);
     ThrowFIE("Could not read file.");
   }

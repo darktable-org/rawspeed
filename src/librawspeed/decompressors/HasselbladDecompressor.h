@@ -3,6 +3,7 @@
 
     Copyright (C) 2009-2014 Klaus Post
     Copyright (C) 2017 Axel Waggershauser
+    Copyright (C) 2023 Roman Lebedev
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,26 +22,37 @@
 
 #pragma once
 
-#include "decompressors/AbstractLJpegDecompressor.h" // for AbstractLJpegDe...
-#include "io/BitPumpMSB32.h"                         // for BitPumpMSB32
+#include "adt/Array1DRef.h"
+#include "bitstreams/BitStreamerMSB32.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include <cstdint>
 
 namespace rawspeed {
 
-class ByteStream;
-class RawImage;
+class HasselbladDecompressor final {
+public:
+  struct PerComponentRecipe final {
+    const PrefixCodeDecoder<>& ht;
+    const uint16_t initPred;
+  };
 
-class HasselbladDecompressor final : public AbstractLJpegDecompressor
-{
-  int pixelBaseOffset = 0;
+private:
+  const RawImage mRaw;
 
-  void decodeScan() override;
+  const PerComponentRecipe& rec;
+
+  const Array1DRef<const uint8_t> input;
+
+  static int getBits(BitStreamerMSB32& bs, int len);
 
 public:
-  HasselbladDecompressor(const ByteStream& bs, const RawImage& img);
+  HasselbladDecompressor(RawImage mRaw, const PerComponentRecipe& rec,
+                         Array1DRef<const uint8_t> input);
 
-  void decode(int pixelBaseOffset_);
-
-  static int getBits(BitPumpMSB32& bs, int len);
+  [[nodiscard]] ByteStream::size_type decompress();
 };
 
 } // namespace rawspeed

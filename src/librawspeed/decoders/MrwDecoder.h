@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
-#include "io/Buffer.h"           // for Buffer
-#include "tiff/TiffIFD.h"        // for TiffRootIFDOwner
-#include <array>                 // for array
-#include <cmath>                 // for NAN
-#include <cstdint>               // for uint32_t
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <cmath>
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -44,11 +44,11 @@ class MrwDecoder final : public RawDecoder {
   std::array<float, 4> wb_coeffs = {{NAN, NAN, NAN, NAN}};
 
 public:
-  explicit MrwDecoder(const Buffer& file);
+  explicit MrwDecoder(Buffer file);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
-  static int isMRW(const Buffer& input);
+  static int isMRW(Buffer input);
 
 private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }

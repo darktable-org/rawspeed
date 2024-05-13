@@ -20,23 +20,22 @@
 
 #pragma once
 
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <utility>                        // for move
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <utility>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
 
-class Cr2Decoder final : public AbstractTiffDecoder
-{
+class Cr2Decoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  Cr2Decoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  Cr2Decoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -51,6 +50,10 @@ private:
   [[nodiscard]] bool isSubSampled() const;
   [[nodiscard]] iPoint2D getSubSampling() const;
   [[nodiscard]] int getHue() const;
+  [[nodiscard]] bool decodeCanonColorData() const;
+  void parseWhiteBalance() const;
+  int ljpegSamplePrecision;
+  int mShiftUpScaleForExif = 0;
 };
 
 } // namespace rawspeed

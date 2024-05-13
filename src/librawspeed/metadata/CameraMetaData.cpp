@@ -18,28 +18,33 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "metadata/CameraMetaData.h"
-#include "common/Common.h"                    // for trimSpaces, writeLog
-#include "metadata/Camera.h"                  // for Camera, Camera::Suppor...
-#include "metadata/CameraMetadataException.h" // for ThrowException, ThrowCME
-#include <algorithm>                          // for find_if
-#include <map>                                // for map, map<>::const_iter...
-#include <string>                             // for string, operator==
-#include <utility>                            // for pair, move
-#include <vector>                             // for vector
+#include "common/Common.h"
+#include "metadata/Camera.h"
+#include <algorithm>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
 
 #ifdef HAVE_PUGIXML
-#include <pugixml.hpp> // for xml_document, xml_pars...
+#include "metadata/CameraMetadataException.h"
+#include <pugixml.hpp>
+#include <vector>
 
-using pugi::xml_node;
 using pugi::xml_document;
+using pugi::xml_node;
 using pugi::xml_parse_result;
 #endif
 
 namespace rawspeed {
 
 #ifdef HAVE_PUGIXML
-CameraMetaData::CameraMetaData(const char *docname) {
+CameraMetaData::CameraMetaData(const char* docname) {
   xml_document doc;
 
   if (xml_parse_result result =
@@ -70,8 +75,10 @@ CameraMetaData::CameraMetaData(const char *docname) {
 }
 #endif
 
-static inline CameraId getId(const std::string& make, const std::string& model,
-                             const std::string& mode) {
+namespace {
+
+inline CameraId getId(const std::string& make, const std::string& model,
+                      const std::string& mode) {
   CameraId id;
   id.make = trimSpaces(make);
   id.model = trimSpaces(model);
@@ -79,6 +86,8 @@ static inline CameraId getId(const std::string& make, const std::string& model,
 
   return id;
 }
+
+} // namespace
 
 const Camera* CameraMetaData::getCamera(const std::string& make,
                                         const std::string& model,
@@ -91,12 +100,11 @@ const Camera* CameraMetaData::getCamera(const std::string& make,
                                         const std::string& model) const {
   auto id = getId(make, model, "");
 
-  auto iter = find_if(cameras.cbegin(), cameras.cend(),
-                      [&id](decltype(*cameras.cbegin())& i) {
-                        const auto& cid = i.first;
-                        return tie(id.make, id.model) ==
-                               tie(cid.make, cid.model);
-                      });
+  auto iter = find_if(
+      cameras.cbegin(), cameras.cend(), [&id](decltype(*cameras.cbegin())& i) {
+        const auto& cid = i.first;
+        return tie(id.make, id.model) == tie(cid.make, cid.model);
+      });
 
   if (iter == cameras.end())
     return nullptr;
@@ -110,20 +118,19 @@ bool CameraMetaData::hasCamera(const std::string& make,
   return getCamera(make, model, mode);
 }
 
-const Camera* __attribute__((pure))
+const Camera* RAWSPEED_READONLY
 CameraMetaData::getChdkCamera(uint32_t filesize) const {
   auto camera = chdkCameras.find(filesize);
   return camera == chdkCameras.end() ? nullptr : camera->second;
 }
 
-bool __attribute__((pure))
-CameraMetaData::hasChdkCamera(uint32_t filesize) const {
-  return chdkCameras.end() != chdkCameras.find(filesize);
+bool RAWSPEED_READONLY CameraMetaData::hasChdkCamera(uint32_t filesize) const {
+  return chdkCameras.contains(filesize);
 }
 
 const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
   auto id = getId(cam->make, cam->model, cam->mode);
-  if (cameras.end() != cameras.find(id)) {
+  if (cameras.contains(id)) {
     writeLog(
         DEBUG_PRIO::WARNING,
         "CameraMetaData: Duplicate entry found for camera: %s %s, Skipping!",
@@ -148,17 +155,17 @@ const Camera* CameraMetaData::addCamera(std::unique_ptr<Camera> cam) {
 }
 
 void CameraMetaData::disableMake(std::string_view make) const {
-  for (const auto& cam : cameras) {
-    if (cam.second->make == make)
-      cam.second->supportStatus = Camera::SupportStatus::Unsupported;
+  for (const auto& [id, cam] : cameras) {
+    if (cam->make == make)
+      cam->supportStatus = Camera::SupportStatus::Unsupported;
   }
 }
 
 void CameraMetaData::disableCamera(std::string_view make,
                                    std::string_view model) const {
-  for (const auto& cam : cameras) {
-    if (cam.second->make == make && cam.second->model == model)
-      cam.second->supportStatus = Camera::SupportStatus::Unsupported;
+  for (const auto& [id, cam] : cameras) {
+    if (cam->make == make && cam->model == model)
+      cam->supportStatus = Camera::SupportStatus::Unsupported;
   }
 }
 

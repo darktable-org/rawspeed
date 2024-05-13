@@ -18,270 +18,161 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "common/RawImage.h"              // for RawImageDataFloat, RawImag...
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for writeLog, DEBUG_PRIO, DEBU...
-#include "common/CroppedArray2DRef.h"     // for CroppedArray2DRef
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "metadata/BlackArea.h"           // for BlackArea
-#include <algorithm>                      // for fill_n, max, min
-#include <array>                          // for array
-#include <cstdint>                        // for uint8_t, uint32_t, uint16_t
-#include <memory>                         // for operator==, default_delete
-#include <vector>                         // for vector
+#include "common/RawImage.h"
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "decoders/RawDecoderException.h"
+#include "metadata/BlackArea.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <vector>
 
-using std::min;
 using std::max;
+using std::min;
 
 namespace rawspeed {
 
 RawImageDataFloat::RawImageDataFloat() {
   bpp = sizeof(float);
   dataType = RawImageType::F32;
-  }
-
-  RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
-      : RawImageData(RawImageType::F32, _dim, sizeof(float), _cpp) {}
-
-  void RawImageDataFloat::calculateBlackAreas() {
-    const Array2DRef<float> img = getF32DataAsUncroppedArray2DRef();
-
-    std::array<float, 4> accPixels;
-    accPixels.fill(0);
-    int totalpixels = 0;
-
-    for (auto area : blackAreas) {
-      /* Make sure area sizes are multiple of two,
-      so we have the same amount of pixels for each CFA group */
-      area.size = area.size - (area.size&1);
-
-      /* Process horizontal area */
-      if (!area.isVertical) {
-        if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
-            uncropped_dim.y)
-          ThrowRDE("Offset + size is larger than height of image");
-        for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
-          for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
-            accPixels[((y & 1) << 1) | (x & 1)] += img(y, x);
-          }
-        }
-        totalpixels += area.size * dim.x;
-      }
-
-      /* Process vertical area */
-      if (area.isVertical) {
-        if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
-            uncropped_dim.x)
-          ThrowRDE("Offset + size is larger than width of image");
-        for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
-          for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
-            accPixels[((y & 1) << 1) | (x & 1)] += img(y, x);
-          }
-        }
-        totalpixels += area.size * dim.y;
-      }
-    }
-
-    if (!totalpixels) {
-      for (int &i : blackLevelSeparate)
-        i = blackLevel;
-      return;
-    }
-
-    /* Calculate median value of black areas for each component */
-    /* Adjust the number of total pixels so it is the same as the median of each histogram */
-    totalpixels /= 4;
-
-    for (int i = 0 ; i < 4; i++) {
-      blackLevelSeparate[i] =
-          static_cast<int>(65535.0F * accPixels[i] / totalpixels);
-    }
-
-    /* If this is not a CFA image, we do not use separate blacklevels, use average */
-    if (!isCFA) {
-      int total = 0;
-      for (int i : blackLevelSeparate)
-        total += i;
-      for (int &i : blackLevelSeparate)
-        i = (total + 2) >> 2;
-    }
-  }
-
-  void RawImageDataFloat::scaleBlackWhite() {
-    const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
-
-    const int skipBorder = 150;
-    int gw = (dim.x - skipBorder) * cpp;
-    if ((blackAreas.empty() && blackLevelSeparate[0] < 0 && blackLevel < 0) || whitePoint == 65536) {  // Estimate
-      float b = 100000000;
-      float m = -10000000;
-      for (int row = skipBorder * cpp; row < (dim.y - skipBorder); row++) {
-        for (int col = skipBorder ; col < gw ; col++) {
-          const float pixel = img(row, col);
-          b = min(pixel, b);
-          m = max(pixel, m);
-        }
-      }
-      if (blackLevel < 0)
-        blackLevel = static_cast<int>(b);
-      if (whitePoint == 65536)
-        whitePoint = static_cast<int>(m);
-      writeLog(DEBUG_PRIO::INFO, "Estimated black:%d, Estimated white: %d",
-               blackLevel, whitePoint);
-    }
-
-    /* If filter has not set separate blacklevel, compute or fetch it */
-    if (blackLevelSeparate[0] < 0)
-      calculateBlackAreas();
-
-    startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
 }
 
-#if 0 // def WITH_SSE2
+RawImageDataFloat::RawImageDataFloat(const iPoint2D& _dim, uint32_t _cpp)
+    : RawImageData(RawImageType::F32, _dim, sizeof(float), _cpp) {}
 
-  void RawImageDataFloat::scaleValues(int start_y, int end_y) {
-    bool WITH_SSE2;
-#ifdef _MSC_VER
-    int info[4];
-    __cpuid(info, 1);
-    WITH_SSE2 = !!(info[3]&(1 << 26));
-#else
-    WITH_SSE2 = true;
-#endif
+void RawImageDataFloat::calculateBlackAreas() {
+  const Array2DRef<float> img = getF32DataAsUncroppedArray2DRef();
 
-    float app_scale = 65535.0F / (whitePoint - blackLevelSeparate[0]);
-    // Check SSE2
-    if (WITH_SSE2 && app_scale < 63) {
+  std::array<float, 4> accPixels;
+  accPixels.fill(0);
+  int totalpixels = 0;
 
-      __m128i sseround;
-      __m128i ssesub2;
-      __m128i ssesign;
-      auto* sub_mul = alignedMallocArray<uint32_t, 16, __m128i>(4);
-	  if (!sub_mul)
-		ThrowRDE("Out of memory, failed to allocate 128 bytes");
+  for (auto area : blackAreas) {
+    /* Make sure area sizes are multiple of two,
+    so we have the same amount of pixels for each CFA group */
+    area.size = area.size - (area.size & 1);
 
-      uint32_t gw = pitch / 16;
-      // 10 bit fraction
-      uint32_t mul = (int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[mOffset.x&1]));
-      mul |= ((int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[(mOffset.x+1)&1])))<<16;
-      uint32_t b = blackLevelSeparate[mOffset.x&1] | (blackLevelSeparate[(mOffset.x+1)&1]<<16);
-
-      for (int i = 0; i< 4; i++) {
-        sub_mul[i] = b;     // Subtract even lines
-        sub_mul[4+i] = mul;   // Multiply even lines
-      }
-
-      mul = (int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[2+(mOffset.x&1)]));
-      mul |= ((int)(1024.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[2+((mOffset.x+1)&1)])))<<16;
-      b = blackLevelSeparate[2+(mOffset.x&1)] | (blackLevelSeparate[2+((mOffset.x+1)&1)]<<16);
-
-      for (int i = 0; i< 4; i++) {
-        sub_mul[8+i] = b;   // Subtract odd lines
-        sub_mul[12+i] = mul;  // Multiply odd lines
-      }
-
-      sseround = _mm_set_epi32(512, 512, 512, 512);
-      ssesub2 = _mm_set_epi32(32768, 32768, 32768, 32768);
-      ssesign = _mm_set_epi32(0x80008000, 0x80008000, 0x80008000, 0x80008000);
-
-      for (int y = start_y; y < end_y; y++) {
-        __m128i* pixel = (__m128i*) & data[(mOffset.y+y)*pitch];
-        __m128i ssescale, ssesub;
-        if (((y+mOffset.y)&1) == 0) {
-          ssesub = _mm_load_si128((__m128i*)&sub_mul[0]);
-          ssescale = _mm_load_si128((__m128i*)&sub_mul[4]);
-        } else {
-          ssesub = _mm_load_si128((__m128i*)&sub_mul[8]);
-          ssescale = _mm_load_si128((__m128i*)&sub_mul[12]);
-        }
-
-        for (uint32_t x = 0 ; x < gw; x++) {
-          __m128i pix_high;
-          __m128i temp;
-          _mm_prefetch((char*)(pixel+1), _MM_HINT_T0);
-          __m128i pix_low = _mm_load_si128(pixel);
-          // Subtract black
-          pix_low = _mm_subs_epu16(pix_low, ssesub);
-          // Multiply the two unsigned shorts and combine it to 32 bit result
-          pix_high = _mm_mulhi_epu16(pix_low, ssescale);
-          temp = _mm_mullo_epi16(pix_low, ssescale);
-          pix_low = _mm_unpacklo_epi16(temp, pix_high);
-          pix_high = _mm_unpackhi_epi16(temp, pix_high);
-          // Add rounder
-          pix_low = _mm_add_epi32(pix_low, sseround);
-          pix_high = _mm_add_epi32(pix_high, sseround);
-          // Shift down
-          pix_low = _mm_srai_epi32(pix_low, 10);
-          pix_high = _mm_srai_epi32(pix_high, 10);
-          // Subtract to avoid clipping
-          pix_low = _mm_sub_epi32(pix_low, ssesub2);
-          pix_high = _mm_sub_epi32(pix_high, ssesub2);
-          // Pack
-          pix_low = _mm_packs_epi32(pix_low, pix_high);
-          // Shift sign off
-          pix_low = _mm_xor_si128(pix_low, ssesign);
-          _mm_store_si128(pixel, pix_low);
-          pixel++;
+    /* Process horizontal area */
+    if (!area.isVertical) {
+      if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
+          uncropped_dim.y)
+        ThrowRDE("Offset + size is larger than height of image");
+      for (uint32_t y = area.offset; y < area.offset + area.size; y++) {
+        for (int x = mOffset.x; x < dim.x + mOffset.x; x++) {
+          accPixels[((y & 1) << 1) | (x & 1)] += img(y, x);
         }
       }
-      alignedFree(sub_mul);
-    } else {
-      // Not SSE2
-      int gw = dim.x * cpp;
-      int mul[4];
-      int sub[4];
-      for (int i = 0; i < 4; i++) {
-        int v = i;
-        if ((mOffset.x&1) != 0)
-          v ^= 1;
-        if ((mOffset.y&1) != 0)
-          v ^= 2;
-        mul[i] = (int)(16384.0F * 65535.0F / (float)(whitePoint - blackLevelSeparate[v]));
-        sub[i] = blackLevelSeparate[v];
-      }
-      for (int y = start_y; y < end_y; y++) {
-        uint16_t *pixel = (uint16_t*)getData(0, y);
-        int *mul_local = &mul[2*(y&1)];
-        int *sub_local = &sub[2*(y&1)];
-        for (int x = 0 ; x < gw; x++) {
-          pixel[x] = clampBits(((pixel[x] - sub_local[x&1]) * mul_local[x&1] + 8192) >> 14, 16);
+      totalpixels += area.size * dim.x;
+    }
+
+    /* Process vertical area */
+    if (area.isVertical) {
+      if (static_cast<int>(area.offset) + static_cast<int>(area.size) >
+          uncropped_dim.x)
+        ThrowRDE("Offset + size is larger than width of image");
+      for (int y = mOffset.y; y < dim.y + mOffset.y; y++) {
+        for (uint32_t x = area.offset; x < area.size + area.offset; x++) {
+          accPixels[((y & 1) << 1) | (x & 1)] += img(y, x);
         }
       }
+      totalpixels += area.size * dim.y;
     }
   }
 
-#else
+  blackLevelSeparate = Array2DRef(blackLevelSeparateStorage.data(), 2, 2);
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
 
-  void RawImageDataFloat::scaleValues(int start_y, int end_y) {
-    const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
-    int gw = dim.x * cpp;
-    std::array<float, 4> mul;
-    std::array<float, 4> sub;
-    for (int i = 0; i < 4; i++) {
-      int v = i;
-      if ((mOffset.x&1) != 0)
-        v ^= 1;
-      if ((mOffset.y&1) != 0)
-        v ^= 2;
-      mul[i] =
-          65535.0F / static_cast<float>(whitePoint - blackLevelSeparate[v]);
-      sub[i] = static_cast<float>(blackLevelSeparate[v]);
-    }
-    for (int y = start_y; y < end_y; y++) {
-      const float* mul_local = &mul[2 * (y & 1)];
-      const float* sub_local = &sub[2 * (y & 1)];
-      for (int x = 0; x < gw; x++)
-        img(y, x) = (img(y, x) - sub_local[x & 1]) * mul_local[x & 1];
-    }
+  if (!totalpixels) {
+    for (int& i : blackLevelSeparate1D)
+      i = blackLevel;
+    return;
   }
 
-#endif
+  /* Calculate median value of black areas for each component */
+  /* Adjust the number of total pixels so it is the same as the median of each
+   * histogram */
+  totalpixels /= 4;
 
-  /* This performs a 4 way interpolated pixel */
-  /* The value is interpolated from the 4 closest valid pixels in */
-  /* the horizontal and vertical direction. Pixels found further away */
-  /* are weighed less */
+  for (int i = 0; i < 4; i++) {
+    blackLevelSeparate1D(i) = static_cast<int>(
+        65535.0F * accPixels[i] / implicit_cast<float>(totalpixels));
+  }
+
+  /* If this is not a CFA image, we do not use separate blacklevels, use average
+   */
+  if (!isCFA) {
+    int total = 0;
+    for (int i : blackLevelSeparate1D)
+      total += i;
+    for (int& i : blackLevelSeparate1D)
+      i = (total + 2) >> 2;
+  }
+}
+
+void RawImageDataFloat::scaleBlackWhite() {
+  const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
+
+  const int skipBorder = 150;
+  int gw = (dim.x - skipBorder) * cpp;
+  // NOTE: lack of whitePoint means that it is pre-normalized.
+  if (blackAreas.empty() && !blackLevelSeparate && blackLevel < 0) { // Estimate
+    float b = 100000000;
+    float m = -10000000;
+    for (int row = skipBorder * cpp; row < (dim.y - skipBorder); row++) {
+      for (int col = skipBorder; col < gw; col++) {
+        const float pixel = img(row, col);
+        b = min(pixel, b);
+        m = max(pixel, m);
+      }
+    }
+    if (blackLevel < 0)
+      blackLevel = static_cast<int>(b);
+    writeLog(DEBUG_PRIO::INFO, "Estimated black:%d", blackLevel);
+  }
+
+  /* If filter has not set separate blacklevel, compute or fetch it */
+  if (!blackLevelSeparate)
+    calculateBlackAreas();
+
+  startWorker(RawImageWorker::RawImageWorkerTask::SCALE_VALUES, true);
+}
+
+void RawImageDataFloat::scaleValues(int start_y, int end_y) {
+  const CroppedArray2DRef<float> img = getF32DataAsCroppedArray2DRef();
+  int gw = dim.x * cpp;
+  std::array<float, 4> mul;
+  std::array<float, 4> sub;
+  assert(blackLevelSeparate->width() == 2 && blackLevelSeparate->height() == 2);
+  auto blackLevelSeparate1D = *blackLevelSeparate->getAsArray1DRef();
+  for (int i = 0; i < 4; i++) {
+    int v = i;
+    if ((mOffset.x & 1) != 0)
+      v ^= 1;
+    if ((mOffset.y & 1) != 0)
+      v ^= 2;
+    mul[i] =
+        65535.0F / static_cast<float>(*whitePoint - blackLevelSeparate1D(v));
+    sub[i] = static_cast<float>(blackLevelSeparate1D(v));
+  }
+  for (int y = start_y; y < end_y; y++) {
+    for (int x = 0; x < gw; x++)
+      img(y, x) = (img(y, x) - sub[(2 * (y & 1)) + (x & 1)]) *
+                  mul[(2 * (y & 1)) + (x & 1)];
+  }
+}
+
+/* This performs a 4 way interpolated pixel */
+/* The value is interpolated from the 4 closest valid pixels in */
+/* the horizontal and vertical direction. Pixels found further away */
+/* are weighed less */
 
 void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   const Array2DRef<float> img = getF32DataAsUncroppedArray2DRef();
@@ -291,7 +182,8 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   std::array<float, 4> dist = {{}};
   std::array<float, 4> weight;
 
-  const uint8_t* bad_line = &mBadPixelMap[y * mBadPixelMapPitch];
+  const auto bad =
+      Array2DRef(mBadPixelMap.data(), mBadPixelMapPitch, uncropped_dim.y);
   // We can have cfa or no-cfa for RawImageDataFloat
   int step = isCFA ? 2 : 1;
 
@@ -299,7 +191,7 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   int x_find = static_cast<int>(x) - step;
   int curr = 0;
   while (x_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<float>(static_cast<int>(x) - x_find);
     }
@@ -309,19 +201,18 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   x_find = static_cast<int>(x) + step;
   curr = 1;
   while (x_find < uncropped_dim.x && values[curr] < 0) {
-    if (0 == ((bad_line[x_find>>3] >> (x_find&7)) & 1)) {
+    if (0 == ((bad(y, x_find >> 3) >> (x_find & 7)) & 1)) {
       values[curr] = img(y, x_find + component);
       dist[curr] = static_cast<float>(x_find - static_cast<int>(x));
     }
     x_find += step;
   }
 
-  bad_line = &mBadPixelMap[x>>3];
   // Find pixel upwards
   int y_find = static_cast<int>(y) - step;
   curr = 2;
   while (y_find >= 0 && values[curr] < 0) {
-    if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<float>(static_cast<int>(y) - y_find);
     }
@@ -331,24 +222,24 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   y_find = static_cast<int>(y) + step;
   curr = 3;
   while (y_find < uncropped_dim.y && values[curr] < 0) {
-    if (0 == ((bad_line[y_find*mBadPixelMapPitch] >> (x&7)) & 1)) {
+    if (0 == ((bad(y_find, x >> 3) >> (x & 7)) & 1)) {
       values[curr] = img(y_find, x + component);
       dist[curr] = static_cast<float>(y_find - static_cast<int>(y));
     }
     y_find += step;
   }
-  // Find x weights
-  float total_dist_x = dist[0] + dist[1];
 
   float total_div = 0.000001F;
-  if (total_dist_x) {
+
+  // Find x weights
+  if (float total_dist_x = dist[0] + dist[1]; std::abs(total_dist_x) > 0) {
     weight[0] = dist[0] > 0.0F ? (total_dist_x - dist[0]) / total_dist_x : 0;
     weight[1] = 1.0F - weight[0];
     total_div += 1;
   }
 
   // Find y weights
-  if (float total_dist_y = dist[2] + dist[3]; total_dist_y) {
+  if (float total_dist_y = dist[2] + dist[3]; std::abs(total_dist_y) > 0) {
     weight[2] = dist[2] > 0.0F ? (total_dist_y - dist[2]) / total_dist_y : 0;
     weight[3] = 1.0F - weight[2];
     total_div += 1;
@@ -365,14 +256,14 @@ void RawImageDataFloat::fixBadPixel(uint32_t x, uint32_t y, int component) {
   /* Process other pixels - could be done inline, since we have the weights */
   if (cpp > 1 && component == 0)
     for (int i = 1; i < cpp; i++)
-      fixBadPixel(x,y,i);
+      fixBadPixel(x, y, i);
 }
 
-void RawImageDataFloat::doLookup( int start_y, int end_y ) {
+void RawImageDataFloat::doLookup(int start_y, int end_y) {
   ThrowRDE("Float point lookup tables not implemented");
 }
 
-void RawImageDataFloat::setWithLookUp(uint16_t value, uint8_t* dst,
+void RawImageDataFloat::setWithLookUp(uint16_t value, std::byte* dst,
                                       uint32_t* random) {
   auto* dest = reinterpret_cast<float*>(dst);
   if (table == nullptr) {

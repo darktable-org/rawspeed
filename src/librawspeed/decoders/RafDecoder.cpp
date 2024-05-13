@@ -20,44 +20,45 @@
 */
 
 #include "decoders/RafDecoder.h"
-#include "common/Array2DRef.h"                      // for Array2DRef
-#include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/NotARational.h"                    // for NotARational
-#include "common/Point.h"                           // for iPoint2D, iRecta...
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/FujiDecompressor.h"         // for FujiDecompressor
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, getH...
-#include "metadata/BlackArea.h"                     // for BlackArea
-#include "metadata/Camera.h"                        // for Camera, Hints
-#include "metadata/CameraMetaData.h"                // for CameraMetaData
-#include "metadata/CameraSensorInfo.h"              // for CameraSensorInfo
-#include "metadata/ColorFilterArray.h"              // for ColorFilterArray
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t
-#include <cstring>                                  // for memcmp
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for string, operator==
-#include <vector>                                   // for vector
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/FujiDecompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/Camera.h"
+#include "metadata/CameraMetaData.h"
+#include "metadata/CameraSensorInfo.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 
-bool RafDecoder::isRAF(const Buffer& input) {
+bool RafDecoder::isRAF(Buffer input) {
   static const std::array<char, 16> magic = {{'F', 'U', 'J', 'I', 'F', 'I', 'L',
                                               'M', 'C', 'C', 'D', '-', 'R', 'A',
                                               'W', ' '}};
-  const unsigned char* data = input.getData(0, magic.size());
-  return 0 == memcmp(data, magic.data(), magic.size());
+  const Buffer data = input.getSubView(0, magic.size());
+  return 0 == memcmp(data.begin(), magic.data(), magic.size());
 }
 
 bool RafDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -74,8 +75,8 @@ RawImage RafDecoder::decodeRawInternal() {
   if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)) {
     height = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLHEIGHT)->getU32();
     width = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLWIDTH)->getU32();
-  } else if (raw->hasEntry(TiffTag::IMAGEWIDTH)) {
-    const TiffEntry* e = raw->getEntry(TiffTag::IMAGEWIDTH);
+  } else if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEFULLSIZE)) {
+    const TiffEntry* e = raw->getEntry(TiffTag::FUJI_RAWIMAGEFULLSIZE);
     height = e->getU16(0);
     width = e->getU16(1);
   } else
@@ -147,28 +148,37 @@ RawImage RafDecoder::decodeRawInternal() {
              counts->getU32(), width, height);
   }
 
-  double_width = hints.has("double_width_unpacked");
+  double_width = hints.contains("double_width_unpacked");
   const uint32_t real_width = double_width ? 2U * width : width;
 
   mRaw->dim = iPoint2D(real_width, height);
-  mRaw->createData();
-
-  UncompressedDecompressor u(input, mRaw);
 
   if (double_width) {
-    u.decodeRawUnpacked<16, Endianness::little>(width * 2, height);
+    UncompressedDecompressor u(
+        input, mRaw, iRectangle2D({0, 0}, iPoint2D(2 * width, height)),
+        2 * 2 * width, 16, BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else if (input.getByteOrder() == Endianness::big &&
              getHostEndianness() == Endianness::little) {
     // FIXME: ^ that if seems fishy
-    u.decodeRawUnpacked<16, Endianness::big>(width, height);
+    UncompressedDecompressor u(input, mRaw,
+                               iRectangle2D({0, 0}, iPoint2D(width, height)),
+                               2 * width, 16, BitOrder::MSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else {
     iPoint2D pos(0, 0);
-    if (hints.has("jpeg32_bitorder")) {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder::MSB32);
+    if (hints.contains("jpeg32_bitorder")) {
+      UncompressedDecompressor u(input, mRaw, iRectangle2D(pos, mRaw->dim),
+                                 width * bps / 8, bps, BitOrder::MSB32);
+      mRaw->createData();
+      u.readUncompressedRaw();
     } else {
-      u.readUncompressedRaw(mRaw->dim, pos, width * bps / 8, bps,
-                            BitOrder::LSB);
+      UncompressedDecompressor u(input, mRaw, iRectangle2D(pos, mRaw->dim),
+                                 width * bps / 8, bps, BitOrder::LSB);
+      mRaw->createData();
+      u.readUncompressedRaw();
     }
   }
 
@@ -196,19 +206,26 @@ void RafDecoder::applyCorrections(const Camera* cam) {
   iPoint2D crop_offset(0, 0);
 
   if (applyCrop) {
-    new_size = cam->cropSize;
-    crop_offset = cam->cropPos;
-    bool double_width = hints.has("double_width_unpacked");
+    if (cam->cropAvailable) {
+      new_size = cam->cropSize;
+      crop_offset = cam->cropPos;
+    } else {
+      const iRectangle2D vendor_crop = getDefaultCrop();
+      new_size = vendor_crop.dim;
+      crop_offset = vendor_crop.pos;
+    }
+    bool double_width = hints.contains("double_width_unpacked");
     // If crop size is negative, use relative cropping
-    if (new_size.x <= 0)
-      new_size.x = mRaw->dim.x / (double_width ? 2 : 1) - cam->cropPos.x + new_size.x;
-    else
+    if (new_size.x <= 0) {
+      new_size.x =
+          mRaw->dim.x / (double_width ? 2 : 1) - crop_offset.x + new_size.x;
+    } else
       new_size.x /= (double_width ? 2 : 1);
     if (new_size.y <= 0)
-      new_size.y = mRaw->dim.y - cam->cropPos.y + new_size.y;
+      new_size.y = mRaw->dim.y - crop_offset.y + new_size.y;
   }
 
-  bool rotate = hints.has("fuji_rotate");
+  bool rotate = hints.contains("fuji_rotate");
   rotate = rotate && fujiRotate;
 
   // Rotate 45 degrees - could be multithreaded.
@@ -217,17 +234,16 @@ void RafDecoder::applyCorrections(const Camera* cam) {
     uint32_t rotatedsize;
     uint32_t rotationPos;
     if (alt_layout) {
-      rotatedsize = new_size.y+new_size.x/2;
-      rotationPos = new_size.x/2 - 1;
-    }
-    else {
-      rotatedsize = new_size.x+new_size.y/2;
+      rotatedsize = new_size.y + new_size.x / 2;
+      rotationPos = new_size.x / 2 - 1;
+    } else {
+      rotatedsize = new_size.x + new_size.y / 2;
       rotationPos = new_size.x - 1;
     }
 
-    iPoint2D final_size(rotatedsize, rotatedsize-1);
+    iPoint2D final_size(rotatedsize, rotatedsize - 1);
     RawImage rotated = RawImage::create(final_size, RawImageType::UINT16, 1);
-    rotated->clearArea(iRectangle2D(iPoint2D(0,0), rotated->dim));
+    rotated->clearArea(iRectangle2D(iPoint2D(0, 0), rotated->dim));
     rotated->metadata = mRaw->metadata;
     rotated->metadata.fujiRotationPos = rotationPos;
 
@@ -240,10 +256,10 @@ void RafDecoder::applyCorrections(const Camera* cam) {
         int w;
         if (alt_layout) { // Swapped x and y
           h = rotatedsize - (new_size.y + 1 - y + (x >> 1));
-          w = ((x+1) >> 1) + y;
+          w = ((x + 1) >> 1) + y;
         } else {
           h = new_size.x - 1 - x + (y >> 1);
-          w = ((y+1) >> 1) + x;
+          w = ((y + 1) >> 1) + x;
         }
         if (h < rotated->dim.y && w < rotated->dim.x)
           dstImg(h, w) = srcImg(crop_offset.y + y, crop_offset.x + x);
@@ -263,6 +279,16 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     iso = mRootIFD->getEntryRecursive(TiffTag::ISOSPEEDRATINGS)->getU32();
   mRaw->metadata.isoSpeed = iso;
 
+  // Set white point derived from Exif.Fujifilm.BitsPerSample if available,
+  // can be overridden by XML data.
+  if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)) {
+    unsigned bps =
+        mRootIFD->getEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
+    if (bps > 16)
+      ThrowRDE("Unexpected bit depth: %i", bps);
+    mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
+  }
+
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
   auto id = mRootIFD->getID();
@@ -274,33 +300,47 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   applyCorrections(cam);
 
-  const CameraSensorInfo *sensor = cam->getSensorInfo(iso);
-  mRaw->blackLevel = sensor->mBlackLevel;
-
   // at least the (bayer sensor) X100 comes with a tag like this:
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_BLACKLEVEL)) {
     const TiffEntry* sep_black =
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BLACKLEVEL);
-    if (sep_black->count == 4)
-    {
-      for(int k=0;k<4;k++)
-        mRaw->blackLevelSeparate[k] = sep_black->getU32(k);
+    if (sep_black->count == 4) {
+      mRaw->blackLevelSeparate =
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+      for (int k = 0; k < 4; k++)
+        blackLevelSeparate1D(k) = sep_black->getU32(k);
     } else if (sep_black->count == 36) {
-      for (int& k : mRaw->blackLevelSeparate)
+      mRaw->blackLevelSeparate =
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+      for (int& k : blackLevelSeparate1D)
         k = 0;
 
       for (int y = 0; y < 6; y++) {
         for (int x = 0; x < 6; x++)
-          mRaw->blackLevelSeparate[2 * (y % 2) + (x % 2)] +=
+          blackLevelSeparate1D(2 * (y % 2) + (x % 2)) +=
               sep_black->getU32(6 * y + x);
       }
 
-      for (int& k : mRaw->blackLevelSeparate)
+      for (int& k : blackLevelSeparate1D)
         k /= 9;
     }
+
+    // Set black level to average of EXIF data, can be overridden by XML data.
+    int sum = 0;
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+    for (int b : blackLevelSeparate1D)
+      sum += b;
+    mRaw->blackLevel = (sum + 2) >> 2;
   }
 
-  mRaw->whitePoint = sensor->mWhiteLevel;
+  if (const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
+      sensor && sensor->mWhiteLevel > 0) {
+    mRaw->blackLevel = sensor->mBlackLevel;
+    mRaw->whitePoint = sensor->mWhiteLevel;
+  }
+
   mRaw->blackAreas = cam->blackAreas;
   mRaw->cfa = cam->cfa;
   if (!cam->color_matrix.empty())
@@ -348,14 +388,38 @@ int RafDecoder::isCompressed() const {
   if (width == 0 || height == 0 || width > 11808 || height > 8754)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
+  uint32_t bps;
+  if (raw->hasEntry(TiffTag::FUJI_BITSPERSAMPLE))
+    bps = raw->getEntry(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
+  else
+    bps = 12;
+
   uint32_t count = raw->getEntry(TiffTag::FUJI_STRIPBYTECOUNTS)->getU32();
 
-  // The uncompressed raf's can be 12/14 bpp, so if it is less than that,
-  // then we are likely in compressed raf.
-  // FIXME: this can't be the correct way to detect this. But i'm not seeing
+  // FIXME: This is not an ideal way to detect compression, but I'm not seeing
   // anything in the diff between exiv2/exiftool dumps of {un,}compressed raws.
   // Maybe we are supposed to check for valid FujiDecompressor::FujiHeader ?
-  return count * 8 / (width * height) < 12;
+  return count * 8 / (width * height) < bps;
+}
+
+iRectangle2D RafDecoder::getDefaultCrop() {
+  // Crop tags alias baseline TIFF tags, but are in the Fujifilm proprietary
+  // directory that can be identified by a different unique tag.
+  if (const auto* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_RAFDATA);
+      raw->hasEntry(TiffTag::FUJI_RAWIMAGECROPTOPLEFT) &&
+      raw->hasEntry(TiffTag::FUJI_RAWIMAGECROPPEDSIZE)) {
+    const auto* pos = raw->getEntry(TiffTag::FUJI_RAWIMAGECROPTOPLEFT);
+    const uint16_t topBorder = pos->getU16(0);
+    const uint16_t leftBorder = pos->getU16(1);
+    const auto* dim = raw->getEntry(TiffTag::FUJI_RAWIMAGECROPPEDSIZE);
+    const uint16_t height = dim->getU16(0);
+    const uint16_t width = dim->getU16(1);
+    return {leftBorder, topBorder, width, height};
+  }
+  ThrowRDE("Cannot figure out vendor crop. Required entries were not found: "
+           "%X, %X",
+           static_cast<unsigned int>(TiffTag::FUJI_RAWIMAGECROPTOPLEFT),
+           static_cast<unsigned int>(TiffTag::FUJI_RAWIMAGECROPPEDSIZE));
 }
 
 } // namespace rawspeed

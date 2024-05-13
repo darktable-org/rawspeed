@@ -22,21 +22,21 @@
 
 #pragma once
 
-#include "common/NORangesSet.h" // for set
-#include "tiff/CiffEntry.h"     // for CiffEntry (ptr only)
-#include "tiff/CiffTag.h"       // for CiffTag
-#include <cstdint>              // for uint32_t
-#include <map>                  // for map
-#include <memory>               // for unique_ptr
-#include <string>               // for string
-#include <vector>               // for vector
+#include "rawspeedconfig.h"
+#include "adt/NORangesSet.h"
+#include "tiff/CiffEntry.h"
+#include "tiff/CiffTag.h"
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 
 class Buffer;
 class ByteStream;
 class CiffEntry;
-template <typename T> class NORangesSet;
 template <typename T> class NORangesSet;
 
 class CiffIFD final {
@@ -77,38 +77,37 @@ class CiffIFD final {
   void add(std::unique_ptr<CiffIFD> subIFD);
   void add(std::unique_ptr<CiffEntry> entry);
 
-  void parseIFDEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream& dirEntries);
+  void parseIFDEntry(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                     ByteStream& dirEntries);
 
   template <typename Lambda>
-  std::vector<const CiffIFD*> __attribute__((pure))
-  getIFDsWithTagIf(CiffTag tag, const Lambda& f) const;
+  std::vector<const CiffIFD*>
+      RAWSPEED_READONLY getIFDsWithTagIf(CiffTag tag, const Lambda& f) const;
 
   template <typename Lambda>
-  const CiffEntry* __attribute__((pure))
-  getEntryRecursiveIf(CiffTag tag, const Lambda& f) const;
+  const CiffEntry* RAWSPEED_READONLY getEntryRecursiveIf(CiffTag tag,
+                                                         const Lambda& f) const;
 
 public:
   explicit CiffIFD(CiffIFD* parent);
   CiffIFD(CiffIFD* parent, ByteStream directory);
 
-  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
-  getIFDsWithTag(CiffTag tag) const;
-  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*>
+      RAWSPEED_READONLY getIFDsWithTag(CiffTag tag) const;
+  [[nodiscard]] std::vector<const CiffIFD*> RAWSPEED_READONLY
   getIFDsWithTagWhere(CiffTag tag, uint32_t isValue) const;
-  [[nodiscard]] std::vector<const CiffIFD*> __attribute__((pure))
+  [[nodiscard]] std::vector<const CiffIFD*> RAWSPEED_READONLY
   getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const;
 
-  [[nodiscard]] bool __attribute__((pure)) hasEntry(CiffTag tag) const;
-  [[nodiscard]] bool __attribute__((pure)) hasEntryRecursive(CiffTag tag) const;
+  [[nodiscard]] bool RAWSPEED_READONLY hasEntry(CiffTag tag) const;
+  [[nodiscard]] bool RAWSPEED_READONLY hasEntryRecursive(CiffTag tag) const;
 
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
-  getEntry(CiffTag tag) const;
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY getEntry(CiffTag tag) const;
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY
   getEntryRecursive(CiffTag tag) const;
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY
   getEntryRecursiveWhere(CiffTag tag, uint32_t isValue) const;
-  [[nodiscard]] const CiffEntry* __attribute__((pure))
+  [[nodiscard]] const CiffEntry* RAWSPEED_READONLY
   getEntryRecursiveWhere(CiffTag tag, const std::string& isValue) const;
 };
 

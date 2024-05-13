@@ -1,25 +1,29 @@
-# Download and unpack googletest at configure time
 set(GOOGLETEST_PREFIX "${RAWSPEED_BINARY_DIR}/src/external/googletest")
-configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${GOOGLETEST_PREFIX}/CMakeLists.txt @ONLY)
 
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
-  -DALLOW_DOWNLOADING_GOOGLETEST=${ALLOW_DOWNLOADING_GOOGLETEST} -DGOOGLETEST_PATH:PATH=${GOOGLETEST_PATH} .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${GOOGLETEST_PREFIX}
-)
+if(NOT EXISTS ${GOOGLETEST_PREFIX}/googletest-paths.cmake OR
+   ${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in IS_NEWER_THAN ${GOOGLETEST_PREFIX}/googletest-paths.cmake)
+  # Download and unpack googletest at configure time
+  configure_file(${RAWSPEED_SOURCE_DIR}/cmake/Modules/GoogleTest.cmake.in ${GOOGLETEST_PREFIX}/CMakeLists.txt @ONLY)
 
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
+    -DALLOW_DOWNLOADING_GOOGLETEST=${ALLOW_DOWNLOADING_GOOGLETEST} -DGOOGLETEST_PATH:PATH=${GOOGLETEST_PATH} .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${GOOGLETEST_PREFIX}
+  )
 
-execute_process(
-  COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${GOOGLETEST_PREFIX}
-)
+  if(result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  endif()
 
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${GOOGLETEST_PREFIX}
+  )
+
+  if(result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+  endif()
 endif()
 
 # shared googletest exibits various spurious failures.
@@ -58,6 +62,10 @@ set_target_properties(gtest PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TA
 set_target_properties(gtest_main PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:gtest_main,INTERFACE_INCLUDE_DIRECTORIES>)
 set_target_properties(gmock PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:gmock,INTERFACE_INCLUDE_DIRECTORIES>)
 set_target_properties(gmock_main PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:gmock_main,INTERFACE_INCLUDE_DIRECTORIES>)
+
+foreach(target gtest gtest_main gmock gmock_main)
+  target_compile_definitions(${target} PUBLIC -DGTEST_REMOVE_LEGACY_TEST_CASEAPI_)
+endforeach()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVE}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVE}")

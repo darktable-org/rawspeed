@@ -21,36 +21,44 @@
 */
 
 #include "decoders/OrfDecoder.h"
-#include "common/Common.h"                          // for BitOrder, BitOrd...
-#include "common/NORangesSet.h"                     // for NORangesSet
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/OlympusDecompressor.h"      // for OlympusDecompressor
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, getH...
-#include "metadata/ColorFilterArray.h"              // for CFAColor, ColorF...
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <memory>                                   // for unique_ptr, allo...
-#include <string>                                   // for operator==, string
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/NORangesSet.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB.h"
+#include "bitstreams/BitStreams.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/OlympusDecompressor.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 
 class CameraMetaData;
 
 bool OrfDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
   // FIXME: magic
 
   return make == "OLYMPUS IMAGING CORP." || make == "OLYMPUS CORPORATION" ||
-         make == "OLYMPUS OPTICAL CO.,LTD";
+         make == "OLYMPUS OPTICAL CO.,LTD" || make == "OM Digital Solutions";
 }
 
 ByteStream OrfDecoder::handleSlices() const {
@@ -123,48 +131,124 @@ RawImage OrfDecoder::decodeRawInternal() {
     ThrowRDE("%u stripes, and not uncompressed. Unsupported.",
              raw->getEntry(TiffTag::STRIPOFFSETS)->count);
 
+  if (mRootIFD->hasEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING)) {
+    // Newer cameras process the Image Processing SubIFD in the makernote
+    const TiffEntry* img_entry =
+        mRootIFD->getEntryRecursive(TiffTag::OLYMPUSIMAGEPROCESSING);
+    // get makernote ifd with containing Buffer
+    NORangesSet<Buffer> ifds;
+
+    TiffRootIFD image_processing(nullptr, &ifds, img_entry->getRootIfdData(),
+                                 img_entry->getU32());
+
+    if (image_processing.hasEntry(static_cast<TiffTag>(0x0611))) {
+      const TiffEntry* validBits =
+          image_processing.getEntry(static_cast<TiffTag>(0x0611));
+      if (validBits->getU16() != 12)
+        ThrowRDE("Only 12-bit images are supported currently.");
+    }
+  }
+
   OlympusDecompressor o(mRaw);
   mRaw->createData();
-  o.decompress(std::move(input));
+  o.decompress(input);
 
   return mRaw;
 }
 
-bool OrfDecoder::decodeUncompressed(const ByteStream& s, uint32_t w, uint32_t h,
+void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
+                                               uint32_t h,
+                                               uint32_t size) const {
+  int inputPitchBits = 12 * w;
+  assert(inputPitchBits % 8 == 0);
+
+  int inputPitchBytes = inputPitchBits / 8;
+
+  const auto numEvenLines = implicit_cast<int>(roundUpDivisionSafe(h, 2));
+  const auto evenLinesInput = s.getStream(numEvenLines, inputPitchBytes)
+                                  .peekRemainingBuffer()
+                                  .getAsArray1DRef();
+
+  const auto oddLinesInputBegin =
+      implicit_cast<int>(roundUp(evenLinesInput.size(), 1U << 11U));
+  assert(oddLinesInputBegin >= evenLinesInput.size());
+  int padding = oddLinesInputBegin - evenLinesInput.size();
+  assert(padding >= 0);
+  s.skipBytes(padding);
+
+  const int numOddLines = h - numEvenLines;
+  const auto oddLinesInput = s.getStream(numOddLines, inputPitchBytes)
+                                 .peekRemainingBuffer()
+                                 .getAsArray1DRef();
+
+  // By now we know we have enough input to produce the image.
+  mRaw->createData();
+
+  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
+  {
+    BitStreamerMSB bs(evenLinesInput);
+    for (int i = 0; i != numEvenLines; ++i) {
+      for (unsigned col = 0; col != w; ++col) {
+        int row = 2 * i;
+        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
+      }
+    }
+  }
+  {
+    BitStreamerMSB bs(oddLinesInput);
+    for (int i = 0; i != numOddLines; ++i) {
+      for (unsigned col = 0; col != w; ++col) {
+        int row = 1 + 2 * i;
+        out(row, col) = implicit_cast<uint16_t>(bs.getBits(12));
+      }
+    }
+  }
+}
+
+bool OrfDecoder::decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
                                     uint32_t size) const {
-  UncompressedDecompressor u(s, mRaw);
   // FIXME: most of this logic should be in UncompressedDecompressor,
   // one way or another.
 
   if (size == h * ((w * 12 / 8) + ((w + 2) / 10))) {
     // 12-bit  packed 'with control' raw
+    UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
+                               (12 * w / 8) + ((w + 2) / 10), 12,
+                               BitOrder::LSB);
     mRaw->createData();
-    u.decode12BitRaw<Endianness::little, false, true>(w, h);
+    u.decode12BitRawWithControl<Endianness::little>();
     return true;
   }
 
+  iPoint2D dimensions(w, h);
+  iPoint2D pos(0, 0);
   if (size == w * h * 12 / 8) { // We're in a 12-bit packed raw
-    iPoint2D dimensions(w, h);
-    iPoint2D pos(0, 0);
+    UncompressedDecompressor u(s, mRaw, iRectangle2D(pos, dimensions),
+                               w * 12 / 8, 12, BitOrder::MSB32);
     mRaw->createData();
-    u.readUncompressedRaw(dimensions, pos, w * 12 / 8, 12, BitOrder::MSB32);
+    u.readUncompressedRaw();
     return true;
   }
 
   if (size == w * h * 2) { // We're in an unpacked raw
-    mRaw->createData();
     // FIXME: seems fishy
-    if (s.getByteOrder() == getHostEndianness())
-      u.decodeRawUnpacked<12, Endianness::little>(w, h);
-    else
-      u.decode12BitRawUnpackedLeftAligned<Endianness::big>(w, h);
+    if (s.getByteOrder() == getHostEndianness()) {
+      UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
+                                 16 * w / 8, 16, BitOrder::LSB);
+      mRaw->createData();
+      u.decode12BitRawUnpackedLeftAligned<Endianness::little>();
+    } else {
+      UncompressedDecompressor u(s, mRaw, iRectangle2D({0, 0}, iPoint2D(w, h)),
+                                 16 * w / 8, 16, BitOrder::MSB);
+      mRaw->createData();
+      u.decode12BitRawUnpackedLeftAligned<Endianness::big>();
+    }
     return true;
   }
 
-  if (size >
-      w * h * 3 / 2) { // We're in one of those weird interlaced packed raws
-    mRaw->createData();
-    u.decode12BitRaw<Endianness::big, true>(w, h);
+  if (size > w * h * 3 / 2) {
+    // We're in one of those weird interlaced packed raws
+    decodeUncompressedInterleaved(s, w, h, size);
     return true;
   }
 
@@ -190,12 +274,13 @@ void OrfDecoder::parseCFA() const {
 
   auto int2enum = [](uint8_t i) {
     switch (i) {
+      using enum CFAColor;
     case 0:
-      return CFAColor::RED;
+      return RED;
     case 1:
-      return CFAColor::GREEN;
+      return GREEN;
     case 2:
-      return CFAColor::BLUE;
+      return BLUE;
     default:
       ThrowRDE("Unexpected CFA color: %u", i);
     }
@@ -211,6 +296,8 @@ void OrfDecoder::parseCFA() const {
 }
 
 void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
+  mRaw->whitePoint = (1U << 12) - 1;
+
   int iso = 0;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::ISOSPEEDRATINGS))
@@ -254,28 +341,34 @@ void OrfDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
           image_processing.getEntry(static_cast<TiffTag>(0x0600));
       // Order is assumed to be RGGB
       if (blackEntry->count == 4) {
+        mRaw->blackLevelSeparate =
+            Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+        auto blackLevelSeparate1D =
+            *mRaw->blackLevelSeparate->getAsArray1DRef();
         for (int i = 0; i < 4; i++) {
           auto c = mRaw->cfa.getColorAt(i & 1, i >> 1);
           int j;
           switch (c) {
-          case CFAColor::RED:
+            using enum CFAColor;
+          case RED:
             j = 0;
             break;
-          case CFAColor::GREEN:
+          case GREEN:
             j = i < 2 ? 1 : 2;
             break;
-          case CFAColor::BLUE:
+          case BLUE:
             j = 3;
             break;
           default:
             ThrowRDE("Unexpected CFA color: %u", static_cast<unsigned>(c));
           }
 
-          mRaw->blackLevelSeparate[i] = blackEntry->getU16(j);
+          blackLevelSeparate1D(i) = blackEntry->getU16(j);
         }
         // Adjust whitelevel based on the read black (we assume the dynamic
         // range is the same)
-        mRaw->whitePoint -= (mRaw->blackLevel - mRaw->blackLevelSeparate[0]);
+        mRaw->whitePoint =
+            *mRaw->whitePoint - (mRaw->blackLevel - blackLevelSeparate1D(0));
       }
     }
   }

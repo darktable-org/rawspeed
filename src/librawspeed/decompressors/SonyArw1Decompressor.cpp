@@ -21,18 +21,23 @@
 */
 
 #include "decompressors/SonyArw1Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for isIntN
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include <cassert>                        // for assert
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 
-SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
+SonyArw1Decompressor::SonyArw1Decompressor(RawImage img)
+    : mRaw(std::move(img)) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
     ThrowRDE("Unexpected component count / data type");
@@ -44,26 +49,26 @@ SonyArw1Decompressor::SonyArw1Decompressor(const RawImage& img) : mRaw(img) {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", w, h);
 }
 
-inline int SonyArw1Decompressor::getDiff(BitPumpMSB& bs, uint32_t len) {
+inline int SonyArw1Decompressor::getDiff(BitStreamerMSB& bs, uint32_t len) {
   if (len == 0)
     return 0;
   int diff = bs.getBitsNoFill(len);
-  return HuffmanTable::extend(diff, len);
+  return PrefixCodeDecoder<>::extend(diff, len);
 }
 
-void SonyArw1Decompressor::decompress(const ByteStream& input) const {
+void SonyArw1Decompressor::decompress(ByteStream input) const {
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width > 0);
-  assert(out.height > 0);
-  assert(out.height % 2 == 0);
+  invariant(out.width() > 0);
+  invariant(out.height() > 0);
+  invariant(out.height() % 2 == 0);
 
-  BitPumpMSB bits(input);
+  BitStreamerMSB bits(input.peekRemainingBuffer().getAsArray1DRef());
   int pred = 0;
-  for (int col = out.width - 1; col >= 0; col--) {
-    for (int row = 0; row < out.height + 1; row += 2) {
+  for (int col = out.width() - 1; col >= 0; col--) {
+    for (int row = 0; row < out.height() + 1; row += 2) {
       bits.fill(32);
 
-      if (row == out.height)
+      if (row == out.height())
         row = 1;
 
       uint32_t len = 4 - bits.getBitsNoFill(2);
@@ -81,7 +86,7 @@ void SonyArw1Decompressor::decompress(const ByteStream& input) const {
       if (!isIntN(pred, 12))
         ThrowRDE("Error decompressing");
 
-      out(row, col) = pred;
+      out(row, col) = implicit_cast<uint16_t>(pred);
     }
   }
 }

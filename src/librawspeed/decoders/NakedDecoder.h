@@ -21,13 +21,10 @@
 
 #pragma once
 
-#include "common/Common.h"       // for BitOrder, BitOrder::MSB16
-#include "common/RawImage.h"     // for RawImage
-#include "decoders/RawDecoder.h" // for RawDecoder
-#include <cstdint>               // for uint32_t
-#include <functional>            // for less
-#include <map>                   // for map
-#include <string>                // for string
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoder.h"
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -45,11 +42,10 @@ class NakedDecoder final : public RawDecoder {
   uint32_t offset{0};
   BitOrder bo{BitOrder::MSB16};
 
-  static const std::map<std::string, BitOrder, std::less<>> order2enum;
   void parseHints();
 
 public:
-  NakedDecoder(const Buffer& file, const Camera* c);
+  NakedDecoder(Buffer file, const Camera* c);
   RawImage decodeRawInternal() override;
   void checkSupportInternal(const CameraMetaData* meta) override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;

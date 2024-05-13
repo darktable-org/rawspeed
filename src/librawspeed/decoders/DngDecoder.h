@@ -20,27 +20,24 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
-#include <cstdint>                        // for uint32_t
-#include <optional>                       // for optional
-#include <vector>                         // for vector
+#include "adt/Optional.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "tiff/TiffIFD.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
 class iRectangle2D;
-class iRectangle2D;
 struct DngTilingDescription;
 
-class DngDecoder final : public AbstractTiffDecoder
-{
+class DngDecoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  DngDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file);
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file);
 
   RawImage decodeRawInternal() override;
   void decodeMetaDataInternal(const CameraMetaData* meta) override;
@@ -50,9 +47,10 @@ private:
   [[nodiscard]] int getDecoderVersion() const override { return 0; }
   bool mFixLjpeg;
   static void dropUnsuportedChunks(std::vector<const TiffIFD*>* data);
-  std::optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;
+  Optional<iRectangle2D> parseACTIVEAREA(const TiffIFD* raw) const;
   void parseCFA(const TiffIFD* raw) const;
   void parseColorMatrix() const;
+  void parseWhiteBalance() const;
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
   void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
   void handleMetadata(const TiffIFD* raw);
@@ -60,7 +58,7 @@ private:
   bool decodeBlackLevels(const TiffIFD* raw) const;
   void setBlack(const TiffIFD* raw) const;
 
-  int bps = -1;
+  Optional<int> bps;
   int compression = -1;
 };
 

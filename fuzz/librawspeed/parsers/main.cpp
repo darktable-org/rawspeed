@@ -18,6 +18,7 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "adt/Casts.h"
 #ifndef PARSER
 #error PARSER must be defined
 #endif
@@ -30,24 +31,23 @@
 #error DECODE must be defined as bool
 #endif
 
-#include "io/Buffer.h"                  // for Buffer
-#include "io/IOException.h"             // for IOException, RawspeedExcep...
-#include "parsers/CiffParser.h"         // IWYU pragma: keep
-#include "parsers/FiffParser.h"         // IWYU pragma: keep
-#include "parsers/RawParser.h"          // IWYU pragma: keep
-#include "parsers/RawParserException.h" // for RawParserException
-#include "parsers/TiffParser.h"         // for TiffParser
-#include <cassert>                      // for assert
-#include <cstdint>                      // for uint8_t
-#include <cstdio>                       // for size_t
+#include "io/Buffer.h"
+#include "io/IOException.h"
+#include "parsers/CiffParser.h" // IWYU pragma: keep
+#include "parsers/FiffParser.h" // IWYU pragma: keep
+#include "parsers/RawParser.h"  // IWYU pragma: keep
+#include "parsers/RawParserException.h"
+#include "parsers/TiffParser.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 #if GETDECODER
-#include "decoders/RawDecoder.h"          // for RawDecoder
-#include "decoders/RawDecoderException.h" // for RawDecoderException
+#include "decoders/RawDecoderException.h"
 #if DECODE
-#include "common/RawspeedException.h" // for RawspeedException
-#include "metadata/CameraMetaData.h"  // for CameraMetaData
-#include <memory>                     // for unique_ptr
+#include "common/RawspeedException.h"
+#include "metadata/CameraMetaData.h"
+#include <memory>
 #endif
 #endif
 
@@ -60,7 +60,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
-  const rawspeed::Buffer buffer(Data, Size);
+  const rawspeed::Buffer buffer(
+      Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
 
   try {
     rawspeed::PARSER parser(buffer);

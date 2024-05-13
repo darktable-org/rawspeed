@@ -18,9 +18,10 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "metadata/CameraSensorInfo.h"
-#include <utility> // for move
-#include <vector>  // for vector
+#include <utility>
+#include <vector>
 
 using std::vector;
 
@@ -32,11 +33,11 @@ CameraSensorInfo::CameraSensorInfo(int black_level, int white_level,
     : mBlackLevel(black_level), mWhiteLevel(white_level), mMinIso(min_iso),
       mMaxIso(max_iso), mBlackLevelSeparate(std::move(black_separate)) {}
 
-bool __attribute__((pure)) CameraSensorInfo::isIsoWithin(int iso) const {
+bool RAWSPEED_READONLY CameraSensorInfo::isIsoWithin(int iso) const {
   return (iso >= mMinIso && iso <= mMaxIso) || (iso >= mMinIso && 0 == mMaxIso);
 }
 
-bool __attribute__((pure)) CameraSensorInfo::isDefault() const {
+bool RAWSPEED_READONLY CameraSensorInfo::isDefault() const {
   return (0 == mMinIso && 0 == mMaxIso);
 }
 

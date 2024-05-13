@@ -21,27 +21,27 @@
 */
 
 #include "parsers/FiffParser.h"
-#include "decoders/RafDecoder.h"         // for RafDecoder
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::big
-#include "parsers/FiffParserException.h" // for ThrowFPE
-#include "parsers/RawParser.h"           // for RawParser
-#include "parsers/TiffParser.h"          // for TiffParser
-#include "parsers/TiffParserException.h" // for ThrowException, TiffParserE...
-#include "tiff/TiffEntry.h"              // for TiffEntry, TiffDataType
-#include "tiff/TiffIFD.h"                // for TiffIFD, TiffRootIFDOwner
-#include "tiff/TiffTag.h"                // for TiffTag, TiffTag::FUJIOLDWB
-#include <cstdint>                       // for uint32_t, uint16_t
-#include <limits>                        // for numeric_limits
-#include <memory>                        // for make_unique, unique_ptr
-#include <utility>                       // for move
+#include "decoders/RafDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/FiffParserException.h"
+#include "parsers/RawParser.h"
+#include "parsers/TiffParser.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <cstdint>
+#include <limits>
+#include <memory>
+#include <utility>
 
 using std::numeric_limits;
 
 namespace rawspeed {
 
-FiffParser::FiffParser(const Buffer& inputData) : RawParser(inputData) {}
+FiffParser::FiffParser(Buffer inputData) : RawParser(inputData) {}
 
 void FiffParser::parseData() {
   ByteStream bs(DataBuffer(mInput, Endianness::big));
@@ -75,13 +75,15 @@ void FiffParser::parseData() {
         ThrowFPE("Fiff is corrupted: second IFD is not after the first IFD");
 
       uint32_t rawOffset = second_ifd - first_ifd;
-      subIFD->add(std::make_unique<TiffEntry>(
+      subIFD->add(std::make_unique<TiffEntryWithData>(
           subIFD.get(), TiffTag::FUJI_STRIPOFFSETS, TiffDataType::OFFSET, 1,
-          ByteStream::createCopy(&rawOffset, 4)));
+          Buffer(reinterpret_cast<const uint8_t*>(&rawOffset),
+                 sizeof(rawOffset))));
       uint32_t max_size = mInput.getSize() - second_ifd;
-      subIFD->add(std::make_unique<TiffEntry>(
+      subIFD->add(std::make_unique<TiffEntryWithData>(
           subIFD.get(), TiffTag::FUJI_STRIPBYTECOUNTS, TiffDataType::LONG, 1,
-          ByteStream::createCopy(&max_size, 4)));
+          Buffer(reinterpret_cast<const uint8_t*>(&max_size),
+                 sizeof(rawOffset))));
     }
   }
 
@@ -101,11 +103,21 @@ void FiffParser::parseData() {
     for (uint32_t i = 0; i < entries; i++) {
       auto tag = static_cast<TiffTag>(bytes.getU16());
       uint16_t length = bytes.getU16();
-      TiffDataType type = TiffDataType::UNDEFINED;
 
-      if (tag == TiffTag::IMAGEWIDTH ||
-          tag == TiffTag::FUJIOLDWB) // also 0x121?
+      TiffDataType type;
+      switch (tag) {
+        using enum TiffTag;
+      case TiffTag::FUJI_RAWIMAGEFULLSIZE:
+      case TiffTag::FUJI_RAWIMAGECROPTOPLEFT:
+      case TiffTag::FUJI_RAWIMAGECROPPEDSIZE:
+      case TiffTag::FUJIOLDWB:
+        // also 0x121?
         type = TiffDataType::SHORT;
+        break;
+      default:
+        type = TiffDataType::UNDEFINED;
+        break;
+      }
 
       uint32_t count = type == TiffDataType::SHORT ? length / 2 : length;
       subIFD->add(std::make_unique<TiffEntry>(

@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
-#include "io/BitPumpMSB32.h"                           // for BitPumpMSB32
-#include "io/ByteStream.h"                             // for ByteStream
-#include <cstdint>                                     // for int32_t
-#include <vector>                                      // for vector
+#include "bitstreams/BitStreamerMSB32.h"
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
@@ -36,13 +36,12 @@ class SamsungV0Decompressor final : public AbstractSamsungDecompressor {
 
   void computeStripes(ByteStream bso, ByteStream bsr);
 
-  void decompressStrip(int row, const ByteStream& bs) const;
+  void decompressStrip(int row, ByteStream bs) const;
 
-  static int32_t calcAdj(BitPumpMSB32& bits, int b);
+  static int32_t calcAdj(BitStreamerMSB32& bits, int b);
 
 public:
-  SamsungV0Decompressor(const RawImage& image, const ByteStream& bso,
-                        const ByteStream& bsr);
+  SamsungV0Decompressor(const RawImage& image, ByteStream bso, ByteStream bsr);
 
   void decompress() const;
 };

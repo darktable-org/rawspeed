@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.22) # FIXME: 3.24.2 / 3.25
 
 cmake_policy(SET CMP0011 NEW)
 cmake_policy(SET CMP0025 NEW)
+cmake_policy(SET CMP0067 NEW)
 
 # Avoid source tree pollution
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -90,8 +91,8 @@ else()
   set(ALLOW_DOWNLOADING_ZLIB OFF CACHE BOOL "If ZLIB src tree is not found in location specified by ZLIB_PATH, do fetch the archive from internet" FORCE)
 endif()
 option(USE_XMLLINT "Run xmllint to test if data/cameras.xml is valid" ON)
-option(USE_IWYU "Run iwyu tool when compiling sources" OFF)
 option(USE_CLANG_TIDY "Run clang-tidy tool when compiling sources" OFF)
+option(USE_RAWSPEED_CLANG_TIDY_MODULE "Run clang-tidy tool when compiling sources" ${USE_CLANG_TIDY})
 option(BUILD_TESTING "Build the testing tree." ON)
 if(BUILD_TESTING)
   option(ALLOW_DOWNLOADING_GOOGLETEST "If googletest src tree is not found in location specified by GOOGLETEST_PATH, do fetch the archive from internet" OFF)
@@ -99,7 +100,7 @@ else()
   set(ALLOW_DOWNLOADING_GOOGLETEST OFF CACHE BOOL "If googletest src tree is not found in location specified by GOOGLETEST_PATH, do fetch the archive from internet" FORCE)
 endif()
 option(BUILD_TOOLS "Build some tools (identify, rstest)." ON)
-option(BUILD_BENCHMARKING "Build some benchmarks." OFF)
+option(BUILD_BENCHMARKING "Build some benchmarks." ON)
 if(BUILD_BENCHMARKING)
   option(ALLOW_DOWNLOADING_GOOGLEBENCHMARK "If googlebenchmark src tree is not found in location specified by GOOGLEBENCHMARK_PATH, do fetch the archive from internet" OFF)
 else()
@@ -167,10 +168,6 @@ include(build-type)
 
 if(RAWSPEED_USE_LIBCXX)
   include(libc++)
-endif()
-
-if(USE_IWYU)
-  include(iwyu)
 endif()
 
 if(USE_LLVM_OPT_REPORT)

@@ -20,34 +20,39 @@
 */
 
 #include "decoders/MosDecoder.h"
-#include "common/Common.h"                          // for trimSpaces
-#include "common/Point.h"                           // for iPoint2D
-#include "decoders/IiqDecoder.h"                    // for IiqDecoder
-#include "decoders/RawDecoder.h"                    // for RawDecoder
-#include "decoders/RawDecoderException.h"           // for ThrowRDE
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for DataBuffer, Buffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "parsers/TiffParserException.h"            // for ThrowException
-#include "tiff/TiffEntry.h"                         // for TiffEntry
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, Tif...
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <array>                                    // for array
-#include <cassert>                                  // for assert
-#include <cstdint>                                  // for uint32_t
-#include <cstring>                                  // for memchr
-#include <istream>                                  // for istringstream
-#include <memory>                                   // for unique_ptr
-#include <string>                                   // for string, allocator
-#include <utility>                                  // for move
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "decoders/IiqDecoder.h"
+#include "decoders/RawDecoder.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <istream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 namespace rawspeed {
 
 class CameraMetaData;
 
-bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      const Buffer& file) {
+bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file) {
   try {
     const auto id = rootIFD->getID();
     const std::string& make = id.make;
@@ -68,7 +73,7 @@ bool MosDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
   }
 }
 
-MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, const Buffer& file)
+MosDecoder::MosDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
     : AbstractTiffDecoder(std::move(rootIFD), file) {
   if (mRootIFD->getEntryRecursive(TiffTag::MAKE)) {
     auto id = mRootIFD->getID();
@@ -91,14 +96,14 @@ std::string MosDecoder::getXMPTag(std::string_view xmp, std::string_view tag) {
   std::string::size_type end = xmp.find("</tiff:" + std::string(tag) + ">");
   if (start == std::string::npos || end == std::string::npos || end <= start)
     ThrowRDE("Couldn't find tag '%s' in the XMP", tag.data());
-  int startlen = tag.size()+7;
+  auto startlen = implicit_cast<int>(tag.size() + 7);
   return std::string(xmp.substr(start + startlen, end - start - startlen));
 }
 
 RawImage MosDecoder::decodeRawInternal() {
   uint32_t off = 0;
 
-  const TiffIFD *raw = nullptr;
+  const TiffIFD* raw = nullptr;
 
   if (mRootIFD->hasEntryRecursive(TiffTag::TILEOFFSETS)) {
     raw = mRootIFD->getIFDWithTag(TiffTag::TILEOFFSETS);
@@ -116,23 +121,20 @@ RawImage MosDecoder::decodeRawInternal() {
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 
   const ByteStream bs(DataBuffer(mFile.getSubView(off), Endianness::little));
   if (bs.getRemainSize() == 0)
     ThrowRDE("Input buffer is empty");
 
-  UncompressedDecompressor u(bs, mRaw);
-
   if (int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
       1 == compression) {
     const Endianness endianness =
         getTiffByteOrder(ByteStream(DataBuffer(mFile, Endianness::little)), 0);
-
-    if (Endianness::big == endianness)
-      u.decodeRawUnpacked<16, Endianness::big>(width, height);
-    else
-      u.decodeRawUnpacked<16, Endianness::little>(width, height);
+    UncompressedDecompressor u(
+        bs, mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 2 * width, 16,
+        endianness == Endianness::big ? BitOrder::MSB : BitOrder::LSB);
+    mRaw->createData();
+    u.readUncompressedRaw();
   } else if (99 == compression || 7 == compression) {
     ThrowRDE("Leaf LJpeg not yet supported");
     // LJpegPlain l(mFile, mRaw);
@@ -150,7 +152,8 @@ void MosDecoder::checkSupportInternal(const CameraMetaData* meta) {
 void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   RawDecoder::setMetaData(meta, make, model, "", 0);
 
-  // Fetch the white balance (see dcraw.c parse_mos for more metadata that can be gotten)
+  // Fetch the white balance (see dcraw.c parse_mos for more metadata that can
+  // be gotten)
   if (mRootIFD->hasEntryRecursive(TiffTag::LEAFMETADATA)) {
     ByteStream bs =
         mRootIFD->getEntryRecursive(TiffTag::LEAFMETADATA)->getData();
@@ -161,19 +164,23 @@ void MosDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
     // dcraw does actual parsing, since we just want one field we bruteforce it
     while (bs.getRemainSize() > minSize) {
-      if (bs.skipPrefix("NeutObj_neutrals", 16)) {
+      if (bs.skipPrefix("NeutObj_neutrals")) {
         bs.skipBytes(28);
         // check for nulltermination of string inside bounds
         if (!memchr(bs.peekData(bs.getRemainSize()), 0, bs.getRemainSize()))
           break;
         std::array<uint32_t, 4> tmp = {{}};
-        std::istringstream iss(bs.peekString());
+        const std::string tmpString(bs.peekString());
+        std::istringstream iss(tmpString);
         iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
         if (!iss.fail() && tmp[0] > 0 && tmp[1] > 0 && tmp[2] > 0 &&
             tmp[3] > 0) {
-          mRaw->metadata.wbCoeffs[0] = static_cast<float>(tmp[0]) / tmp[1];
-          mRaw->metadata.wbCoeffs[1] = static_cast<float>(tmp[0]) / tmp[2];
-          mRaw->metadata.wbCoeffs[2] = static_cast<float>(tmp[0]) / tmp[3];
+          mRaw->metadata.wbCoeffs[0] =
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[1]);
+          mRaw->metadata.wbCoeffs[1] =
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[2]);
+          mRaw->metadata.wbCoeffs[2] =
+              static_cast<float>(tmp[0]) / implicit_cast<float>(tmp[3]);
         }
         break;
       }

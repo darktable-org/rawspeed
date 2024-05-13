@@ -21,24 +21,25 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
-#include <cstdint>                        // for uint32_t
-#include <utility>                        // for move
+#include "adt/Array1DRef.h"
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "tiff/TiffIFD.h"
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
 
-class ArwDecoder final : public AbstractTiffDecoder
-{
+class ArwDecoder final : public AbstractTiffDecoder {
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  ArwDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  ArwDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -48,14 +49,15 @@ private:
   void ParseA100WB() const;
 
   [[nodiscard]] int getDecoderVersion() const override { return 1; }
-  RawImage decodeSRF(const TiffIFD* raw);
-  void DecodeARW2(const ByteStream& input, uint32_t w, uint32_t h,
-                  uint32_t bpp);
+  static std::vector<uint16_t> decodeCurve(const TiffIFD* raw);
+  RawImage decodeTransitionalArw();
+  RawImage decodeSRF();
+  void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
+  void DecodeLJpeg(const TiffIFD* raw);
   void DecodeUncompressed(const TiffIFD* raw) const;
-  static void SonyDecrypt(const uint32_t* ibuf, uint32_t* obuf, uint32_t len,
-                          uint32_t key);
+  static void SonyDecrypt(Array1DRef<const uint8_t> ibuf,
+                          Array1DRef<uint8_t> obuf, int len, uint32_t key);
   void GetWB() const;
-  ByteStream in;
   int mShiftDownScale = 0;
   int mShiftDownScaleForExif = 0;
 };

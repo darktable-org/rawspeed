@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include "ThreadSafetyAnalysis.h" // for REQUIRES, GUARDED_BY
-#include "common/Mutex.h"         // for Mutex
-#include <string>                 // for string, basic_string
-#include <vector>                 // for vector
+#include "ThreadSafetyAnalysis.h"
+#include "adt/Mutex.h"
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 

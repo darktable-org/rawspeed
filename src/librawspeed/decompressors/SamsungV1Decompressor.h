@@ -20,10 +20,11 @@
 
 #pragma once
 
-#include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
-#include "io/BitPumpMSB.h"                             // for BitPumpMSB
-#include <cstdint>                                     // for int32_t
-#include <vector>                                      // for vector
+#include "bitstreams/BitStreamerMSB.h"
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
@@ -34,14 +35,14 @@ class RawImage;
 class SamsungV1Decompressor final : public AbstractSamsungDecompressor {
   struct encTableItem;
 
-  static inline int32_t samsungDiff(BitPumpMSB& pump,
+  static inline int32_t samsungDiff(BitStreamerMSB& pump,
                                     const std::vector<encTableItem>& tbl);
 
-  const ByteStream& bs;
+  ByteStream bs;
   static constexpr int bits = 12;
 
 public:
-  SamsungV1Decompressor(const RawImage& image, const ByteStream& bs_, int bit);
+  SamsungV1Decompressor(const RawImage& image, ByteStream bs_, int bit);
 
   void decompress() const;
 };

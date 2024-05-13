@@ -22,24 +22,25 @@
 
 #pragma once
 
-#include "common/NORangesSet.h" // for set
-#include "io/ByteStream.h"      // for ByteStream
-#include "tiff/CiffTag.h"       // for CiffTag
-#include <cstdint>              // for uint32_t, uint16_t, uint8_t
-#include <string>               // for string
-#include <vector>               // for vector
+#include "rawspeedconfig.h"
+#include "adt/NORangesSet.h"
+#include "io/ByteStream.h"
+#include "tiff/CiffTag.h"
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace rawspeed {
 
 class Buffer;
 class CiffIFD; // IWYU pragma: keep
 template <typename T> class NORangesSet;
-template <typename T> class NORangesSet;
 
 /*
  * Tag data type information.
  */
-enum class CiffDataType {
+enum class CiffDataType : uint16_t {
   BYTE = 0x0000,  /* 8-bit unsigned integer */
   ASCII = 0x0800, /* 8-bit bytes w/ last byte null */
   SHORT = 0x1000, /* 16-bit unsigned integer */
@@ -50,35 +51,38 @@ enum class CiffDataType {
 
 };
 
-class CiffEntry
-{
+class CiffEntry final {
   friend class CiffIFD;
 
   ByteStream data;
 
-public:
-  explicit CiffEntry(NORangesSet<Buffer>* valueDatas,
-                     const ByteStream& valueData, ByteStream dirEntry);
+  CiffEntry(ByteStream data, CiffTag tag, CiffDataType type, uint32_t count);
 
-  [[nodiscard]] const ByteStream& getData() const { return data; }
+public:
+  static CiffEntry Create(NORangesSet<Buffer>* valueDatas, ByteStream valueData,
+                          ByteStream dirEntry);
+
+  [[nodiscard]] ByteStream getData() const { return data; }
 
   [[nodiscard]] uint8_t getByte(uint32_t num = 0) const;
   [[nodiscard]] uint32_t getU32(uint32_t num = 0) const;
   [[nodiscard]] uint16_t getU16(uint32_t num = 0) const;
 
-  [[nodiscard]] std::string getString() const;
+  [[nodiscard]] std::string_view getString() const;
   [[nodiscard]] std::vector<std::string> getStrings() const;
 
-  [[nodiscard]] uint32_t __attribute__((pure)) getElementSize() const;
-  [[nodiscard]] uint32_t __attribute__((pure)) getElementShift() const;
+  [[nodiscard]] uint32_t RAWSPEED_READONLY getElementSize() const;
+
+  [[nodiscard]] static uint32_t
+  getElementShift(CiffDataType type) RAWSPEED_READONLY;
 
   // variables:
   CiffTag tag;
   CiffDataType type;
   uint32_t count;
 
-  [[nodiscard]] bool __attribute__((pure)) isInt() const;
-  [[nodiscard]] bool __attribute__((pure)) isString() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isInt() const;
+  [[nodiscard]] bool RAWSPEED_READONLY isString() const;
 };
 
 } // namespace rawspeed

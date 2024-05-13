@@ -21,15 +21,16 @@
 
 #pragma once
 
-#include "common/Common.h"                      // for roundUpDivision
-#include "common/Point.h"                       // for iPoint2D
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "io/ByteStream.h"                      // for ByteStream
-#include <cassert>                              // for assert
-#include <cstdint>                              // for uint32_t
-#include <utility>                              // for move
-#include <vector>                               // for vector
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include "io/ByteStream.h"
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
@@ -54,18 +55,19 @@ struct DngTilingDescription final {
 
   DngTilingDescription(const iPoint2D& dim_, uint32_t tileW_, uint32_t tileH_)
       : dim(dim_), tileW(tileW_), tileH(tileH_),
-        tilesX(roundUpDivision(dim.x, tileW)),
-        tilesY(roundUpDivision(dim.y, tileH)), numTiles(tilesX * tilesY) {
-    assert(dim.area() > 0);
-    assert(tileW > 0);
-    assert(tileH > 0);
-    assert(tilesX > 0);
-    assert(tilesY > 0);
-    assert(tileW * tilesX >= static_cast<unsigned>(dim.x));
-    assert(tileH * tilesY >= static_cast<unsigned>(dim.y));
-    assert(tileW * (tilesX - 1) < static_cast<unsigned>(dim.x));
-    assert(tileH * (tilesY - 1) < static_cast<unsigned>(dim.y));
-    assert(numTiles > 0);
+        tilesX(implicit_cast<uint32_t>(roundUpDivisionSafe(dim.x, tileW))),
+        tilesY(implicit_cast<uint32_t>(roundUpDivisionSafe(dim.y, tileH))),
+        numTiles(tilesX * tilesY) {
+    invariant(dim.area() > 0);
+    invariant(tileW > 0);
+    invariant(tileH > 0);
+    invariant(tilesX > 0);
+    invariant(tilesY > 0);
+    invariant(tileW * tilesX >= static_cast<unsigned>(dim.x));
+    invariant(tileH * tilesY >= static_cast<unsigned>(dim.y));
+    invariant(tileW * (tilesX - 1) < static_cast<unsigned>(dim.x));
+    invariant(tileH * (tilesY - 1) < static_cast<unsigned>(dim.y));
+    invariant(numTiles > 0);
   }
 };
 
@@ -100,24 +102,25 @@ struct DngSliceElement final {
   DngSliceElement& operator=(DngSliceElement&&) noexcept = delete;
 
   DngSliceElement(const DngTilingDescription& dsc_, unsigned n_, ByteStream bs_)
-      : dsc(dsc_), n(n_), bs(std::move(bs_)), column(n % dsc.tilesX),
-        row(n / dsc.tilesX), lastColumn((column + 1) == dsc.tilesX),
+      : dsc(dsc_), n(n_), bs(bs_), column(n % dsc.tilesX), row(n / dsc.tilesX),
+        lastColumn((column + 1) == dsc.tilesX),
         lastRow((row + 1) == dsc.tilesY), offX(dsc.tileW * column),
         offY(dsc.tileH * row),
         width(!lastColumn ? dsc.tileW : dsc.dim.x - offX),
         height(!lastRow ? dsc.tileH : dsc.dim.y - offY) {
-    assert(n < dsc.numTiles);
-    assert(bs.getRemainSize() > 0);
-    assert(column < dsc.tilesX);
-    assert(row < dsc.tilesY);
-    assert(offX < static_cast<unsigned>(dsc.dim.x));
-    assert(offY < static_cast<unsigned>(dsc.dim.y));
-    assert(width > 0);
-    assert(height > 0);
-    assert(offX + width <= static_cast<unsigned>(dsc.dim.x));
-    assert(offY + height <= static_cast<unsigned>(dsc.dim.y));
-    assert(!lastColumn || (offX + width == static_cast<unsigned>(dsc.dim.x)));
-    assert(!lastRow || (offY + height == static_cast<unsigned>(dsc.dim.y)));
+    invariant(n < dsc.numTiles);
+    invariant(bs.getRemainSize() > 0);
+    invariant(column < dsc.tilesX);
+    invariant(row < dsc.tilesY);
+    invariant(offX < static_cast<unsigned>(dsc.dim.x));
+    invariant(offY < static_cast<unsigned>(dsc.dim.y));
+    invariant(width > 0);
+    invariant(height > 0);
+    invariant(offX + width <= static_cast<unsigned>(dsc.dim.x));
+    invariant(offY + height <= static_cast<unsigned>(dsc.dim.y));
+    invariant(!lastColumn ||
+              (offX + width == static_cast<unsigned>(dsc.dim.x)));
+    invariant(!lastRow || (offY + height == static_cast<unsigned>(dsc.dim.y)));
   }
 };
 
@@ -129,11 +132,11 @@ class AbstractDngDecompressor final : public AbstractDecompressor {
   void decompressThread() const noexcept;
 
 public:
-  AbstractDngDecompressor(const RawImage& img, const DngTilingDescription& dsc_,
+  AbstractDngDecompressor(RawImage img, const DngTilingDescription& dsc_,
                           int compression_, bool mFixLjpeg_, uint32_t mBps_,
                           uint32_t mPredictor_)
-      : mRaw(img), dsc(dsc_), compression(compression_), mFixLjpeg(mFixLjpeg_),
-        mBps(mBps_), mPredictor(mPredictor_) {}
+      : mRaw(std::move(img)), dsc(dsc_), compression(compression_),
+        mFixLjpeg(mFixLjpeg_), mBps(mBps_), mPredictor(mPredictor_) {}
 
   void decompress() const;
 

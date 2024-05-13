@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <cstdint> // for uint32_t
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -28,9 +28,9 @@ class BlackArea final {
 public:
   BlackArea(int offset_, int size_, bool isVertical_)
       : offset(offset_), size(size_), isVertical(isVertical_) {}
-  uint32_t offset;  // Offset in bayer pixels.
-  uint32_t size;    // Size in bayer pixels.
-  bool isVertical;  // Otherwise horizontal
+  uint32_t offset; // Offset in bayer pixels.
+  uint32_t size;   // Size in bayer pixels.
+  bool isVertical; // Otherwise horizontal
 };
 
 } // namespace rawspeed

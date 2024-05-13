@@ -21,26 +21,25 @@
 
 #pragma once
 
-#include "common/RawImage.h"              // for RawImage
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "io/ByteStream.h"                // for ByteStream
-#include "tiff/TiffIFD.h"                 // for TiffRootIFD (ptr only)
-#include <cstdint>                        // for uint32_t
-#include <utility>                        // for move
+#include "common/RawImage.h"
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "tiff/TiffIFD.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 
 class Buffer;
 class CameraMetaData;
 
-class OrfDecoder final : public AbstractTiffDecoder
-{
+class OrfDecoder final : public AbstractTiffDecoder {
   [[nodiscard]] ByteStream handleSlices() const;
 
 public:
-  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                   const Buffer& file);
-  OrfDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  static bool isAppropriateDecoder(const TiffRootIFD* rootIFD, Buffer file);
+  OrfDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   RawImage decodeRawInternal() override;
@@ -50,8 +49,10 @@ private:
   void parseCFA() const;
 
   [[nodiscard]] int getDecoderVersion() const override { return 3; }
-  [[nodiscard]] bool decodeUncompressed(const ByteStream& s, uint32_t w,
-                                        uint32_t h, uint32_t size) const;
+  void decodeUncompressedInterleaved(ByteStream s, uint32_t w, uint32_t h,
+                                     uint32_t size) const;
+  [[nodiscard]] bool decodeUncompressed(ByteStream s, uint32_t w, uint32_t h,
+                                        uint32_t size) const;
 };
 
 } // namespace rawspeed

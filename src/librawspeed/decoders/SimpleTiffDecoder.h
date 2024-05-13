@@ -22,20 +22,23 @@
 
 #pragma once
 
-#include "decoders/AbstractTiffDecoder.h" // for AbstractTiffDecoder
-#include "tiff/TiffIFD.h"                 // for TiffIFD (ptr only), TiffRo...
-#include <cstdint>                        // for uint32_t
-#include <utility>                        // for move
+#include "decoders/AbstractTiffDecoder.h"
+#include "io/Buffer.h"
+#include "tiff/TiffIFD.h"
+#include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 
 class Buffer;
 
 class SimpleTiffDecoder : public AbstractTiffDecoder {
+  void anchor() const final;
+
   virtual void checkImageDimensions() = 0;
 
 public:
-  SimpleTiffDecoder(TiffRootIFDOwner&& root, const Buffer& file)
+  SimpleTiffDecoder(TiffRootIFDOwner&& root, Buffer file)
       : AbstractTiffDecoder(std::move(root), file) {}
 
   void prepareForRawDecoding();

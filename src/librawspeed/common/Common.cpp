@@ -19,8 +19,8 @@
 */
 
 #include "common/Common.h"
-#include <cstdarg> // for va_end, va_list, va_start
-#include <cstdio>  // for fprintf, stdout, vfprintf
+#include <cstdarg>
+#include <cstdio>
 
 // #define _DEBUG
 
@@ -28,8 +28,7 @@ namespace rawspeed {
 
 #if defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION) && !defined(_DEBUG)
 
-void __attribute__((const))
-writeLog(DEBUG_PRIO priority, const char* format, ...) {
+void writeLog(DEBUG_PRIO priority, const char* format, ...) {
   // When fuzzing, any output is really undesirable.
 }
 

@@ -21,15 +21,18 @@
 
 #pragma once
 
-#include "common/Point.h" // for iPoint2D
-#include <algorithm>      // for fill_n, max, copy, min
-#include <cassert>        // for assert
-#include <cstdint>        // for uint16_t
-#include <functional>     // for greater_equal
-#include <limits>         // for numeric_limits
-#include <memory>         // for allocator_traits<>::value_type
-#include <type_traits>    // for enable_if_t, is_floating_point
-#include <vector>         // for vector
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <limits>
+#include <type_traits>
+#include <vector>
+
+#ifndef NDEBUG
+#include <functional>
+#endif
 
 namespace rawspeed {
 class iPoint2D;
@@ -38,8 +41,8 @@ class iPoint2D;
 // See https://en.wikipedia.org/wiki/Spline_(mathematics)
 // section "Algorithm for computing natural cubic splines"
 
-template <typename T = uint16_t,
-          typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template <typename T = uint16_t>
+  requires std::is_arithmetic_v<T>
 class Spline final {
 public:
   using value_type = T;
@@ -47,7 +50,7 @@ public:
   // These are the constant factors for each segment of the curve.
   // Each segment i will have the formula:
   // f(x) = a[i] + b[i]*(x - x[i]) + c[i]*(x - x[i])^2 + d[i]*(x - x[i])^3
-  struct Segment {
+  struct Segment final {
     double a;
     double b;
     double c;
@@ -123,7 +126,7 @@ public:
            "The X coordinates must all be strictly increasing");
 
 #ifndef NDEBUG
-    if (!std::is_floating_point<value_type>::value) {
+    if constexpr (!std::is_floating_point_v<value_type>) {
       // The Y coords must be limited to the range of value_type
       std::for_each(control_points.cbegin(), control_points.cend(),
                     [](const iPoint2D& p) {
@@ -133,7 +136,7 @@ public:
     }
 #endif
 
-    num_coords = control_points.size();
+    num_coords = implicit_cast<int>(control_points.size());
     num_segments = num_coords - 1;
 
     xCp.resize(num_coords);
@@ -161,14 +164,14 @@ public:
 
         double interpolated = s.a + s.b * diff + s.c * diff_2 + s.d * diff_3;
 
-        if (!std::is_floating_point<value_type>::value) {
+        if constexpr (!std::is_floating_point_v<value_type>) {
           interpolated = std::max(
               interpolated, double(std::numeric_limits<value_type>::min()));
           interpolated = std::min(
               interpolated, double(std::numeric_limits<value_type>::max()));
         }
 
-        curve[x] = interpolated;
+        curve[x] = implicit_cast<T>(interpolated);
       }
     }
 

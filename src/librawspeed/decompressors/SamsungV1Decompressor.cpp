@@ -21,17 +21,19 @@
 */
 
 #include "decompressors/SamsungV1Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for isIntN
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "decompressors/HuffmanTable.h"   // for HuffmanTable
-#include "io/BitPumpMSB.h"                // for BitPumpMSB
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <memory>                         // for allocator_traits<>::value_...
-#include <vector>                         // for vector
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreamerMSB.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include <array>
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
@@ -41,7 +43,7 @@ struct SamsungV1Decompressor::encTableItem {
 };
 
 SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
-                                             const ByteStream& bs_, int bit)
+                                             ByteStream bs_, int bit)
     : AbstractSamsungDecompressor(image), bs(bs_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -59,7 +61,7 @@ SamsungV1Decompressor::SamsungV1Decompressor(const RawImage& image,
 }
 
 inline int32_t
-SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
+SamsungV1Decompressor::samsungDiff(BitStreamerMSB& pump,
                                    const std::vector<encTableItem>& tbl) {
   pump.fill(23); // That is the maximal number of bits we will need here.
   // We read 10 bits to index into our table
@@ -72,7 +74,7 @@ SamsungV1Decompressor::samsungDiff(BitPumpMSB& pump,
     return 0;
   int32_t diff = pump.getBitsNoFill(len);
   // If the first bit is 0 we need to turn this into a negative number
-  diff = HuffmanTable::extend(diff, len);
+  diff = PrefixCodeDecoder<>::extend(diff, len);
   return diff;
 }
 
@@ -116,22 +118,23 @@ void SamsungV1Decompressor::decompress() const {
   }
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  assert(out.width % 32 == 0 && "Should have even count of pixels per row.");
-  assert(out.height % 2 == 0 && "Should have even row count.");
-  BitPumpMSB pump(bs);
-  for (int row = 0; row < out.height; row++) {
+  invariant(out.width() % 32 == 0 &&
+            "Should have even count of pixels per row.");
+  invariant(out.height() % 2 == 0 && "Should have even row count.");
+  BitStreamerMSB pump(bs.peekRemainingBuffer().getAsArray1DRef());
+  for (int row = 0; row < out.height(); row++) {
     std::array<int, 2> pred = {{}};
     if (row >= 2)
       pred = {out(row - 2, 0), out(row - 2, 1)};
 
-    for (int col = 0; col < out.width; col++) {
+    for (int col = 0; col < out.width(); col++) {
       int32_t diff = samsungDiff(pump, tbl);
       pred[col & 1] += diff;
 
       int value = pred[col & 1];
       if (!isIntN(value, bits))
         ThrowRDE("decoded value out of bounds");
-      out(row, col) = value;
+      out(row, col) = implicit_cast<uint16_t>(value);
     }
   }
 }

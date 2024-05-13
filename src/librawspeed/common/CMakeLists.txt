@@ -1,40 +1,46 @@
+rawspeed_add_library(rawspeed_common OBJECT)
+set_target_properties(rawspeed_common PROPERTIES LINKER_LANGUAGE CXX)
+
 FILE(GLOB SOURCES
-  "Array2DRef.h"
   "BayerPhase.h"
   "ChecksumFile.cpp"
   "ChecksumFile.h"
   "Common.cpp"
   "Common.h"
-  "Cpuid.cpp"
-  "CroppedArray2DRef.h"
-  "DefaultInitAllocatorAdaptor.h"
+  "CpuFeatures.cpp"
+  "CpuFeatures.h"
   "DngOpcodes.cpp"
   "DngOpcodes.h"
   "ErrorLog.cpp"
   "ErrorLog.h"
   "FloatingPoint.h"
-  "Memory.cpp"
-  "Memory.h"
-  "Mutex.h"
-  "NORangesSet.h"
-  "NotARational.h"
-  "Point.h"
-  "Range.h"
+  "GetNumberOfProcessorCores.cpp"
   "RawImage.cpp"
   "RawImage.h"
   "RawImageDataFloat.cpp"
   "RawImageDataU16.cpp"
+  "RawspeedException.cpp"
   "RawspeedException.h"
   "SimpleLUT.h"
   "Spline.h"
   "TableLookUp.cpp"
   "TableLookUp.h"
-  "iterator_range.h"
+  "XTransPhase.h"
 )
 
-target_sources(rawspeed PRIVATE
+target_sources(rawspeed_common PRIVATE
   ${SOURCES}
 )
+
+target_include_directories(rawspeed_common PUBLIC "${RAWSPEED_BINARY_DIR}/src")
+target_include_directories(rawspeed_common SYSTEM PUBLIC "${RAWSPEED_SOURCE_DIR}/src/external")
+target_include_directories(rawspeed_common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+if(TARGET RawSpeed::OpenMP_CXX)
+  target_link_libraries(rawspeed_common PUBLIC RawSpeed::OpenMP_CXX)
+endif()
+
+target_link_libraries(rawspeed PRIVATE rawspeed_common)
 
 # Provide naive implementation of rawspeed_get_number_of_processor_cores().
 

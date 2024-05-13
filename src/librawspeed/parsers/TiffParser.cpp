@@ -22,44 +22,48 @@
 */
 
 #include "parsers/TiffParser.h"
-#include "common/NORangesSet.h"          // for NORangesSet
-#include "decoders/ArwDecoder.h"         // for ArwDecoder
-#include "decoders/Cr2Decoder.h"         // for Cr2Decoder
-#include "decoders/DcrDecoder.h"         // for DcrDecoder
-#include "decoders/DcsDecoder.h"         // for DcsDecoder
-#include "decoders/DngDecoder.h"         // for DngDecoder
-#include "decoders/ErfDecoder.h"         // for ErfDecoder
-#include "decoders/IiqDecoder.h"         // for IiqDecoder
-#include "decoders/KdcDecoder.h"         // for KdcDecoder
-#include "decoders/MefDecoder.h"         // for MefDecoder
-#include "decoders/MosDecoder.h"         // for MosDecoder
-#include "decoders/NefDecoder.h"         // for NefDecoder
-#include "decoders/OrfDecoder.h"         // for OrfDecoder
-#include "decoders/PefDecoder.h"         // for PefDecoder
-#include "decoders/Rw2Decoder.h"         // for Rw2Decoder
-#include "decoders/SrwDecoder.h"         // for SrwDecoder
-#include "decoders/ThreefrDecoder.h"     // for ThreefrDecoder
-#include "io/Buffer.h"                   // for Buffer, DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::unk...
-#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
-#include <cassert>                       // for assert
-#include <cstdint>                       // for UINT32_MAX, uint16_t, uint32_t
-#include <memory>                        // for make_unique, unique_ptr
-#include <tuple>                         // for tie, tuple
-#include <vector>                        // for vector
-// IWYU pragma: no_include <ext/alloc_traits.h>
+#include "adt/NORangesSet.h"
+#include "decoders/ArwDecoder.h"
+#include "decoders/Cr2Decoder.h"
+#include "decoders/DcrDecoder.h"
+#include "decoders/DcsDecoder.h"
+#include "decoders/DngDecoder.h"
+#include "decoders/ErfDecoder.h"
+#include "decoders/IiqDecoder.h"
+#include "decoders/KdcDecoder.h"
+#include "decoders/MefDecoder.h"
+#include "decoders/MosDecoder.h"
+#include "decoders/NefDecoder.h"
+#include "decoders/OrfDecoder.h"
+#include "decoders/PefDecoder.h"
+#include "decoders/Rw2Decoder.h"
+#include "decoders/SrwDecoder.h"
+#include "decoders/StiDecoder.h"
+#include "decoders/ThreefrDecoder.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/RawParser.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffIFD.h"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 class RawDecoder;
 
-TiffParser::TiffParser(const Buffer& file) : RawParser(file) {}
+TiffParser::TiffParser(Buffer file) : RawParser(file) {}
 
 std::unique_ptr<RawDecoder> TiffParser::getDecoder(const CameraMetaData* meta) {
   return TiffParser::makeDecoder(TiffParser::parse(nullptr, mInput), mInput);
 }
 
-TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
+TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, Buffer data) {
   ByteStream bs(DataBuffer(data, Endianness::unknown));
   bs.setByteOrder(getTiffByteOrder(bs, 0, "TIFF header"));
   bs.skipBytes(2);
@@ -77,14 +81,25 @@ TiffRootIFDOwner TiffParser::parse(TiffIFD* parent, const Buffer& data) {
 
   for (uint32_t IFDOffset = bs.getU32(); IFDOffset;
        IFDOffset = root->getSubIFDs().back()->getNextIFD()) {
-    root->add(std::make_unique<TiffIFD>(root.get(), &ifds, bs, IFDOffset));
+    std::unique_ptr<TiffIFD> subIFD;
+    try {
+      subIFD = std::make_unique<TiffIFD>(root.get(), &ifds, bs, IFDOffset);
+    } catch (const TiffParserException&) {
+      // This IFD may fail to parse, in which case exit the loop,
+      // because the offset to the next IFD is last 4 bytes of an IFD,
+      // and we didn't get them because the IFD failed to parse.
+      // BUT: don't discard the IFD's that did succeed to parse!
+      break;
+    }
+    assert(subIFD.get());
+    root->add(std::move(subIFD));
   }
 
   return root;
 }
 
 std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
-                                                    const Buffer& data) {
+                                                    Buffer data) {
   if (!root)
     ThrowTPE("TiffIFD is null.");
 
@@ -108,7 +123,7 @@ std::unique_ptr<RawDecoder> TiffParser::makeDecoder(TiffRootIFDOwner root,
 
 template <class Decoder>
 std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
-                                                    const Buffer& data) {
+                                                    Buffer data) {
   return std::make_unique<Decoder>(std::move(root), data);
 }
 
@@ -120,7 +135,7 @@ std::unique_ptr<RawDecoder> TiffParser::constructor(TiffRootIFDOwner&& root,
   }
 
 const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
-                 16>
+                 17>
     TiffParser::Map = {{
         DECODER(DngDecoder),
         DECODER(MosDecoder),
@@ -137,6 +152,7 @@ const std::array<std::pair<TiffParser::checker_t, TiffParser::constructor_t>,
         DECODER(DcsDecoder),
         DECODER(KdcDecoder),
         DECODER(ErfDecoder),
+        DECODER(StiDecoder),
         DECODER(ThreefrDecoder),
 
     }};

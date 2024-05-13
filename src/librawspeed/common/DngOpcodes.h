@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <cstdint> // for uint32_t
-#include <map>     // for map
-#include <memory>  // for unique_ptr
-#include <utility> // for pair
-#include <vector>  // for vector
+#include "adt/Optional.h"
+#include <cstdint>
+#include <memory>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
@@ -33,7 +33,7 @@ class ByteStream;
 class RawImage;
 class iRectangle2D;
 
-class DngOpcodes {
+class DngOpcodes final {
 public:
   DngOpcodes(const RawImage& ri, ByteStream bs);
   ~DngOpcodes();
@@ -44,7 +44,6 @@ private:
 
   std::vector<std::unique_ptr<DngOpcode>> opcodes;
 
-protected:
   class DeltaRowOrColBase;
   class DummyROIOpcode;
   class FixBadPixelsConstant;
@@ -66,7 +65,8 @@ protected:
 
   using constructor_t = std::unique_ptr<DngOpcode> (*)(
       const RawImage& ri, ByteStream& bs, iRectangle2D& integrated_subimg);
-  static const std::map<uint32_t, std::pair<const char*, constructor_t>> Map;
+  static Optional<std::pair<const char*, DngOpcodes::constructor_t>>
+  Map(uint32_t code);
 };
 
 } // namespace rawspeed

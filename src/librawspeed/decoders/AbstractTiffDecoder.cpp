@@ -19,16 +19,22 @@
 */
 
 #include "decoders/AbstractTiffDecoder.h"
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD, TiffRootIFD, Tiff...
-#include <cstdint>                        // for uint32_t
-#include <vector>                         // for vector
+#include "decoders/RawDecoderException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <cstdint>
+#include <vector>
 
 namespace rawspeed {
 
-const TiffIFD* AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const
-{
+void AbstractTiffDecoder::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
+
+const TiffIFD*
+AbstractTiffDecoder::getIFDWithLargestImage(TiffTag filter) const {
   std::vector<const TiffIFD*> ifds = mRootIFD->getIFDsWithTag(filter);
 
   if (ifds.empty())

@@ -19,15 +19,18 @@
 */
 
 #include "decompressors/Cr2LJpegDecoder.h"
-#include "common/RawImage.h"          // for RawImage, RawImageData
-#include "common/RawspeedException.h" // for RawspeedException
-#include "fuzz/Common.h"              // for CreateRawImage
-#include "io/Buffer.h"                // for Buffer, DataBuffer
-#include "io/ByteStream.h"            // for ByteStream
-#include "io/Endianness.h"            // for Endianness, Endianness::little
-#include <cassert>                    // for assert
-#include <cstdint>                    // for uint8_t, uint16_t
-#include <cstdio>                     // for size_t
+#include "MemorySanitizer.h"
+#include "adt/Casts.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
+#include "decompressors/Cr2Decompressor.h"
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -35,7 +38,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
@@ -46,14 +50,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const auto sliceWidth = bs.get<slice_type>();
     const auto lastSliceWidth = bs.get<slice_type>();
 
-    const rawspeed::Cr2Slicing slicing(numSlices, sliceWidth, lastSliceWidth);
+    const rawspeed::Cr2SliceWidths slicing(numSlices, sliceWidth,
+                                           lastSliceWidth);
 
     rawspeed::Cr2LJpegDecoder c(bs, mRaw);
     mRaw->createData();
     c.decode(slicing);
 
-    mRaw->checkMemIsInitialized();
-  } catch (const rawspeed::RawspeedException&) {
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 

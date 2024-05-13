@@ -20,24 +20,28 @@
 */
 
 #include "decoders/DcsDecoder.h"
-#include "decoders/RawDecoderException.h"           // for ThrowException
-#include "decompressors/UncompressedDecompressor.h" // for UncompressedDeco...
-#include "io/Buffer.h"                              // for Buffer, DataBuffer
-#include "io/ByteStream.h"                          // for ByteStream
-#include "io/Endianness.h"                          // for Endianness, Endi...
-#include "tiff/TiffEntry.h"                         // for TiffEntry, TiffD...
-#include "tiff/TiffIFD.h"                           // for TiffRootIFD, TiffID
-#include "tiff/TiffTag.h"                           // for TiffTag, TiffTag...
-#include <cassert>                                  // for assert
-#include <memory>                                   // for allocator, uniqu...
-#include <string>                                   // for operator==, string
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decoders/SimpleTiffDecoder.h"
+#include "decompressors/UncompressedDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <cassert>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 
 class CameraMetaData;
 
 bool DcsDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -67,12 +71,14 @@ RawImage DcsDecoder::decodeRawInternal() {
 
   UncompressedDecompressor u(
       ByteStream(DataBuffer(mFile.getSubView(off, c2), Endianness::little)),
-      mRaw);
+      mRaw, iRectangle2D({0, 0}, iPoint2D(width, height)), 8 * width / 8, 8,
+      BitOrder::LSB);
+  mRaw->createData();
 
   if (uncorrectedRawValues)
-    u.decode8BitRaw<true>(width, height);
+    u.decode8BitRaw<true>();
   else
-    u.decode8BitRaw<false>(width, height);
+    u.decode8BitRaw<false>();
 
   return mRaw;
 }

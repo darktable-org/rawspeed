@@ -23,25 +23,37 @@ if(BUILD_TESTING)
     CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wlarger-than=${MAX_MEANINGFUL_SIZE})
   endif()
 
-  set(CMAKE_CXX_CLANG_TIDY_SAVE "${CMAKE_CXX_CLANG_TIDY}")
-
-  unset(CMAKE_CXX_CLANG_TIDY)
-
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-c99-extensions)
   CHECK_CXX_COMPILER_FLAG_AND_ENABLE_IT(-Wno-missing-variable-declarations)
   rawspeed_add_executable(MD5Test md5.cpp MD5Test.cpp)
+  target_include_directories(MD5Test PRIVATE "${RAWSPEED_BINARY_DIR}/src")
+  target_include_directories(MD5Test PRIVATE "${RAWSPEED_SOURCE_DIR}/src/librawspeed")
   target_link_libraries(MD5Test gtest_main)
-  rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test --gtest_output=xml:${UNITTEST_REPORT_PATH})
+  rawspeed_add_test(NAME utilities/rstest/md5 COMMAND MD5Test)
+  set_tests_properties(utilities/rstest/md5 PROPERTIES LABELS "unittest")
   add_dependencies(tests MD5Test)
 
   rawspeed_add_test(NAME utilities/rstest COMMAND rstest
                     WORKING_DIRECTORY "$<TARGET_PROPERTY:rawspeed_get_number_of_processor_cores,BINARY_DIR>")
+  set_tests_properties(utilities/rstest PROPERTIES LABELS "dummy")
 endif()
 
 if(BUILD_BENCHMARKING)
   rawspeed_add_executable(MD5Benchmark md5.cpp MD5Benchmark.cpp)
-  target_link_libraries(MD5Benchmark benchmark)
-  rawspeed_add_test(NAME benchmarks/rstest/MD5Benchmark COMMAND MD5Benchmark --help)
+  target_link_libraries(MD5Benchmark rawspeed_bench)
+
+  rawspeed_add_test(NAME benchmarks/rstest/MD5Benchmark-Dummy COMMAND MD5Benchmark --help)
+  set_tests_properties(benchmarks/rstest/MD5Benchmark-Dummy PROPERTIES LABELS "benchmark;dummy")
+  if(WIN32)
+    set_tests_properties(benchmarks/rstest/MD5Benchmark-Dummy PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:rawspeed_bench>")
+  endif()
+
+  rawspeed_add_test(NAME benchmarks/rstest/MD5Benchmark COMMAND MD5Benchmark --benchmark_min_time=1x)
+  set_tests_properties(benchmarks/rstest/MD5Benchmark PROPERTIES LABELS "benchmark")
+  set_tests_properties(benchmarks/rstest/MD5Benchmark PROPERTIES ENVIRONMENT "RAWSPEED_BENCHMARK_DRYRUN=1")
+  if(WIN32)
+    set_tests_properties(benchmarks/rstest/MD5Benchmark PROPERTIES ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:rawspeed_bench>")
+  endif()
 
   add_dependencies(benchmarks MD5Benchmark)
 endif()

@@ -1,10 +1,7 @@
-rawspeed |github actions| |travis-ci| OBS_ |codecov| |oss-fuzz|
+rawspeed |github actions| OBS_ |codecov| |oss-fuzz|
 
 .. |github actions| image:: https://github.com/darktable-org/rawspeed/actions/workflows/CI.yml/badge.svg
     :target: https://github.com/darktable-org/rawspeed/actions/workflows/CI.yml
-
-.. |travis-ci| image:: https://travis-ci.com/darktable-org/rawspeed.svg?branch=develop
-    :target: https://travis-ci.com/darktable-org/rawspeed
 
 .. _OBS: https://build.opensuse.org/project/monitor/graphics:darktable:master
 
@@ -86,9 +83,6 @@ Background of RawSpeed
 The main objectives were to make a very fast loader that worked for 75% of the cameras out there, and was able to decode a RAW file at close to the optimal speed. The last 25% of the cameras out there could be serviced by a more generic loader, or convert their images to DNG – which as a sidenote usually compresses better than your camera.
 
 RawSpeed is not at the moment a separate library, so you have to include it in your project directly.
-
-Please see <https://rawspeed.org/> for documentation.
-Doxygen-generated documentation is available at <https://rawspeed.org/doxygen>
 
 Submitting Requests and Patches
 --------------------------------------------------------------------------------

@@ -20,11 +20,11 @@
 
 #pragma once
 
-#include "decompressors/AbstractSamsungDecompressor.h" // for AbstractSamsu...
-#include "io/BitPumpMSB32.h"                           // for BitPumpMSB32
-#include "io/ByteStream.h"                             // for ByteStream
-#include <array>                                       // for array
-#include <cstdint>                                     // for uint32_t, uin...
+#include "bitstreams/BitStreamerMSB32.h"
+#include "decompressors/AbstractSamsungDecompressor.h"
+#include "io/ByteStream.h"
+#include <array>
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -33,7 +33,7 @@ class RawImage;
 // Decoder for third generation compressed SRW files (NX1)
 class SamsungV2Decompressor final : public AbstractSamsungDecompressor {
 public:
-  enum struct OptFlags : uint32_t;
+  enum struct OptFlags : uint8_t;
 
 private:
   uint32_t bitDepth;
@@ -49,25 +49,24 @@ private:
   std::array<std::array<int, 2>, 3> diffBitsMode;
 
   static inline __attribute__((always_inline)) int16_t
-  getDiff(BitPumpMSB32& pump, uint32_t len);
+  getDiff(BitStreamerMSB32& pump, uint32_t len);
 
   inline __attribute__((always_inline)) std::array<uint16_t, 16>
-  prepareBaselineValues(BitPumpMSB32& pump, int row, int col);
+  prepareBaselineValues(BitStreamerMSB32& pump, int row, int col);
 
   inline __attribute__((always_inline)) std::array<uint32_t, 4>
-  decodeDiffLengths(BitPumpMSB32& pump, int row);
+  decodeDiffLengths(BitStreamerMSB32& pump, int row);
 
   inline __attribute__((always_inline)) std::array<int, 16>
-  decodeDifferences(BitPumpMSB32& pump, int row);
+  decodeDifferences(BitStreamerMSB32& pump, int row);
 
-  inline __attribute__((always_inline)) void processBlock(BitPumpMSB32& pump,
-                                                          int row, int col);
+  inline __attribute__((always_inline)) void
+  processBlock(BitStreamerMSB32& pump, int row, int col);
 
   void decompressRow(int row);
 
 public:
-  SamsungV2Decompressor(const RawImage& image, const ByteStream& bs,
-                        unsigned bit);
+  SamsungV2Decompressor(const RawImage& image, ByteStream bs, unsigned bit);
 
   void decompress();
 };

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.22) # FIXME: 3.24.2 / 3.25
 
 project(zlib-download NONE)
 

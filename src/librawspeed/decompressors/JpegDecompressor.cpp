@@ -19,87 +19,95 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_JPEG_MEM_SRC, HAVE_JPEG
+#include "rawspeedconfig.h" // IWYU pragma: keep
 
 #ifdef HAVE_JPEG
 
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Memory.h"                // for alignedFree, alignedMalloc...
-#include "common/Point.h"                 // for iPoint2D
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
+#include "adt/AlignedAllocator.h"
+#include "adt/Array2DRef.h"
+#include "adt/Point.h"
+#include "decoders/RawDecoderException.h"
 #include "decompressors/JpegDecompressor.h"
-#include "io/ByteStream.h" // for ByteStream
-#include <algorithm>       // for min, fill_n
-#include <array>           // for array
-#include <jpeglib.h>       // for jpeg_destroy_decompress
-#include <memory>          // for unique_ptr
+#include "io/IOException.h"
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <jpeglib.h>
+#include <memory>
+#include <vector>
 
-#ifndef HAVE_JPEG_MEM_SRC
-#include "io/IOException.h" // for ThrowIOE
-#endif
-
-using std::unique_ptr;
 using std::min;
+using std::unique_ptr;
 
 namespace rawspeed {
 
-#ifdef HAVE_JPEG_MEM_SRC
+namespace {
 
-// FIXME: some libjpeg versions discard const qual for the input data pointer
-// should this be a cmake check?
-#define JPEG_MEMSRC(A, B, C)                                                   \
-  jpeg_mem_src(A, const_cast<unsigned char*>(B), C) // NOLINT
-
-#else
-
-#define JPEG_MEMSRC(A, B, C) jpeg_mem_src_int(A, B, C)
 /* Read JPEG image from a memory segment */
 
-static void init_source(j_decompress_ptr cinfo) {}
-static boolean fill_input_buffer(j_decompress_ptr cinfo) {
-  auto* src = (struct jpeg_source_mgr*)cinfo->src;
-  return (boolean) !!src->bytes_in_buffer;
+void init_source(j_decompress_ptr /*cinfo*/) {
+  // No action needed.
 }
-static void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
-  auto* src = (struct jpeg_source_mgr*)cinfo->src;
 
-  if (num_bytes > (int)src->bytes_in_buffer)
+boolean fill_input_buffer(j_decompress_ptr cinfo) {
+  return cinfo->src->bytes_in_buffer != 0;
+}
+
+// NOLINTNEXTLINE(google-runtime-int)
+void skip_input_data(j_decompress_ptr cinfo, long num_bytes) {
+  auto* src = cinfo->src;
+
+  if (num_bytes > static_cast<int>(src->bytes_in_buffer))
     ThrowIOE("read out of buffer");
   if (num_bytes > 0) {
-    src->next_input_byte += (size_t)num_bytes;
-    src->bytes_in_buffer -= (size_t)num_bytes;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Wunsafe-buffer-usage"
+    src->next_input_byte += static_cast<size_t>(num_bytes);
+#pragma GCC diagnostic pop
+    src->bytes_in_buffer -= static_cast<size_t>(num_bytes);
   }
 }
-static void term_source(j_decompress_ptr cinfo) {}
-static void jpeg_mem_src_int(j_decompress_ptr cinfo,
-                             const unsigned char* buffer, long nbytes) {
-  struct jpeg_source_mgr* src;
+
+void term_source(j_decompress_ptr /*cinfo*/) {
+  // No action needed.
+}
+
+[[maybe_unused]] void
+jpeg_mem_src_int(j_decompress_ptr cinfo, const unsigned char* buffer,
+                 long nbytes) { // NOLINT(google-runtime-int)
+  jpeg_source_mgr* src;
 
   if (cinfo->src == nullptr) { /* first time for this JPEG object? */
-    cinfo->src = (struct jpeg_source_mgr*)(*cinfo->mem->alloc_small)(
-        (j_common_ptr)cinfo, JPOOL_PERMANENT, sizeof(struct jpeg_source_mgr));
+    void* buf =
+        cinfo->mem->alloc_small(reinterpret_cast<j_common_ptr>(cinfo),
+                                JPOOL_PERMANENT, sizeof(jpeg_source_mgr));
+    cinfo->src = static_cast<jpeg_source_mgr*>(buf);
   }
 
-  src = (struct jpeg_source_mgr*)cinfo->src;
+  src = cinfo->src;
   src->init_source = init_source;
   src->fill_input_buffer = fill_input_buffer;
   src->skip_input_data = skip_input_data;
   src->resync_to_restart = jpeg_resync_to_restart; /* use default method */
   src->term_source = term_source;
   src->bytes_in_buffer = nbytes;
-  src->next_input_byte = (const JOCTET*)buffer;
+  src->next_input_byte = buffer;
 }
 
-#endif
-
+// NOLINTNEXTLINE(readability-static-definition-in-anonymous-namespace)
 [[noreturn]] METHODDEF(void) my_error_throw(j_common_ptr cinfo) {
   std::array<char, JMSG_LENGTH_MAX> buf;
   buf.fill(0);
-  (*cinfo->err->format_message)(cinfo, buf.data());
+  cinfo->err->format_message(cinfo, buf.data());
   ThrowRDE("JPEG decoder error: %s", buf.data());
 }
 
-struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
+} // namespace
+
+struct JpegDecompressor::JpegDecompressStruct final : jpeg_decompress_struct {
   struct jpeg_error_mgr jerr;
 
   JpegDecompressStruct(const JpegDecompressStruct&) = delete;
@@ -119,11 +127,14 @@ struct JpegDecompressor::JpegDecompressStruct : jpeg_decompress_struct {
 
 void JpegDecompressor::decode(uint32_t offX,
                               uint32_t offY) { /* Each slice is a JPEG image */
-  struct JpegDecompressStruct dinfo;
+  JpegDecompressStruct dinfo;
 
-  const auto size = input.getRemainSize();
-
-  JPEG_MEMSRC(&dinfo, input.getData(size), size);
+#ifdef HAVE_JPEG_MEM_SRC
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast): why, macOS?!
+  jpeg_mem_src(&dinfo, const_cast<uint8_t*>(input.begin()), input.getSize());
+#else
+  jpeg_mem_src_int(&dinfo, input.begin(), input.getSize());
+#endif
 
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
     ThrowRDE("Unable to read JPEG header");
@@ -133,11 +144,8 @@ void JpegDecompressor::decode(uint32_t offX,
     ThrowRDE("Component count doesn't match");
   int row_stride = dinfo.output_width * dinfo.output_components;
 
-  unique_ptr<uint8_t[], // NOLINT
-             decltype(&alignedFree)>
-      complete_buffer(
-          alignedMallocArray<uint8_t, 16>(dinfo.output_height, row_stride),
-          &alignedFree);
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 16>> complete_buffer;
+  complete_buffer.resize(dinfo.output_height * row_stride);
 
   const Array2DRef<uint8_t> tmp(&complete_buffer[0],
                                 dinfo.output_components * dinfo.output_width,

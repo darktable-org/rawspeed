@@ -20,32 +20,37 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "rawspeedconfig.h" // for HAVE_OPENMP
+#include "rawspeedconfig.h"
 #include "decompressors/PanasonicV4Decompressor.h"
-#include "common/Array2DRef.h"            // for Array2DRef
-#include "common/Common.h"                // for extractHighBits, rawspeed_...
-#include "common/Mutex.h"                 // for MutexLocker
-#include "common/Point.h"                 // for iPoint2D, iPoint2D::value_...
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/Buffer.h"                    // for Buffer, Buffer::size_type
-#include <algorithm>                      // for copy, max, fill_n, generate_n
-#include <array>                          // for array
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint32_t, uint8_t, uint16_t
-#include <iterator>                       // for back_insert_iterator, back...
-#include <limits>                         // for numeric_limits
-#include <memory>                         // for allocator_traits<>::value_...
-#include <utility>                        // for move
-#include <vector>                         // for vector, vector<>::iterator
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "adt/Mutex.h"
+#include "adt/Point.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <limits>
+#include <utility>
+#include <vector>
 
 namespace rawspeed {
 
-PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
-                                                 const ByteStream& input_,
+PanasonicV4Decompressor::PanasonicV4Decompressor(RawImage img,
+                                                 ByteStream input_,
                                                  bool zero_is_not_bad,
                                                  uint32_t section_split_offset_)
-    : mRaw(img), zero_is_bad(!zero_is_not_bad),
+    : mRaw(std::move(img)), zero_is_bad(!zero_is_not_bad),
       section_split_offset(section_split_offset_) {
   if (mRaw->getCpp() != 1 || mRaw->getDataType() != RawImageType::UINT16 ||
       mRaw->getBpp() != sizeof(uint16_t))
@@ -61,9 +66,9 @@ PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
              section_split_offset, BlockSize);
 
   // Naive count of bytes that given pixel count requires.
-  assert(mRaw->dim.area() % PixelsPerPacket == 0);
+  invariant(mRaw->dim.area() % PixelsPerPacket == 0);
   const auto bytesTotal = (mRaw->dim.area() / PixelsPerPacket) * BytesPerPacket;
-  assert(bytesTotal > 0);
+  invariant(bytesTotal > 0);
 
   // If section_split_offset is zero, then that we need to read the normal
   // amount of bytes. But if it is not, then we need to round up to multiple of
@@ -75,7 +80,7 @@ PanasonicV4Decompressor::PanasonicV4Decompressor(const RawImage& img,
   if (bufSize > std::numeric_limits<ByteStream::size_type>::max())
     ThrowRDE("Raw dimensions require input buffer larger than supported");
 
-  input = input_.peekStream(bufSize);
+  input = input_.peekStream(implicit_cast<Buffer::size_type>(bufSize));
 
   chopInputIntoBlocks();
 }
@@ -86,30 +91,32 @@ void PanasonicV4Decompressor::chopInputIntoBlocks() {
   };
 
   // If section_split_offset == 0, last block may not be full.
-  const auto blocksTotal = roundUpDivision(input.getRemainSize(), BlockSize);
-  assert(blocksTotal > 0);
-  assert(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
-  blocks.reserve(blocksTotal);
+  const auto blocksTotal =
+      roundUpDivisionSafe(input.getRemainSize(), BlockSize);
+  invariant(blocksTotal > 0);
+  invariant(blocksTotal * PixelsPerBlock >= mRaw->dim.area());
+  assert(blocksTotal <= std::numeric_limits<uint32_t>::max());
+  assert(blocksTotal <= std::numeric_limits<size_t>::max());
+  blocks.reserve(implicit_cast<size_t>(blocksTotal));
 
   unsigned currPixel = 0;
-  std::generate_n(std::back_inserter(blocks), blocksTotal,
-                  [&, pixelToCoordinate]() {
-                    assert(input.getRemainSize() != 0);
-                    const auto blockSize =
-                        std::min(input.getRemainSize(), BlockSize);
-                    assert(blockSize > 0);
-                    assert(blockSize % BytesPerPacket == 0);
-                    const auto packets = blockSize / BytesPerPacket;
-                    assert(packets > 0);
-                    const auto pixels = packets * PixelsPerPacket;
-                    assert(pixels > 0);
+  std::generate_n(
+      std::back_inserter(blocks), blocksTotal, [&, pixelToCoordinate]() {
+        invariant(input.getRemainSize() != 0);
+        const auto blockSize = std::min(input.getRemainSize(), BlockSize);
+        invariant(blockSize > 0);
+        invariant(blockSize % BytesPerPacket == 0);
+        const auto packets = blockSize / BytesPerPacket;
+        invariant(packets > 0);
+        const auto pixels = packets * PixelsPerPacket;
+        invariant(pixels > 0);
 
-                    ByteStream bs = input.getStream(blockSize);
-                    iPoint2D beginCoord = pixelToCoordinate(currPixel);
-                    currPixel += pixels;
-                    iPoint2D endCoord = pixelToCoordinate(currPixel);
-                    return Block(std::move(bs), beginCoord, endCoord);
-                  });
+        ByteStream bs = input.getStream(blockSize);
+        iPoint2D beginCoord = pixelToCoordinate(currPixel);
+        currPixel += pixels;
+        iPoint2D endCoord = pixelToCoordinate(currPixel);
+        return Block(bs, beginCoord, endCoord);
+      });
   assert(blocks.size() == blocksTotal);
   assert(currPixel >= mRaw->dim.area());
   assert(input.getRemainSize() == 0);
@@ -128,8 +135,8 @@ class PanasonicV4Decompressor::ProxyStream {
 
   void parseBlock() {
     assert(buf.empty());
-    assert(block.getRemainSize() <= BlockSize);
-    assert(section_split_offset <= BlockSize);
+    invariant(block.getRemainSize() <= BlockSize);
+    invariant(section_split_offset <= BlockSize);
 
     Buffer FirstSection = block.getBuffer(section_split_offset);
     Buffer SecondSection = block.getBuffer(block.getRemainSize());
@@ -143,7 +150,7 @@ class PanasonicV4Decompressor::ProxyStream {
     // Now append the original 1'st section right after the new 1'st section.
     buf.insert(buf.end(), FirstSection.begin(), FirstSection.end());
 
-    assert(block.getRemainSize() == 0);
+    invariant(block.getRemainSize() == 0);
 
     // get one more byte, so the return statement of getBits does not have
     // to special case for accessing the last byte
@@ -152,7 +159,7 @@ class PanasonicV4Decompressor::ProxyStream {
 
 public:
   ProxyStream(ByteStream block_, int section_split_offset_)
-      : block(std::move(block_)), section_split_offset(section_split_offset_) {
+      : block(block_), section_split_offset(section_split_offset_) {
     parseBlock();
   }
 
@@ -201,7 +208,7 @@ inline void PanasonicV4Decompressor::processPixelPacket(
         pred[c] = nonz[c] << 4 | bits.getBits(4);
     }
 
-    out(row, col) = pred[c];
+    out(row, col) = implicit_cast<uint16_t>(pred[c]);
 
     if (zero_is_bad && 0 == pred[c])
       zero_pos->push_back((row << 16) | col);
@@ -225,8 +232,8 @@ void PanasonicV4Decompressor::processBlock(
     if (block.endCoord.y == row)
       endCol = block.endCoord.x;
 
-    assert(col % PixelsPerPacket == 0);
-    assert(endCol % PixelsPerPacket == 0);
+    invariant(col % PixelsPerPacket == 0);
+    invariant(endCol % PixelsPerPacket == 0);
 
     for (; col < endCol; col += PixelsPerPacket)
       processPixelPacket(bits, row, col, zero_pos);
@@ -241,8 +248,15 @@ void PanasonicV4Decompressor::decompressThread() const noexcept {
 #ifdef HAVE_OPENMP
 #pragma omp for schedule(static)
 #endif
-  for (auto block = blocks.cbegin(); block < blocks.cend(); ++block)
-    processBlock(*block, &zero_pos);
+  for (const auto& block :
+       Array1DRef(blocks.data(), implicit_cast<int>(blocks.size()))) {
+    try {
+      processBlock(block, &zero_pos);
+    } catch (...) {
+      // We should not get any exceptions here.
+      __builtin_unreachable();
+    }
+  }
 
   if (zero_is_bad && !zero_pos.empty()) {
     MutexLocker guard(&mRaw->mBadPixelMutex);

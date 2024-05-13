@@ -21,15 +21,20 @@
 */
 
 #include "decoders/SimpleTiffDecoder.h"
-#include "common/Point.h"                 // for iPoint2D
-#include "common/RawImage.h"              // for RawImage, RawImageData
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include "io/Buffer.h"                    // for Buffer
-#include "tiff/TiffEntry.h"               // for TiffEntry
-#include "tiff/TiffIFD.h"                 // for TiffIFD
-#include "tiff/TiffTag.h"                 // for TiffTag, TiffTag::IMAGELENGTH
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "io/Buffer.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
 
 namespace rawspeed {
+
+void SimpleTiffDecoder::anchor() const {
+  // Empty out-of-line definition for the purpose of anchoring
+  // the class's vtable to this Translational Unit.
+}
 
 void SimpleTiffDecoder::prepareForRawDecoding() {
   raw = getIFDWithLargestImage();
@@ -50,7 +55,6 @@ void SimpleTiffDecoder::prepareForRawDecoding() {
   checkImageDimensions();
 
   mRaw->dim = iPoint2D(width, height);
-  mRaw->createData();
 }
 
 } // namespace rawspeed

@@ -20,11 +20,17 @@
 */
 
 #include "common/TableLookUp.h"
-#include "common/Common.h"                // for clampBits
-#include "decoders/RawDecoderException.h" // for ThrowException, ThrowRDE
-#include <cassert>                        // for assert
-#include <cstdint>                        // for uint16_t
-#include <limits>                         // for numeric_limits
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Bit.h"
+#include "adt/Casts.h"
+#include "adt/Invariant.h"
+#include "decoders/RawDecoderException.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <limits>
+#include <vector>
 
 namespace rawspeed {
 
@@ -44,17 +50,18 @@ TableLookUp::TableLookUp(int _ntables, bool _dither)
 void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
   assert(!table.empty());
 
-  const int nfilled = table.size();
+  const auto nfilled = implicit_cast<int>(table.size());
   if (nfilled > TABLE_MAX_ELTS)
     ThrowRDE("Table lookup with %i entries is unsupported", nfilled);
 
   if (ntable > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
-  uint16_t* t = &tables[ntable * TABLE_SIZE];
+
+  auto t = Array2DRef(tables.data(), TABLE_SIZE, ntables)[ntable];
   if (!dither) {
     for (int i = 0; i < TABLE_MAX_ELTS; i++) {
-      t[i] = (i < nfilled) ? table[i] : table[nfilled - 1];
+      t(i) = (i < nfilled) ? table[i] : table[nfilled - 1];
     }
     return;
   }
@@ -62,25 +69,26 @@ void TableLookUp::setTable(int ntable, const std::vector<uint16_t>& table) {
     int center = table[i];
     int lower = i > 0 ? table[i - 1] : center;
     int upper = i < (nfilled - 1) ? table[i + 1] : center;
+    // Non-monotonic LUT handling: don't interpolate across the cross-over.
+    lower = std::min(lower, center);
+    upper = std::max(upper, center);
     int delta = upper - lower;
-    t[i * 2] = clampBits(center - ((upper - lower + 2) / 4), 16);
-    t[i * 2 + 1] = uint16_t(delta);
-    // FIXME: this is completely broken when the curve is non-monotonic.
+    invariant(delta >= 0);
+    t(i * 2) = clampBits(center - ((upper - lower + 2) / 4), 16);
+    t(i * 2 + 1) = implicit_cast<uint16_t>(delta);
   }
 
   for (int i = nfilled; i < TABLE_MAX_ELTS; i++) {
-    t[i * 2] = table[nfilled - 1];
-    t[i * 2 + 1] = 0;
+    t(i * 2) = table[nfilled - 1];
+    t(i * 2 + 1) = 0;
   }
-  t[0] = t[1];
-  t[TABLE_SIZE - 1] = t[TABLE_SIZE - 2];
 }
 
-uint16_t* TableLookUp::getTable(int n) {
+Array1DRef<uint16_t> TableLookUp::getTable(int n) {
   if (n > ntables) {
     ThrowRDE("Table lookup with number greater than number of tables.");
   }
-  return &tables[n * TABLE_SIZE];
+  return Array2DRef(tables.data(), TABLE_SIZE, ntables)[n];
 }
 
 } // namespace rawspeed

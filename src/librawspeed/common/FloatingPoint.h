@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <cstdint> // for uint32_t, int32_t, uint16_t
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -59,8 +59,9 @@ struct BinaryN {
 // bits 9-0 - fraction (10 bit)
 // bits 14-10 - exponent (5 bit)
 // bit 15 - sign
-struct Binary16 : public BinaryN</*StorageWidth=*/16, /*FractionWidth=*/10,
-                                 /*ExponentWidth=*/5> {
+struct Binary16 final
+    : public BinaryN</*StorageWidth=*/16, /*FractionWidth=*/10,
+                     /*ExponentWidth=*/5> {
   static_assert(Precision == 11);
   static_assert(ExponentMax == 15);
   static_assert(ExponentPos == 10);
@@ -71,8 +72,9 @@ struct Binary16 : public BinaryN</*StorageWidth=*/16, /*FractionWidth=*/10,
 // bits 15-0 - fraction (16 bit)
 // bits 22-16 - exponent (7 bit)
 // bit 23 - sign
-struct Binary24 : public BinaryN</*StorageWidth=*/24, /*FractionWidth=*/16,
-                                 /*ExponentWidth=*/7> {
+struct Binary24 final
+    : public BinaryN</*StorageWidth=*/24, /*FractionWidth=*/16,
+                     /*ExponentWidth=*/7> {
   static_assert(Precision == 17);
   static_assert(ExponentMax == 63);
   static_assert(ExponentPos == 16);
@@ -83,8 +85,9 @@ struct Binary24 : public BinaryN</*StorageWidth=*/24, /*FractionWidth=*/16,
 // bits 22-0 - fraction (23 bit)
 // bits 30-23 - exponent (8 bit)
 // bit 31 - sign
-struct Binary32 : public BinaryN</*StorageWidth=*/32, /*FractionWidth=*/23,
-                                 /*ExponentWidth=*/8> {
+struct Binary32 final
+    : public BinaryN</*StorageWidth=*/32, /*FractionWidth=*/23,
+                     /*ExponentWidth=*/8> {
   static_assert(Precision == 24);
   static_assert(ExponentMax == 127);
   static_assert(ExponentPos == 23);

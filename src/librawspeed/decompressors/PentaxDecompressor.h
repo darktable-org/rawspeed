@@ -21,12 +21,14 @@
 
 #pragma once
 
-#include "common/RawImage.h"                    // for RawImage
-#include "decompressors/AbstractDecompressor.h" // for AbstractDecompressor
-#include "decompressors/HuffmanTable.h"         // for HuffmanTable
-#include <array>                                // for array
-#include <cstdint>                              // for uint8_t
-#include <optional>                             // for optional
+#include "adt/Optional.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/HuffmanCode.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "common/RawImage.h"
+#include "decompressors/AbstractDecompressor.h"
+#include <array>
+#include <cstdint>
 
 namespace rawspeed {
 
@@ -34,17 +36,19 @@ class ByteStream;
 
 class PentaxDecompressor final : public AbstractDecompressor {
   RawImage mRaw;
-  const HuffmanTable ht;
+  const PrefixCodeDecoder<> ht;
 
 public:
-  PentaxDecompressor(const RawImage& img, std::optional<ByteStream> metaData);
+  PentaxDecompressor(RawImage img, Optional<ByteStream> metaData);
 
-  void decompress(const ByteStream& data) const;
+  void decompress(ByteStream data) const;
 
 private:
-  static HuffmanTable SetupHuffmanTable_Legacy();
-  static HuffmanTable SetupHuffmanTable_Modern(ByteStream stream);
-  static HuffmanTable SetupHuffmanTable(std::optional<ByteStream> metaData);
+  static HuffmanCode<BaselineCodeTag> SetupPrefixCodeDecoder_Legacy();
+  static HuffmanCode<BaselineCodeTag>
+  SetupPrefixCodeDecoder_Modern(ByteStream stream);
+  static PrefixCodeDecoder<>
+  SetupPrefixCodeDecoder(Optional<ByteStream> metaData);
 
   static const std::array<std::array<std::array<uint8_t, 16>, 2>, 1>
       pentax_tree;

@@ -19,11 +19,14 @@
 */
 
 #include "fuzz/Common.h"
-#include "common/Point.h"    // for iPoint2D, iPoint2D::value_type
-#include "common/RawImage.h" // for RawImage, RawImageData, RawImageType
-#include "io/ByteStream.h"   // for ByteStream
-#include "io/IOException.h"  // for ThrowException, ThrowRSE, ThrowIOE
-#include <cstdint>           // for uint32_t, int32_t
+#include "adt/Casts.h"
+#include "adt/Point.h"
+#include "common/RawImage.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/IOException.h"
+#include "metadata/ColorFilterArray.h"
+#include <cstdint>
 
 rawspeed::RawImage CreateRawImage(rawspeed::ByteStream& bs) {
   const uint32_t width = bs.getU32();
@@ -58,7 +61,8 @@ rawspeed::ColorFilterArray CreateCFA(rawspeed::ByteStream& bs) {
 
   rawspeed::ColorFilterArray cfa;
   cfa.setSize(cfaSize);
-  (void)bs.check(cfaSize.area(), 4);
+  (void)bs.check(
+      rawspeed::implicit_cast<rawspeed::Buffer::size_type>(cfaSize.area()), 4);
 
   for (auto x = 0; x < cfaWidth; x++) {
     for (auto y = 0; y < cfaHeight; y++) {

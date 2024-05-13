@@ -20,46 +20,48 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#include "rawspeedconfig.h"
 #include "tiff/CiffIFD.h"
-#include "common/Common.h"               // for isIn
-#include "common/NORangesSet.h"          // for NORangesSet
-#include "io/Buffer.h"                   // for Buffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "parsers/CiffParserException.h" // for ThrowException, ThrowCPE
-#include "tiff/CiffEntry.h"              // for CiffEntry, CiffDataType
-#include <algorithm>                     // for copy, max, any_of
-#include <cassert>                       // for assert
-#include <map>                           // for map, operator!=, _Rb_tree_c...
-#include <memory>                        // for unique_ptr, make_unique
-#include <string>                        // for operator==, string
-#include <utility>                       // for move, pair
-#include <vector>                        // for vector, vector<>::const_ite...
+#include "adt/NORangesSet.h"
+#include "common/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "parsers/CiffParserException.h"
+#include "tiff/CiffEntry.h"
+#include "tiff/CiffTag.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 using std::vector;
 
 namespace rawspeed {
 
 void CiffIFD::parseIFDEntry(NORangesSet<Buffer>* valueDatas,
-                            const ByteStream& valueData,
-                            ByteStream& dirEntries) {
+                            ByteStream valueData, ByteStream& dirEntries) {
   assert(valueDatas);
 
   ByteStream dirEntry = dirEntries.getStream(10); // Entry is 10 bytes.
 
-  auto t = std::make_unique<CiffEntry>(valueDatas, valueData, dirEntry);
+  CiffEntry t = CiffEntry::Create(valueDatas, valueData, dirEntry);
 
-  switch (t->type) {
+  switch (t.type) {
   case CiffDataType::SUB1:
   case CiffDataType::SUB2: {
-    add(std::make_unique<CiffIFD>(this, t->data));
+    add(std::make_unique<CiffIFD>(this, t.data));
     break;
   }
 
   default:
     // Will we ever look for this entry?
-    if (!isIn(t->tag, CiffTagsWeCareAbout))
+    if (!isIn(t.tag, CiffTagsWeCareAbout))
       return;
-    add(std::move(t));
+    add(std::make_unique<CiffEntry>(t));
   }
 }
 
@@ -225,16 +227,16 @@ CiffIFD::getIFDsWithTagWhere(CiffTag tag, const std::string& isValue) const {
   });
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntry(CiffTag tag) const {
+bool RAWSPEED_READONLY CiffIFD::hasEntry(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  return mEntry.count(tag) > 0;
+  return mEntry.contains(tag);
 }
 
-bool __attribute__((pure)) CiffIFD::hasEntryRecursive(CiffTag tag) const {
+bool RAWSPEED_READONLY CiffIFD::hasEntryRecursive(CiffTag tag) const {
   assert(isIn(tag, CiffTagsWeCareAbout));
 
-  if (mEntry.count(tag) > 0)
+  if (mEntry.contains(tag))
     return true;
 
   return std::any_of(mSubIFD.begin(), mSubIFD.end(),

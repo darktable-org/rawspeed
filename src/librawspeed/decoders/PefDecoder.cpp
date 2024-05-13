@@ -20,27 +20,32 @@
 */
 
 #include "decoders/PefDecoder.h"
-#include "common/Common.h"                    // for BitOrder, BitOrder::MSB
-#include "common/Point.h"                     // for iPoint2D
-#include "decoders/RawDecoderException.h"     // for ThrowException, ThrowRDE
-#include "decompressors/PentaxDecompressor.h" // for PentaxDecompressor
-#include "io/Buffer.h"                        // for Buffer, DataBuffer
-#include "io/ByteStream.h"                    // for ByteStream
-#include "io/Endianness.h"                    // for Endianness, Endianness...
-#include "metadata/ColorFilterArray.h"        // for CFAColor, CFAColor::GREEN
-#include "tiff/TiffEntry.h"                   // for TiffEntry, TiffDataType
-#include "tiff/TiffIFD.h"                     // for TiffRootIFD, TiffIFD
-#include "tiff/TiffTag.h"                     // for TiffTag, TiffTag::ISOS...
-#include <array>                              // for array
-#include <cstdint>                            // for uint32_t
-#include <memory>                             // for unique_ptr, allocator
-#include <optional>                           // for optional
-#include <string>                             // for operator==, string
+#include "adt/Array1DRef.h"
+#include "adt/Array2DRef.h"
+#include "adt/Casts.h"
+#include "adt/Optional.h"
+#include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
+#include "common/Common.h"
+#include "common/RawImage.h"
+#include "decoders/RawDecoderException.h"
+#include "decompressors/PentaxDecompressor.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "metadata/ColorFilterArray.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffIFD.h"
+#include "tiff/TiffTag.h"
+#include <array>
+#include <cstdint>
+#include <memory>
+#include <string>
 
 namespace rawspeed {
 
 bool PefDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
-                                      [[maybe_unused]] const Buffer& file) {
+                                      [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
   const std::string& make = id.make;
 
@@ -63,6 +68,17 @@ RawImage PefDecoder::decodeRawInternal() {
   if (65535 != compression)
     ThrowRDE("Unsupported compression");
 
+  if (raw->hasEntry(TiffTag::PHOTOMETRICINTERPRETATION)) {
+    mRaw->isCFA =
+        (raw->getEntry(TiffTag::PHOTOMETRICINTERPRETATION)->getU16() != 34892);
+  }
+
+  if (mRaw->isCFA)
+    writeLog(DEBUG_PRIO::EXTRA, "This is a CFA image");
+  else {
+    writeLog(DEBUG_PRIO::EXTRA, "This is NOT a CFA image");
+  }
+
   const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
   const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
 
@@ -83,7 +99,7 @@ RawImage PefDecoder::decodeRawInternal() {
 
   mRaw->dim = iPoint2D(width, height);
 
-  std::optional<ByteStream> metaData;
+  Optional<ByteStream> metaData;
   if (getRootIFD()->hasEntryRecursive(static_cast<TiffTag>(0x220))) {
     /* Attempt to read huffman table, if found in makernote */
     const TiffEntry* t =
@@ -116,8 +132,11 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* black =
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x200));
     if (black->count == 4) {
+      mRaw->blackLevelSeparate =
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; i++)
-        mRaw->blackLevelSeparate[i] = black->getU32(i);
+        blackLevelSeparate1D(i) = black->getU32(i);
     }
   }
 
@@ -126,9 +145,9 @@ void PefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* wb =
         mRootIFD->getEntryRecursive(static_cast<TiffTag>(0x0201));
     if (wb->count == 4) {
-      mRaw->metadata.wbCoeffs[0] = wb->getU32(0);
-      mRaw->metadata.wbCoeffs[1] = wb->getU32(1);
-      mRaw->metadata.wbCoeffs[2] = wb->getU32(3);
+      mRaw->metadata.wbCoeffs[0] = implicit_cast<float>(wb->getU32(0));
+      mRaw->metadata.wbCoeffs[1] = implicit_cast<float>(wb->getU32(1));
+      mRaw->metadata.wbCoeffs[2] = implicit_cast<float>(wb->getU32(3));
     }
   }
 }

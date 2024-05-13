@@ -22,19 +22,19 @@
 
 #pragma once
 
-#include "common/NORangesSet.h"          // for set
-#include "common/RawspeedException.h"    // for ThrowException
-#include "io/Buffer.h"                   // for Buffer (ptr only), DataBuffer
-#include "io/ByteStream.h"               // for ByteStream
-#include "io/Endianness.h"               // for Endianness, Endianness::big
-#include "parsers/TiffParserException.h" // for ThrowException, ThrowTPE
-#include "tiff/TiffEntry.h"              // for TiffEntry
-#include "tiff/TiffTag.h"                // for TiffTag
-#include <cstdint>                       // for uint32_t
-#include <map>                           // for map, operator!=, map<>::con...
-#include <memory>                        // for unique_ptr
-#include <string>                        // for string
-#include <vector>                        // for vector
+#include "rawspeedconfig.h"
+#include "adt/NORangesSet.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include "parsers/TiffParserException.h"
+#include "tiff/TiffEntry.h"
+#include "tiff/TiffTag.h"
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace rawspeed {
 
@@ -46,8 +46,7 @@ using TiffIFDOwner = std::unique_ptr<TiffIFD>;
 using TiffRootIFDOwner = std::unique_ptr<TiffRootIFD>;
 using TiffEntryOwner = std::unique_ptr<TiffEntry>;
 
-class TiffIFD
-{
+class TiffIFD {
   uint32_t nextIFD = 0;
 
   TiffIFD* const parent;
@@ -58,6 +57,8 @@ class TiffIFD
   int subIFDCountRecursive = 0;
 
   std::map<TiffTag, TiffEntryOwner> entries;
+
+  virtual void anchor() const;
 
   friend class TiffEntry;
   friend class FiffParser;
@@ -98,7 +99,7 @@ class TiffIFD
 public:
   explicit TiffIFD(TiffIFD* parent);
 
-  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, const DataBuffer& data,
+  TiffIFD(TiffIFD* parent, NORangesSet<Buffer>* ifds, DataBuffer data,
           uint32_t offset);
 
   virtual ~TiffIFD() = default;
@@ -113,10 +114,10 @@ public:
   [[nodiscard]] const TiffIFD* getIFDWithTag(TiffTag tag,
                                              uint32_t index = 0) const;
   [[nodiscard]] TiffEntry* getEntry(TiffTag tag) const;
-  [[nodiscard]] TiffEntry* __attribute__((pure))
+  [[nodiscard]] TiffEntry* RAWSPEED_READONLY
   getEntryRecursive(TiffTag tag) const;
-  [[nodiscard]] bool __attribute__((pure)) hasEntry(TiffTag tag) const {
-    return entries.find(tag) != entries.end();
+  [[nodiscard]] bool RAWSPEED_READONLY hasEntry(TiffTag tag) const {
+    return entries.contains(tag);
   }
   [[nodiscard]] bool hasEntryRecursive(TiffTag tag) const {
     return getEntryRecursive(tag) != nullptr;
@@ -125,21 +126,23 @@ public:
   [[nodiscard]] const std::vector<TiffIFDOwner>& getSubIFDs() const {
     return subIFDs;
   }
-//  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries; }
+  //  const std::map<TiffTag, TiffEntry*>& getEntries() const { return entries;
+  //  }
 };
 
-struct TiffID
-{
+struct TiffID final {
   std::string make;
   std::string model;
 };
 
 class TiffRootIFD final : public TiffIFD {
+  void anchor() const override;
+
 public:
   const DataBuffer rootBuffer;
 
-  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds,
-              const DataBuffer& data, uint32_t offset)
+  TiffRootIFD(TiffIFD* parent_, NORangesSet<Buffer>* ifds, DataBuffer data,
+              uint32_t offset)
       : TiffIFD(parent_, ifds, data, offset), rootBuffer(data) {}
 
   // find the MAKE and MODEL tags identifying the camera
@@ -147,11 +150,11 @@ public:
   [[nodiscard]] TiffID getID() const;
 };
 
-inline Endianness getTiffByteOrder(const ByteStream& bs, uint32_t pos,
+inline Endianness getTiffByteOrder(ByteStream bs, uint32_t pos,
                                    const char* context = "") {
-  if (bs.hasPatternAt("II", 2, pos))
+  if (bs.hasPatternAt("II", pos))
     return Endianness::little;
-  if (bs.hasPatternAt("MM", 2, pos))
+  if (bs.hasPatternAt("MM", pos))
     return Endianness::big;
 
   ThrowTPE("Failed to parse TIFF endianness information in %s.", context);

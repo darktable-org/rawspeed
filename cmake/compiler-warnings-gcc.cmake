@@ -36,6 +36,9 @@ endif()
 
 set (GCC_DISABLED_WARNING_FLAGS
   "unused-parameter"
+  "maybe-uninitialized"
+  "stringop-overflow" # bogus warnings at least as of GCC13
+  "array-bounds" # bogus warnings at least as of GCC13
 )
 
 set (GCC_NOERROR_WARNING_FLAGS

@@ -18,16 +18,18 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "decompressors/KodakDecompressor.h" // for SonyArw1Decompre...
-#include "common/RawImage.h"                 // for RawImage, RawImageData
-#include "common/RawspeedException.h"        // for RawspeedException
-#include "fuzz/Common.h"                     // for CreateRawImage
-#include "io/Buffer.h"                       // for Buffer, DataBuffer
-#include "io/ByteStream.h"                   // for ByteStream
-#include "io/Endianness.h" // for Endianness, Endianness::little
-#include <cassert>         // for assert
-#include <cstdint>         // for uint8_t
-#include <cstdio>          // for size_t
+#include "decompressors/KodakDecompressor.h"
+#include "MemorySanitizer.h"
+#include "adt/Casts.h"
+#include "common/RawImage.h"
+#include "common/RawspeedException.h"
+#include "fuzz/Common.h"
+#include "io/Buffer.h"
+#include "io/ByteStream.h"
+#include "io/Endianness.h"
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size);
 
@@ -35,7 +37,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
   assert(Data);
 
   try {
-    const rawspeed::Buffer b(Data, Size);
+    const rawspeed::Buffer b(
+        Data, rawspeed::implicit_cast<rawspeed::Buffer::size_type>(Size));
     const rawspeed::DataBuffer db(b, rawspeed::Endianness::little);
     rawspeed::ByteStream bs(db);
 
@@ -51,8 +54,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     k.decompress();
 
-    mRaw->checkMemIsInitialized();
-  } catch (const rawspeed::RawspeedException&) {
+    rawspeed::MSan::CheckMemIsInitialized(
+        mRaw->getByteDataAsUncroppedArray2DRef());
+  } catch (const rawspeed::RawspeedException&) { // NOLINT(bugprone-empty-catch)
     // Exceptions are good, crashes are bad.
   }
 
