@@ -15368,6 +15368,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="FUJIFILM" model="GFX100S II" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="GFX100S II">Fujifilm GFX100S II</ID>
+	</Camera>
 	<Camera make="FUJIFILM" model="GFX100 II">
 		<ID make="Fujifilm" model="GFX100 II">Fujifilm GFX 100 II</ID>
 		<CFA width="2" height="2">
@@ -16558,6 +16561,9 @@
 				<ColorMatrixRow plane="2">-580 1303 5980</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
+	</Camera>
+	<Camera make="FUJIFILM" model="X-T50" supported="unknown-no-samples">
+		<ID make="Fujifilm" model="X-T50">Fujifilm X-T50</ID>
 	</Camera>
 	<Camera make="FUJIFILM" model="X-T100">
 		<ID make="Fujifilm" model="X-T100">Fujifilm X-T100</ID>
