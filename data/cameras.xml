@@ -17918,15 +17918,15 @@
 	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR III" mode="dng">
 		<ID make="Ricoh" model="GR III">Ricoh GR III</ID>
-	</Camera>
-	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR III HDF" mode="dng">
-		<ID make="Ricoh" model="GR III HDF">Ricoh GR III HDF</ID>
+		<Aliases>
+			<Alias id="GR III HDF">RICOH GR III HDF</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR IIIx" mode="dng">
 		<ID make="Ricoh" model="GR IIIx">Ricoh GR IIIx</ID>
-	</Camera>
-	<Camera make="RICOH IMAGING COMPANY, LTD." model="RICOH GR IIIx HDF" mode="dng">
-		<ID make="Ricoh" model="GR IIIx HDF">Ricoh GR IIIx HDF</ID>
+		<Aliases>
+			<Alias id="GR IIIx HDF">RICOH GR IIIx HDF</Alias>
+		</Aliases>
 	</Camera>
 	<Camera make="Canon" model="Canon IXY 220F" mode="dng">
 		<ID make="Canon" model="IXY 220F">Canon IXY 220F</ID>
