@@ -11012,6 +11012,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S9" supported="no">
+		<ID make="Panasonic" model="DC-S9">Panasonic DC-S9</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ60">
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="145" white="3971"/>
