@@ -17085,7 +17085,7 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="34" y="24" width="-12" height="-12"/>
-		<Sensor black="0" white="65535"/>
+		<Sensor black="0" white="16383"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">2905 732 -237</ColorMatrixRow>
