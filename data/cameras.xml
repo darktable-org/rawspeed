@@ -17125,6 +17125,9 @@
 		</CFA>
 		<Crop x="46" y="28" width="-24" height="-32"/>
 		<Sensor black="0" white="16383"/>
+		<Aliases>
+			<Alias>P45+</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5053 -24 -117</ColorMatrixRow>
