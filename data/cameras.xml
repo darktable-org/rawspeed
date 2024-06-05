@@ -16877,6 +16877,9 @@
 		</CFA>
 		<Crop x="0" y="0" width="-32" height="0"/>
 		<Sensor black="512" white="16300"/>
+		<Aliases>
+			<Alias>UMC-R10C</Alias>
+		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">5991 -1456 -455</ColorMatrixRow>
