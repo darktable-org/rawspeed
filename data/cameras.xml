@@ -14995,25 +14995,9 @@
 		</CFA2>
 		<Crop x="32" y="0" width="-32" height="0"/>
 		<Sensor black="0" white="15872"/>
-		<Hints>
-			<Hint name="fuji_rotate" value=""/>
-		</Hints>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">12343 -4515 -1285</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-7165 14899 2435</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1895 2496 8800</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
-	<Camera make="FUJIFILM" model="FinePix S9600fd" supported="no-samples">
-		<ID make="Fujifilm" model="FinePix S9600fd">Fujifilm FinePix S9600fd</ID>
-		<CFA2 width="2" height="2">
-			<ColorRow y="0">GB</ColorRow>
-			<ColorRow y="1">RG</ColorRow>
-		</CFA2>
-		<Crop x="64" y="0" width="-64" height="0"/>
-		<Sensor black="0" white="15872"/>
+		<Aliases>
+			<Alias id="FinePix S9600fd">Fujifilm FinePix S9600fd</Alias>
+		</Aliases>
 		<Hints>
 			<Hint name="fuji_rotate" value=""/>
 		</Hints>
