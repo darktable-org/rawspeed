@@ -14996,7 +14996,7 @@
 		<Crop x="32" y="0" width="-32" height="0"/>
 		<Sensor black="0" white="15872"/>
 		<Aliases>
-			<Alias id="FinePix S9600fd">Fujifilm FinePix S9600fd</Alias>
+			<Alias>FinePix S9600fd</Alias>
 		</Aliases>
 		<Hints>
 			<Hint name="fuji_rotate" value=""/>
