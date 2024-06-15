@@ -26,6 +26,7 @@
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "bitstreams/BitStreamerMSB.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
@@ -181,7 +182,7 @@ bool NefDecoder::NEFIsUncompressed(const TiffIFD* raw) {
   // We can't just accept this. Some *compressed* NEF's also pass this check :(
   // Thus, let's accept *some* *small* padding.
   const auto requiredInputBits = bitPerPixel * requiredPixels;
-  const auto requiredInputBytes = roundUpDivision(requiredInputBits, 8);
+  const auto requiredInputBytes = roundUpDivisionSafe(requiredInputBits, 8);
   // While we might have more *pixels* than needed, it does not nessesairly mean
   // that we have more input *bytes*. We might be off by a few pixels, and with
   // small image dimensions and bpp, we might still be in the same byte.
@@ -228,7 +229,7 @@ void NefDecoder::DecodeUncompressed() const {
   }
 
   if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
-      roundUpDivision(mRaw->dim.y, yPerSlice) != counts->count) {
+      roundUpDivisionSafe(mRaw->dim.y, yPerSlice) != counts->count) {
     ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
              yPerSlice, counts->count, mRaw->dim.y);
   }

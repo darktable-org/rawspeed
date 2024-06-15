@@ -22,6 +22,7 @@
 #include "adt/Casts.h"
 #include "adt/Point.h"
 #include "bench/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "io/Buffer.h"

@@ -20,9 +20,13 @@
 
 #include "bitstreams/BitVacuumerMSB16.h"
 #include "adt/Array1DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
 #include "adt/PartitioningOutputIterator.h"
+#include "bitstreams/BitStreamPosition.h"
 #include "bitstreams/BitStreamerMSB16.h"
+#include "common/Common.h"
+#include <climits>
 #include <cstdint>
 #include <iterator>
 #include <utility>
@@ -196,6 +200,174 @@ TEST_P(BitVacuumerMSB16Test, Dissolution) {
     bs.fill(32);
     const auto actualVal = len != 0 ? bs.getBitsNoFill(len) : 0;
     ASSERT_THAT(actualVal, expectedVal);
+  }
+}
+
+TEST(BitVacuumerMSB16Test, LoadPos) {
+  std::vector<uint8_t> bitstream;
+
+  constexpr int numByteElts = 64;
+
+  {
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
+    using BitVacuumer = BitVacuumerMSB16<decltype(bsInserter)>;
+    auto bv = BitVacuumer(bsInserter);
+
+    for (int e = 0; e != numByteElts; ++e)
+      bv.put(e, 8);
+  }
+
+  auto fullInput =
+      Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
+
+  using BitStreamer = BitStreamerMSB16;
+  using BitStreamerTraits = BitStreamer::Traits;
+  using BitStreamTraits = BitStreamer::StreamTraits;
+
+  for (int fillLevel : {8, 32}) {
+    for (int baseLoadPosStep = 1;
+         baseLoadPosStep <= 2 * BitStreamTraits::MinLoadStepByteMultiple;
+         ++baseLoadPosStep) {
+      for (int baseLoadPos = 0;
+           baseLoadPos <= numByteElts - BitStreamerTraits::MaxProcessBytes;
+           baseLoadPos += baseLoadPosStep) {
+        auto input =
+            fullInput.getCrop(baseLoadPos, fullInput.size() - baseLoadPos)
+                .getAsArray1DRef();
+        auto bs = BitStreamer(input);
+        for (int i = 0; i != input.size(); ++i) {
+          const auto expectedVal = baseLoadPos + i;
+          bs.fill(fillLevel);
+          const auto actualVal = bs.getBitsNoFill(8);
+          if (baseLoadPosStep % BitStreamTraits::MinLoadStepByteMultiple == 0 ||
+              baseLoadPos % BitStreamTraits::MinLoadStepByteMultiple == 0) {
+            ASSERT_THAT(actualVal, expectedVal);
+          } else {
+            ASSERT_NE(actualVal, expectedVal);
+          }
+        }
+      }
+    }
+  }
+}
+
+TEST(BitVacuumerMSB16Test, DependencyBreaking) {
+  std::vector<uint8_t> bitstream;
+
+  using BitStreamer = BitStreamerMSB16;
+  using BitStreamerTraits = BitStreamer::Traits;
+
+  constexpr int numByteElts = 256;
+
+  {
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
+    using BitVacuumer = BitVacuumerMSB16<decltype(bsInserter)>;
+    auto bv = BitVacuumer(bsInserter);
+
+    for (int e = 0; e != numByteElts + BitStreamerTraits::MaxProcessBytes; ++e)
+      bv.put(e, 8);
+  }
+  constexpr int numBitsTotal = CHAR_BIT * numByteElts;
+
+  auto fullInput =
+      Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
+
+  for (int numBitsToSkip = 0; numBitsToSkip <= numBitsTotal; ++numBitsToSkip) {
+    auto bsRef = BitStreamer(fullInput);
+    bsRef.fill();
+
+    for (int i = 0; i != numBitsToSkip / 8; ++i) {
+      const auto expectedVal = i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+    }
+    if ((numBitsToSkip % 8) != 0) {
+      const auto expectedVal = extractHighBits<unsigned>(
+          numBitsToSkip / CHAR_BIT, numBitsToSkip % 8, CHAR_BIT);
+      ASSERT_THAT(bsRef.getBits(numBitsToSkip % 8), expectedVal);
+    }
+
+    const int numBitsRemaining = numBitsTotal - numBitsToSkip;
+
+    BitStreamPosition<BitStreamerTraits::Tag> state;
+    state.pos = bsRef.getInputPosition();
+    state.fillLevel = bsRef.getFillLevel();
+    const auto bsPos = getAsByteStreamPosition(state);
+
+    auto rebasedInput =
+        fullInput.getCrop(bsPos.bytePos, fullInput.size() - bsPos.bytePos)
+            .getAsArray1DRef();
+    auto bsRebased = BitStreamer(rebasedInput);
+    if (bsPos.numBitsToSkip != 0)
+      bsRebased.skipBits(bsPos.numBitsToSkip);
+
+    int numSubByteBitsRemaining = numBitsRemaining % CHAR_BIT;
+    int numBytesRemaining = numBitsRemaining / CHAR_BIT;
+    if (numSubByteBitsRemaining != 0) {
+      const auto expectedVal = extractLowBits<unsigned>(
+          numBitsToSkip / CHAR_BIT, numSubByteBitsRemaining);
+      ASSERT_THAT(bsRef.getBits(numSubByteBitsRemaining), expectedVal);
+      ASSERT_THAT(bsRebased.getBits(numSubByteBitsRemaining), expectedVal);
+    }
+
+    for (int i = 0; i != numBytesRemaining; ++i) {
+      const auto expectedVal = roundUpDivision(numBitsToSkip, CHAR_BIT) + i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+      ASSERT_THAT(bsRebased.getBits(8), expectedVal);
+    }
+  }
+}
+
+TEST(BitVacuumerMSB16Test, ReloadCache) {
+  std::vector<uint8_t> bitstream;
+
+  using BitStreamer = BitStreamerMSB16;
+  using BitStreamerTraits = BitStreamer::Traits;
+
+  constexpr int numByteElts = 256;
+
+  {
+    auto bsInserter = PartitioningOutputIterator(std::back_inserter(bitstream));
+    using BitVacuumer = BitVacuumerMSB16<decltype(bsInserter)>;
+    auto bv = BitVacuumer(bsInserter);
+
+    for (int e = 0; e != numByteElts + BitStreamerTraits::MaxProcessBytes; ++e)
+      bv.put(e, 8);
+  }
+  constexpr int numBitsTotal = CHAR_BIT * numByteElts;
+
+  auto fullInput =
+      Array1DRef(bitstream.data(), implicit_cast<int>(bitstream.size()));
+
+  for (int numBitsToSkip = 0; numBitsToSkip <= numBitsTotal; ++numBitsToSkip) {
+    auto bsRef = BitStreamer(fullInput);
+    bsRef.fill();
+
+    for (int i = 0; i != numBitsToSkip / 8; ++i) {
+      const auto expectedVal = i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+    }
+    if ((numBitsToSkip % 8) != 0) {
+      const auto expectedVal = extractHighBits<unsigned>(
+          numBitsToSkip / CHAR_BIT, numBitsToSkip % 8, CHAR_BIT);
+      ASSERT_THAT(bsRef.getBits(numBitsToSkip % 8), expectedVal);
+    }
+
+    bsRef.reload();
+
+    const int numBitsRemaining = numBitsTotal - numBitsToSkip;
+
+    int numSubByteBitsRemaining = numBitsRemaining % CHAR_BIT;
+    int numBytesRemaining = numBitsRemaining / CHAR_BIT;
+    if (numSubByteBitsRemaining != 0) {
+      const auto expectedVal = extractLowBits<unsigned>(
+          numBitsToSkip / CHAR_BIT, numSubByteBitsRemaining);
+      ASSERT_THAT(bsRef.getBits(numSubByteBitsRemaining), expectedVal);
+    }
+
+    for (int i = 0; i != numBytesRemaining; ++i) {
+      const auto expectedVal = roundUpDivision(numBitsToSkip, CHAR_BIT) + i;
+      ASSERT_THAT(bsRef.getBits(8), expectedVal);
+    }
   }
 }
 

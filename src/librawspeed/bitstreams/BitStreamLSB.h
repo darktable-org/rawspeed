@@ -28,9 +28,9 @@
 
 namespace rawspeed {
 
-class BitStreamLSB;
+template <> struct BitStreamTraits<BitOrder::LSB> final {
+  static constexpr BitOrder Tag = BitOrder::LSB;
 
-template <> struct BitStreamTraits<BitStreamLSB> final {
   using StreamFlow = BitStreamCacheLeftInRightOut;
 
   static constexpr bool FixedSizeChunks = true;
@@ -38,6 +38,8 @@ template <> struct BitStreamTraits<BitStreamLSB> final {
   using ChunkType = uint32_t;
 
   static constexpr Endianness ChunkEndianness = Endianness::little;
+
+  static constexpr int MinLoadStepByteMultiple = 1;
 };
 
 } // namespace rawspeed

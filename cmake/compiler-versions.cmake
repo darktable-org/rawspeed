@@ -26,10 +26,9 @@
 #   coming with gcc-14 and LLVM18
 # * macOS 13 (Ventura) be the oldest supported macOS version,
 #   with the newest supported Xcode version being 15.2 (LLVM16-based !)
-# * (as of 2024-02-14) oss-fuzz provides LLVM15.
+# * (as of 2024-04-30) oss-fuzz provides LLVM18~.
 #
-# Therefore, we currently require GCC12, macOS 13.5 + Xcode 15.2, and LLVM15,
-# and, pending oss-fuzz roll-forward, LLVM16.
+# Therefore, we currently require GCC12, macOS 13.5 + Xcode 15.2, and LLVM16.
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 12)
   message(SEND_ERROR "GNU C compiler version ${CMAKE_C_COMPILER_VERSION} is too old and is unsupported. Version 12+ is required.")
@@ -38,24 +37,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_L
   message(SEND_ERROR "GNU C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old and is unsupported. Version 12+ is required.")
 endif()
 
-if(NOT TEMPORAIRLY_ALLOW_OLD_TOOCHAIN)
-  if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 16)
-    set(FAILURE ON)
-  endif()
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
-    set(FAILURE ON)
-  endif()
-  if(FAILURE)
-    message(SEND_ERROR "LLVM Clang compiler version ${CMAKE_C_COMPILER_VERSION} is too old and is about to become unsupported. Version 16+ is to be required.")
-    message(SEND_ERROR "If you are seeing this message, please complain before March 4'th on https://github.com/darktable-org/darktable/pull/16374 and this will be temporarily reverted (but will be reinstated after Ubuntu 24.04 has been released, on April 25'th)")
-  endif()
-else()
-  if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 15)
-    message(SEND_ERROR "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} is too old and is unsupported. Version 15+ is required.")
-  endif()
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
-    message(SEND_ERROR "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old and is unsupported. Version 15+ is required.")
-  endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 16)
+  message(SEND_ERROR "LLVM Clang C compiler version ${CMAKE_C_COMPILER_VERSION} is too old and is unsupported. Version 16+ is required.")
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
+  message(SEND_ERROR "LLVM Clang C++ compiler version ${CMAKE_CXX_COMPILER_VERSION} is too old and is unsupported. Version 16+ is required.")
 endif()
 
 # XCode 15.2 (apple clang 15.0.0.15000100) is based on LLVM16
@@ -102,8 +88,6 @@ if(NOT DEFINED RAWSPEED_LIBCXX_MIN)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(LIBCXX_MIN 160000)
   else()
-    # Yes, even though we support using clang-15 (because of oss-fuzz),
-    # if you are using libc++, we require libc++-16.
     set(LIBCXX_MIN 16000)
   endif()
   message(STATUS "Performing libc++ version check")

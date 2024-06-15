@@ -36,7 +36,7 @@ using rawspeed::isIn;
 using rawspeed::isPowerOfTwo;
 using rawspeed::roundDown;
 using rawspeed::roundUp;
-using rawspeed::roundUpDivision;
+using rawspeed::roundUpDivisionSafe;
 using rawspeed::splitString;
 using rawspeed::trimSpaces;
 using std::make_tuple;
@@ -101,11 +101,11 @@ INSTANTIATE_TEST_SUITE_P(RoundUpTest, RoundUpTest,
                          ::testing::ValuesIn(RoundUpValues));
 TEST_P(RoundUpTest, RoundUpTest) { ASSERT_EQ(roundUp(in, multiple), expected); }
 
-using RoundUpDivisionType = std::tuple<uint64_t, uint64_t, uint64_t>;
-class RoundUpDivisionTest
-    : public ::testing::TestWithParam<RoundUpDivisionType> {
+using roundUpDivisionSafeType = std::tuple<uint64_t, uint64_t, uint64_t>;
+class roundUpDivisionSafeTest
+    : public ::testing::TestWithParam<roundUpDivisionSafeType> {
 protected:
-  RoundUpDivisionTest() = default;
+  roundUpDivisionSafeTest() = default;
   virtual void SetUp() {
     in = std::get<0>(GetParam());
     divider = std::get<1>(GetParam());
@@ -116,7 +116,7 @@ protected:
   uint64_t divider;
   uint64_t expected; // expected output
 };
-static const RoundUpDivisionType RoundUpDivisionValues[] = {
+static const roundUpDivisionSafeType roundUpDivisionSafeValues[] = {
     make_tuple(0, 10, 0),
     make_tuple(10, 10, 1),
     make_tuple(10, 1, 10),
@@ -148,10 +148,10 @@ static const RoundUpDivisionType RoundUpDivisionValues[] = {
                1),
 
 };
-INSTANTIATE_TEST_SUITE_P(RoundUpDivisionTest, RoundUpDivisionTest,
-                         ::testing::ValuesIn(RoundUpDivisionValues));
-TEST_P(RoundUpDivisionTest, RoundUpDivisionTest) {
-  ASSERT_EQ(roundUpDivision(in, divider), expected);
+INSTANTIATE_TEST_SUITE_P(roundUpDivisionSafeTest, roundUpDivisionSafeTest,
+                         ::testing::ValuesIn(roundUpDivisionSafeValues));
+TEST_P(roundUpDivisionSafeTest, roundUpDivisionSafeTest) {
+  ASSERT_EQ(roundUpDivisionSafe(in, divider), expected);
 }
 
 using IsAlignedType = std::tuple<int, int>;

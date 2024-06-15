@@ -26,6 +26,7 @@
 #include "adt/Invariant.h"
 #include "adt/NORangesSet.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
@@ -327,13 +328,13 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
 
   assert(tilew > 0);
   const auto tilesX =
-      implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.x, tilew));
+      implicit_cast<uint32_t>(roundUpDivisionSafe(mRaw->dim.x, tilew));
   if (!tilesX)
     ThrowRDE("Zero tiles horizontally");
 
   assert(tileh > 0);
   const auto tilesY =
-      implicit_cast<uint32_t>(roundUpDivision(mRaw->dim.y, tileh));
+      implicit_cast<uint32_t>(roundUpDivisionSafe(mRaw->dim.y, tileh));
   if (!tilesY)
     ThrowRDE("Zero tiles vertically");
 

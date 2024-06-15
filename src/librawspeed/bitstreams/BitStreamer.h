@@ -28,6 +28,7 @@
 #include "adt/Invariant.h"
 #include "adt/VariableLengthLoad.h"
 #include "bitstreams/BitStream.h"
+#include "bitstreams/BitStreamPosition.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
 #include <array>
@@ -41,6 +42,9 @@ template <typename BIT_STREAM> struct BitStreamerTraits;
 
 template <typename Tag> struct BitStreamerReplenisherBase {
   using size_type = int32_t;
+
+  using Traits = BitStreamerTraits<Tag>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   Array1DRef<const std::byte> input;
   int pos = 0;
@@ -62,6 +66,7 @@ BitStreamerReplenisherBase<Tag>::establishClassInvariants() const noexcept {
   input.establishClassInvariants();
   invariant(input.size() >= BitStreamerTraits<Tag>::MaxProcessBytes);
   invariant(pos >= 0);
+  invariant(pos % StreamTraits::MinLoadStepByteMultiple == 0);
   // `pos` *could* be out-of-bounds of `input`.
 }
 
@@ -69,6 +74,8 @@ template <typename Tag>
 struct BitStreamerForwardSequentialReplenisher final
     : public BitStreamerReplenisherBase<Tag> {
   using Base = BitStreamerReplenisherBase<Tag>;
+  using Traits = BitStreamerTraits<Tag>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Base::BitStreamerReplenisherBase;
 
@@ -86,6 +93,7 @@ struct BitStreamerForwardSequentialReplenisher final
     Base::establishClassInvariants();
     invariant(numBytes >= 0);
     invariant(numBytes != 0);
+    invariant(numBytes % StreamTraits::MinLoadStepByteMultiple == 0);
     Base::pos += numBytes;
   }
 
@@ -131,7 +139,7 @@ class BitStreamer {
 public:
   using size_type = int32_t;
   using Traits = BitStreamerTraits<Derived>;
-  using StreamTraits = BitStreamTraits<typename Traits::Stream>;
+  using StreamTraits = BitStreamTraits<Traits::Tag>;
 
   using Cache = typename StreamTraits::StreamFlow;
 
@@ -185,6 +193,22 @@ public:
     establishClassInvariants();
   }
 
+  void reload() {
+    establishClassInvariants();
+
+    BitStreamPosition<Traits::Tag> state;
+    state.pos = getInputPosition();
+    state.fillLevel = getFillLevel();
+    const auto bsPos = getAsByteStreamPosition(state);
+
+    auto replacement = BitStreamer(replenisher.input);
+    if (bsPos.bytePos != 0)
+      replacement.replenisher.markNumBytesAsConsumed(bsPos.bytePos);
+    replacement.fill();
+    replacement.skipBitsNoFill(bsPos.numBitsToSkip);
+    *this = std::move(replacement);
+  }
+
   void fill(int nbits = Cache::MaxGetBits) {
     establishClassInvariants();
     invariant(nbits >= 0);
@@ -197,6 +221,7 @@ public:
     const auto input = replenisher.getInput();
     const auto numBytes = static_cast<Derived*>(this)->fillCache(input);
     replenisher.markNumBytesAsConsumed(numBytes);
+    invariant(cache.fillLevel >= nbits);
   }
 
   // these methods might be specialized by implementations that support it
@@ -271,11 +296,11 @@ public:
     return getBitsNoFill(nbits);
   }
 
-  // This may be used to skip arbitrarily large number of *bytes*,
+  // This may be used to skip arbitrarily large number of *bits*,
   // not limited by the fill level.
-  void skipBytes(int nbytes) {
+  void skipManyBits(int nbits) {
     establishClassInvariants();
-    int remainingBitsToSkip = 8 * nbytes;
+    int remainingBitsToSkip = nbits;
     for (; remainingBitsToSkip >= Cache::MaxGetBits;
          remainingBitsToSkip -= Cache::MaxGetBits) {
       fill(Cache::MaxGetBits);
@@ -285,6 +310,14 @@ public:
       fill(remainingBitsToSkip);
       skipBitsNoFill(remainingBitsToSkip);
     }
+  }
+
+  // This may be used to skip arbitrarily large number of *bytes*,
+  // not limited by the fill level.
+  void skipBytes(int nbytes) {
+    establishClassInvariants();
+    int nbits = 8 * nbytes;
+    skipManyBits(nbits);
   }
 };
 

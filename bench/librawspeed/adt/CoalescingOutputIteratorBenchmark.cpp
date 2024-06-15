@@ -61,7 +61,7 @@ template <typename C> void BM_Broadcast(benchmark::State& state) {
   int64_t numBytes = state.range(0);
   const int bytesPerChunk = sizeof(T);
   const auto numChunks =
-      implicit_cast<int>(roundUpDivision(numBytes, bytesPerChunk));
+      implicit_cast<int>(roundUpDivisionSafe(numBytes, bytesPerChunk));
   numBytes = bytesPerChunk * numChunks;
 
   std::vector<T, DefaultInitAllocatorAdaptor<T, std::allocator<T>>> output;
@@ -105,7 +105,7 @@ template <typename C> void BM_Copy(benchmark::State& state) {
   int64_t numBytes = state.range(0);
   const int bytesPerChunk = sizeof(T);
   const auto numChunks =
-      implicit_cast<int>(roundUpDivision(numBytes, bytesPerChunk));
+      implicit_cast<int>(roundUpDivisionSafe(numBytes, bytesPerChunk));
   numBytes = bytesPerChunk * numChunks;
 
   std::vector<uint8_t,

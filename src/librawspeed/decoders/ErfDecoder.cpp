@@ -21,7 +21,7 @@
 
 #include "decoders/ErfDecoder.h"
 #include "adt/Point.h"
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decoders/SimpleTiffDecoder.h"

@@ -27,6 +27,7 @@
 #include "adt/NORangesSet.h"
 #include "adt/Point.h"
 #include "bitstreams/BitStreamerMSB.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
@@ -163,7 +164,7 @@ void OrfDecoder::decodeUncompressedInterleaved(ByteStream s, uint32_t w,
 
   int inputPitchBytes = inputPitchBits / 8;
 
-  const auto numEvenLines = implicit_cast<int>(roundUpDivision(h, 2));
+  const auto numEvenLines = implicit_cast<int>(roundUpDivisionSafe(h, 2));
   const auto evenLinesInput = s.getStream(numEvenLines, inputPitchBytes)
                                   .peekRemainingBuffer()
                                   .getAsArray1DRef();

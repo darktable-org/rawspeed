@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "common/Common.h"
+#include "bitstreams/BitStreams.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoder.h"
 #include <cstdint>

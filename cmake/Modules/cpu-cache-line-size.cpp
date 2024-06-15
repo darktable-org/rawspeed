@@ -1,9 +1,14 @@
+#include <cerrno>
 #include <cstdint>
 #include <iostream>
 #include <optional>
 
 #if defined(__unix__)
 #include <unistd.h>
+#endif
+
+#if defined(__GLIBC__)
+#include <elf.h>
 #endif
 
 #if defined(_POSIX_C_SOURCE) && defined(_SC_LEVEL1_DCACHE_LINESIZE)

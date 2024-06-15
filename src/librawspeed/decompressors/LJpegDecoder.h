@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "adt/Point.h"
 #include "decompressors/AbstractLJpegDecoder.h"
 #include <cstdint>
 

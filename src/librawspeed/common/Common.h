@@ -138,6 +138,12 @@ constexpr uint64_t RAWSPEED_READNONE roundUp(uint64_t value,
 
 constexpr uint64_t RAWSPEED_READNONE roundUpDivision(uint64_t value,
                                                      uint64_t div) {
+  invariant(div != 0);
+  return roundUp(value, div) / div;
+}
+
+constexpr uint64_t RAWSPEED_READNONE roundUpDivisionSafe(uint64_t value,
+                                                         uint64_t div) {
   return (value != 0) ? (1 + ((value - 1) / div)) : 0;
 }
 
@@ -198,13 +204,5 @@ inline std::array<T, N> to_array(const std::vector<T>& v) {
   std::move(v.begin(), v.end(), a.begin());
   return a;
 }
-
-enum class BitOrder : uint8_t {
-  LSB,   /* Memory order */
-  MSB,   /* Input is added to stack byte by byte, and output is lifted
-                     from top */
-  MSB16, /* Same as above, but 16 bits at the time */
-  MSB32, /* Same as above, but 32 bits at the time */
-};
 
 } // namespace rawspeed

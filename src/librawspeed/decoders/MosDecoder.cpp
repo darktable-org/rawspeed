@@ -22,6 +22,7 @@
 #include "decoders/MosDecoder.h"
 #include "adt/Casts.h"
 #include "adt/Point.h"
+#include "bitstreams/BitStreams.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "decoders/AbstractTiffDecoder.h"

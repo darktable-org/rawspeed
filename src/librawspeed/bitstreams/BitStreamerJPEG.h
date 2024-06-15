@@ -23,12 +23,12 @@
 #include "rawspeedconfig.h"
 #include "adt/Array1DRef.h"
 #include "adt/Bit.h"
+#include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "bitstreams/BitStream.h"
 #include "bitstreams/BitStreamJPEG.h"
 #include "bitstreams/BitStreamer.h"
 #include "io/Endianness.h"
-#include <algorithm>
 #include <array>
 #include <concepts>
 #include <cstddef>
@@ -68,7 +68,7 @@ public:
 class BitStreamerJPEG;
 
 template <> struct BitStreamerTraits<BitStreamerJPEG> final {
-  using Stream = BitStreamJPEG;
+  static constexpr BitOrder Tag = BitOrder::JPEG;
 
   static constexpr bool canUseWithPrefixCodeDecoder = true;
 
