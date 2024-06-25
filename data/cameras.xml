@@ -11012,7 +11012,7 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DC-S9" supported="no">
+	<Camera make="Panasonic" model="DC-S9" supported="unknown-no-samples">
 		<ID make="Panasonic" model="DC-S9">Panasonic DC-S9</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-TZ60">
@@ -11442,7 +11442,7 @@
 	<Camera make="Panasonic" model="DC-GH6" supported="no">
 		<ID make="Panasonic" model="DC-GH6">Panasonic DC-GH6</ID>
 	</Camera>
-	<Camera make="Panasonic" model="DC-GH7" supported="no">
+	<Camera make="Panasonic" model="DC-GH7" supported="unknown-no-samples">
 		<ID make="Panasonic" model="DC-GH7">Panasonic DC-GH7</ID>
 	</Camera>
 	<Camera make="Panasonic" model="DC-G9">
