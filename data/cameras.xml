@@ -17164,6 +17164,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Phase One A/S" model="IQ150">
+		<ID make="Phase One" model="IQ150">Phase One IQ150</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="102" y="116" width="0" height="0"/>
+		<Sensor black="0" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10325 845 -604</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4113 13385 481</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1791 4163 6924</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="Phase One A/S" model="IQ180">
 		<ID make="Phase One" model="IQ180">Phase One IQ180</ID>
 		<CFA width="2" height="2">
