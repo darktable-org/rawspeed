@@ -17908,6 +17908,9 @@
 	<Camera make="LEICA CAMERA AG" model="LEICA CL" mode="dng">
 		<ID make="Leica" model="CL">LEICA CL</ID>
 	</Camera>
+	<Camera make="LEICA CAMERA AG" model="LEICA D-Lux 8" mode="dng">
+		<ID make="Leica" model="D-Lux 8">LEICA D-Lux 8</ID>
+	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="GR" mode="dng">
 		<ID make="Ricoh" model="GR">GR</ID>
 	</Camera>
