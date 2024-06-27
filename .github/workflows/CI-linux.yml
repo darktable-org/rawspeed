@@ -161,6 +161,7 @@ jobs:
                                       python3-pip-whl \
                                       python3-portalocker \
                                       python3-psutil \
+                                      python3-setuptools \
                                       python3-venv \
                                       python3-virtualenv \
                                       python3-wheel \
