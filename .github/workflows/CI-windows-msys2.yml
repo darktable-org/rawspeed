@@ -51,9 +51,6 @@ jobs:
           cache: false
           msystem: ${{ inputs.msys2-msystem }}
           update: false
-          install: >-
-            git
-            base-devel
           pacboy: >-
             cc:p
             gcc-libs:p
@@ -67,12 +64,8 @@ jobs:
       - name: Install Additional Dependencies (Coverage)
         if: inputs.flavor == 'Coverage'
         timeout-minutes: 1
-        uses: msys2/setup-msys2@v2
-        with:
-          cache: false
-          msystem: ${{ inputs.msys2-msystem }}
-          pacboy: >-
-            zstd:p
+        run: |
+          pacboy --noconfirm -S --needed zstd:p
       - name: Configure
         timeout-minutes: 3
         env:
