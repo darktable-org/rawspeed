@@ -178,7 +178,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            msys2: { msystem: MINGW64, arch: x86_64, family: GNU, CC: gcc, CXX: g++ }
+            msys2: { msystem: UCRT64, arch: x86_64, family: GNU, CC: gcc, CXX: g++ }
             flavor: Coverage
     uses: ./.github/workflows/CI-windows-msys2.yml
     with:
