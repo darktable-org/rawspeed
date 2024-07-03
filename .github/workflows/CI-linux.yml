@@ -217,6 +217,7 @@ jobs:
           cd codechecker
           make venv
           . $PWD/venv/bin/activate
+          pip install setuptools
           BUILD_LOGGER_64_BIT_ONLY=YES BUILD_UI_DIST=NO make package
           export PATH="$PWD/build/CodeChecker/bin:$PATH"
       - name: Initialize CodeQL (for CodeQL static analysis)
