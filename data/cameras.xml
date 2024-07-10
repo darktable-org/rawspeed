@@ -14483,6 +14483,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="SONY" model="ZV-E10M2" supported="unknown-no-samples">
+		<ID make="Sony" model="ZV-E10M2">Sony ZV-E10M2</ID>
+	</Camera>
 	<Camera make="SONY" model="ILME-FX3">
 		<ID make="Sony" model="ILME-FX3">Sony ILME-FX3</ID>
 		<CFA width="2" height="2">
