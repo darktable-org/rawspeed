@@ -1629,6 +1629,9 @@
 	<Camera make="Canon" model="Canon EOS RP" supported="no">
 		<ID make="Canon" model="EOS RP">Canon EOS RP</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS R1" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS R1">Canon EOS R1</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS R3" supported="no">
 		<ID make="Canon" model="EOS R3">Canon EOS R3</ID>
 	</Camera>
