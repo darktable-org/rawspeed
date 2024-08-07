@@ -12847,7 +12847,7 @@
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
 		<Crop x="0" y="2" width="-10" height="-2"/>
-		<Sensor black="0" white="4095"/>
+		<Sensor black="0" white="4000"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
 				<ColorMatrixRow plane="0">12093 -3557 -1155</ColorMatrixRow>
