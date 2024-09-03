@@ -11311,6 +11311,9 @@
 			<Alias>DC-FZ80</Alias>
 			<Alias>DMC-FZ80</Alias>
 			<Alias>DMC-FZ85</Alias>
+			<Alias>DC-FZ80D</Alias>
+			<Alias>DC-FZ82D</Alias>
+			<Alias>DC-FZ85D</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -11328,6 +11331,9 @@
 			<Alias>DC-FZ80</Alias>
 			<Alias>DMC-FZ80</Alias>
 			<Alias>DMC-FZ85</Alias>
+			<Alias>DC-FZ80D</Alias>
+			<Alias>DC-FZ82D</Alias>
+			<Alias>DC-FZ85D</Alias>
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
