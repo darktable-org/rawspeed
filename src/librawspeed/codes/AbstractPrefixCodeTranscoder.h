@@ -93,7 +93,7 @@ public:
 
   bool operator==(const AbstractPrefixCodeTranscoder& other) const {
     return code.symbols == other.code.symbols &&
-           code.Base::codeValues == other.codeValues;
+           code.Base::codeValues == other.code.Base::codeValues;
   }
 };
 
