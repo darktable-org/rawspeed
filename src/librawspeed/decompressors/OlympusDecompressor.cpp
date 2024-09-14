@@ -222,7 +222,7 @@ OlympusDecompressor::OlympusDecompressor(RawImage img) : mRaw(std::move(img)) {
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
       mRaw->dim.y % 2 != 0 || mRaw->dim.x > 10400 || mRaw->dim.y > 7792)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
 }
 

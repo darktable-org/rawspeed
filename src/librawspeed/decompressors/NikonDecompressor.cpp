@@ -354,7 +354,7 @@ public:
       }
 
       if (l > 16) {
-        ThrowRDE("Corrupt JPEG data: bad Huffman code:%u\n", l);
+        ThrowRDE("Corrupt JPEG data: bad Huffman code:%d\n", l);
       } else {
         rv = dctbl1.huffval[dctbl1.valptr[l] + (code - dctbl1.mincode[l])];
       }
@@ -479,7 +479,7 @@ NikonDecompressor::NikonDecompressor(RawImage raw, ByteStream metadata,
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
       mRaw->dim.x > 8288 || mRaw->dim.y > 5520)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
 
   switch (bitsPS) {

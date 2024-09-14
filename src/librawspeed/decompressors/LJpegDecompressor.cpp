@@ -140,7 +140,7 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
       frame.dim.x < mcusToConsume ||
       frame.mcu.y * frame.dim.y < imgFrame.dim.y ||
       frame.mcu.x * frame.dim.x < tileRequiredWidth) {
-    ThrowRDE("LJpeg frame (%d, %d) is smaller than expected (%u, %u)",
+    ThrowRDE("LJpeg frame (%d, %d) is smaller than expected (%d, %d)",
              frame.mcu.x * frame.dim.x, frame.mcu.y * frame.dim.y,
              tileRequiredWidth, imgFrame.dim.y);
   }

@@ -155,7 +155,7 @@ void RawImageData::setCpp(uint32_t val) {
     ThrowRDE("Attempted to set Components per pixel after data allocation");
   if (val > 4) {
     ThrowRDE(
-        "Only up to 4 components per pixel is support - attempted to set: %d",
+        "Only up to 4 components per pixel is support - attempted to set: %u",
         val);
   }
 

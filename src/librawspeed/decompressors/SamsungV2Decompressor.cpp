@@ -212,9 +212,9 @@ SamsungV2Decompressor::prepareBaselineValues(BitStreamerMSB32& pump, int row,
     }
 
     if (refCol < 0)
-      ThrowRDE("Bad motion %u at the beginning of the row", motion);
+      ThrowRDE("Bad motion %d at the beginning of the row", motion);
     if ((refCol >= width) || (doAverage && (refCol + 2 >= width)))
-      ThrowRDE("Bad motion %u at the end of the row", motion);
+      ThrowRDE("Bad motion %d at the end of the row", motion);
 
     // In some cases we use as reference interpolation of this pixel and
     // the next

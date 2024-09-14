@@ -50,7 +50,7 @@ Cr2LJpegDecoder::Cr2LJpegDecoder(ByteStream bs, const RawImage& img)
 
   if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x > 19440 ||
       mRaw->dim.y > 5920) {
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
   }
 }

@@ -145,7 +145,7 @@ void AbstractLJpegDecoder::parseSOF(ByteStream sofInput, SOFInfo* sof) {
   }
 
   if (sof->cps > static_cast<uint32_t>(mRaw->dim.x)) {
-    ThrowRDE("Component count should be no greater than row length (%u vs %u).",
+    ThrowRDE("Component count should be no greater than row length (%u vs %d).",
              sof->cps, mRaw->dim.x);
   }
 

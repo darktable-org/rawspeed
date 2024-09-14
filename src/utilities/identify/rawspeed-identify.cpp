@@ -229,7 +229,7 @@ int main(int argc_, char* argv_[]) {
     iPoint2D cropTL = r->getCropOffset();
     fprintf(stdout, "cropOffset: %dx%d\n", cropTL.x, cropTL.y);
 
-    fprintf(stdout, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
+    fprintf(stdout, "fuji_rotation_pos: %u\n", r->metadata.fujiRotationPos);
     fprintf(stdout, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
     double sum = 0.0;
