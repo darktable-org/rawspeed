@@ -65,7 +65,7 @@ public:
       : numSlices(numSlices_), sliceWidth(sliceWidth_),
         lastSliceWidth(lastSliceWidth_) {
     if (numSlices < 1)
-      ThrowRDE("Bad slice count: %u", numSlices);
+      ThrowRDE("Bad slice count: %d", numSlices);
   }
 
   [[nodiscard]] bool empty() const {

@@ -46,7 +46,7 @@ SonyArw2Decompressor::SonyArw2Decompressor(RawImage img, ByteStream input_)
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 32 != 0 ||
       mRaw->dim.x > 9600 || mRaw->dim.y > 6376)
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
 
   // 1 byte per pixel

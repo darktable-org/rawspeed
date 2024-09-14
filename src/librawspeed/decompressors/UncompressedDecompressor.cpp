@@ -143,7 +143,7 @@ UncompressedDecompressor::UncompressedDecompressor(
   invariant(outPixelBits > 0);
 
   if (outPixelBits % 8 != 0) {
-    ThrowRDE("Bad combination of cpp (%u), bps (%u) and width (%u), the "
+    ThrowRDE("Bad combination of cpp (%u), bps (%d) and width (%u), the "
              "pitch is %" PRIu64 " bits, which is not a multiple of 8 (1 byte)",
              cpp, bitPerPixel, w, outPixelBits);
   }
@@ -241,7 +241,7 @@ void UncompressedDecompressor::readUncompressedRaw() {
           h, implicit_cast<int>(y));
       return;
     }
-    ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %u / %u",
+    ThrowRDE("Unsupported floating-point input bitwidth/bit packing: %d / %u",
              bitPerPixel, static_cast<unsigned>(order));
   }
 

@@ -57,7 +57,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
       case static_cast<int>(rawspeed::BitOrder::JPEG):
         return rawspeed::BitOrder(val);
       default:
-        ThrowRSE("Unknown bit order: %u", val);
+        ThrowRSE("Unknown bit order: %i", val);
       }
       __builtin_unreachable();
     }();

@@ -72,7 +72,7 @@ DngDecoder::DngDecoder(TiffRootIFDOwner&& rootIFD, Buffer file)
       mRootIFD->getEntryRecursive(TiffTag::DNGVERSION)->getData().getBuffer(4);
 
   if (v[0] != 1) {
-    ThrowRDE("Not a supported DNG image format: v%u.%u.%u.%u",
+    ThrowRDE("Not a supported DNG image format: v%i.%i.%i.%i",
              static_cast<int>(v[0]), static_cast<int>(v[1]),
              static_cast<int>(v[2]), static_cast<int>(v[3]));
   }
@@ -159,7 +159,7 @@ Optional<iRectangle2D> DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
 
   const TiffEntry* active_area = raw->getEntry(TiffTag::ACTIVEAREA);
   if (active_area->count != 4)
-    ThrowRDE("active area has %d values instead of 4", active_area->count);
+    ThrowRDE("active area has %u values instead of 4", active_area->count);
 
   const iRectangle2D fullImage(0, 0, mRaw->dim.x, mRaw->dim.y);
 
@@ -172,7 +172,7 @@ Optional<iRectangle2D> DngDecoder::parseACTIVEAREA(const TiffIFD* raw) const {
   if (!(fullImage.isPointInsideInclusive(topLeft) &&
         fullImage.isPointInsideInclusive(bottomRight) &&
         bottomRight >= topLeft)) {
-    ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+    ThrowRDE("Rectangle (%i, %i, %i, %i) not inside image (%i, %i, %i, %i).",
              topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
              fullImage.getTopLeft().x, fullImage.getTopLeft().y,
              fullImage.getBottomRight().x, fullImage.getBottomRight().y);
@@ -229,7 +229,7 @@ void DngDecoder::parseCFA(const TiffIFD* raw) const {
   iPoint2D cfaSize(cfadim->getU32(1), cfadim->getU32(0));
   if (!cfaSize.hasPositiveArea() || cfaSize.area() != cPat->count) {
     ThrowRDE("CFA pattern dimension and pattern count does not "
-             "match: %d.",
+             "match: %u.",
              cPat->count);
   }
 
@@ -351,7 +351,7 @@ DngDecoder::getTilingDescription(const TiffIFD* raw) const {
 
   if (yPerSlice == 0 ||
       roundUpDivisionSafe(mRaw->dim.y, yPerSlice) != counts->count) {
-    ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
+    ThrowRDE("Invalid y per slice %u or strip count %u (height = %i)",
              yPerSlice, counts->count, mRaw->dim.y);
   }
 
@@ -465,7 +465,7 @@ RawImage DngDecoder::decodeRawInternal() {
 
   bps = raw->getEntry(TiffTag::BITSPERSAMPLE)->getU32();
   if (*bps < 1 || *bps > 32)
-    ThrowRDE("Unsupported bit per sample count: %u.", *bps);
+    ThrowRDE("Unsupported bit per sample count: %i.", *bps);
 
   uint32_t sample_format = 1;
   if (raw->hasEntry(TiffTag::SAMPLEFORMAT))

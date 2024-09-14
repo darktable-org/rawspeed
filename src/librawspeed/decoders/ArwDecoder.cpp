@@ -613,14 +613,14 @@ void ArwDecoder::GetWB() const {
     if (encryptedIFD.hasEntry(TiffTag::SONYGRBGLEVELS)) {
       const TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYGRBGLEVELS);
       if (wb->count != 4)
-        ThrowRDE("WB has %d entries instead of 4", wb->count);
+        ThrowRDE("WB has %u entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(2);
     } else if (encryptedIFD.hasEntry(TiffTag::SONYRGGBLEVELS)) {
       const TiffEntry* wb = encryptedIFD.getEntry(TiffTag::SONYRGGBLEVELS);
       if (wb->count != 4)
-        ThrowRDE("WB has %d entries instead of 4", wb->count);
+        ThrowRDE("WB has %u entries instead of 4", wb->count);
       mRaw->metadata.wbCoeffs[0] = wb->getFloat(0);
       mRaw->metadata.wbCoeffs[1] = wb->getFloat(1);
       mRaw->metadata.wbCoeffs[2] = wb->getFloat(3);
@@ -629,7 +629,7 @@ void ArwDecoder::GetWB() const {
     if (encryptedIFD.hasEntry(TiffTag::SONYBLACKLEVEL)) {
       const TiffEntry* bl = encryptedIFD.getEntry(TiffTag::SONYBLACKLEVEL);
       if (bl->count != 4)
-        ThrowRDE("Black Level has %d entries instead of 4", bl->count);
+        ThrowRDE("Black Level has %u entries instead of 4", bl->count);
       mRaw->blackLevelSeparate =
           Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
       auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
@@ -640,7 +640,7 @@ void ArwDecoder::GetWB() const {
     if (encryptedIFD.hasEntry(TiffTag::SONYWHITELEVEL)) {
       const TiffEntry* wl = encryptedIFD.getEntry(TiffTag::SONYWHITELEVEL);
       if (wl->count != 1 && wl->count != 3)
-        ThrowRDE("White Level has %d entries instead of 1 or 3", wl->count);
+        ThrowRDE("White Level has %u entries instead of 1 or 3", wl->count);
       mRaw->whitePoint = wl->getU16(0) >> mShiftDownScaleForExif;
     }
   }

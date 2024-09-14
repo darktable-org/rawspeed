@@ -311,7 +311,7 @@ Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
   frame.y /= dsc.Y_S_F;
 
   if (mRaw->dim.x > 19440 || mRaw->dim.y > 5920) {
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
@@ -334,7 +334,7 @@ Cr2Decompressor<PrefixCodeDecoder>::Cr2Decompressor(
 
   for (auto* width : {&slicing.sliceWidth, &slicing.lastSliceWidth}) {
     if (*width % dsc.sliceColStep != 0) {
-      ThrowRDE("Slice width (%u) should be multiple of pixel group size (%u)",
+      ThrowRDE("Slice width (%d) should be multiple of pixel group size (%d)",
                *width, dsc.sliceColStep);
     }
     *width /= dsc.sliceColStep;

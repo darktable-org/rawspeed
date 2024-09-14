@@ -79,7 +79,7 @@ RawImage KdcDecoder::decodeRawInternal() {
   if (auto compression =
           mRootIFD->getEntryRecursive(TiffTag::COMPRESSION)->getU32();
       7 != compression)
-    ThrowRDE("Unsupported compression %d", compression);
+    ThrowRDE("Unsupported compression %u", compression);
 
   const TiffEntry* ifdoffset = mRootIFD->getEntryRecursive(TiffTag::KODAK_IFD2);
   if (!ifdoffset)
@@ -104,7 +104,7 @@ RawImage KdcDecoder::decodeRawInternal() {
   mRaw->dim = iPoint2D(width, height);
 
   if (!mRaw->dim.hasPositiveArea() || !(mRaw->dim <= iPoint2D(4304, 3221)))
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
 
   const Buffer inputBuffer = KdcDecoder::getInputBuffer();

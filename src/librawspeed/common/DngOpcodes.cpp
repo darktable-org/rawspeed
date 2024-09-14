@@ -212,7 +212,7 @@ protected:
     if (!(subImage.isPointInsideInclusive(topLeft) &&
           subImage.isPointInsideInclusive(bottomRight) &&
           bottomRight >= topLeft)) {
-      ThrowRDE("Rectangle (%u, %u, %u, %u) not inside image (%u, %u, %u, %u).",
+      ThrowRDE("Rectangle (%d, %d, %d, %d) not inside image (%d, %d, %d, %d).",
                topLeft.x, topLeft.y, bottomRight.x, bottomRight.y,
                subImage.getTopLeft().x, subImage.getTopLeft().y,
                subImage.getBottomRight().x, subImage.getBottomRight().y);
@@ -702,7 +702,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, ByteStream bs) {
     if (auto Op = Map(code))
       std::tie(opName, opConstructor) = *Op;
     else
-      ThrowRDE("Unknown unhandled Opcode: %d", code);
+      ThrowRDE("Unknown unhandled Opcode: %u", code);
 
     if (opConstructor != nullptr)
       opcodes.emplace_back(opConstructor(ri, opcode_bs, integrated_subimg));
@@ -711,7 +711,7 @@ DngOpcodes::DngOpcodes(const RawImage& ri, ByteStream bs) {
       // Throw Error if not marked as optional
       if (!(flags & 1))
 #endif
-        ThrowRDE("Unsupported Opcode: %d (%s)", code, opName);
+        ThrowRDE("Unsupported Opcode: %u (%s)", code, opName);
     }
 
     if (opcode_bs.getRemainSize() != 0)

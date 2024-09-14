@@ -51,7 +51,7 @@ PhaseOneDecompressor::PhaseOneDecompressor(RawImage img,
 
   if (!mRaw->dim.hasPositiveArea() || mRaw->dim.x % 2 != 0 ||
       mRaw->dim.x > 11976 || mRaw->dim.y > 8854) {
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
   }
 
@@ -63,7 +63,7 @@ void PhaseOneDecompressor::prepareStrips() {
 
   // If the length is different, then the 'strips' vector is clearly incorrect.
   if (strips.size() != static_cast<decltype(strips)::size_type>(mRaw->dim.y)) {
-    ThrowRDE("Height (%u) vs strip count %zu mismatch", mRaw->dim.y,
+    ThrowRDE("Height (%d) vs strip count %zu mismatch", mRaw->dim.y,
              strips.size());
   }
 

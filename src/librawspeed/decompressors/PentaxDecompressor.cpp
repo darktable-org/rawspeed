@@ -59,7 +59,7 @@ PentaxDecompressor::PentaxDecompressor(RawImage img,
 
   if (!mRaw->dim.x || !mRaw->dim.y || mRaw->dim.x % 2 != 0 ||
       mRaw->dim.x > 8384 || mRaw->dim.y > 6208) {
-    ThrowRDE("Unexpected image dimensions found: (%u; %u)", mRaw->dim.x,
+    ThrowRDE("Unexpected image dimensions found: (%d; %d)", mRaw->dim.x,
              mRaw->dim.y);
   }
 }
@@ -96,7 +96,7 @@ PentaxDecompressor::SetupPrefixCodeDecoder_Modern(ByteStream stream) {
     v1[i] = stream.getByte();
 
     if (v1[i] == 0 || v1[i] > 12)
-      ThrowRDE("Data corrupt: v1[%i]=%i, expected [1..12]", depth, v1[i]);
+      ThrowRDE("Data corrupt: v1[%u]=%u, expected [1..12]", depth, v1[i]);
   }
 
   std::vector<uint8_t> nCodesPerLength;

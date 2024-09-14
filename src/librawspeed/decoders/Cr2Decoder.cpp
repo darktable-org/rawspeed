@@ -170,7 +170,7 @@ RawImage Cr2Decoder::decodeNewFormat() {
           raw->getEntryRecursive(TiffTag::CANONCR2SLICE);
       cr2SliceEntry) {
     if (cr2SliceEntry->count != 3) {
-      ThrowRDE("Found RawImageSegmentation tag with %d elements, should be 3.",
+      ThrowRDE("Found RawImageSegmentation tag with %u elements, should be 3.",
                cr2SliceEntry->count);
     }
 

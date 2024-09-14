@@ -224,8 +224,8 @@ std::string img_hash(const RawImage& r, bool noSamples) {
   APPEND(&oss, "isCFA: %d\n", r->isCFA);
   APPEND(&oss, "cfa: %s\n", r->cfa.asString().c_str());
   APPEND(&oss, "filters: 0x%x\n", r->cfa.getDcrawFilter());
-  APPEND(&oss, "bpp: %d\n", r->getBpp());
-  APPEND(&oss, "cpp: %d\n", r->getCpp());
+  APPEND(&oss, "bpp: %u\n", r->getBpp());
+  APPEND(&oss, "cpp: %u\n", r->getCpp());
   APPEND(&oss, "dataType: %u\n", static_cast<unsigned>(r->getDataType()));
 
   const iPoint2D dimUncropped = r->getUncroppedDim();
@@ -242,17 +242,17 @@ std::string img_hash(const RawImage& r, bool noSamples) {
 
   APPEND(&oss, "blackAreas: ");
   for (auto ba : r->blackAreas)
-    APPEND(&oss, "%d:%dx%d, ", ba.isVertical, ba.offset, ba.size);
+    APPEND(&oss, "%d:%ux%u, ", ba.isVertical, ba.offset, ba.size);
   APPEND(&oss, "\n");
 
-  APPEND(&oss, "fuji_rotation_pos: %d\n", r->metadata.fujiRotationPos);
+  APPEND(&oss, "fuji_rotation_pos: %u\n", r->metadata.fujiRotationPos);
   APPEND(&oss, "pixel_aspect_ratio: %f\n", r->metadata.pixelAspectRatio);
 
   APPEND(&oss, "badPixelPositions: ");
   {
     MutexLocker guard(&r->mBadPixelMutex);
     for (uint32_t p : r->mBadPixelPositions)
-      APPEND(&oss, "%d, ", p);
+      APPEND(&oss, "%u, ", p);
   }
 
   APPEND(&oss, "\n");

@@ -230,7 +230,7 @@ void NefDecoder::DecodeUncompressed() const {
 
   if (yPerSlice == 0 || yPerSlice > static_cast<uint32_t>(mRaw->dim.y) ||
       roundUpDivisionSafe(mRaw->dim.y, yPerSlice) != counts->count) {
-    ThrowRDE("Invalid y per slice %u or strip count %u (height = %u)",
+    ThrowRDE("Invalid y per slice %u or strip count %u (height = %i)",
              yPerSlice, counts->count, mRaw->dim.y);
   }
 
@@ -630,10 +630,10 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     const TiffEntry* bl =
         mRootIFD->getEntryRecursive(TiffTag::NIKON_BLACKLEVEL);
     if (bl->count != 4)
-      ThrowRDE("BlackLevel has %d entries instead of 4", bl->count);
+      ThrowRDE("BlackLevel has %u entries instead of 4", bl->count);
     uint32_t bitPerPixel = getBitPerSample();
     if (bitPerPixel != 12 && bitPerPixel != 14)
-      ThrowRDE("Bad bit per pixel: %i", bitPerPixel);
+      ThrowRDE("Bad bit per pixel: %u", bitPerPixel);
     const int sh = 14 - bitPerPixel;
     mRaw->blackLevelSeparate =
         Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
@@ -664,7 +664,7 @@ void NefDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 // trivial to run this multithreaded.
 void NefDecoder::DecodeNikonSNef(ByteStream input) const {
   if (mRaw->dim.x < 6)
-    ThrowIOE("got a %u wide sNEF, aborting", mRaw->dim.x);
+    ThrowIOE("got a %i wide sNEF, aborting", mRaw->dim.x);
 
   // We need to read the applied whitebalance, since we should return
   // data before whitebalance, so we "unapply" it.
