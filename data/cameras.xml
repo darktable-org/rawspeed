@@ -1389,7 +1389,7 @@
 		</CFA>
 		<Crop x="78" y="42" width="-4" height="-6"/>
 		<BlackAreas>
-			<Vertical x="0" width="70"/>
+			<Vertical x="5" width="70"/>
 			<Horizontal y="4" height="30"/>
 		</BlackAreas>
 		<Aliases>
