@@ -23,12 +23,11 @@ export CMAKE_GENERATOR=Ninja
 ln -f -s /usr/local/bin/lld /usr/bin/ld
 
 cd "$SRC"
-
 wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/llvm-project-16.0.6.src.tar.xz
 tar -xf llvm-project-16.0.6.src.tar.xz llvm-project-16.0.6.src/{runtimes,cmake,llvm/cmake,libcxx,libcxxabi}/
-LIBCXX_BUILD="$SRC/llvm-project-16.0.6.build"
-mkdir "$LIBCXX_BUILD"
-cmake -S llvm-project-16.0.6.src/runtimes/ -B "$LIBCXX_BUILD" \
+LIBCXX_SOURCE="$SRC/llvm-project-16.0.6.src"
+LIBCXX_BUILD="$WORK/llvm-project-16.0.6"
+cmake -S "$LIBCXX_SOURCE/runtimes/" -B "$LIBCXX_BUILD" \
       -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_SHARED_LIBS=OFF \
       -DLLVM_INCLUDE_TESTS=OFF \
@@ -42,6 +41,9 @@ cmake --build "$LIBCXX_BUILD" -- -j$(nproc) cxx cxxabi
 
 CXXFLAGS="$CXXFLAGS -nostdinc++ -nostdlib++ -isystem $LIBCXX_BUILD/include -isystem $LIBCXX_BUILD/include/c++/v1 -L$LIBCXX_BUILD/lib -lc++ -lc++abi"
 
+THINLTO_CACHE="$WORK/thinlto-cache"
+LDFLAGS="${LDFLAGS:-} -Wl,--thinlto-cache-dir=\"$THINLTO_CACHE\""
+
 if [[ $SANITIZER = *undefined* ]]; then
   CFLAGS="$CFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
   CXXFLAGS="$CXXFLAGS -fsanitize=unsigned-integer-overflow -fno-sanitize-recover=unsigned-integer-overflow"
@@ -52,11 +54,11 @@ if [[ $SANITIZER = *memory* ]]; then
   WITH_OPENMP=OFF
 fi
 
-cd "$WORK"
-mkdir build
-cd build
+RAWSPEED_SOURCE="$SRC/librawspeed/"
+RAWSPEED_BUILD="$WORK/rawspeed"
 
-cmake \
+cmake -S "$RAWSPEED_SOURCE" -B "$RAWSPEED_BUILD" \
+  -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DRAWSPEED_ENABLE_DEBUG_INFO=OFF \
   -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
   -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
   -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
@@ -66,7 +68,8 @@ cmake \
   -DCMAKE_INSTALL_PREFIX:PATH="$OUT" -DCMAKE_INSTALL_BINDIR:PATH="$OUT" \
   "$SRC/librawspeed/"
 
-cmake --build . -- -j$(nproc) all && cmake --build . -- -j$(nproc) install
+cmake --build "$RAWSPEED_BUILD" -- -j$(nproc) all && cmake --build "$RAWSPEED_BUILD" -- -j$(nproc) install
 
-du -hcs .
-du -hcs "$OUT"
+du -hcs "$SRC"/* \
+        "$WORK"/* \
+        "$OUT"
