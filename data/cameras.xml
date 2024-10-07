@@ -17857,6 +17857,9 @@
 	<Camera make="Leica Camera AG" model="LEICA M11 Monochrom" mode="dng">
 		<ID make="Leica" model="M11 Monochrom">LEICA M11 Monochrom</ID>
 	</Camera>
+	<Camera make="Leica Camera AG" model="LEICA M11-D" mode="dng">
+		<ID make="Leica" model="M11-D">LEICA M11-D</ID>
+	</Camera>
 	<Camera make="Leica Camera AG" model="LEICA M11-P" mode="dng">
 		<ID make="Leica" model="M11-P">LEICA M11-P</ID>
 	</Camera>
