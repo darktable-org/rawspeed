@@ -65,6 +65,8 @@ static_assert(RAWSPEED_LARGEPAGESIZE >= RAWSPEED_PAGESIZE,
 #cmakedefine HAVE_JPEG
 #cmakedefine HAVE_JPEG_MEM_SRC
 
+#cmakedefine HAVE_JXL
+
 #cmakedefine HAVE_CXX_THREAD_LOCAL
 #cmakedefine HAVE_GCC_THREAD_LOCAL
 

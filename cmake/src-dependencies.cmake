@@ -184,6 +184,33 @@ else()
 endif()
 add_feature_info("Lossy JPEG decoding" HAVE_JPEG "used for DNG Lossy JPEG compression decoding")
 
+unset(HAVE_JXL)
+if(WITH_JXL)
+  message(STATUS "Looking for JPEG XL")
+  find_package(JXL)
+  if(NOT JXL_FOUND)
+    message(SEND_ERROR "Did not find JPEG XL! Either make it find JPEG XL, or pass -DWITH_JXL=OFF to disable JPEG XL.")
+  else()
+    message(STATUS "Looking for JPEG XL - found")
+    set(HAVE_JXL 1)
+
+    if(NOT TARGET JXL::jxl)
+      add_library(JXL::jxl INTERFACE IMPORTED)
+      set_property(TARGET JXL::jxl PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${JXL_INCLUDE_DIRS}")
+      set_property(TARGET JXL::jxl PROPERTY INTERFACE_LINK_LIBRARIES "${JXL_LIBRARIES}")
+    endif()
+
+    target_link_libraries(rawspeed PRIVATE JXL::jxl)
+    set_package_properties(JXL PROPERTIES
+                           TYPE RECOMMENDED
+                           DESCRIPTION "library for handling the JPEG XL image data format, implements a JPEG XL codec"
+                           PURPOSE "Used for decoding DNG JPEG XL compression")
+  endif()
+else()
+  message(STATUS "JPEG XL is disabled, DNG JPEG XL support won't be available.")
+endif()
+add_feature_info("JPEG XL decoding" HAVE_JXL "used for DNG JPEG XL compression decoding")
+
 unset(HAVE_ZLIB)
 if (WITH_ZLIB)
   message(STATUS "Looking for ZLIB")
