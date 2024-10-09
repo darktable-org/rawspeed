@@ -10989,11 +10989,53 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DC-S5M2" supported="no">
+	<Camera make="Panasonic" model="DC-S5M2">
 		<ID make="Panasonic" model="DC-S5M2">Panasonic DC-S5M2</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10308 -4206 -783</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4088 12102 2229</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-125 1051 5912</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DC-S5M2X" supported="no">
+	<Camera make="Panasonic" model="DC-S5M2" mode="3:2">
+		<ID make="Panasonic" model="DC-S5M2">Panasonic DC-S5M2</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10308 -4206 -783</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4088 12102 2229</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-125 1051 5912</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S5M2X">
 		<ID make="Panasonic" model="DC-S5M2X">Panasonic DC-S5M2X</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10308 -4206 -783</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4088 12102 2229</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-125 1051 5912</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-S5M2X" mode="3:2">
+		<ID make="Panasonic" model="DC-S5M2X">Panasonic DC-S5M2X</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10308 -4206 -783</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4088 12102 2229</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-125 1051 5912</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DC-S1R">
 		<ID make="Panasonic" model="DC-S1R">Panasonic DC-S1R</ID>
