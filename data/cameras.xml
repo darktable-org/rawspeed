@@ -10989,6 +10989,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="Panasonic" model="DC-S5D" supported="unknown-no-samples">
+		<ID make="Panasonic" model="DC-S5D">Panasonic DC-S5D</ID>
+	</Camera>
 	<Camera make="Panasonic" model="DC-S5M2" supported="no">
 		<ID make="Panasonic" model="DC-S5M2">Panasonic DC-S5M2</ID>
 	</Camera>
