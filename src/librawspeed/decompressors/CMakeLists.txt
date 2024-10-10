@@ -26,6 +26,8 @@ FILE(GLOB SOURCES
   "JpegDecompressor.cpp"
   "JpegDecompressor.h"
   "JpegMarkers.h"
+  "JpegXLDecompressor.cpp"
+  "JpegXLDecompressor.h"
   "KodakDecompressor.cpp"
   "KodakDecompressor.h"
   "LJpegDecoder.cpp"
@@ -78,6 +80,10 @@ endif()
 
 if(WITH_JPEG AND TARGET JPEG::JPEG)
   target_link_libraries(rawspeed_decompressors PUBLIC JPEG::JPEG)
+endif()
+
+if(WITH_JXL AND TARGET JXL::jxl)
+  target_link_libraries(rawspeed_decompressors PUBLIC JXL::jxl)
 endif()
 
 target_link_libraries(rawspeed PRIVATE rawspeed_decompressors)
