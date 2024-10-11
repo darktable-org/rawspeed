@@ -843,7 +843,7 @@
 			<Color x="0" y="1">RED</Color>
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
-		<Crop x="158" y="51" width="5634" height="3753"/>
+		<Crop x="158" y="52" width="5634" height="3752"/>
 		<BlackAreas>
 			<Vertical x="0" width="156"/>
 			<Horizontal y="2" height="48"/>
