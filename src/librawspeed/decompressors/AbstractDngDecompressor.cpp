@@ -49,6 +49,10 @@
 #include "decompressors/JpegDecompressor.h"
 #endif
 
+#ifdef HAVE_JXL
+#include "decompressors/JpegXLDecompressor.h"
+#endif
+
 namespace rawspeed {
 
 template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
@@ -201,6 +205,29 @@ void AbstractDngDecompressor::decompressThread<0x884c>() const noexcept {
 }
 #endif
 
+#ifdef HAVE_JXL
+template <>
+void AbstractDngDecompressor::decompressThread<0xcd42>() const noexcept {
+#ifdef HAVE_OPENMP
+#pragma omp for schedule(static)
+#endif
+  for (const auto& e :
+       Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
+    try {
+      JpegXLDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw);
+      j.decode(e.offX, e.offY);
+    } catch (const RawDecoderException& err) {
+      mRaw->setError(err.what());
+    } catch (const IOException& err) {
+      mRaw->setError(err.what());
+    } catch (...) {
+      // We should not get any other exception type here.
+      __builtin_unreachable();
+    }
+  }
+}
+#endif
+
 void AbstractDngDecompressor::decompressThread() const noexcept {
   invariant(mRaw->dim.x > 0);
   invariant(mRaw->dim.y > 0);
@@ -232,6 +259,14 @@ void AbstractDngDecompressor::decompressThread() const noexcept {
 #else
 #pragma message "JPEG is not present! Lossy JPEG DNG will not be supported!"
     mRaw->setError("jpeg support is disabled.");
+#endif
+  } else if (compression == 0xcd42) {
+    /* Lossy DNG */
+#ifdef HAVE_JXL
+    decompressThread<0xcd42>();
+#else
+#pragma message "JPEG XL is not present! JPEG XL DNG will not be supported!"
+    mRaw->setError("jpeg xl support is disabled.");
 #endif
   } else
     mRaw->setError("AbstractDngDecompressor: Unknown compression");
