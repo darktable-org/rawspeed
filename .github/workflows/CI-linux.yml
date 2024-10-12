@@ -135,9 +135,11 @@ jobs:
                                   googletest \
                                   binutils-gold \
                                   libjpeg-dev \
+                                  libjxl-dev \
                                   libpugixml-dev \
                                   libxml2-utils \
                                   ninja-build \
+                                  pkgconf \
                                   zlib1g-dev
             if [ "$COMPILER_FAMILY" = "GNU" ]; then
               eatmydata apt install g++-${{ inputs.compiler-version }} \
