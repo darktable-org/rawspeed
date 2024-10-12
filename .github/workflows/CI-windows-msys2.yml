@@ -60,6 +60,7 @@ jobs:
             libxml2:p
             pugixml:p
             libjpeg-turbo:p
+            libjxl:p
             zlib:p
       - name: Install Additional Dependencies (Coverage)
         if: inputs.flavor == 'Coverage'
