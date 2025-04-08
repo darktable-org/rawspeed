@@ -46,6 +46,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     env:
+      JOB_NAME: linux.${{ inputs.distro }}.${{ inputs.compiler-family }}${{ inputs.compiler-version }}.${{ inputs.flavor }}
       SONAR_SCANNER_VERSION: 5.0.1.3006
     name: ${{ inputs.distro }}.${{ inputs.compiler-family }}${{ inputs.compiler-version }}.${{ inputs.flavor }}
     container:
@@ -137,7 +138,8 @@ jobs:
           fi
           if [ "$COMPILER_FAMILY" = "LLVM" ]; then
             eatmydata apt install clang-${{ inputs.compiler-version }} \
-                                      libomp-${{ inputs.compiler-version }}-dev
+                                  libomp-${{ inputs.compiler-version }}-dev \
+                                  python3
           fi
           if [ "$ENABLE_SAMPLE_BASED_TESTING" = "true" ]; then
             eatmydata apt install zstd
@@ -228,6 +230,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: cpp
+          source-root: ${{ github.workspace }}/rawspeed
       - name: Set up JDK 11 (for SonarCloud static analysis)
         timeout-minutes: 1
         if: inputs.flavor == 'SonarCloudStaticAnalysis' && github.repository == 'darktable-org/rawspeed' && github.event_name != 'pull_request' && github.ref_type == 'branch' && (github.ref_name == 'develop' || github.ref_name == 'stable')
@@ -264,6 +267,7 @@ jobs:
         env:
           CC: ${{ inputs.compiler-CC }}
           CXX: ${{ inputs.compiler-CXX }}
+          FAMILY: ${{ inputs.compiler-family }}
           CLANG_TIDY: ${{ inputs.compiler-CLANG_TIDY }}
           GCOV: ${{ inputs.compiler-GCOV }}
           SRC_DIR: ${{ github.workspace }}/rawspeed
@@ -279,14 +283,15 @@ jobs:
           cmake -E make_directory "${INSTALL_PREFIX}"
           export ECO="${ECO} -DRAWSPEED_REFERENCE_SAMPLE_ARCHIVE=${RPUU_DST}"
           export ECO="${ECO} -DCMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR=${BUILD_DIR}/clang-tidy/"
-          if [ "$FLAVOR" = "ClangTidy" ] || [ "$FLAVOR" = "ClangStaticAnalysis" ] || [ "$FLAVOR" = "ClangCTUStaticAnalysis" ] || [ "$FLAVOR" = "CodeQLAnalysis" ]; then
-            export ECO="${ECO} -DRAWSPEED_ENABLE_WERROR=OFF"
+          if [ "$FAMILY" = "LLVM" ]; then
+            export ECO="${ECO} -DCMAKE_CXX_COMPILER_LAUNCHER='${SRC_DIR}/.ci/clang-sarif-wrapper.sh;${GITHUB_WORKSPACE}/clang_report/'"
           fi
           "${SRC_DIR}/.ci/ci-script.sh"
       - name: Build
         id: build
         timeout-minutes: ${{ inputs.flavor != 'ClangTidy' && (inputs.flavor != 'CodeQLAnalysis' && 7 || 12) || 25 }}
         env:
+          FAMILY: ${{ inputs.compiler-family }}
           SRC_DIR: ${{ github.workspace }}/rawspeed
           BUILD_DIR: ${{ github.workspace }}/rawspeed-build
           INSTALL_PREFIX: ${{ github.workspace }}/rawspeed-install
@@ -295,6 +300,23 @@ jobs:
         run: |
           set -xe
           "${SRC_DIR}/.ci/ci-script.sh"
+      - name: Merge clang SARIF reports
+        if: inputs.compiler-family == 'LLVM' && !cancelled() && steps.build.conclusion != 'skipped'
+        timeout-minutes: 1
+        env:
+          SRC_DIR: ${{ github.workspace }}/rawspeed
+        run: |
+          set -xe
+          "${SRC_DIR}/.ci/clang-sarif-merge.py" --output="${GITHUB_WORKSPACE}/clang_report.json" "${GITHUB_WORKSPACE}/clang_report/"
+          cat "${GITHUB_WORKSPACE}/clang_report.json"
+      - name: Upload results of clang compile [SARIF]
+        timeout-minutes: 1
+        if: inputs.compiler-family == 'LLVM' && !cancelled() && steps.build.conclusion != 'skipped'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "${{ github.workspace }}/clang_report.json"
+          checkout_path: "${{ github.workspace }}/rawspeed"
+          category: ${{ env.JOB_NAME }}
       - name: Test (unit tests)
         timeout-minutes: 1
         env:
