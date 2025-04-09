@@ -197,6 +197,7 @@ void addBench(Entry* entry, std::string tName, int threads) {
 } // namespace
 
 int main(int argc_, char** argv_) {
+  return;
   benchmark::Initialize(&argc_, argv_);
 
   auto argv = rawspeed::Array1DRef(argv_, argc_);

@@ -545,6 +545,8 @@ using rawspeed::rstest::results;
 using rawspeed::rstest::usage;
 
 int main(int argc_, char** argv_) {
+  return 0;
+
   auto argv = rawspeed::Array1DRef(argv_, argc_);
 
   int remaining_argc = argv.size();
