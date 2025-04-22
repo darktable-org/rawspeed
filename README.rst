@@ -20,6 +20,7 @@ What is RawSpeed?
 
 RawSpeed…
 
+
 - is capable of decoding various images in RAW file format.
 - is intended to provide the fastest decoding speed possible.
 - supports the most common DSLR and similar class brands.
