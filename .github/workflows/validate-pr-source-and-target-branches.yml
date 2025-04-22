@@ -35,7 +35,7 @@ jobs:
         timeout-minutes: 1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REF: ${{ github.ref }}
         run: |
           cd rawspeed
-          gh workflow run CI.yml --ref ${GH_REF}
+          git fetch origin refs/pull/${{ github.event.number }}/merge:refs/remotes/pull/${{ github.event.number }}/merge
+          gh workflow run CI.yml --ref refs/remotes/pull/${{ github.event.number }}/merge
