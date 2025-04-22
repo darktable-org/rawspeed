@@ -18,6 +18,7 @@ RawSpeed Developer Information
 What is RawSpeed?
 --------------------------------------------------------------------------------
 
+
 RawSpeed…
 
 - is capable of decoding various images in RAW file format.
