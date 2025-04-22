@@ -31,6 +31,10 @@ jobs:
           cd rawspeed
           gh pr close --comment "Pull Requests source branch should be branched off of the Pull Request's target branch" ${{ github.event.number }}
           exit 1
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Trigger the rest of the CI
         timeout-minutes: 1
         env:
