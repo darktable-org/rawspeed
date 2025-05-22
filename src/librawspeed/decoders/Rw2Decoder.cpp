@@ -25,6 +25,8 @@
 #include "adt/Array2DRef.h"
 #include "adt/Point.h"
 #include "bitstreams/BitStreams.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/PrefixCode.h"
 #include "common/BayerPhase.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
@@ -51,6 +53,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 using std::fabs;
@@ -181,42 +184,32 @@ DecompressorV8Params::DecompressorV8Params(const TiffIFD& ifd) {
   validate();
 }
 
-std::vector<PanasonicV8Decompressor::HuffmanLUTEntry>
-populateHuffmanLUT(const TiffIFD& ifd) {
-  std::vector<PanasonicV8Decompressor::HuffmanLUTEntry> mHuffmanLUT;
+PanasonicV8Decompressor::PrefixCodeDecoder
+populatePrefixCodeDecoder(const TiffIFD& ifd) {
+  using Tag = PanasonicV8Decompressor::PrefixCodeDecoder::Tag;
+
+  using CodeSymbol = AbstractPrefixCode<Tag>::CodeSymbol;
+  using CodeValueTy = CodeTraits<Tag>::CodeValueTy;
 
   ByteStream stream = ifd.getEntry(TiffTag::PANASONIC_V8_HUF_TABLE)->getData();
+  const int numCodeSymbols = stream.getU16();
 
-  struct HuffEntry {
-    uint16_t bitcount, symbol, mask;
-  };
-  std::vector<HuffEntry> huffTable(stream.getU16());
+  std::vector<CodeSymbol> symbols;
+  std::vector<CodeValueTy> codeValues;
 
-  for (HuffEntry& entry : huffTable) {
-    entry.bitcount = stream.getU16(); // Number of bits in symbol
-    entry.symbol = uint16_t(stream.getU16() << (16U - entry.bitcount));
-    entry.mask = uint16_t(
-        0xffffU << (16U -
-                    entry.bitcount)); // mask of the bits overlapping symbol
+  symbols.reserve(numCodeSymbols);
+  codeValues.reserve(numCodeSymbols);
+  for (int i = 0; i != numCodeSymbols; ++i) {
+    const auto len = stream.getU16();
+    const auto bits = stream.getU16();
+    symbols.emplace_back(bits, len);
+    codeValues.emplace_back(i);
   }
 
-  // Cache of Huffman table results for all possible 16-bit values.
-  mHuffmanLUT.resize(1 + UINT16_MAX);
-
-  // Populates LUT by checking for a bitwise match between each value and the
-  // prefix codes recorded in the table.
-  for (unsigned li = 0; li < mHuffmanLUT.size(); ++li) {
-    PanasonicV8Decompressor::HuffmanLUTEntry& lutVal = mHuffmanLUT[li];
-    for (unsigned ti = 0; ti < huffTable.size(); ++ti) {
-      if ((uint16_t(li) & huffTable[ti].mask) == huffTable[ti].symbol) {
-        lutVal.bitcount = uint8_t(huffTable[ti].bitcount);
-        lutVal.diffCat = uint8_t(ti);
-        break;
-      }
-    }
-  }
-
-  return mHuffmanLUT;
+  PrefixCode<Tag> code(std::move(symbols), std::move(codeValues));
+  PanasonicV8Decompressor::PrefixCodeDecoder codeDecoder(std::move(code));
+  codeDecoder.setup(/*fullDecode_=*/true, /*fixDNGBug16_=*/false);
+  return codeDecoder;
 }
 
 /// Maybe the most complicated part of the entire file format, and seemingly,
@@ -285,8 +278,7 @@ RawImage Rw2Decoder::decodeRawV8(const TiffIFD& raw) const {
     ThrowRDE("Unexpected CFA, only RGGB is supported");
 
   const DecompressorV8Params mParams(raw);
-  const std::vector<PanasonicV8Decompressor::HuffmanLUTEntry> mHuffmanLUT =
-      populateHuffmanLUT(raw);
+  const auto mPrefixCodeDecoder = populatePrefixCodeDecoder(raw);
   populateGammaLUT(mParams, raw);
   const std::vector<Array1DRef<const uint8_t>> mStrips =
       getInputStrips(mParams, mFile);
@@ -300,7 +292,7 @@ RawImage Rw2Decoder::decodeRawV8(const TiffIFD& raw) const {
       getAsArray1DRef(mParams.stripHeights));
 
   PanasonicV8Decompressor v8(mRaw, b.getDecompressorParams(),
-                             getAsArray1DRef(mHuffmanLUT));
+                             mPrefixCodeDecoder);
   mRaw->createData();
   v8.decompress();
   return mRaw;

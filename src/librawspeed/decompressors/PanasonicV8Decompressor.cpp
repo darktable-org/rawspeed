@@ -33,8 +33,6 @@
 #include "bitstreams/BitStreamer.h"
 #include "bitstreams/BitStreamerMSB.h" // IWYU pragma: keep
 #include "bitstreams/BitStreams.h"
-#include "codes/AbstractPrefixCode.h"
-#include "codes/AbstractPrefixCodeDecoder.h"
 #include "common/Common.h"
 #include "common/RawImage.h"
 #include "common/RawspeedException.h"
@@ -127,21 +125,6 @@ class BitStreamerRevMSB final
 
 public:
   using Base::Base;
-};
-
-/// Utility class for Panasonic V8 entropy decoding
-class PanasonicV8Decompressor::InternalHuffDecoder {
-private:
-  const Array1DRef<const HuffmanLUTEntry>
-      mLUT; // Reference to PanasonicV8Decompressor::mHuffmanLUT
-  BitStreamerRevMSB mBitPump;
-
-public:
-  InternalHuffDecoder(const Array1DRef<const HuffmanLUTEntry>& LUT,
-                      Array1DRef<const uint8_t> bitStream)
-      : mLUT(LUT), mBitPump(bitStream) {}
-
-  int32_t decodeNextDiffValue();
 };
 
 namespace {
@@ -238,9 +221,9 @@ PanasonicV8Decompressor::DecompressorParamsBuilder::getOutRects(
 
 PanasonicV8Decompressor::PanasonicV8Decompressor(
     RawImage outputImg, DecompressorParams mParams_,
-    Array1DRef<const HuffmanLUTEntry> mHuffmanLUT_)
+    PrefixCodeDecoder mCodeDecoder_)
     : mRawOutput(std::move(outputImg)), mParams(std::move(mParams_)),
-      mHuffmanLUT(mHuffmanLUT_) {
+      mCodeDecoder(std::move(mCodeDecoder_)) {
   if (mRawOutput->getCpp() != 1 ||
       mRawOutput->getDataType() != RawImageType::UINT16 ||
       mRawOutput->getBpp() != sizeof(uint16_t)) {
@@ -272,9 +255,7 @@ void PanasonicV8Decompressor::decompress() const {
                            /*croppedHeight=*/outRect.dim.y)
                            .getAsArray2DRef();
 
-      InternalHuffDecoder decoder(mHuffmanLUT, strip);
-
-      decompressStrip(out, decoder);
+      decompressStrip(out, strip);
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRawOutput->setError(err.what());
@@ -286,7 +267,9 @@ void PanasonicV8Decompressor::decompress() const {
 }
 
 void PanasonicV8Decompressor::decompressStrip(
-    const Array2DRef<uint16_t> out, InternalHuffDecoder decoder) const {
+    const Array2DRef<uint16_t> out, Array1DRef<const uint8_t> strip) const {
+  BitStreamerRevMSB bs(strip);
+
   Bayer2x2 predictedStorage = mParams.initialPrediction;
   const auto pred = Array2DRef(predictedStorage.data(), 2, 2);
 
@@ -318,7 +301,7 @@ void PanasonicV8Decompressor::decompressStrip(
 
       for (int j = 0; j != 2; ++j) {
         for (int i = 0; i != 2; ++i) {
-          const int32_t diff = decoder.decodeNextDiffValue();
+          const int32_t diff = mCodeDecoder.decodeDifference(bs);
           const int32_t decodedValue = pred(i, j) + diff;
           invariant(decodedValue > 0);
           pred(i, j) = uint16_t(std::clamp(
@@ -335,25 +318,6 @@ void PanasonicV8Decompressor::decompressStrip(
       for (int i = 0; i != 2; ++i)
         pred(i, j) = tmp(i, j);
   }
-}
-
-int32_t inline PanasonicV8Decompressor::InternalHuffDecoder::
-    decodeNextDiffValue() {
-  // Retrieve the difference category, which indicates magnitude of the
-  // difference between the predicted and actual value.
-  const auto next16 = uint16_t(mBitPump.peekBits(16));
-  const auto& [codeLen, codeValue] = mLUT(next16);
-  if (codeValue == 0 && codeLen == 7)
-    ThrowRDE("Huffman decoding encountered an invalid value!");
-  mBitPump.skipBits(
-      codeLen); // Skip the bits that encoded the difference category
-  int diffLen = codeValue;
-
-  if (diffLen == 0)
-    return 0;
-
-  const uint32_t diff = mBitPump.getBits(diffLen);
-  return AbstractPrefixCodeDecoder<BaselineCodeTag>::extend(diff, diffLen);
 }
 
 } // namespace rawspeed

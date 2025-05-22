@@ -26,6 +26,10 @@
 #include "adt/Array1DRefExtras.h"
 #include "adt/Array2DRef.h"
 #include "adt/CroppedArray2DRef.h"
+#include "codes/AbstractPrefixCode.h"
+#include "codes/AbstractPrefixCodeDecoder.h"
+#include "codes/PrefixCodeDecoder.h"
+#include "codes/PrefixCodeVectorDecoder.h"
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractDecompressor.h"
@@ -51,6 +55,10 @@ private:
 public:
   /// Four values, one for each component of the sensor's color filter array.
   using Bayer2x2 = std::array<uint16_t, 4>;
+
+  using PrefixCodeDecoder =
+      PrefixCodeLUTDecoder<BaselineCodeTag,
+                           PrefixCodeVectorDecoder<BaselineCodeTag>>;
 
   /// Decompressor parameters populated from tags. They remain constant after
   /// construction.
@@ -115,7 +123,7 @@ public:
 
 private:
   const DecompressorParams mParams;
-  const Array1DRef<const HuffmanLUTEntry> mHuffmanLUT;
+  const PrefixCodeDecoder mCodeDecoder;
 
   /// Huffman decoder helper class. Defined only in the cpp file.
   class InternalHuffDecoder;
@@ -123,11 +131,11 @@ private:
   /// Thread safe function for decompressing a single data-stripstrip within a
   /// Rw2V8 raw image.
   void decompressStrip(Array2DRef<uint16_t> out,
-                       InternalHuffDecoder decoder) const;
+                       Array1DRef<const uint8_t> strip) const;
 
 public:
   PanasonicV8Decompressor(RawImage outputImg, DecompressorParams mParams_,
-                          Array1DRef<const HuffmanLUTEntry> mHuffmanLUT_);
+                          PrefixCodeDecoder mCodeDecoder_);
 
   /// Run the decompressor on the provided raw image
   void decompress() const;

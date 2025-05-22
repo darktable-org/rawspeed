@@ -147,11 +147,12 @@ public:
 
     CodeSymbol() = default;
 
-    CodeSymbol(typename Traits::CodeTy code_, uint8_t code_len_)
-        : code(code_), code_len(code_len_) {
-      assert(code_len > 0);
-      assert(code_len <= Traits::MaxCodeLenghtBits);
-      assert(code <= ((1U << code_len) - 1U));
+    CodeSymbol(typename Traits::CodeTy code_, uint16_t code_len_) {
+      assert(code_len_ > 0);
+      assert(code_len_ <= Traits::MaxCodeLenghtBits);
+      assert(code_ <= ((1U << code_len_) - 1U));
+      code = code_;
+      code_len = implicit_cast<decltype(code_len)>(code_len_);
     }
 
     [[nodiscard]] iterator_range<BitMSBIterator<typename Traits::CodeTy>>
