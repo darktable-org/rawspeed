@@ -54,6 +54,7 @@
 #include <vector>
 
 using std::map;
+using std::pair;
 using std::vector;
 
 namespace rawspeed {
@@ -385,6 +386,13 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   if (raw->hasEntry(TiffTag::PREDICTOR))
     predictor = raw->getEntry(TiffTag::PREDICTOR)->getU32();
 
+  pair<uint32_t, uint32_t> interleave{1U, 1U};
+  if (raw->hasEntry(TiffTag::ROWINTERLEAVEFACTOR))
+    interleave.first = raw->getEntry(TiffTag::ROWINTERLEAVEFACTOR)->getU32();
+  if (raw->hasEntry(TiffTag::COLUMNINTERLEAVEFACTOR))
+    interleave.second =
+        raw->getEntry(TiffTag::COLUMNINTERLEAVEFACTOR)->getU32();
+
   if (mRaw->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
     mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
@@ -414,7 +422,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   }
 
   AbstractDngDecompressor slices(mRaw, getTilingDescription(raw), compression,
-                                 mFixLjpeg, *bps, predictor);
+                                 mFixLjpeg, *bps, predictor, interleave);
 
   slices.slices.reserve(slices.dsc.numTiles);
 

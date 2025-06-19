@@ -32,6 +32,7 @@
 #include <jxl/codestream_header.h>
 #include <jxl/decode.h>
 #include <jxl/types.h>
+#include <utility>
 #include <vector>
 
 using std::min;
@@ -45,6 +46,13 @@ void JpegXLDecompressor::decode(
 
   if (signature != JXL_SIG_CODESTREAM && signature != JXL_SIG_CONTAINER)
     ThrowRDE("Unable to verify JPEG XL signature");
+
+  if (mInterleave != std::pair(1U, 1U) && mInterleave != std::pair(2U, 2U))
+    ThrowRDE("Invalid interleave factors");
+
+  if (mInterleave == std::pair(2U, 2U) && mRaw->getCpp() != 1)
+    ThrowRDE(
+        "Invalid combination of interleave factors and components per pixel");
 
   JxlDecoder* decoder = JxlDecoderCreate(nullptr);
 
@@ -129,7 +137,7 @@ void JpegXLDecompressor::decode(
 
   const Array2DRef<uint16_t> tmp(complete_buffer.data(),
                                  basicinfo.num_color_channels * basicinfo.xsize,
-                                 basicinfo.xsize);
+                                 basicinfo.ysize);
 
   // Now the image is decoded, and we copy the image data
   unsigned int copy_w = min(mRaw->dim.x - offX, basicinfo.xsize);
@@ -137,10 +145,19 @@ void JpegXLDecompressor::decode(
 
   const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
   for (unsigned int row = 0; row < copy_h; row++) {
+    unsigned int rowbuf =
+        (row / mInterleave.first) +
+        (row % mInterleave.first) * (basicinfo.ysize / mInterleave.first);
     for (unsigned int col = 0; col < basicinfo.num_color_channels * copy_w;
-         col++)
+         col++) {
+      unsigned int colbuf =
+          (col / mInterleave.second) +
+          (col % mInterleave.second) *
+              ((basicinfo.num_color_channels * basicinfo.xsize) /
+               mInterleave.second);
       out(offY + row, basicinfo.num_color_channels * offX + col) =
-          tmp(row, col);
+          tmp(rowbuf, colbuf);
+    }
   }
 }
 

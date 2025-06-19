@@ -28,16 +28,19 @@
 #include "decompressors/AbstractDecompressor.h"
 #include "io/Buffer.h"
 #include <cstdint>
+#include <utility>
 
 namespace rawspeed {
 
 class JpegXLDecompressor final : public AbstractDecompressor {
   Buffer input;
   RawImage mRaw;
+  std::pair<uint32_t, uint32_t> mInterleave;
 
 public:
-  JpegXLDecompressor(Buffer bs, RawImage img)
-      : input(bs), mRaw(std::move(img)) {}
+  JpegXLDecompressor(Buffer bs, RawImage img,
+                     std::pair<uint32_t, uint32_t> interleave)
+      : input(bs), mRaw(std::move(img)), mInterleave(std::move(interleave)) {}
 
   void decode(uint32_t offsetX, uint32_t offsetY);
 };
