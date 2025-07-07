@@ -59,8 +59,14 @@ public:
   explicit DefaultInitAllocatorAdaptor(
       const DefaultInitAllocatorAdaptor<
           To, typename allocator_traits::template rebind_alloc<To>>&
-          allocator_) noexcept
-      : allocator(allocator_.get_allocator()) {}
+          allocator_) noexcept {
+    if constexpr (std::is_constructible_v<allocator_type, 
+                    typename allocator_traits::template rebind_alloc<To>>) {
+      allocator = allocator_type(allocator_.get_allocator());
+    } else {
+      allocator = allocator_type{};
+    }
+  }
 
   T* allocate(std::size_t n) {
     return allocator_traits::allocate(allocator, n);

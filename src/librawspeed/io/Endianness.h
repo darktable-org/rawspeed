@@ -26,6 +26,10 @@
 #include <cstdint>
 #include <cstring>
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
 namespace rawspeed {
 
 enum class Endianness : uint16_t {
@@ -61,7 +65,6 @@ inline Endianness getHostEndianness() {
 }
 
 #ifdef _MSC_VER
-#include <intrin.h>
 
 #define BSWAP16(A) _byteswap_ushort(A)
 #define BSWAP32(A) _byteswap_ulong(A)
