@@ -44,6 +44,19 @@ public:
     using other = AlignedAllocator<U, alignment>;
   };
 
+  // Default constructor
+  AlignedAllocator() noexcept = default;
+
+  // Copy constructor
+  AlignedAllocator(const AlignedAllocator&) noexcept = default;
+
+  // Copy assignment
+  AlignedAllocator& operator=(const AlignedAllocator&) noexcept = default;
+
+  // Converting constructor from other AlignedAllocator types
+  template <class U>
+  AlignedAllocator(const AlignedAllocator<U, alignment>&) noexcept {}
+
   [[nodiscard]] T* allocate(std::size_t numElts) const {
     static_assert(size_t(alignment) >= alignof(T), "insufficient alignment");
     invariant(numElts > 0 && "Should not be trying to allocate no elements");
