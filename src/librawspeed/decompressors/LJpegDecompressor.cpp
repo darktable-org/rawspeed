@@ -212,10 +212,10 @@ inline int computePrediction(int predMode, int Ra, int Rb, int Rc) {
 
 } // namespace
 
-template <const iPoint2D& MCUSize, int N_COMP>
+template <const iPoint2D& MCUSize, int N_COMP, bool Use2DPred>
 void LJpegDecompressor::decodeRowN(
     Array2DRef<uint16_t> outStripe, Array2DRef<const uint16_t> pred,
-    int predMode, Array2DRef<const uint16_t> prevStripe,
+    Array2DRef<const uint16_t> prevStripe,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
   invariant(MCUSize.area() == N_COMP);
@@ -238,25 +238,22 @@ void LJpegDecompressor::decodeRowN(
                              .getAsArray2DRef();
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-        int c = (MCUSize.x * MCURow) + MCUСol;
+        const int c = (MCUSize.x * MCURow) + MCUСol;
         int prediction;
-        if (predMode == 1) {
-          // Fast path for the common case (mode 1 = left neighbor).
+        if constexpr (!Use2DPred) {
           prediction = pred(MCURow, MCUСol);
         } else {
-          // For modes 2-7, compute Ra, Rb, Rc.
-          int Ra = pred(MCURow, MCUСol); // left neighbor
-          int stripeCol = MCUSize.x * mcuIdx + MCUСol;
-          int stripeRow = MCURow;
-          int Rb = prevStripe(stripeRow, stripeCol);
-          int Rc = (stripeCol >= MCUSize.x)
-                       ? prevStripe(stripeRow, stripeCol - MCUSize.x)
-                       : Rb; // First column: Rc = Rb
-          prediction = computePrediction(predMode, Ra, Rb, Rc);
+          const int Ra = pred(MCURow, MCUСol);
+          const int stripeCol = MCUSize.x * mcuIdx + MCUСol;
+          const int Rb = prevStripe(MCURow, stripeCol);
+          const int Rc = (mcuIdx > 0)
+                             ? prevStripe(MCURow, stripeCol - MCUSize.x)
+                             : Rb;
+          prediction = computePrediction(predictorMode, Ra, Rb, Rc);
         }
-        int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                       .decodeDifference(bs);
-        int pix = prediction + diff;
+        const int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                             .decodeDifference(bs);
+        const int pix = prediction + diff;
         outTile(MCURow, MCUСol) = uint16_t(pix);
       }
     }
@@ -275,29 +272,27 @@ void LJpegDecompressor::decodeRowN(
     // We may end up needing just part of last N_COMP pixels.
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-        int c = (MCUSize.x * MCURow) + MCUСol;
+        const int c = (MCUSize.x * MCURow) + MCUСol;
         int prediction;
-        if (predMode == 1) {
+        if constexpr (!Use2DPred) {
           prediction = pred(MCURow, MCUСol);
         } else {
-          int Ra = pred(MCURow, MCUСol);
-          int stripeCol = MCUSize.x * mcuIdx + MCUСol;
-          int stripeRow = MCURow;
-          int Rb = (stripeCol < prevStripe.width())
-                       ? prevStripe(stripeRow, stripeCol)
-                       : Ra;
-          int Rc = (stripeCol >= MCUSize.x && stripeCol < prevStripe.width())
-                       ? prevStripe(stripeRow, stripeCol - MCUSize.x)
-                       : Rb;
-          prediction = computePrediction(predMode, Ra, Rb, Rc);
+          const int Ra = pred(MCURow, MCUСol);
+          const int stripeCol = MCUSize.x * mcuIdx + MCUСol;
+          const int Rb = (stripeCol < prevStripe.width())
+                             ? prevStripe(MCURow, stripeCol)
+                             : Ra;
+          const int Rc = (mcuIdx > 0 && stripeCol < prevStripe.width())
+                             ? prevStripe(MCURow, stripeCol - MCUSize.x)
+                             : Rb;
+          prediction = computePrediction(predictorMode, Ra, Rb, Rc);
         }
-        int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                       .decodeDifference(bs);
-        int pix = prediction + diff;
-        int stripeRow = MCURow;
-        int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
+        const int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                             .decodeDifference(bs);
+        const int pix = prediction + diff;
+        const int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
         if (stripeCol < outStripe.width())
-          outStripe(stripeRow, stripeCol) = uint16_t(pix);
+          outStripe(MCURow, stripeCol) = uint16_t(pix);
       }
     }
     ++mcuIdx; // We did just process one more MCU.
@@ -386,8 +381,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
       // For the first row of each restart interval, use predictor mode 1
       // (per ITU-T T.81: first row always uses horizontal prediction).
       // For the first row, prevStripe points to outStripe itself (unused
-      // since predMode will be 1).
-      const int predMode = isFirstRow ? 1 : predictorMode;
+      // since Use2DPred will be false).
       const Array2DRef<const uint16_t> prevStripe =
           isFirstRow
               ? Array2DRef<const uint16_t>(outStripe)
@@ -399,7 +393,10 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                     /*croppedHeight=*/frame.mcu.y)
                     .getAsArray2DRef();
 
-      decodeRowN<MCU, N_COMP>(outStripe, pred, predMode, prevStripe, ht, bs);
+      if (!isFirstRow && predictorMode != 1)
+        decodeRowN<MCU, N_COMP, true>(outStripe, pred, prevStripe, ht, bs);
+      else
+        decodeRowN<MCU, N_COMP, false>(outStripe, pred, prevStripe, ht, bs);
 
       // The predictor for the next line is the start of this line.
       pred = CroppedArray2DRef(outStripe,

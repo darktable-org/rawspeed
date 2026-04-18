@@ -113,7 +113,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
     if (frame.compInfo[i].superH != 1 || frame.compInfo[i].superV != 1)
       ThrowRDE("Unsupported subsampling");
 
-  int N_COMP = frame.cps;
+  const int N_COMP = frame.cps;
 
   std::vector<LJpegDecompressor::PerComponentRecipe> rec;
   rec.reserve(N_COMP);
@@ -131,7 +131,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
       std::numeric_limits<int>::max())
     ThrowRDE("Maximal output tile is too large");
 
-  auto maxRes =
+  const auto maxRes =
       iPoint2D(implicit_cast<int>(mRaw->getCpp()) * maxDim.x, maxDim.y);
   if (maxRes.area() != N_COMP * jpegFrameDim.area())
     ThrowRDE("LJpeg frame area does not match maximal tile area");
@@ -140,15 +140,14 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   // CinemaDNG): JPEG frame is wider than tile and shorter, with packed rows.
   // Standard (Adobe): maxRes.x >= jpegFrameDim.x (tile is wider/equal)
   // Inverted (DJI):   jpegFrameDim.x > maxRes.x  (JPEG frame is wider)
-  bool invertedReshape = (jpegFrameDim.x > maxRes.x);
-
+  const bool invertedReshape = (jpegFrameDim.x > maxRes.x);
   if (!invertedReshape) {
     // Standard case: tile width is a multiple of JPEG frame width.
     if (maxRes.x % jpegFrameDim.x != 0 || maxRes.y % jpegFrameDim.y != 0)
       ThrowRDE(
           "Maximal output tile size is not a multiple of LJpeg frame size");
 
-    auto MCUSize =
+    const auto MCUSize =
         iPoint2D{maxRes.x / jpegFrameDim.x, maxRes.y / jpegFrameDim.y};
     if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
       ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
@@ -222,7 +221,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
                       numLJpegRowsPerRestartInterval,
                       implicit_cast<int>(predictorMode),
                       input.peekRemainingBuffer().getAsArray1DRef());
-  auto consumed = d.decode();
+  const auto consumed = d.decode();
 
   // Deinterleave: each JPEG row of width (widthPack * tileW) maps to
   // widthPack consecutive tile rows of width tileW.
@@ -241,10 +240,10 @@ Buffer::size_type LJpegDecoder::decodeScan() {
         continue;
       const int srcCol = pack * outRowPixels;
       const int dstCol = cpp * implicit_cast<int>(offX);
-      for (int col = 0; col < outRowPixels && (srcCol + col) < jpegFrameDim.x;
-           ++col) {
-        outData(tileRow, dstCol + col) = tmpData(jpegRow, srcCol + col);
-      }
+      // Contiguous row-segment copy. Bounds guaranteed by validation:
+      // srcCol + outRowPixels <= widthPack * outRowPixels <= jpegFrameDim.x
+      std::memcpy(&outData(tileRow, dstCol), &tmpData(jpegRow, srcCol),
+                  sizeof(uint16_t) * outRowPixels);
     }
   }
 

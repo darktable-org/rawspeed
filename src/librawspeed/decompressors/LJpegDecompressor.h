@@ -77,10 +77,10 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <const iPoint2D& MCUSize, int N_COMP>
+  template <const iPoint2D& MCUSize, int N_COMP, bool Use2DPred>
   __attribute__((always_inline)) inline void decodeRowN(
       Array2DRef<uint16_t> outStripe, Array2DRef<const uint16_t> pred,
-      int predMode, Array2DRef<const uint16_t> prevStripe,
+      Array2DRef<const uint16_t> prevStripe,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
