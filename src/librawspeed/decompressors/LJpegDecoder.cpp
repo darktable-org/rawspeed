@@ -199,11 +199,10 @@ Buffer::size_type LJpegDecoder::decodeScan() {
 
   // Create a temporary raw image to decode the JPEG into.
   // RawImage::create with dimensions already calls createData() internally.
-  RawImage tmpRaw = RawImage::create(
-      iPoint2D(jpegFrameDim.x, jpegFrameDim.y), RawImageType::UINT16, 1);
+  RawImage tmpRaw = RawImage::create(iPoint2D(jpegFrameDim.x, jpegFrameDim.y),
+                                     RawImageType::UINT16, 1);
 
-  const iRectangle2D tmpFrame = {
-      {0, 0}, {jpegFrameDim.x, jpegFrameDim.y}};
+  const iRectangle2D tmpFrame = {{0, 0}, {jpegFrameDim.x, jpegFrameDim.y}};
   const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
 
   int numLJpegRowsPerRestartInterval;
@@ -213,8 +212,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
     const int numMCUsPerRow = jpegFrameDim.x;
     if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
       ThrowRDE("Restart interval is not a multiple of frame row size");
-    numLJpegRowsPerRestartInterval =
-        numMCUsPerRestartInterval / numMCUsPerRow;
+    numLJpegRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
   }
 
   LJpegDecompressor d(tmpRaw, tmpFrame, jpegFrame, rec,
@@ -234,8 +232,7 @@ Buffer::size_type LJpegDecoder::decodeScan() {
 
   for (int jpegRow = 0; jpegRow < jpegFrameDim.y; ++jpegRow) {
     for (int pack = 0; pack < widthPack; ++pack) {
-      const int tileRow =
-          implicit_cast<int>(offY) + jpegRow * widthPack + pack;
+      const int tileRow = implicit_cast<int>(offY) + jpegRow * widthPack + pack;
       if (tileRow >= mRaw->dim.y)
         continue;
       const int srcCol = pack * outRowPixels;
