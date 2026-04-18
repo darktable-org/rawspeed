@@ -102,8 +102,8 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
     ThrowRDE("Frame has zero size");
 
   if (iPoint2D{1, 1} != frame.mcu && iPoint2D{2, 1} != frame.mcu &&
-      iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu &&
-      iPoint2D{2, 2} != frame.mcu)
+      iPoint2D{1, 2} != frame.mcu && iPoint2D{3, 1} != frame.mcu &&
+      iPoint2D{4, 1} != frame.mcu && iPoint2D{2, 2} != frame.mcu)
     ThrowRDE("Unexpected MCU size: {%i, %i}", frame.mcu.x, frame.mcu.y);
 
   if (rec.size() != static_cast<unsigned>(frame.mcu.area()))
@@ -422,6 +422,9 @@ ByteStream::size_type LJpegDecompressor::decode() const {
   case 2:
     if (frame.mcu == MCU<2, 1>) {
       return decodeN<MCU<2, 1>>();
+    }
+    if (frame.mcu == MCU<1, 2>) {
+      return decodeN<MCU<1, 2>>();
     }
     break;
   case 3:
