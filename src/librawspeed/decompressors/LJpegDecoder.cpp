@@ -32,8 +32,10 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <vector>
 
 using std::copy_n;
@@ -104,7 +106,7 @@ void LJpegDecoder::decode(uint32_t offsetX, uint32_t offsetY, uint32_t width,
 Buffer::size_type LJpegDecoder::decodeScan() {
   invariant(frame.cps > 0);
 
-  if (predictorMode != 1)
+  if (predictorMode < 1 || predictorMode > 7)
     ThrowRDE("Unsupported predictor mode: %u", predictorMode);
 
   for (uint32_t i = 0; i < frame.cps; i++)
@@ -123,9 +125,6 @@ Buffer::size_type LJpegDecoder::decodeScan() {
                     return {*hts[i], initPred[i]};
                   });
 
-  const iRectangle2D imgFrame = {
-      {static_cast<int>(offX), static_cast<int>(offY)},
-      {static_cast<int>(w), static_cast<int>(h)}};
   const auto jpegFrameDim = iPoint2D(frame.w, frame.h);
 
   if (implicit_cast<int64_t>(maxDim.x) * implicit_cast<int>(mRaw->getCpp()) >
@@ -137,31 +136,119 @@ Buffer::size_type LJpegDecoder::decodeScan() {
   if (maxRes.area() != N_COMP * jpegFrameDim.area())
     ThrowRDE("LJpeg frame area does not match maximal tile area");
 
-  if (maxRes.x % jpegFrameDim.x != 0 || maxRes.y % jpegFrameDim.y != 0)
-    ThrowRDE("Maximal output tile size is not a multiple of LJpeg frame size");
+  // Detect whether the JPEG frame uses an inverted reshape (e.g. DJI/Blackmagic
+  // CinemaDNG): JPEG frame is wider than tile and shorter, with packed rows.
+  // Standard (Adobe): maxRes.x >= jpegFrameDim.x (tile is wider/equal)
+  // Inverted (DJI):   jpegFrameDim.x > maxRes.x  (JPEG frame is wider)
+  bool invertedReshape = (jpegFrameDim.x > maxRes.x);
 
-  auto MCUSize = iPoint2D{maxRes.x / jpegFrameDim.x, maxRes.y / jpegFrameDim.y};
-  if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
-    ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
+  if (!invertedReshape) {
+    // Standard case: tile width is a multiple of JPEG frame width.
+    if (maxRes.x % jpegFrameDim.x != 0 || maxRes.y % jpegFrameDim.y != 0)
+      ThrowRDE(
+          "Maximal output tile size is not a multiple of LJpeg frame size");
 
+    auto MCUSize =
+        iPoint2D{maxRes.x / jpegFrameDim.x, maxRes.y / jpegFrameDim.y};
+    if (MCUSize.area() != implicit_cast<uint64_t>(N_COMP))
+      ThrowRDE("Unexpected MCU size, does not match LJpeg component count");
+
+    const iRectangle2D imgFrame = {
+        {static_cast<int>(offX), static_cast<int>(offY)},
+        {static_cast<int>(w), static_cast<int>(h)}};
+    const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
+
+    int numLJpegRowsPerRestartInterval;
+    if (numMCUsPerRestartInterval == 0) {
+      numLJpegRowsPerRestartInterval = jpegFrameDim.y;
+    } else {
+      const int numMCUsPerRow = jpegFrameDim.x;
+      if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
+        ThrowRDE("Restart interval is not a multiple of frame row size");
+      numLJpegRowsPerRestartInterval =
+          numMCUsPerRestartInterval / numMCUsPerRow;
+    }
+
+    LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec,
+                        numLJpegRowsPerRestartInterval,
+                        implicit_cast<int>(predictorMode),
+                        input.peekRemainingBuffer().getAsArray1DRef());
+    return d.decode();
+  }
+
+  // Inverted reshape case (DJI/Blackmagic CinemaDNG):
+  // JPEG frame is wider than tile, e.g. JPEG=8000x1500 1-comp, tile=4000x3000.
+  // Each JPEG row contains 'widthPack' tile rows concatenated.
+  if (N_COMP != 1)
+    ThrowRDE("Inverted reshape only supported for single-component LJpeg");
+
+  if (jpegFrameDim.x % maxRes.x != 0)
+    ThrowRDE("LJpeg frame width is not a multiple of tile width");
+  if (maxRes.y % jpegFrameDim.y != 0)
+    ThrowRDE("Tile height is not a multiple of LJpeg frame height");
+
+  const int widthPack = jpegFrameDim.x / maxRes.x;
+  if (widthPack * jpegFrameDim.y != maxRes.y)
+    ThrowRDE("Inverted reshape dimensions mismatch");
+
+  if (widthPack < 1 || widthPack > 4)
+    ThrowRDE("Unexpected row packing factor: %d", widthPack);
+
+  // Decode into a temporary buffer at JPEG frame dimensions.
+  // MCU is {1,1} since we have a single component.
+  const auto MCUSize = iPoint2D{1, 1};
+
+  // Create a temporary raw image to decode the JPEG into.
+  // RawImage::create with dimensions already calls createData() internally.
+  RawImage tmpRaw = RawImage::create(
+      iPoint2D(jpegFrameDim.x, jpegFrameDim.y), RawImageType::UINT16, 1);
+
+  const iRectangle2D tmpFrame = {
+      {0, 0}, {jpegFrameDim.x, jpegFrameDim.y}};
   const LJpegDecompressor::Frame jpegFrame = {MCUSize, jpegFrameDim};
 
   int numLJpegRowsPerRestartInterval;
   if (numMCUsPerRestartInterval == 0) {
-    // Restart interval not enabled, so all of the rows
-    // are contained in the first (implicit) restart interval.
     numLJpegRowsPerRestartInterval = jpegFrameDim.y;
   } else {
     const int numMCUsPerRow = jpegFrameDim.x;
     if (numMCUsPerRestartInterval % numMCUsPerRow != 0)
       ThrowRDE("Restart interval is not a multiple of frame row size");
-    numLJpegRowsPerRestartInterval = numMCUsPerRestartInterval / numMCUsPerRow;
+    numLJpegRowsPerRestartInterval =
+        numMCUsPerRestartInterval / numMCUsPerRow;
   }
 
-  LJpegDecompressor d(mRaw, imgFrame, jpegFrame, rec,
+  LJpegDecompressor d(tmpRaw, tmpFrame, jpegFrame, rec,
                       numLJpegRowsPerRestartInterval,
+                      implicit_cast<int>(predictorMode),
                       input.peekRemainingBuffer().getAsArray1DRef());
-  return d.decode();
+  auto consumed = d.decode();
+
+  // Deinterleave: each JPEG row of width (widthPack * tileW) maps to
+  // widthPack consecutive tile rows of width tileW.
+  const auto tmpData = tmpRaw->getU16DataAsUncroppedArray2DRef();
+  const auto outData = mRaw->getU16DataAsUncroppedArray2DRef();
+
+  const int tileW = implicit_cast<int>(w);
+  const int cpp = implicit_cast<int>(mRaw->getCpp());
+  const int outRowPixels = cpp * tileW;
+
+  for (int jpegRow = 0; jpegRow < jpegFrameDim.y; ++jpegRow) {
+    for (int pack = 0; pack < widthPack; ++pack) {
+      const int tileRow =
+          implicit_cast<int>(offY) + jpegRow * widthPack + pack;
+      if (tileRow >= mRaw->dim.y)
+        continue;
+      const int srcCol = pack * outRowPixels;
+      const int dstCol = cpp * implicit_cast<int>(offX);
+      for (int col = 0; col < outRowPixels && (srcCol + col) < jpegFrameDim.x;
+           ++col) {
+        outData(tileRow, dstCol + col) = tmpData(jpegRow, srcCol + col);
+      }
+    }
+  }
+
+  return consumed;
 }
 
 } // namespace rawspeed

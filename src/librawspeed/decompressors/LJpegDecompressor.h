@@ -59,6 +59,7 @@ private:
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
   const int numLJpegRowsPerRestartInterval;
+  const int predictorMode;
 
   int numFullMCUs = 0;
   int trailingPixels = 0;
@@ -79,6 +80,7 @@ private:
   template <const iPoint2D& MCUSize, int N_COMP>
   __attribute__((always_inline)) inline void decodeRowN(
       Array2DRef<uint16_t> outStripe, Array2DRef<const uint16_t> pred,
+      int predMode, Array2DRef<const uint16_t> prevStripe,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
@@ -89,6 +91,7 @@ public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
                     int numLJpegRowsPerRestartInterval_,
+                    int predictorMode_,
                     Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decode() const;

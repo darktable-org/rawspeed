@@ -53,10 +53,12 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
                                      int numLJpegRowsPerRestartInterval_,
+                                     int predictorMode_,
                                      Array1DRef<const uint8_t> input_)
     : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)),
-      numLJpegRowsPerRestartInterval(numLJpegRowsPerRestartInterval_) {
+      numLJpegRowsPerRestartInterval(numLJpegRowsPerRestartInterval_),
+      predictorMode(predictorMode_) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -181,9 +183,39 @@ constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
 
 } // namespace
 
+namespace {
+
+// Compute the LJpeg prediction value given predictor mode and neighbor values.
+// Ra = left, Rb = above, Rc = above-left.
+// All arithmetic done in int32_t to avoid overflow in modes 4-6.
+// Result is modulo 2^16 per ITU-T T.81.
+inline int computePrediction(int predMode, int Ra, int Rb, int Rc) {
+  switch (predMode) {
+  case 1:
+    return Ra;
+  case 2:
+    return Rb;
+  case 3:
+    return Rc;
+  case 4:
+    return Ra + Rb - Rc;
+  case 5:
+    return Ra + ((Rb - Rc) >> 1);
+  case 6:
+    return Rb + ((Ra - Rc) >> 1);
+  case 7:
+    return (Ra + Rb) >> 1;
+  default:
+    __builtin_unreachable();
+  }
+}
+
+} // namespace
+
 template <const iPoint2D& MCUSize, int N_COMP>
 void LJpegDecompressor::decodeRowN(
     Array2DRef<uint16_t> outStripe, Array2DRef<const uint16_t> pred,
+    int predMode, Array2DRef<const uint16_t> prevStripe,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
   invariant(MCUSize.area() == N_COMP);
@@ -207,7 +239,21 @@ void LJpegDecompressor::decodeRowN(
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
         int c = (MCUSize.x * MCURow) + MCUСol;
-        int prediction = pred(MCURow, MCUСol);
+        int prediction;
+        if (predMode == 1) {
+          // Fast path for the common case (mode 1 = left neighbor).
+          prediction = pred(MCURow, MCUСol);
+        } else {
+          // For modes 2-7, compute Ra, Rb, Rc.
+          int Ra = pred(MCURow, MCUСol); // left neighbor
+          int stripeCol = MCUSize.x * mcuIdx + MCUСol;
+          int stripeRow = MCURow;
+          int Rb = prevStripe(stripeRow, stripeCol);
+          int Rc = (stripeCol >= MCUSize.x)
+                       ? prevStripe(stripeRow, stripeCol - MCUSize.x)
+                       : Rb; // First column: Rc = Rb
+          prediction = computePrediction(predMode, Ra, Rb, Rc);
+        }
         int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                        .decodeDifference(bs);
         int pix = prediction + diff;
@@ -230,7 +276,21 @@ void LJpegDecompressor::decodeRowN(
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
         int c = (MCUSize.x * MCURow) + MCUСol;
-        int prediction = pred(MCURow, MCUСol);
+        int prediction;
+        if (predMode == 1) {
+          prediction = pred(MCURow, MCUСol);
+        } else {
+          int Ra = pred(MCURow, MCUСol);
+          int stripeCol = MCUSize.x * mcuIdx + MCUСol;
+          int stripeRow = MCURow;
+          int Rb = (stripeCol < prevStripe.width())
+                       ? prevStripe(stripeRow, stripeCol)
+                       : Ra;
+          int Rc = (stripeCol >= MCUSize.x && stripeCol < prevStripe.width())
+                       ? prevStripe(stripeRow, stripeCol - MCUSize.x)
+                       : Rb;
+          prediction = computePrediction(predMode, Ra, Rb, Rc);
+        }
         int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
                        .decodeDifference(bs);
         int pix = prediction + diff;
@@ -284,6 +344,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
        restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
     auto predStorage = getInitialPreds<N_COMP>();
     auto pred = Array2DRef(predStorage.data(), MCU.x, MCU.y);
+    bool isFirstRow = true;
 
     if (restartIntervalIndex != 0) {
       auto marker = peekMarker(inputStream);
@@ -321,7 +382,24 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                                /*croppedHeight=*/frame.mcu.y)
                                  .getAsArray2DRef();
 
-      decodeRowN<MCU, N_COMP>(outStripe, pred, ht, bs);
+      // For predictor modes 2-7, we need the previous row (stripe).
+      // For the first row of each restart interval, use predictor mode 1
+      // (per ITU-T T.81: first row always uses horizontal prediction).
+      // For the first row, prevStripe points to outStripe itself (unused
+      // since predMode will be 1).
+      const int predMode = isFirstRow ? 1 : predictorMode;
+      const Array2DRef<const uint16_t> prevStripe =
+          isFirstRow
+              ? Array2DRef<const uint16_t>(outStripe)
+              : CroppedArray2DRef<const uint16_t>(
+                    img,
+                    /*offsetCols=*/0,
+                    /*offsetRows=*/row - frame.mcu.y,
+                    /*croppedWidth=*/img.width(),
+                    /*croppedHeight=*/frame.mcu.y)
+                    .getAsArray2DRef();
+
+      decodeRowN<MCU, N_COMP>(outStripe, pred, predMode, prevStripe, ht, bs);
 
       // The predictor for the next line is the start of this line.
       pred = CroppedArray2DRef(outStripe,
@@ -330,6 +408,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                /*croppedWidth=*/MCU.x,
                                /*croppedHeight=*/MCU.y)
                  .getAsArray2DRef();
+      isFirstRow = false;
     }
 
     inputStream.skipBytes(bs.getStreamPosition());
