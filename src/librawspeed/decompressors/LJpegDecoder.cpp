@@ -20,6 +20,7 @@
 */
 
 #include "decompressors/LJpegDecoder.h"
+#include "adt/Array1DRef.h"
 #include "adt/Casts.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
@@ -106,8 +107,9 @@ decodeStandardScan(const ScanSettings& settings, iPoint2D mcuSize,
   return d.decode();
 }
 
-void copyDeinterleavedRows(const RawImage& raw, RawImage tmpRaw, uint32_t offX,
-                           uint32_t offY, uint32_t tileWidth, int widthPack) {
+void copyDeinterleavedRows(const RawImage& raw, const RawImage& tmpRaw,
+                           uint32_t offX, uint32_t offY, uint32_t tileWidth,
+                           int widthPack) {
   const auto tmpData = tmpRaw->getU16DataAsUncroppedArray2DRef();
   const auto outData = raw->getU16DataAsUncroppedArray2DRef();
 
