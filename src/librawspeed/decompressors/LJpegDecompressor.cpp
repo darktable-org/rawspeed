@@ -52,13 +52,12 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     int numLJpegRowsPerRestartInterval_,
-                                     int predictorMode_,
+                                     DecodeSettings settings,
                                      Array1DRef<const uint8_t> input_)
     : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)),
-      numLJpegRowsPerRestartInterval(numLJpegRowsPerRestartInterval_),
-      predictorMode(predictorMode_) {
+      numLJpegRowsPerRestartInterval(settings.numLJpegRowsPerRestartInterval),
+      predictorMode(settings.predictorMode) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",

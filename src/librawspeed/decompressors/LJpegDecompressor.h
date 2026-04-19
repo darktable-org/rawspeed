@@ -45,6 +45,10 @@ public:
     const iPoint2D mcu;
     const iPoint2D dim;
   };
+  struct DecodeSettings final {
+    const int numLJpegRowsPerRestartInterval;
+    const int predictorMode;
+  };
   struct PerComponentRecipe final {
     const PrefixCodeDecoder<>& ht;
     const uint16_t initPred;
@@ -90,8 +94,7 @@ private:
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
-                    int numLJpegRowsPerRestartInterval_, int predictorMode_,
-                    Array1DRef<const uint8_t> input);
+                    DecodeSettings settings, Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decode() const;
 };
