@@ -289,7 +289,7 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         mRootIFD->getEntryRecursive(TiffTag::FUJI_BITSPERSAMPLE)->getU32();
     if (bps > 16)
       ThrowRDE("Unexpected bit depth: %u", bps);
-    mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
+    mRaw->whitePoint = implicit_cast<int>((1ULL << bps) - 1ULL);
   }
 
   // This is where we'd normally call setMetaData but since we may still need

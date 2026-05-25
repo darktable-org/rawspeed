@@ -374,7 +374,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
 
   if (mRaw->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
-    mRaw->whitePoint = implicit_cast<int>((1UL << *bps) - 1UL);
+    mRaw->whitePoint = implicit_cast<int>((1ULL << *bps) - 1ULL);
   } else if (mRaw->getDataType() == RawImageType::F32) {
     // 1. We divide by white level to normalize the image,
     //    s.t. the 1.0 becomes the white level.

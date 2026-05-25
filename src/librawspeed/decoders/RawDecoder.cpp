@@ -121,7 +121,7 @@ void RawDecoder::decodeUncompressed(const TiffIFD* rawIFD,
   mRaw->createData();
 
   // Default white level is (2 ** BitsPerSample) - 1
-  mRaw->whitePoint = implicit_cast<int>((1UL << bitPerPixel) - 1UL);
+  mRaw->whitePoint = implicit_cast<int>((1ULL << bitPerPixel) - 1ULL);
 
   offY = 0;
   for (const RawSlice& slice : slices) {
