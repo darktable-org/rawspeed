@@ -116,6 +116,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
   if (numLJpegRowsPerRestartInterval < 1)
     ThrowRDE("Number of rows per restart interval must be positives");
 
+  if (predictorMode < 1 || predictorMode > 7)
+    ThrowRDE("Unsupported predictor mode: %i", predictorMode);
+
   if (static_cast<int64_t>(frame.mcu.x) * frame.dim.x >
           std::numeric_limits<int>::max() ||
       static_cast<int64_t>(frame.mcu.y) * frame.dim.y >

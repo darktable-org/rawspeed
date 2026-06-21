@@ -53,9 +53,12 @@ FileReader::readFile() const {
   size_t fileSize = 0;
 
 #if defined(__unix__) || defined(__APPLE__)
-  auto fclose = [](std::FILE* fp) { std::fclose(fp); };
-  using file_ptr = std::unique_ptr<FILE, decltype(fclose)>;
-  file_ptr file(fopen(fileName, "rb"), fclose);
+  using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE*)>;
+  // The opened stream is owned by `file`, whose deleter (std::fclose) closes it
+  // on every exit path. The static analyzer does not model the unique_ptr
+  // destructor, so it wrongly reports a leak here.
+  // codechecker_false_positive [unix.Stream] close done by unique_ptr deleter
+  file_ptr file(std::fopen(fileName, "rb"), &std::fclose);
 
   if (file == nullptr)
     ThrowFIE("Could not open file \"%s\".", fileName);

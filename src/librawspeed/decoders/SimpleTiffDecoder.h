@@ -39,7 +39,8 @@ class SimpleTiffDecoder : public AbstractTiffDecoder {
 
 public:
   SimpleTiffDecoder(TiffRootIFDOwner&& root, Buffer file)
-      : AbstractTiffDecoder(std::move(root), file) {}
+      : AbstractTiffDecoder(std::move(root), file), raw(nullptr), width(0),
+        height(0), off(0), c2(0) {}
 
   void prepareForRawDecoding();
 

@@ -35,6 +35,7 @@
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <string>
