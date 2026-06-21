@@ -120,7 +120,10 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
 #ifdef HAVE_JPEG
     case 0x884c: // lossy JPEG
 #endif
-                 // no change, if supported, then is still supported.
+#ifdef HAVE_JPEGXL
+    case 52546: // JPEG XL (DNG 1.7)
+#endif
+                // no change, if supported, then is still supported.
       break;
 
 #ifndef HAVE_ZLIB
@@ -138,6 +141,15 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
     "JPEG is not present! Lossy JPEG compression will not be supported!"
       writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found lossy JPEG-encoded "
                                     "chunk, but the jpeg support was "
+                                    "disabled at build!");
+      [[clang::fallthrough]];
+#endif
+#ifndef HAVE_JPEGXL
+    case 52546: // JPEG XL (DNG 1.7)
+#pragma message                                                                \
+    "JPEG XL is not present! DNG JPEG XL compression will not be supported!"
+      writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found JPEG XL-encoded "
+                                    "chunk, but JPEG XL support was "
                                     "disabled at build!");
       [[clang::fallthrough]];
 #endif
