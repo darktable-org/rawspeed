@@ -34,6 +34,7 @@
 #include "decompressors/LJpegDecoder.h"
 #include "decompressors/SonyArw1Decompressor.h"
 #include "decompressors/SonyArw2Decompressor.h"
+#include "decompressors/SonyArw6Decompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -182,6 +183,11 @@ RawImage ArwDecoder::decodeRawInternal() {
     return mRaw;
   }
 
+  if (32766 == compression) {
+    DecodeARW6(raw);
+    return mRaw;
+  }
+
   if (32767 != compression)
     ThrowRDE("Unsupported compression %i", compression);
 
@@ -316,7 +322,7 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   }
 
   if (width == 0 || height == 0 || width % 2 != 0 || height % 2 != 0 ||
-      width > 9728 || height > 6656)
+      width > 10240 || height > 7168)
     ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
 
   mRaw->dim = iPoint2D(width, height);
@@ -410,6 +416,69 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   const TiffEntry* size_entry = raw->getEntry(TiffTag::SONYRAWIMAGESIZE);
   iRectangle2D crop(0, 0, size_entry->getU32(0), size_entry->getU32(1));
   mRaw->subFrame(crop);
+}
+
+void ArwDecoder::DecodeARW6(const TiffIFD* raw) {
+  // Sony "Compressed RAW 2" / ARW 6.0 (TIFF compression 32766), lossy RAW.
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+
+  // FF frames are 10016x6672, APS-C 6592x4372. Raise the dimension ceiling.
+  if (width == 0 || height == 0 || width % 2 != 0 || height % 2 != 0 ||
+      width > 10240 || height > 7168)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  if (offsets->count != 1)
+    ThrowRDE("Multiple Strips found: %u", offsets->count);
+  if (counts->count != offsets->count)
+    ThrowRDE("Byte count number does not match strip size: count:%u, strips:%u",
+             counts->count, offsets->count);
+
+  uint32_t off = offsets->getU32();
+  uint32_t c2 = counts->getU32();
+
+  if (!mFile.isValid(off))
+    ThrowRDE("Data offset after EOF, file probably truncated");
+  if (!mFile.isValid(off, c2))
+    c2 = mFile.getSize() - off;
+
+  mRaw->dim = iPoint2D(width, height);
+  mRaw->createData();
+
+  ByteStream input(DataBuffer(mFile.getSubView(off, c2), Endianness::little));
+
+  SonyArw6Decompressor d(mRaw, input, implicit_cast<int>(width),
+                         implicit_cast<int>(height));
+  d.decompress();
+
+  // The ARW6 output is already in the final 16-bit CFA domain; no SonyCurve is
+  // applied for this path. Its value domain is the native ~14-bit scale, so the
+  // levels from cameras.xml (black 512 / white 16383) and the
+  // SONYBLACKLEVEL/SONYWHITELEVEL EXIF tags (read by GetWB()) apply unchanged.
+
+  // Crop to the active CFA. The decoded frame keeps the tiling overlap on its
+  // right edge, so the active area is narrower than the decoded width: it is
+  // the DefaultCrop region plus its symmetric border (DefaultCropOrigin px on
+  // each side), equal to the lossless path's SonyRawImageSize. Both tags are
+  // read from the file, so this holds for any frame size with no hard-coded
+  // dimensions or full-frame/APS-C special-casing.
+  const TiffEntry* cropOrigin = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
+  const TiffEntry* cropSize = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
+  // 64-bit so the doubled origin and the sum cannot wrap a 32-bit value past
+  // the frame-size guard.
+  uint64_t activeW =
+      uint64_t{cropSize->getU32(0)} + (2 * cropOrigin->getU32(0));
+  uint64_t activeH =
+      uint64_t{cropSize->getU32(1)} + (2 * cropOrigin->getU32(1));
+  if (activeW > width || activeH > height)
+    ThrowRDE("Active area (%llu; %llu) exceeds the decoded frame (%u; %u)",
+             static_cast<unsigned long long>(activeW),
+             static_cast<unsigned long long>(activeH), width, height);
+  mRaw->subFrame(iRectangle2D(0, 0, implicit_cast<int>(activeW),
+                              implicit_cast<int>(activeH)));
+  applyCrop = false;
 }
 
 void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
