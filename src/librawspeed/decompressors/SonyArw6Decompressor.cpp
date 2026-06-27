@@ -379,8 +379,12 @@ void coefDiffDecode(std::vector<int32_t>& coef, int n) {
     return;
   int32_t acc = coef[0];
   for (int i = 1; i < n; ++i) {
-    int32_t s =
-        static_cast<int32_t>(static_cast<uint32_t>(acc + coef[i]) & 0xffffU);
+    // Cumulative sum in a wider type: the raw coefficients can saturate to
+    // ~INT32_MIN/MAX, so `acc + coef[i]` would overflow `int`. Only the low 16
+    // bits matter (the band stores wrap to signed 16-bit), so widen, mask, then
+    // reinterpret as signed 16-bit.
+    int32_t s = static_cast<int32_t>((static_cast<int64_t>(acc) + coef[i]) &
+                                     0xffff);
     if (s >= 0x8000)
       s -= 0x10000;
     coef[i] = s;
