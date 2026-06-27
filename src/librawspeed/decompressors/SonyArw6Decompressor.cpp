@@ -1343,8 +1343,8 @@ void SonyArw6Decompressor::decompress() const {
   if (mRaw->isTooManyErrors(1, &firstErr))
     ThrowRDE("ARW6: tile component decode failed: %s", firstErr.c_str());
 
-  // Phase B: per tile, combine its components (luma PostFilter + colour-conv)
-  // and write the RGGB block into its disjoint, clipped output rectangle.
+    // Phase B: per tile, combine its components (luma PostFilter + colour-conv)
+    // and write the RGGB block into its disjoint, clipped output rectangle.
 #ifdef HAVE_OPENMP
 #pragma omp parallel for schedule(static) num_threads(nThreads)
 #endif
