@@ -31,6 +31,7 @@
 #include "common/DngOpcodes.h"
 #include "common/RawImage.h"
 #include "decoders/AbstractTiffDecoder.h"
+#include "decoders/DngDeinterleave.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/AbstractDngDecompressor.h"
 #include "io/Buffer.h"
@@ -45,7 +46,9 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <map>
 #include <memory>
@@ -455,6 +458,68 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   mRaw->createData();
 
   slices.decompress();
+
+  // DNG 1.7 may store the (already assembled) frame with its color-plane
+  // fields stacked, signalled by Row/ColumnInterleaveFactor. This is a
+  // whole-frame post-pass over the fully assembled buffer, applied BEFORE
+  // ActiveArea/DefaultCropOrigin (handleMetadata) crop the image. A single
+  // (e.g. JXL) tile can straddle a field boundary, so this can NOT be done
+  // per-tile.
+  deinterleaveFields(raw);
+}
+
+void DngDecoder::deinterleaveFields(const TiffIFD* raw) const {
+  uint32_t rowFactor = 1;
+  if (raw->hasEntry(TiffTag::ROWINTERLEAVEFACTOR))
+    rowFactor = raw->getEntry(TiffTag::ROWINTERLEAVEFACTOR)->getU32();
+
+  uint32_t colFactor = 1;
+  if (raw->hasEntry(TiffTag::COLUMNINTERLEAVEFACTOR))
+    colFactor = raw->getEntry(TiffTag::COLUMNINTERLEAVEFACTOR)->getU32();
+
+  if (rowFactor == 0 || colFactor == 0)
+    ThrowRDE("Invalid interleave factor (%u, %u)", rowFactor, colFactor);
+
+  // Fast path: nothing to do.
+  if (rowFactor == 1 && colFactor == 1)
+    return;
+
+  const int storedH = mRaw->dim.y;
+  const int storedW = mRaw->dim.x;
+
+  if (rowFactor > static_cast<uint32_t>(storedH) ||
+      colFactor > static_cast<uint32_t>(storedW))
+    ThrowRDE("Interleave factor (%u, %u) larger than image dimensions (%i, %i)",
+             rowFactor, colFactor, storedW, storedH);
+
+  // stored-row -> final-row and stored-col -> final-col lookup tables.
+  const std::vector<int> rowMap =
+      dngDeinterleaveFieldMap(storedH, implicit_cast<int>(rowFactor));
+  const std::vector<int> colMap =
+      dngDeinterleaveFieldMap(storedW, implicit_cast<int>(colFactor));
+
+  // Operate on raw bytes so the same scatter works for both UINT16 and F32
+  // buffers. `bpp` is the size of one whole pixel (all channels) in bytes; the
+  // byte Array2DRef indexes columns in bytes.
+  const int bpp = implicit_cast<int>(mRaw->getBpp());
+  const Array2DRef<std::byte> img = mRaw->getByteDataAsUncroppedArray2DRef();
+
+  // A temporary copy of the assembled (stored-order) frame to scatter from.
+  std::vector<std::byte> tmp(static_cast<size_t>(storedH) * storedW * bpp);
+  const Array2DRef<std::byte> src(tmp.data(), storedW * bpp, storedH);
+  for (int sy = 0; sy < storedH; ++sy)
+    std::memcpy(&src(sy, 0), &img(sy, 0),
+                static_cast<size_t>(storedW) * bpp);
+
+  // Scatter src(sy,sx) -> img(fy,fx), one whole pixel (bpp bytes) at a time.
+  for (int sy = 0; sy < storedH; ++sy) {
+    const int fy = rowMap[static_cast<size_t>(sy)];
+    for (int sx = 0; sx < storedW; ++sx) {
+      const int fx = colMap[static_cast<size_t>(sx)];
+      std::memcpy(&img(fy, bpp * fx), &src(sy, bpp * sx),
+                  static_cast<size_t>(bpp));
+    }
+  }
 }
 
 RawImage DngDecoder::decodeRawInternal() {
