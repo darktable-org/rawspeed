@@ -508,8 +508,7 @@ void DngDecoder::deinterleaveFields(const TiffIFD* raw) const {
   std::vector<std::byte> tmp(static_cast<size_t>(storedH) * storedW * bpp);
   const Array2DRef<std::byte> src(tmp.data(), storedW * bpp, storedH);
   for (int sy = 0; sy < storedH; ++sy)
-    std::memcpy(&src(sy, 0), &img(sy, 0),
-                static_cast<size_t>(storedW) * bpp);
+    std::memcpy(&src(sy, 0), &img(sy, 0), static_cast<size_t>(storedW) * bpp);
 
   // Scatter src(sy,sx) -> img(fy,fx), one whole pixel (bpp bytes) at a time.
   for (int sy = 0; sy < storedH; ++sy) {

@@ -89,11 +89,11 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
   // uint16. Decode JXL directly into whichever sample type mRaw expects, so the
   // tile lands in the matching typed view below.
   const bool isFloat = mRaw->getDataType() == RawImageType::F32;
-  const JxlPixelFormat fmt = {/*num_channels=*/cpp,
-                              /*data_type=*/isFloat ? JXL_TYPE_FLOAT
-                                                    : JXL_TYPE_UINT16,
-                              /*endianness=*/JXL_LITTLE_ENDIAN,
-                              /*align=*/0};
+  const JxlPixelFormat fmt = {
+      /*num_channels=*/cpp,
+      /*data_type=*/isFloat ? JXL_TYPE_FLOAT : JXL_TYPE_UINT16,
+      /*endianness=*/JXL_LITTLE_ENDIAN,
+      /*align=*/0};
 
   JxlBasicInfo info = {};
   uint32_t jxl_w = 0;
@@ -142,8 +142,8 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
 
   if (isFloat) {
     copyTile<float>(mRaw->getF32DataAsUncroppedArray2DRef(),
-                    reinterpret_cast<const float*>(pixels.data()), jxl_w, copy_w,
-                    copy_h, cpp, offX, offY);
+                    reinterpret_cast<const float*>(pixels.data()), jxl_w,
+                    copy_w, copy_h, cpp, offX, offY);
   } else {
     copyTile<uint16_t>(mRaw->getU16DataAsUncroppedArray2DRef(),
                        reinterpret_cast<const uint16_t*>(pixels.data()), jxl_w,

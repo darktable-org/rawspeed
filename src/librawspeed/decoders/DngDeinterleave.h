@@ -50,8 +50,8 @@ namespace rawspeed {
 //
 // Returns a vector `map` of size `total` such that the pixel stored at index
 // `s` belongs at final index `map[s]`.
-[[nodiscard]] inline std::vector<int>
-dngDeinterleaveFieldMap(int total, int factor) {
+[[nodiscard]] inline std::vector<int> dngDeinterleaveFieldMap(int total,
+                                                              int factor) {
   assert(total >= 0);
   assert(factor >= 1);
 

@@ -32,10 +32,8 @@ namespace {
 // mirroring DngDecoder::deinterleaveFields for verification of the index math.
 std::vector<int> applyDeinterleave(const std::vector<int>& stored, int storedH,
                                    int storedW, int rowFactor, int colFactor) {
-  const std::vector<int> rowMap =
-      dngDeinterleaveFieldMap(storedH, rowFactor);
-  const std::vector<int> colMap =
-      dngDeinterleaveFieldMap(storedW, colFactor);
+  const std::vector<int> rowMap = dngDeinterleaveFieldMap(storedH, rowFactor);
+  const std::vector<int> colMap = dngDeinterleaveFieldMap(storedW, colFactor);
 
   std::vector<int> out(stored.size());
   for (int sy = 0; sy < storedH; ++sy) {
