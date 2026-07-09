@@ -13969,8 +13969,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SONY" model="ILCE-7RM6" supported="unknown-no-samples">
+	<Camera make="SONY" model="ILCE-7RM6">
 		<ID make="Sony" model="ILCE-7RM6">Sony ILCE-7RM6</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-32" height="0"/>
+		<Sensor black="512" white="16383"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11765 -5595 -1192</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3689 11507 2485</ColorMatrixRow>
+				<ColorMatrixRow plane="2">51 681 5731</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="SONY" model="ILCE-7S">
 		<ID make="Sony" model="ILCE-7S">Sony ILCE-7S</ID>

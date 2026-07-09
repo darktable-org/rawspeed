@@ -31,6 +31,7 @@ set(DECOMPRESSORS
   "SamsungV2Decompressor"
   "SonyArw1Decompressor"
   "SonyArw2Decompressor"
+  "SonyArw6Decompressor"
   "UncompressedDecompressor"
   "VC5Decompressor"
 )
