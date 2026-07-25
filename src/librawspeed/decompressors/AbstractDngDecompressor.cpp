@@ -214,7 +214,14 @@ void AbstractDngDecompressor::decompressThread<52546>() const noexcept {
   for (const auto& e :
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
     try {
-      JpegXlDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw, mBps);
+      // WhiteLevel, not mBps: it is the tag that says which range the samples
+      // are on, and DngDecoder::decodeData() has already set it by now (the
+      // same reason VC5 may rely on it). 0 means "unknown", which leaves
+      // libjxl's default scaling in place.
+      const uint32_t whiteLevel =
+          implicit_cast<uint32_t>(std::max(0, mRaw->whitePoint.value_or(0)));
+      JpegXlDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw,
+                           whiteLevel);
       j.decode(e.offX, e.offY);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());

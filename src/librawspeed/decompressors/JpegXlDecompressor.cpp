@@ -115,13 +115,13 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
                /*numColorChannels=*/info.num_color_channels,
                /*numExtraChannels=*/info.num_extra_channels};
       if (const JpegXlStreamCheck check =
-              checkJpegXlStream(props, cpp, dngBps, isFloat);
+              checkJpegXlStream(props, cpp, whiteLevel, isFloat);
           check != JpegXlStreamCheck::Ok) {
         ThrowRDE("JXL: %s (codestream %ux%u, %u bit, %u color + %u extra "
-                 "channels; DNG cpp %u, %u bit)",
+                 "channels; DNG cpp %u, WhiteLevel %u)",
                  toString(check), props.width, props.height,
                  props.bitsPerSample, props.numColorChannels,
-                 props.numExtraChannels, cpp, dngBps);
+                 props.numExtraChannels, cpp, whiteLevel);
       }
       continue;
     }
@@ -143,12 +143,16 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
           JxlDecoderSetImageOutBuffer(dec, &fmt, pixels.data(), buf_size))
         ThrowRDE("JXL: JxlDecoderSetImageOutBuffer failed");
       // Must follow SetImageOutBuffer -- that ordering is the libjxl API
-      // contract. Without this call the default JXL_BIT_DEPTH_FROM_PIXEL_FORMAT
-      // rescales the codestream to fill the full uint16 range, so a 12-bit tile
-      // would land ~16x too bright relative to the DNG's WhiteLevel. Only a
-      // 16-bit codestream makes that default a no-op. Float output supports
-      // nothing but the default, so it is left alone.
-      if (!isFloat) {
+      // contract.
+      //
+      // libjxl's default (JXL_BIT_DEPTH_FROM_PIXEL_FORMAT) stretches the
+      // codestream to fill uint16. Whether that is right depends entirely on
+      // which range the DNG's WhiteLevel is expressed in, so let
+      // jpegXlBitDepthMode decide from WhiteLevel rather than assuming either
+      // way; both kinds of file exist. Only override when we want the
+      // codestream's own range, since the default needs no call at all.
+      if (jpegXlBitDepthMode(props, whiteLevel, isFloat) ==
+          JpegXlBitDepthMode::FromCodestream) {
         const JxlBitDepth bitDepth = {/*type=*/JXL_BIT_DEPTH_FROM_CODESTREAM,
                                       /*bits_per_sample=*/0,
                                       /*exponent_bits_per_sample=*/0};

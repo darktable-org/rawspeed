@@ -33,8 +33,8 @@ namespace rawspeed {
 // index arithmetic and the codestream-vs-DNG agreement rules can be unit-tested
 // on every build, with or without libjxl, and without needing a sample file.
 
-// The subset of a decoded JXL codestream's properties that has to agree with
-// the DNG tags describing the tile. Mirrors the relevant JxlBasicInfo fields.
+// The subset of a decoded JXL codestream's properties the tile path has to
+// reason about. Mirrors the relevant JxlBasicInfo fields.
 struct JpegXlStreamProps final {
   uint32_t width = 0;
   uint32_t height = 0;
@@ -48,7 +48,8 @@ enum class JpegXlStreamCheck {
   EmptyImage,
   ColorChannelMismatch,
   ExtraChannelsUnsupported,
-  BitDepthMismatch,
+  BitDepthUnsupported,
+  WhiteLevelUnrepresentable,
 };
 
 [[nodiscard]] constexpr const char* toString(JpegXlStreamCheck check) noexcept {
@@ -61,34 +62,45 @@ enum class JpegXlStreamCheck {
     return "codestream color channel count does not match DNG SamplesPerPixel";
   case JpegXlStreamCheck::ExtraChannelsUnsupported:
     return "codestream has extra (non-color) channels";
-  case JpegXlStreamCheck::BitDepthMismatch:
-    return "codestream bit depth does not match DNG BitsPerSample";
+  case JpegXlStreamCheck::BitDepthUnsupported:
+    return "codestream bit depth does not fit the uint16 output";
+  case JpegXlStreamCheck::WhiteLevelUnrepresentable:
+    return "DNG WhiteLevel exceeds the uint16 output range";
   }
   return "unknown";
 }
 
+// Largest sample value an integer codestream of `bitsPerSample` bits can hold.
+// Only meaningful for 1..16; callers reject anything else first.
+[[nodiscard]] constexpr uint32_t
+jpegXlCodestreamMax(uint32_t bitsPerSample) noexcept {
+  return (uint32_t{1} << bitsPerSample) - 1;
+}
+
+// Widest value the integer output path (JXL_TYPE_UINT16) can carry.
+constexpr uint32_t JpegXlMaxOutputValue = 65535;
+
 // Decide whether a decoded codestream may be copied into the DNG tile.
 //
-// `cpp` is the raw image's samples-per-pixel and `dngBitsPerSample` the DNG's
-// BitsPerSample (tag 0x0102) for this IFD.
+// `cpp` is the raw image's samples-per-pixel and `whiteLevel` the DNG's
+// WhiteLevel (tag 0xC61D, or the BitsPerSample-derived default) for this IFD.
+// Pass 0 when it is unknown.
 //
-// On the integer path the decoder asks libjxl for
-// JXL_BIT_DEPTH_FROM_CODESTREAM, i.e. samples come out in the codestream's own
-// range rather than stretched to fill uint16. That range is then interpreted by
-// the rest of the pipeline against the DNG's BlackLevel/WhiteLevel, which are
-// keyed to BitsPerSample. If the two depths disagree there is no way to know
-// which one describes the intended scale, and either choice silently misexposes
-// the image by a factor of (2^16 - 1)/(2^bps - 1). Refuse instead, naming both
-// depths, so that a file hitting this is reported rather than quietly
-// mis-decoded.
-//
-// Float tiles are decoded as JXL_TYPE_FLOAT, for which libjxl supports only
-// JXL_BIT_DEPTH_FROM_PIXEL_FORMAT, and a DNG float BitsPerSample (16/24/32)
-// does not describe the codestream's integer bitsPerSample. Nothing to compare,
-// so the depth rule does not apply there.
+// Deliberately NOT checked: the codestream's bitsPerSample against the DNG's
+// BitsPerSample. Those two legitimately disagree in the wild, because
+// BitsPerSample is not what the sample values are scaled to:
+//   - Apple ProRAW (iPhone 17 Pro) declares BitsPerSample = 10 while embedding
+//     a 16-bit codestream, with WhiteLevel = 65535.
+//   - Panasonic declares BitsPerSample = 16 while embedding a 12-bit
+//     codestream, with WhiteLevel = 63232 = 3952 * 16.
+// Rejecting on disagreement would refuse both of those real files. WhiteLevel
+// is the tag that describes the intended range, so it is what the scaling
+// decision is keyed to (see jpegXlBitDepthMode) and a depth disagreement is not
+// by itself an error. What IS worth refusing is a depth the output path cannot
+// represent at all, and a WhiteLevel no uint16 scaling could reach.
 [[nodiscard]] constexpr JpegXlStreamCheck
 checkJpegXlStream(const JpegXlStreamProps& props, uint32_t cpp,
-                  uint32_t dngBitsPerSample, bool isFloat) noexcept {
+                  uint32_t whiteLevel, bool isFloat) noexcept {
   if (props.width == 0 || props.height == 0)
     return JpegXlStreamCheck::EmptyImage;
   if (props.numColorChannels != cpp)
@@ -98,9 +110,49 @@ checkJpegXlStream(const JpegXlStreamProps& props, uint32_t cpp,
   // is not a file we understand; do not silently discard part of it.
   if (props.numExtraChannels != 0)
     return JpegXlStreamCheck::ExtraChannelsUnsupported;
-  if (!isFloat && props.bitsPerSample != dngBitsPerSample)
-    return JpegXlStreamCheck::BitDepthMismatch;
+  // The integer path decodes as JXL_TYPE_UINT16, so a deeper codestream has no
+  // representation, and 0 is not a valid depth. Float tiles decode as
+  // JXL_TYPE_FLOAT, where bitsPerSample is paired with an exponent field and
+  // neither bound applies.
+  if (!isFloat && (props.bitsPerSample == 0 || props.bitsPerSample > 16))
+    return JpegXlStreamCheck::BitDepthUnsupported;
+  if (!isFloat && whiteLevel > JpegXlMaxOutputValue)
+    return JpegXlStreamCheck::WhiteLevelUnrepresentable;
   return JpegXlStreamCheck::Ok;
+}
+
+enum class JpegXlBitDepthMode {
+  // libjxl's default (JXL_BIT_DEPTH_FROM_PIXEL_FORMAT): the codestream is
+  // rescaled to fill the pixel format's range, so a b-bit codestream is
+  // stretched to fill uint16.
+  PixelFormatDefault,
+  // JXL_BIT_DEPTH_FROM_CODESTREAM: samples come out in the codestream's own
+  // range, unscaled.
+  FromCodestream,
+};
+
+// Pick the libjxl output bit depth so decoded values land on the scale the
+// DNG's WhiteLevel describes.
+//
+// If WhiteLevel fits inside the codestream's own range, then that range is the
+// scale the DNG's levels are keyed to and the samples must not be touched. If
+// WhiteLevel is larger than the codestream can express, it can only be
+// describing the stretched full-uint16 range, and libjxl's default rescale is
+// exactly what makes the two agree (Panasonic: 12-bit codestream, WhiteLevel
+// 63232 = 3952 * 16). For a 16-bit codestream the two modes coincide.
+//
+// An unknown WhiteLevel (0) keeps libjxl's default, which is the behaviour that
+// predates this decision.
+[[nodiscard]] constexpr JpegXlBitDepthMode
+jpegXlBitDepthMode(const JpegXlStreamProps& props, uint32_t whiteLevel,
+                   bool isFloat) noexcept {
+  // Float output supports nothing but the default.
+  if (isFloat || whiteLevel == 0 || props.bitsPerSample == 0 ||
+      props.bitsPerSample > 16)
+    return JpegXlBitDepthMode::PixelFormatDefault;
+  if (whiteLevel <= jpegXlCodestreamMax(props.bitsPerSample))
+    return JpegXlBitDepthMode::FromCodestream;
+  return JpegXlBitDepthMode::PixelFormatDefault;
 }
 
 struct JpegXlTileExtent final {
