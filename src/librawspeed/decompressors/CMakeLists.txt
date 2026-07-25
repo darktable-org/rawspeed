@@ -28,6 +28,7 @@ FILE(GLOB SOURCES
   "JpegMarkers.h"
   "JpegXlDecompressor.cpp"
   "JpegXlDecompressor.h"
+  "JpegXlTileLayout.h"
   "KodakDecompressor.cpp"
   "KodakDecompressor.h"
   "LJpegDecoder.cpp"

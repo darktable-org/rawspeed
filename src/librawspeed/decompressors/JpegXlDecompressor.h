@@ -37,10 +37,13 @@ namespace rawspeed {
 class JpegXlDecompressor final : public AbstractDecompressor {
   Buffer input;
   RawImage mRaw;
+  // The DNG's BitsPerSample for this IFD. The decoded codestream must agree
+  // with it, because that is the depth the BlackLevel/WhiteLevel are keyed to.
+  uint32_t dngBps;
 
 public:
-  JpegXlDecompressor(Buffer bs, RawImage img)
-      : input(bs), mRaw(std::move(img)) {}
+  JpegXlDecompressor(Buffer bs, RawImage img, uint32_t dngBps_)
+      : input(bs), mRaw(std::move(img)), dngBps(dngBps_) {}
 
   void decode(uint32_t offsetX, uint32_t offsetY);
 };

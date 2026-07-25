@@ -27,13 +27,12 @@
 #include "common/RawImage.h"
 #include "decoders/RawDecoderException.h"
 #include "decompressors/JpegXlDecompressor.h"
-#include <algorithm>
+#include "decompressors/JpegXlTileLayout.h"
 #include <cstddef>
 #include <cstdint>
 #include <jxl/decode.h>
+#include <jxl/types.h>
 #include <vector>
-
-using std::min;
 
 namespace rawspeed {
 
@@ -89,15 +88,14 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
   // uint16. Decode JXL directly into whichever sample type mRaw expects, so the
   // tile lands in the matching typed view below.
   const bool isFloat = mRaw->getDataType() == RawImageType::F32;
+  const size_t sampleSize = isFloat ? sizeof(float) : sizeof(uint16_t);
   const JxlPixelFormat fmt = {
       /*num_channels=*/cpp,
       /*data_type=*/isFloat ? JXL_TYPE_FLOAT : JXL_TYPE_UINT16,
       /*endianness=*/JXL_LITTLE_ENDIAN,
       /*align=*/0};
 
-  JxlBasicInfo info = {};
-  uint32_t jxl_w = 0;
-  uint32_t jxl_h = 0;
+  JpegXlStreamProps props;
   // Type-agnostic byte buffer; libjxl reports the required size in bytes.
   std::vector<uint8_t> pixels;
 
@@ -108,23 +106,55 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
     if (status == JXL_DEC_NEED_MORE_INPUT)
       ThrowRDE("JXL: needs more input (truncated tile?)");
     if (status == JXL_DEC_BASIC_INFO) {
+      JxlBasicInfo info = {};
       if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec, &info))
         ThrowRDE("JXL: JxlDecoderGetBasicInfo failed");
-      jxl_w = info.xsize;
-      jxl_h = info.ysize;
-      if (info.num_color_channels != cpp)
-        ThrowRDE("JXL: color channel count %u does not match cpp %u",
-                 info.num_color_channels, cpp);
+      props = {/*width=*/info.xsize,
+               /*height=*/info.ysize,
+               /*bitsPerSample=*/info.bits_per_sample,
+               /*numColorChannels=*/info.num_color_channels,
+               /*numExtraChannels=*/info.num_extra_channels};
+      if (const JpegXlStreamCheck check =
+              checkJpegXlStream(props, cpp, dngBps, isFloat);
+          check != JpegXlStreamCheck::Ok) {
+        ThrowRDE("JXL: %s (codestream %ux%u, %u bit, %u color + %u extra "
+                 "channels; DNG cpp %u, %u bit)",
+                 toString(check), props.width, props.height,
+                 props.bitsPerSample, props.numColorChannels,
+                 props.numExtraChannels, cpp, dngBps);
+      }
       continue;
     }
     if (status == JXL_DEC_NEED_IMAGE_OUT_BUFFER) {
       size_t buf_size = 0;
       if (JXL_DEC_SUCCESS != JxlDecoderImageOutBufferSize(dec, &fmt, &buf_size))
         ThrowRDE("JXL: JxlDecoderImageOutBufferSize failed");
+      // copyTile indexes the buffer as a tightly-packed jxl_w * cpp row stride;
+      // make libjxl's own accounting confirm that before trusting it.
+      if (const size_t needed =
+              jpegXlTileBufferBytes(props.width, props.height, cpp, sampleSize);
+          buf_size < needed) {
+        ThrowRDE("JXL: output buffer of %zu bytes is short of the %zu needed "
+                 "for a %ux%u tile of %u channels",
+                 buf_size, needed, props.width, props.height, cpp);
+      }
       pixels.resize(buf_size);
       if (JXL_DEC_SUCCESS !=
           JxlDecoderSetImageOutBuffer(dec, &fmt, pixels.data(), buf_size))
         ThrowRDE("JXL: JxlDecoderSetImageOutBuffer failed");
+      // Must follow SetImageOutBuffer -- that ordering is the libjxl API
+      // contract. Without this call the default JXL_BIT_DEPTH_FROM_PIXEL_FORMAT
+      // rescales the codestream to fill the full uint16 range, so a 12-bit tile
+      // would land ~16x too bright relative to the DNG's WhiteLevel. Only a
+      // 16-bit codestream makes that default a no-op. Float output supports
+      // nothing but the default, so it is left alone.
+      if (!isFloat) {
+        const JxlBitDepth bitDepth = {/*type=*/JXL_BIT_DEPTH_FROM_CODESTREAM,
+                                      /*bits_per_sample=*/0,
+                                      /*exponent_bits_per_sample=*/0};
+        if (JXL_DEC_SUCCESS != JxlDecoderSetImageOutBitDepth(dec, &bitDepth))
+          ThrowRDE("JXL: JxlDecoderSetImageOutBitDepth failed");
+      }
       continue;
     }
     if (status == JXL_DEC_FULL_IMAGE)
@@ -134,20 +164,24 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
     ThrowRDE("JXL: unexpected decoder status %d", static_cast<int>(status));
   }
 
-  if (pixels.empty() || jxl_w == 0 || jxl_h == 0)
+  if (pixels.empty())
     ThrowRDE("JXL: no pixel data decoded");
 
-  const uint32_t copy_w = min(static_cast<uint32_t>(mRaw->dim.x) - offX, jxl_w);
-  const uint32_t copy_h = min(static_cast<uint32_t>(mRaw->dim.y) - offY, jxl_h);
+  const JpegXlTileExtent copy = clipJpegXlTile(
+      static_cast<uint32_t>(mRaw->dim.x), static_cast<uint32_t>(mRaw->dim.y),
+      offX, offY, props.width, props.height);
+  if (copy.empty())
+    ThrowRDE("JXL: tile origin (%u,%u) lies outside the %ix%i raw image", offX,
+             offY, mRaw->dim.x, mRaw->dim.y);
 
   if (isFloat) {
     copyTile<float>(mRaw->getF32DataAsUncroppedArray2DRef(),
-                    reinterpret_cast<const float*>(pixels.data()), jxl_w,
-                    copy_w, copy_h, cpp, offX, offY);
+                    reinterpret_cast<const float*>(pixels.data()), props.width,
+                    copy.w, copy.h, cpp, offX, offY);
   } else {
     copyTile<uint16_t>(mRaw->getU16DataAsUncroppedArray2DRef(),
-                       reinterpret_cast<const uint16_t*>(pixels.data()), jxl_w,
-                       copy_w, copy_h, cpp, offX, offY);
+                       reinterpret_cast<const uint16_t*>(pixels.data()),
+                       props.width, copy.w, copy.h, cpp, offX, offY);
   }
 }
 

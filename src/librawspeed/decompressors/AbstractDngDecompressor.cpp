@@ -214,7 +214,7 @@ void AbstractDngDecompressor::decompressThread<52546>() const noexcept {
   for (const auto& e :
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
     try {
-      JpegXlDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw);
+      JpegXlDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw, mBps);
       j.decode(e.offX, e.offY);
     } catch (const RawDecoderException& err) {
       mRaw->setError(err.what());
