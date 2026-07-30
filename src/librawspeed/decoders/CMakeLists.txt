@@ -16,6 +16,7 @@ FILE(GLOB SOURCES
   "DcsDecoder.h"
   "DngDecoder.cpp"
   "DngDecoder.h"
+  "DngDeinterleave.h"
   "ErfDecoder.cpp"
   "ErfDecoder.h"
   "IiqDecoder.cpp"
