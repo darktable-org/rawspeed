@@ -12252,8 +12252,23 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="SAMSUNG TECHWIN" model="GX-1S" supported="unknown-no-samples">
+	<Camera make="SAMSUNG TECHWIN" model="GX-1S">
 		<ID make="Samsung" model="GX-1S">Samsung GX-1S</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="127" white="3950"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">10504 -2438 -1189</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8603 16207 2531</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1022 863 12242</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="SAMSUNG" model="NX mini">
 		<ID make="Samsung" model="NX mini">Samsung NX mini</ID>
