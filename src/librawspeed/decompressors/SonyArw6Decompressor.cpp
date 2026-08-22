@@ -36,6 +36,8 @@
 #include <bit>
 #include <cstdint>
 #include <cstring>
+#include <exception>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -571,6 +573,26 @@ std::vector<Plane> decodeComponent(const ComponentData& comp,
   return planes;
 }
 
+Plane decodePlane(const std::array<std::vector<ComponentData>, NumRegions>& comps,
+                  const std::array<RegionGeometry, NumRegions>& geom, int c) {
+  if (c == NumComponents) {
+    std::vector<Plane> greenHi =
+        decodeComponent(comps[NumLevels][0], geom[NumLevels]);
+    return std::move(greenHi[0]);
+  }
+  // Reconstruct the three wavelet-coded components: undo the LL prediction,
+  // then fold the detail levels in, coarsest first.
+  std::vector<Plane> ll = decodeComponent(comps[0][c], geom[0]);
+  Plane plane = std::move(ll[0]);
+  predictHorizontal(*plane);
+  for (int region = 1; region != NumLevels; ++region) {
+    std::vector<Plane> detail = decodeComponent(comps[region][c], geom[region]);
+    // Orientation stream order is HL, LH, HH.
+    plane = idwt2d(plane, detail[1], detail[0], detail[2], geom[region].vflip);
+  }
+  return plane;
+}
+
 } // namespace
 
 // ---------------- the decompressor ----------------
@@ -719,30 +741,33 @@ void SonyArw6Decompressor::decompressTile(const TileDesc& t) const {
     regionBase += totals[region];
   }
 
-  // Reconstruct the three wavelet-coded components: undo the LL prediction,
-  // then fold the detail levels in, coarsest first.
-  std::vector<Plane> recon;
-  recon.reserve(NumComponents);
-  for (int c = 0; c != NumComponents; ++c) {
-    std::vector<Plane> ll = decodeComponent(comps[0][c], geom[0]);
-    Plane plane = std::move(ll[0]);
-    predictHorizontal(*plane);
-    for (int region = 1; region != NumLevels; ++region) {
-      std::vector<Plane> detail =
-          decodeComponent(comps[region][c], geom[region]);
-      // Orientation stream order is HL, LH, HH.
-      plane = idwt2d(plane, detail[1], detail[0], detail[2],
-                     geom[region].vflip);
+  std::array<std::optional<Plane>, NumComponents + 1> decoded;
+  std::array<std::exception_ptr, NumComponents + 1> errors;
+#ifdef HAVE_OPENMP
+#pragma omp taskgroup
+#endif
+  for (int c = 0; c != NumComponents + 1; ++c) {
+#ifdef HAVE_OPENMP
+#pragma omp task default(none) firstprivate(c)                                 \
+    shared(comps, geom, decoded, errors)
+#endif
+    {
+      try {
+        decoded[c].emplace(decodePlane(comps, geom, c));
+      } catch (...) {
+        errors[c] = std::current_exception();
+      }
     }
-    recon.emplace_back(std::move(plane));
   }
-  std::vector<Plane> greenHiPlanes =
-      decodeComponent(comps[NumLevels][0], geom[NumLevels]);
-  const Array2DRef<const int16_t> greenHi = *greenHiPlanes[0];
+  for (const std::exception_ptr& err : errors) {
+    if (err)
+      std::rethrow_exception(err);
+  }
 
-  const Array2DRef<const int16_t> greenLo = *recon[0];
-  const Array2DRef<const int16_t> chromaR = *recon[1];
-  const Array2DRef<const int16_t> chromaB = *recon[2];
+  const Array2DRef<const int16_t> greenHi = **decoded[NumComponents];
+  const Array2DRef<const int16_t> greenLo = **decoded[0];
+  const Array2DRef<const int16_t> chromaR = **decoded[1];
+  const Array2DRef<const int16_t> chromaB = **decoded[2];
   if (greenLo.width() != greenHi.width())
     ThrowRDE("Green sub-band widths do not agree");
   invariant(chromaR.width() == greenLo.width() &&
