@@ -34,6 +34,7 @@
 #include "decompressors/LJpegDecoder.h"
 #include "decompressors/SonyArw1Decompressor.h"
 #include "decompressors/SonyArw2Decompressor.h"
+#include "decompressors/SonyArw6Decompressor.h"
 #include "decompressors/UncompressedDecompressor.h"
 #include "io/Buffer.h"
 #include "io/ByteStream.h"
@@ -169,21 +170,26 @@ RawImage ArwDecoder::decodeRawInternal() {
     return decodeTransitionalArw();
 
   const TiffIFD* raw = data[0];
-  int compression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
-  if (1 == compression) {
+  mCompression = raw->getEntry(TiffTag::COMPRESSION)->getU32();
+  if (1 == mCompression) {
     DecodeUncompressed(raw);
     return mRaw;
   }
 
-  if (7 == compression) {
+  if (7 == mCompression) {
     DecodeLJpeg(raw);
     // cropping of lossless compressed L files already done in Ljpeg decoder
     applyCrop = false;
     return mRaw;
   }
 
-  if (32767 != compression)
-    ThrowRDE("Unsupported compression %i", compression);
+  if (32766 == mCompression) {
+    DecodeARW6(raw);
+    return mRaw;
+  }
+
+  if (32767 != mCompression)
+    ThrowRDE("Unsupported compression %i", mCompression);
 
   const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
   const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
@@ -412,6 +418,62 @@ void ArwDecoder::DecodeLJpeg(const TiffIFD* raw) {
   mRaw->subFrame(crop);
 }
 
+void ArwDecoder::DecodeARW6(const TiffIFD* raw) {
+  uint32_t width = raw->getEntry(TiffTag::IMAGEWIDTH)->getU32();
+  uint32_t height = raw->getEntry(TiffTag::IMAGELENGTH)->getU32();
+
+  if (width == 0 || height == 0 || width % 2 != 0 || height % 2 != 0 ||
+      width > 10240 || height > 7168)
+    ThrowRDE("Unexpected image dimensions found: (%u; %u)", width, height);
+
+  const TiffEntry* offsets = raw->getEntry(TiffTag::STRIPOFFSETS);
+  const TiffEntry* counts = raw->getEntry(TiffTag::STRIPBYTECOUNTS);
+  if (offsets->count != 1 || counts->count != offsets->count) {
+    ThrowRDE("Unexpected strip count: count:%u, strips:%u", counts->count,
+             offsets->count);
+  }
+
+  uint32_t off = offsets->getU32();
+  uint32_t c2 = counts->getU32();
+
+  if (!mFile.isValid(off))
+    ThrowRDE("Data offset after EOF, file probably truncated");
+
+  if (!mFile.isValid(off, c2))
+    c2 = mFile.getSize() - off;
+
+  ByteStream input(DataBuffer(mFile.getSubView(off, c2), Endianness::little));
+
+  mRaw->dim = iPoint2D(width, height);
+  SonyArw6Decompressor a6(mRaw, input, !uncorrectedRawValues);
+  mRaw->createData();
+  a6.decompress();
+
+  if (uncorrectedRawValues) {
+    // The values were not delinearized; attach the curve for consumers.
+    const auto curve = SonyArw6Decompressor::delinearizationCurve();
+    mRaw->setTable(std::vector<uint16_t>(curve.begin(), curve.end()), false);
+  }
+
+  // Crop to the raw IFD's default crop when it is present; otherwise leave
+  // the cropping to cameras.xml.
+  if (raw->hasEntry(TiffTag::DEFAULTCROPORIGIN) &&
+      raw->hasEntry(TiffTag::DEFAULTCROPSIZE)) {
+    const TiffEntry* origin = raw->getEntry(TiffTag::DEFAULTCROPORIGIN);
+    const TiffEntry* size = raw->getEntry(TiffTag::DEFAULTCROPSIZE);
+    if (origin->count == 2 && size->count == 2) {
+      iRectangle2D crop(implicit_cast<int>(origin->getU32(0)),
+                        implicit_cast<int>(origin->getU32(1)),
+                        implicit_cast<int>(size->getU32(0)),
+                        implicit_cast<int>(size->getU32(1)));
+      if (crop.isThisInside(iRectangle2D({0, 0}, mRaw->dim))) {
+        mRaw->subFrame(crop);
+        applyCrop = false;
+      }
+    }
+  }
+}
+
 void ArwDecoder::DecodeARW2(ByteStream input, uint32_t w, uint32_t h,
                             uint32_t bpp) {
 
@@ -521,6 +583,24 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   } catch (const RawspeedException& e) {
     mRaw->setError(e.what());
     // We caught an exception reading WB, just ignore it
+  }
+
+  // The ARW6 raw IFD carries its own levels, stored halved, applying to the
+  // delinearized values; use them over whatever the generic paths above have
+  // set.
+  if (32766 == mCompression) {
+    const TiffIFD* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
+    const TiffEntry* bl = raw->getEntry(TiffTag::SONYBLACKLEVEL);
+    if (bl->count != 4)
+      ThrowRDE("Black level has %u entries instead of 4", bl->count);
+    mRaw->blackLevel = 2 * bl->getU16(0);
+    mRaw->blackLevelSeparate =
+        Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
+    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+    for (int i = 0; i < 4; ++i)
+      blackLevelSeparate1D(i) = 2 * bl->getU16(i);
+    mRaw->whitePoint =
+        implicit_cast<int>(2 * raw->getEntry(TiffTag::WHITELEVEL)->getU32());
   }
 }
 
