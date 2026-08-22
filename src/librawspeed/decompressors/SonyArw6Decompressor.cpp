@@ -22,7 +22,10 @@
 #include "decompressors/SonyArw6Decompressor.h"
 #include "adt/Array1DRef.h"
 #include "adt/Array2DRef.h"
+#include "adt/Bit.h"
 #include "adt/Casts.h"
+#include "adt/CroppedArray2DRef.h"
+#include "adt/DefaultInitAllocatorAdaptor.h"
 #include "adt/Invariant.h"
 #include "adt/Point.h"
 #include "bitstreams/BitStreamerMSB.h"
@@ -289,40 +292,28 @@ int16_t dequant(int32_t value, int q) {
 }
 
 // ---------------- image planes ----------------
-// The decoder works on small owning int16 planes; all values the codec
-// produces fit.
 
 class Plane final {
-  std::vector<int16_t> storage;
-  Array2DRef<int16_t> view;
+  std::vector<int16_t, DefaultInitAllocatorAdaptor<int16_t>> storage;
+  Array2DRef<int16_t> ref;
 
 public:
   Plane(int width, int height)
-      : view(Array2DRef<int16_t>::create(storage, width, height)) {
+      : ref(Array2DRef<int16_t>::create(storage, width, height)) {
     invariant(width > 0 && height > 0);
   }
 
-  // `view` points into `storage`; moves keep it valid, copies would not.
   Plane(const Plane&) = delete;
   Plane& operator=(const Plane&) = delete;
   Plane(Plane&&) = default;
   Plane& operator=(Plane&&) = default;
 
-  // Smart-pointer-style access to the view; on a const plane the elements
-  // are const too.
-  Array2DRef<int16_t> operator*() { return view; }
-  const Array2DRef<int16_t>* operator->() { return &view; }
-  Array2DRef<const int16_t> operator*() const { return view; }
-  // Array2DRef<const int16_t> is a distinct object, so the const arrow has
-  // to chain through a proxy holding one.
-  struct ConstArrow final {
-    Array2DRef<const int16_t> view;
-    const Array2DRef<const int16_t>* operator->() const { return &view; }
-  };
-  ConstArrow operator->() const { return {view}; }
+  void fill(int16_t value) { std::fill(storage.begin(), storage.end(), value); }
+
+  Array2DRef<int16_t> view() { return ref; }
+  Array2DRef<const int16_t> view() const { return ref; }
 };
 
-// Whole-sample edge handling: clamp an index to [0, n).
 int clampIndex(int i, int n) {
   invariant(n > 0);
   return std::clamp(i, 0, n - 1);
@@ -352,7 +343,8 @@ Plane idwt53Vertical(Array2DRef<const int16_t> low,
   const int nHigh = high.height();
   const int w = low.width();
   Plane out(w, nLow + nHigh);
-  const Array2DRef<int16_t> dst = *out;
+  out.fill(0);
+  const Array2DRef<int16_t> dst = out.view();
   const int c = flip ? 1 : 0; // coarse-row output parity; detail takes 1 - c
   // Undo the update: coarse from its two flanking details.
   for (int n = 0; n != nLow; ++n) {
@@ -386,7 +378,7 @@ Plane idwt53Vertical(Array2DRef<const int16_t> low,
 Plane idwt53Horizontal(Array2DRef<const int16_t> left,
                        Array2DRef<const int16_t> right, int nRows, int nCols) {
   Plane out(2 * nCols, nRows);
-  const Array2DRef<int16_t> dst = *out;
+  const Array2DRef<int16_t> dst = out.view();
   for (int r = 0; r != nRows; ++r) {
     Array1DRef<const int16_t> lo = left[r];
     Array1DRef<const int16_t> hi = right[r];
@@ -407,13 +399,14 @@ Plane idwt53Horizontal(Array2DRef<const int16_t> left,
 // pairs LL|LH and HL|HH), then the horizontal pass over the common area.
 Plane idwt2d(const Plane& ll, const Plane& lh, const Plane& hl,
              const Plane& hh, bool flip) {
-  if (ll->width() != lh->width() || hl->width() != hh->width())
+  if (ll.view().width() != lh.view().width() ||
+      hl.view().width() != hh.view().width())
     ThrowRDE("Sub-band widths do not agree");
-  const Plane left = idwt53Vertical(*ll, *lh, flip);
-  const Plane right = idwt53Vertical(*hl, *hh, flip);
-  const int nRows = std::min(left->height(), right->height());
-  const int nCols = std::min(left->width(), right->width());
-  return idwt53Horizontal(*left, *right, nRows, nCols);
+  const Plane left = idwt53Vertical(ll.view(), lh.view(), flip);
+  const Plane right = idwt53Vertical(hl.view(), hh.view(), flip);
+  const int nRows = std::min(left.view().height(), right.view().height());
+  const int nCols = std::min(left.view().width(), right.view().width());
+  return idwt53Horizontal(left.view(), right.view(), nRows, nCols);
 }
 
 // The quincunx (diamond) green wavelet's update undone: recover the
@@ -426,8 +419,12 @@ Plane diamondLow(Array2DRef<const int16_t> lo, Array2DRef<const int16_t> hi,
   invariant(h <= lo.height() && h <= hi.height());
   const int w = lo.width();
   Plane low(w, h);
-  const Array2DRef<int16_t> dst = *low;
-  for (int r = 0; r != h; ++r) {
+  const Array2DRef<int16_t> dst = low.view();
+#ifdef HAVE_OPENMP
+#pragma omp taskloop default(none) firstprivate(lo, hi, dst, w, h)             \
+    num_tasks(rawspeed_get_number_of_processor_cores())
+#endif
+  for (int r = 0; r < h; ++r) {
     Array1DRef<const int16_t> hiR = hi[r];
     Array1DRef<const int16_t> hiR0 = hi[clampIndex(r - 1, h)];
     Array1DRef<const int16_t> loR = lo[r];
@@ -529,7 +526,7 @@ std::vector<Plane> decodeComponent(const ComponentData& comp,
     const LatticeSpan& span = geom.orientations[o];
     if (span.bottom <= span.top)
       ThrowRDE("Empty sub-band");
-    planes.emplace_back(width, span.bottom - span.top);
+    planes.emplace_back(width, span.bottom - span.top).fill(0);
   }
 
   std::vector<int32_t> lineStorage(size_t(GroupSize) * groups);
@@ -564,7 +561,7 @@ std::vector<Plane> decodeComponent(const ComponentData& comp,
       const int bottom = std::min(span.bottom, windowTop + rowsPerChunk);
       for (int row = top; row < bottom; ++row) {
         decodeLine(bits, line);
-        Array1DRef<int16_t> dst = (*planes[o])[row - span.top];
+        Array1DRef<int16_t> dst = planes[o].view()[row - span.top];
         for (int col = 0; col != width; ++col)
           dst(col) = dequant(line(col), q);
       }
@@ -573,8 +570,9 @@ std::vector<Plane> decodeComponent(const ComponentData& comp,
   return planes;
 }
 
-Plane decodePlane(const std::array<std::vector<ComponentData>, NumRegions>& comps,
-                  const std::array<RegionGeometry, NumRegions>& geom, int c) {
+Plane decodePlane(
+    const std::array<std::vector<ComponentData>, NumRegions>& comps,
+    const std::array<RegionGeometry, NumRegions>& geom, int c) {
   if (c == NumComponents) {
     std::vector<Plane> greenHi =
         decodeComponent(comps[NumLevels][0], geom[NumLevels]);
@@ -584,7 +582,7 @@ Plane decodePlane(const std::array<std::vector<ComponentData>, NumRegions>& comp
   // then fold the detail levels in, coarsest first.
   std::vector<Plane> ll = decodeComponent(comps[0][c], geom[0]);
   Plane plane = std::move(ll[0]);
-  predictHorizontal(*plane);
+  predictHorizontal(plane.view());
   for (int region = 1; region != NumLevels; ++region) {
     std::vector<Plane> detail = decodeComponent(comps[region][c], geom[region]);
     // Orientation stream order is HL, LH, HH.
@@ -626,8 +624,7 @@ SonyArw6Decompressor::SonyArw6Decompressor(RawImage img, ByteStream input,
   records.reserve(tileCount);
   for (uint32_t i = 0; i != tileCount; ++i) {
     TileRecord rec = {};
-    rec.offset = uint64_t(input.getU32());
-    rec.offset |= uint64_t(input.getU32()) << 32;
+    rec.offset = input.get<uint64_t>();
     rec.x = input.getU32();
     rec.y = input.getU32();
     rec.w = input.getU32();
@@ -664,8 +661,9 @@ SonyArw6Decompressor::SonyArw6Decompressor(RawImage img, ByteStream input,
     for (size_t j = i + 1; j != tiles.size(); ++j) {
       const TileDesc& a = tiles[i];
       const TileDesc& b = tiles[j];
-      if (a.pos.x < b.pos.x + b.dim.x && b.pos.x < a.pos.x + a.dim.x &&
-          a.pos.y < b.pos.y + b.dim.y && b.pos.y < a.pos.y + a.dim.y)
+      if (iRectangle2D(a.pos, a.dim)
+              .getOverlap(iRectangle2D(b.pos, b.dim))
+              .hasPositiveArea())
         ThrowRDE("Tiles overlap in the mosaic");
     }
   }
@@ -764,10 +762,10 @@ void SonyArw6Decompressor::decompressTile(const TileDesc& t) const {
       std::rethrow_exception(err);
   }
 
-  const Array2DRef<const int16_t> greenHi = **decoded[NumComponents];
-  const Array2DRef<const int16_t> greenLo = **decoded[0];
-  const Array2DRef<const int16_t> chromaR = **decoded[1];
-  const Array2DRef<const int16_t> chromaB = **decoded[2];
+  const Array2DRef<const int16_t> greenHi = decoded[NumComponents]->view();
+  const Array2DRef<const int16_t> greenLo = decoded[0]->view();
+  const Array2DRef<const int16_t> chromaR = decoded[1]->view();
+  const Array2DRef<const int16_t> chromaB = decoded[2]->view();
   if (greenLo.width() != greenHi.width())
     ThrowRDE("Green sub-band widths do not agree");
   invariant(chromaR.width() == greenLo.width() &&
@@ -782,44 +780,41 @@ void SonyArw6Decompressor::decompressTile(const TileDesc& t) const {
   // update step...
   const Plane low = diamondLow(greenLo, greenHi, h);
 
-  static constexpr auto identity = [] {
-    std::array<uint16_t, MaxValue + 1> t = {};
-    for (int i = 0; i != MaxValue + 1; ++i)
-      t[i] = implicit_cast<uint16_t>(i);
-    return t;
-  }();
-  const Array1DRef<const uint16_t> lut =
-      applyCurve ? delinearizationCurve()
-                 : Array1DRef<const uint16_t>(identity.data(), MaxValue + 1);
+  const Array1DRef<const uint16_t> lut = delinearizationCurve();
 
   // ... then, row by row, undo its predict step and assemble the Bayer
   // cells: the greens land on their diagonal offset by MidValue, and each
   // 2x2 cell's R and B restore from the mean of its two greens plus the
   // doubled chroma residual. Everything clamps to the codec's bit depth and
   // maps through the delinearization curve.
-  const Array2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef());
-  for (int r = 0; r != h; ++r) {
-    Array1DRef<const int16_t> lowR = (*low)[r];
-    Array1DRef<const int16_t> lowN = (*low)[clampIndex(r + 1, h)];
+  const CroppedArray2DRef<uint16_t> out(mRaw->getU16DataAsUncroppedArray2DRef(),
+                                        t.pos.x, t.pos.y, t.dim.x, t.dim.y);
+#ifdef HAVE_OPENMP
+#pragma omp taskloop default(none) shared(low)                                 \
+    firstprivate(greenHi, chromaR, chromaB, out, lut, w, h)                    \
+    num_tasks(rawspeed_get_number_of_processor_cores())
+#endif
+  for (int r = 0; r < h; ++r) {
+    Array1DRef<const int16_t> lowR = low.view()[r];
+    Array1DRef<const int16_t> lowN = low.view()[clampIndex(r + 1, h)];
     Array1DRef<const int16_t> hiR = greenHi[r];
     Array1DRef<const int16_t> cR = chromaR[r];
     Array1DRef<const int16_t> cB = chromaB[r];
-    Array1DRef<uint16_t> top = out[t.pos.y + 2 * r];
-    Array1DRef<uint16_t> bottom = out[t.pos.y + 2 * r + 1];
+    const auto top = out[2 * r];
+    const auto bottom = out[2 * r + 1];
     for (int i = 0; i != w; ++i) {
       const int i0 = clampIndex(i - 1, w);
-      const int g0 = std::clamp(
-          ((lowN(i0) + lowN(i) + lowR(i0) + lowR(i)) >> 2) + hiR(i) +
-              MidValue,
-          0, MaxValue);
-      const int g1 = std::clamp(lowR(i) + MidValue, 0, MaxValue);
+      const uint16_t g0 = clampBits(
+          ((lowN(i0) + lowN(i) + lowR(i0) + lowR(i)) >> 2) + hiR(i) + MidValue,
+          BitDepth);
+      const uint16_t g1 = clampBits(lowR(i) + MidValue, BitDepth);
       const int mean = (g0 + g1) >> 1;
-      const int red = std::clamp(mean + 2 * cR(i), 0, MaxValue);
-      const int blue = std::clamp(mean + 2 * cB(i), 0, MaxValue);
-      top(t.pos.x + 2 * i) = lut(red);
-      top(t.pos.x + 2 * i + 1) = lut(g1);
-      bottom(t.pos.x + 2 * i) = lut(g0);
-      bottom(t.pos.x + 2 * i + 1) = lut(blue);
+      const uint16_t red = clampBits(mean + 2 * cR(i), BitDepth);
+      const uint16_t blue = clampBits(mean + 2 * cB(i), BitDepth);
+      top(2 * i) = applyCurve ? lut(red) : red;
+      top(2 * i + 1) = applyCurve ? lut(g1) : g1;
+      bottom(2 * i) = applyCurve ? lut(g0) : g0;
+      bottom(2 * i + 1) = applyCurve ? lut(blue) : blue;
     }
   }
 }
@@ -834,6 +829,9 @@ void SonyArw6Decompressor::decompressThread() const noexcept {
     } catch (const RawspeedException& err) {
       // Propagate the exception out of OpenMP magic.
       mRaw->setError(err.what());
+#ifdef HAVE_OPENMP
+#pragma omp cancel for
+#endif
     } catch (...) {
       // We should not get any other exception type here.
       __builtin_unreachable();

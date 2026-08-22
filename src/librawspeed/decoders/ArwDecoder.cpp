@@ -58,6 +58,8 @@ using std::vector;
 
 namespace rawspeed {
 
+constexpr uint32_t CompressionSonyArw6 = 32766;
+
 bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
                                       [[maybe_unused]] Buffer file) {
   const auto id = rootIFD->getID();
@@ -183,7 +185,7 @@ RawImage ArwDecoder::decodeRawInternal() {
     return mRaw;
   }
 
-  if (32766 == mCompression) {
+  if (CompressionSonyArw6 == mCompression) {
     DecodeARW6(raw);
     return mRaw;
   }
@@ -588,7 +590,7 @@ void ArwDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
   // The ARW6 raw IFD carries its own levels, stored halved, applying to the
   // delinearized values; use them over whatever the generic paths above have
   // set.
-  if (32766 == mCompression) {
+  if (CompressionSonyArw6 == mCompression) {
     const TiffIFD* raw = mRootIFD->getIFDWithTag(TiffTag::STRIPOFFSETS);
     const TiffEntry* bl = raw->getEntry(TiffTag::SONYBLACKLEVEL);
     if (bl->count != 4)
