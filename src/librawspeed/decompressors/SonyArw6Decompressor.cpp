@@ -299,9 +299,7 @@ class Plane final {
 
 public:
   Plane(int width, int height)
-      : ref(Array2DRef<int16_t>::create(storage, width, height)) {
-    invariant(width > 0 && height > 0);
-  }
+      : ref(Array2DRef<int16_t>::create(storage, width, height)) {}
 
   Plane(const Plane&) = delete;
   Plane& operator=(const Plane&) = delete;
