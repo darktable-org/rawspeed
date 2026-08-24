@@ -5514,8 +5514,89 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="NIKON CORPORATION" model="NIKON D810A" supported="unknown-no-samples">
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" mode="sNEF-uncompressed">
 		<ID make="Nikon" model="D810A">Nikon D810A</ID>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="0" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11973 -5685 -888</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1965 10326 1901</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-115 1123 7169</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" mode="12bit-uncompressed">
+		<ID make="Nikon" model="D810A">Nikon D810A</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="150" white="3880"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11973 -5685 -888</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1965 10326 1901</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-115 1123 7169</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" mode="12bit-compressed">
+		<ID make="Nikon" model="D810A">Nikon D810A</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="150" white="3880"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11973 -5685 -888</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1965 10326 1901</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-115 1123 7169</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" mode="14bit-uncompressed">
+		<ID make="Nikon" model="D810A">Nikon D810A</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="600" white="15520"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11973 -5685 -888</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1965 10326 1901</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-115 1123 7169</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON D810A" mode="14bit-compressed">
+		<ID make="Nikon" model="D810A">Nikon D810A</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="600" white="15520"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">11973 -5685 -888</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-1965 10326 1901</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-115 1123 7169</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON D850" mode="12bit-compressed">
 		<ID make="Nikon" model="D850">Nikon D850</ID>
