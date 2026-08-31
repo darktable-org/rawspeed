@@ -292,6 +292,24 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     mRaw->whitePoint = implicit_cast<int>((1UL << bps) - 1UL);
   }
 
+  // The aspect ratio dialed in on the camera, kept in the same proprietary
+  // directory as the crop tags read by getDefaultCrop(). Stored as height
+  // then width. The raw data is left uncropped, so this is the only record
+  // of the framing that was chosen while shooting.
+  // getIFDWithTag() throws, and not every raf carries that directory
+  if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_RAFDATA)) {
+    const TiffIFD* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_RAFDATA);
+    if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEASPECTRATIO)) {
+      const TiffEntry* ratio = raw->getEntry(TiffTag::FUJI_RAWIMAGEASPECTRATIO);
+      if (ratio->count == 2) {
+        const int height = ratio->getU16(0);
+        const int width = ratio->getU16(1);
+        if (width > 0 && height > 0)
+          mRaw->metadata.cameraAspectRatio = std::array<int, 2>{width, height};
+      }
+    }
+  }
+
   // This is where we'd normally call setMetaData but since we may still need
   // to rotate the image for SuperCCD cameras we do everything ourselves
   auto id = mRootIFD->getID();
