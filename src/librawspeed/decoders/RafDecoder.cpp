@@ -294,17 +294,25 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   // The aspect ratio dialed in on the camera, kept in the same proprietary
   // directory as the crop tags read by getDefaultCrop(). Stored as height
-  // then width. The raw data is left uncropped, so this is the only record
-  // of the framing that was chosen while shooting.
+  // then width, like the cropped size beside it. The raw data is left
+  // uncropped, so this is the only record of the framing chosen while
+  // shooting.
   // getIFDWithTag() throws, and not every raf carries that directory
   if (mRootIFD->hasEntryRecursive(TiffTag::FUJI_RAFDATA)) {
     const TiffIFD* raw = mRootIFD->getIFDWithTag(TiffTag::FUJI_RAFDATA);
-    if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEASPECTRATIO)) {
+    if (raw->hasEntry(TiffTag::FUJI_RAWIMAGEASPECTRATIO) &&
+        raw->hasEntry(TiffTag::FUJI_RAWIMAGECROPPEDSIZE)) {
       const TiffEntry* ratio = raw->getEntry(TiffTag::FUJI_RAWIMAGEASPECTRATIO);
-      if (ratio->count == 2) {
+      const TiffEntry* size = raw->getEntry(TiffTag::FUJI_RAWIMAGECROPPEDSIZE);
+      if (ratio->count == 2 && size->count == 2) {
         const int height = ratio->getU16(0);
         const int width = ratio->getU16(1);
-        if (width > 0 && height > 0)
+        const int fullHeight = size->getU16(0);
+        const int fullWidth = size->getU16(1);
+        // The tag is written whether or not a ratio was picked, so it is only
+        // of interest when it differs from the shape of the frame itself.
+        if (width > 0 && height > 0 && fullWidth > 0 && fullHeight > 0 &&
+            width * fullHeight != height * fullWidth)
           mRaw->metadata.cameraAspectRatio = std::array<int, 2>{width, height};
       }
     }
