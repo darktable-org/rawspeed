@@ -7161,6 +7161,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="OM Digital Solutions" model="PEN" supported="unknown-no-samples">
+		<ID make="OM System" model="PEN">OM Digital Solutions PEN</ID>
+	</Camera>
 	<Camera make="OM Digital Solutions" model="TG-7">
 		<ID make="OM System" model="TG-7">OM Digital Solutions TG-7</ID>
 		<Crop x="0" y="0" width="-24" height="0"/>
