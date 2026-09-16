@@ -1664,6 +1664,9 @@
 	<Camera make="Canon" model="Canon EOS R8" supported="no">
 		<ID make="Canon" model="EOS R8">Canon EOS R8</ID>
 	</Camera>
+	<Camera make="Canon" model="Canon EOS R8 Mark II" supported="unknown-no-samples">
+		<ID make="Canon" model="EOS R8 Mark II">Canon EOS R8 Mark II</ID>
+	</Camera>
 	<Camera make="Canon" model="Canon EOS R10" supported="no">
 		<ID make="Canon" model="EOS R10">Canon EOS R10</ID>
 	</Camera>
