@@ -7161,6 +7161,18 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="OM Digital Solutions" model="PEN">
+		<ID make="OM System" model="PEN">OM Digital Solutions PEN</ID>
+		<Crop x="0" y="0" width="-28" height="0"/>
+		<Sensor black="254" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">12008 -5230 -1123</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-2265 10496 2046</ColorMatrixRow>
+				<ColorMatrixRow plane="2">69 734 4938</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="OM Digital Solutions" model="TG-7">
 		<ID make="OM System" model="TG-7">OM Digital Solutions TG-7</ID>
 		<Crop x="0" y="0" width="-24" height="0"/>
