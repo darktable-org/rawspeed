@@ -505,8 +505,8 @@ void IiqDecoder::correctSensorDefects(ByteStream data) const {
     const uint16_t type = data.getU16();
     data.skipBytes(2); // Ignore unknown/unused bits.
 
-    if (col >= mRaw->dim.x || row >= mRaw->dim.y)
-      continue; // Defect coordinates are outside the raw image.
+    if (col >= mRaw->dim.x) // Value for col is outside the raw image.
+      continue;
     switch (type) {
     case 131: // bad column
     case 137: // bad column
@@ -522,6 +522,8 @@ void IiqDecoder::correctSensorDefects(ByteStream data) const {
 }
 
 void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) const {
+  if (col >= mRaw->dim.x || row >= mRaw->dim.y)
+    return; // Defect coordinates are outside the raw image.
   MutexLocker guard(&mRaw->mBadPixelMutex);
   mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
                                   (static_cast<uint32_t>(row) << 16) + col);
