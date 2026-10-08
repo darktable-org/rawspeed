@@ -45,6 +45,10 @@ public:
     const iPoint2D mcu;
     const iPoint2D dim;
   };
+  struct DecodeSettings final {
+    const int numLJpegRowsPerRestartInterval;
+    const int predictorMode;
+  };
   struct PerComponentRecipe final {
     const PrefixCodeDecoder<>& ht;
     const uint16_t initPred;
@@ -59,6 +63,7 @@ private:
   const Frame frame;
   const std::vector<PerComponentRecipe> rec;
   const int numLJpegRowsPerRestartInterval;
+  const int predictorMode;
 
   int numFullMCUs = 0;
   int trailingPixels = 0;
@@ -76,9 +81,10 @@ private:
   template <int N_COMP>
   [[nodiscard]] std::array<uint16_t, N_COMP> getInitialPreds() const;
 
-  template <const iPoint2D& MCUSize, int N_COMP>
+  template <const iPoint2D& MCUSize, int N_COMP, bool Use2DPred>
   __attribute__((always_inline)) inline void decodeRowN(
       Array2DRef<uint16_t> outStripe, Array2DRef<const uint16_t> pred,
+      Array2DRef<const uint16_t> prevStripe,
       std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
       BitStreamerJPEG& bs) const;
 
@@ -88,8 +94,7 @@ private:
 public:
   LJpegDecompressor(RawImage img, iRectangle2D imgFrame, Frame frame,
                     std::vector<PerComponentRecipe> rec,
-                    int numLJpegRowsPerRestartInterval_,
-                    Array1DRef<const uint8_t> input);
+                    DecodeSettings settings, Array1DRef<const uint8_t> input);
 
   [[nodiscard]] ByteStream::size_type decode() const;
 };

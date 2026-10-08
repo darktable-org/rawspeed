@@ -52,11 +52,12 @@ namespace rawspeed {
 LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
                                      Frame frame_,
                                      std::vector<PerComponentRecipe> rec_,
-                                     int numLJpegRowsPerRestartInterval_,
+                                     DecodeSettings settings,
                                      Array1DRef<const uint8_t> input_)
     : mRaw(std::move(img)), input(input_), imgFrame(imgFrame_),
       frame(std::move(frame_)), rec(std::move(rec_)),
-      numLJpegRowsPerRestartInterval(numLJpegRowsPerRestartInterval_) {
+      numLJpegRowsPerRestartInterval(settings.numLJpegRowsPerRestartInterval),
+      predictorMode(settings.predictorMode) {
 
   if (mRaw->getDataType() != RawImageType::UINT16)
     ThrowRDE("Unexpected data type (%u)",
@@ -100,8 +101,8 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
     ThrowRDE("Frame has zero size");
 
   if (iPoint2D{1, 1} != frame.mcu && iPoint2D{2, 1} != frame.mcu &&
-      iPoint2D{3, 1} != frame.mcu && iPoint2D{4, 1} != frame.mcu &&
-      iPoint2D{2, 2} != frame.mcu)
+      iPoint2D{1, 2} != frame.mcu && iPoint2D{3, 1} != frame.mcu &&
+      iPoint2D{4, 1} != frame.mcu && iPoint2D{2, 2} != frame.mcu)
     ThrowRDE("Unexpected MCU size: {%i, %i}", frame.mcu.x, frame.mcu.y);
 
   if (rec.size() != static_cast<unsigned>(frame.mcu.area()))
@@ -114,6 +115,9 @@ LJpegDecompressor::LJpegDecompressor(RawImage img, iRectangle2D imgFrame_,
 
   if (numLJpegRowsPerRestartInterval < 1)
     ThrowRDE("Number of rows per restart interval must be positives");
+
+  if (predictorMode < 1 || predictorMode > 7)
+    ThrowRDE("Unsupported predictor mode: %i", predictorMode);
 
   if (static_cast<int64_t>(frame.mcu.x) * frame.dim.x >
           std::numeric_limits<int>::max() ||
@@ -181,9 +185,39 @@ constexpr iPoint2D MCU = {MCUWidth, MCUHeight};
 
 } // namespace
 
-template <const iPoint2D& MCUSize, int N_COMP>
+namespace {
+
+// Compute the LJpeg prediction value given predictor mode and neighbor values.
+// Ra = left, Rb = above, Rc = above-left.
+// All arithmetic done in int32_t to avoid overflow in modes 4-6.
+// Result is modulo 2^16 per ITU-T T.81.
+inline int computePrediction(int predMode, int Ra, int Rb, int Rc) {
+  switch (predMode) {
+  case 1:
+    return Ra;
+  case 2:
+    return Rb;
+  case 3:
+    return Rc;
+  case 4:
+    return Ra + Rb - Rc;
+  case 5:
+    return Ra + ((Rb - Rc) >> 1);
+  case 6:
+    return Rb + ((Ra - Rc) >> 1);
+  case 7:
+    return (Ra + Rb) >> 1;
+  default:
+    __builtin_unreachable();
+  }
+}
+
+} // namespace
+
+template <const iPoint2D& MCUSize, int N_COMP, bool Use2DPred>
 void LJpegDecompressor::decodeRowN(
     Array2DRef<uint16_t> outStripe, Array2DRef<const uint16_t> pred,
+    Array2DRef<const uint16_t> prevStripe,
     std::array<std::reference_wrapper<const PrefixCodeDecoder<>>, N_COMP> ht,
     BitStreamerJPEG& bs) const {
   invariant(MCUSize.area() == N_COMP);
@@ -206,11 +240,21 @@ void LJpegDecompressor::decodeRowN(
                              .getAsArray2DRef();
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-        int c = (MCUSize.x * MCURow) + MCUСol;
-        int prediction = pred(MCURow, MCUСol);
-        int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                       .decodeDifference(bs);
-        int pix = prediction + diff;
+        const int c = (MCUSize.x * MCURow) + MCUСol;
+        int prediction;
+        if constexpr (!Use2DPred) {
+          prediction = pred(MCURow, MCUСol);
+        } else {
+          const int Ra = pred(MCURow, MCUСol);
+          const int stripeCol = MCUSize.x * mcuIdx + MCUСol;
+          const int Rb = prevStripe(MCURow, stripeCol);
+          const int Rc =
+              (mcuIdx > 0) ? prevStripe(MCURow, stripeCol - MCUSize.x) : Rb;
+          prediction = computePrediction(predictorMode, Ra, Rb, Rc);
+        }
+        const int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                             .decodeDifference(bs);
+        const int pix = prediction + diff;
         outTile(MCURow, MCUСol) = uint16_t(pix);
       }
     }
@@ -229,15 +273,27 @@ void LJpegDecompressor::decodeRowN(
     // We may end up needing just part of last N_COMP pixels.
     for (int MCURow = 0; MCURow != MCUSize.y; ++MCURow) {
       for (int MCUСol = 0; MCUСol != MCUSize.x; ++MCUСol) {
-        int c = (MCUSize.x * MCURow) + MCUСol;
-        int prediction = pred(MCURow, MCUСol);
-        int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
-                       .decodeDifference(bs);
-        int pix = prediction + diff;
-        int stripeRow = MCURow;
-        int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
+        const int c = (MCUSize.x * MCURow) + MCUСol;
+        int prediction;
+        if constexpr (!Use2DPred) {
+          prediction = pred(MCURow, MCUСol);
+        } else {
+          const int Ra = pred(MCURow, MCUСol);
+          const int stripeCol = MCUSize.x * mcuIdx + MCUСol;
+          const int Rb = (stripeCol < prevStripe.width())
+                             ? prevStripe(MCURow, stripeCol)
+                             : Ra;
+          const int Rc = (mcuIdx > 0 && stripeCol < prevStripe.width())
+                             ? prevStripe(MCURow, stripeCol - MCUSize.x)
+                             : Rb;
+          prediction = computePrediction(predictorMode, Ra, Rb, Rc);
+        }
+        const int diff = (static_cast<const PrefixCodeDecoder<>&>(ht[c]))
+                             .decodeDifference(bs);
+        const int pix = prediction + diff;
+        const int stripeCol = (MCUSize.x * mcuIdx) + MCUСol;
         if (stripeCol < outStripe.width())
-          outStripe(stripeRow, stripeCol) = uint16_t(pix);
+          outStripe(MCURow, stripeCol) = uint16_t(pix);
       }
     }
     ++mcuIdx; // We did just process one more MCU.
@@ -284,6 +340,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
        restartIntervalIndex != numRestartIntervals; ++restartIntervalIndex) {
     auto predStorage = getInitialPreds<N_COMP>();
     auto pred = Array2DRef(predStorage.data(), MCU.x, MCU.y);
+    bool isFirstRow = true;
 
     if (restartIntervalIndex != 0) {
       auto marker = peekMarker(inputStream);
@@ -321,7 +378,25 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                                /*croppedHeight=*/frame.mcu.y)
                                  .getAsArray2DRef();
 
-      decodeRowN<MCU, N_COMP>(outStripe, pred, ht, bs);
+      // For predictor modes 2-7, we need the previous row (stripe).
+      // For the first row of each restart interval, use predictor mode 1
+      // (per ITU-T T.81: first row always uses horizontal prediction).
+      // For the first row, prevStripe points to outStripe itself (unused
+      // since Use2DPred will be false).
+      const Array2DRef<const uint16_t> prevStripe =
+          isFirstRow ? Array2DRef<const uint16_t>(outStripe)
+                     : CroppedArray2DRef<const uint16_t>(
+                           img,
+                           /*offsetCols=*/0,
+                           /*offsetRows=*/row - frame.mcu.y,
+                           /*croppedWidth=*/img.width(),
+                           /*croppedHeight=*/frame.mcu.y)
+                           .getAsArray2DRef();
+
+      if (!isFirstRow && predictorMode != 1)
+        decodeRowN<MCU, N_COMP, true>(outStripe, pred, prevStripe, ht, bs);
+      else
+        decodeRowN<MCU, N_COMP, false>(outStripe, pred, prevStripe, ht, bs);
 
       // The predictor for the next line is the start of this line.
       pred = CroppedArray2DRef(outStripe,
@@ -330,6 +405,7 @@ ByteStream::size_type LJpegDecompressor::decodeN() const {
                                /*croppedWidth=*/MCU.x,
                                /*croppedHeight=*/MCU.y)
                  .getAsArray2DRef();
+      isFirstRow = false;
     }
 
     inputStream.skipBytes(bs.getStreamPosition());
@@ -348,6 +424,9 @@ ByteStream::size_type LJpegDecompressor::decode() const {
   case 2:
     if (frame.mcu == MCU<2, 1>) {
       return decodeN<MCU<2, 1>>();
+    }
+    if (frame.mcu == MCU<1, 2>) {
+      return decodeN<MCU<1, 2>>();
     }
     break;
   case 3:
