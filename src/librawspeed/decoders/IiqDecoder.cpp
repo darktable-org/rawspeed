@@ -505,8 +505,8 @@ void IiqDecoder::correctSensorDefects(ByteStream data) const {
     const uint16_t type = data.getU16();
     data.skipBytes(2); // Ignore unknown/unused bits.
 
-    if (col >= mRaw->dim.x) // Value for col is outside the raw image.
-      continue;
+    if (col >= mRaw->dim.x || row >= mRaw->dim.y)
+      continue; // Defect coordinates are outside the raw image.
     switch (type) {
     case 131: // bad column
     case 137: // bad column
