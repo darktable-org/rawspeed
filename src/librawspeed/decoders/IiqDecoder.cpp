@@ -522,6 +522,8 @@ void IiqDecoder::correctSensorDefects(ByteStream data) const {
 }
 
 void IiqDecoder::handleBadPixel(const uint16_t col, const uint16_t row) const {
+  if (col >= mRaw->dim.x || row >= mRaw->dim.y)
+    return; // Defect coordinates are outside the raw image.
   MutexLocker guard(&mRaw->mBadPixelMutex);
   mRaw->mBadPixelPositions.insert(mRaw->mBadPixelPositions.end(),
                                   (static_cast<uint32_t>(row) << 16) + col);
