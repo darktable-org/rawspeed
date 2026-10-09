@@ -11590,7 +11590,27 @@
 	<Camera make="Panasonic" model="DC-TZ300" supported="unknown-no-samples">
 		<ID make="Panasonic" model="DC-TZ300">Panasonic DC-ZS300</ID>
 	</Camera>
-	<Camera make="Panasonic" model="DC-ZS300" supported="unknown-no-samples">
+	<Camera make="Panasonic" model="DC-ZS300">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="142" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7790 -2736 -755</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3452 11870 1769</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-628 1647 4898</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-ZS300" mode="3:2">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="142" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">7790 -2736 -755</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3452 11870 1769</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-628 1647 4898</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="PENTAX Corporation" model="PENTAX K100D">
 		<ID make="Pentax" model="K100D">Pentax K100D</ID>
