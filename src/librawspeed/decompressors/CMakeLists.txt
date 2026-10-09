@@ -60,6 +60,8 @@ FILE(GLOB SOURCES
   "SonyArw1Decompressor.h"
   "SonyArw2Decompressor.cpp"
   "SonyArw2Decompressor.h"
+  "SonyArw6Decompressor.cpp"
+  "SonyArw6Decompressor.h"
   "UncompressedDecompressor.cpp"
   "UncompressedDecompressor.h"
   "VC5Decompressor.cpp"
