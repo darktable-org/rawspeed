@@ -7151,7 +7151,7 @@
 	</Camera>
 	<Camera make="OM Digital Solutions" model="OM-5MarkII">
 		<ID make="OM System" model="OM-5 Mark II">OM Digital Solutions OM-5 Mark II</ID>
-		<Crop x="0" y="0" width="-30" height="0"/>
+		<Crop x="0" y="0" width="-28" height="0"/>
 		<Sensor black="254" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
