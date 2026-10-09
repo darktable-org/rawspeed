@@ -136,7 +136,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
       writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found Deflate-encoded chunk, "
                                     "but the deflate support was disabled at "
                                     "build!");
-      [[clang::fallthrough]];
+      [[fallthrough]];
 #endif
 #ifndef HAVE_JPEG
     case 0x884c: // lossy JPEG
@@ -145,7 +145,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
       writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found lossy JPEG-encoded "
                                     "chunk, but the jpeg support was "
                                     "disabled at build!");
-      [[clang::fallthrough]];
+      [[fallthrough]];
 #endif
 #ifndef HAVE_JPEGXL
     case 52546: // JPEG XL (DNG 1.7)
@@ -154,7 +154,7 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
       writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found JPEG XL-encoded "
                                     "chunk, but JPEG XL support was "
                                     "disabled at build!");
-      [[clang::fallthrough]];
+      [[fallthrough]];
 #endif
     default:
       supported = false;

@@ -131,12 +131,16 @@ void JpegXlDecompressor::decode(uint32_t offX, uint32_t offY) {
         ThrowRDE("JXL: JxlDecoderImageOutBufferSize failed");
       // copyTile indexes the buffer as a tightly-packed jxl_w * cpp row stride;
       // make libjxl's own accounting confirm that before trusting it.
-      if (const size_t needed =
-              jpegXlTileBufferBytes(props.width, props.height, cpp, sampleSize);
-          buf_size < needed) {
+      const auto needed =
+          jpegXlTileBufferBytes(props.width, props.height, cpp, sampleSize);
+      if (!needed)
+        ThrowRDE("JXL: output buffer size is unrepresentable for a %ux%u tile "
+                 "of %u channels",
+                 props.width, props.height, cpp);
+      if (buf_size < *needed) {
         ThrowRDE("JXL: output buffer of %zu bytes is short of the %zu needed "
                  "for a %ux%u tile of %u channels",
-                 buf_size, needed, props.width, props.height, cpp);
+                 buf_size, *needed, props.width, props.height, cpp);
       }
       pixels.resize(buf_size);
       if (JXL_DEC_SUCCESS !=

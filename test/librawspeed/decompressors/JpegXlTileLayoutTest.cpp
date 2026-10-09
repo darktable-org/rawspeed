@@ -21,6 +21,8 @@
 #include "decompressors/JpegXlTileLayout.h"
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <optional>
 #include <gtest/gtest.h>
 
 using rawspeed::checkJpegXlStream;
@@ -338,12 +340,22 @@ TEST(JpegXlTileBufferTest, S23FullFrameSize) {
             size_t{72'000'000});
 }
 
-// The product must be computed in size_t: 65535*65535*3*2 overflows uint32_t.
+TEST(JpegXlTileBufferTest, UnrepresentableBufferSizeIsRejected) {
+  const std::optional<size_t> bytes =
+      jpegXlTileBufferBytes(2, 1, 1, std::numeric_limits<size_t>::max());
+  EXPECT_EQ(bytes, std::nullopt);
+}
+
+// A valid large tile fits a 64-bit buffer size but must be refused on 32 bits.
 TEST(JpegXlTileBufferTest, LargeTileDoesNotOverflow) {
-  constexpr size_t expected = size_t{65535} * 65535 * 3 * 2;
-  static_assert(expected > size_t{UINT32_MAX},
+  constexpr uint64_t expected = uint64_t{65535} * 65535 * 3 * 2;
+  static_assert(expected > UINT32_MAX,
                 "test is meaningless if it fits in 32 bits");
-  EXPECT_EQ(jpegXlTileBufferBytes(65535, 65535, 3, sizeof(uint16_t)), expected);
+  const auto bytes = jpegXlTileBufferBytes(65535, 65535, 3, sizeof(uint16_t));
+  if constexpr (expected <= std::numeric_limits<size_t>::max())
+    EXPECT_EQ(bytes, expected);
+  else
+    EXPECT_EQ(bytes, std::nullopt);
 }
 
 } // namespace rawspeed_test

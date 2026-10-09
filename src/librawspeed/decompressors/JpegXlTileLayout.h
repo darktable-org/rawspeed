@@ -21,8 +21,11 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <optional>
 
 namespace rawspeed {
 
@@ -182,13 +185,19 @@ clipJpegXlTile(uint32_t imgW, uint32_t imgH, uint32_t offX, uint32_t offY,
 // samples of `sampleSize` bytes each (JxlPixelFormat align = 0, so rows are
 // tightly packed).
 //
-// Widened to size_t before multiplying: the product of plausible tile
-// dimensions overflows 32 bits well before it overflows the buffer.
-[[nodiscard]] constexpr size_t
+// Reject products that cannot be represented by the output buffer's size type.
+[[nodiscard]] constexpr std::optional<size_t>
 jpegXlTileBufferBytes(uint32_t jxlW, uint32_t jxlH, uint32_t cpp,
                       size_t sampleSize) noexcept {
-  return static_cast<size_t>(jxlW) * static_cast<size_t>(jxlH) *
-         static_cast<size_t>(cpp) * sampleSize;
+  if (jxlW == 0 || jxlH == 0 || cpp == 0 || sampleSize == 0)
+    return size_t{0};
+  size_t bytes = jxlW;
+  for (const size_t factor : std::array<size_t, 3>{jxlH, cpp, sampleSize}) {
+    if (bytes > std::numeric_limits<size_t>::max() / factor)
+      return std::nullopt;
+    bytes *= factor;
+  }
+  return bytes;
 }
 
 } // namespace rawspeed
