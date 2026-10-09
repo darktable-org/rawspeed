@@ -3885,6 +3885,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="NIKON CORPORATION" model="NIKON Z5_2C" supported="unknown-no-samples">
+		<ID make="Nikon" model="Z5_2C">Nikon Z 5 2C</ID>
+	</Camera>
 	<Camera make="NIKON CORPORATION" model="NIKON Z 6" mode="14bit-compressed">
 		<ID make="Nikon" model="Z 6">Nikon Z 6</ID>
 		<CFA width="2" height="2">
