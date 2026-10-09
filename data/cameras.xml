@@ -10542,7 +10542,60 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="Panasonic" model="DC-L10" supported="unknown-no-samples">
+	<Camera make="Panasonic" model="DC-L10">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8056 -3376 -782</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4528 12406 2376</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-790 2517 5688</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-L10" mode="4:3">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8056 -3376 -782</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4528 12406 2376</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-790 2517 5688</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-L10" mode="3:2">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8056 -3376 -782</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4528 12406 2376</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-790 2517 5688</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-L10" mode="16:9">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8056 -3376 -782</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4528 12406 2376</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-790 2517 5688</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="Panasonic" model="DC-L10" mode="1:1">
+		<Crop x="0" y="0" width="0" height="0"/>
+		<Sensor black="2048" white="65535"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">8056 -3376 -782</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4528 12406 2376</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-790 2517 5688</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DC-S1">
 		<Crop x="0" y="0" width="-50" height="0"/>
