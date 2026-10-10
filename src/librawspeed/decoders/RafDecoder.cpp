@@ -264,7 +264,7 @@ void RafDecoder::applyCorrections(const Camera* cam) {
           h = new_size.x - 1 - x + (y >> 1);
           w = ((y + 1) >> 1) + x;
         }
-        if (h < rotated->dim.y && w < rotated->dim.x)
+        if (h >= 0 && w >= 0 && h < rotated->dim.y && w < rotated->dim.x)
           dstImg(h, w) = srcImg(crop_offset.y + y, crop_offset.x + x);
         else
           ThrowRDE("Trying to write out of bounds");
