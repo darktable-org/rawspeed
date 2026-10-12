@@ -842,6 +842,8 @@
 			<Color x="1" y="1">GREEN</Color>
 		</CFA>
 		<Crop x="158" y="52" width="5634" height="3752"/>
+		<Sensor black="1024" white="12995" iso_list="160 320 640 1250"/>
+		<Sensor black="1024" white="15950"/>
 		<BlackAreas>
 			<Vertical x="0" width="156"/>
 			<Horizontal y="2" height="48"/>
