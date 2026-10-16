@@ -134,9 +134,11 @@ class AbstractDngDecompressor final : public AbstractDecompressor {
 public:
   AbstractDngDecompressor(RawImage img, const DngTilingDescription& dsc_,
                           int compression_, bool mFixLjpeg_, uint32_t mBps_,
-                          uint32_t mPredictor_)
+                          uint32_t mPredictor_,
+                          std::pair<uint32_t, uint32_t> mInterleave_)
       : mRaw(std::move(img)), dsc(dsc_), compression(compression_),
-        mFixLjpeg(mFixLjpeg_), mBps(mBps_), mPredictor(mPredictor_) {}
+        mFixLjpeg(mFixLjpeg_), mBps(mBps_), mPredictor(mPredictor_),
+        mInterleave(std::move(mInterleave_)) {}
 
   void decompress() const;
 
@@ -148,6 +150,7 @@ public:
   const bool mFixLjpeg = false;
   const uint32_t mBps;
   const uint32_t mPredictor;
+  const std::pair<uint32_t, uint32_t> mInterleave;
 };
 
 } // namespace rawspeed
