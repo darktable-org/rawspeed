@@ -139,6 +139,10 @@ void JpegDecompressor::decode(uint32_t offX,
   if (JPEG_HEADER_OK != jpeg_read_header(&dinfo, static_cast<boolean>(true)))
     ThrowRDE("Unable to read JPEG header");
 
+  if (dinfo.data_precision != 8)
+    ThrowRDE("Lossy JPEG tiles with %d-bit precision are not yet supported.",
+             dinfo.data_precision);
+
   jpeg_start_decompress(&dinfo);
   if (dinfo.output_components != static_cast<int>(mRaw->getCpp()))
     ThrowRDE("Component count doesn't match");
