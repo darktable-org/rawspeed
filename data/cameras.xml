@@ -6655,7 +6655,7 @@
 	<Camera make="OLYMPUS IMAGING CORP." model="SP310" supported="unknown-no-samples">
 		<ID make="Olympus" model="SP310">Olympus SP310</ID>
 	</Camera>
-	<Camera make="OLYMPUS IMAGING CORP." model="SP320" supported="no-samples">
+	<Camera make="OLYMPUS IMAGING CORP." model="SP320">
 		<ID make="Olympus" model="SP320">Olympus SP320</ID>
 		<Crop x="0" y="0" width="0" height="0"/>
 		<Sensor black="0" white="4095"/>
