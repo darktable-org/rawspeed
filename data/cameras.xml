@@ -310,6 +310,7 @@
 		<Aliases>
 			<Alias id="EOS Digital Rebel XT">Canon EOS DIGITAL REBEL XT</Alias>
 			<Alias id="EOS Kiss Digital N">Canon EOS Kiss Digital N</Alias>
+			<Alias id="EOS 350D">Canon EOS 350D</Alias>
 			<Alias id="EOS 350D">Canon EOS 350D Digital</Alias>
 		</Aliases>
 		<ColorMatrices>
