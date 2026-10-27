@@ -196,7 +196,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - { os: macos-15,       family: XCode, version: 26.3, deployment_target: 15.5, CC: cc, CXX: c++ } # AArch64, LLVM19, native
+          - { os: macos-26, family: XCode, version: 26.6, deployment_target: 26.5, CC: cc, CXX: c++ } # AArch64, LLVM21, native
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
@@ -213,7 +213,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-          - { os: macos-14, family: XCode, version: 16.2, deployment_target: 14.5, CC: cc, CXX: c++ } # AArch64, LLVM17, native
+          - { os: macos-15, family: XCode, version: 26.3, deployment_target: 15.5, CC: cc, CXX: c++ } # AArch64, LLVM19, native
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
@@ -230,7 +230,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - compiler: { os: macos-15, family: XCode, version: 26.3, deployment_target: 15.5, CC: cc, CXX: c++ } # AArch64, LLVM19, native
+          - compiler: { os: macos-26, family: XCode, version: 26.6, deployment_target: 26.5, CC: cc, CXX: c++ } # AArch64, LLVM21, native
             flavor: Coverage
     uses: ./.github/workflows/CI-macOS.yml
     with:
