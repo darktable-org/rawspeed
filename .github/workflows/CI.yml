@@ -159,7 +159,6 @@ jobs:
       matrix:
         msys2:
           - { os: windows-latest, msystem: MINGW64,    arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
-          - { os: windows-latest, msystem: MINGW32,    arch: i686,    family: GNU,  CC: gcc,   CXX: g++ }
           - { os: windows-latest, msystem: CLANG64,    arch: x86_64,  family: LLVM, CC: clang, CXX: clang++ }
           - { os: windows-11-arm, msystem: CLANGARM64, arch: aarch64, family: LLVM, CC: clang, CXX: clang++ }
           - { os: windows-latest, msystem: UCRT64,     arch: x86_64,  family: GNU,  CC: gcc,   CXX: g++ }
