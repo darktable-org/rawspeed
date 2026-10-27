@@ -51,6 +51,7 @@ jobs:
           cache: false
           msystem: ${{ inputs.msys2-msystem }}
           update: false
+          release: false
           pacboy: >-
             cc:p
             gcc-libs:p
