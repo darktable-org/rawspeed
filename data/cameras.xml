@@ -18707,6 +18707,9 @@
 	<Camera make="SIGMA" model="SIGMA fp L" mode="dng">
 		<ID make="Sigma" model="fp L">SIGMA fp L</ID>
 	</Camera>
+	<Camera make="Sigma" model="Sigma FP2" mode="dng">
+		<ID make="Sigma" model="FP2">Sigma FP2</ID>
+	</Camera>
 	<Camera make="SIGMA" model="sd Quattro" mode="dng">
 		<ID make="Sigma" model="sd Quattro">sd Quattro</ID>
 	</Camera>
