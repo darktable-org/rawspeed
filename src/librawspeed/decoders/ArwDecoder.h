@@ -53,6 +53,7 @@ private:
   RawImage decodeTransitionalArw();
   RawImage decodeSRF();
   void DecodeARW2(ByteStream input, uint32_t w, uint32_t h, uint32_t bpp);
+  void DecodeARW6(const TiffIFD* raw);
   void DecodeLJpeg(const TiffIFD* raw);
   void DecodeUncompressed(const TiffIFD* raw) const;
   static void SonyDecrypt(Array1DRef<const uint8_t> ibuf,
@@ -60,6 +61,7 @@ private:
   void GetWB() const;
   int mShiftDownScale = 0;
   int mShiftDownScaleForExif = 0;
+  int mCompression = 0;
 };
 
 } // namespace rawspeed
