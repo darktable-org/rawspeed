@@ -197,7 +197,6 @@ jobs:
       matrix:
         compiler:
           - { os: macos-15,       family: XCode, version: 26.3, deployment_target: 15.5, CC: cc, CXX: c++ } # AArch64, LLVM19, native
-          - { os: macos-15-intel, family: XCode, version: 26.3, deployment_target: 15.5, CC: cc, CXX: c++ } # x86_64,  LLVM19, native
         flavor: [ ReleaseWithAsserts, Release ]
     uses: ./.github/workflows/CI-macOS.yml
     with:
