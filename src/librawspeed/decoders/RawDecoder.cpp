@@ -305,6 +305,8 @@ void RawDecoder::setMetaData(const CameraMetaData* meta,
       mRaw->setError("Expected 4 values '10,20,30,20' as values for "
                      "final_cfa_black hint.");
     } else {
+      mRaw->blackLevelSeparate =
+          Array2DRef(mRaw->blackLevelSeparateStorage.data(), 2, 2);
       auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
       for (int i = 0; i < 4; i++) {
         blackLevelSeparate1D(i) = stoi(v[i]);
