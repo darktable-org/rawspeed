@@ -110,6 +110,7 @@ void FiffParser::parseData() {
       case TiffTag::FUJI_RAWIMAGEFULLSIZE:
       case TiffTag::FUJI_RAWIMAGECROPTOPLEFT:
       case TiffTag::FUJI_RAWIMAGECROPPEDSIZE:
+      case TiffTag::FUJI_RAWIMAGEASPECTRATIO:
       case TiffTag::FUJIOLDWB:
         // also 0x121?
         type = TiffDataType::SHORT;
