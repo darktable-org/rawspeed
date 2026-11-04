@@ -84,7 +84,7 @@ RawImage ArwDecoder::decodeSRF() {
   uint32_t head_off = 164600;
 
   // Replicate the dcraw contortions to get the "decryption" key
-  uint8_t offset = mFile[key_off];
+  uint8_t offset = *mFile.getSubView(key_off, 1).begin();
   const Buffer keyData = mFile.getSubView(key_off + (4 * offset), 4);
   uint32_t key = getU32BE(keyData.begin());
 
