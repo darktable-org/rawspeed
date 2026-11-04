@@ -64,7 +64,7 @@ bool ArwDecoder::isAppropriateDecoder(const TiffRootIFD* rootIFD,
 
   // FIXME: magic
 
-  return make == "SONY";
+  return make == "SONY" || make == "HASSELBLAD";
 }
 
 RawImage ArwDecoder::decodeSRF() {
