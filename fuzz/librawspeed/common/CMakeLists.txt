@@ -9,6 +9,7 @@ endmacro()
 
 set(NAMES
   "DngOpcodes"
+  "RawImagePostProcess"
 )
 
 foreach(name ${NAMES})

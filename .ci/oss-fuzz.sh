@@ -56,7 +56,7 @@ if [[ $SANITIZER = *memory* ]]; then
 fi
 
 cd "$WORK"
-mkdir build
+mkdir -p build
 cd build
 
 cmake \
