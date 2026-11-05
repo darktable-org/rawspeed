@@ -18089,6 +18089,9 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="HASSELBLAD" model="Stellar" supported="unknown-no-samples">
+		<ID make="Hasselblad" model="Stellar">Hasselblad Stellar</ID>
+	</Camera>
 	<Camera make="Hasselblad" model="Hasselblad 500 mech.">
 		<ID make="Hasselblad" model="CFV">Hasselblad 16-Uncoated</ID>
 		<CFA width="2" height="2">
