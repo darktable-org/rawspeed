@@ -56,13 +56,28 @@ if [[ $SANITIZER = *memory* ]]; then
 fi
 
 cd "$WORK"
-mkdir build
+mkdir -p build
 cd build
+
+# Deflate (DNG) and lossy-JPEG (DNG) decompressors: compile them in for all
+# configurations except MemorySanitizer, which requires every linked library
+# to be MSan-instrumented and the system zlib/libjpeg are not. MSan builds
+# therefore keep the exact previous configuration (no digression, no
+# silencing), while ASan/UBSan and the afl/honggfuzz engines gain the two
+# decompressors.
+WITH_ZLIB=OFF
+WITH_JPEG=OFF
+if [[ $SANITIZER != *memory* ]]; then
+  WITH_ZLIB=ON
+  WITH_JPEG=ON
+fi
 
 cmake \
   -DBINARY_PACKAGE_BUILD=ON -DWITH_OPENMP=$WITH_OPENMP \
   -DUSE_BUNDLED_LLVMOPENMP=ON -DALLOW_DOWNLOADING_LLVMOPENMP=ON \
-  -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=OFF -DWITH_ZLIB=OFF \
+  -DWITH_PUGIXML=OFF -DUSE_XMLLINT=OFF -DWITH_JPEG=$WITH_JPEG -DWITH_ZLIB=$WITH_ZLIB \
+  -DZLIB_USE_STATIC_LIBS=ON \
+  -DJPEG_LIBRARY:PATH=/usr/lib/x86_64-linux-gnu/libjpeg.a \
   -DBUILD_TESTING=OFF -DBUILD_TOOLS=OFF -DBUILD_BENCHMARKING=OFF \
   -DCMAKE_BUILD_TYPE=FUZZ -DBUILD_FUZZERS=ON \
   -DLIB_FUZZING_ENGINE:STRING="$LIB_FUZZING_ENGINE" \
