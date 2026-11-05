@@ -1,0 +1,17 @@
+# Dictionary for FujiDecompressorFuzzer: tokens keeping mutated inputs inside
+# the strict FujiHeader/raw-header validation (FujiDecompressor.cpp).
+# Header fields are parsed big-endian after the little-endian fuzz/Common.cpp preamble.
+sig_is="\x49\x53"
+sig_is_ver1="\x49\x53\x00\x01"
+version_1="\x01"
+raw_type_bayer="\x00"
+raw_type_xtrans="\x10"
+raw_bits_14="\x0e"
+raw_bits_16="\x10"
+block_size_0300_be="\x03\x00"
+blocks_in_row_1="\x01"
+image_type_uint16="\x00\x00\x00\x00"
+cfa_rggb="\x02\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00"
+cfa_green="\x01\x00\x00\x00"
+cfa_red="\x00\x00\x00\x00"
+cfa_blue="\x02\x00\x00\x00"
