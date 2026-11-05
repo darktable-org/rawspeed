@@ -424,6 +424,7 @@
       <xs:enumeration value="GITUP"/>
       <xs:enumeration value="Generic"/>
       <xs:enumeration value="GoPro"/>
+      <xs:enumeration value="HASSELBLAD"/>
       <xs:enumeration value="Hasselblad"/>
       <xs:enumeration value="ImBack"/>
       <xs:enumeration value="KODAK"/>

@@ -18073,6 +18073,27 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="HASSELBLAD" model="Lunar">
+		<ID make="Hasselblad" model="Lunar">Hasselblad Lunar</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-24" height="0"/>
+		<Sensor black="512" white="16300"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">5491 -1192 -363</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4951 12342 2948</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-911 1722 7192</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="HASSELBLAD" model="Stellar" supported="unknown-no-samples">
+		<ID make="Hasselblad" model="Stellar">Hasselblad Stellar</ID>
+	</Camera>
 	<Camera make="Hasselblad" model="Hasselblad 500 mech.">
 		<ID make="Hasselblad" model="CFV">Hasselblad 16-Uncoated</ID>
 		<CFA width="2" height="2">
