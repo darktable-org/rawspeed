@@ -6,4 +6,6 @@ add_subdirectory(common)
 add_subdirectory(decoders)
 add_subdirectory(decompressors)
 add_subdirectory(fuzz)
+add_subdirectory(interpolators)
 add_subdirectory(parsers)
+

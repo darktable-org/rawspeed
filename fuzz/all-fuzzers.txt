@@ -4,6 +4,7 @@ CiffParserFuzzer-GetDecoder-Decode
 Cr2DecompressorFuzzer-DummyPrefixCodeDecoder
 Cr2DecompressorFuzzer-PrefixCodeDecoder
 Cr2LJpegDecoderFuzzer
+Cr2sRawInterpolatorFuzzer
 CrwDecompressorFuzzer
 DngOpcodesFuzzer
 DummyLJpegDecoderFuzzer

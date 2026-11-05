@@ -1,0 +1,1 @@
+add_simple_fuzzer(Cr2sRawInterpolator)
