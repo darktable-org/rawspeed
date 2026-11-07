@@ -72,6 +72,12 @@ You can get access to the latest version using `from here <rawspeed_>`_. You wil
 
 CMake-based build system is provided.
 
+JPEG XL decoding for DNG 1.7 requires libjxl 0.8 or newer and pkg-config.
+The CMake option ``WITH_JPEGXL`` defaults to ``AUTO``, enabling support when
+the dependency is available and reporting disabled support otherwise.
+Use ``-DWITH_JPEGXL=ON`` to require the dependency or ``-DWITH_JPEGXL=OFF``
+to disable JPEG XL decoding.
+
 Integration into LLVM LNT / Test-Suite
 --------------------------------------
 It is possible to natively integrate the RawSpeed into LLVM test-suite, and use
