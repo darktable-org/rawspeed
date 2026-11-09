@@ -8063,7 +8063,7 @@
 		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-GM1" mode="4:3">
-		<Crop x="0" y="0" width="-206" height="0"/>
+		<Crop x="0" y="0" width="-208" height="0"/>
 		<Sensor black="143" white="3971"/>
 		<Aliases>
 			<Alias>DMC-GM1S</Alias>
@@ -8077,7 +8077,7 @@
 		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-GM1" mode="3:2">
-		<Crop x="0" y="0" width="-206" height="0"/>
+		<Crop x="0" y="0" width="-208" height="0"/>
 		<Sensor black="143" white="3971"/>
 		<Aliases>
 			<Alias>DMC-GM1S</Alias>
@@ -8091,7 +8091,7 @@
 		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-GM1" mode="16:9">
-		<Crop x="0" y="0" width="-206" height="0"/>
+		<Crop x="0" y="0" width="-208" height="0"/>
 		<Sensor black="143" white="3971"/>
 		<Aliases>
 			<Alias>DMC-GM1S</Alias>
@@ -8105,7 +8105,7 @@
 		</ColorMatrices>
 	</Camera>
 	<Camera make="Panasonic" model="DMC-GM1" mode="1:1">
-		<Crop x="0" y="0" width="0" height="0"/>
+		<Crop x="0" y="0" width="-32" height="0"/>
 		<Sensor black="143" white="3971"/>
 		<Aliases>
 			<Alias>DMC-GM1S</Alias>
