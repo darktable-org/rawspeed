@@ -330,6 +330,9 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
       for (int& k : blackLevelSeparate1D)
         k /= 9;
+    } else {
+      ThrowRDE("Black Level has %u entries instead of 4 or 36",
+               sep_black->count);
     }
 
     // Set black level to average of EXIF data, can be overridden by XML data.
