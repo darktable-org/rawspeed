@@ -12234,9 +12234,9 @@
 		<Sensor black="0" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">11057 -3604 -1155</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5152 13046 2329</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-282 375 8104</ColorMatrixRow>
+				<ColorMatrixRow plane="0">9730 -2989 -970</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8527 16258 2381</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1060 970 8362</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -12345,9 +12345,9 @@
 		<Sensor black="0" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">11057 -3604 -1155</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5152 13046 2329</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-282 375 8104</ColorMatrixRow>
+				<ColorMatrixRow plane="0">9730 -2989 -970</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8527 16258 2381</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1060 970 8362</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
