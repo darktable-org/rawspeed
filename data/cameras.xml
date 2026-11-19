@@ -11982,6 +11982,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="PENTAX" model="PENTAX K200D">
+		<ID make="Pentax" model="K200D">Pentax K200D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-40" height="-8"/>
+		<Sensor black="0" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9186 -2678 -907</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8693 16517 2260</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1129 1094 8524</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-S1">
 		<ID make="Pentax" model="K-S1">Pentax K-S1</ID>
 		<CFA width="2" height="2">
@@ -12312,24 +12330,6 @@
 				<ColorMatrixRow plane="0">8617 -3228 -1034</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4674 12821 2044</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-803 1577 5728</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
-	<Camera make="PENTAX" model="PENTAX K200D">
-		<ID make="Pentax" model="K200D">Pentax K200D</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
-		<Crop x="0" y="0" width="-40" height="-8"/>
-		<Sensor black="0" white="4095"/>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9186 -2678 -907</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-8693 16517 2260</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1129 1094 8524</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
