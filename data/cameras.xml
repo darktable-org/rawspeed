@@ -12363,9 +12363,9 @@
 		<Sensor black="0" white="15767"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9814 -2716 -1439</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5049 13907 1166</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1830 3836 5706</ColorMatrixRow>
+				<ColorMatrixRow plane="0">10646 -3593 -1158</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3329 11699 1831</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-667 2874 6287</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
