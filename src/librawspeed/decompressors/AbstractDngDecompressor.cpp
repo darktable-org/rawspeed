@@ -35,6 +35,7 @@
 #include "io/ByteStream.h"
 #include "io/Endianness.h"
 #include "io/IOException.h"
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <string>
@@ -50,6 +51,64 @@
 #endif
 
 namespace rawspeed {
+
+namespace {
+
+// Some DNG files (e.g. Blackmagic CinemaDNG) use TIFF compression=7
+// (lossless JPEG) but the actual tile data contains lossy DCT JPEG
+// (SOF0/SOF1/SOF2 with DQT). Detect this by scanning the first few
+// JPEG markers in the tile stream.
+[[nodiscard]] bool tileContainsLossyJpeg(const ByteStream& bs) {
+  const auto remaining = bs.getRemainSize();
+  if (remaining < 4)
+    return false;
+
+  // Must start with JPEG SOI marker
+  if (bs.peekByte(0) != 0xFF || bs.peekByte(1) != 0xD8)
+    return false;
+
+  // Scan markers after SOI. Stop after a reasonable number of bytes.
+  const auto limit =
+      std::min(remaining, static_cast<ByteStream::size_type>(1024));
+  ByteStream::size_type pos = 2;
+
+  while (pos + 3 < limit) {
+    if (bs.peekByte(pos) != 0xFF)
+      return false; // Invalid marker - stop scanning
+
+    const uint8_t marker = bs.peekByte(pos + 1);
+
+    // DQT (quantization table) is definitive proof of lossy JPEG
+    if (marker == 0xDB) // DQT
+      return true;
+
+    // SOF0/SOF1/SOF2 = lossy DCT-based JPEG
+    if (marker == 0xC0 || marker == 0xC1 || marker == 0xC2)
+      return true;
+
+    // SOF3 = lossless - this is what compression=7 should be
+    if (marker == 0xC3)
+      return false;
+
+    // SOS = start of scan data - stop scanning
+    if (marker == 0xDA)
+      return false;
+
+    // Skip this marker segment
+    if (pos + 4 > remaining)
+      return false;
+    const auto segLen = static_cast<uint16_t>(
+        (static_cast<uint16_t>(bs.peekByte(pos + 2)) << 8) |
+        static_cast<uint16_t>(bs.peekByte(pos + 3)));
+    if (segLen < 2)
+      return false;
+    pos += 2 + segLen;
+  }
+
+  return false;
+}
+
+} // namespace
 
 template <> void AbstractDngDecompressor::decompressThread<1>() const noexcept {
 #ifdef HAVE_OPENMP
@@ -116,6 +175,15 @@ template <> void AbstractDngDecompressor::decompressThread<7>() const noexcept {
   for (const auto& e :
        Array1DRef(slices.data(), implicit_cast<int>(slices.size()))) {
     try {
+#ifdef HAVE_JPEG
+      // Some cameras (e.g. Blackmagic CinemaDNG) mislabel lossy DCT JPEG
+      // tiles as compression=7 (lossless JPEG). Detect and redirect.
+      if (tileContainsLossyJpeg(e.bs)) {
+        JpegDecompressor j(e.bs.peekBuffer(e.bs.getRemainSize()), mRaw);
+        j.decode(e.offX, e.offY);
+        continue;
+      }
+#endif
       LJpegDecoder d(e.bs, mRaw);
       d.decode(e.offX, e.offY, e.width, e.height,
                iPoint2D(e.dsc.tileW, e.dsc.tileH), mFixLjpeg);
