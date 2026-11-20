@@ -11982,6 +11982,24 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
+	<Camera make="PENTAX" model="PENTAX K200D">
+		<ID make="Pentax" model="K200D">Pentax K200D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-42" height="-10"/>
+		<Sensor black="0" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9186 -2678 -907</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8693 16517 2260</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1129 1094 8524</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
 	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX K-S1">
 		<ID make="Pentax" model="K-S1">Pentax K-S1</ID>
 		<CFA width="2" height="2">
@@ -12152,16 +12170,6 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="PENTAX" model="PENTAX K-5" mode="dng">
-		<ID make="Pentax" model="K-5">PENTAX K-5</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">8713 -2833 -743</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-4342 11900 2772</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-722 1543 6247</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-5 II" decoder_version="2">
 		<ID make="Pentax" model="K-5 II">PENTAX K-5 II</ID>
 		<CFA width="2" height="2">
@@ -12312,24 +12320,6 @@
 				<ColorMatrixRow plane="0">8617 -3228 -1034</ColorMatrixRow>
 				<ColorMatrixRow plane="1">-4674 12821 2044</ColorMatrixRow>
 				<ColorMatrixRow plane="2">-803 1577 5728</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
-	<Camera make="PENTAX" model="PENTAX K200D">
-		<ID make="Pentax" model="K200D">Pentax K200D</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
-		<Crop x="0" y="0" width="-42" height="-10"/>
-		<Sensor black="0" white="4095"/>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9186 -2678 -907</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-8693 16517 2260</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1129 1094 8524</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -18366,68 +18356,20 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="RICOH IMAGING COMPANY, LTD." model="PENTAX 645Z" mode="dng">
-		<ID make="Pentax" model="645Z">PENTAX 645Z</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9551 -3012 -1235</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3685 12133 1721</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1019 1887 6544</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
-	<Camera make="PENTAX" model="PENTAX 645D" mode="dng">
-		<ID make="Pentax" model="645D">PENTAX 645D</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9814 -2716 -1439</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5049 13907 1166</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1830 3836 5706</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
 	<Camera make="PENTAX" model="PENTAX 645Z" mode="dng">
 		<ID make="Pentax" model="645Z">PENTAX 645Z</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9551 -3012 -1235</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3685 12133 1721</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1019 1887 6544</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-01" mode="dng">
 		<ID make="Pentax" model="K-01">PENTAX K-01</ID>
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-30" mode="dng">
 		<ID make="Pentax" model="K-30">PENTAX K-30</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">5789 -1749 -775</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-2618 8062 1233</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-642 1125 4278</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-50" mode="dng">
 		<ID make="Pentax" model="K-50">PENTAX K-50</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">6184 -1869 -828</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-2618 8062 1233</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-639 1120 4259</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX K-500" mode="dng">
 		<ID make="Pentax" model="K-500">PENTAX K-500</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">6184 -1869 -828</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-2618 8062 1233</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-639 1120 4259</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
 	</Camera>
 	<Camera make="PENTAX" model="PENTAX Q" mode="dng">
 		<ID make="Pentax" model="Q">PENTAX Q</ID>
@@ -18694,26 +18636,6 @@
 	</Camera>
 	<Camera make="SAMSUNG TECHWIN Co." model="SAMSUNG GX20" mode="dng">
 		<ID make="Samsung" model="GX20">Samsung GX20</ID>
-	</Camera>
-	<Camera make="PENTAX" model="PENTAX K-r" mode="dng">
-		<ID make="Pentax" model="K-r">PENTAX K-r</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9895 -3077 -850</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5304 13035 2521</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-883 1768 6936</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
-	<Camera make="PENTAX Corporation" model="PENTAX K10D" mode="dng">
-		<ID make="Pentax" model="K10D">PENTAX K10D</ID>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9566 -2863 -803</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-7170 15172 2112</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-818 803 9705</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
 	</Camera>
 	<Camera make="Sigma" model="Sigma BF" mode="dng">
 		<ID make="Sigma" model="BF">Sigma BF</ID>
