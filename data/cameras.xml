@@ -15106,7 +15106,7 @@
 			<ColorRow y="0">GB</ColorRow>
 			<ColorRow y="1">RG</ColorRow>
 		</CFA2>
-		<Crop x="30" y="4" width="-30" height="-4"/>
+		<Crop x="30" y="0" width="-30" height="0"/>
 		<Sensor black="0" white="15872"/>
 		<Hints>
 			<Hint name="fuji_rotate" value=""/>
