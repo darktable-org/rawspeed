@@ -333,11 +333,13 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
     }
 
     // Set black level to average of EXIF data, can be overridden by XML data.
-    int sum = 0;
-    auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
-    for (int b : blackLevelSeparate1D)
-      sum += b;
-    mRaw->blackLevel = (sum + 2) >> 2;
+    if (mRaw->blackLevelSeparate) {
+      int sum = 0;
+      auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
+      for (int b : blackLevelSeparate1D)
+        sum += b;
+      mRaw->blackLevel = (sum + 2) >> 2;
+    }
   }
 
   if (const CameraSensorInfo* sensor = cam->getSensorInfo(iso);
