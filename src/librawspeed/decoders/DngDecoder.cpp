@@ -54,6 +54,7 @@
 #include <vector>
 
 using std::map;
+using std::pair;
 using std::vector;
 
 namespace rawspeed {
@@ -120,6 +121,9 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
 #ifdef HAVE_JPEG
     case 0x884c: // lossy JPEG
 #endif
+#ifdef HAVE_JXL
+    case 0xcd42: // JPEG XL
+#endif
                  // no change, if supported, then is still supported.
       break;
 
@@ -138,6 +142,15 @@ void DngDecoder::dropUnsuportedChunks(std::vector<const TiffIFD*>* data) {
     "JPEG is not present! Lossy JPEG compression will not be supported!"
       writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found lossy JPEG-encoded "
                                     "chunk, but the jpeg support was "
+                                    "disabled at build!");
+      [[clang::fallthrough]];
+#endif
+#ifndef HAVE_JXL
+    case 0xcd42: // JPEG XL
+#pragma message                                                                \
+    "JPEG XL is not present! JPEG XL compression will not be supported!"
+      writeLog(DEBUG_PRIO::WARNING, "DNG Decoder: found JPEG XL encoded "
+                                    "chunk, but the jpeg xl support was "
                                     "disabled at build!");
       [[clang::fallthrough]];
 #endif
@@ -362,15 +375,23 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   if (compression == 8 && sample_format != 3) {
     ThrowRDE("Only float format is supported for "
              "deflate-compressed data.");
-  } else if ((compression == 7 || compression == 0x884c) &&
+  } else if ((compression == 7 || compression == 0x884c ||
+              compression == 0xcd42) &&
              sample_format != 1) {
     ThrowRDE("Only 16 bit unsigned data supported for "
-             "JPEG-compressed data.");
+             "JPEG or JPEG XL compressed data.");
   }
 
   uint32_t predictor = ~0U;
   if (raw->hasEntry(TiffTag::PREDICTOR))
     predictor = raw->getEntry(TiffTag::PREDICTOR)->getU32();
+
+  pair<uint32_t, uint32_t> interleave{1U, 1U};
+  if (raw->hasEntry(TiffTag::ROWINTERLEAVEFACTOR))
+    interleave.first = raw->getEntry(TiffTag::ROWINTERLEAVEFACTOR)->getU32();
+  if (raw->hasEntry(TiffTag::COLUMNINTERLEAVEFACTOR))
+    interleave.second =
+        raw->getEntry(TiffTag::COLUMNINTERLEAVEFACTOR)->getU32();
 
   if (mRaw->getDataType() == RawImageType::UINT16) {
     // Default white level is (2 ** BitsPerSample) - 1
@@ -401,7 +422,7 @@ void DngDecoder::decodeData(const TiffIFD* raw, uint32_t sample_format) const {
   }
 
   AbstractDngDecompressor slices(mRaw, getTilingDescription(raw), compression,
-                                 mFixLjpeg, *bps, predictor);
+                                 mFixLjpeg, *bps, predictor, interleave);
 
   slices.slices.reserve(slices.dsc.numTiles);
 
