@@ -110,7 +110,11 @@ struct DecompressorV8Params {
 };
 
 void DecompressorV8Params::validate() const {
-  const unsigned totalStrips = horizontalStripCount * verticalStripCount;
+  const unsigned totalStrips =
+      static_cast<unsigned>(horizontalStripCount) * verticalStripCount;
+
+  if (totalStrips == 0)
+    ThrowRDE("No strips specified!");
 
   // Check that we won't be going OOB on any of these strip lists
   if (totalStrips > stripByteOffsets.size())
