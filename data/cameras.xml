@@ -11922,9 +11922,9 @@
 		<Sensor black="0" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9566 -2863 -803</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-7170 15172 2112</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-818 803 9705</ColorMatrixRow>
+				<ColorMatrixRow plane="0">9679 -2965 -811</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8622 16514 2182</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-975 883 9793</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -11972,7 +11972,25 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="3880" height="2604"/>
+		<Crop x="0" y="0" width="-40" height="-8"/>
+		<Sensor black="0" white="4095"/>
+		<ColorMatrices>
+			<ColorMatrix planes="3">
+				<ColorMatrixRow plane="0">9186 -2678 -907</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8693 16517 2260</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1129 1094 8524</ColorMatrixRow>
+			</ColorMatrix>
+		</ColorMatrices>
+	</Camera>
+	<Camera make="PENTAX" model="PENTAX K200D">
+		<ID make="Pentax" model="K200D">Pentax K200D</ID>
+		<CFA width="2" height="2">
+			<Color x="0" y="0">RED</Color>
+			<Color x="1" y="0">GREEN</Color>
+			<Color x="0" y="1">GREEN</Color>
+			<Color x="1" y="1">BLUE</Color>
+		</CFA>
+		<Crop x="0" y="0" width="-40" height="-8"/>
 		<Sensor black="0" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -12026,13 +12044,13 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="58" y="30" width="0" height="-14"/>
+		<Crop x="58" y="28" width="0" height="-12"/>
 		<Sensor black="64" white="16319"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">8113 -2078 -1275</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-4359 12953 1514</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1091 1955 6044</ColorMatrixRow>
+				<ColorMatrixRow plane="0">8766 -3149 -747</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3976 11943 2292</ColorMatrixRow>
+				<ColorMatrixRow plane="2"> -517 1259 5552</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -12230,13 +12248,13 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="3900" height="2616"/>
+		<Crop x="0" y="0" width="-40" height="-8"/>
 		<Sensor black="0" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">11057 -3604 -1155</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5152 13046 2329</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-282 375 8104</ColorMatrixRow>
+				<ColorMatrixRow plane="0">9730 -2989 -970</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8527 16258 2381</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1060 970 8362</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -12287,13 +12305,13 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="62" y="30" width="0" height="-14"/>
+		<Crop x="58" y="28" width="0" height="-12"/>
 		<Sensor black="64" white="16319"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">8113 -2078 -1275</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-4359 12953 1514</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1091 1955 6044</ColorMatrixRow>
+				<ColorMatrixRow plane="0">8766 -3149 -747</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3976 11943 2292</ColorMatrixRow>
+				<ColorMatrixRow plane="2"> -517 1259 5552</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -12315,24 +12333,6 @@
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
-	<Camera make="PENTAX" model="PENTAX K200D">
-		<ID make="Pentax" model="K200D">Pentax K200D</ID>
-		<CFA width="2" height="2">
-			<Color x="0" y="0">RED</Color>
-			<Color x="1" y="0">GREEN</Color>
-			<Color x="0" y="1">GREEN</Color>
-			<Color x="1" y="1">BLUE</Color>
-		</CFA>
-		<Crop x="0" y="0" width="-42" height="-10"/>
-		<Sensor black="0" white="4095"/>
-		<ColorMatrices>
-			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9186 -2678 -907</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-8693 16517 2260</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1129 1094 8524</ColorMatrixRow>
-			</ColorMatrix>
-		</ColorMatrices>
-	</Camera>
 	<Camera make="PENTAX" model="PENTAX K2000">
 		<ID make="Pentax" model="K2000">Pentax K2000</ID>
 		<CFA width="2" height="2">
@@ -12341,13 +12341,13 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="0" y="0" width="3900" height="2616"/>
+		<Crop x="0" y="0" width="-40" height="-8"/>
 		<Sensor black="0" white="4095"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">11057 -3604 -1155</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5152 13046 2329</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-282 375 8104</ColorMatrixRow>
+				<ColorMatrixRow plane="0">9730 -2989 -970</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8527 16258 2381</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1060 970 8362</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -12363,9 +12363,9 @@
 		<Sensor black="0" white="15767"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9814 -2716 -1439</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5049 13907 1166</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1830 3836 5706</ColorMatrixRow>
+				<ColorMatrixRow plane="0">10646 -3593 -1158</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3329 11699 1831</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-667 2874 6287</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -12381,9 +12381,9 @@
 		<Sensor black="1" white="16316"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">9551 -3012 -1235</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-3685 12133 1721</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1019 1887 6544</ColorMatrixRow>
+				<ColorMatrixRow plane="0">9519 -3591 -664</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4074 11725 2671</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-624 1501 6653</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
