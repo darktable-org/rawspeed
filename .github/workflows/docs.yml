@@ -28,7 +28,7 @@ jobs:
       matrix:
         os: [ linux ]
         compiler:
-          - { distro: "debian:unstable-slim", family: LLVM, version: 18, CC: clang-18, CXX: clang++-18 }
+          - { distro: "debian:unstable-slim", family: LLVM, version: 21, CC: clang-21, CXX: clang++-21 }
         flavor: [ WWW ]
     uses: ./.github/workflows/CI-linux.yml
     with:
