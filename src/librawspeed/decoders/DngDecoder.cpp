@@ -699,12 +699,20 @@ void DngDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
 
   TiffID id;
 
-  try {
+  if (mRootIFD->hasEntryRecursive(TiffTag::MAKE) &&
+      mRootIFD->hasEntryRecursive(TiffTag::MODEL)) {
     id = mRootIFD->getID();
-  } catch (const RawspeedException& e) {
-    mRaw->setError(e.what());
-    // not all dngs have MAKE/MODEL entries,
-    // will be dealt with by using UNIQUECAMERAMODEL below
+  } else if (mRootIFD->hasEntryRecursive(TiffTag::UNIQUECAMERAMODEL)) {
+    // Not all DNGs have MAKE/MODEL entries (e.g. Blackmagic CinemaDNG).
+    // Fall back to UNIQUECAMERAMODEL for identification.
+    std::string unique =
+        mRootIFD->getEntryRecursive(TiffTag::UNIQUECAMERAMODEL)->getString();
+    if (unique.empty())
+      ThrowRDE("UNIQUECAMERAMODEL is empty");
+    id.make = unique;
+    id.model = unique;
+  } else {
+    ThrowRDE("DNG has neither MAKE/MODEL nor UNIQUECAMERAMODEL");
   }
 
   // Set the make and model
