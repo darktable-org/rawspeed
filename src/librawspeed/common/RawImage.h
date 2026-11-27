@@ -106,6 +106,13 @@ public:
 
   // ISO speed. If known the value is set, otherwise it will be '0'.
   int isoSpeed = 0;
+
+  // The aspect ratio the camera was set to while shooting, as {width,
+  // height}, when the camera recorded one and left the raw data uncropped.
+  // Consumers are expected to center it on the image themselves; the crop
+  // the vendor describes is relative to the vendor's own output area, which
+  // is not necessarily the area we hand out.
+  Optional<std::array<int, 2>> cameraAspectRatio;
 };
 
 class RawImageData : public ErrorLog {
