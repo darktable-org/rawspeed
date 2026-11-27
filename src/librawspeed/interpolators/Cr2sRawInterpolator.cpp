@@ -536,7 +536,7 @@ void Cr2sRawInterpolator::interpolate(int version) {
       interpolate_420<2>();
       break;
     default:
-      __builtin_unreachable();
+      ThrowRDE("Unsupported sRaw version %i for 4:2:0 subsampling", version);
     }
   } else {
     ThrowRDE("Unknown subsampling: (%i; %i)", subSampling.x, subSampling.y);
