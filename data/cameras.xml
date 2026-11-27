@@ -2566,9 +2566,9 @@
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">10566 -3652 -1129</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-6552 14662 2006</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-2197 2581 7670</ColorMatrixRow>
+				<ColorMatrixRow plane="0">10744 -3813 -1142</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-7962 15966 2075</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-2492 2805 7744</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -2591,9 +2591,9 @@
 		</Hints>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">8510 -2487 -940</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-6869 14231 2900</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-2318 2829 9013</ColorMatrixRow>
+				<ColorMatrixRow plane="0">8606 -2573 -949</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8237 15489 2974</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-2649 3076 9100</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -2612,9 +2612,9 @@
 		</BlackAreas>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">8163 -2333 -955</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-6682 14174 2751</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-2077 2597 8041</ColorMatrixRow>
+				<ColorMatrixRow plane="0">8251 -2410 -964</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-8047 15430 2823</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-2380 2824 8119</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -2634,9 +2634,9 @@
 		</BlackAreas>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">8882 -2571 -863</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-6348 14234 2288</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1516 2172 6569</ColorMatrixRow>
+				<ColorMatrixRow plane="0">8979 -2658 -871</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-7721 15500 2357</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1773 2366 6634</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
