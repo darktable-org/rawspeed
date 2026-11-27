@@ -18138,7 +18138,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="10" y="6" width="-8" height="-10"/>
+		<Crop x="8" y="4" width="-8" height="-8"/>
 		<Sensor black="0" white="31456"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -18213,7 +18213,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="56" y="104" width="-56" height="0"/>
+		<Crop x="48" y="96" width="-46" height="0"/>
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="CFV-50c">Hasselblad CFV-50c</Alias>
@@ -18230,9 +18230,9 @@
 		</Aliases>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">4932 -835 141</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-4878 11868 3437</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1138 1961 7067</ColorMatrixRow>
+				<ColorMatrixRow plane="0">5002 -878 111</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-4856 11929 3338</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1183 2041 7022</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -18250,13 +18250,13 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="68" y="112" width="-332" height="-4"/>
+		<Crop x="64" y="108" width="-328" height="0"/>
 		<Sensor black="256" white="65535"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
-				<ColorMatrixRow plane="0">5110 -1357 -308</ColorMatrixRow>
-				<ColorMatrixRow plane="1">-5573 12835 3077</ColorMatrixRow>
-				<ColorMatrixRow plane="2">-1279 2025 7010</ColorMatrixRow>
+				<ColorMatrixRow plane="0">5656 -659 -346</ColorMatrixRow>
+				<ColorMatrixRow plane="1">-3923 12306 1791</ColorMatrixRow>
+				<ColorMatrixRow plane="2">-1602 3509 5442</ColorMatrixRow>
 			</ColorMatrix>
 		</ColorMatrices>
 	</Camera>
@@ -18286,7 +18286,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="56" y="104" width="-60" height="0"/>
+		<Crop x="46" y="96" width="-58" height="0"/>
 		<Sensor black="1028" white="65535"/>
 		<ColorMatrices>
 			<ColorMatrix planes="3">
@@ -18304,7 +18304,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="56" y="104" width="-60" height="0"/>
+		<Crop x="46" y="96" width="-58" height="0"/>
 		<Sensor black="256" white="62914"/>
 		<Aliases>
 			<Alias id="X1D II 50C">Hasselblad X1D II 50C</Alias>
@@ -18329,7 +18329,7 @@
 			<Color x="0" y="1">GREEN</Color>
 			<Color x="1" y="1">BLUE</Color>
 		</CFA>
-		<Crop x="136" y="106" width="-118" height="0"/>
+		<Crop x="124" y="92" width="-116" height="0"/>
 		<Sensor black="4267" white="65535"/>
 		<Aliases>
 			<Alias id="X2D 100C">Hasselblad X2D 100C</Alias>
