@@ -332,6 +332,10 @@ void RafDecoder::decodeMetaDataInternal(const CameraMetaData* meta) {
         k /= 9;
     }
 
+    if (!mRaw->blackLevelSeparate) {
+      ThrowRDE("Black level metadata format is invalid");
+    }
+
     // Set black level to average of EXIF data, can be overridden by XML data.
     int sum = 0;
     auto blackLevelSeparate1D = *mRaw->blackLevelSeparate->getAsArray1DRef();
