@@ -53,6 +53,7 @@ private:
   void parseWhiteBalance() const;
   DngTilingDescription getTilingDescription(const TiffIFD* raw) const;
   void decodeData(const TiffIFD* raw, uint32_t sample_format) const;
+  void deinterleaveFields(const TiffIFD* raw) const;
   void handleMetadata(const TiffIFD* raw);
   bool decodeMaskedAreas(const TiffIFD* raw) const;
   bool decodeBlackLevels(const TiffIFD* raw) const;
